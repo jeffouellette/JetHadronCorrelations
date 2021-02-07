@@ -1,0 +1,7 @@
+Plots/
+rootFiles
+bin/
+lib/
+obj/
+rootlogon.C
+Setup.sh
