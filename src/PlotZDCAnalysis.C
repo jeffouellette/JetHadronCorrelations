@@ -58,7 +58,8 @@ void PlotZDCAnalysis () {
     h_mb_Pb_zdc_calibE_sum->Add (h_mb_Pb_zdc_calibE[iRun]);
   }
 
-  h_jet_Pb_zdc_calibE_sum->Scale (h_mb_Pb_zdc_calibE_sum->Integral (h_mb_Pb_zdc_calibE_sum->FindBin (65.9228), h_mb_Pb_zdc_calibE_sum->GetNbinsX ()) / h_jet_Pb_zdc_calibE_sum->Integral (h_jet_Pb_zdc_calibE_sum->FindBin (65.9228), h_jet_Pb_zdc_calibE_sum->GetNbinsX ()));
+  h_jet_Pb_zdc_calibE_sum->Scale (1. / h_jet_Pb_zdc_calibE_sum->Integral (h_jet_Pb_zdc_calibE_sum->FindBin (65.9228), h_jet_Pb_zdc_calibE_sum->GetNbinsX ()));
+  h_mb_Pb_zdc_calibE_sum->Scale (1. / h_mb_Pb_zdc_calibE_sum->Integral (h_mb_Pb_zdc_calibE_sum->FindBin (65.9228), h_mb_Pb_zdc_calibE_sum->GetNbinsX ()));
 
   TH2D* h2_jet_Pb_fcal_et_zdc_calibE_run312796 = (TH2D*) inFile->Get ("h2_jet_Pb_fcal_et_zdc_calibE_run312796");
   TH2D* h2_mb_Pb_fcal_et_zdc_calibE_run312796 = (TH2D*) inFile->Get ("h2_mb_Pb_fcal_et_zdc_calibE_run312796");
@@ -222,14 +223,14 @@ void PlotZDCAnalysis () {
 
     TH1D* h = h_jet_Pb_zdc_calibE_sum;
     h->GetXaxis ()->SetTitle ("Calibrated #Sigma#it{E}_{ZDC}^{Pb} [TeV]");
-    h->GetYaxis ()->SetTitle ("Normalized counts");
+    h->GetYaxis ()->SetTitle ("A.U. (normalized in 0-20%)");
 
     double ymin = 5e-7;
     double ymax = 8e-2;
 
     h->SetLineColor (kBlue+3);
 
-    h->Scale (1./h->Integral ());
+    //h->Scale (1./h->Integral ());
 
     h->GetYaxis ()->SetRangeUser (ymin, ymax);
 
@@ -255,7 +256,7 @@ void PlotZDCAnalysis () {
 
     h = h_mb_Pb_zdc_calibE_sum;
 
-    h->Scale (1./h->Integral ());
+    //h->Scale (1./h->Integral ());
 
     h->SetLineColor (kRed+1);
 
