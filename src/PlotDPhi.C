@@ -43,10 +43,6 @@ void PlotDPhi () {
   TH1D** h_ljet_counts_bkg = new TH1D*[2];
   TH1D** h_sljet_counts_bkg = new TH1D*[2];
 
-  TH1D** h_jet_pt = new TH1D*[2];
-  TH2D** h2_jet_pt_cov = new TH2D*[2];
-  TH2D** h2_jet_eta_phi = new TH2D*[2];
-
   TH1D** h_jet_trk_dphi = new TH1D*[2];
   TH2D** h2_jet_trk_dphi_cov = new TH2D*[2];
   TH1D** h_ljet_trk_dphi = new TH1D*[2];
@@ -73,9 +69,6 @@ void PlotDPhi () {
     h_jet_counts[1] = (TH1D*) inFile->Get ("h_jet_counts_jets_data16");
     h_ljet_counts[1] = (TH1D*) inFile->Get ("h_ljet_counts_jets_data16");
     h_sljet_counts[1] = (TH1D*) inFile->Get ("h_sljet_counts_jets_data16");
-    h_jet_pt[1] = (TH1D*) inFile->Get ("h_jet_pt_jets_data16");
-    h2_jet_pt_cov[1] = (TH2D*) inFile->Get ("h2_jet_pt_cov_jets_data16");
-    h2_jet_eta_phi[1] = (TH2D*) inFile->Get ("h2_jet_eta_phi_jets_data16");
     h_jet_trk_dphi[1] = (TH1D*) inFile->Get ("h_jet_trk_dphi_jets_data16");
     h2_jet_trk_dphi_cov[1] = (TH2D*) inFile->Get ("h2_jet_trk_dphi_cov_jets_data16");
     h_ljet_trk_dphi[1] = (TH1D*) inFile->Get ("h_ljet_trk_dphi_jets_data16");
@@ -86,8 +79,6 @@ void PlotDPhi () {
     const double nEvts = h_jet_counts[1]->GetBinContent (1); // total number of accepted jets
     const double nLEvts = h_ljet_counts[1]->GetBinContent (1); // total number of accepted leading jets
     const double nSLEvts = h_sljet_counts[1]->GetBinContent (1); // total number of accepted subleading jets
-
-    CalcUncertainties (h_jet_pt[1], h2_jet_pt_cov[1], nEvts);
 
     CalcUncertainties (h_jet_trk_dphi[1], h2_jet_trk_dphi_cov[1], nEvts);
     CalcUncertainties (h_ljet_trk_dphi[1], h2_ljet_trk_dphi_cov[1], nLEvts);
@@ -102,9 +93,6 @@ void PlotDPhi () {
     h_jet_counts[0] = (TH1D*) inFile->Get ("h_jet_counts_jets_data17");
     h_ljet_counts[0] = (TH1D*) inFile->Get ("h_ljet_counts_jets_data17");
     h_sljet_counts[0] = (TH1D*) inFile->Get ("h_sljet_counts_jets_data17");
-    h_jet_pt[0] = (TH1D*) inFile->Get ("h_jet_pt_jets_data17");
-    h2_jet_pt_cov[0] = (TH2D*) inFile->Get ("h2_jet_pt_cov_jets_data17");
-    h2_jet_eta_phi[0] = (TH2D*) inFile->Get ("h2_jet_eta_phi_jets_data17");
     h_jet_trk_dphi[0] = (TH1D*) inFile->Get ("h_jet_trk_dphi_jets_data17");
     h2_jet_trk_dphi_cov[0] = (TH2D*) inFile->Get ("h2_jet_trk_dphi_cov_jets_data17");
     h_ljet_trk_dphi[0] = (TH1D*) inFile->Get ("h_ljet_trk_dphi_jets_data17");
@@ -115,8 +103,6 @@ void PlotDPhi () {
     const double nEvts = h_jet_counts[0]->GetBinContent (1); // total number of accepted jets
     const double nLEvts = h_ljet_counts[0]->GetBinContent (1); // total number of accepted leading jets
     const double nSLEvts = h_sljet_counts[0]->GetBinContent (1); // total number of accepted subleading jets
-
-    CalcUncertainties (h_jet_pt[0], h2_jet_pt_cov[0], nEvts);
 
     CalcUncertainties (h_jet_trk_dphi[0], h2_jet_trk_dphi_cov[0], nEvts);
     CalcUncertainties (h_ljet_trk_dphi[0], h2_ljet_trk_dphi_cov[0], nLEvts);
@@ -176,39 +162,6 @@ void PlotDPhi () {
   l->SetLineStyle (7);
   l->SetLineWidth (1);
   l->SetLineColor (kBlack);
-
-
-
-  {
-    TCanvas* c = new TCanvas ("c1", "", 800, 800);
-    c->SetLogx ();
-    c->SetLogy ();
-
-    TH1D* h = h_jet_pt[1];
-
-    h->GetXaxis ()->SetMoreLogLabels ();
-
-    h->DrawCopy ("hist");
-    h->DrawCopy ("e1 same");
-
-    c->SaveAs ("Plots/JetPtSpectrum.pdf");
-  }
-
-
-
-  {
-    TCanvas* c = new TCanvas ("c2", "", 800, 800);
-    c->SetRightMargin (0.18);
-    c->SetLeftMargin (0.15);
-    c->SetTopMargin (0.04);
-    c->SetBottomMargin (0.15);
-
-    TH2D* h2 = h2_jet_eta_phi[1];
-
-    h2->Draw ("colz");
-
-    c->SaveAs ("Plots/JetEtaPhiSpectrum.pdf");
-  }
 
 
 

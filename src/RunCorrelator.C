@@ -80,6 +80,7 @@ void Correlator (const char* tag, const char* outFileName, TTree* jetsTree, TTre
   TFile* outFile = new TFile (outFileName, "recreate");
 
 
+  TH1D* h_evt_counts = new TH1D (Form ("h_evt_counts_%s", tag), "", 3, 0.5, 3.5);
   TH1D* h_jet_counts = new TH1D (Form ("h_jet_counts_%s", tag), "", 3, 0.5, 3.5);
   TH1D* h_ljet_counts = new TH1D (Form ("h_ljet_counts_%s", tag), "", 3, 0.5, 3.5);
   TH1D* h_sljet_counts = new TH1D (Form ("h_sljet_counts_%s", tag), "", 3, 0.5, 3.5);
@@ -158,11 +159,24 @@ void Correlator (const char* tag, const char* outFileName, TTree* jetsTree, TTre
     if (IspPb () && iCent != numZdcCentBins-1 && iCent != numZdcCentBins-2) // only look at 0-10% or 10-20% central events
       continue;
 
+    const double wgt = 1; // event weight 1 for now
+
+    h_evt_counts->Fill (1);
+    h_evt_counts->Fill (2, wgt);
+    h_evt_counts->Fill (3, wgt*wgt);
     h_jet_counts->Fill (1, akt4_hi_jet_n); // adds to number of jets (i.e. denominator)
-    if (leading_jet != -1)
+    h_jet_counts->Fill (2, akt4_hi_jet_n*wgt);
+    h_jet_counts->Fill (3, akt4_hi_jet_n*wgt*wgt);
+    if (leading_jet != -1) {
       h_ljet_counts->Fill (1);
-    if (subleading_jet != -1)
+      h_ljet_counts->Fill (2, wgt);
+      h_ljet_counts->Fill (3, wgt*wgt);
+    }
+    if (subleading_jet != -1) {
       h_sljet_counts->Fill (1);
+      h_sljet_counts->Fill (2, wgt);
+      h_sljet_counts->Fill (3, wgt*wgt);
+    }
 
 
     // do a mixed event
@@ -294,6 +308,7 @@ void Correlator (const char* tag, const char* outFileName, TTree* jetsTree, TTre
   cout << "Finished event loop." << endl;
 
 
+  h_evt_counts->Write ();
   h_jet_counts->Write ();
   h_ljet_counts->Write ();
   h_sljet_counts->Write ();

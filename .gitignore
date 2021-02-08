@@ -3,6 +3,9 @@ rootFiles
 bin/
 lib/
 obj/
+run/errors
+run/outputs
+run/logs
 rootlogon.C
 Setup.sh
 Slides
