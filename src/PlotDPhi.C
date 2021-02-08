@@ -36,9 +36,11 @@ void PlotDPhi () {
 
   TFile* inFile = new TFile ("./rootFiles/JetsData/Nominal/data16_5TeV_hists.root", "read");
 
+  TH1D** h_evt_counts = new TH1D*[2];
   TH1D** h_jet_counts = new TH1D*[2];
   TH1D** h_ljet_counts = new TH1D*[2];
   TH1D** h_sljet_counts = new TH1D*[2];
+  TH1D** h_evt_counts_bkg = new TH1D*[2];
   TH1D** h_jet_counts_bkg = new TH1D*[2];
   TH1D** h_ljet_counts_bkg = new TH1D*[2];
   TH1D** h_sljet_counts_bkg = new TH1D*[2];
@@ -66,6 +68,7 @@ void PlotDPhi () {
 
 
   {
+    h_evt_counts[1] = (TH1D*) inFile->Get ("h_evt_counts_jets_data16");
     h_jet_counts[1] = (TH1D*) inFile->Get ("h_jet_counts_jets_data16");
     h_ljet_counts[1] = (TH1D*) inFile->Get ("h_ljet_counts_jets_data16");
     h_sljet_counts[1] = (TH1D*) inFile->Get ("h_sljet_counts_jets_data16");
@@ -76,13 +79,14 @@ void PlotDPhi () {
     h_sljet_trk_dphi[1] = (TH1D*) inFile->Get ("h_sljet_trk_dphi_jets_data16");
     h2_sljet_trk_dphi_cov[1] = (TH2D*) inFile->Get ("h2_sljet_trk_dphi_cov_jets_data16");
 
-    const double nEvts = h_jet_counts[1]->GetBinContent (1); // total number of accepted jets
-    const double nLEvts = h_ljet_counts[1]->GetBinContent (1); // total number of accepted leading jets
-    const double nSLEvts = h_sljet_counts[1]->GetBinContent (1); // total number of accepted subleading jets
+    const double nEvts = h_evt_counts[1]->GetBinContent (1); // total number of accepted evts
+    const double nJets = h_jet_counts[1]->GetBinContent (1); // total number of accepted jets
+    const double nLJets = h_ljet_counts[1]->GetBinContent (1); // total number of accepted leading jets
+    const double nSLJets = h_sljet_counts[1]->GetBinContent (1); // total number of accepted subleading jets
 
-    CalcUncertainties (h_jet_trk_dphi[1], h2_jet_trk_dphi_cov[1], nEvts);
-    CalcUncertainties (h_ljet_trk_dphi[1], h2_ljet_trk_dphi_cov[1], nLEvts);
-    CalcUncertainties (h_sljet_trk_dphi[1], h2_sljet_trk_dphi_cov[1], nSLEvts);
+    CalcUncertainties (h_jet_trk_dphi[1], h2_jet_trk_dphi_cov[1], nJets);
+    CalcUncertainties (h_ljet_trk_dphi[1], h2_ljet_trk_dphi_cov[1], nLJets);
+    CalcUncertainties (h_sljet_trk_dphi[1], h2_sljet_trk_dphi_cov[1], nSLJets);
   }
 
 
@@ -90,6 +94,7 @@ void PlotDPhi () {
   {
     inFile = new TFile ("./rootFiles/JetsData/Nominal/data17_5TeV_hists.root", "read");
 
+    h_evt_counts[0] = (TH1D*) inFile->Get ("h_evt_counts_jets_data17");
     h_jet_counts[0] = (TH1D*) inFile->Get ("h_jet_counts_jets_data17");
     h_ljet_counts[0] = (TH1D*) inFile->Get ("h_ljet_counts_jets_data17");
     h_sljet_counts[0] = (TH1D*) inFile->Get ("h_sljet_counts_jets_data17");
@@ -100,13 +105,14 @@ void PlotDPhi () {
     h_sljet_trk_dphi[0] = (TH1D*) inFile->Get ("h_sljet_trk_dphi_jets_data17");
     h2_sljet_trk_dphi_cov[0] = (TH2D*) inFile->Get ("h2_sljet_trk_dphi_cov_jets_data17");
 
-    const double nEvts = h_jet_counts[0]->GetBinContent (1); // total number of accepted jets
-    const double nLEvts = h_ljet_counts[0]->GetBinContent (1); // total number of accepted leading jets
-    const double nSLEvts = h_sljet_counts[0]->GetBinContent (1); // total number of accepted subleading jets
+    const double nEvts = h_evt_counts[0]->GetBinContent (1); // total number of accepted evts
+    const double nJets = h_jet_counts[0]->GetBinContent (1); // total number of accepted jets
+    const double nLJets = h_ljet_counts[0]->GetBinContent (1); // total number of accepted leading jets
+    const double nSLJets = h_sljet_counts[0]->GetBinContent (1); // total number of accepted subleading jets
 
-    CalcUncertainties (h_jet_trk_dphi[0], h2_jet_trk_dphi_cov[0], nEvts);
-    CalcUncertainties (h_ljet_trk_dphi[0], h2_ljet_trk_dphi_cov[0], nLEvts);
-    CalcUncertainties (h_sljet_trk_dphi[0], h2_sljet_trk_dphi_cov[0], nSLEvts);
+    CalcUncertainties (h_jet_trk_dphi[0], h2_jet_trk_dphi_cov[0], nJets);
+    CalcUncertainties (h_ljet_trk_dphi[0], h2_ljet_trk_dphi_cov[0], nLJets);
+    CalcUncertainties (h_sljet_trk_dphi[0], h2_sljet_trk_dphi_cov[0], nSLJets);
   }
 
 
@@ -114,6 +120,7 @@ void PlotDPhi () {
   {
     inFile = new TFile ("./rootFiles/MinBiasData/Nominal/data16_5TeV_hists.root", "read");
 
+    h_evt_counts_bkg[1] = (TH1D*) inFile->Get ("h_evt_counts_minbias_data16");
     h_jet_counts_bkg[1] = (TH1D*) inFile->Get ("h_jet_counts_minbias_data16");
     h_ljet_counts_bkg[1] = (TH1D*) inFile->Get ("h_ljet_counts_minbias_data16");
     h_sljet_counts_bkg[1] = (TH1D*) inFile->Get ("h_sljet_counts_minbias_data16");
@@ -124,13 +131,14 @@ void PlotDPhi () {
     h_sljet_trk_dphi_bkg[1] = (TH1D*) inFile->Get ("h_sljet_trk_dphi_minbias_data16");
     h2_sljet_trk_dphi_cov_bkg[1] = (TH2D*) inFile->Get ("h2_sljet_trk_dphi_cov_minbias_data16");
 
-    const double nEvts = h_jet_counts_bkg[1]->GetBinContent (1); // total number of accepted jets
-    const double nLEvts = h_ljet_counts_bkg[1]->GetBinContent (1); // total number of accepted leading jets
-    const double nSLEvts = h_sljet_counts_bkg[1]->GetBinContent (1); // total number of accepted subleading jets
+    const double nEvts = h_evt_counts_bkg[1]->GetBinContent (1); // total number of accepted evts
+    const double nJets = h_jet_counts_bkg[1]->GetBinContent (1); // total number of accepted jets
+    const double nLJets = h_ljet_counts_bkg[1]->GetBinContent (1); // total number of accepted leading jets
+    const double nSLJets = h_sljet_counts_bkg[1]->GetBinContent (1); // total number of accepted subleading jets
 
-    CalcUncertainties (h_jet_trk_dphi_bkg[1], h2_jet_trk_dphi_cov_bkg[1], nEvts);
-    CalcUncertainties (h_ljet_trk_dphi_bkg[1], h2_ljet_trk_dphi_cov_bkg[1], nLEvts);
-    CalcUncertainties (h_sljet_trk_dphi_bkg[1], h2_sljet_trk_dphi_cov_bkg[1], nSLEvts);
+    CalcUncertainties (h_jet_trk_dphi_bkg[1], h2_jet_trk_dphi_cov_bkg[1], nJets);
+    CalcUncertainties (h_ljet_trk_dphi_bkg[1], h2_ljet_trk_dphi_cov_bkg[1], nLJets);
+    CalcUncertainties (h_sljet_trk_dphi_bkg[1], h2_sljet_trk_dphi_cov_bkg[1], nSLJets);
   }
 
 

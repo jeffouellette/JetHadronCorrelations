@@ -47,6 +47,9 @@ void PlotJets () {
 
   TH1D** h_jet_pt = new TH1D*[2];
   TH2D** h2_jet_pt_cov = new TH2D*[2];
+
+  TH1D* h_jet_pt_ratio = nullptr;
+
   TH2D** h2_jet_eta_phi = new TH2D*[2];
 
   {
@@ -101,6 +104,13 @@ void PlotJets () {
     const double nJets = h_jet_counts_bkg[1]->GetBinContent (1); // total number of accepted jets
     const double nLJets = h_ljet_counts_bkg[1]->GetBinContent (1); // total number of accepted leading jets
     const double nSLJets = h_sljet_counts_bkg[1]->GetBinContent (1); // total number of accepted subleading jets
+  }
+
+
+
+  {
+    h_jet_pt_ratio = (TH1D*) h_jet_pt[1]->Clone ();
+    h_jet_pt_ratio->Divide (h_jet_pt[0]);
   }
 
 
