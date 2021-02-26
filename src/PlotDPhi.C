@@ -1,5 +1,5 @@
-#ifndef __JetHadronCorrelatorPlotter_C__
-#define __JetHadronCorrelatorPlotter_C__
+#ifndef __JetHadronCorrelatorPlotDPhi_C__
+#define __JetHadronCorrelatorPlotDPhi_C__
 
 #include "Params.h"
 #include "OutTree.h"
@@ -20,21 +20,21 @@
 #include <iostream>
 #include <math.h>
 
-using namespace HadronYieldsAnalysis;
+using namespace JetHadronCorrelations;
 
 TColor* tcolor = new TColor ();
-const Color_t myBlue = (Color_t) tcolor->GetColor ( 87, 132, 198);
+const Color_t myBlue = (Color_t) tcolor->GetColor (45, 64, 245);
 const Color_t myPurple = (Color_t) tcolor->GetColor (130,  10, 130);
 const Color_t myRed = (Color_t) tcolor->GetColor (255,  12,  73);
 
 TLine* l = new TLine ();
 
 
-void PlotDPhi () {
+void PlotDPhi (const char* tag, const char* inFileTag) {
 
   SetupDirectories ("Data");
 
-  TFile* inFile = new TFile ("./rootFiles/JetsData/Nominal/data16_5TeV_hists.root", "read");
+  TFile* inFile = nullptr;
 
   TH1D** h_evt_counts = new TH1D*[2];
   TH1D** h_jet_counts = new TH1D*[2];
@@ -66,105 +66,84 @@ void PlotDPhi () {
   TH1D* h_ljet_trk_dphi_iaa = nullptr;
   TH1D* h_sljet_trk_dphi_iaa = nullptr;
 
+  TGAE** g_jet_trk_dphi_syst = new TGAE*[2];
+  TGAE** g_ljet_trk_dphi_syst = new TGAE*[2];
+  TGAE** g_sljet_trk_dphi_syst = new TGAE*[2];
+  TGAE** g_jet_trk_dphi_bkg_syst = new TGAE*[2];
+  TGAE** g_ljet_trk_dphi_bkg_syst = new TGAE*[2];
+  TGAE** g_sljet_trk_dphi_bkg_syst = new TGAE*[2];
 
-  {
-    h_evt_counts[1] = (TH1D*) inFile->Get ("h_evt_counts_jets_data16");
-    h_jet_counts[1] = (TH1D*) inFile->Get ("h_jet_counts_jets_data16");
-    h_ljet_counts[1] = (TH1D*) inFile->Get ("h_ljet_counts_jets_data16");
-    h_sljet_counts[1] = (TH1D*) inFile->Get ("h_sljet_counts_jets_data16");
-    h_jet_trk_dphi[1] = (TH1D*) inFile->Get ("h_jet_trk_dphi_jets_data16");
-    h2_jet_trk_dphi_cov[1] = (TH2D*) inFile->Get ("h2_jet_trk_dphi_cov_jets_data16");
-    h_ljet_trk_dphi[1] = (TH1D*) inFile->Get ("h_ljet_trk_dphi_jets_data16");
-    h2_ljet_trk_dphi_cov[1] = (TH2D*) inFile->Get ("h2_ljet_trk_dphi_cov_jets_data16");
-    h_sljet_trk_dphi[1] = (TH1D*) inFile->Get ("h_sljet_trk_dphi_jets_data16");
-    h2_sljet_trk_dphi_cov[1] = (TH2D*) inFile->Get ("h2_sljet_trk_dphi_cov_jets_data16");
+  TGAE** g_jet_trk_dphi_sig_syst = new TGAE*[2];
+  TGAE** g_ljet_trk_dphi_sig_syst = new TGAE*[2];
+  TGAE** g_sljet_trk_dphi_sig_syst = new TGAE*[2];
 
-    const double nEvts = h_evt_counts[1]->GetBinContent (1); // total number of accepted evts
-    const double nJets = h_jet_counts[1]->GetBinContent (1); // total number of accepted jets
-    const double nLJets = h_ljet_counts[1]->GetBinContent (1); // total number of accepted leading jets
-    const double nSLJets = h_sljet_counts[1]->GetBinContent (1); // total number of accepted subleading jets
-
-    CalcUncertainties (h_jet_trk_dphi[1], h2_jet_trk_dphi_cov[1], nJets);
-    CalcUncertainties (h_ljet_trk_dphi[1], h2_ljet_trk_dphi_cov[1], nLJets);
-    CalcUncertainties (h_sljet_trk_dphi[1], h2_sljet_trk_dphi_cov[1], nSLJets);
-  }
+  TGAE* g_jet_trk_dphi_iaa_syst = nullptr;
+  TGAE* g_ljet_trk_dphi_iaa_syst = nullptr;
+  TGAE* g_sljet_trk_dphi_iaa_syst = nullptr;
 
 
 
   {
-    inFile = new TFile ("./rootFiles/JetsData/Nominal/data17_5TeV_hists.root", "read");
+    TString inFileName = Form ("./rootFiles/Results/PlotDPhi_%s.root", inFileTag);
+    std::cout << "Reading " << inFileName.Data () << std::endl;
+    inFile = new TFile (inFileName.Data (), "read");
 
-    h_evt_counts[0] = (TH1D*) inFile->Get ("h_evt_counts_jets_data17");
-    h_jet_counts[0] = (TH1D*) inFile->Get ("h_jet_counts_jets_data17");
-    h_ljet_counts[0] = (TH1D*) inFile->Get ("h_ljet_counts_jets_data17");
-    h_sljet_counts[0] = (TH1D*) inFile->Get ("h_sljet_counts_jets_data17");
-    h_jet_trk_dphi[0] = (TH1D*) inFile->Get ("h_jet_trk_dphi_jets_data17");
-    h2_jet_trk_dphi_cov[0] = (TH2D*) inFile->Get ("h2_jet_trk_dphi_cov_jets_data17");
-    h_ljet_trk_dphi[0] = (TH1D*) inFile->Get ("h_ljet_trk_dphi_jets_data17");
-    h2_ljet_trk_dphi_cov[0] = (TH2D*) inFile->Get ("h2_ljet_trk_dphi_cov_jets_data17");
-    h_sljet_trk_dphi[0] = (TH1D*) inFile->Get ("h_sljet_trk_dphi_jets_data17");
-    h2_sljet_trk_dphi_cov[0] = (TH2D*) inFile->Get ("h2_sljet_trk_dphi_cov_jets_data17");
+    h_evt_counts[0] = (TH1D*) inFile->Get ("h_evt_counts_ref");
+    h_jet_counts[0] = (TH1D*) inFile->Get ("h_jet_counts_ref");
+    h_ljet_counts[0] = (TH1D*) inFile->Get ("h_ljet_counts_ref");
+    h_sljet_counts[0] = (TH1D*) inFile->Get ("h_sljet_counts_ref");
+    h_evt_counts[1] = (TH1D*) inFile->Get ("h_evt_counts");
+    h_jet_counts[1] = (TH1D*) inFile->Get ("h_jet_counts");
+    h_ljet_counts[1] = (TH1D*) inFile->Get ("h_ljet_counts");
+    h_sljet_counts[1] = (TH1D*) inFile->Get ("h_sljet_counts");
+    h_evt_counts_bkg[1] = (TH1D*) inFile->Get ("h_evt_counts_bkg");
+    h_jet_counts_bkg[1] = (TH1D*) inFile->Get ("h_jet_counts_bkg");
+    h_ljet_counts_bkg[1] = (TH1D*) inFile->Get ("h_ljet_counts_bkg");
+    h_sljet_counts_bkg[1] = (TH1D*) inFile->Get ("h_sljet_counts_bkg");
 
-    const double nEvts = h_evt_counts[0]->GetBinContent (1); // total number of accepted evts
-    const double nJets = h_jet_counts[0]->GetBinContent (1); // total number of accepted jets
-    const double nLJets = h_ljet_counts[0]->GetBinContent (1); // total number of accepted leading jets
-    const double nSLJets = h_sljet_counts[0]->GetBinContent (1); // total number of accepted subleading jets
+    h_jet_trk_dphi[0] = (TH1D*) inFile->Get ("h_jet_trk_dphi_ref");
+    h_ljet_trk_dphi[0] = (TH1D*) inFile->Get ("h_ljet_trk_dphi_ref");
+    h_sljet_trk_dphi[0] = (TH1D*) inFile->Get ("h_sljet_trk_dphi_ref");
+    h_jet_trk_dphi[1] = (TH1D*) inFile->Get ("h_jet_trk_dphi");
+    h_ljet_trk_dphi[1] = (TH1D*) inFile->Get ("h_ljet_trk_dphi");
+    h_sljet_trk_dphi[1] = (TH1D*) inFile->Get ("h_sljet_trk_dphi");
+    h_jet_trk_dphi_bkg[1] = (TH1D*) inFile->Get ("h_jet_trk_dphi_bkg");
+    h_ljet_trk_dphi_bkg[1] = (TH1D*) inFile->Get ("h_ljet_trk_dphi_bkg");
+    h_sljet_trk_dphi_bkg[1] = (TH1D*) inFile->Get ("h_sljet_trk_dphi_bkg");
 
-    CalcUncertainties (h_jet_trk_dphi[0], h2_jet_trk_dphi_cov[0], nJets);
-    CalcUncertainties (h_ljet_trk_dphi[0], h2_ljet_trk_dphi_cov[0], nLJets);
-    CalcUncertainties (h_sljet_trk_dphi[0], h2_sljet_trk_dphi_cov[0], nSLJets);
+    h_jet_trk_dphi_sig[0] = (TH1D*) inFile->Get ("h_jet_trk_dphi_ref_sig");
+    h_ljet_trk_dphi_sig[0] = (TH1D*) inFile->Get ("h_ljet_trk_dphi_ref_sig");
+    h_sljet_trk_dphi_sig[0] = (TH1D*) inFile->Get ("h_sljet_trk_dphi_ref_sig");
+    h_jet_trk_dphi_sig[1] = (TH1D*) inFile->Get ("h_jet_trk_dphi_sig");
+    h_ljet_trk_dphi_sig[1] = (TH1D*) inFile->Get ("h_ljet_trk_dphi_sig");
+    h_sljet_trk_dphi_sig[1] = (TH1D*) inFile->Get ("h_sljet_trk_dphi_sig");
+
+    h_jet_trk_dphi_iaa = (TH1D*) inFile->Get ("h_jet_trk_dphi_iaa");
+    h_ljet_trk_dphi_iaa = (TH1D*) inFile->Get ("h_ljet_trk_dphi_iaa");
+    h_sljet_trk_dphi_iaa = (TH1D*) inFile->Get ("h_ljet_trk_dphi_iaa");
+
+    g_jet_trk_dphi_syst[0] = (TGAE*) inFile->Get ("g_jet_trk_dphi_ref_syst");
+    g_ljet_trk_dphi_syst[0] = (TGAE*) inFile->Get ("g_ljet_trk_dphi_ref_syst");
+    g_sljet_trk_dphi_syst[0] = (TGAE*) inFile->Get ("g_sljet_trk_dphi_ref_syst");
+    g_jet_trk_dphi_syst[1] = (TGAE*) inFile->Get ("g_jet_trk_dphi_syst");
+    g_ljet_trk_dphi_syst[1] = (TGAE*) inFile->Get ("g_ljet_trk_dphi_syst");
+    g_sljet_trk_dphi_syst[1] = (TGAE*) inFile->Get ("g_sljet_trk_dphi_syst");
+    g_jet_trk_dphi_bkg_syst[1] = (TGAE*) inFile->Get ("g_jet_trk_dphi_bkg_syst");
+    g_ljet_trk_dphi_bkg_syst[1] = (TGAE*) inFile->Get ("g_ljet_trk_dphi_bkg_syst");
+    g_sljet_trk_dphi_bkg_syst[1] = (TGAE*) inFile->Get ("g_sljet_trk_dphi_bkg_syst");
+
+    g_jet_trk_dphi_sig_syst[0] = (TGAE*) inFile->Get ("g_jet_trk_dphi_ref_sig_syst");
+    g_ljet_trk_dphi_sig_syst[0] = (TGAE*) inFile->Get ("g_ljet_trk_dphi_ref_sig_syst");
+    g_sljet_trk_dphi_sig_syst[0] = (TGAE*) inFile->Get ("g_sljet_trk_dphi_ref_sig_syst");
+    g_jet_trk_dphi_sig_syst[1] = (TGAE*) inFile->Get ("g_jet_trk_dphi_sig_syst");
+    g_ljet_trk_dphi_sig_syst[1] = (TGAE*) inFile->Get ("g_ljet_trk_dphi_sig_syst");
+    g_sljet_trk_dphi_sig_syst[1] = (TGAE*) inFile->Get ("g_sljet_trk_dphi_sig_syst");
+
+    g_jet_trk_dphi_iaa_syst = (TGAE*) inFile->Get ("g_jet_trk_dphi_iaa_syst");
+    g_ljet_trk_dphi_iaa_syst = (TGAE*) inFile->Get ("g_ljet_trk_dphi_iaa_syst");
+    g_sljet_trk_dphi_iaa_syst = (TGAE*) inFile->Get ("g_sljet_trk_dphi_iaa_syst");
   }
 
-
-
-  {
-    inFile = new TFile ("./rootFiles/MinBiasData/Nominal/data16_5TeV_hists.root", "read");
-
-    h_evt_counts_bkg[1] = (TH1D*) inFile->Get ("h_evt_counts_minbias_data16");
-    h_jet_counts_bkg[1] = (TH1D*) inFile->Get ("h_jet_counts_minbias_data16");
-    h_ljet_counts_bkg[1] = (TH1D*) inFile->Get ("h_ljet_counts_minbias_data16");
-    h_sljet_counts_bkg[1] = (TH1D*) inFile->Get ("h_sljet_counts_minbias_data16");
-    h_jet_trk_dphi_bkg[1] = (TH1D*) inFile->Get ("h_jet_trk_dphi_minbias_data16");
-    h2_jet_trk_dphi_cov_bkg[1] = (TH2D*) inFile->Get ("h2_jet_trk_dphi_cov_minbias_data16");
-    h_ljet_trk_dphi_bkg[1] = (TH1D*) inFile->Get ("h_ljet_trk_dphi_minbias_data16");
-    h2_ljet_trk_dphi_cov_bkg[1] = (TH2D*) inFile->Get ("h2_ljet_trk_dphi_cov_minbias_data16");
-    h_sljet_trk_dphi_bkg[1] = (TH1D*) inFile->Get ("h_sljet_trk_dphi_minbias_data16");
-    h2_sljet_trk_dphi_cov_bkg[1] = (TH2D*) inFile->Get ("h2_sljet_trk_dphi_cov_minbias_data16");
-
-    const double nEvts = h_evt_counts_bkg[1]->GetBinContent (1); // total number of accepted evts
-    const double nJets = h_jet_counts_bkg[1]->GetBinContent (1); // total number of accepted jets
-    const double nLJets = h_ljet_counts_bkg[1]->GetBinContent (1); // total number of accepted leading jets
-    const double nSLJets = h_sljet_counts_bkg[1]->GetBinContent (1); // total number of accepted subleading jets
-
-    CalcUncertainties (h_jet_trk_dphi_bkg[1], h2_jet_trk_dphi_cov_bkg[1], nJets);
-    CalcUncertainties (h_ljet_trk_dphi_bkg[1], h2_ljet_trk_dphi_cov_bkg[1], nLJets);
-    CalcUncertainties (h_sljet_trk_dphi_bkg[1], h2_sljet_trk_dphi_cov_bkg[1], nSLJets);
-  }
-
-
-
-  {
-    h_jet_trk_dphi_sig[0] = (TH1D*) h_jet_trk_dphi[0]->Clone ("h_jet_trk_dphi_data17_sig");
-    h_jet_trk_dphi_sig[1] = (TH1D*) h_jet_trk_dphi[1]->Clone ("h_jet_trk_dphi_data16_sig");
-    h_jet_trk_dphi_sig[1]->Add (h_jet_trk_dphi_bkg[1], -1);
-
-    h_ljet_trk_dphi_sig[0] = (TH1D*) h_ljet_trk_dphi[0]->Clone ("h_ljet_trk_dphi_data17_sig");
-    h_ljet_trk_dphi_sig[1] = (TH1D*) h_ljet_trk_dphi[1]->Clone ("h_ljet_trk_dphi_data16_sig");
-    h_ljet_trk_dphi_sig[1]->Add (h_ljet_trk_dphi_bkg[1], -1);
-
-    h_sljet_trk_dphi_sig[0] = (TH1D*) h_sljet_trk_dphi[0]->Clone ("h_sljet_trk_dphi_data17_sig");
-    h_sljet_trk_dphi_sig[1] = (TH1D*) h_sljet_trk_dphi[1]->Clone ("h_sljet_trk_dphi_data16_sig");
-    h_sljet_trk_dphi_sig[1]->Add (h_sljet_trk_dphi_bkg[1], -1);
-
-    h_jet_trk_dphi_iaa = (TH1D*) h_jet_trk_dphi_sig[1]->Clone ("h_jet_trk_dphi_data16_iaa");
-    h_jet_trk_dphi_iaa->Divide (h_jet_trk_dphi_sig[0]);
-
-    h_ljet_trk_dphi_iaa = (TH1D*) h_ljet_trk_dphi_sig[1]->Clone ("h_ljet_trk_dphi_data16_iaa");
-    h_ljet_trk_dphi_iaa->Divide (h_ljet_trk_dphi_sig[0]);
-
-    h_sljet_trk_dphi_iaa = (TH1D*) h_sljet_trk_dphi_sig[1]->Clone ("h_sljet_trk_dphi_data16_iaa");
-    h_sljet_trk_dphi_iaa->Divide (h_sljet_trk_dphi_sig[0]);
-  }
 
 
   l->SetLineStyle (7);
@@ -223,8 +202,16 @@ void PlotDPhi () {
     shadedBox->Draw ();                                                          
     l->DrawLine (7.*pi/8., ymin, 7.*pi/8., ymax);       
 
+    g = g_jet_trk_dphi_syst[0];
+    g->SetMarkerStyle (0);
+    g->SetMarkerSize (0.);
+    g->SetLineColor (myBlue);
+    g->SetLineWidth (1);
+    ((TGAE*) g->Clone ())->Draw ("5");
+    SaferDelete (&g);
     h = h_jet_trk_dphi[0];
     g = make_graph (h);
+    ResetXErrors (g);
     g->SetMarkerStyle (kFullCircle);
     g->SetMarkerSize (0.8);
     g->SetMarkerColor (myBlue);
@@ -237,8 +224,16 @@ void PlotDPhi () {
     ((TGAE*) g->Clone ())->Draw ("p");
     SaferDelete (&g);
 
+    g = g_jet_trk_dphi_syst[1];
+    g->SetMarkerStyle (0);
+    g->SetMarkerSize (0.);
+    g->SetLineColor (myRed);
+    g->SetLineWidth (1);
+    ((TGAE*) g->Clone ())->Draw ("5");
+    SaferDelete (&g);
     h = h_jet_trk_dphi[1];
     g = make_graph (h);
+    ResetXErrors (g);
     g->SetMarkerStyle (kFullCircle);
     g->SetMarkerSize (0.8);
     g->SetMarkerColor (myRed);
@@ -251,8 +246,16 @@ void PlotDPhi () {
     ((TGAE*) g->Clone ())->Draw ("p");
     SaferDelete (&g);
 
+    g = g_jet_trk_dphi_bkg_syst[1];
+    g->SetMarkerStyle (0);
+    g->SetMarkerSize (0.);
+    g->SetLineColor (kBlack);
+    g->SetLineWidth (1);
+    ((TGAE*) g->Clone ())->Draw ("5");
+    SaferDelete (&g);
     h = h_jet_trk_dphi_bkg[1];
     g = make_graph (h);
+    ResetXErrors (g);
     g->SetMarkerStyle (kOpenCircle);
     g->SetMarkerSize (0.8);
     g->SetMarkerColor (kBlack);
@@ -265,10 +268,8 @@ void PlotDPhi () {
     myText (0.23, 0.77, kBlack, "2016 #it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV, #bf{0-20%}", 0.020/fuPad);
     myText (0.23, 0.71, kBlack, "2017 #it{pp}, #sqrt{s} = 5.02 TeV", 0.020/fuPad);
     myText (0.23, 0.65, kBlack, "Jet-hadron correlations", 0.020/fuPad);
-    myText (0.23, 0.59, kBlack, "#it{p}_{T}^{ch} > 4 GeV, #it{p}_{T}^{jet} > 60 GeV", 0.020/fuPad);
-    myMarkerText (0.29, 0.52, myRed, kFullCircle, "#it{p}+Pb jet-tagged events (#it{all jets})", 0.8, 0.020/fuPad, true);
-    myMarkerText (0.29, 0.46, myBlue, kFullCircle, "#it{pp} jet-tagged events (#it{all jets})", 0.8, 0.020/fuPad, true);
-    myMarkerText (0.29, 0.40, kBlack, kOpenCircle, "#it{p}+Pb mixed events", 0.8, 0.020/fuPad);
+    myText (0.23, 0.59, kBlack, Form ("#it{p}_{T}^{jet} > %i GeV, #it{p}_{T}^{ch} > 2 GeV", strcmp (tag, "30GeVJets") == 0 ? 30 : 60), 0.020/fuPad);
+    myText (0.23, 0.53, kBlack, "|#eta_{ch} - #it{y}_{CoM}| < 2.035", 0.020/fuPad);
 
 
     cPad->cd (); 
@@ -301,8 +302,16 @@ void PlotDPhi () {
     shadedBox->Draw ();                                                          
     l->DrawLine (7.*pi/8., ymin, 7.*pi/8., ymax);       
 
+    g = g_jet_trk_dphi_sig_syst[0];
+    g->SetMarkerStyle (0);
+    g->SetMarkerSize (0.);
+    g->SetLineColor (myBlue);
+    g->SetLineWidth (1);
+    ((TGAE*) g->Clone ())->Draw ("5");
+    SaferDelete (&g);
     h = h_jet_trk_dphi_sig[0];
     g = make_graph (h);
+    ResetXErrors (g);
     g->SetLineColor (myBlue);
     g->SetLineWidth (2);
     g->SetMarkerColor (myBlue);
@@ -315,8 +324,16 @@ void PlotDPhi () {
     ((TGAE*) g->Clone ())->Draw ("p");
     SaferDelete (&g);
 
+    g = g_jet_trk_dphi_sig_syst[1];
+    g->SetMarkerStyle (0);
+    g->SetMarkerSize (0.);
+    g->SetLineColor (myRed);
+    g->SetLineWidth (1);
+    ((TGAE*) g->Clone ())->Draw ("5");
+    SaferDelete (&g);
     h = h_jet_trk_dphi_sig[1];
     g = make_graph (h);
+    ResetXErrors (g);
     g->SetLineColor (myRed);
     g->SetLineWidth (2);
     g->SetMarkerColor (myRed);
@@ -329,8 +346,9 @@ void PlotDPhi () {
     ((TGAE*) g->Clone ())->Draw ("p");
     SaferDelete (&g);
 
-    myMarkerText (0.29, 0.84, myRed, kFullCircle, "#it{p}+Pb", 0.8, 0.020/fdPad, true);
-    myMarkerText (0.29, 0.75, myBlue, kFullCircle, "#it{pp} (no bkg.)", 0.8, 0.020/fdPad, true);
+    myMarkerText (0.29, 0.84, myRed, kFullCircle, "#it{p}+Pb jet-tagged events", 0.8, 0.020/fcPad, true);
+    myMarkerText (0.29, 0.75, myBlue, kFullCircle, "#it{pp} jet-tagged events", 0.8, 0.020/fcPad, true);
+    myMarkerText (0.29, 0.66, kBlack, kOpenCircle, "#it{p}+Pb mixed events", 0.8, 0.020/fcPad);
 
 
     dPad->cd (); 
@@ -364,8 +382,16 @@ void PlotDPhi () {
     shadedBox->Draw ();                                                          
     l->DrawLine (7.*pi/8., ymin, 7.*pi/8., ymax);       
 
+    g = g_jet_trk_dphi_iaa_syst;
+    g->SetMarkerStyle (0);
+    g->SetMarkerSize (0.);
+    g->SetLineColor (myBlue);
+    g->SetLineWidth (1);
+    ((TGAE*) g->Clone ())->Draw ("5");
+    SaferDelete (&g);
     h = h_jet_trk_dphi_iaa;
     g = make_graph (h);
+    ResetXErrors (g);
     g->SetLineColor (myBlue);
     g->SetLineWidth (2);
     g->SetMarkerColor (myBlue);
@@ -433,8 +459,16 @@ void PlotDPhi () {
     shadedBox->Draw ();                                                          
     l->DrawLine (7.*pi/8., ymin, 7.*pi/8., ymax);       
 
+    g = g_ljet_trk_dphi_syst[0];
+    g->SetMarkerStyle (0);
+    g->SetMarkerSize (0.);
+    g->SetLineColor (myBlue);
+    g->SetLineWidth (1);
+    ((TGAE*) g->Clone ())->Draw ("5");
+    SaferDelete (&g);
     h = h_ljet_trk_dphi[0];
     g = make_graph (h);
+    ResetXErrors (g);
     g->SetMarkerStyle (kFullCircle);
     g->SetMarkerSize (0.8);
     g->SetMarkerColor (myBlue);
@@ -447,8 +481,16 @@ void PlotDPhi () {
     ((TGAE*) g->Clone ())->Draw ("p");
     SaferDelete (&g);
 
+    g = g_ljet_trk_dphi_syst[1];
+    g->SetMarkerStyle (0);
+    g->SetMarkerSize (0.);
+    g->SetLineColor (myRed);
+    g->SetLineWidth (1);
+    ((TGAE*) g->Clone ())->Draw ("5");
+    SaferDelete (&g);
     h = h_ljet_trk_dphi[1];
     g = make_graph (h);
+    ResetXErrors (g);
     g->SetMarkerStyle (kFullCircle);
     g->SetMarkerSize (0.8);
     g->SetMarkerColor (myRed);
@@ -461,8 +503,16 @@ void PlotDPhi () {
     ((TGAE*) g->Clone ())->Draw ("p");
     SaferDelete (&g);
 
+    g = g_ljet_trk_dphi_bkg_syst[1];
+    g->SetMarkerStyle (0);
+    g->SetMarkerSize (0.);
+    g->SetLineColor (kBlack);
+    g->SetLineWidth (1);
+    ((TGAE*) g->Clone ())->Draw ("5");
+    SaferDelete (&g);
     h = h_ljet_trk_dphi_bkg[1];
     g = make_graph (h);
+    ResetXErrors (g);
     g->SetMarkerStyle (kOpenCircle);
     g->SetMarkerSize (0.8);
     g->SetMarkerColor (kBlack);
@@ -475,10 +525,8 @@ void PlotDPhi () {
     myText (0.23, 0.77, kBlack, "2016 #it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV, #bf{0-20%}", 0.020/fuPad);
     myText (0.23, 0.71, kBlack, "2017 #it{pp}, #sqrt{s} = 5.02 TeV", 0.020/fuPad);
     myText (0.23, 0.65, kBlack, "Leading jet-hadron correlations", 0.020/fuPad);
-    myText (0.23, 0.59, kBlack, "#it{p}_{T}^{ch} > 4 GeV, #it{p}_{T}^{jet} > 60 GeV", 0.020/fuPad);
-    myMarkerText (0.29, 0.52, myRed, kFullCircle, "#it{p}+Pb jet-tagged events (#it{leading jet})", 0.8, 0.020/fuPad, true);
-    myMarkerText (0.29, 0.46, myBlue, kFullCircle, "#it{pp} jet-tagged events (#it{leading jet})", 0.8, 0.020/fuPad, true);
-    myMarkerText (0.29, 0.40, kBlack, kOpenCircle, "#it{p}+Pb mixed events", 0.8, 0.020/fuPad);
+    myText (0.23, 0.59, kBlack, Form ("#it{p}_{T}^{jet} > %i GeV, #it{p}_{T}^{ch} > 2 GeV", strcmp (tag, "30GeVJets") == 0 ? 30 : 60), 0.020/fuPad);
+    myText (0.23, 0.53, kBlack, "|#eta_{ch} - #it{y}_{CoM}| < 2.035", 0.020/fuPad);
 
 
     cPad->cd (); 
@@ -511,8 +559,16 @@ void PlotDPhi () {
     shadedBox->Draw ();                                                          
     l->DrawLine (7.*pi/8., ymin, 7.*pi/8., ymax);       
 
+    g = g_ljet_trk_dphi_sig_syst[0];
+    g->SetMarkerStyle (0);
+    g->SetMarkerSize (0.);
+    g->SetLineColor (myBlue);
+    g->SetLineWidth (1);
+    ((TGAE*) g->Clone ())->Draw ("5");
+    SaferDelete (&g);
     h = h_ljet_trk_dphi_sig[0];
     g = make_graph (h);
+    ResetXErrors (g);
     g->SetLineColor (myBlue);
     g->SetLineWidth (2);
     g->SetMarkerColor (myBlue);
@@ -525,8 +581,16 @@ void PlotDPhi () {
     ((TGAE*) g->Clone ())->Draw ("p");
     SaferDelete (&g);
 
+    g = g_ljet_trk_dphi_sig_syst[1];
+    g->SetMarkerStyle (0);
+    g->SetMarkerSize (0.);
+    g->SetLineColor (myRed);
+    g->SetLineWidth (1);
+    ((TGAE*) g->Clone ())->Draw ("5");
+    SaferDelete (&g);
     h = h_ljet_trk_dphi_sig[1];
     g = make_graph (h);
+    ResetXErrors (g);
     g->SetLineColor (myRed);
     g->SetLineWidth (2);
     g->SetMarkerColor (myRed);
@@ -539,8 +603,9 @@ void PlotDPhi () {
     ((TGAE*) g->Clone ())->Draw ("p");
     SaferDelete (&g);
 
-    myMarkerText (0.29, 0.84, myRed, kFullCircle, "#it{p}+Pb", 0.8, 0.020/fdPad, true);
-    myMarkerText (0.29, 0.75, myBlue, kFullCircle, "#it{pp} (no bkg.)", 0.8, 0.020/fdPad, true);
+    myMarkerText (0.29, 0.84, myRed, kFullCircle, "#it{p}+Pb jet-tagged events", 0.8, 0.020/fcPad, true);
+    myMarkerText (0.29, 0.75, myBlue, kFullCircle, "#it{pp} jet-tagged events", 0.8, 0.020/fcPad, true);
+    myMarkerText (0.29, 0.66, kBlack, kOpenCircle, "#it{p}+Pb mixed events", 0.8, 0.020/fcPad);
 
 
     dPad->cd (); 
@@ -574,8 +639,16 @@ void PlotDPhi () {
     shadedBox->Draw ();                                                          
     l->DrawLine (7.*pi/8., ymin, 7.*pi/8., ymax);       
 
+    g = g_ljet_trk_dphi_iaa_syst;
+    g->SetMarkerStyle (0);
+    g->SetMarkerSize (0.);
+    g->SetLineColor (myBlue);
+    g->SetLineWidth (1);
+    ((TGAE*) g->Clone ())->Draw ("5");
+    SaferDelete (&g);
     h = h_ljet_trk_dphi_iaa;
     g = make_graph (h);
+    ResetXErrors (g);
     g->SetLineColor (myBlue);
     g->SetLineWidth (2);
     g->SetMarkerColor (myBlue);

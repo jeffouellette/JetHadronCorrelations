@@ -18,7 +18,7 @@
 
 using namespace std;
 
-namespace HadronYieldsAnalysis {
+namespace JetHadronCorrelations {
 
 
 bool ZDCAnalysis (const char* directory,
@@ -193,19 +193,19 @@ bool ZDCAnalysis (const char* directory,
 
   // Load files for output
   TFile* outFile = new TFile (Form ("%s/%s.root", rootPath.Data (), identifier.Data ()), "recreate");
-  TH2D* h2_mb_Pb_fcal_et_zdc_calibE = new TH2D (Form ("h2_mb_Pb_fcal_et_zdc_calibE_run%i", dataSet), "", 80, -100, 300, 1120, 0, 140);
-  TH2D* h2_jet_Pb_fcal_et_zdc_calibE = new TH2D (Form ("h2_jet_Pb_fcal_et_zdc_calibE_run%i", dataSet), "", 80, -100, 300, 1120, 0, 140);
+  TH2D* h2_mb_Pb_fcal_et_zdc_calibE = new TH2D (Form ("h2_mb_Pb_fcal_et_zdc_calibE_run%i", dataSet), "", 80, -100, 300, 1400, 0, 175);
+  TH2D* h2_jet_Pb_fcal_et_zdc_calibE = new TH2D (Form ("h2_jet_Pb_fcal_et_zdc_calibE_run%i", dataSet), "", 80, -100, 300, 1400, 0, 175);
 
   TH1D* h_mb_Pb_fcal_et = new TH1D ("h_mb_Pb_fcal_et", "", 400, -100, 300);
   h_mb_Pb_fcal_et->Sumw2 ();
   TH1D* h_mb_p_fcal_et = new TH1D ("h_mb_p_fcal_et", "", 150, -100, 200);
   h_mb_p_fcal_et->Sumw2 ();
 
-  TH1D* h_mb_Pb_zdc_calibE = new TH1D (Form ("h_mb_Pb_zdc_calibE_run%i", dataSet), "", 1120, 0, 140);
+  TH1D* h_mb_Pb_zdc_calibE = new TH1D (Form ("h_mb_Pb_zdc_calibE_run%i", dataSet), "", 1400, 0, 175);
   h_mb_Pb_zdc_calibE->Sumw2 ();
-  TH1D* h_mb_Pb_zdc_calibE_cut = new TH1D (Form ("h_mb_Pb_zdc_calibE_cut_run%i", dataSet), "", 1120, 0, 140);
+  TH1D* h_mb_Pb_zdc_calibE_cut = new TH1D (Form ("h_mb_Pb_zdc_calibE_cut_run%i", dataSet), "", 1400, 0, 175);
   h_mb_Pb_zdc_calibE_cut->Sumw2 ();
-  TH1D* h_mb_p_zdc_calibE = new TH1D (Form ("h_mb_p_zdc_calibE_run%i", dataSet), "", 1120, 0, 140);
+  TH1D* h_mb_p_zdc_calibE = new TH1D (Form ("h_mb_p_zdc_calibE_run%i", dataSet), "", 1400, 0, 175);
   h_mb_p_zdc_calibE->Sumw2 ();
 
   TH1D* h_jet_Pb_fcal_et = new TH1D ("h_jet_Pb_fcal_et", "", 400, -100, 300);
@@ -213,11 +213,11 @@ bool ZDCAnalysis (const char* directory,
   TH1D* h_jet_p_fcal_et = new TH1D ("h_jet_p_fcal_et", "", 150, -100, 200);
   h_jet_p_fcal_et->Sumw2 ();
 
-  TH1D* h_jet_Pb_zdc_calibE = new TH1D (Form ("h_jet_Pb_zdc_calibE_run%i", dataSet), "", 1120, 0, 140);
+  TH1D* h_jet_Pb_zdc_calibE = new TH1D (Form ("h_jet_Pb_zdc_calibE_run%i", dataSet), "", 1400, 0, 175);
   h_jet_Pb_zdc_calibE->Sumw2 ();
-  TH1D* h_jet_Pb_zdc_calibE_cut = new TH1D (Form ("h_jet_Pb_zdc_calibE_cut_run%i", dataSet), "", 1120, 0, 140);
+  TH1D* h_jet_Pb_zdc_calibE_cut = new TH1D (Form ("h_jet_Pb_zdc_calibE_cut_run%i", dataSet), "", 1400, 0, 175);
   h_jet_Pb_zdc_calibE_cut->Sumw2 ();
-  TH1D* h_jet_p_zdc_calibE = new TH1D (Form ("h_jet_p_zdc_calibE_run%i", dataSet), "", 1120, 0, 140);
+  TH1D* h_jet_p_zdc_calibE = new TH1D (Form ("h_jet_p_zdc_calibE_run%i", dataSet), "", 1400, 0, 175);
   h_jet_p_zdc_calibE->Sumw2 ();
 
 

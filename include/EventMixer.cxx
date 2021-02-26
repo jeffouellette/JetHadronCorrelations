@@ -3,7 +3,7 @@
 
 #include "TreeVariables.h"
 
-namespace HadronYieldsAnalysis {
+namespace JetHadronCorrelations {
 
 bool MeetsJetCuts (int iJ);
 

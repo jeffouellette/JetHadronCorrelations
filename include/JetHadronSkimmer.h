@@ -3,7 +3,7 @@
 
 #include "TreeVariables.h"
 
-namespace HadronYieldsAnalysis {
+namespace JetHadronCorrelations {
 
 bool JetHadronSkimmer (const char* directory,
                        const int dataSet,

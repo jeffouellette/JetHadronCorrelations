@@ -1,13 +1,13 @@
 #include "JetHadronSkimmer.h"
 #include "ZDCAnalysis.h"
 #include "Params.h"
-#include "run.h"
+#include "Process.h"
 
 #include <string>
 #include <iostream>
 
 using namespace std;
-using namespace HadronYieldsAnalysis;
+using namespace JetHadronCorrelations;
 
 
 int main (int argc, char** argv) {
@@ -27,7 +27,7 @@ int main (int argc, char** argv) {
   else if (collSys == ToTString (CollisionSystem::pp17))        { collisionSystem = CollisionSystem::pp17;       }
   else if (collSys == ToTString (CollisionSystem::PbPb18))      { collisionSystem = CollisionSystem::PbPb18;     }
   else {
-    std::cout << "In Run.cxx: Invalid collision system, exiting." << std::endl;
+    std::cout << "In Process.cxx: Invalid collision system, exiting." << std::endl;
     return 1;
   }
 
@@ -38,7 +38,7 @@ int main (int argc, char** argv) {
   else if (dType == ToTString (DataType::MCHijing))         { dataType = DataType::MCHijing;        }
   else if (dType == ToTString (DataType::MCHijingOverlay))  { dataType = DataType::MCHijingOverlay; }
   else {
-    std::cout << "In Run.cxx: Invalid data type, exiting." << std::endl;
+    std::cout << "In Process.cxx: Invalid data type, exiting." << std::endl;
     return 2;
   }
 
@@ -46,13 +46,21 @@ int main (int argc, char** argv) {
   if      (tType == ToTString (TriggerType::Jet))     { triggerType = TriggerType::Jet;     }
   else if (tType == ToTString (TriggerType::MinBias)) { triggerType = TriggerType::MinBias; }
   else if (IsCollisions ()) {
-    std::cout << "In Run.cxx: Invalid trigger type in data, exiting." << std::endl;
+    std::cout << "In Process.cxx: Invalid trigger type in data, exiting." << std::endl;
     return 3;
   }
 
-  doHITightVar            = (argc > argn && argv[argn] ? string (argv[argn++]) == "true" : false);
-  doPionsOnlyVar          = (argc > argn && argv[argn] ? string (argv[argn++]) == "true" : false);
-  doWithPileupVar         = (argc > argn && argv[argn] ? string (argv[argn++]) == "true" : false);
+  TString sFlag = TString (argv[argn++]);
+  if      (sFlag == ToTString (SystFlag::HITightVar))         { ToggleSyst (SystFlag::HITightVar);        }
+  else if (sFlag == ToTString (SystFlag::PionsOnlyVar))       { ToggleSyst (SystFlag::PionsOnlyVar);      }
+  else if (sFlag == ToTString (SystFlag::WithPileupVar))      { ToggleSyst (SystFlag::WithPileupVar);     }
+  else if (sFlag == ToTString (SystFlag::JetES5PercUpVar))    { ToggleSyst (SystFlag::JetES5PercUpVar);   }
+  else if (sFlag == ToTString (SystFlag::JetES5PercDownVar))  { ToggleSyst (SystFlag::JetES5PercDownVar); }
+  else if (sFlag == ToTString (SystFlag::JetES2PercUpVar))    { ToggleSyst (SystFlag::JetES2PercUpVar);   }
+  else if (sFlag == ToTString (SystFlag::JetES2PercDownVar))  { ToggleSyst (SystFlag::JetES2PercDownVar); }
+  else {
+    std::cout << "In Process.cxx: No systematics specified." << std::endl;
+  }
 
   crossSectionPicoBarns             = (argc > argn && argv[argn] ? atof (argv[argn++]) : 0);
   mcFilterEfficiency                = (argc > argn && argv[argn] ? atof (argv[argn++]) : 0);
@@ -60,7 +68,7 @@ int main (int argc, char** argv) {
   const char* inFileName            = (argc > argn && argv[argn] ? argv[argn++] : "");
   const char* eventWeightsFileName  = (argc > argn && argv[argn] ? argv[argn++] : "");
 
-  std::cout << "Info: In run.cxx: Configuration set to";
+  std::cout << "Info: In Process.cxx: Configuration set to";
   std::cout << "\n\talg = " << alg;
   std::cout << "\n\tsubdir = " << subdir;
   std::cout << "\n\tdataSet = " << dataSet;
@@ -71,6 +79,10 @@ int main (int argc, char** argv) {
   std::cout << "\n\tdoHITightVar = " << doHITightVar;
   std::cout << "\n\tdoPionsOnlyVar = " << doPionsOnlyVar;
   std::cout << "\n\tdoWithPileupVar = " << doWithPileupVar;
+  std::cout << "\n\tdoJetES5PercUpVar = " << doJetES5PercUpVar;
+  std::cout << "\n\tdoJetES5PercDownVar = " << doJetES5PercDownVar;
+  std::cout << "\n\tdoJetES2PercUpVar = " << doJetES2PercUpVar;
+  std::cout << "\n\tdoJetES2PercDownVar = " << doJetES2PercDownVar;
   if (crossSectionPicoBarns != 0.)
     std::cout << "\n\tcrossSectionPicoBarns = " << crossSectionPicoBarns;
   if (mcFilterEfficiency != 0.)
@@ -84,25 +96,25 @@ int main (int argc, char** argv) {
 
   bool success = false;
   if (alg == "JetHadronSkimmer") {
-    std::cout << "Info: In run.cxx: Running JetHadronSkimmer algorithm..." << std::endl;
-    success = HadronYieldsAnalysis::JetHadronSkimmer (subdir, dataSet, inFileName);
+    std::cout << "Info: In Process.cxx: Running JetHadronSkimmer algorithm..." << std::endl;
+    success = JetHadronCorrelations::JetHadronSkimmer (subdir, dataSet, inFileName);
   }
-  else if (alg == "ZDCAnalysis") {
-    std::cout << "Info: In run.cxx: Running ZDCAnalysis algorithm..." << std::endl;
-    success = HadronYieldsAnalysis::ZDCAnalysis (subdir, dataSet, inFileName);
+  else if (alg == "ZDCAnalysis" && !Ispp ()) {
+    std::cout << "Info: In Process.cxx: Running ZDCAnalysis algorithm..." << std::endl;
+    success = JetHadronCorrelations::ZDCAnalysis (subdir, dataSet, inFileName);
   }
   else {
-    std::cout << "Error: In run.cxx: Failed to recognize algorithm! Quitting." << std::endl;
+    std::cout << "Error: In Process.cxx: Failed to recognize algorithm! Quitting." << std::endl;
     return 1;
   }
 
 
   if (success) {
-    std::cout << "Info: In run.cxx: Finished algorithm!" << std::endl;
+    std::cout << "Info: In Process.cxx: Finished algorithm!" << std::endl;
     return 0;
   }
   else {
-    std::cout << "Error: In run.cxx: Algorithm failed!" << std::endl;
+    std::cout << "Error: In Process.cxx: Algorithm failed!" << std::endl;
     return 1;
   }
 }

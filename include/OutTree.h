@@ -9,7 +9,7 @@
 
 using namespace std;
 
-namespace HadronYieldsAnalysis {
+namespace JetHadronCorrelations {
 
 // Here we define additional analysis-level variables unavailable from the AOD output,
 // plus "out_" versions of arrays with slimmed entries meeting basic selections.

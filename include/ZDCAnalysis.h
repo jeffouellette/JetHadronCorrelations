@@ -1,7 +1,7 @@
 #ifndef __ZDCAnalysis_h__
 #define __ZDCAnalysis_h__
 
-namespace HadronYieldsAnalysis {
+namespace JetHadronCorrelations {
 
 bool ZDCAnalysis (const char* directory,
                   const int dataSet,

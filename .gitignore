@@ -9,3 +9,6 @@ run/logs
 rootlogon.C
 Setup.sh
 Slides
+*.d
+*.so
+*ACLiC*

@@ -13,7 +13,7 @@
 
 using namespace std;
 
-namespace HadronYieldsAnalysis { 
+namespace JetHadronCorrelations { 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Global variable declarations
@@ -26,7 +26,7 @@ const double muon_mass = 0.105658;
 
 
 const float min_trk_pt = 0.5;
-const float min_akt4_hi_jet_pt = 60;
+const float min_akt4_hi_jet_pt = 30;
 
 TString workPath = TString (std::getenv ("JETHADRONCORR_PATH")) + "/Analysis/";
 TString extWorkPath = TString (std::getenv ("JETHADRONCORR_DATA_PATH")) + "/";
@@ -42,10 +42,18 @@ extern int mcNumberEvents;
 extern bool doHITightVar;
 extern bool doPionsOnlyVar;
 extern bool doWithPileupVar;
+extern bool doJetES5PercUpVar;
+extern bool doJetES5PercDownVar;
+extern bool doJetES2PercUpVar;
+extern bool doJetES2PercDownVar;
 
 extern CollisionSystem collisionSystem;
 extern DataType dataType; 
 extern TriggerType triggerType;
+
+// histogram level jet pT cuts
+extern double jet_min_pt;
+extern double jet_max_pt;
 
 
 // Centrality classes for mixing events
@@ -191,8 +199,8 @@ short GetRunGroup (int rn) {
 }
 
 
-const int nPtJBins = 36;
-double* pTJBins = linspace (50, 410, nPtJBins);
+const int nPtJBins = 60;
+double* pTJBins = logspace (30, 450, nPtJBins);
 
 short GetPtJBin (const float jpt) {
   short iPtJ = 0;

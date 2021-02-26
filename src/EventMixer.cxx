@@ -24,7 +24,7 @@
 
 using namespace std;
 
-namespace HadronYieldsAnalysis {
+namespace JetHadronCorrelations {
 
 
 bool EventMixer (const char* directory,

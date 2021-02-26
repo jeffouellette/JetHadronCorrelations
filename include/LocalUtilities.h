@@ -6,15 +6,18 @@
 #include <TH1D.h>
 #include <TFile.h>
 
-namespace HadronYieldsAnalysis {
+namespace JetHadronCorrelations {
 
 enum class CollisionSystem { pp15, PbPb15, pPb16s5TeV, pPb16, Pbp16, XeXe17, pp17, PbPb18 }; // run 2 HI data sets
 enum class DataType { Collisions, MCSignal, MCDataOverlay, MCHijing, MCHijingOverlay }; // data types used in HI
 enum class TriggerType { Jet, MinBias }; // types of triggers in this analysis
+enum class SystFlag { None, HITightVar, PionsOnlyVar, WithPileupVar, JetES5PercUpVar, JetES5PercDownVar, JetES2PercUpVar, JetES2PercDownVar }; // types of systematic variations
+
 
 TString ToTString (const CollisionSystem collSys);
 TString ToTString (const DataType dType);
 TString ToTString (const TriggerType tType);
+TString ToTString (const SystFlag sFlag);
 
 
 bool IsIons (const CollisionSystem collSys);
@@ -42,6 +45,8 @@ bool IsHijing (const DataType dType);
 
 bool UseJetTriggers (const TriggerType tType);
 bool UseMinBiasTriggers (const TriggerType tType);
+
+bool ToggleSyst (const SystFlag sFlag);
 
 
 bool IsIons ();
@@ -111,13 +116,25 @@ double GetJetLuminosity ();
 /**
  * Returns true if this jet passes selection criteria.
  */
-bool MeetsJetCuts (int iJ);
+bool MeetsJetAcceptanceCuts (int iJ);
+
+
+/**
+ * Returns true if this jet pT passes pT cuts.
+ */
+bool MeetsJetPtCut (double jpt);
 
 
 /**
  * Returns true if this track passes selection criteria.
  */
 bool MeetsTrackCuts (int iTrk);
+
+
+/**
+ * Returns the appropriate per-jet reweighting factor. Takes in coordinates for an anti-kT R=0.4 HI jet (pT, eta, & phi).
+ */
+double GetAkt4JetWeight (const float jpt, const float jeta, const float jphi, const float jetr = 0.4);
 
 } // end namespace
 

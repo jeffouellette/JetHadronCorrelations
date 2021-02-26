@@ -24,7 +24,7 @@
 
 using namespace std;
 
-namespace HadronYieldsAnalysis {
+namespace JetHadronCorrelations {
 
 
 bool JetHadronSkimmer (const char* directory,
@@ -292,7 +292,7 @@ bool JetHadronSkimmer (const char* directory,
   TFile* outFiles[numFileBins];
   OutTree* outTrees[numFileBins];
   for (int iCent = 0; iCent < numFileBins; iCent++) {
-    TString fName = (numFileBins == 1 ? Form ("%s/%s.root", rootPath.Data (), identifier.Data ()) : Form ("%s/%s/%s_iCent%i.root", rootPath.Data (), identifier.Data (), identifier.Data (), iCent));
+    TString fName = (numFileBins == 1 ? Form ("%s/%s.root", rootPath.Data (), identifier.Data ()) : Form ("%s/%s_iCent%i.root", rootPath.Data (), identifier.Data (), iCent));
     outFiles[iCent] = new TFile (fName.Data (), "recreate");
     outFiles[iCent]->Delete (Form ("%s;*", outTreeName.Data ()));
 
@@ -382,13 +382,22 @@ bool JetHadronSkimmer (const char* directory,
 
       out_akt4_hi_jet_n = 0;
       for (int iJ = 0; iJ < akt4_hi_jet_n; iJ++) {
-        if (!MeetsJetCuts (iJ))
+        if (!MeetsJetAcceptanceCuts (iJ))
           continue;
 
-        out_akt4_hi_jet_pt[out_akt4_hi_jet_n] = akt4_hi_jet_pt_xcalib[iJ];
+        // Crude systematic -- smear jet energy scale by 2% or 5% (ad-hoc)
+        double jpt = akt4_hi_jet_pt_xcalib[iJ];
+        double jen = akt4_hi_jet_e_xcalib[iJ]; 
+
+        if (doJetES5PercUpVar)   { jpt *= 1.05;  jen *= 1.05; }
+        if (doJetES2PercUpVar)   { jpt *= 1.02;  jen *= 1.02; }
+        if (doJetES5PercDownVar) { jpt *= 0.95;  jen *= 0.95; }
+        if (doJetES2PercDownVar) { jpt *= 0.98;  jen *= 0.98; }
+
+        out_akt4_hi_jet_pt[out_akt4_hi_jet_n] = jpt;
         out_akt4_hi_jet_eta[out_akt4_hi_jet_n] = akt4_hi_jet_eta_xcalib[iJ];
         out_akt4_hi_jet_phi[out_akt4_hi_jet_n] = akt4_hi_jet_phi[iJ];
-        out_akt4_hi_jet_e[out_akt4_hi_jet_n] = akt4_hi_jet_e_xcalib[iJ];
+        out_akt4_hi_jet_e[out_akt4_hi_jet_n] = jen;
         out_akt4_hi_jet_n++;
       }
 

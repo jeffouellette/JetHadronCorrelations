@@ -44,6 +44,7 @@ void PlotZDCAnalysis () {
   TH1D* h_mb_Pb_zdc_calibE[6] = {};
   TH1D* h_jet_Pb_zdc_calibE_sum = nullptr;
   TH1D* h_mb_Pb_zdc_calibE_sum = nullptr;
+  TH1D* h_ratio_Pb_zdc_calibE_sum = nullptr; // ratio of jet-tagged / MB events
 
   for (int iRun = 0; iRun < 6; iRun++) {
     h_jet_Pb_zdc_calibE[iRun] = (TH1D*) inFile->Get (Form ("h_jet_Pb_zdc_calibE_run%i", runs[iRun]));
@@ -60,6 +61,9 @@ void PlotZDCAnalysis () {
 
   h_jet_Pb_zdc_calibE_sum->Scale (1. / h_jet_Pb_zdc_calibE_sum->Integral (h_jet_Pb_zdc_calibE_sum->FindBin (65.9228), h_jet_Pb_zdc_calibE_sum->GetNbinsX ()));
   h_mb_Pb_zdc_calibE_sum->Scale (1. / h_mb_Pb_zdc_calibE_sum->Integral (h_mb_Pb_zdc_calibE_sum->FindBin (65.9228), h_mb_Pb_zdc_calibE_sum->GetNbinsX ()));
+
+  h_ratio_Pb_zdc_calibE_sum = (TH1D*) h_jet_Pb_zdc_calibE_sum->Clone ("h_ratio_Pb_zdc_calibE_sum");
+  h_ratio_Pb_zdc_calibE_sum->Divide (h_mb_Pb_zdc_calibE_sum); 
 
   TH2D* h2_jet_Pb_fcal_et_zdc_calibE_run312796 = (TH2D*) inFile->Get ("h2_jet_Pb_fcal_et_zdc_calibE_run312796");
   TH2D* h2_mb_Pb_fcal_et_zdc_calibE_run312796 = (TH2D*) inFile->Get ("h2_mb_Pb_fcal_et_zdc_calibE_run312796");
@@ -93,18 +97,10 @@ void PlotZDCAnalysis () {
 
     h->GetXaxis ()->SetTitleFont (43);
     h->GetXaxis ()->SetTitleSize (26);
-    h->GetXaxis ()->SetTitleFont (43);
-    h->GetXaxis ()->SetTitleSize (26);
-    h->GetYaxis ()->SetTitleFont (43);
-    h->GetYaxis ()->SetTitleSize (26);
     h->GetYaxis ()->SetTitleFont (43);
     h->GetYaxis ()->SetTitleSize (26);
     h->GetXaxis ()->SetLabelFont (43);
     h->GetXaxis ()->SetLabelSize (24);
-    h->GetXaxis ()->SetLabelFont (43);
-    h->GetXaxis ()->SetLabelSize (24);
-    h->GetYaxis ()->SetLabelFont (43);
-    h->GetYaxis ()->SetLabelSize (24);
     h->GetYaxis ()->SetLabelFont (43);
     h->GetYaxis ()->SetLabelSize (24);
 
@@ -159,15 +155,15 @@ void PlotZDCAnalysis () {
     myText (0.65, 0.550, kBlue+3, "J50 Trigger", 0.032);
     myText (0.65, 0.510, kRed+1, "MinBias Trigger", 0.032);
 
-    TPad* subpad = new TPad ("c3_subpad", "", 0.6, 0.6, 1.-c->GetRightMargin (), 1.-c->GetTopMargin ());
-    subpad->SetTopMargin (0);
-    subpad->SetRightMargin (0);
-    subpad->SetLeftMargin (0.10);
-    subpad->SetBottomMargin (0.08);
-//    subpad->SetBorderSize (1);
-    subpad->SetLogy ();
-    subpad->Draw ();
-    subpad->cd ();
+    TPad* subPad = new TPad ("c3_subPad", "", 0.6, 0.6, 1.-c->GetRightMargin (), 1.-c->GetTopMargin ());
+    subPad->SetTopMargin (0);
+    subPad->SetRightMargin (0);
+    subPad->SetLeftMargin (0.10);
+    subPad->SetBottomMargin (0.08);
+//    subPad->SetBorderSize (1);
+    subPad->SetLogy ();
+    subPad->Draw ();
+    subPad->cd ();
 
     h = h_jet_Pb_zdc_calibE[iRun];
 
@@ -179,18 +175,10 @@ void PlotZDCAnalysis () {
 
     h->GetXaxis ()->SetTitleFont (43);
     h->GetXaxis ()->SetTitleSize (18);
-    h->GetXaxis ()->SetTitleFont (43);
-    h->GetXaxis ()->SetTitleSize (18);
-    h->GetYaxis ()->SetTitleFont (43);
-    h->GetYaxis ()->SetTitleSize (18);
     h->GetYaxis ()->SetTitleFont (43);
     h->GetYaxis ()->SetTitleSize (18);
     h->GetXaxis ()->SetLabelFont (43);
     h->GetXaxis ()->SetLabelSize (14);
-    h->GetXaxis ()->SetLabelFont (43);
-    h->GetXaxis ()->SetLabelSize (14);
-    h->GetYaxis ()->SetLabelFont (43);
-    h->GetYaxis ()->SetLabelSize (14);
     h->GetYaxis ()->SetLabelFont (43);
     h->GetYaxis ()->SetLabelSize (14);
 
@@ -200,11 +188,11 @@ void PlotZDCAnalysis () {
     h->DrawCopy ("hist same");
 
     c->cd ();
-    TLine* subpadBorder = new TLine ();
-    subpadBorder->DrawLineNDC (0.6, 0.6, 1.-c->GetRightMargin (), 0.6);
-    subpadBorder->DrawLineNDC (1.-c->GetRightMargin (), 0.6, 1.-c->GetRightMargin (), 1.-c->GetTopMargin ());
-    subpadBorder->DrawLineNDC (1.-c->GetRightMargin (), 1.-c->GetTopMargin (), 0.6, 1.-c->GetTopMargin ());
-    subpadBorder->DrawLineNDC (0.6, 1.-c->GetTopMargin (), 0.6, 0.6);
+    TLine* subPadBorder = new TLine ();
+    subPadBorder->DrawLineNDC (0.6, 0.6, 1.-c->GetRightMargin (), 0.6);
+    subPadBorder->DrawLineNDC (1.-c->GetRightMargin (), 0.6, 1.-c->GetRightMargin (), 1.-c->GetTopMargin ());
+    subPadBorder->DrawLineNDC (1.-c->GetRightMargin (), 1.-c->GetTopMargin (), 0.6, 1.-c->GetTopMargin ());
+    subPadBorder->DrawLineNDC (0.6, 1.-c->GetTopMargin (), 0.6, 0.6);
    
     c->SaveAs (Form ("Plots/ZDCAnalysis/run%i_zdc.pdf", runs[iRun]));
   }
@@ -212,18 +200,45 @@ void PlotZDCAnalysis () {
 
 
   {
-    TCanvas* c = new TCanvas ("c1", "", 800, 800);
+    TCanvas* c = new TCanvas ("c", "", 800, 1000);
 
-    gPad->SetLogy ();
+    const double bMargin = 0.20;
+    const double lMargin = 0.11;
+    const double rMargin = 0.04;
+    const double tMargin = 0.04;
 
-    gPad->SetBottomMargin (0.11);
-    gPad->SetLeftMargin (0.11);
-    gPad->SetRightMargin (0.04);
-    gPad->SetTopMargin (0.04);
+    TPad* uPad = new TPad ("c_uPad", "", 0.0, 0.3, 1.0, 1.0);
+    TPad* dPad = new TPad ("c_dPad", "", 0.0, 0.0, 1.0, 0.3);
+    TPad* subPad = new TPad ("c_subPad", "", 0.6, 0.6*0.7+0.3, 1.-rMargin, 1.-tMargin*0.7);
+
+    uPad->SetBottomMargin (0);
+    uPad->SetLeftMargin (lMargin);
+    uPad->SetRightMargin (rMargin);
+    uPad->SetTopMargin (tMargin);
+
+    dPad->SetBottomMargin (bMargin);
+    dPad->SetLeftMargin (lMargin);
+    dPad->SetRightMargin (rMargin);
+    dPad->SetTopMargin (0);
+
+    subPad->SetBottomMargin (0.08);
+    subPad->SetLeftMargin (0.10);
+    subPad->SetRightMargin (0);
+    subPad->SetTopMargin (0);
+
+    uPad->Draw ();
+    dPad->Draw ();
+    subPad->Draw ();
+
+
+    uPad->cd ();
+    uPad->SetLogy ();
 
     TH1D* h = h_jet_Pb_zdc_calibE_sum;
-    h->GetXaxis ()->SetTitle ("Calibrated #Sigma#it{E}_{ZDC}^{Pb} [TeV]");
+    //h->GetXaxis ()->SetTitle ("Calibrated #Sigma#it{E}_{ZDC}^{Pb} [TeV]");
     h->GetYaxis ()->SetTitle ("A.U. (normalized in 0-20%)");
+
+    h->GetYaxis ()->SetTitleOffset (1.2 * h->GetYaxis ()->GetTitleOffset ());
 
     double ymin = 5e-7;
     double ymax = 8e-2;
@@ -236,19 +251,11 @@ void PlotZDCAnalysis () {
 
 
     h->GetXaxis ()->SetTitleFont (43);
-    h->GetXaxis ()->SetTitleSize (26);
-    h->GetXaxis ()->SetTitleFont (43);
-    h->GetXaxis ()->SetTitleSize (26);
-    h->GetYaxis ()->SetTitleFont (43);
-    h->GetYaxis ()->SetTitleSize (26);
+    h->GetXaxis ()->SetTitleSize (0);
     h->GetYaxis ()->SetTitleFont (43);
     h->GetYaxis ()->SetTitleSize (26);
     h->GetXaxis ()->SetLabelFont (43);
-    h->GetXaxis ()->SetLabelSize (24);
-    h->GetXaxis ()->SetLabelFont (43);
-    h->GetXaxis ()->SetLabelSize (24);
-    h->GetYaxis ()->SetLabelFont (43);
-    h->GetYaxis ()->SetLabelSize (24);
+    h->GetXaxis ()->SetLabelSize (0);
     h->GetYaxis ()->SetLabelFont (43);
     h->GetYaxis ()->SetLabelSize (24);
 
@@ -298,20 +305,47 @@ void PlotZDCAnalysis () {
 
     h->DrawCopy ("hist same");
 
-    myText (0.20, 0.88, kBlack, "#bf{#it{ATLAS}} Internal", 0.036);
-    myText (0.20, 0.840, kBlack, "All runs", 0.032);
+    myText (0.20, 0.900, kBlack, "#bf{#it{ATLAS}} Internal", 0.036);
+    myText (0.20, 0.860, kBlack, "#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV", 0.032);
+    myText (0.20, 0.820, kBlack, "All runs", 0.032);
     myText (0.65, 0.550, kBlue+3, "J50 Trigger", 0.032);
     myText (0.65, 0.510, kRed+1, "MinBias Trigger", 0.032);
 
-    TPad* subpad = new TPad ("c3_subpad", "", 0.6, 0.6, 1.-c->GetRightMargin (), 1.-c->GetTopMargin ());
-    subpad->SetTopMargin (0);
-    subpad->SetRightMargin (0);
-    subpad->SetLeftMargin (0.10);
-    subpad->SetBottomMargin (0.08);
-//    subpad->SetBorderSize (1);
-    subpad->SetLogy ();
-    subpad->Draw ();
-    subpad->cd ();
+
+    dPad->cd ();
+    dPad->SetLogy ();
+
+    ymin = 7e-2;
+    ymax = 2e1;
+
+    h = h_ratio_Pb_zdc_calibE_sum;
+    h->GetXaxis ()->SetTitle ("Calibrated #Sigma#it{E}_{ZDC}^{Pb} [TeV]");
+    h->GetYaxis ()->SetTitle ("Jet / MB");
+
+    h->GetXaxis ()->SetTitleOffset (2.4 * h->GetXaxis ()->GetTitleOffset ());
+    h->GetYaxis ()->SetTitleOffset (1.2 * h->GetYaxis ()->GetTitleOffset ());
+    h->GetYaxis ()->CenterTitle ();
+
+    h->SetLineColor (kBlue+3);
+
+    h->GetYaxis ()->SetRangeUser (ymin, ymax);
+
+    h->GetXaxis ()->SetTitleFont (43);
+    h->GetXaxis ()->SetTitleSize (26);
+    h->GetYaxis ()->SetTitleFont (43);
+    h->GetYaxis ()->SetTitleSize (26);
+    h->GetXaxis ()->SetLabelFont (43);
+    h->GetXaxis ()->SetLabelSize (24);
+    h->GetYaxis ()->SetLabelFont (43);
+    h->GetYaxis ()->SetLabelSize (24);
+
+    h->DrawCopy ("hist");
+
+    divs->DrawLine (0, 1, 140, 1);
+
+
+    subPad->cd ();
+    subPad->SetLogy ();
 
     h = h_jet_Pb_zdc_calibE_sum;
 
@@ -323,18 +357,10 @@ void PlotZDCAnalysis () {
 
     h->GetXaxis ()->SetTitleFont (43);
     h->GetXaxis ()->SetTitleSize (18);
-    h->GetXaxis ()->SetTitleFont (43);
-    h->GetXaxis ()->SetTitleSize (18);
-    h->GetYaxis ()->SetTitleFont (43);
-    h->GetYaxis ()->SetTitleSize (18);
     h->GetYaxis ()->SetTitleFont (43);
     h->GetYaxis ()->SetTitleSize (18);
     h->GetXaxis ()->SetLabelFont (43);
     h->GetXaxis ()->SetLabelSize (14);
-    h->GetXaxis ()->SetLabelFont (43);
-    h->GetXaxis ()->SetLabelSize (14);
-    h->GetYaxis ()->SetLabelFont (43);
-    h->GetYaxis ()->SetLabelSize (14);
     h->GetYaxis ()->SetLabelFont (43);
     h->GetYaxis ()->SetLabelSize (14);
 
@@ -344,11 +370,14 @@ void PlotZDCAnalysis () {
     h->DrawCopy ("hist same");
 
     c->cd ();
-    TLine* subpadBorder = new TLine ();
-    subpadBorder->DrawLineNDC (0.6, 0.6, 1.-c->GetRightMargin (), 0.6);
-    subpadBorder->DrawLineNDC (1.-c->GetRightMargin (), 0.6, 1.-c->GetRightMargin (), 1.-c->GetTopMargin ());
-    subpadBorder->DrawLineNDC (1.-c->GetRightMargin (), 1.-c->GetTopMargin (), 0.6, 1.-c->GetTopMargin ());
-    subpadBorder->DrawLineNDC (0.6, 1.-c->GetTopMargin (), 0.6, 0.6);
+    TLine* subPadBorder = new TLine ();
+    subPadBorder->DrawLineNDC (0.6, 0.6*0.7+0.3, 1.-rMargin, 0.6*0.7+0.3);
+    subPadBorder->DrawLineNDC (1.-rMargin, 0.6*0.7+0.3, 1.-rMargin, 1.-tMargin*0.7);
+    subPadBorder->DrawLineNDC (1.-rMargin, 1.-tMargin*0.7, 0.6, 1.-tMargin*0.7);
+    subPadBorder->DrawLineNDC (0.6, 1.-tMargin*0.7, 0.6, 0.6*0.7+0.3);
+
+
+    dPad->cd ();
    
     c->SaveAs ("Plots/ZDCAnalysis/allruns_zdc.pdf");
   }
@@ -378,27 +407,15 @@ void PlotZDCAnalysis () {
 
     h->GetXaxis ()->SetTitleFont (43);
     h->GetXaxis ()->SetTitleSize (26);
-    h->GetXaxis ()->SetTitleFont (43);
-    h->GetXaxis ()->SetTitleSize (26);
     h->GetYaxis ()->SetTitleFont (43);
     h->GetYaxis ()->SetTitleSize (26);
-    h->GetYaxis ()->SetTitleFont (43);
-    h->GetYaxis ()->SetTitleSize (26);
-    h->GetZaxis ()->SetTitleFont (43);
-    h->GetZaxis ()->SetTitleSize (26);
     h->GetZaxis ()->SetTitleFont (43);
     h->GetZaxis ()->SetTitleSize (26);
 
     h->GetXaxis ()->SetLabelFont (43);
     h->GetXaxis ()->SetLabelSize (22);
-    h->GetXaxis ()->SetLabelFont (43);
-    h->GetXaxis ()->SetLabelSize (22);
     h->GetYaxis ()->SetLabelFont (43);
     h->GetYaxis ()->SetLabelSize (22);
-    h->GetYaxis ()->SetLabelFont (43);
-    h->GetYaxis ()->SetLabelSize (22);
-    h->GetZaxis ()->SetLabelFont (43);
-    h->GetZaxis ()->SetLabelSize (22);
     h->GetZaxis ()->SetLabelFont (43);
     h->GetZaxis ()->SetLabelSize (22);
 
@@ -462,27 +479,15 @@ void PlotZDCAnalysis () {
 
     h->GetXaxis ()->SetTitleFont (43);
     h->GetXaxis ()->SetTitleSize (26);
-    h->GetXaxis ()->SetTitleFont (43);
-    h->GetXaxis ()->SetTitleSize (26);
     h->GetYaxis ()->SetTitleFont (43);
     h->GetYaxis ()->SetTitleSize (26);
-    h->GetYaxis ()->SetTitleFont (43);
-    h->GetYaxis ()->SetTitleSize (26);
-    h->GetZaxis ()->SetTitleFont (43);
-    h->GetZaxis ()->SetTitleSize (26);
     h->GetZaxis ()->SetTitleFont (43);
     h->GetZaxis ()->SetTitleSize (26);
 
     h->GetXaxis ()->SetLabelFont (43);
     h->GetXaxis ()->SetLabelSize (22);
-    h->GetXaxis ()->SetLabelFont (43);
-    h->GetXaxis ()->SetLabelSize (22);
     h->GetYaxis ()->SetLabelFont (43);
     h->GetYaxis ()->SetLabelSize (22);
-    h->GetYaxis ()->SetLabelFont (43);
-    h->GetYaxis ()->SetLabelSize (22);
-    h->GetZaxis ()->SetLabelFont (43);
-    h->GetZaxis ()->SetLabelSize (22);
     h->GetZaxis ()->SetLabelFont (43);
     h->GetZaxis ()->SetLabelSize (22);
 

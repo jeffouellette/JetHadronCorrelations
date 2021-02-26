@@ -4,7 +4,7 @@ LDFLAGS=`root-config --glibs --ldflags` -Llib -L${ROOT_UTILS_PATH}/lib -L${ATLAS
 
 libraries = LocalUtilities
 algorithms = JetHadronSkimmer ZDCAnalysis
-binaries = run
+binaries = Process RunCorrelator
 
 libs : $(libraries)
 algs : $(algorithms)
@@ -16,8 +16,11 @@ LocalUtilities : src/LocalUtilities.cxx
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) -shared -o lib/lib$@.so src/$@.cxx
 
 # Main needs to be compiled into binary
-run : $(libraries) $(algorithms) src/run.cxx
-	$(CXX) $(CXXFLAGS) src/run.cxx $(LDFLAGS) $(libraries:%=-l%) $(algorithms:%=-l%) -o bin/run.exe
+Process : $(libraries) $(algorithms) src/Process.cxx
+	$(CXX) $(CXXFLAGS) src/Process.cxx $(LDFLAGS) $(libraries:%=-l%) $(algorithms:%=-l%) -o bin/Process.exe
+
+RunCorrelator : $(libraries) src/RunCorrelator.C
+	$(CXX) $(CXXFLAGS) src/RunCorrelator.C $(LDFLAGS) $(libraries:%=-l%) $(algorithms:%=-l%) -o bin/RunCorrelator.exe
 
 obj/%.o : src/%.cxx
 	$(CXX) $(CXXFLAGS) -c -o $@ $<

@@ -1,15 +1,19 @@
-#ifndef __run_h__
-#define __run_h__
+#ifndef __Process_h__
+#define __Process_h__
 
 #include "Params.h"
 
-using namespace HadronYieldsAnalysis;
+using namespace JetHadronCorrelations;
 
-namespace HadronYieldsAnalysis {
+namespace JetHadronCorrelations {
 
 bool doHITightVar = false;
 bool doPionsOnlyVar = false;
 bool doWithPileupVar = false;
+bool doJetES5PercUpVar = false;
+bool doJetES5PercDownVar = false;
+bool doJetES2PercUpVar = false;
+bool doJetES2PercDownVar = false;
 
 float crossSectionPicoBarns = 0;
 float mcFilterEfficiency = 0;

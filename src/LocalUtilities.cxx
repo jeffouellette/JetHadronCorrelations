@@ -4,7 +4,8 @@
 #include "LocalUtilities.h"
 #include "TreeVariables.h"
 #include "Params.h"
-#include "run.h"
+#include "Process.h"
+#include "RunCorrelator.h"
 
 #include <AtlasUtils.h>
 
@@ -16,9 +17,8 @@
 #include <iostream>
 #include <sys/stat.h>
 
-using namespace std;
 
-namespace HadronYieldsAnalysis {
+namespace JetHadronCorrelations {
 
 
 TString ToTString (const CollisionSystem collSys) {
@@ -58,6 +58,20 @@ TString ToTString (const TriggerType tType) {
   }
 }
 
+
+
+TString ToTString (const SystFlag sFlag) {
+  switch (sFlag) {
+    case SystFlag::HITightVar:              return TString ("HITightVar");
+    case SystFlag::PionsOnlyVar:            return TString ("PionsOnlyVar");
+    case SystFlag::WithPileupVar:           return TString ("WithPileupVar");
+    case SystFlag::JetES5PercUpVar:    return TString ("JetES5PercUpVar");
+    case SystFlag::JetES5PercDownVar:  return TString ("JetES5PercDownVar");
+    case SystFlag::JetES2PercUpVar:    return TString ("JetES2PercUpVar");
+    case SystFlag::JetES2PercDownVar:  return TString ("JetES2PercDownVar");
+    default:                                return TString ("???");
+  }
+}
 
 
 
@@ -202,6 +216,21 @@ bool UseJetTriggers (const TriggerType tType) {
 
 bool UseMinBiasTriggers (const TriggerType tType) {
   return tType == TriggerType::MinBias;
+}
+
+
+
+bool ToggleSyst (const SystFlag sFlag) {
+  switch (sFlag) {
+    case SystFlag::HITightVar:        { doHITightVar = true;        return true; }
+    case SystFlag::PionsOnlyVar:      { doPionsOnlyVar = true;      return true; }
+    case SystFlag::WithPileupVar:     { doWithPileupVar = true;     return true; }
+    case SystFlag::JetES5PercUpVar:   { doJetES5PercUpVar = true;   return true; }
+    case SystFlag::JetES5PercDownVar: { doJetES5PercDownVar = true; return true; }
+    case SystFlag::JetES2PercUpVar:   { doJetES2PercUpVar = true;   return true; }
+    case SystFlag::JetES2PercDownVar: { doJetES2PercDownVar = true; return true; }
+    default:                                return false;
+  }
 }
 
 
@@ -370,11 +399,19 @@ void SetupDirectories (const TString dataSubDir, const bool addSubDir) {
 
   if (addSubDir) {
     if (doHITightVar)
-      rootPath = rootPath + "Variations/TrackHITightWPVariation/";
+      rootPath = rootPath + "HITightVar/";
     else if (doPionsOnlyVar)
-      rootPath = rootPath + "Variations/TrackEffPionsVariation/";
+      rootPath = rootPath + "PionsOnlyVar/";
     else if (doWithPileupVar)
-      rootPath = rootPath + "Variations/WithPileupVariation/";
+      rootPath = rootPath + "WithPileupVar/";
+    else if (doJetES5PercUpVar)
+      rootPath = rootPath + "JetES5PercUpVar/";
+    else if (doJetES5PercDownVar)
+      rootPath = rootPath + "JetES5PercDownVar/";
+    else if (doJetES2PercUpVar)
+      rootPath = rootPath + "JetES2PercUpVar/";
+    else if (doJetES2PercDownVar)
+      rootPath = rootPath + "JetES2PercDownVar/";
     else
       rootPath = rootPath + "Nominal/";
   }
@@ -564,12 +601,26 @@ double GetJetLuminosity () {
 /**
  * Returns true if this jet passes selection criteria.
  */
-bool MeetsJetCuts (int iJ) {
-  if (akt4_hi_jet_pt_xcalib[iJ] < min_akt4_hi_jet_pt)
-    return false;
+bool MeetsJetAcceptanceCuts (int iJ) {
   if (fabs (akt4_hi_jet_eta_xcalib[iJ]) > 2.8)
     return false;
-  if (InDisabledHEC (akt4_hi_jet_eta_xcalib[iJ], akt4_hi_jet_phi[iJ]))
+  if (IspPb () && InDisabledHEC (akt4_hi_jet_eta_xcalib[iJ], akt4_hi_jet_phi[iJ]))
+    return false;
+  return true;
+}
+
+
+/**
+ * Returns true if this jet pT passes pT cuts.
+ */
+bool MeetsJetPtCut (double jpt) {
+  if (jet_min_pt > 0) {
+    if (jpt < jet_min_pt)
+      return false;
+    if (jet_max_pt > jet_min_pt && jpt > jet_max_pt)
+      return false;
+  }
+  if (jet_max_pt > 0 && jpt > jet_max_pt)
     return false;
   return true;
 }
@@ -596,6 +647,17 @@ bool MeetsTrackCuts (int iTrk) {
       return false; // z0 significance cut in Pb+Pb
   }
   return true;
+}
+
+
+/**
+ * Returns the appropriate per-jet reweighting factor. Takes in coordinates for an anti-kT R=0.4 HI jet (pT, eta, & phi).
+ * Returns 0 if the jet is outside the acceptance.
+ */
+double GetAkt4JetWeight (const float jpt, const float jeta, const float jphi, const float jetr) {
+  const double accept = ((IspPb () & InDisabledHEC (jeta, jphi)) || fabs (jeta) > 2.8 ? 0. : 1.);
+  const double hecwgt = (IspPb () && jeta > 1.1 && jeta < 3.6 ? (2.*M_PI / (3.*M_PI/2. - 2*jetr)) : 1.);
+  return accept * hecwgt;
 }
 
 
