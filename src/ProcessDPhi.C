@@ -7,7 +7,6 @@
 #include "LocalUtilities.h"
 
 #include <ArrayTemplates.h>
-
 #include <Utilities.h>
 
 #include <TH1D.h>
@@ -361,9 +360,33 @@ void ProcessDPhi (const char* tag, const char* outFileTag) {
     g_jet_trk_dphi_iaa_syst[0]->Write ("g_jet_trk_dphi_iaa_syst");
     g_ljet_trk_dphi_iaa_syst[0]->Write ("g_ljet_trk_dphi_iaa_syst");
     g_sljet_trk_dphi_iaa_syst[0]->Write ("g_sljet_trk_dphi_iaa_syst");
-  }
 
-  outFile->Close ();
+
+    for (int iVar = 1; iVar < nVar; iVar++) {
+      h_jet_trk_dphi[0][iVar]->Write (Form ("h_jet_trk_dphi_ref_%s", variations[iVar].Data ()));
+      h_ljet_trk_dphi[0][iVar]->Write (Form ("h_ljet_trk_dphi_ref_%s", variations[iVar].Data ()));
+      h_sljet_trk_dphi[0][iVar]->Write (Form ("h_sljet_trk_dphi_ref_%s", variations[iVar].Data ()));
+      h_jet_trk_dphi[1][iVar]->Write (Form ("h_jet_trk_dphi_%s", variations[iVar].Data ()));
+      h_ljet_trk_dphi[1][iVar]->Write (Form ("h_ljet_trk_dphi_%s", variations[iVar].Data ()));
+      h_sljet_trk_dphi[1][iVar]->Write (Form ("h_sljet_trk_dphi_%s", variations[iVar].Data ()));
+      h_jet_trk_dphi_bkg[1][iVar]->Write (Form ("h_jet_trk_dphi_bkg_%s", variations[iVar].Data ()));
+      h_ljet_trk_dphi_bkg[1][iVar]->Write (Form ("h_ljet_trk_dphi_bkg_%s", variations[iVar].Data ()));
+      h_sljet_trk_dphi_bkg[1][iVar]->Write (Form ("h_sljet_trk_dphi_bkg_%s", variations[iVar].Data ()));
+
+      h_jet_trk_dphi_sig[0][iVar]->Write (Form ("h_jet_trk_dphi_ref_sig_%s", variations[iVar].Data ()));
+      h_ljet_trk_dphi_sig[0][iVar]->Write (Form ("h_ljet_trk_dphi_ref_sig_%s", variations[iVar].Data ()));
+      h_sljet_trk_dphi_sig[0][iVar]->Write (Form ("h_sljet_trk_dphi_ref_sig_%s", variations[iVar].Data ()));
+      h_jet_trk_dphi_sig[1][iVar]->Write (Form ("h_jet_trk_dphi_sig_%s", variations[iVar].Data ()));
+      h_ljet_trk_dphi_sig[1][iVar]->Write (Form ("h_ljet_trk_dphi_sig_%s", variations[iVar].Data ()));
+      h_sljet_trk_dphi_sig[1][iVar]->Write (Form ("h_sljet_trk_dphi_sig_%s", variations[iVar].Data ()));
+
+      h_jet_trk_dphi_iaa[iVar]->Write (Form ("h_jet_trk_dphi_iaa_%s", variations[iVar].Data ()));
+      h_ljet_trk_dphi_iaa[iVar]->Write (Form ("h_ljet_trk_dphi_iaa_%s", variations[iVar].Data ()));
+      h_sljet_trk_dphi_iaa[iVar]->Write (Form ("h_sljet_trk_dphi_iaa_%s", variations[iVar].Data ()));
+    }
+
+    outFile->Close ();
+  }
 }
 
 

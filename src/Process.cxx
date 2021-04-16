@@ -51,13 +51,15 @@ int main (int argc, char** argv) {
   }
 
   TString sFlag = TString (argv[argn++]);
-  if      (sFlag == ToTString (SystFlag::HITightVar))         { ToggleSyst (SystFlag::HITightVar);        }
-  else if (sFlag == ToTString (SystFlag::PionsOnlyVar))       { ToggleSyst (SystFlag::PionsOnlyVar);      }
-  else if (sFlag == ToTString (SystFlag::WithPileupVar))      { ToggleSyst (SystFlag::WithPileupVar);     }
-  else if (sFlag == ToTString (SystFlag::JetES5PercUpVar))    { ToggleSyst (SystFlag::JetES5PercUpVar);   }
-  else if (sFlag == ToTString (SystFlag::JetES5PercDownVar))  { ToggleSyst (SystFlag::JetES5PercDownVar); }
-  else if (sFlag == ToTString (SystFlag::JetES2PercUpVar))    { ToggleSyst (SystFlag::JetES2PercUpVar);   }
-  else if (sFlag == ToTString (SystFlag::JetES2PercDownVar))  { ToggleSyst (SystFlag::JetES2PercDownVar); }
+  if      (sFlag == ToTString (SystFlag::HITightVar))         { ToggleSyst (SystFlag::HITightVar);         }
+  else if (sFlag == ToTString (SystFlag::PionsOnlyVar))       { ToggleSyst (SystFlag::PionsOnlyVar);       }
+  else if (sFlag == ToTString (SystFlag::WithPileupVar))      { ToggleSyst (SystFlag::WithPileupVar);      }
+  else if (sFlag == ToTString (SystFlag::JetES5PercUpVar))    { ToggleSyst (SystFlag::JetES5PercUpVar);    }
+  else if (sFlag == ToTString (SystFlag::JetES5PercDownVar))  { ToggleSyst (SystFlag::JetES5PercDownVar);  }
+  else if (sFlag == ToTString (SystFlag::JetES5PercSmearVar)) { ToggleSyst (SystFlag::JetES5PercSmearVar); }
+  else if (sFlag == ToTString (SystFlag::JetES2PercUpVar))    { ToggleSyst (SystFlag::JetES2PercUpVar);    }
+  else if (sFlag == ToTString (SystFlag::JetES2PercDownVar))  { ToggleSyst (SystFlag::JetES2PercDownVar);  }
+  else if (sFlag == ToTString (SystFlag::JetES2PercSmearVar)) { ToggleSyst (SystFlag::JetES2PercSmearVar); }
   else {
     std::cout << "In Process.cxx: No systematics specified." << std::endl;
   }
@@ -81,8 +83,10 @@ int main (int argc, char** argv) {
   std::cout << "\n\tdoWithPileupVar = " << doWithPileupVar;
   std::cout << "\n\tdoJetES5PercUpVar = " << doJetES5PercUpVar;
   std::cout << "\n\tdoJetES5PercDownVar = " << doJetES5PercDownVar;
+  std::cout << "\n\tdoJetES5PercSmearVar = " << doJetES5PercSmearVar;
   std::cout << "\n\tdoJetES2PercUpVar = " << doJetES2PercUpVar;
   std::cout << "\n\tdoJetES2PercDownVar = " << doJetES2PercDownVar;
+  std::cout << "\n\tdoJetES2PercSmearVar = " << doJetES2PercSmearVar;
   if (crossSectionPicoBarns != 0.)
     std::cout << "\n\tcrossSectionPicoBarns = " << crossSectionPicoBarns;
   if (mcFilterEfficiency != 0.)

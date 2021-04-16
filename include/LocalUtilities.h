@@ -11,7 +11,7 @@ namespace JetHadronCorrelations {
 enum class CollisionSystem { pp15, PbPb15, pPb16s5TeV, pPb16, Pbp16, XeXe17, pp17, PbPb18 }; // run 2 HI data sets
 enum class DataType { Collisions, MCSignal, MCDataOverlay, MCHijing, MCHijingOverlay }; // data types used in HI
 enum class TriggerType { Jet, MinBias }; // types of triggers in this analysis
-enum class SystFlag { None, HITightVar, PionsOnlyVar, WithPileupVar, JetES5PercUpVar, JetES5PercDownVar, JetES2PercUpVar, JetES2PercDownVar }; // types of systematic variations
+enum class SystFlag { None, HITightVar, PionsOnlyVar, WithPileupVar, JetES5PercUpVar, JetES5PercDownVar, JetES5PercSmearVar, JetES2PercUpVar, JetES2PercDownVar, JetES2PercSmearVar }; // types of systematic variations
 
 
 TString ToTString (const CollisionSystem collSys);

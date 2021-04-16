@@ -21,6 +21,7 @@
 #include <TLorentzVector.h>
 
 #include <iostream>
+#include <random>
 
 using namespace std;
 
@@ -306,6 +307,11 @@ bool JetHadronSkimmer (const char* directory,
 
   const int nEvts = tree->GetEntries ();
 
+  std::random_device rndm;
+  std::mt19937 mt19937_gen (rndm ());
+  std::normal_distribution <double> jetES2PercSmearDist (1.0, 0.02);
+  std::normal_distribution <double> jetES5PercSmearDist (1.0, 0.05);
+
   for (int iEvt = 0; iEvt < nEvts; iEvt++) {
     if (nEvts > 100 && iEvt % (nEvts / 100) == 0)
       std::cout << "Info: In JetHadronSkimmer.cxx: Events " << iEvt / (nEvts / 100) << "\% done...\r" << flush;
@@ -389,10 +395,20 @@ bool JetHadronSkimmer (const char* directory,
         double jpt = akt4_hi_jet_pt_xcalib[iJ];
         double jen = akt4_hi_jet_e_xcalib[iJ]; 
 
-        if (doJetES5PercUpVar)   { jpt *= 1.05;  jen *= 1.05; }
-        if (doJetES2PercUpVar)   { jpt *= 1.02;  jen *= 1.02; }
-        if (doJetES5PercDownVar) { jpt *= 0.95;  jen *= 0.95; }
-        if (doJetES2PercDownVar) { jpt *= 0.98;  jen *= 0.98; }
+        if (doJetES5PercUpVar)    { jpt *= 1.05;  jen *= 1.05; }
+        if (doJetES5PercDownVar)  { jpt *= 0.95;  jen *= 0.95; }
+        if (doJetES5PercSmearVar) { 
+          double sf = jetES5PercSmearDist (mt19937_gen);
+          jpt *= sf;
+          jen *= sf;
+        }
+        if (doJetES2PercUpVar)    { jpt *= 1.02;  jen *= 1.02; }
+        if (doJetES2PercDownVar)  { jpt *= 0.98;  jen *= 0.98; }
+        if (doJetES2PercSmearVar) { 
+          double sf = jetES2PercSmearDist (mt19937_gen);
+          jpt *= sf;
+          jen *= sf;
+        }
 
         out_akt4_hi_jet_pt[out_akt4_hi_jet_n] = jpt;
         out_akt4_hi_jet_eta[out_akt4_hi_jet_n] = akt4_hi_jet_eta_xcalib[iJ];

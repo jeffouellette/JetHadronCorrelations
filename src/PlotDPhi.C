@@ -404,7 +404,7 @@ void PlotDPhi (const char* tag, const char* inFileTag) {
     ((TGAE*) g->Clone ())->Draw ("p");
     SaferDelete (&g);
 
-    c->SaveAs ("Plots/JetTagged_HadronYields_Central_comparison_dphi.pdf"); 
+    c->SaveAs (Form ("Plots/JetTagged_HadronYields_Central_comparison_dphi_%s.pdf", tag));
   }
 
 
@@ -661,7 +661,7 @@ void PlotDPhi (const char* tag, const char* inFileTag) {
     ((TGAE*) g->Clone ())->Draw ("p");
     SaferDelete (&g);
 
-    c->SaveAs ("Plots/LeadingJetTagged_HadronYields_Central_comparison_dphi.pdf"); 
+    c->SaveAs (Form ("Plots/LeadingJetTagged_HadronYields_Central_comparison_dphi_%s.pdf", tag)); 
   }
 
 }

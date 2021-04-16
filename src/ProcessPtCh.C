@@ -7,7 +7,6 @@
 #include "LocalUtilities.h"
 
 #include <ArrayTemplates.h>
-
 #include <Utilities.h>
 
 #include <TH1D.h>
@@ -19,6 +18,7 @@
 using namespace JetHadronCorrelations;
 
 const int nVar = 5;
+std::vector <TString> variations = {"Nominal", "JetES5PercUpVar", "JetES5PercDownVar", "JetES2PercUpVar", "JetES2PercDownVar"};
 
 void ProcessPtCh (const char* tag, const char* outFileTag) {
 
@@ -103,8 +103,6 @@ void ProcessPtCh (const char* tag, const char* outFileTag) {
   TGAE** g_sljet_trk_pt_as_iaa_syst = Get1DArray <TGAE*> (nVar);
 
 
-  std::vector <TString> variations = {"Nominal", "JetES5PercUpVar", "JetES5PercDownVar", "JetES2PercUpVar", "JetES2PercDownVar"};
-
   TString outFileName = Form ("./rootFiles/Results/PlotPtCh_%s.root", outFileTag);
   std::cout << "Writing " << outFileName.Data () << std::endl;
   TFile* outFile = new TFile (outFileName.Data (), "recreate");
@@ -117,22 +115,22 @@ void ProcessPtCh (const char* tag, const char* outFileTag) {
       inFile = new TFile (inFileName.Data (), "read");
       outFile->cd ();
 
-      h_evt_counts[1][iVar] = (TH1D*) inFile->Get (Form ("h_evt_counts_%s_data16", tag))->Clone (Form ("h_evt_counts_%s_data16_%s", tag, variations[iVar].Data ()));
-      h_jet_counts[1][iVar] = (TH1D*) inFile->Get (Form ("h_jet_counts_%s_data16", tag))->Clone (Form ("h_evt_counts_%s_data16_%s", tag, variations[iVar].Data ()));
-      h_ljet_counts[1][iVar] = (TH1D*) inFile->Get (Form ("h_ljet_counts_%s_data16", tag))->Clone (Form ("h_evt_counts_%s_data16_%s", tag, variations[iVar].Data ()));
-      h_sljet_counts[1][iVar] = (TH1D*) inFile->Get (Form ("h_sljet_counts_%s_data16", tag))->Clone (Form ("h_sljet_counts_%s_data16_%s", tag, variations[iVar].Data ()));
-      h_jet_trk_pt_ns[1][iVar] = (TH1D*) inFile->Get (Form ("h_jet_trk_pt_ns_%s_data16", tag))->Clone (Form ("h_jet_trk_pt_ns_%s_data16_%s", tag, variations[iVar].Data ()));
-      h2_jet_trk_pt_ns_cov[1][iVar] = (TH2D*) inFile->Get (Form ("h2_jet_trk_pt_ns_cov_%s_data16", tag))->Clone (Form ("h2_jet_trk_pt_ns_cov_%s_data16_%s", tag, variations[iVar].Data ()));
-      h_ljet_trk_pt_ns[1][iVar] = (TH1D*) inFile->Get (Form ("h_ljet_trk_pt_ns_%s_data16", tag))->Clone (Form ("h_ljet_trk_pt_ns_%s_data16_%s", tag, variations[iVar].Data ()));
-      h2_ljet_trk_pt_ns_cov[1][iVar] = (TH2D*) inFile->Get (Form ("h2_ljet_trk_pt_ns_cov_%s_data16", tag))->Clone (Form ("h2_ljet_trk_pt_ns_cov_%s_data16_%s", tag, variations[iVar].Data ()));
-      h_sljet_trk_pt_ns[1][iVar] = (TH1D*) inFile->Get (Form ("h_sljet_trk_pt_ns_%s_data16", tag))->Clone (Form ("h_sljet_trk_pt_ns_%s_data16_%s", tag, variations[iVar].Data ()));
-      h2_sljet_trk_pt_ns_cov[1][iVar] = (TH2D*) inFile->Get (Form ("h2_sljet_trk_pt_ns_cov_%s_data16", tag))->Clone (Form ("h2_sljet_trk_pt_ns_cov_%s_data16_%s", tag, variations[iVar].Data ()));
-      h_jet_trk_pt_as[1][iVar] = (TH1D*) inFile->Get (Form ("h_jet_trk_pt_as_%s_data16", tag))->Clone (Form ("h_jet_trk_pt_as_%s_data16_%s", tag, variations[iVar].Data ()));
-      h2_jet_trk_pt_as_cov[1][iVar] = (TH2D*) inFile->Get (Form ("h2_jet_trk_pt_as_cov_%s_data16", tag))->Clone (Form ("h2_jet_trk_pt_as_cov_%s_data16_%s", tag, variations[iVar].Data ()));
-      h_ljet_trk_pt_as[1][iVar] = (TH1D*) inFile->Get (Form ("h_ljet_trk_pt_as_%s_data16", tag))->Clone (Form ("h_ljet_trk_pt_as_%s_data16_%s", tag, variations[iVar].Data ()));
-      h2_ljet_trk_pt_as_cov[1][iVar] = (TH2D*) inFile->Get (Form ("h2_ljet_trk_pt_as_cov_%s_data16", tag))->Clone (Form ("h2_ljet_trk_pt_as_cov_%s_data16_%s", tag, variations[iVar].Data ()));
-      h_sljet_trk_pt_as[1][iVar] = (TH1D*) inFile->Get (Form ("h_sljet_trk_pt_as_%s_data16", tag))->Clone (Form ("h_sljet_trk_pt_as_%s_data16_%s", tag, variations[iVar].Data ()));
-      h2_sljet_trk_pt_as_cov[1][iVar] = (TH2D*) inFile->Get (Form ("h2_sljet_trk_pt_as_cov_%s_data16", tag))->Clone (Form ("h2_sljet_trk_pt_as_cov_%s_data16_%s", tag, variations[iVar].Data ()));
+      h_evt_counts[1][iVar] = (TH1D*) inFile->Get (Form ("h_evt_counts_%s_data16", tag))->Clone (Form ("h_evt_counts_%s_pPb_%s", tag, variations[iVar].Data ()));
+      h_jet_counts[1][iVar] = (TH1D*) inFile->Get (Form ("h_jet_counts_%s_data16", tag))->Clone (Form ("h_evt_counts_%s_pPb_%s", tag, variations[iVar].Data ()));
+      h_ljet_counts[1][iVar] = (TH1D*) inFile->Get (Form ("h_ljet_counts_%s_data16", tag))->Clone (Form ("h_evt_counts_%s_pPb_%s", tag, variations[iVar].Data ()));
+      h_sljet_counts[1][iVar] = (TH1D*) inFile->Get (Form ("h_sljet_counts_%s_data16", tag))->Clone (Form ("h_sljet_counts_%s_pPb_%s", tag, variations[iVar].Data ()));
+      h_jet_trk_pt_ns[1][iVar] = (TH1D*) inFile->Get (Form ("h_jet_trk_pt_ns_%s_data16", tag))->Clone (Form ("h_jet_trk_pt_ns_%s_pPb_%s", tag, variations[iVar].Data ()));
+      h2_jet_trk_pt_ns_cov[1][iVar] = (TH2D*) inFile->Get (Form ("h2_jet_trk_pt_ns_cov_%s_data16", tag))->Clone (Form ("h2_jet_trk_pt_ns_cov_%s_pPb_%s", tag, variations[iVar].Data ()));
+      h_ljet_trk_pt_ns[1][iVar] = (TH1D*) inFile->Get (Form ("h_ljet_trk_pt_ns_%s_data16", tag))->Clone (Form ("h_ljet_trk_pt_ns_%s_pPb_%s", tag, variations[iVar].Data ()));
+      h2_ljet_trk_pt_ns_cov[1][iVar] = (TH2D*) inFile->Get (Form ("h2_ljet_trk_pt_ns_cov_%s_data16", tag))->Clone (Form ("h2_ljet_trk_pt_ns_cov_%s_pPb_%s", tag, variations[iVar].Data ()));
+      h_sljet_trk_pt_ns[1][iVar] = (TH1D*) inFile->Get (Form ("h_sljet_trk_pt_ns_%s_data16", tag))->Clone (Form ("h_sljet_trk_pt_ns_%s_pPb_%s", tag, variations[iVar].Data ()));
+      h2_sljet_trk_pt_ns_cov[1][iVar] = (TH2D*) inFile->Get (Form ("h2_sljet_trk_pt_ns_cov_%s_data16", tag))->Clone (Form ("h2_sljet_trk_pt_ns_cov_%s_pPb_%s", tag, variations[iVar].Data ()));
+      h_jet_trk_pt_as[1][iVar] = (TH1D*) inFile->Get (Form ("h_jet_trk_pt_as_%s_data16", tag))->Clone (Form ("h_jet_trk_pt_as_%s_pPb_%s", tag, variations[iVar].Data ()));
+      h2_jet_trk_pt_as_cov[1][iVar] = (TH2D*) inFile->Get (Form ("h2_jet_trk_pt_as_cov_%s_data16", tag))->Clone (Form ("h2_jet_trk_pt_as_cov_%s_pPb_%s", tag, variations[iVar].Data ()));
+      h_ljet_trk_pt_as[1][iVar] = (TH1D*) inFile->Get (Form ("h_ljet_trk_pt_as_%s_data16", tag))->Clone (Form ("h_ljet_trk_pt_as_%s_pPb_%s", tag, variations[iVar].Data ()));
+      h2_ljet_trk_pt_as_cov[1][iVar] = (TH2D*) inFile->Get (Form ("h2_ljet_trk_pt_as_cov_%s_data16", tag))->Clone (Form ("h2_ljet_trk_pt_as_cov_%s_pPb_%s", tag, variations[iVar].Data ()));
+      h_sljet_trk_pt_as[1][iVar] = (TH1D*) inFile->Get (Form ("h_sljet_trk_pt_as_%s_data16", tag))->Clone (Form ("h_sljet_trk_pt_as_%s_pPb_%s", tag, variations[iVar].Data ()));
+      h2_sljet_trk_pt_as_cov[1][iVar] = (TH2D*) inFile->Get (Form ("h2_sljet_trk_pt_as_cov_%s_data16", tag))->Clone (Form ("h2_sljet_trk_pt_as_cov_%s_pPb_%s", tag, variations[iVar].Data ()));
 
       inFile->Close ();
 
@@ -152,22 +150,22 @@ void ProcessPtCh (const char* tag, const char* outFileTag) {
       inFile = new TFile (inFileName.Data (), "read");
       outFile->cd ();
 
-      h_evt_counts[0][iVar] = (TH1D*) inFile->Get (Form ("h_evt_counts_%s_data17", tag))->Clone (Form ("h_evt_counts_%s_data17_%s", tag, variations[iVar].Data ()));
-      h_jet_counts[0][iVar] = (TH1D*) inFile->Get (Form ("h_jet_counts_%s_data17", tag))->Clone (Form ("h_evt_counts_%s_data17_%s", tag, variations[iVar].Data ()));
-      h_ljet_counts[0][iVar] = (TH1D*) inFile->Get (Form ("h_ljet_counts_%s_data17", tag))->Clone (Form ("h_evt_counts_%s_data17_%s", tag, variations[iVar].Data ()));
-      h_sljet_counts[0][iVar] = (TH1D*) inFile->Get (Form ("h_sljet_counts_%s_data17", tag))->Clone (Form ("h_sljet_counts_%s_data17_%s", tag, variations[iVar].Data ()));
-      h_jet_trk_pt_ns[0][iVar] = (TH1D*) inFile->Get (Form ("h_jet_trk_pt_ns_%s_data17", tag))->Clone (Form ("h_jet_trk_pt_ns_%s_data17_%s", tag, variations[iVar].Data ()));
-      h2_jet_trk_pt_ns_cov[0][iVar] = (TH2D*) inFile->Get (Form ("h2_jet_trk_pt_ns_cov_%s_data17", tag))->Clone (Form ("h2_jet_trk_pt_ns_cov_%s_data17_%s", tag, variations[iVar].Data ()));
-      h_ljet_trk_pt_ns[0][iVar] = (TH1D*) inFile->Get (Form ("h_ljet_trk_pt_ns_%s_data17", tag))->Clone (Form ("h_ljet_trk_pt_ns_%s_data17_%s", tag, variations[iVar].Data ()));
-      h2_ljet_trk_pt_ns_cov[0][iVar] = (TH2D*) inFile->Get (Form ("h2_ljet_trk_pt_ns_cov_%s_data17", tag))->Clone (Form ("h2_ljet_trk_pt_ns_cov_%s_data17_%s", tag, variations[iVar].Data ()));
-      h_sljet_trk_pt_ns[0][iVar] = (TH1D*) inFile->Get (Form ("h_sljet_trk_pt_ns_%s_data17", tag))->Clone (Form ("h_sljet_trk_pt_ns_%s_data17_%s", tag, variations[iVar].Data ()));
-      h2_sljet_trk_pt_ns_cov[0][iVar] = (TH2D*) inFile->Get (Form ("h2_sljet_trk_pt_ns_cov_%s_data17", tag))->Clone (Form ("h2_sljet_trk_pt_ns_cov_%s_data17_%s", tag, variations[iVar].Data ()));
-      h_jet_trk_pt_as[0][iVar] = (TH1D*) inFile->Get (Form ("h_jet_trk_pt_as_%s_data17", tag))->Clone (Form ("h_jet_trk_pt_as_%s_data17_%s", tag, variations[iVar].Data ()));
-      h2_jet_trk_pt_as_cov[0][iVar] = (TH2D*) inFile->Get (Form ("h2_jet_trk_pt_as_cov_%s_data17", tag))->Clone (Form ("h2_jet_trk_pt_as_cov_%s_data17_%s", tag, variations[iVar].Data ()));
-      h_ljet_trk_pt_as[0][iVar] = (TH1D*) inFile->Get (Form ("h_ljet_trk_pt_as_%s_data17", tag))->Clone (Form ("h_ljet_trk_pt_as_%s_data17_%s", tag, variations[iVar].Data ()));
-      h2_ljet_trk_pt_as_cov[0][iVar] = (TH2D*) inFile->Get (Form ("h2_ljet_trk_pt_as_cov_%s_data17", tag))->Clone (Form ("h2_ljet_trk_pt_as_cov_%s_data17_%s", tag, variations[iVar].Data ()));
-      h_sljet_trk_pt_as[0][iVar] = (TH1D*) inFile->Get (Form ("h_sljet_trk_pt_as_%s_data17", tag))->Clone (Form ("h_sljet_trk_pt_as_%s_data17_%s", tag, variations[iVar].Data ()));
-      h2_sljet_trk_pt_as_cov[0][iVar] = (TH2D*) inFile->Get (Form ("h2_sljet_trk_pt_as_cov_%s_data17", tag))->Clone (Form ("h2_sljet_trk_pt_as_cov_%s_data17_%s", tag, variations[iVar].Data ()));
+      h_evt_counts[0][iVar] = (TH1D*) inFile->Get (Form ("h_evt_counts_%s_data17", tag))->Clone (Form ("h_evt_counts_%s_pp_%s", tag, variations[iVar].Data ()));
+      h_jet_counts[0][iVar] = (TH1D*) inFile->Get (Form ("h_jet_counts_%s_data17", tag))->Clone (Form ("h_evt_counts_%s_pp_%s", tag, variations[iVar].Data ()));
+      h_ljet_counts[0][iVar] = (TH1D*) inFile->Get (Form ("h_ljet_counts_%s_data17", tag))->Clone (Form ("h_evt_counts_%s_pp_%s", tag, variations[iVar].Data ()));
+      h_sljet_counts[0][iVar] = (TH1D*) inFile->Get (Form ("h_sljet_counts_%s_data17", tag))->Clone (Form ("h_sljet_counts_%s_pp_%s", tag, variations[iVar].Data ()));
+      h_jet_trk_pt_ns[0][iVar] = (TH1D*) inFile->Get (Form ("h_jet_trk_pt_ns_%s_data17", tag))->Clone (Form ("h_jet_trk_pt_ns_%s_pp_%s", tag, variations[iVar].Data ()));
+      h2_jet_trk_pt_ns_cov[0][iVar] = (TH2D*) inFile->Get (Form ("h2_jet_trk_pt_ns_cov_%s_data17", tag))->Clone (Form ("h2_jet_trk_pt_ns_cov_%s_pp_%s", tag, variations[iVar].Data ()));
+      h_ljet_trk_pt_ns[0][iVar] = (TH1D*) inFile->Get (Form ("h_ljet_trk_pt_ns_%s_data17", tag))->Clone (Form ("h_ljet_trk_pt_ns_%s_pp_%s", tag, variations[iVar].Data ()));
+      h2_ljet_trk_pt_ns_cov[0][iVar] = (TH2D*) inFile->Get (Form ("h2_ljet_trk_pt_ns_cov_%s_data17", tag))->Clone (Form ("h2_ljet_trk_pt_ns_cov_%s_pp_%s", tag, variations[iVar].Data ()));
+      h_sljet_trk_pt_ns[0][iVar] = (TH1D*) inFile->Get (Form ("h_sljet_trk_pt_ns_%s_data17", tag))->Clone (Form ("h_sljet_trk_pt_ns_%s_pp_%s", tag, variations[iVar].Data ()));
+      h2_sljet_trk_pt_ns_cov[0][iVar] = (TH2D*) inFile->Get (Form ("h2_sljet_trk_pt_ns_cov_%s_data17", tag))->Clone (Form ("h2_sljet_trk_pt_ns_cov_%s_pp_%s", tag, variations[iVar].Data ()));
+      h_jet_trk_pt_as[0][iVar] = (TH1D*) inFile->Get (Form ("h_jet_trk_pt_as_%s_data17", tag))->Clone (Form ("h_jet_trk_pt_as_%s_pp_%s", tag, variations[iVar].Data ()));
+      h2_jet_trk_pt_as_cov[0][iVar] = (TH2D*) inFile->Get (Form ("h2_jet_trk_pt_as_cov_%s_data17", tag))->Clone (Form ("h2_jet_trk_pt_as_cov_%s_pp_%s", tag, variations[iVar].Data ()));
+      h_ljet_trk_pt_as[0][iVar] = (TH1D*) inFile->Get (Form ("h_ljet_trk_pt_as_%s_data17", tag))->Clone (Form ("h_ljet_trk_pt_as_%s_pp_%s", tag, variations[iVar].Data ()));
+      h2_ljet_trk_pt_as_cov[0][iVar] = (TH2D*) inFile->Get (Form ("h2_ljet_trk_pt_as_cov_%s_data17", tag))->Clone (Form ("h2_ljet_trk_pt_as_cov_%s_pp_%s", tag, variations[iVar].Data ()));
+      h_sljet_trk_pt_as[0][iVar] = (TH1D*) inFile->Get (Form ("h_sljet_trk_pt_as_%s_data17", tag))->Clone (Form ("h_sljet_trk_pt_as_%s_pp_%s", tag, variations[iVar].Data ()));
+      h2_sljet_trk_pt_as_cov[0][iVar] = (TH2D*) inFile->Get (Form ("h2_sljet_trk_pt_as_cov_%s_data17", tag))->Clone (Form ("h2_sljet_trk_pt_as_cov_%s_pp_%s", tag, variations[iVar].Data ()));
 
       inFile->Close ();
 
@@ -187,22 +185,22 @@ void ProcessPtCh (const char* tag, const char* outFileTag) {
       inFile = new TFile (inFileName.Data (), "read");
       outFile->cd ();
 
-      h_evt_counts_bkg[1][iVar] = (TH1D*) inFile->Get (Form ("h_evt_counts_%s_mixed_data16", tag))->Clone (Form ("h_evt_counts_%s_mixed_data16_%s", tag, variations[iVar].Data ()));
-      h_jet_counts_bkg[1][iVar] = (TH1D*) inFile->Get (Form ("h_jet_counts_%s_mixed_data16", tag))->Clone (Form ("h_evt_counts_%s_mixed_data16_%s", tag, variations[iVar].Data ()));
-      h_ljet_counts_bkg[1][iVar] = (TH1D*) inFile->Get (Form ("h_ljet_counts_%s_mixed_data16", tag))->Clone (Form ("h_evt_counts_%s_mixed_data16_%s", tag, variations[iVar].Data ()));
-      h_sljet_counts_bkg[1][iVar] = (TH1D*) inFile->Get (Form ("h_sljet_counts_%s_mixed_data16", tag))->Clone (Form ("h_sljet_counts_%s_mixed_data16_%s", tag, variations[iVar].Data ()));
-      h_jet_trk_pt_ns_bkg[1][iVar] = (TH1D*) inFile->Get (Form ("h_jet_trk_pt_ns_%s_mixed_data16", tag))->Clone (Form ("h_jet_trk_pt_ns_%s_mixed_data16_%s", tag, variations[iVar].Data ()));
-      h2_jet_trk_pt_ns_cov_bkg[1][iVar] = (TH2D*) inFile->Get (Form ("h2_jet_trk_pt_ns_cov_%s_mixed_data16", tag))->Clone (Form ("h2_jet_trk_pt_ns_cov_%s_mixed_data16_%s", tag, variations[iVar].Data ()));
-      h_ljet_trk_pt_ns_bkg[1][iVar] = (TH1D*) inFile->Get (Form ("h_ljet_trk_pt_ns_%s_mixed_data16", tag))->Clone (Form ("h_ljet_trk_pt_ns_%s_mixed_data16_%s", tag, variations[iVar].Data ()));
-      h2_ljet_trk_pt_ns_cov_bkg[1][iVar] = (TH2D*) inFile->Get (Form ("h2_ljet_trk_pt_ns_cov_%s_mixed_data16", tag))->Clone (Form ("h2_ljet_trk_pt_ns_cov_%s_mixed_data16_%s", tag, variations[iVar].Data ()));
-      h_sljet_trk_pt_ns_bkg[1][iVar] = (TH1D*) inFile->Get (Form ("h_sljet_trk_pt_ns_%s_mixed_data16", tag))->Clone (Form ("h_sljet_trk_pt_ns_%s_mixed_data16_%s", tag, variations[iVar].Data ()));
-      h2_sljet_trk_pt_ns_cov_bkg[1][iVar] = (TH2D*) inFile->Get (Form ("h2_sljet_trk_pt_ns_cov_%s_mixed_data16", tag))->Clone (Form ("h2_sljet_trk_pt_ns_cov_%s_mixed_data16_%s", tag, variations[iVar].Data ()));
-      h_jet_trk_pt_as_bkg[1][iVar] = (TH1D*) inFile->Get (Form ("h_jet_trk_pt_as_%s_mixed_data16", tag))->Clone (Form ("h_jet_trk_pt_as_%s_mixed_data16_%s", tag, variations[iVar].Data ()));
-      h2_jet_trk_pt_as_cov_bkg[1][iVar] = (TH2D*) inFile->Get (Form ("h2_jet_trk_pt_as_cov_%s_mixed_data16", tag))->Clone (Form ("h2_jet_trk_pt_as_cov_%s_mixed_data16_%s", tag, variations[iVar].Data ()));
-      h_ljet_trk_pt_as_bkg[1][iVar] = (TH1D*) inFile->Get (Form ("h_ljet_trk_pt_as_%s_mixed_data16", tag))->Clone (Form ("h_ljet_trk_pt_as_%s_mixed_data16_%s", tag, variations[iVar].Data ()));
-      h2_ljet_trk_pt_as_cov_bkg[1][iVar] = (TH2D*) inFile->Get (Form ("h2_ljet_trk_pt_as_cov_%s_mixed_data16", tag))->Clone (Form ("h2_ljet_trk_pt_as_cov_%s_mixed_data16_%s", tag, variations[iVar].Data ()));
-      h_sljet_trk_pt_as_bkg[1][iVar] = (TH1D*) inFile->Get (Form ("h_sljet_trk_pt_as_%s_mixed_data16", tag))->Clone (Form ("h_sljet_trk_pt_as_%s_mixed_data16_%s", tag, variations[iVar].Data ()));
-      h2_sljet_trk_pt_as_cov_bkg[1][iVar] = (TH2D*) inFile->Get (Form ("h2_sljet_trk_pt_as_cov_%s_mixed_data16", tag))->Clone (Form ("h2_sljet_trk_pt_as_cov_%s_mixed_data16_%s", tag, variations[iVar].Data ()));
+      h_evt_counts_bkg[1][iVar] = (TH1D*) inFile->Get (Form ("h_evt_counts_%s_mixed_data16", tag))->Clone (Form ("h_evt_counts_%s_mixed_pPb_%s", tag, variations[iVar].Data ()));
+      h_jet_counts_bkg[1][iVar] = (TH1D*) inFile->Get (Form ("h_jet_counts_%s_mixed_data16", tag))->Clone (Form ("h_evt_counts_%s_mixed_pPb_%s", tag, variations[iVar].Data ()));
+      h_ljet_counts_bkg[1][iVar] = (TH1D*) inFile->Get (Form ("h_ljet_counts_%s_mixed_data16", tag))->Clone (Form ("h_evt_counts_%s_mixed_pPb_%s", tag, variations[iVar].Data ()));
+      h_sljet_counts_bkg[1][iVar] = (TH1D*) inFile->Get (Form ("h_sljet_counts_%s_mixed_data16", tag))->Clone (Form ("h_sljet_counts_%s_mixed_pPb_%s", tag, variations[iVar].Data ()));
+      h_jet_trk_pt_ns_bkg[1][iVar] = (TH1D*) inFile->Get (Form ("h_jet_trk_pt_ns_%s_mixed_data16", tag))->Clone (Form ("h_jet_trk_pt_ns_%s_mixed_pPb_%s", tag, variations[iVar].Data ()));
+      h2_jet_trk_pt_ns_cov_bkg[1][iVar] = (TH2D*) inFile->Get (Form ("h2_jet_trk_pt_ns_cov_%s_mixed_data16", tag))->Clone (Form ("h2_jet_trk_pt_ns_cov_%s_mixed_pPb_%s", tag, variations[iVar].Data ()));
+      h_ljet_trk_pt_ns_bkg[1][iVar] = (TH1D*) inFile->Get (Form ("h_ljet_trk_pt_ns_%s_mixed_data16", tag))->Clone (Form ("h_ljet_trk_pt_ns_%s_mixed_pPb_%s", tag, variations[iVar].Data ()));
+      h2_ljet_trk_pt_ns_cov_bkg[1][iVar] = (TH2D*) inFile->Get (Form ("h2_ljet_trk_pt_ns_cov_%s_mixed_data16", tag))->Clone (Form ("h2_ljet_trk_pt_ns_cov_%s_mixed_pPb_%s", tag, variations[iVar].Data ()));
+      h_sljet_trk_pt_ns_bkg[1][iVar] = (TH1D*) inFile->Get (Form ("h_sljet_trk_pt_ns_%s_mixed_data16", tag))->Clone (Form ("h_sljet_trk_pt_ns_%s_mixed_pPb_%s", tag, variations[iVar].Data ()));
+      h2_sljet_trk_pt_ns_cov_bkg[1][iVar] = (TH2D*) inFile->Get (Form ("h2_sljet_trk_pt_ns_cov_%s_mixed_data16", tag))->Clone (Form ("h2_sljet_trk_pt_ns_cov_%s_mixed_pPb_%s", tag, variations[iVar].Data ()));
+      h_jet_trk_pt_as_bkg[1][iVar] = (TH1D*) inFile->Get (Form ("h_jet_trk_pt_as_%s_mixed_data16", tag))->Clone (Form ("h_jet_trk_pt_as_%s_mixed_pPb_%s", tag, variations[iVar].Data ()));
+      h2_jet_trk_pt_as_cov_bkg[1][iVar] = (TH2D*) inFile->Get (Form ("h2_jet_trk_pt_as_cov_%s_mixed_data16", tag))->Clone (Form ("h2_jet_trk_pt_as_cov_%s_mixed_pPb_%s", tag, variations[iVar].Data ()));
+      h_ljet_trk_pt_as_bkg[1][iVar] = (TH1D*) inFile->Get (Form ("h_ljet_trk_pt_as_%s_mixed_data16", tag))->Clone (Form ("h_ljet_trk_pt_as_%s_mixed_pPb_%s", tag, variations[iVar].Data ()));
+      h2_ljet_trk_pt_as_cov_bkg[1][iVar] = (TH2D*) inFile->Get (Form ("h2_ljet_trk_pt_as_cov_%s_mixed_data16", tag))->Clone (Form ("h2_ljet_trk_pt_as_cov_%s_mixed_pPb_%s", tag, variations[iVar].Data ()));
+      h_sljet_trk_pt_as_bkg[1][iVar] = (TH1D*) inFile->Get (Form ("h_sljet_trk_pt_as_%s_mixed_data16", tag))->Clone (Form ("h_sljet_trk_pt_as_%s_mixed_pPb_%s", tag, variations[iVar].Data ()));
+      h2_sljet_trk_pt_as_cov_bkg[1][iVar] = (TH2D*) inFile->Get (Form ("h2_sljet_trk_pt_as_cov_%s_mixed_data16", tag))->Clone (Form ("h2_sljet_trk_pt_as_cov_%s_mixed_pPb_%s", tag, variations[iVar].Data ()));
 
       inFile->Close ();
 
@@ -217,47 +215,47 @@ void ProcessPtCh (const char* tag, const char* outFileTag) {
 
 
     {
-      h_jet_trk_pt_ns_sig[0][iVar] = (TH1D*) h_jet_trk_pt_ns[0][iVar]->Clone (Form ("h_jet_trk_pt_ns_data17_sig_%s", variations[iVar].Data ()));
-      h_jet_trk_pt_ns_sig[1][iVar] = (TH1D*) h_jet_trk_pt_ns[1][iVar]->Clone (Form ("h_jet_trk_pt_ns_data16_sig_%s", variations[iVar].Data ()));
+      h_jet_trk_pt_ns_sig[0][iVar] = (TH1D*) h_jet_trk_pt_ns[0][iVar]->Clone (Form ("h_jet_trk_pt_ns_pp_sig_%s", variations[iVar].Data ()));
+      h_jet_trk_pt_ns_sig[1][iVar] = (TH1D*) h_jet_trk_pt_ns[1][iVar]->Clone (Form ("h_jet_trk_pt_ns_pPb_sig_%s", variations[iVar].Data ()));
       h_jet_trk_pt_ns_sig[1][iVar]->Add (h_jet_trk_pt_ns_bkg[1][iVar], -1);
 
-      h_ljet_trk_pt_ns_sig[0][iVar] = (TH1D*) h_ljet_trk_pt_ns[0][iVar]->Clone (Form ("h_ljet_trk_pt_ns_data17_sig_%s", variations[iVar].Data ()));
-      h_ljet_trk_pt_ns_sig[1][iVar] = (TH1D*) h_ljet_trk_pt_ns[1][iVar]->Clone (Form ("h_ljet_trk_pt_ns_data16_sig_%s", variations[iVar].Data ()));
+      h_ljet_trk_pt_ns_sig[0][iVar] = (TH1D*) h_ljet_trk_pt_ns[0][iVar]->Clone (Form ("h_ljet_trk_pt_ns_pp_sig_%s", variations[iVar].Data ()));
+      h_ljet_trk_pt_ns_sig[1][iVar] = (TH1D*) h_ljet_trk_pt_ns[1][iVar]->Clone (Form ("h_ljet_trk_pt_ns_pPb_sig_%s", variations[iVar].Data ()));
       h_ljet_trk_pt_ns_sig[1][iVar]->Add (h_ljet_trk_pt_ns_bkg[1][iVar], -1);
 
-      h_sljet_trk_pt_ns_sig[0][iVar] = (TH1D*) h_sljet_trk_pt_ns[0][iVar]->Clone (Form ("h_sljet_trk_pt_ns_data17_sig_%s", variations[iVar].Data ()));
-      h_sljet_trk_pt_ns_sig[1][iVar] = (TH1D*) h_sljet_trk_pt_ns[1][iVar]->Clone (Form ("h_sljet_trk_pt_ns_data16_sig_%s", variations[iVar].Data ()));
+      h_sljet_trk_pt_ns_sig[0][iVar] = (TH1D*) h_sljet_trk_pt_ns[0][iVar]->Clone (Form ("h_sljet_trk_pt_ns_pp_sig_%s", variations[iVar].Data ()));
+      h_sljet_trk_pt_ns_sig[1][iVar] = (TH1D*) h_sljet_trk_pt_ns[1][iVar]->Clone (Form ("h_sljet_trk_pt_ns_pPb_sig_%s", variations[iVar].Data ()));
       h_sljet_trk_pt_ns_sig[1][iVar]->Add (h_sljet_trk_pt_ns_bkg[1][iVar], -1);
 
-      h_jet_trk_pt_as_sig[0][iVar] = (TH1D*) h_jet_trk_pt_as[0][iVar]->Clone (Form ("h_jet_trk_pt_as_data17_sig_%s", variations[iVar].Data ()));
-      h_jet_trk_pt_as_sig[1][iVar] = (TH1D*) h_jet_trk_pt_as[1][iVar]->Clone (Form ("h_jet_trk_pt_as_data16_sig_%s", variations[iVar].Data ()));
+      h_jet_trk_pt_as_sig[0][iVar] = (TH1D*) h_jet_trk_pt_as[0][iVar]->Clone (Form ("h_jet_trk_pt_as_pp_sig_%s", variations[iVar].Data ()));
+      h_jet_trk_pt_as_sig[1][iVar] = (TH1D*) h_jet_trk_pt_as[1][iVar]->Clone (Form ("h_jet_trk_pt_as_pPb_sig_%s", variations[iVar].Data ()));
       h_jet_trk_pt_as_sig[1][iVar]->Add (h_jet_trk_pt_as_bkg[1][iVar], -1);
 
-      h_ljet_trk_pt_as_sig[0][iVar] = (TH1D*) h_ljet_trk_pt_as[0][iVar]->Clone (Form ("h_ljet_trk_pt_as_data17_sig_%s", variations[iVar].Data ()));
-      h_ljet_trk_pt_as_sig[1][iVar] = (TH1D*) h_ljet_trk_pt_as[1][iVar]->Clone (Form ("h_ljet_trk_pt_as_data16_sig_%s", variations[iVar].Data ()));
+      h_ljet_trk_pt_as_sig[0][iVar] = (TH1D*) h_ljet_trk_pt_as[0][iVar]->Clone (Form ("h_ljet_trk_pt_as_pp_sig_%s", variations[iVar].Data ()));
+      h_ljet_trk_pt_as_sig[1][iVar] = (TH1D*) h_ljet_trk_pt_as[1][iVar]->Clone (Form ("h_ljet_trk_pt_as_pPb_sig_%s", variations[iVar].Data ()));
       h_ljet_trk_pt_as_sig[1][iVar]->Add (h_ljet_trk_pt_as_bkg[1][iVar], -1);
 
-      h_sljet_trk_pt_as_sig[0][iVar] = (TH1D*) h_sljet_trk_pt_as[0][iVar]->Clone (Form ("h_sljet_trk_pt_as_data17_sig_%s", variations[iVar].Data ()));
-      h_sljet_trk_pt_as_sig[1][iVar] = (TH1D*) h_sljet_trk_pt_as[1][iVar]->Clone (Form ("h_sljet_trk_pt_as_data16_sig_%s", variations[iVar].Data ()));
+      h_sljet_trk_pt_as_sig[0][iVar] = (TH1D*) h_sljet_trk_pt_as[0][iVar]->Clone (Form ("h_sljet_trk_pt_as_pp_sig_%s", variations[iVar].Data ()));
+      h_sljet_trk_pt_as_sig[1][iVar] = (TH1D*) h_sljet_trk_pt_as[1][iVar]->Clone (Form ("h_sljet_trk_pt_as_pPb_sig_%s", variations[iVar].Data ()));
       h_sljet_trk_pt_as_sig[1][iVar]->Add (h_sljet_trk_pt_as_bkg[1][iVar], -1);
 
 
-      h_jet_trk_pt_ns_iaa[iVar] = (TH1D*) h_jet_trk_pt_ns_sig[1][iVar]->Clone (Form ("h_jet_trk_pt_ns_data16_iaa_%s", variations[iVar].Data ()));
+      h_jet_trk_pt_ns_iaa[iVar] = (TH1D*) h_jet_trk_pt_ns_sig[1][iVar]->Clone (Form ("h_jet_trk_pt_ns_iaa_%s", variations[iVar].Data ()));
       h_jet_trk_pt_ns_iaa[iVar]->Divide (h_jet_trk_pt_ns_sig[0][iVar]);
 
-      h_ljet_trk_pt_ns_iaa[iVar] = (TH1D*) h_ljet_trk_pt_ns_sig[1][iVar]->Clone (Form ("h_ljet_trk_pt_ns_data16_iaa_%s", variations[iVar].Data ()));
+      h_ljet_trk_pt_ns_iaa[iVar] = (TH1D*) h_ljet_trk_pt_ns_sig[1][iVar]->Clone (Form ("h_ljet_trk_pt_ns_iaa_%s", variations[iVar].Data ()));
       h_ljet_trk_pt_ns_iaa[iVar]->Divide (h_ljet_trk_pt_ns_sig[0][iVar]);
 
-      h_sljet_trk_pt_ns_iaa[iVar] = (TH1D*) h_sljet_trk_pt_ns_sig[1][iVar]->Clone (Form ("h_sljet_trk_pt_ns_data16_iaa_%s", variations[iVar].Data ()));
+      h_sljet_trk_pt_ns_iaa[iVar] = (TH1D*) h_sljet_trk_pt_ns_sig[1][iVar]->Clone (Form ("h_sljet_trk_pt_ns_iaa_%s", variations[iVar].Data ()));
       h_sljet_trk_pt_ns_iaa[iVar]->Divide (h_sljet_trk_pt_ns_sig[0][iVar]);
 
-      h_jet_trk_pt_as_iaa[iVar] = (TH1D*) h_jet_trk_pt_as_sig[1][iVar]->Clone (Form ("h_jet_trk_pt_as_data16_iaa_%s", variations[iVar].Data ()));
+      h_jet_trk_pt_as_iaa[iVar] = (TH1D*) h_jet_trk_pt_as_sig[1][iVar]->Clone (Form ("h_jet_trk_pt_as_iaa_%s", variations[iVar].Data ()));
       h_jet_trk_pt_as_iaa[iVar]->Divide (h_jet_trk_pt_as_sig[0][iVar]);
 
-      h_ljet_trk_pt_as_iaa[iVar] = (TH1D*) h_ljet_trk_pt_as_sig[1][iVar]->Clone (Form ("h_ljet_trk_pt_as_data16_iaa_%s", variations[iVar].Data ()));
+      h_ljet_trk_pt_as_iaa[iVar] = (TH1D*) h_ljet_trk_pt_as_sig[1][iVar]->Clone (Form ("h_ljet_trk_pt_as_iaa_%s", variations[iVar].Data ()));
       h_ljet_trk_pt_as_iaa[iVar]->Divide (h_ljet_trk_pt_as_sig[0][iVar]);
 
-      h_sljet_trk_pt_as_iaa[iVar] = (TH1D*) h_sljet_trk_pt_as_sig[1][iVar]->Clone (Form ("h_sljet_trk_pt_as_data16_iaa_%s", variations[iVar].Data ()));
+      h_sljet_trk_pt_as_iaa[iVar] = (TH1D*) h_sljet_trk_pt_as_sig[1][iVar]->Clone (Form ("h_sljet_trk_pt_as_iaa_%s", variations[iVar].Data ()));
       h_sljet_trk_pt_as_iaa[iVar]->Divide (h_sljet_trk_pt_as_sig[0][iVar]);
     }
   }
@@ -567,9 +565,51 @@ void ProcessPtCh (const char* tag, const char* outFileTag) {
     g_jet_trk_pt_as_iaa_syst[0]->Write ("g_jet_trk_pt_as_iaa_syst");
     g_ljet_trk_pt_as_iaa_syst[0]->Write ("g_ljet_trk_pt_as_iaa_syst");
     g_sljet_trk_pt_as_iaa_syst[0]->Write ("g_sljet_trk_pt_as_iaa_syst");
-  }
 
-  outFile->Close ();
+
+    for (int iVar = 1; iVar < nVar; iVar++) {
+      h_jet_trk_pt_ns[0][iVar]->Write (Form ("h_jet_trk_pt_ns_ref_%s", variations[iVar].Data ()));
+      h_ljet_trk_pt_ns[0][iVar]->Write (Form ("h_ljet_trk_pt_ns_ref_%s", variations[iVar].Data ()));
+      h_sljet_trk_pt_ns[0][iVar]->Write (Form ("h_sljet_trk_pt_ns_ref_%s", variations[iVar].Data ()));
+      h_jet_trk_pt_as[0][iVar]->Write (Form ("h_jet_trk_pt_as_ref_%s", variations[iVar].Data ()));
+      h_ljet_trk_pt_as[0][iVar]->Write (Form ("h_ljet_trk_pt_as_ref_%s", variations[iVar].Data ()));
+      h_sljet_trk_pt_as[0][iVar]->Write (Form ("h_sljet_trk_pt_as_ref_%s", variations[iVar].Data ()));
+      h_jet_trk_pt_ns[1][iVar]->Write (Form ("h_jet_trk_pt_ns_%s", variations[iVar].Data ()));
+      h_ljet_trk_pt_ns[1][iVar]->Write (Form ("h_ljet_trk_pt_ns_%s", variations[iVar].Data ()));
+      h_sljet_trk_pt_ns[1][iVar]->Write (Form ("h_sljet_trk_pt_ns_%s", variations[iVar].Data ()));
+      h_jet_trk_pt_as[1][iVar]->Write (Form ("h_jet_trk_pt_as_%s", variations[iVar].Data ()));
+      h_ljet_trk_pt_as[1][iVar]->Write (Form ("h_ljet_trk_pt_as_%s", variations[iVar].Data ()));
+      h_sljet_trk_pt_as[1][iVar]->Write (Form ("h_sljet_trk_pt_as_%s", variations[iVar].Data ()));
+      h_jet_trk_pt_ns_bkg[1][iVar]->Write (Form ("h_jet_trk_pt_ns_bkg_%s", variations[iVar].Data ()));
+      h_ljet_trk_pt_ns_bkg[1][iVar]->Write (Form ("h_ljet_trk_pt_ns_bkg_%s", variations[iVar].Data ()));
+      h_sljet_trk_pt_ns_bkg[1][iVar]->Write (Form ("h_sljet_trk_pt_ns_bkg_%s", variations[iVar].Data ()));
+      h_jet_trk_pt_as_bkg[1][iVar]->Write (Form ("h_jet_trk_pt_as_bkg_%s", variations[iVar].Data ()));
+      h_ljet_trk_pt_as_bkg[1][iVar]->Write (Form ("h_ljet_trk_pt_as_bkg_%s", variations[iVar].Data ()));
+      h_sljet_trk_pt_as_bkg[1][iVar]->Write (Form ("h_sljet_trk_pt_as_bkg_%s", variations[iVar].Data ()));
+
+      h_jet_trk_pt_ns_sig[0][iVar]->Write (Form ("h_jet_trk_pt_ns_ref_sig_%s", variations[iVar].Data ()));
+      h_ljet_trk_pt_ns_sig[0][iVar]->Write (Form ("h_ljet_trk_pt_ns_ref_sig_%s", variations[iVar].Data ()));
+      h_sljet_trk_pt_ns_sig[0][iVar]->Write (Form ("h_sljet_trk_pt_ns_ref_sig_%s", variations[iVar].Data ()));
+      h_jet_trk_pt_as_sig[0][iVar]->Write (Form ("h_jet_trk_pt_as_ref_sig_%s", variations[iVar].Data ()));
+      h_ljet_trk_pt_as_sig[0][iVar]->Write (Form ("h_ljet_trk_pt_as_ref_sig_%s", variations[iVar].Data ()));
+      h_sljet_trk_pt_as_sig[0][iVar]->Write (Form ("h_sljet_trk_pt_as_ref_sig_%s", variations[iVar].Data ()));
+      h_jet_trk_pt_ns_sig[1][iVar]->Write (Form ("h_jet_trk_pt_ns_sig_%s", variations[iVar].Data ()));
+      h_ljet_trk_pt_ns_sig[1][iVar]->Write (Form ("h_ljet_trk_pt_ns_sig_%s", variations[iVar].Data ()));
+      h_sljet_trk_pt_ns_sig[1][iVar]->Write (Form ("h_sljet_trk_pt_ns_sig_%s", variations[iVar].Data ()));
+      h_jet_trk_pt_as_sig[1][iVar]->Write (Form ("h_jet_trk_pt_as_sig_%s", variations[iVar].Data ()));
+      h_ljet_trk_pt_as_sig[1][iVar]->Write (Form ("h_ljet_trk_pt_as_sig_%s", variations[iVar].Data ()));
+      h_sljet_trk_pt_as_sig[1][iVar]->Write (Form ("h_sljet_trk_pt_as_sig_%s", variations[iVar].Data ()));
+
+      h_jet_trk_pt_ns_iaa[iVar]->Write (Form ("h_jet_trk_pt_ns_iaa_%s", variations[iVar].Data ()));
+      h_ljet_trk_pt_ns_iaa[iVar]->Write (Form ("h_ljet_trk_pt_ns_iaa_%s", variations[iVar].Data ()));
+      h_sljet_trk_pt_ns_iaa[iVar]->Write (Form ("h_sljet_trk_pt_ns_iaa_%s", variations[iVar].Data ()));
+      h_jet_trk_pt_as_iaa[iVar]->Write (Form ("h_jet_trk_pt_as_iaa_%s", variations[iVar].Data ()));
+      h_ljet_trk_pt_as_iaa[iVar]->Write (Form ("h_ljet_trk_pt_as_iaa_%s", variations[iVar].Data ()));
+      h_sljet_trk_pt_as_iaa[iVar]->Write (Form ("h_sljet_trk_pt_as_iaa_%s", variations[iVar].Data ()));
+    }
+
+    outFile->Close ();
+  }
 }
 
 

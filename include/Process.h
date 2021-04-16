@@ -12,8 +12,10 @@ bool doPionsOnlyVar = false;
 bool doWithPileupVar = false;
 bool doJetES5PercUpVar = false;
 bool doJetES5PercDownVar = false;
+bool doJetES5PercSmearVar = false;
 bool doJetES2PercUpVar = false;
 bool doJetES2PercDownVar = false;
+bool doJetES2PercSmearVar = false;
 
 float crossSectionPicoBarns = 0;
 float mcFilterEfficiency = 0;

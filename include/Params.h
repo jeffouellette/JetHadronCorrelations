@@ -44,8 +44,10 @@ extern bool doPionsOnlyVar;
 extern bool doWithPileupVar;
 extern bool doJetES5PercUpVar;
 extern bool doJetES5PercDownVar;
+extern bool doJetES5PercSmearVar;
 extern bool doJetES2PercUpVar;
 extern bool doJetES2PercDownVar;
+extern bool doJetES2PercSmearVar;
 
 extern CollisionSystem collisionSystem;
 extern DataType dataType; 

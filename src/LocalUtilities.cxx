@@ -65,10 +65,12 @@ TString ToTString (const SystFlag sFlag) {
     case SystFlag::HITightVar:              return TString ("HITightVar");
     case SystFlag::PionsOnlyVar:            return TString ("PionsOnlyVar");
     case SystFlag::WithPileupVar:           return TString ("WithPileupVar");
-    case SystFlag::JetES5PercUpVar:    return TString ("JetES5PercUpVar");
-    case SystFlag::JetES5PercDownVar:  return TString ("JetES5PercDownVar");
-    case SystFlag::JetES2PercUpVar:    return TString ("JetES2PercUpVar");
-    case SystFlag::JetES2PercDownVar:  return TString ("JetES2PercDownVar");
+    case SystFlag::JetES5PercUpVar:         return TString ("JetES5PercUpVar");
+    case SystFlag::JetES5PercDownVar:       return TString ("JetES5PercDownVar");
+    case SystFlag::JetES5PercSmearVar:      return TString ("JetES5PercSmearVar");
+    case SystFlag::JetES2PercUpVar:         return TString ("JetES2PercUpVar");
+    case SystFlag::JetES2PercDownVar:       return TString ("JetES2PercDownVar");
+    case SystFlag::JetES2PercSmearVar:      return TString ("JetES2PercSmearVar");
     default:                                return TString ("???");
   }
 }
@@ -222,13 +224,15 @@ bool UseMinBiasTriggers (const TriggerType tType) {
 
 bool ToggleSyst (const SystFlag sFlag) {
   switch (sFlag) {
-    case SystFlag::HITightVar:        { doHITightVar = true;        return true; }
-    case SystFlag::PionsOnlyVar:      { doPionsOnlyVar = true;      return true; }
-    case SystFlag::WithPileupVar:     { doWithPileupVar = true;     return true; }
-    case SystFlag::JetES5PercUpVar:   { doJetES5PercUpVar = true;   return true; }
-    case SystFlag::JetES5PercDownVar: { doJetES5PercDownVar = true; return true; }
-    case SystFlag::JetES2PercUpVar:   { doJetES2PercUpVar = true;   return true; }
-    case SystFlag::JetES2PercDownVar: { doJetES2PercDownVar = true; return true; }
+    case SystFlag::HITightVar:          { doHITightVar = true;          return true; }
+    case SystFlag::PionsOnlyVar:        { doPionsOnlyVar = true;        return true; }
+    case SystFlag::WithPileupVar:       { doWithPileupVar = true;       return true; }
+    case SystFlag::JetES5PercUpVar:     { doJetES5PercUpVar = true;     return true; }
+    case SystFlag::JetES5PercDownVar:   { doJetES5PercDownVar = true;   return true; }
+    case SystFlag::JetES5PercSmearVar:  { doJetES5PercSmearVar = true;  return true; }
+    case SystFlag::JetES2PercUpVar:     { doJetES2PercUpVar = true;     return true; }
+    case SystFlag::JetES2PercDownVar:   { doJetES2PercDownVar = true;   return true; }
+    case SystFlag::JetES2PercSmearVar:  { doJetES2PercSmearVar = true;  return true; }
     default:                                return false;
   }
 }
@@ -408,10 +412,14 @@ void SetupDirectories (const TString dataSubDir, const bool addSubDir) {
       rootPath = rootPath + "JetES5PercUpVar/";
     else if (doJetES5PercDownVar)
       rootPath = rootPath + "JetES5PercDownVar/";
+    else if (doJetES5PercSmearVar)
+      rootPath = rootPath + "JetES5PercSmearVar/";
     else if (doJetES2PercUpVar)
       rootPath = rootPath + "JetES2PercUpVar/";
     else if (doJetES2PercDownVar)
       rootPath = rootPath + "JetES2PercDownVar/";
+    else if (doJetES2PercSmearVar)
+      rootPath = rootPath + "JetES2PercSmearVar/";
     else
       rootPath = rootPath + "Nominal/";
   }
