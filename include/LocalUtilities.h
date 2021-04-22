@@ -6,18 +6,33 @@
 #include <TH1D.h>
 #include <TFile.h>
 
+#include <vector>
+
 namespace JetHadronCorrelations {
 
 enum class CollisionSystem { pp15, PbPb15, pPb16s5TeV, pPb16, Pbp16, XeXe17, pp17, PbPb18 }; // run 2 HI data sets
+static const std::vector <CollisionSystem> AllCollisionSystem = { CollisionSystem::pp15, CollisionSystem::PbPb15, CollisionSystem::pPb16s5TeV, CollisionSystem::pPb16, CollisionSystem::Pbp16, CollisionSystem::XeXe17, CollisionSystem::pp17, CollisionSystem::PbPb18 };
+
 enum class DataType { Collisions, MCSignal, MCDataOverlay, MCHijing, MCHijingOverlay }; // data types used in HI
-enum class TriggerType { Jet, MinBias }; // types of triggers in this analysis
-enum class SystFlag { None, HITightVar, PionsOnlyVar, WithPileupVar, JetES5PercUpVar, JetES5PercDownVar, JetES5PercSmearVar, JetES2PercUpVar, JetES2PercDownVar, JetES2PercSmearVar }; // types of systematic variations
+static const std::vector <DataType> AllDataType = { DataType::Collisions, DataType::MCSignal, DataType:: MCDataOverlay, DataType::MCHijing, DataType::MCHijingOverlay };
+
+enum class TriggerType { None, Jet, MinBias }; // types of triggers in this analysis
+static const std::vector <TriggerType> AllTriggerType = { TriggerType::None, TriggerType::Jet, TriggerType::MinBias };
+
+enum class SystFlag { None, HITightVar, PionsOnlyVar, WithPileupVar, FcalCentVar, JetES5PercUpVar, JetES5PercDownVar, JetES5PercSmearVar, JetES2PercUpVar, JetES2PercDownVar, JetES2PercSmearVar }; // types of systematic variations
+static const std::vector <SystFlag> AllSystFlag = { SystFlag::None, SystFlag::HITightVar, SystFlag::PionsOnlyVar, SystFlag::WithPileupVar, SystFlag::FcalCentVar, SystFlag::JetES5PercUpVar, SystFlag::JetES5PercDownVar, SystFlag::JetES5PercSmearVar, SystFlag::JetES2PercUpVar, SystFlag::JetES2PercDownVar, SystFlag::JetES2PercSmearVar };
 
 
 TString ToTString (const CollisionSystem collSys);
 TString ToTString (const DataType dType);
 TString ToTString (const TriggerType tType);
 TString ToTString (const SystFlag sFlag);
+
+
+bool SetCollisionSystem (TString ts);
+bool SetDataType (TString ts);
+bool SetTriggerType (TString ts);
+bool SetSystFlag (TString ts);
 
 
 bool IsIons (const CollisionSystem collSys);
@@ -46,7 +61,17 @@ bool IsHijing (const DataType dType);
 bool UseJetTriggers (const TriggerType tType);
 bool UseMinBiasTriggers (const TriggerType tType);
 
-bool ToggleSyst (const SystFlag sFlag);
+bool DoHITightVar (const SystFlag sFlag);
+bool DoPionsOnlyVar (const SystFlag sFlag);
+bool DoWithPileupVar (const SystFlag sFlag);
+bool DoFcalCentVar (const SystFlag sFlag);
+bool DoJetES5PercUpVar (const SystFlag sFlag);
+bool DoJetES5PercDownVar (const SystFlag sFlag);
+bool DoJetES5PercSmearVar (const SystFlag sFlag);
+bool DoJetES2PercUpVar (const SystFlag sFlag);
+bool DoJetES2PercDownVar (const SystFlag sFlag);
+bool DoJetES2PercSmearVar (const SystFlag sFlag);
+
 
 
 bool IsIons ();
@@ -75,6 +100,17 @@ bool IsHijing ();
 bool UseJetTriggers ();
 bool UseMinBiasTriggers ();
 
+bool DoHITightVar ();
+bool DoPionsOnlyVar ();
+bool DoWithPileupVar ();
+bool DoFcalCentVar ();
+bool DoJetES5PercUpVar ();
+bool DoJetES5PercDownVar ();
+bool DoJetES5PercSmearVar ();
+bool DoJetES2PercUpVar ();
+bool DoJetES2PercDownVar ();
+bool DoJetES2PercSmearVar ();
+
 
 /**
  * Returns the CoM boost relevant for asymmetric collision systems (i.e. p+Pb). 0 for everything else.
@@ -86,6 +122,12 @@ double GetBoost (int rn);
  * Establishes path variables appropriately.
  */
 void SetupDirectories (const TString dataSubDir, const bool addSubDir = true);
+
+
+/**
+ * Looks up MC sample cross section, filter efficiency, and number of events.
+ */
+bool GetMCWeights (TString fname);
 
 
 /**

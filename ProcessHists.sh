@@ -1,0 +1,13 @@
+#root -b -q 'src/ProcessPtCh.C("60GeVJets", "60GeVJets_JetES5Perc.root")'
+#root -b -q 'src/ProcessPtCh.C("30GeVJets", "30GeVJets_JetES5Perc.root")'
+#root -b -q 'src/ProcessDPhi.C("60GeVJets", "60GeVJets_JetES5Perc.root")'
+#root -b -q 'src/ProcessDPhi.C("30GeVJets", "30GeVJets_JetES5Perc.root")'
+#root -b -q 'src/ProcessJets.C("60GeVJets", "60GeVJets_JetES5Perc.root")'
+#root -b -q 'src/ProcessJets.C("30GeVJets", "30GeVJets_JetES5Perc.root")'
+
+root -b -q 'src/PlotPtCh.C("60GeVJets", "60GeVJets_JetES5Perc.root")'
+root -b -q 'src/PlotPtCh.C("30GeVJets", "30GeVJets_JetES5Perc.root")'
+root -b -q 'src/PlotDPhi.C("60GeVJets", "60GeVJets_JetES5Perc.root")'
+root -b -q 'src/PlotDPhi.C("30GeVJets", "30GeVJets_JetES5Perc.root")'
+root -b -q 'src/PlotJets.C("60GeVJets", "60GeVJets_JetES5Perc.root")'
+root -b -q 'src/PlotJets.C("30GeVJets", "30GeVJets_JetES5Perc.root")'

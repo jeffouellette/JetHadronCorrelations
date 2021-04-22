@@ -33,20 +33,26 @@ const Color_t systColors[10] = {kRed+1, kAzure-2, kGreen+2, kViolet-3, kMagenta,
 TLine* l = new TLine ();
 TLatex* tl = new TLatex ();
 
-const int nVar = 4;
-std::vector <TString> variations = {"JetES5PercUpVar", "JetES5PercDownVar", "JetES2PercUpVar", "JetES2PercDownVar"};
+const int nVar = 8;
+std::vector <TString> variations = {"Nominal", "JetES5PercUpVar", "JetES5PercDownVar", "JetES5PercSmearVar", "JetES2PercUpVar", "JetES2PercDownVar", "JetES2PercSmearVar", "FcalCentVar"};
 
 std::map <TString, MyStyle> varStyles = {
   {"JetES5PercUpVar",   MyStyle (kPink+5, 3)},
   {"JetES5PercDownVar", MyStyle (kPink+5, 2)},
+  {"JetES5PercSmearVar",MyStyle (kGreen+2, 4)},
   {"JetES2PercUpVar",   MyStyle (kAzure+2, 3)},
-  {"JetES2PercDownVar", MyStyle (kAzure+2, 2)}
+  {"JetES2PercDownVar", MyStyle (kAzure+2, 2)},
+  {"JetES2PercSmearVar",MyStyle (kOrange+7, 4)},
+  {"FcalCentVar",       MyStyle (kViolet-5, 5)}
 };
 std::map <TString, TString> varFullNames = {
   {"JetES5PercUpVar",   "JES 5\% up"},
   {"JetES5PercDownVar", "JES 5\% down"},
+  {"JetES5PercSmearVar","JES 5\% smear"},
   {"JetES2PercUpVar",   "JES 2\% up"},
-  {"JetES2PercDownVar", "JES 2\% down"}
+  {"JetES2PercDownVar", "JES 2\% down"},
+  {"JetES2PercSmearVar","JES 2\% smear"},
+  {"FcalCentVar",       "FCal 0-20\%"}
 };
 
 
@@ -149,8 +155,11 @@ void PlotPtCh (const char* tag, const char* inFileTag) {
 
 
   {
-    std::cout << Form ("Reading ./rootFiles/Results/PlotPtCh_%s.root", inFileTag) << std::endl;
-    inFile = new TFile (Form ("./rootFiles/Results/PlotPtCh_%s.root", inFileTag), "read");
+    TString inFileName = inFileTag;
+    inFileName.ReplaceAll (".root", "");
+    inFileName = Form ("./rootFiles/Results/PlotPtCh_%s.root", inFileName.Data ());
+    std::cout << "Reading " << inFileName.Data () << std::endl;
+    inFile = new TFile (inFileName, "read");
 
     h_evt_counts[0] = (TH1D*) inFile->Get ("h_evt_counts_ref");
     h_jet_counts[0] = (TH1D*) inFile->Get ("h_jet_counts_ref");
@@ -243,7 +252,7 @@ void PlotPtCh (const char* tag, const char* inFileTag) {
     g_ljet_trk_pt_as_iaa_syst = (TGAE*) inFile->Get ("g_ljet_trk_pt_as_iaa_syst");
     g_sljet_trk_pt_as_iaa_syst = (TGAE*) inFile->Get ("g_sljet_trk_pt_as_iaa_syst");
 
-    for (int iVar = 0; iVar < nVar; iVar++) {
+    for (int iVar = 1; iVar < nVar; iVar++) {
       h_jet_trk_pt_ns_syst[0][iVar] = (TH1D*) inFile->Get (Form ("h_jet_trk_pt_ns_ref_%s", variations[iVar].Data ()));
       h_ljet_trk_pt_ns_syst[0][iVar] = (TH1D*) inFile->Get (Form ("h_ljet_trk_pt_ns_ref_%s", variations[iVar].Data ()));
       h_sljet_trk_pt_ns_syst[0][iVar] = (TH1D*) inFile->Get (Form ("h_sljet_trk_pt_ns_ref_%s", variations[iVar].Data ()));
@@ -780,7 +789,7 @@ void PlotPtCh (const char* tag, const char* inFileTag) {
     ((TGAE*) g->Clone ())->Draw ("p");
     SaferDelete (&g);
 
-    c->SaveAs (Form ("Plots/JetTagged_HadronYields_Central_comparison_PtCh_%s.pdf", tag)); 
+    c->SaveAs (Form ("%s/Plots/JetTagged_HadronYields_Central_comparison_PtCh_%s.pdf", workPath.Data (), tag)); 
   }
 
 
@@ -1272,7 +1281,7 @@ void PlotPtCh (const char* tag, const char* inFileTag) {
     ((TGAE*) g->Clone ())->Draw ("p");
     SaferDelete (&g);
 
-    c->SaveAs (Form ("Plots/LeadingJetTagged_HadronYields_Central_comparison_PtCh_%s.pdf", tag)); 
+    c->SaveAs (Form ("%s/Plots/LeadingJetTagged_HadronYields_Central_comparison_PtCh_%s.pdf", workPath.Data (), tag)); 
   }
 
 
@@ -1311,7 +1320,7 @@ void PlotPtCh (const char* tag, const char* inFileTag) {
       h->DrawCopy ("hist ][");
       SaferDelete (&h);
 
-      for (int iVar = 0; iVar < nVar; iVar++) {
+      for (int iVar = 1; iVar < nVar; iVar++) {
         h = (TH1D*) h_jet_trk_pt_ns_syst[iSys][iVar]->Clone ("htemp");
         SaveRelativeErrors (h, h_jet_trk_pt_ns[iSys], true);
         for (int iX = 1; iX <= h->GetNbinsX (); iX++) h->SetBinContent (iX, 100*h->GetBinContent (iX) - 100);
@@ -1335,11 +1344,11 @@ void PlotPtCh (const char* tag, const char* inFileTag) {
         myText (0.22, 0.828, kBlack, "#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV, 0-20%", 0.032);
       }
       myText (0.22, 0.786, kBlack, "#Delta#phi < #pi/8 (near-side)", 0.032);
-      for (int iVar = 0; iVar < nVar; iVar++)
+      for (int iVar = 1; iVar < nVar; iVar++)
         myLineColorText (0.25, 0.744-iVar*0.040, varStyles[variations[iVar]].first, varStyles[variations[iVar]].second, varFullNames[variations[iVar]], 1.0, 0.028);
       
 
-      c->SaveAs (Form ("Plots/Systematics/TotalJetTaggedYield_%s_nearside_ptch_%s_syst.pdf", iSys == 0 ? "pp" : "pPb", tag));
+      c->SaveAs (Form ("%s/Plots/Systematics/TotalJetTaggedYield_%s_nearside_ptch_%s_syst.pdf", workPath.Data (), iSys == 0 ? "pp" : "pPb", tag));
     }
   }
 
@@ -1378,7 +1387,7 @@ void PlotPtCh (const char* tag, const char* inFileTag) {
       h->DrawCopy ("hist ][");
       SaferDelete (&h);
 
-      for (int iVar = 0; iVar < nVar; iVar++) {
+      for (int iVar = 1; iVar < nVar; iVar++) {
         h = (TH1D*) h_jet_trk_pt_as_syst[iSys][iVar]->Clone ("htemp");
         SaveRelativeErrors (h, h_jet_trk_pt_as[iSys], true);
         for (int iX = 1; iX <= h->GetNbinsX (); iX++) h->SetBinContent (iX, 100*h->GetBinContent (iX) - 100);
@@ -1402,11 +1411,11 @@ void PlotPtCh (const char* tag, const char* inFileTag) {
         myText (0.22, 0.828, kBlack, "#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV, 0-20%", 0.032);
       }
       myText (0.22, 0.786, kBlack, "#Delta#phi > 7#pi/8 (away-side)", 0.032);
-      for (int iVar = 0; iVar < nVar; iVar++)
+      for (int iVar = 1; iVar < nVar; iVar++)
         myLineColorText (0.25, 0.744-iVar*0.040, varStyles[variations[iVar]].first, varStyles[variations[iVar]].second, varFullNames[variations[iVar]], 1.0, 0.028);
       
 
-      c->SaveAs (Form ("Plots/Systematics/TotalJetTaggedYield_%s_awayside_ptch_%s_syst.pdf", iSys == 0 ? "pp" : "pPb", tag));
+      c->SaveAs (Form ("%s/Plots/Systematics/TotalJetTaggedYield_%s_awayside_ptch_%s_syst.pdf", workPath.Data (), iSys == 0 ? "pp" : "pPb", tag));
     }
   }
 
@@ -1445,7 +1454,7 @@ void PlotPtCh (const char* tag, const char* inFileTag) {
       h->DrawCopy ("hist ][");
       SaferDelete (&h);
 
-      for (int iVar = 0; iVar < nVar; iVar++) {
+      for (int iVar = 1; iVar < nVar; iVar++) {
         h = (TH1D*) h_jet_trk_pt_ns_sig_syst[iSys][iVar]->Clone ("htemp");
         SaveRelativeErrors (h, h_jet_trk_pt_ns_sig[iSys], true);
         for (int iX = 1; iX <= h->GetNbinsX (); iX++) h->SetBinContent (iX, 100*h->GetBinContent (iX) - 100);
@@ -1469,11 +1478,11 @@ void PlotPtCh (const char* tag, const char* inFileTag) {
         myText (0.22, 0.828, kBlack, "#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV, 0-20%", 0.032);
       }
       myText (0.22, 0.768, kBlack, "#Delta#phi < #pi/8 (near-side)", 0.032);
-      for (int iVar = 0; iVar < nVar; iVar++)
+      for (int iVar = 1; iVar < nVar; iVar++)
         myLineColorText (0.25, 0.744-iVar*0.040, varStyles[variations[iVar]].first, varStyles[variations[iVar]].second, varFullNames[variations[iVar]], 1.0, 0.028);
       
 
-      c->SaveAs (Form ("Plots/Systematics/SignalJetTaggedYield_%s_nearside_ptch_%s_syst.pdf", iSys == 0 ? "pp" : "pPb", tag));
+      c->SaveAs (Form ("%s/Plots/Systematics/SignalJetTaggedYield_%s_nearside_ptch_%s_syst.pdf", workPath.Data (), iSys == 0 ? "pp" : "pPb", tag));
     }
   }
 
@@ -1512,7 +1521,7 @@ void PlotPtCh (const char* tag, const char* inFileTag) {
       h->DrawCopy ("hist ][");
       SaferDelete (&h);
 
-      for (int iVar = 0; iVar < nVar; iVar++) {
+      for (int iVar = 1; iVar < nVar; iVar++) {
         h = (TH1D*) h_jet_trk_pt_as_sig_syst[iSys][iVar]->Clone ("htemp");
         SaveRelativeErrors (h, h_jet_trk_pt_as_sig[iSys], true);
         for (int iX = 1; iX <= h->GetNbinsX (); iX++) h->SetBinContent (iX, 100*h->GetBinContent (iX) - 100);
@@ -1536,11 +1545,11 @@ void PlotPtCh (const char* tag, const char* inFileTag) {
         myText (0.22, 0.828, kBlack, "#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV, 0-20%", 0.032);
       }
       myText (0.22, 0.786, kBlack, "#Delta#phi > 7#pi/8 (away-side)", 0.032);
-      for (int iVar = 0; iVar < nVar; iVar++)
+      for (int iVar = 1; iVar < nVar; iVar++)
         myLineColorText (0.25, 0.744-iVar*0.040, varStyles[variations[iVar]].first, varStyles[variations[iVar]].second, varFullNames[variations[iVar]], 1.0, 0.028);
       
 
-      c->SaveAs (Form ("Plots/Systematics/SignalJetTaggedYield_%s_awayside_ptch_%s_syst.pdf", iSys == 0 ? "pp" : "pPb", tag));
+      c->SaveAs (Form ("%s/Plots/Systematics/SignalJetTaggedYield_%s_awayside_ptch_%s_syst.pdf", workPath.Data (), iSys == 0 ? "pp" : "pPb", tag));
     }
   }
 
@@ -1576,7 +1585,7 @@ void PlotPtCh (const char* tag, const char* inFileTag) {
     h->DrawCopy ("hist ][");
     SaferDelete (&h);
 
-    for (int iVar = 0; iVar < nVar; iVar++) {
+    for (int iVar = 1; iVar < nVar; iVar++) {
       h = (TH1D*) h_jet_trk_pt_ns_iaa_syst[iVar]->Clone ("htemp");
       SaveRelativeErrors (h, h_jet_trk_pt_ns_iaa, true);
       for (int iX = 1; iX <= h->GetNbinsX (); iX++) h->SetBinContent (iX, 100*h->GetBinContent (iX) - 100);
@@ -1596,11 +1605,11 @@ void PlotPtCh (const char* tag, const char* inFileTag) {
     myText (0.22, 0.828, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.032);
     myText (0.22, 0.786, kBlack, "#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV, 0-20%", 0.032);
     myText (0.22, 0.744, kBlack, "#Delta#phi < #pi/8 (near-side)", 0.032);
-    for (int iVar = 0; iVar < nVar; iVar++)
+    for (int iVar = 1; iVar < nVar; iVar++)
       myLineColorText (0.25, 0.702-iVar*0.040, varStyles[variations[iVar]].first, varStyles[variations[iVar]].second, varFullNames[variations[iVar]], 1.0, 0.028);
     
 
-    c->SaveAs (Form ("Plots/Systematics/JetTagged_IpA_nearside_ptch_%s_syst.pdf", tag));
+    c->SaveAs (Form ("%s/Plots/Systematics/JetTagged_IpA_nearside_ptch_%s_syst.pdf", workPath.Data (), tag));
   }
 
 
@@ -1635,7 +1644,7 @@ void PlotPtCh (const char* tag, const char* inFileTag) {
     h->DrawCopy ("hist ][");
     SaferDelete (&h);
 
-    for (int iVar = 0; iVar < nVar; iVar++) {
+    for (int iVar = 1; iVar < nVar; iVar++) {
       h = (TH1D*) h_jet_trk_pt_as_iaa_syst[iVar]->Clone ("htemp");
       SaveRelativeErrors (h, h_jet_trk_pt_as_iaa, true);
       for (int iX = 1; iX <= h->GetNbinsX (); iX++) h->SetBinContent (iX, 100*h->GetBinContent (iX) - 100);
@@ -1655,11 +1664,11 @@ void PlotPtCh (const char* tag, const char* inFileTag) {
     myText (0.22, 0.828, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.032);
     myText (0.22, 0.786, kBlack, "#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV, 0-20%", 0.032);
     myText (0.22, 0.744, kBlack, "#Delta#phi > 7#pi/8 (away-side)", 0.032);
-    for (int iVar = 0; iVar < nVar; iVar++)
+    for (int iVar = 1; iVar < nVar; iVar++)
       myLineColorText (0.25, 0.702-iVar*0.040, varStyles[variations[iVar]].first, varStyles[variations[iVar]].second, varFullNames[variations[iVar]], 1.0, 0.028);
     
 
-    c->SaveAs (Form ("Plots/Systematics/JetTagged_IpA_awayside_ptch_%s_syst.pdf", tag));
+    c->SaveAs (Form ("%s/Plots/Systematics/JetTagged_IpA_awayside_ptch_%s_syst.pdf", workPath.Data (), tag));
   }
 
 }

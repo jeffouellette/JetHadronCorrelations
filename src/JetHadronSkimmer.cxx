@@ -66,7 +66,7 @@ bool JetHadronSkimmer (const char* directory,
       fileIdentifier = to_string (dataSet);
     }
     else {
-      std::cout << "Error: In JetHadronSkimmer.C: Cannot identify this MC file! Quitting." << std::endl;
+      std::cout << "Error: In JetHadronSkimmer.cxx: Cannot identify this MC file! Quitting." << std::endl;
       return false;
     }
   }
@@ -88,7 +88,7 @@ bool JetHadronSkimmer (const char* directory,
       tree->Add (dataPath + directory + "/" + file + "/*.root");
       break;
     }
-    std::cout << "Chain has " << tree->GetListOfFiles ()->GetEntries () << " files, " << tree->GetEntries () << " entries" << std::endl;
+    std::cout << "Info: In JetHadronSkimmer.cxx: Chain has " << tree->GetListOfFiles ()->GetEntries () << " files, " << tree->GetEntries () << " entries" << std::endl;
   }
 
 
@@ -288,8 +288,12 @@ bool JetHadronSkimmer (const char* directory,
   }
 
 
+  centBins = (DoFcalCentVar () ? fcalCentBins : zdcCentBins);
+  numCentBins = (DoFcalCentVar () ? numFcalCentBins : numZdcCentBins);
+
+
   // Load files for output
-  const int numFileBins = (Ispp () ? 1 : numZdcCentBins);
+  const int numFileBins = (Ispp () ? 1 : numCentBins);
   TFile* outFiles[numFileBins];
   OutTree* outTrees[numFileBins];
   for (int iCent = 0; iCent < numFileBins; iCent++) {
@@ -346,7 +350,7 @@ bool JetHadronSkimmer (const char* directory,
         else if (vert_type[iVert] == 3)
           hasPileup = true;
       }
-      if (!hasPrimary || (!doWithPileupVar && hasPileup) || fabs (vz) > 150)
+      if (!hasPrimary || (!DoWithPileupVar () && hasPileup) || fabs (vz) > 150)
         continue;
     }
     else {
@@ -366,8 +370,7 @@ bool JetHadronSkimmer (const char* directory,
       zdc_calibE_p = IsPeriodA () ? ZdcCalibEnergy_C : ZdcCalibEnergy_A;
       zdc_calibE_Pb *= 1e3;
       zdc_calibE_p *= 1e3;
-      //iCent = GetCentBin (fcal_et_Pb);
-      iCent = GetZdcCentBin (zdc_calibE_Pb);
+      iCent = GetCentBin (DoFcalCentVar () ? fcal_et_Pb : zdc_calibE_Pb);
     }
     else if (Ispp ()) {
       fcal_et_Pb = -999;
@@ -381,7 +384,7 @@ bool JetHadronSkimmer (const char* directory,
       iCent = 0;
     }
 
-    if (iCent < 0 || iCent > numZdcCentBins-1)
+    if (iCent < 0 || iCent > numCentBins-1)
       continue;
 
     if (event_weight != -1) { // trigger requirement
@@ -395,16 +398,16 @@ bool JetHadronSkimmer (const char* directory,
         double jpt = akt4_hi_jet_pt_xcalib[iJ];
         double jen = akt4_hi_jet_e_xcalib[iJ]; 
 
-        if (doJetES5PercUpVar)    { jpt *= 1.05;  jen *= 1.05; }
-        if (doJetES5PercDownVar)  { jpt *= 0.95;  jen *= 0.95; }
-        if (doJetES5PercSmearVar) { 
+        if (DoJetES5PercUpVar ())    { jpt *= 1.05;  jen *= 1.05; }
+        if (DoJetES5PercDownVar ())  { jpt *= 0.95;  jen *= 0.95; }
+        if (DoJetES5PercSmearVar ()) { 
           double sf = jetES5PercSmearDist (mt19937_gen);
           jpt *= sf;
           jen *= sf;
         }
-        if (doJetES2PercUpVar)    { jpt *= 1.02;  jen *= 1.02; }
-        if (doJetES2PercDownVar)  { jpt *= 0.98;  jen *= 0.98; }
-        if (doJetES2PercSmearVar) { 
+        if (DoJetES2PercUpVar ())    { jpt *= 1.02;  jen *= 1.02; }
+        if (DoJetES2PercDownVar ())  { jpt *= 0.98;  jen *= 0.98; }
+        if (DoJetES2PercSmearVar ()) { 
           double sf = jetES2PercSmearDist (mt19937_gen);
           jpt *= sf;
           jen *= sf;

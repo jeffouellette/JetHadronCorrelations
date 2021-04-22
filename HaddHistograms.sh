@@ -1,6 +1,7 @@
 #! /bin/bash
 
-declare -a vardirs=("Nominal" "JetES5PercUpVar" "JetES5PercDownVar" "JetES2PercUpVar" "JetES2PercDownVar")
+#declare -a vardirs=("Nominal" "JetES5PercUpVar" "JetES5PercDownVar" "JetES5PercSmearVar" "JetES2PercUpVar" "JetES2PercDownVar" "JetES2PercSmearVar" "FcalCentVar")
+declare -a vardirs=("FcalCentVar")
 declare -a resdirs=("60GeVJets" "30GeVJets")
 
 for resdir in ${resdirs[@]}; do

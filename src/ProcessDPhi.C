@@ -17,7 +17,8 @@
 
 using namespace JetHadronCorrelations;
 
-const int nVar = 5;
+const int nVar = 8;
+std::vector <TString> variations = {"Nominal", "JetES5PercUpVar", "JetES5PercDownVar", "JetES5PercSmearVar", "JetES2PercUpVar", "JetES2PercDownVar", "JetES2PercSmearVar", "FcalCentVar"};
 
 void ProcessDPhi (const char* tag, const char* outFileTag) {
 
@@ -71,9 +72,9 @@ void ProcessDPhi (const char* tag, const char* outFileTag) {
   TGAE** g_sljet_trk_dphi_iaa_syst = Get1DArray <TGAE*> (nVar);
 
 
-  std::vector <TString> variations = {"Nominal", "JetES5PercUpVar", "JetES5PercDownVar", "JetES2PercUpVar", "JetES2PercDownVar"};
-
-  TString outFileName = Form ("./rootFiles/Results/PlotDPhi_%s.root", outFileTag);
+  TString outFileName = outFileTag;
+  outFileName.ReplaceAll (".root", "");
+  outFileName = Form ("./rootFiles/Results/PlotDPhi_%s.root", outFileName.Data ());
   std::cout << "Writing " << outFileName.Data () << std::endl;
   TFile* outFile = new TFile (outFileName.Data (), "recreate");
 
@@ -276,6 +277,7 @@ void ProcessDPhi (const char* tag, const char* outFileTag) {
 
 
   // takes the maximum variation of the jet pT ES up/down variations
+  // TODO
   {
     const int syst = 1;
 

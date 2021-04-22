@@ -19,7 +19,7 @@ bool BlayerDesyn;
 float actualInteractionsPerCrossing;
 float averageInteractionsPerCrossing;
 
-std::vector<float> mcEventWeights;
+std::vector<float>* mcEventWeights;
 
 // truth event info
 const static int max_truth_event_n = 5;

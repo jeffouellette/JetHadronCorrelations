@@ -3,7 +3,7 @@ CXXFLAGS=-O3 -g -Wall -fPIC -std=c++1y `root-config --cflags` -Iinclude -I${ROOT
 LDFLAGS=`root-config --glibs --ldflags` -Llib -L${ROOT_UTILS_PATH}/lib -L${ATLAS_PATH}/lib -lUtilities -lAtlasUtils -lAtlasStyle
 
 libraries = LocalUtilities
-algorithms = JetHadronSkimmer ZDCAnalysis
+algorithms = JetHadronSkimmer CentralityAnalysis TrackingPerformance TrackMomentumResolution JetEnergyResolution
 binaries = Process RunCorrelator
 
 libs : $(libraries)

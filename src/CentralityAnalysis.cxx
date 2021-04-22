@@ -1,7 +1,7 @@
-#ifndef __ZDCAnalysis_cxx__
-#define __ZDCAnalysis_cxx__
+#ifndef __CentralityAnalysis_cxx__
+#define __CentralityAnalysis_cxx__
 
-#include "ZDCAnalysis.h"
+#include "CentralityAnalysis.h"
 #include "Params.h"
 #include "TreeVariables.h"
 #include "LocalUtilities.h"
@@ -21,20 +21,19 @@ using namespace std;
 namespace JetHadronCorrelations {
 
 
-bool ZDCAnalysis (const char* directory,
-                  const int dataSet,
-                  const char* inFileName) {
+bool CentralityAnalysis (const char* directory,
+                         const int dataSet,
+                         const char* inFileName) {
 
-  cout << "Info: In ZDCAnalysis.cxx: Entered ZDCAnalysis routine." << endl;
-  cout << "Info: In ZDCAnalysis.cxx: Printing systematic onfiguration:";
+  cout << "Info: In CentralityAnalysis.cxx: Entered CentralityAnalysis routine." << endl;
 
-  SetupDirectories ("ZDCAnalysis");
+  SetupDirectories ("CentralityAnalysis");
 
 
   // this identifier here corresponds to the name of the output file
   const TString identifier = GetIdentifier (dataSet, directory, inFileName);
-  std::cout << "Info: In ZDCAnalysis.cxx: File Identifier: " << identifier << std::endl;
-  std::cout << "Info: In ZDCAnalysis.cxx: Saving output to " << rootPath << std::endl;
+  std::cout << "Info: In CentralityAnalysis.cxx: File Identifier: " << identifier << std::endl;
+  std::cout << "Info: In CentralityAnalysis.cxx: Saving output to " << rootPath << std::endl;
 
 
   // creates a file identifier pattern that we will use to identify the directory containing the input files
@@ -144,7 +143,7 @@ bool ZDCAnalysis (const char* directory,
 
   TString outTreeName = "";
   if (!Is5TeV ()) {
-    std::cout << "Error: In ZDCAnalysis.cxx::ZDCAnalysis (const char*, const int, const char*): Unsupported beam collision energy, quitting." << std::endl;
+    std::cout << "Error: In CentralityAnalysis.cxx::CentralityAnalysis (const char*, const int, const char*): Unsupported beam collision energy, quitting." << std::endl;
     return false;
   }
   else if (IspPb16 ()) {
@@ -169,7 +168,7 @@ bool ZDCAnalysis (const char* directory,
     jet_trig_name = jet_trig_name_PbPb18;
   }
   else {
-    std::cout << "Error: In ZDCAnalysis.cxx::ZDCAnalysis (const char*, const int, const char*): Beam configuration not recognized, quitting." << std::endl;
+    std::cout << "Error: In CentralityAnalysis.cxx::CentralityAnalysis (const char*, const int, const char*): Beam configuration not recognized, quitting." << std::endl;
     return false;
   }
 
@@ -196,9 +195,9 @@ bool ZDCAnalysis (const char* directory,
   TH2D* h2_mb_Pb_fcal_et_zdc_calibE = new TH2D (Form ("h2_mb_Pb_fcal_et_zdc_calibE_run%i", dataSet), "", 80, -100, 300, 1400, 0, 175);
   TH2D* h2_jet_Pb_fcal_et_zdc_calibE = new TH2D (Form ("h2_jet_Pb_fcal_et_zdc_calibE_run%i", dataSet), "", 80, -100, 300, 1400, 0, 175);
 
-  TH1D* h_mb_Pb_fcal_et = new TH1D ("h_mb_Pb_fcal_et", "", 400, -100, 300);
+  TH1D* h_mb_Pb_fcal_et = new TH1D (Form ("h_mb_Pb_fcal_et_run%i", dataSet), "", 250, -30, 220);
   h_mb_Pb_fcal_et->Sumw2 ();
-  TH1D* h_mb_p_fcal_et = new TH1D ("h_mb_p_fcal_et", "", 150, -100, 200);
+  TH1D* h_mb_p_fcal_et = new TH1D (Form ("h_mb_p_fcal_et_run%i", dataSet), "", 250, -30, 220);
   h_mb_p_fcal_et->Sumw2 ();
 
   TH1D* h_mb_Pb_zdc_calibE = new TH1D (Form ("h_mb_Pb_zdc_calibE_run%i", dataSet), "", 1400, 0, 175);
@@ -208,9 +207,9 @@ bool ZDCAnalysis (const char* directory,
   TH1D* h_mb_p_zdc_calibE = new TH1D (Form ("h_mb_p_zdc_calibE_run%i", dataSet), "", 1400, 0, 175);
   h_mb_p_zdc_calibE->Sumw2 ();
 
-  TH1D* h_jet_Pb_fcal_et = new TH1D ("h_jet_Pb_fcal_et", "", 400, -100, 300);
+  TH1D* h_jet_Pb_fcal_et = new TH1D (Form ("h_jet_Pb_fcal_et_run%i", dataSet), "", 250, -30, 220);
   h_jet_Pb_fcal_et->Sumw2 ();
-  TH1D* h_jet_p_fcal_et = new TH1D ("h_jet_p_fcal_et", "", 150, -100, 200);
+  TH1D* h_jet_p_fcal_et = new TH1D (Form ("h_jet_p_fcal_et_run%i", dataSet), "", 250, -30, 220);
   h_jet_p_fcal_et->Sumw2 ();
 
   TH1D* h_jet_Pb_zdc_calibE = new TH1D (Form ("h_jet_Pb_zdc_calibE_run%i", dataSet), "", 1400, 0, 175);
@@ -226,7 +225,7 @@ bool ZDCAnalysis (const char* directory,
   // First loop over events
   for (int iEvt = 0; iEvt < nEvts; iEvt++) {
     if (nEvts > 0 && iEvt % (nEvts / 100) == 0)
-      cout << "Info: In ZDCAnalysis.cxx: Events " << iEvt / (nEvts / 100) << "\% done...\r" << flush;
+      cout << "Info: In CentralityAnalysis.cxx: Events " << iEvt / (nEvts / 100) << "\% done...\r" << flush;
 
     tree->GetEntry (iEvt);
 
@@ -289,7 +288,7 @@ bool ZDCAnalysis (const char* directory,
       h_jet_p_zdc_calibE->Fill (zdc_calibE_p);
     }
   } // end event loop
-  cout << endl << "Info: In ZDCAnalysis.cxx: Finished processing events." << endl;
+  cout << endl << "Info: In CentralityAnalysis.cxx: Finished processing events." << endl;
 
   h2_mb_Pb_fcal_et_zdc_calibE->Write ();
   h_mb_Pb_fcal_et->Write ();

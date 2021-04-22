@@ -19,8 +19,8 @@ sigdir=JetsData
 # Input subdirectory for mixing pool; MinBiasData (at the moment)
 mixdir=MinBiasData
 
-# Variation subdirectory; Nominal, JetES5PercUpVar, JetES5PercDownVar, JetES2PercUpVar, JetES2PercDownVar, HITightVar, PionsOnlyVar, WithPileupVar (at the moment)
-#vardir=Nominal
+# Variation subdirectory; Nominal, JetES5PercUpVar, JetES5PercDownVar, JetES5PercSmearVar, JetES2PercUpVar, JetES2PercDownVar, JetES2PercSmearVar, HITightVar, PionsOnlyVar, WithPileupVar, FcalCentVar (at the moment)
+vardir=FcalCentVar
 
 # Centrality selection
 # 1 or 0 (at the moment)
@@ -43,11 +43,11 @@ Output = run/outputs/$(minjpt)GeVJets_MixedHists_$(run)_iCent$(cent)_$(vardir).o
 Queue run in (312796 312837 312937 312945 312968 314199)
 
 
-# pp
-Arguments = $(minjpt) $(maxjpt) pp17_5TeV $(minjpt)GeVJets_data17 ./rootFiles/$(minjpt)GeVJets/JetsHists/$(vardir)/$(run)_hists.root ./rootFiles/$(sigdir)/$(vardir)/$(run).root
-Error = run/errors/$(minjpt)GeVJets_JetsHists_$(run)_$(vardir).err
-Log = /tmp/jeff/logs/$(minjpt)GeVJets_JetsHists_$(run)_$(vardir).log
-Output = run/outputs/$(minjpt)GeVJets_JetsHists_$(run)_$(vardir).out
-Queue run in (340644 340683 340697 340718 340814 340849 340850 340910 340925 340973 341027 341123 341184)
-
-
+## pp
+#Arguments = $(minjpt) $(maxjpt) pp17_5TeV $(minjpt)GeVJets_data17 ./rootFiles/$(minjpt)GeVJets/JetsHists/$(vardir)/$(run)_hists.root ./rootFiles/$(sigdir)/$(vardir)/$(run).root
+#Error = run/errors/$(minjpt)GeVJets_JetsHists_$(run)_$(vardir).err
+#Log = /tmp/jeff/logs/$(minjpt)GeVJets_JetsHists_$(run)_$(vardir).log
+#Output = run/outputs/$(minjpt)GeVJets_JetsHists_$(run)_$(vardir).out
+#Queue run in (340644 340683 340697 340718 340814 340849 340850 340910 340925 340973 341027 341123 341184)
+#
+#

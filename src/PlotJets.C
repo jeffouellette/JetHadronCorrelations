@@ -80,8 +80,11 @@ void PlotJets (const char* tag, const char* inFileTag) {
 
 
   {
-    std::cout << Form ("Reading ./rootFiles/Results/PlotJets_%s.root", inFileTag) << std::endl;
-    inFile = new TFile (Form ("./rootFiles/Results/PlotJets_%s.root", inFileTag), "read");
+    TString inFileName = inFileTag;
+    inFileName.ReplaceAll (".root", "");
+    inFileName = Form ("./rootFiles/Results/PlotJets_%s.root", inFileName.Data ());
+    std::cout << "Reading " << inFileName.Data () << std::endl;
+    inFile = new TFile (inFileName, "read");
 
     h_evt_counts[0] = (TH1D*) inFile->Get ("h_evt_counts_ref");
     h_jet_counts[0] = (TH1D*) inFile->Get ("h_jet_counts_ref");
@@ -261,7 +264,7 @@ void PlotJets (const char* tag, const char* inFileTag) {
     ((TGAE*) g->Clone ())->Draw ("p");
     SaferDelete (&g);
 
-    c->SaveAs (Form ("Plots/JetPtSpectrum_%s.pdf", tag));
+    c->SaveAs (Form ("%s/Plots/JetPtSpectrum_%s.pdf", workPath.Data (), tag));
   }
 
 
@@ -277,7 +280,7 @@ void PlotJets (const char* tag, const char* inFileTag) {
 
   //  h2->Draw ("colz");
 
-  //  c->SaveAs ("Plots/JetEtaPhiSpectrum.pdf");
+  //  c->SaveAs (Form ("%s/Plots/JetEtaPhiSpectrum.pdf", workPath.Data ()));
   //}
 
 

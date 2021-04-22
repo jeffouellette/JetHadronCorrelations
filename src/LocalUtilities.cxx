@@ -15,6 +15,7 @@
 
 #include <math.h>
 #include <iostream>
+#include <fstream>
 #include <sys/stat.h>
 
 
@@ -52,6 +53,7 @@ TString ToTString (const DataType dType) {
 
 TString ToTString (const TriggerType tType) {
   switch (tType) {
+    case TriggerType::None:     return TString ("None");
     case TriggerType::Jet:      return TString ("Jet");
     case TriggerType::MinBias:  return TString ("MinBias");
     default:                    return TString ("???");
@@ -62,9 +64,11 @@ TString ToTString (const TriggerType tType) {
 
 TString ToTString (const SystFlag sFlag) {
   switch (sFlag) {
+    case SystFlag::None:                    return TString ("None");
     case SystFlag::HITightVar:              return TString ("HITightVar");
     case SystFlag::PionsOnlyVar:            return TString ("PionsOnlyVar");
     case SystFlag::WithPileupVar:           return TString ("WithPileupVar");
+    case SystFlag::FcalCentVar:             return TString ("FcalCentVar");
     case SystFlag::JetES5PercUpVar:         return TString ("JetES5PercUpVar");
     case SystFlag::JetES5PercDownVar:       return TString ("JetES5PercDownVar");
     case SystFlag::JetES5PercSmearVar:      return TString ("JetES5PercSmearVar");
@@ -73,6 +77,42 @@ TString ToTString (const SystFlag sFlag) {
     case SystFlag::JetES2PercSmearVar:      return TString ("JetES2PercSmearVar");
     default:                                return TString ("???");
   }
+}
+
+
+
+bool SetCollisionSystem (TString ts) {
+  for (CollisionSystem cs : AllCollisionSystem) {
+    if (ts == ToTString (cs)) { collisionSystem = cs; return true; }
+  }
+  return false;
+}
+
+
+
+bool SetDataType (TString ts) {
+  for (DataType dt : AllDataType) {
+    if (ts == ToTString (dt)) { dataType = dt; return true; }
+  }
+  return false;
+}
+
+
+
+bool SetTriggerType (TString ts) {
+  for (TriggerType tt : AllTriggerType) {
+    if (ts == ToTString (tt)) { triggerType = tt; return true; }
+  }
+  return false;
+}
+
+
+
+bool SetSystFlag (TString ts) {
+  for (SystFlag sf : AllSystFlag) {
+    if (ts == ToTString (sf)) { systFlag = sf; return true; }
+  }
+  return false;
 }
 
 
@@ -222,21 +262,63 @@ bool UseMinBiasTriggers (const TriggerType tType) {
 
 
 
-bool ToggleSyst (const SystFlag sFlag) {
-  switch (sFlag) {
-    case SystFlag::HITightVar:          { doHITightVar = true;          return true; }
-    case SystFlag::PionsOnlyVar:        { doPionsOnlyVar = true;        return true; }
-    case SystFlag::WithPileupVar:       { doWithPileupVar = true;       return true; }
-    case SystFlag::JetES5PercUpVar:     { doJetES5PercUpVar = true;     return true; }
-    case SystFlag::JetES5PercDownVar:   { doJetES5PercDownVar = true;   return true; }
-    case SystFlag::JetES5PercSmearVar:  { doJetES5PercSmearVar = true;  return true; }
-    case SystFlag::JetES2PercUpVar:     { doJetES2PercUpVar = true;     return true; }
-    case SystFlag::JetES2PercDownVar:   { doJetES2PercDownVar = true;   return true; }
-    case SystFlag::JetES2PercSmearVar:  { doJetES2PercSmearVar = true;  return true; }
-    default:                                return false;
-  }
+bool DoHITightVar (const SystFlag sFlag) {
+  return sFlag == SystFlag::HITightVar;
 }
 
+
+
+bool DoPionsOnlyVar (const SystFlag sFlag) {
+  return sFlag == SystFlag::PionsOnlyVar;
+}
+
+
+
+bool DoWithPileupVar (const SystFlag sFlag) {
+  return sFlag == SystFlag::WithPileupVar;
+}
+
+
+
+bool DoFcalCentVar (const SystFlag sFlag) {
+  return sFlag == SystFlag::FcalCentVar;
+}
+
+
+
+bool DoJetES5PercUpVar (const SystFlag sFlag) {
+  return sFlag == SystFlag::JetES5PercUpVar;
+}
+
+
+
+bool DoJetES5PercDownVar (const SystFlag sFlag) {
+  return sFlag == SystFlag::JetES5PercDownVar;
+}
+
+
+
+bool DoJetES5PercSmearVar (const SystFlag sFlag) {
+  return sFlag == SystFlag::JetES5PercSmearVar;
+}
+
+
+
+bool DoJetES2PercUpVar (const SystFlag sFlag) {
+  return sFlag == SystFlag::JetES2PercUpVar;
+}
+
+
+
+bool DoJetES2PercDownVar (const SystFlag sFlag) {
+  return sFlag == SystFlag::JetES2PercDownVar;
+}
+
+
+
+bool DoJetES2PercSmearVar (const SystFlag sFlag) {
+  return sFlag == SystFlag::JetES2PercSmearVar;
+}
 
 
 
@@ -378,6 +460,65 @@ bool UseMinBiasTriggers () {
 
 
 
+bool DoHITightVar () {
+  return DoHITightVar (systFlag);
+}
+
+
+
+bool DoPionsOnlyVar () {
+  return DoPionsOnlyVar (systFlag);
+}
+
+
+
+bool DoWithPileupVar () {
+  return DoWithPileupVar (systFlag);
+}
+
+
+
+bool DoFcalCentVar () {
+  return DoFcalCentVar (systFlag);
+}
+
+
+
+bool DoJetES5PercUpVar () {
+  return DoJetES5PercUpVar (systFlag);
+}
+
+
+
+bool DoJetES5PercDownVar () {
+  return DoJetES5PercDownVar (systFlag);
+}
+
+
+
+bool DoJetES5PercSmearVar () {
+  return DoJetES5PercSmearVar (systFlag);
+}
+
+
+
+bool DoJetES2PercUpVar () {
+  return DoJetES2PercUpVar (systFlag);
+}
+
+
+bool DoJetES2PercDownVar () {
+  return DoJetES2PercDownVar (systFlag);
+}
+
+
+
+bool DoJetES2PercSmearVar () {
+  return DoJetES2PercSmearVar (systFlag);
+}
+
+
+
 /**
  * Returns the CoM boost relevant for asymmetric collision systems (i.e. p+Pb). 0 for everything else.
  */
@@ -399,30 +540,69 @@ double GetBoost (int rn) {
  */
 void SetupDirectories (const TString dataSubDir, const bool addSubDir) {
   rootPath = extWorkPath + "rootFiles/" + dataSubDir + "/";
-  plotPath = workPath + "Plots/" + dataSubDir + "/";
 
   if (addSubDir) {
-    if (doHITightVar)
+    if (DoHITightVar ())
       rootPath = rootPath + "HITightVar/";
-    else if (doPionsOnlyVar)
+    else if (DoPionsOnlyVar ())
       rootPath = rootPath + "PionsOnlyVar/";
-    else if (doWithPileupVar)
+    else if (DoWithPileupVar ())
       rootPath = rootPath + "WithPileupVar/";
-    else if (doJetES5PercUpVar)
+    else if (DoFcalCentVar ())
+      rootPath = rootPath + "FcalCentVar/";
+    else if (DoJetES5PercUpVar ())
       rootPath = rootPath + "JetES5PercUpVar/";
-    else if (doJetES5PercDownVar)
+    else if (DoJetES5PercDownVar ())
       rootPath = rootPath + "JetES5PercDownVar/";
-    else if (doJetES5PercSmearVar)
+    else if (DoJetES5PercSmearVar ())
       rootPath = rootPath + "JetES5PercSmearVar/";
-    else if (doJetES2PercUpVar)
+    else if (DoJetES2PercUpVar ())
       rootPath = rootPath + "JetES2PercUpVar/";
-    else if (doJetES2PercDownVar)
+    else if (DoJetES2PercDownVar ())
       rootPath = rootPath + "JetES2PercDownVar/";
-    else if (doJetES2PercSmearVar)
+    else if (DoJetES2PercSmearVar ())
       rootPath = rootPath + "JetES2PercSmearVar/";
     else
       rootPath = rootPath + "Nominal/";
   }
+}
+
+
+
+/**
+ * Looks up MC sample cross section, filter efficiency, and number of events.
+ */
+bool GetMCWeights (TString fname) {
+  ifstream f_wgts;
+  f_wgts.open ("MC_Weights.dat");
+
+  string line;
+  while (getline (f_wgts, line)) {
+
+    vector <string> words = {};
+
+    string word = "";
+    for (auto x : line) {
+        if (x == ' ') {
+            words.push_back (word);
+            word = "";
+        }
+        else {
+            word = word + x;
+        }
+    }
+    words.push_back (word);
+
+    assert (words.size () == 4);
+
+    if (fname.Contains (TString (words[0]))) {
+      crossSectionPicoBarns = atof (words[1].c_str ());
+      mcFilterEfficiency = atof (words[2].c_str ());
+      mcNumberEvents = atof (words[3].c_str ());
+      return true;
+    }
+  }
+  return false;
 }
 
 
@@ -524,6 +704,24 @@ TString GetIdentifier (const int dataSet, const char* directory, const char* inF
     id = (IsPeriodA () ? "pPb16" : "Pbp16");
   else if (Ispp ())
     id = (Is2015 () ? "pp15" : "pp17");
+
+  if (TString (inFileName).Contains ("420010"))
+    id = id + "_JZ0";
+  else if (TString (inFileName).Contains ("420011"))
+    id = id + "_JZ1";
+  else if (TString (inFileName).Contains ("420012"))
+    id = id + "_JZ2";
+  else if (TString (inFileName).Contains ("420013"))
+    id = id + "_JZ3";
+  else if (TString (inFileName).Contains ("420014"))
+    id = id + "_JZ4";
+  else if (TString (inFileName).Contains ("420015"))
+    id = id + "_JZ5";
+
+  if (TString (inFileName).Contains ("e4108"))
+    id = id + "_SampleA";
+  else if (TString (inFileName).Contains ("e6608"))
+    id = id + "_SampleB";
 
   if (TString (inFileName).Contains ("Sherpa"))
     id = id + "_Sherpa";
@@ -643,9 +841,9 @@ bool MeetsTrackCuts (int iTrk) {
   if (fabs (trk_eta[iTrk]) > 2.5)
     return false; // track maximum eta
 
-  if (doHITightVar && !trk_HItight[iTrk])
+  if (DoHITightVar () && !trk_HItight[iTrk])
     return false;
-  else if (!doHITightVar && !trk_HIloose[iTrk])
+  else if (!DoHITightVar () && !trk_HIloose[iTrk])
     return false;
 
   if (IsPbPb ()) {

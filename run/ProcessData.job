@@ -14,9 +14,9 @@ Log = logs/$(runNumber).log
 Output = outputs/$(runNumber).out
 Queue runNumber in (312796 312837 312937 312945 312968 314199)
 
-#Arguments = JetHadronSkimmer main_000 $(runNumber) pp17_5TeV Collisions Jet $(syst)
-Arguments = JetHadronSkimmer minbias_000 $(runNumber) pp17_5TeV Collisions MinBias $(syst)
-Error = errors/$(runNumber).err
-Log = logs/$(runNumber).log
-Output = outputs/$(runNumber).out
-Queue runNumber in (340644 340683 340697 340718 340814 340849 340850 340910 340925 340973 341027 341123 341184)
+##Arguments = JetHadronSkimmer main_000 $(runNumber) pp17_5TeV Collisions Jet $(syst)
+#Arguments = JetHadronSkimmer minbias_000 $(runNumber) pp17_5TeV Collisions MinBias $(syst)
+#Error = errors/$(runNumber).err
+#Log = logs/$(runNumber).log
+#Output = outputs/$(runNumber).out
+#Queue runNumber in (340644 340683 340697 340718 340814 340849 340850 340910 340925 340973 341027 341123 341184)

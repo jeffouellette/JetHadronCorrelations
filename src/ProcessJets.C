@@ -17,8 +17,8 @@
 
 using namespace JetHadronCorrelations;
 
-const int nVar = 5;
-std::vector <TString> variations = {"Nominal", "JetES5PercUpVar", "JetES5PercDownVar", "JetES2PercUpVar", "JetES2PercDownVar"};
+const int nVar = 8;
+std::vector <TString> variations = {"Nominal", "JetES5PercUpVar", "JetES5PercDownVar", "JetES5PercSmearVar", "JetES2PercUpVar", "JetES2PercDownVar", "JetES2PercSmearVar", "FcalCentVar"};
 
 void ProcessJets (const char* tag, const char* outFileTag) {
 
@@ -48,7 +48,9 @@ void ProcessJets (const char* tag, const char* outFileTag) {
   TGAE** g_jet_pt_ratio_syst = Get1DArray <TGAE*> (nVar);
 
 
-  TString outFileName = Form ("./rootFiles/Results/PlotJets_%s.root", outFileTag);
+  TString outFileName = outFileTag;
+  outFileName.ReplaceAll (".root", "");
+  outFileName = Form ("./rootFiles/Results/PlotJets_%s.root", outFileName.Data ());
   std::cout << "Writing " << outFileName.Data () << std::endl;
   TFile* outFile = new TFile (outFileName.Data (), "recreate");
 

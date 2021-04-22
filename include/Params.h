@@ -25,14 +25,13 @@ const double electron_mass = 0.000511;
 const double muon_mass = 0.105658;
 
 
-const float min_trk_pt = 0.5;
+const float min_trk_pt = 0.4;
 const float min_akt4_hi_jet_pt = 30;
 
-TString workPath = TString (std::getenv ("JETHADRONCORR_PATH")) + "/Analysis/";
+TString workPath = TString (std::getenv ("JETHADRONCORR_PATH"));
 TString extWorkPath = TString (std::getenv ("JETHADRONCORR_DATA_PATH")) + "/";
 TString rootPath = extWorkPath + "rootFiles/";
 TString dataPath = extWorkPath + "data/";
-TString plotPath = workPath + "Plots/"; 
 
 extern float crossSectionPicoBarns;
 extern float mcFilterEfficiency;
@@ -42,6 +41,7 @@ extern int mcNumberEvents;
 extern bool doHITightVar;
 extern bool doPionsOnlyVar;
 extern bool doWithPileupVar;
+extern bool doFcalCentVar;
 extern bool doJetES5PercUpVar;
 extern bool doJetES5PercDownVar;
 extern bool doJetES5PercSmearVar;
@@ -60,7 +60,7 @@ extern double jet_max_pt;
 
 // Centrality classes for mixing events
 // See centralities defined in Kurt's note: https://cds.cern.ch/record/2301540/files/ATL-COM-DAPR-2018-002.pdf
-const float CentBins[12] = {
+double fcalCentBins[] = {
  -1000,     // 100%
      3.54,  // 90%
      7.60,  // 80%
@@ -74,26 +74,26 @@ const float CentBins[12] = {
     79.45,  // 5%
    109.01   // 1%
 };
-const int numCentBins = sizeof (CentBins) / sizeof (CentBins[0]) - 1; // no bin needed for pp
+int numFcalCentBins = sizeof (fcalCentBins) / sizeof (fcalCentBins[0]) - 1; // no bin needed for pp
 
 /**
  * Returns the bin corresponding to this sum fcal et bin.
  * Returns -1 for >90% peripheral collisions (i.e. FCal Et is less than energy for 90% centrality).
  */
-short GetCentBin (const float fcal_et) {
-  if (fcal_et < CentBins[0])
+short GetFcalCentBin (const float fcal_et) {
+  if (fcal_et < fcalCentBins[0])
     return -1;
   short i = 0;
-  while (i < numCentBins) {
+  while (i < numFcalCentBins) {
     i++;
-    if (fcal_et < CentBins[i])
+    if (fcal_et < fcalCentBins[i])
       break;
   }
   return i-1;
 }
 
 
-const double zdcCentBins[3] = {
+double zdcCentBins[] = {
 /* UNCALIBRATED ADC VALUES
    0,         // 100%
    0.725967,  // 90%
@@ -133,7 +133,7 @@ const double zdcCentBins[3] = {
  //102.71,      // 0.1%
  140          // "0%"
 };
-const int numZdcCentBins = sizeof (zdcCentBins) / sizeof (zdcCentBins[0]) - 1; // no bin needed for pp
+int numZdcCentBins = sizeof (zdcCentBins) / sizeof (zdcCentBins[0]) - 1; // no bin needed for pp
 
 
 short GetZdcCentBin (const float zdc_E) {
@@ -143,6 +143,22 @@ short GetZdcCentBin (const float zdc_E) {
   while (i < numZdcCentBins) {
     i++;
     if (zdc_E < zdcCentBins[i])
+      break;
+  }
+  return i-1;
+}
+
+
+double* centBins = nullptr;
+int numCentBins = 0;
+
+short GetCentBin (const float val) {
+  if (numCentBins == 0 || val < centBins[0])
+    return -1;
+  short i = 0;
+  while (i < numCentBins) {
+    i++;
+    if (val < centBins[i])
       break;
   }
   return i-1;
@@ -228,8 +244,8 @@ short GetDPhiBin (const float dphi) {
   return iDPhi;
 }
 
-const int nPtChBins = 50;
-double pTChBins[nPtChBins+1] = {0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2, 2.25, 2.5, 2.75, 3, 3.25, 3.5, 3.75, 4, 4.5, 5, 5.5, 6, 7, 8, 9, 10, 11, 12, 14, 16, 18, 20, 25, 30, 35, 40, 45, 50, 55, 60};
+const double pTChBins[] = {0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2, 2.25, 2.5, 2.75, 3, 3.25, 3.5, 3.75, 4, 4.5, 5, 5.5, 6, 7, 8, 9, 10, 11, 12, 14, 16, 18, 20, 25, 30, 35, 40, 45, 50, 55, 60};
+const int nPtChBins = sizeof (pTChBins) / sizeof (pTChBins[0]) - 1;
 short GetPtChBin (const float ptch) {
   short iPtCh = 0;
   while (iPtCh < nPtChBins) {

@@ -84,9 +84,11 @@ void PlotDPhi (const char* tag, const char* inFileTag) {
 
 
   {
-    TString inFileName = Form ("./rootFiles/Results/PlotDPhi_%s.root", inFileTag);
+    TString inFileName = inFileTag;
+    inFileName.ReplaceAll (".root", "");
+    inFileName = Form ("./rootFiles/Results/PlotDPhi_%s.root", inFileName.Data ());
     std::cout << "Reading " << inFileName.Data () << std::endl;
-    inFile = new TFile (inFileName.Data (), "read");
+    inFile = new TFile (inFileName, "read");
 
     h_evt_counts[0] = (TH1D*) inFile->Get ("h_evt_counts_ref");
     h_jet_counts[0] = (TH1D*) inFile->Get ("h_jet_counts_ref");
@@ -404,7 +406,7 @@ void PlotDPhi (const char* tag, const char* inFileTag) {
     ((TGAE*) g->Clone ())->Draw ("p");
     SaferDelete (&g);
 
-    c->SaveAs (Form ("Plots/JetTagged_HadronYields_Central_comparison_dphi_%s.pdf", tag));
+    c->SaveAs (Form ("%s/Plots/JetTagged_HadronYields_Central_comparison_dphi_%s.pdf", workPath.Data (), tag));
   }
 
 
@@ -661,7 +663,7 @@ void PlotDPhi (const char* tag, const char* inFileTag) {
     ((TGAE*) g->Clone ())->Draw ("p");
     SaferDelete (&g);
 
-    c->SaveAs (Form ("Plots/LeadingJetTagged_HadronYields_Central_comparison_dphi_%s.pdf", tag)); 
+    c->SaveAs (Form ("%s/Plots/LeadingJetTagged_HadronYields_Central_comparison_dphi_%s.pdf", workPath.Data (), tag)); 
   }
 
 }
