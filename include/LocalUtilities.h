@@ -16,8 +16,8 @@ static const std::vector <CollisionSystem> AllCollisionSystem = { CollisionSyste
 enum class DataType { Collisions, MCSignal, MCDataOverlay, MCHijing, MCHijingOverlay }; // data types used in HI
 static const std::vector <DataType> AllDataType = { DataType::Collisions, DataType::MCSignal, DataType:: MCDataOverlay, DataType::MCHijing, DataType::MCHijingOverlay };
 
-enum class TriggerType { None, Jet, MinBias }; // types of triggers in this analysis
-static const std::vector <TriggerType> AllTriggerType = { TriggerType::None, TriggerType::Jet, TriggerType::MinBias };
+enum class TriggerType { None, Jet50GeV, Jet100GeV, MinBias }; // types of triggers in this analysis
+static const std::vector <TriggerType> AllTriggerType = { TriggerType::None, TriggerType::Jet50GeV, TriggerType::Jet100GeV, TriggerType::MinBias };
 
 enum class SystFlag { None, HITightVar, PionsOnlyVar, WithPileupVar, FcalCentVar, JetES5PercUpVar, JetES5PercDownVar, JetES5PercSmearVar, JetES2PercUpVar, JetES2PercDownVar, JetES2PercSmearVar }; // types of systematic variations
 static const std::vector <SystFlag> AllSystFlag = { SystFlag::None, SystFlag::HITightVar, SystFlag::PionsOnlyVar, SystFlag::WithPileupVar, SystFlag::FcalCentVar, SystFlag::JetES5PercUpVar, SystFlag::JetES5PercDownVar, SystFlag::JetES5PercSmearVar, SystFlag::JetES2PercUpVar, SystFlag::JetES2PercDownVar, SystFlag::JetES2PercSmearVar };
@@ -59,6 +59,8 @@ bool IsDataOverlay (const DataType dType);
 bool IsHijing (const DataType dType);
 
 bool UseJetTriggers (const TriggerType tType);
+bool UseJet50GeVTriggers (const TriggerType tType);
+bool UseJet100GeVTriggers (const TriggerType tType);
 bool UseMinBiasTriggers (const TriggerType tType);
 
 bool DoHITightVar (const SystFlag sFlag);
@@ -98,6 +100,8 @@ bool IsDataOverlay ();
 bool IsHijing ();
 
 bool UseJetTriggers ();
+bool UseJet50GeVTriggers ();
+bool UseJet100GeVTriggers ();
 bool UseMinBiasTriggers ();
 
 bool DoHITightVar ();

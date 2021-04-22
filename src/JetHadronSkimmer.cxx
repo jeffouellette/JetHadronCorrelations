@@ -46,8 +46,10 @@ bool JetHadronSkimmer (const char* directory,
   else if (!IsCollisions ())
     SetupDirectories ("MC");
   else {
-    if (UseJetTriggers ())
-      SetupDirectories ("JetsData");
+    if (UseJet50GeVTriggers ())
+      SetupDirectories ("50GeVJetsData");
+    else if (UseJet100GeVTriggers ())
+      SetupDirectories ("100GeVJetsData");
     else if (UseMinBiasTriggers ())
       SetupDirectories ("MinBiasData");
   }
@@ -323,8 +325,10 @@ bool JetHadronSkimmer (const char* directory,
 
     if (IsCollisions ()) {
       event_weight = -1;
-      if (UseJetTriggers () && jetTriggers[0]->trigDecision)
+      if (UseJet50GeVTriggers () && jetTriggers[0]->trigDecision)
         event_weight = jetTriggers[0]->trigPrescale;
+      else if (UseJet100GeVTriggers () && jetTriggers[1]->trigDecision)
+        event_weight = jetTriggers[1]->trigPrescale;
       else if (UseMinBiasTriggers () && minbiasTriggers[0]->trigDecision)
         event_weight = minbiasTriggers[0]->trigPrescale;
     }

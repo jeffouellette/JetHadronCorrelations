@@ -53,10 +53,11 @@ TString ToTString (const DataType dType) {
 
 TString ToTString (const TriggerType tType) {
   switch (tType) {
-    case TriggerType::None:     return TString ("None");
-    case TriggerType::Jet:      return TString ("Jet");
-    case TriggerType::MinBias:  return TString ("MinBias");
-    default:                    return TString ("???");
+    case TriggerType::None:       return TString ("None");
+    case TriggerType::Jet50GeV:   return TString ("Jet50GeV");
+    case TriggerType::Jet100GeV:  return TString ("Jet100GeV");
+    case TriggerType::MinBias:    return TString ("MinBias");
+    default:                      return TString ("???");
   }
 }
 
@@ -251,7 +252,19 @@ bool IsHijing (const DataType dType) {
 
 
 bool UseJetTriggers (const TriggerType tType) {
-  return tType == TriggerType::Jet;
+  return UseJet50GeVTriggers (tType) || UseJet100GeVTriggers (tType);
+}
+
+
+
+bool UseJet50GeVTriggers (const TriggerType tType) {
+  return tType == TriggerType::Jet50GeV;
+}
+
+
+
+bool UseJet100GeVTriggers (const TriggerType tType) {
+  return tType == TriggerType::Jet100GeV;
 }
 
 
@@ -450,6 +463,18 @@ bool IsHijing () {
 
 bool UseJetTriggers () {
   return UseJetTriggers (triggerType);
+}
+
+
+
+bool UseJet50GeVTriggers () {
+  return UseJet50GeVTriggers (triggerType);
+}
+
+
+
+bool UseJet100GeVTriggers () {
+  return UseJet100GeVTriggers (triggerType);
 }
 
 
