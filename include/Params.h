@@ -28,10 +28,10 @@ const double muon_mass = 0.105658;
 const float min_trk_pt = 0.4;
 const float min_akt4_hi_jet_pt = 30;
 
-TString workPath = TString (std::getenv ("JETHADRONCORR_PATH"));
-TString extWorkPath = TString (std::getenv ("JETHADRONCORR_DATA_PATH")) + "/";
-TString rootPath = extWorkPath + "rootFiles/";
-TString dataPath = extWorkPath + "data/";
+extern TString workPath;
+extern TString extWorkPath;
+extern TString rootPath;
+extern TString dataPath;
 
 extern float crossSectionPicoBarns;
 extern float mcFilterEfficiency;
@@ -62,19 +62,28 @@ extern double jet_max_pt;
 // See centralities defined in Kurt's note: https://cds.cern.ch/record/2301540/files/ATL-COM-DAPR-2018-002.pdf
 double fcalCentBins[] = {
  -1000,     // 100%
-     3.54,  // 90%
-     7.60,  // 80%
-    12.27,  // 70%
-    17.51,  // 60%
-    23.45,  // 50%
-    30.29,  // 40%
-    38.49,  // 30%
-    49.03,  // 20%
-    65.08,  // 10%
-    79.45,  // 5%
-   109.01   // 1%
+   //  2.21,  // 90%
+   //  4.94,  // 80%
+   //  8.24,  // 70%
+   // 12.14,  // 60%
+   // 16.71,  // 50%
+   // 22.11,  // 40%
+   // 28.64,  // 30%
+    37.07,  // 20%
+   // 39.13,  // 18%
+   // 41.40,  // 16%
+   // 43.90,  // 14%
+   // 46.71,  // 12%
+   // 49.94,  // 10%
+   // 53.78,  // 8%
+   // 58.54,  // 6%
+   // 64.96,  // 4%
+   // 75.34,  // 2%
+   // 85.08,  // 1%
+   220     // "0%" -- really just an upper bound for sanity
 };
-int numFcalCentBins = sizeof (fcalCentBins) / sizeof (fcalCentBins[0]) - 1; // no bin needed for pp
+int numFcalCentBins = sizeof (fcalCentBins) / sizeof (fcalCentBins[0]) - 1;
+
 
 /**
  * Returns the bin corresponding to this sum fcal et bin.
@@ -92,28 +101,49 @@ short GetFcalCentBin (const float fcal_et) {
   return i-1;
 }
 
+double fineFcalCentBins[] = {
+ -1000,     // 100%
+   //  2.21,  // 90%
+   //  4.94,  // 80%
+   //  8.24,  // 70%
+   // 12.14,  // 60%
+   // 16.71,  // 50%
+   // 22.11,  // 40%
+   // 28.64,  // 30%
+    37.07,  // 20%
+    39.13,  // 18%
+    41.40,  // 16%
+    43.90,  // 14%
+    46.71,  // 12%
+    49.94,  // 10%
+    53.78,  // 8%
+    58.54,  // 6%
+    64.96,  // 4%
+    75.34,  // 2%
+   // 85.08,  // 1%
+   220     // "0%" -- really just an upper bound for sanity
+};
+int numFineFcalCentBins = sizeof (fineFcalCentBins) / sizeof (fineFcalCentBins[0]) - 1;
+
+
+/**
+ * Returns the bin corresponding to this sum fcal et bin.
+ * Returns -1 for >90% peripheral collisions (i.e. FCal Et is less than energy for 90% centrality).
+ */
+short GetFineFcalCentBin (const float fcal_et) {
+  if (fcal_et < fineFcalCentBins[0])
+    return -1;
+  short i = 0;
+  while (i < numFineFcalCentBins) {
+    i++;
+    if (fcal_et < fineFcalCentBins[i])
+      break;
+  }
+  return i-1;
+}
+
 
 double zdcCentBins[] = {
-/* UNCALIBRATED ADC VALUES
-   0,         // 100%
-   0.725967,  // 90%
-   2.94087,   // 80%
-   5.22591,   // 70%
-   7.12421,   // 60%
-   8.7794,    // 50%
-  10.2273,    // 40%
-  11.5395,    // 30%
-  12.8396,    // 20%
-  14.4122,    // 10%
-  //15.6168,    // 5%
-  //16.9208,    // 2%
-  //17.7623,    // 1%
-  //18.5288,    // 0.5%
-  //19.4441,    // 0.2%
-  //20.051,     // 0.1%
-  26.95       // 0%
-*/
-
 /* CALIBRATED ENERGIES (over all runs) */
    0,         // "100%"
  //  3.62017,   // 90%

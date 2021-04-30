@@ -1,12 +1,11 @@
 Universe = vanilla
-Notification = Complete
 Executable = /atlasgpfs01/usatlas/workarea/jeff/JetHadronCorrelations/bin/Process.exe
 Priority = +1
 GetEnv = True
 InitialDir = /atlasgpfs01/usatlas/workarea/jeff/JetHadronCorrelations/run
 accounting_group = group_atlas.boulder
 
-Arguments = CentralityAnalysis main_020 $(runNumber) pPb16_5TeV Collisions MinBias $(syst)
+Arguments = CentralityAnalysis main_030 $(runNumber) pPb16_5TeV Collisions MinBias $(syst)
 Error = errors/$(runNumber).err
 Log = logs/$(runNumber).log
 Output = outputs/$(runNumber).out

@@ -5,6 +5,7 @@
 #include "OutTree.h"
 #include "TreeVariables.h"
 #include "LocalUtilities.h"
+#include "Variations.h"
 
 #include <ArrayTemplates.h>
 #include <Utilities.h>
@@ -17,23 +18,18 @@
 
 using namespace JetHadronCorrelations;
 
-const int nVar = 8;
-std::vector <TString> variations = {"Nominal", "JetES5PercUpVar", "JetES5PercDownVar", "JetES5PercSmearVar", "JetES2PercUpVar", "JetES2PercDownVar", "JetES2PercSmearVar", "FcalCentVar"};
-
 void ProcessJets (const char* tag, const char* outFileTag) {
-
-  SetupDirectories ("Data");
 
   TFile* inFile = nullptr;
 
   TH1D*** h_evt_counts = Get2DArray <TH1D*> (2, nVar);
   TH1D*** h_jet_counts = Get2DArray <TH1D*> (2, nVar);
-  TH1D*** h_ljet_counts = Get2DArray <TH1D*> (2, nVar);
-  TH1D*** h_sljet_counts = Get2DArray <TH1D*> (2, nVar);
+  //TH1D*** h_ljet_counts = Get2DArray <TH1D*> (2, nVar);
+  //TH1D*** h_sljet_counts = Get2DArray <TH1D*> (2, nVar);
   TH1D*** h_evt_counts_bkg = Get2DArray <TH1D*> (2, nVar);
   TH1D*** h_jet_counts_bkg = Get2DArray <TH1D*> (2, nVar);
-  TH1D*** h_ljet_counts_bkg = Get2DArray <TH1D*> (2, nVar);
-  TH1D*** h_sljet_counts_bkg = Get2DArray <TH1D*> (2, nVar);
+  //TH1D*** h_ljet_counts_bkg = Get2DArray <TH1D*> (2, nVar);
+  //TH1D*** h_sljet_counts_bkg = Get2DArray <TH1D*> (2, nVar);
 
   TH1D*** h_jet_pt = Get2DArray <TH1D*> (2, nVar);
   TH2D*** h2_jet_pt_cov = Get2DArray <TH2D*> (2, nVar);
@@ -57,15 +53,15 @@ void ProcessJets (const char* tag, const char* outFileTag) {
 
   for (int iVar = 0; iVar < nVar; iVar++) {
     {
-      TString inFileName = Form ("./rootFiles/%s/JetsHists/%s/data16_5TeV_hists.root", tag, variations[iVar].Data ());
+      TString inFileName = Form ("./rootFiles/Histograms/%s/JetsHists/%s/data16_5TeV_hists.root", tag, variations[iVar].Data ());
       std::cout << "Reading " << inFileName.Data () << std::endl;
       inFile = new TFile (inFileName.Data (), "read");
       outFile->cd ();
 
       h_evt_counts[1][iVar] = (TH1D*) inFile->Get (Form ("h_evt_counts_%s_data16", tag))->Clone (Form ("h_evt_counts_%s_pPb_%s", tag, variations[iVar].Data ()));
       h_jet_counts[1][iVar] = (TH1D*) inFile->Get (Form ("h_jet_counts_%s_data16", tag))->Clone (Form ("h_evt_counts_%s_pPb_%s", tag, variations[iVar].Data ()));
-      h_ljet_counts[1][iVar] = (TH1D*) inFile->Get (Form ("h_ljet_counts_%s_data16", tag))->Clone (Form ("h_evt_counts_%s_pPb_%s", tag, variations[iVar].Data ()));
-      h_sljet_counts[1][iVar] = (TH1D*) inFile->Get (Form ("h_sljet_counts_%s_data16", tag))->Clone (Form ("h_sljet_counts_%s_pPb_%s", tag, variations[iVar].Data ()));
+      //h_ljet_counts[1][iVar] = (TH1D*) inFile->Get (Form ("h_ljet_counts_%s_data16", tag))->Clone (Form ("h_evt_counts_%s_pPb_%s", tag, variations[iVar].Data ()));
+      //h_sljet_counts[1][iVar] = (TH1D*) inFile->Get (Form ("h_sljet_counts_%s_data16", tag))->Clone (Form ("h_sljet_counts_%s_pPb_%s", tag, variations[iVar].Data ()));
       h_jet_pt[1][iVar] = (TH1D*) inFile->Get (Form ("h_jet_pt_%s_data16", tag))->Clone (Form ("h_jet_pt_%s_pPb_%s", tag, variations[iVar].Data ()));
       h2_jet_pt_cov[1][iVar] = (TH2D*) inFile->Get (Form ("h2_jet_pt_cov_%s_data16", tag))->Clone (Form ("h2_jet_pt_cov_%s_pPb_%s", tag, variations[iVar].Data ()));
       h2_jet_eta_phi[1][iVar] = (TH2D*) inFile->Get (Form ("h2_jet_eta_phi_%s_data16", tag))->Clone (Form ("h2_jet_eta_phi_%s_pPb_%s", tag, variations[iVar].Data ()));
@@ -84,15 +80,15 @@ void ProcessJets (const char* tag, const char* outFileTag) {
 
 
     {
-      TString inFileName = Form ("./rootFiles/%s/JetsHists/%s/data17_5TeV_hists.root", tag, variations[iVar].Data ());
+      TString inFileName = Form ("./rootFiles/Histograms/%s/JetsHists/%s/data17_5TeV_hists.root", tag, variations[iVar].Data ());
       std::cout << "Reading " << inFileName.Data () << std::endl;
       inFile = new TFile (inFileName.Data (), "read");
       outFile->cd ();
 
       h_evt_counts[0][iVar] = (TH1D*) inFile->Get (Form ("h_evt_counts_%s_data17", tag))->Clone (Form ("h_evt_counts_%s_pp_%s", tag, variations[iVar].Data ()));
       h_jet_counts[0][iVar] = (TH1D*) inFile->Get (Form ("h_jet_counts_%s_data17", tag))->Clone (Form ("h_evt_counts_%s_pp_%s", tag, variations[iVar].Data ()));
-      h_ljet_counts[0][iVar] = (TH1D*) inFile->Get (Form ("h_ljet_counts_%s_data17", tag))->Clone (Form ("h_evt_counts_%s_pp_%s", tag, variations[iVar].Data ()));
-      h_sljet_counts[0][iVar] = (TH1D*) inFile->Get (Form ("h_sljet_counts_%s_data17", tag))->Clone (Form ("h_sljet_counts_%s_pp_%s", tag, variations[iVar].Data ()));
+      //h_ljet_counts[0][iVar] = (TH1D*) inFile->Get (Form ("h_ljet_counts_%s_data17", tag))->Clone (Form ("h_evt_counts_%s_pp_%s", tag, variations[iVar].Data ()));
+      //h_sljet_counts[0][iVar] = (TH1D*) inFile->Get (Form ("h_sljet_counts_%s_data17", tag))->Clone (Form ("h_sljet_counts_%s_pp_%s", tag, variations[iVar].Data ()));
       h_jet_pt[0][iVar] = (TH1D*) inFile->Get (Form ("h_jet_pt_%s_data17", tag))->Clone (Form ("h_jet_pt_%s_pp_%s", tag, variations[iVar].Data ()));
       h2_jet_pt_cov[0][iVar] = (TH2D*) inFile->Get (Form ("h2_jet_pt_cov_%s_data17", tag))->Clone (Form ("h2_jet_pt_cov_%s_pp_%s", tag, variations[iVar].Data ()));
       h2_jet_eta_phi[0][iVar] = (TH2D*) inFile->Get (Form ("h2_jet_eta_phi_%s_data17", tag))->Clone (Form ("h2_jet_eta_phi_%s_pp_%s", tag, variations[iVar].Data ()));
@@ -111,7 +107,7 @@ void ProcessJets (const char* tag, const char* outFileTag) {
 
 
     //{
-    //  inFile = new TFile (Form ("./rootFiles/%s/MixedHists/Nominal/data16_5TeV_hists.root", tag), "read");
+    //  inFile = new TFile (Form ("./rootFiles/Histograms/%s/MixedHists/Nominal/data16_5TeV_hists.root", tag), "read");
 
     //  h_evt_counts_bkg[1] = (TH1D*) inFile->Get ("h_evt_counts_minbias_data16");
     //  h_jet_counts_bkg[1] = (TH1D*) inFile->Get ("h_jet_counts_minbias_data16");
@@ -178,12 +174,12 @@ void ProcessJets (const char* tag, const char* outFileTag) {
 
     h_evt_counts[0][0]->Write ("h_evt_counts_ref");
     h_jet_counts[0][0]->Write ("h_jet_counts_ref");
-    h_ljet_counts[0][0]->Write ("h_ljet_counts_ref");
-    h_sljet_counts[0][0]->Write ("h_sljet_counts_ref");
+    //h_ljet_counts[0][0]->Write ("h_ljet_counts_ref");
+    //h_sljet_counts[0][0]->Write ("h_sljet_counts_ref");
     h_evt_counts[1][0]->Write ("h_evt_counts");
     h_jet_counts[1][0]->Write ("h_jet_counts");
-    h_ljet_counts[1][0]->Write ("h_ljet_counts");
-    h_sljet_counts[1][0]->Write ("h_sljet_counts");
+    //h_ljet_counts[1][0]->Write ("h_ljet_counts");
+    //h_sljet_counts[1][0]->Write ("h_sljet_counts");
 
     h_jet_pt[0][0]->Write ("h_jet_pt_ref");
     h_jet_pt[1][0]->Write ("h_jet_pt");

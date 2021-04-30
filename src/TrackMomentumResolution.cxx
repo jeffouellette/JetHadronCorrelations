@@ -200,23 +200,10 @@ bool TrackMomentumResolution (const char* directory,
   const int numFinerEtaTrkBins = 40;
   const double* finerEtaTrkBins = linspace (-2.5, 2.5, numFinerEtaTrkBins);
 
-  //const double etaTrkBins[6] = {0, 0.5, 1.0, 1.5, 2.0, 2.5};
-  //const int numEtaTrkBins = sizeof (etaTrkBins) / sizeof (etaTrkBins[0]) - 1;
-
   const double pTchBins[] = {0.5, 0.525, 0.55, 0.575, 0.6, 0.625, 0.65, 0.675, 0.7, 0.725, 0.75, 0.775, 0.8, 0.825, 0.85, 0.875, 0.9, 0.925, 0.95, 0.975, 1, 1.05, 1.1, 1.15, 1.2, 1.25, 1.3, 1.35, 1.4, 1.45, 1.5, 1.55, 1.6, 1.65, 1.7, 1.75, 1.8, 1.85, 1.9, 1.95, 2, 2.125, 2.25, 2.375, 2.5, 2.625, 2.75, 2.875, 3, 3.125, 3.25, 3.375, 3.5, 3.625, 3.75, 3.875, 4, 4.25, 4.5, 4.75, 5, 5.25, 5.5, 5.75, 6, 6.5, 7, 7.5, 8, 8.5, 9, 9.5, 10, 10.5, 11, 11.5, 12, 13, 14, 15, 16, 17, 18, 19, 20, 22.5, 25, 27.5, 30, 32.5, 35, 37.5, 40, 42.5, 45, 47.5, 50, 52.5, 55, 57.5, 60, 65, 70, 75, 80, 90, 100};
   const int numPtchBins = sizeof (pTchBins) / sizeof (pTchBins[0]) - 1;
 
   TH1D*** h_tms = new TH1D**[numPtchBins];
-
-  //TH2D* h2_avg_tms = new TH2D (Form ("h2_avg_tms_%s", sys.Data ()), ";#it{p}_{T}^{truth} [GeV];#eta_{truth};TMS [%]", numPtchBins, pTchBins, numFinerEtaTrkBins, finerEtaTrkBins);
-  //TH2D* h2_avg_tmr = new TH2D (Form ("h2_avg_tmr_%s", sys.Data ()), ";#it{p}_{T}^{truth} [GeV];#eta_{truth};TMR [%]", numPtchBins, pTchBins, numFinerEtaTrkBins, finerEtaTrkBins);
-  //TH1D** h_avg_tms = new TH1D*[numEtaTrkBins];
-  //TH1D** h_avg_tmr = new TH1D*[numEtaTrkBins];
-
-  //for (int iEta = 0; iEta < numEtaTrkBins; iEta++) {
-  //  h_avg_tms[iEta] = new TH1D (Form ("h_avg_tms_%s_iEta%i", sys.Data (), iEta), ";#it{p}_{T}^{truth} [GeV];TMS [%]", numPtchBins, pTchBins);
-  //  h_avg_tmr[iEta] = new TH1D (Form ("h_avg_tmr_%s_iEta%i", sys.Data (), iEta), ";#it{p}_{T}^{truth} [GeV];TMR [%]", numPtchBins, pTchBins);
-  //}
 
   for (int iPtch = 0; iPtch < numPtchBins; iPtch++) {
     h_tms[iPtch] = new TH1D*[numFinerEtaTrkBins];
@@ -295,119 +282,22 @@ bool TrackMomentumResolution (const char* directory,
   cout << endl << "Info: In TrackMomentumResolution.cxx: Finished event loop." << endl;
 
 
-
-  //for (int iPtch = 0; iPtch < numPtchBins; iPtch++) {
-
-  //  TH1D** h_tms_integratedEta = new TH1D*[numEtaTrkBins];
-  //  for (int iEta = 0; iEta < numEtaTrkBins; iEta++) {
-  //    h_tms_integratedEta[iEta] = new TH1D (Form ("h_tms_integratedEta_iEta%i", iEta), "#it{p}_{T}^{reco} / #it{p}_{T}^{truth}", 200, 0.5, 1.5);
-  //    h_tms_integratedEta[iEta]->Sumw2 ();
-  //  }
-
-  //  for (int iEta = 0; iEta < numFinerEtaTrkBins; iEta++) {
-
-  //    if (h_tms[iPtch][iEta]->Integral () == 0) continue;
-
-  //    // first add to eta-integrated plot
-  //    const float binCenter = 0.5 * fabs (finerEtaTrkBins[iEta] + finerEtaTrkBins[iEta+1]);
-  //    int iEtaTrk = 0;
-  //    while (iEtaTrk < numEtaTrkBins) {
-  //      if (etaTrkBins[iEtaTrk] < binCenter && binCenter < etaTrkBins[iEtaTrk+1])
-  //        break;
-  //      iEtaTrk++;
-  //    }
-
-  //    h_tms_integratedEta[iEta]->Add (h_tms[iPtch][iEta]);
-
-  //    TF1* fit = new TF1 ("fit", "gaus(0)", 0.5, 1.5);
-  //    fit->SetParameter (0, h_tms[iPtch][iEta]->Integral ());
-  //    fit->SetParameter (1, 1);
-  //    fit->SetParameter (2, 1);
-
-  //    h_tms[iPtch][iEta]->Fit (fit, "RN0Q");
-
-  //    double mean = fit->GetParameter (1);
-  //    double sigma = fit->GetParameter (2);
-
-  //    delete fit;
-  //    fit = new TF1 ("fit", "gaus(0)", mean-2*sigma, mean+2*sigma);
-
-  //    fit->SetParameter (0, h_tms[iPtch][iEta]->Integral ());
-  //    fit->SetParameter (1, mean);
-  //    fit->SetParameter (2, sigma);
-
-  //    h_tms[iPtch][iEta]->Fit (fit, "RN0Q");
-
-  //    mean = fit->GetParameter (1);
-  //    sigma = fit->GetParameter (2);
-
-  //    delete fit;
-
-  //    const double tms = mean;
-  //    const double tmr = sigma / mean;
-
-  //    h2_avg_tms->SetBinContent (iPtch+1, iEta+1, tms);
-  //    h2_avg_tmr->SetBinContent (iPtch+1, iEta+1, tmr);
-  //  }
-
-  //  for (int iEta = 0; iEta < numEtaTrkBins; iEta++) {
-  //    TF1* fit = new TF1 ("fit", "gaus(0)", 0.5, 1.5);
-  //    fit->SetParameter (0, h_tms_integratedEta[iEta]->Integral ());
-  //    fit->SetParameter (1, 1);
-  //    fit->SetParameter (2, 1);
-
-  //    h_tms_integratedEta[iEta]->Fit (fit, "RN0Q");
-
-  //    double mean = fit->GetParameter (1);
-  //    double sigma = fit->GetParameter (2);
-
-  //    delete fit;
-  //    fit = new TF1 ("fit", "gaus(0)", mean-2*sigma, mean+2*sigma);
-
-  //    fit->SetParameter (0, h_tms_integratedEta[iEta]->Integral ());
-  //    fit->SetParameter (1, mean);
-  //    fit->SetParameter (2, sigma);
-
-  //    h_tms_integratedEta[iEta]->Fit (fit, "RN0Q");
-
-  //    mean = fit->GetParameter (1);
-  //    sigma = fit->GetParameter (2);
-
-  //    delete fit;
-
-  //    const double tms = mean;
-  //    const double tmr = sigma / mean;
-
-  //    h_avg_tms[iEta]->SetBinContent (iPtch+1, tms);
-  //    h_avg_tmr[iEta]->SetBinContent (iPtch+1, tmr);
-
-  //    delete h_tms_integratedEta[iEta];
-  //  } // end loop over iEta
-  //
-  //  delete[] h_tms_integratedEta;
-  //} // end loop over iPtch
+  SaferDelete (&tree);
 
 
+  outFile->cd ();
 
   for (int iPtch = 0; iPtch < numPtchBins; iPtch++) {
     for (int iEta = 0; iEta < numFinerEtaTrkBins; iEta++) {
       h_tms[iPtch][iEta]->Write ();
+      SaferDelete (&(h_tms[iPtch][iEta]));
     } // end loop over iEta
   } // end loop over iPtch
 
 
-  //  h2_avg_tms->Write ();
-  //  h2_avg_tmr->Write ();
-  //  for (int iEta = 0; iEta < numEtaTrkBins; iEta++) {
-  //    h_avg_tms[iEta]->Write ();
-  //    h_avg_tmr[iEta]->Write ();
-  //  } // end loop over iEta
-
-
-
   outFile->Write (0, TObject::kOverwrite);
   outFile->Close ();
-  //SaferDelete (&outFile);
+  SaferDelete (&outFile);
 
   return true;
 }

@@ -76,7 +76,7 @@ int main (int argc, char** argv) {
     std::cout << "Info: In Process.cxx: Running JetHadronSkimmer algorithm..." << std::endl;
     success = JetHadronCorrelations::JetHadronSkimmer (subdir, dataSet, inFileName);
   }
-  else if (alg == "CentralityAnalysis" && !Ispp ()) {
+  else if (alg == "CentralityAnalysis") {
     std::cout << "Info: In Process.cxx: Running CentralityAnalysis algorithm..." << std::endl;
     success = JetHadronCorrelations::CentralityAnalysis (subdir, dataSet, inFileName);
   }

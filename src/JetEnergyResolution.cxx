@@ -260,19 +260,25 @@ bool JetEnergyResolution (const char* directory,
   cout << endl << "Info: In JetEnergyResolution.cxx: Finished event loop." << endl;
 
 
+  SaferDelete (&tree);
+
+
+  outFile->cd ();
 
   for (int iEnJ = 0; iEnJ < numEnJBins; iEnJ++) {
     for (int iEta = 0; iEta < numFinerEtaBins; iEta++) {
       h_jpts[iEnJ][iEta]->Write ();
+      SaferDelete (&(h_jpts[iEnJ][iEta]));
       h_jes[iEnJ][iEta]->Write ();
+      SaferDelete (&(h_jes[iEnJ][iEta]));
       h_jetacorr[iEnJ][iEta]->Write ();
+      SaferDelete (&(h_jetacorr[iEnJ][iEta]));
     } // end loop over iEta
   } // end loop over iEnJ
 
-
   outFile->Write (0, TObject::kOverwrite);
   outFile->Close ();
-  //SaferDelete (&outFile);
+  SaferDelete (&outFile);
 
   return true;
 }

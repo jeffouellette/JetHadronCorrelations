@@ -26,8 +26,6 @@ bool doMixing = false;
 
 void Correlator (const char* tag, const char* outFileName, TTree* jetsTree, TTree* tracksTree = nullptr) {
 
-  SetupDirectories ("Data");
-
   // get event tagging & jet information from main tree
   jetsTree->Branch ("event_number",  &event_number);
   jetsTree->Branch ("lumi_block",    &lumi_block);
@@ -70,14 +68,17 @@ void Correlator (const char* tag, const char* outFileName, TTree* jetsTree, TTre
   tracksTree->SetBranchAddress ("trk_eta",        &trk_eta);
   tracksTree->SetBranchAddress ("trk_phi",        &trk_phi);
 
+  TH2D* h2_trk_eff = LoadTrackingEfficiency ();
+  TH2D* h2_trk_pur = LoadTrackingPurity ();
+
 
   TFile* outFile = new TFile (outFileName, "recreate");
 
 
   TH1D* h_evt_counts = new TH1D (Form ("h_evt_counts_%s", tag), "", 3, -0.5, 2.5);
   TH1D* h_jet_counts = new TH1D (Form ("h_jet_counts_%s", tag), "", 3, -0.5, 2.5);
-  TH1D* h_ljet_counts = new TH1D (Form ("h_ljet_counts_%s", tag), "", 3, -0.5, 2.5);
-  TH1D* h_sljet_counts = new TH1D (Form ("h_sljet_counts_%s", tag), "", 3, -0.5, 2.5);
+  //TH1D* h_ljet_counts = new TH1D (Form ("h_ljet_counts_%s", tag), "", 3, -0.5, 2.5);
+  //TH1D* h_sljet_counts = new TH1D (Form ("h_sljet_counts_%s", tag), "", 3, -0.5, 2.5);
 
   TH1D* h_jet_pt = new TH1D (Form ("h_jet_pt_%s", tag), ";#it{p}_{T}^{jet} [GeV];(1/N_{jet}) (dN_{jet}/d#it{p}_{T}) [GeV^{-1}]", nPtJBins, pTJBins);
   TH2D* h2_jet_pt_cov = new TH2D (Form ("h2_jet_pt_cov_%s", tag), ";#it{p}_{T}^{jet} [GeV];#it{p}_{T}^{jet} [GeV];Covariance", nPtJBins, pTJBins, nPtJBins, pTJBins);
@@ -86,39 +87,39 @@ void Correlator (const char* tag, const char* outFileName, TTree* jetsTree, TTre
 
   TH1D* h_jet_trk_dphi = new TH1D (Form ("h_jet_trk_dphi_%s", tag), ";#Delta#phi;(1/N_{jet}) (dN_{trk}/d#Delta#phi)", nDPhiBins, 0, pi);
   TH2D* h2_jet_trk_dphi_cov = new TH2D (Form ("h2_jet_trk_dphi_cov_%s", tag), ";#Delta#phi;#Delta#phi;Covariance", nDPhiBins, 0, pi, nDPhiBins, 0, pi);
-  TH1D* h_ljet_trk_dphi = new TH1D (Form ("h_ljet_trk_dphi_%s", tag), ";#Delta#phi;(1/N_{jet}) (dN_{trk}/d#Delta#phi)", nDPhiBins, 0, pi);
-  TH2D* h2_ljet_trk_dphi_cov = new TH2D (Form ("h2_ljet_trk_dphi_cov_%s", tag), ";#Delta#phi;#Delta#phi;Covariance", nDPhiBins, 0, pi, nDPhiBins, 0, pi);
-  TH1D* h_sljet_trk_dphi = new TH1D (Form ("h_sljet_trk_dphi_%s", tag), ";#Delta#phi;(1/N_{jet}) (dN_{trk}/d#Delta#phi)", nDPhiBins, 0, pi);
-  TH2D* h2_sljet_trk_dphi_cov = new TH2D (Form ("h2_sljet_trk_dphi_cov_%s", tag), ";#Delta#phi;#Delta#phi;Covariance", nDPhiBins, 0, pi, nDPhiBins, 0, pi);
+  //TH1D* h_ljet_trk_dphi = new TH1D (Form ("h_ljet_trk_dphi_%s", tag), ";#Delta#phi;(1/N_{jet}) (dN_{trk}/d#Delta#phi)", nDPhiBins, 0, pi);
+  //TH2D* h2_ljet_trk_dphi_cov = new TH2D (Form ("h2_ljet_trk_dphi_cov_%s", tag), ";#Delta#phi;#Delta#phi;Covariance", nDPhiBins, 0, pi, nDPhiBins, 0, pi);
+  //TH1D* h_sljet_trk_dphi = new TH1D (Form ("h_sljet_trk_dphi_%s", tag), ";#Delta#phi;(1/N_{jet}) (dN_{trk}/d#Delta#phi)", nDPhiBins, 0, pi);
+  //TH2D* h2_sljet_trk_dphi_cov = new TH2D (Form ("h2_sljet_trk_dphi_cov_%s", tag), ";#Delta#phi;#Delta#phi;Covariance", nDPhiBins, 0, pi, nDPhiBins, 0, pi);
 
   TH1D* h_jet_trk_pt_ns = new TH1D (Form ("h_jet_trk_pt_ns_%s", tag), ";#it{p}_{T}^{ch} [GeV];(1/N_{jet}) (dN_{trk}/d#it{p}_{T})", nPtChBins, pTChBins);
   TH2D* h2_jet_trk_pt_ns_cov = new TH2D (Form ("h2_jet_trk_pt_ns_cov_%s", tag), ";#it{p}_{T}^{ch} [GeV];#it{p}_{T}^{ch} [GeV];Covariance", nPtChBins, pTChBins, nPtChBins, pTChBins);
-  TH1D* h_ljet_trk_pt_ns = new TH1D (Form ("h_ljet_trk_pt_ns_%s", tag), ";#it{p}_{T}^{ch} [GeV];(1/N_{jet}) (dN_{trk}/d#it{p}_{T})", nPtChBins, pTChBins);
-  TH2D* h2_ljet_trk_pt_ns_cov = new TH2D (Form ("h2_ljet_trk_pt_ns_cov_%s", tag), ";#it{p}_{T}^{ch} [GeV];#it{p}_{T}^{ch} [GeV];Covariance", nPtChBins, pTChBins, nPtChBins, pTChBins);
-  TH1D* h_sljet_trk_pt_ns = new TH1D (Form ("h_sljet_trk_pt_ns_%s", tag), ";#it{p}_{T}^{ch} [GeV];(1/N_{jet}) (dN_{trk}/d#it{p}_{T})", nPtChBins, pTChBins);
-  TH2D* h2_sljet_trk_pt_ns_cov = new TH2D (Form ("h2_sljet_trk_pt_ns_cov_%s", tag), ";#it{p}_{T}^{ch} [GeV];#it{p}_{T}^{ch} [GeV];Covariance", nPtChBins, pTChBins, nPtChBins, pTChBins);
+  //TH1D* h_ljet_trk_pt_ns = new TH1D (Form ("h_ljet_trk_pt_ns_%s", tag), ";#it{p}_{T}^{ch} [GeV];(1/N_{jet}) (dN_{trk}/d#it{p}_{T})", nPtChBins, pTChBins);
+  //TH2D* h2_ljet_trk_pt_ns_cov = new TH2D (Form ("h2_ljet_trk_pt_ns_cov_%s", tag), ";#it{p}_{T}^{ch} [GeV];#it{p}_{T}^{ch} [GeV];Covariance", nPtChBins, pTChBins, nPtChBins, pTChBins);
+  //TH1D* h_sljet_trk_pt_ns = new TH1D (Form ("h_sljet_trk_pt_ns_%s", tag), ";#it{p}_{T}^{ch} [GeV];(1/N_{jet}) (dN_{trk}/d#it{p}_{T})", nPtChBins, pTChBins);
+  //TH2D* h2_sljet_trk_pt_ns_cov = new TH2D (Form ("h2_sljet_trk_pt_ns_cov_%s", tag), ";#it{p}_{T}^{ch} [GeV];#it{p}_{T}^{ch} [GeV];Covariance", nPtChBins, pTChBins, nPtChBins, pTChBins);
 
   TH1D* h_jet_trk_pt_as = new TH1D (Form ("h_jet_trk_pt_as_%s", tag), ";#it{p}_{T}^{ch} [GeV];(1/N_{jet}) (dN_{trk}/d#it{p}_{T})", nPtChBins, pTChBins);
   TH2D* h2_jet_trk_pt_as_cov = new TH2D (Form ("h2_jet_trk_pt_as_cov_%s", tag), ";#it{p}_{T}^{ch} [GeV];#it{p}_{T}^{ch} [GeV];Covariance", nPtChBins, pTChBins, nPtChBins, pTChBins);
-  TH1D* h_ljet_trk_pt_as = new TH1D (Form ("h_ljet_trk_pt_as_%s", tag), ";#it{p}_{T}^{ch} [GeV];(1/N_{jet}) (dN_{trk}/d#it{p}_{T})", nPtChBins, pTChBins);
-  TH2D* h2_ljet_trk_pt_as_cov = new TH2D (Form ("h2_ljet_trk_pt_as_cov_%s", tag), ";#it{p}_{T}^{ch} [GeV];#it{p}_{T}^{ch} [GeV];Covariance", nPtChBins, pTChBins, nPtChBins, pTChBins);
-  TH1D* h_sljet_trk_pt_as = new TH1D (Form ("h_sljet_trk_pt_as_%s", tag), ";#it{p}_{T}^{ch} [GeV];(1/N_{jet}) (dN_{trk}/d#it{p}_{T})", nPtChBins, pTChBins);
-  TH2D* h2_sljet_trk_pt_as_cov = new TH2D (Form ("h2_sljet_trk_pt_as_cov_%s", tag), ";#it{p}_{T}^{ch} [GeV];#it{p}_{T}^{ch} [GeV];Covariance", nPtChBins, pTChBins, nPtChBins, pTChBins);
+  //TH1D* h_ljet_trk_pt_as = new TH1D (Form ("h_ljet_trk_pt_as_%s", tag), ";#it{p}_{T}^{ch} [GeV];(1/N_{jet}) (dN_{trk}/d#it{p}_{T})", nPtChBins, pTChBins);
+  //TH2D* h2_ljet_trk_pt_as_cov = new TH2D (Form ("h2_ljet_trk_pt_as_cov_%s", tag), ";#it{p}_{T}^{ch} [GeV];#it{p}_{T}^{ch} [GeV];Covariance", nPtChBins, pTChBins, nPtChBins, pTChBins);
+  //TH1D* h_sljet_trk_pt_as = new TH1D (Form ("h_sljet_trk_pt_as_%s", tag), ";#it{p}_{T}^{ch} [GeV];(1/N_{jet}) (dN_{trk}/d#it{p}_{T})", nPtChBins, pTChBins);
+  //TH2D* h2_sljet_trk_pt_as_cov = new TH2D (Form ("h2_sljet_trk_pt_as_cov_%s", tag), ";#it{p}_{T}^{ch} [GeV];#it{p}_{T}^{ch} [GeV];Covariance", nPtChBins, pTChBins, nPtChBins, pTChBins);
 
 
 
   // arrays for filling histograms & covariance matrices correctly
   double jet_pt_counts[nPtJBins];
   double jet_trk_dphi_counts[nDPhiBins];
-  double ljet_trk_dphi_counts[nDPhiBins];
-  double sljet_trk_dphi_counts[nDPhiBins];
+  //double ljet_trk_dphi_counts[nDPhiBins];
+  //double sljet_trk_dphi_counts[nDPhiBins];
 
   double jet_trk_pt_ns_counts[nPtChBins];
-  double ljet_trk_pt_ns_counts[nPtChBins];
-  double sljet_trk_pt_ns_counts[nPtChBins];
+  //double ljet_trk_pt_ns_counts[nPtChBins];
+  //double sljet_trk_pt_ns_counts[nPtChBins];
   double jet_trk_pt_as_counts[nPtChBins];
-  double ljet_trk_pt_as_counts[nPtChBins];
-  double sljet_trk_pt_as_counts[nPtChBins];
+  //double ljet_trk_pt_as_counts[nPtChBins];
+  //double sljet_trk_pt_as_counts[nPtChBins];
 
   const int nEvts = (doMixing ? 20. : 1.) * (jetsTree->GetEntries ());
   const int nTrkEvts = tracksTree->GetEntries ();
@@ -133,16 +134,16 @@ void Correlator (const char* tag, const char* outFileName, TTree* jetsTree, TTre
       jet_pt_counts[iX] = 0;
     for (int iX = 0; iX < nDPhiBins; iX++) {
       jet_trk_dphi_counts[iX] = 0;
-      ljet_trk_dphi_counts[iX] = 0;
-      sljet_trk_dphi_counts[iX] = 0;
+      //ljet_trk_dphi_counts[iX] = 0;
+      //sljet_trk_dphi_counts[iX] = 0;
     }
     for (int iX = 0; iX < nPtChBins; iX++) {
       jet_trk_pt_ns_counts[iX] = 0;
-      ljet_trk_pt_ns_counts[iX] = 0;
-      sljet_trk_pt_ns_counts[iX] = 0;
+      //ljet_trk_pt_ns_counts[iX] = 0;
+      //sljet_trk_pt_ns_counts[iX] = 0;
       jet_trk_pt_as_counts[iX] = 0;
-      ljet_trk_pt_as_counts[iX] = 0;
-      sljet_trk_pt_as_counts[iX] = 0;
+      //ljet_trk_pt_as_counts[iX] = 0;
+      //sljet_trk_pt_as_counts[iX] = 0;
     }
 
     jetsTree->GetEntry (iEvt % jetsTree->GetEntries ());
@@ -176,22 +177,22 @@ void Correlator (const char* tag, const char* outFileName, TTree* jetsTree, TTre
       h_jet_counts->Fill (1, ewgt*jwgt);
       h_jet_counts->Fill (2, pow (ewgt*jwgt, 2));
     }
-    if (leading_jet != -1 && MeetsJetPtCut (akt4_hi_jet_pt[leading_jet])) {
-      const double jwgt = GetAkt4JetWeight (akt4_hi_jet_pt[leading_jet], akt4_hi_jet_eta[leading_jet], akt4_hi_jet_phi[leading_jet], 0.4);
-      if (jwgt <= 0.)
-        continue;
-      h_ljet_counts->Fill (0);
-      h_ljet_counts->Fill (1, ewgt*jwgt);
-      h_ljet_counts->Fill (2, pow (ewgt*jwgt, 2));
-    }
-    if (subleading_jet != -1 && MeetsJetPtCut (akt4_hi_jet_pt[subleading_jet])) {
-      const double jwgt = GetAkt4JetWeight (akt4_hi_jet_pt[subleading_jet], akt4_hi_jet_eta[subleading_jet], akt4_hi_jet_phi[subleading_jet], 0.4);
-      if (jwgt <= 0.)
-        continue;
-      h_sljet_counts->Fill (0);
-      h_sljet_counts->Fill (1, ewgt*jwgt);
-      h_sljet_counts->Fill (2, pow (ewgt*jwgt, 2));
-    }
+    //if (leading_jet != -1 && MeetsJetPtCut (akt4_hi_jet_pt[leading_jet])) {
+    //  const double jwgt = GetAkt4JetWeight (akt4_hi_jet_pt[leading_jet], akt4_hi_jet_eta[leading_jet], akt4_hi_jet_phi[leading_jet], 0.4);
+    //  if (jwgt <= 0.)
+    //    continue;
+    //  h_ljet_counts->Fill (0);
+    //  h_ljet_counts->Fill (1, ewgt*jwgt);
+    //  h_ljet_counts->Fill (2, pow (ewgt*jwgt, 2));
+    //}
+    //if (subleading_jet != -1 && MeetsJetPtCut (akt4_hi_jet_pt[subleading_jet])) {
+    //  const double jwgt = GetAkt4JetWeight (akt4_hi_jet_pt[subleading_jet], akt4_hi_jet_eta[subleading_jet], akt4_hi_jet_phi[subleading_jet], 0.4);
+    //  if (jwgt <= 0.)
+    //    continue;
+    //  h_sljet_counts->Fill (0);
+    //  h_sljet_counts->Fill (1, ewgt*jwgt);
+    //  h_sljet_counts->Fill (2, pow (ewgt*jwgt, 2));
+    //}
 
 
     // do a mixed event
@@ -254,12 +255,16 @@ void Correlator (const char* tag, const char* outFileName, TTree* jetsTree, TTre
         if (iDPhi < 0 || nDPhiBins < iDPhi)
           continue;
 
+        const float teff = h2_trk_eff->GetBinContent (h2_trk_eff->FindBin (trk_pt[iTrk], trk_eta[iTrk]));
+        const float tpur = h2_trk_pur->GetBinContent (h2_trk_pur->FindBin (trk_pt[iTrk], trk_eta[iTrk]));
+        const float twgt = (teff > 0. ? tpur / teff : 0.);
+
         if (trk_pt[iTrk] > 2)
-          jet_trk_dphi_counts[iDPhi]++;
+          jet_trk_dphi_counts[iDPhi] += twgt;
         if (dphi < pi/8.)
-          jet_trk_pt_ns_counts[iPtCh]++;
+          jet_trk_pt_ns_counts[iPtCh] += twgt;
         else if (dphi > 7.*pi/8.)
-          jet_trk_pt_as_counts[iPtCh]++;
+          jet_trk_pt_as_counts[iPtCh] += twgt;
       }
 
       for (int iX = 0; iX < nDPhiBins; iX++) {
@@ -280,123 +285,135 @@ void Correlator (const char* tag, const char* outFileName, TTree* jetsTree, TTre
     }
 
 
-    if (leading_jet != -1 && MeetsJetPtCut (akt4_hi_jet_pt[leading_jet])) {
-      const double jwgt = GetAkt4JetWeight (akt4_hi_jet_pt[leading_jet], akt4_hi_jet_eta[leading_jet], akt4_hi_jet_phi[leading_jet], 0.4);
-      if (jwgt <= 0.)
-        continue;
+    //if (leading_jet != -1 && MeetsJetPtCut (akt4_hi_jet_pt[leading_jet])) {
+    //  const double jwgt = GetAkt4JetWeight (akt4_hi_jet_pt[leading_jet], akt4_hi_jet_eta[leading_jet], akt4_hi_jet_phi[leading_jet], 0.4);
+    //  if (jwgt <= 0.)
+    //    continue;
 
-      for (int iTrk = 0; iTrk < trk_n; iTrk++) {
+    //  for (int iTrk = 0; iTrk < trk_n; iTrk++) {
 
-        const short iPtCh = GetPtChBin (trk_pt[iTrk]);
-        if (iPtCh < 0 || iPtCh >= nPtChBins)
-          continue;
+    //    const short iPtCh = GetPtChBin (trk_pt[iTrk]);
+    //    if (iPtCh < 0 || iPtCh >= nPtChBins)
+    //      continue;
 
-        if (fabs (trk_eta[iTrk] - yboost) > 2.5 - 0.465)
-          continue;
+    //    if (fabs (trk_eta[iTrk] - yboost) > 2.5 - 0.465)
+    //      continue;
 
-        const float dphi = DeltaPhi (akt4_hi_jet_phi[leading_jet], trk_phi[iTrk]);
-        const short iDPhi = GetDPhiBin (dphi);
-        if (iDPhi < 0 || nDPhiBins < iDPhi)
-          continue;
+    //    const float dphi = DeltaPhi (akt4_hi_jet_phi[leading_jet], trk_phi[iTrk]);
+    //    const short iDPhi = GetDPhiBin (dphi);
+    //    if (iDPhi < 0 || nDPhiBins < iDPhi)
+    //      continue;
 
-        if (trk_pt[iTrk] > 2)
-          ljet_trk_dphi_counts[iDPhi]++;
-        if (dphi < pi/8.)
-          ljet_trk_pt_ns_counts[iPtCh]++;
-        else if (dphi > 7.*pi/8.)
-          ljet_trk_pt_as_counts[iPtCh]++;
-      }
+    //    const float teff = h2_trk_eff->GetBinContent (h2_trk_eff->FindBin (trk_pt[iTrk], trk_eta[iTrk]));
+    //    const float tpur = h2_trk_pur->GetBinContent (h2_trk_pur->FindBin (trk_pt[iTrk], trk_eta[iTrk]));
+    //    const float twgt = (teff > 0. ? tpur / teff : 0.);
 
-      for (int iX = 0; iX < nDPhiBins; iX++) {
-        h_ljet_trk_dphi->SetBinContent (iX+1, h_ljet_trk_dphi->GetBinContent (iX+1) + (ewgt*jwgt)*(ljet_trk_dphi_counts[iX]));
-        for (int iY = 0; iY < nDPhiBins; iY++)
-          h2_ljet_trk_dphi_cov->SetBinContent (iX+1, iY+1, h2_ljet_trk_dphi_cov->GetBinContent (iX+1, iY+1) + (ewgt*jwgt)*(ljet_trk_dphi_counts[iX])*(ljet_trk_dphi_counts[iY]));
-      }
-      for (int iX = 0; iX < nPtChBins; iX++) {
-        h_ljet_trk_pt_ns->SetBinContent (iX+1, h_ljet_trk_pt_ns->GetBinContent (iX+1) + (ewgt*jwgt)*(ljet_trk_pt_ns_counts[iX]));
-        for (int iY = 0; iY < nPtChBins; iY++)
-          h2_ljet_trk_pt_ns_cov->SetBinContent (iX+1, iY+1, h2_ljet_trk_pt_ns_cov->GetBinContent (iX+1, iY+1) + (ewgt*jwgt)*(ljet_trk_pt_ns_counts[iX])*(ljet_trk_pt_ns_counts[iY]));
-      }
-      for (int iX = 0; iX < nPtChBins; iX++) {
-        h_ljet_trk_pt_as->SetBinContent (iX+1, h_ljet_trk_pt_as->GetBinContent (iX+1) + (ewgt*jwgt)*(ljet_trk_pt_as_counts[iX]));
-        for (int iY = 0; iY < nPtChBins; iY++)
-          h2_ljet_trk_pt_as_cov->SetBinContent (iX+1, iY+1, h2_ljet_trk_pt_as_cov->GetBinContent (iX+1, iY+1) + (ewgt*jwgt)*(ljet_trk_pt_as_counts[iX])*(ljet_trk_pt_as_counts[iY]));
-      }
-    }
+    //    if (trk_pt[iTrk] > 2)
+    //      ljet_trk_dphi_counts[iDPhi] += twgt;
+    //    if (dphi < pi/8.)
+    //      ljet_trk_pt_ns_counts[iPtCh] += twgt;
+    //    else if (dphi > 7.*pi/8.)
+    //      ljet_trk_pt_as_counts[iPtCh] += twgt;
+    //  }
+
+    //  for (int iX = 0; iX < nDPhiBins; iX++) {
+    //    h_ljet_trk_dphi->SetBinContent (iX+1, h_ljet_trk_dphi->GetBinContent (iX+1) + (ewgt*jwgt)*(ljet_trk_dphi_counts[iX]));
+    //    for (int iY = 0; iY < nDPhiBins; iY++)
+    //      h2_ljet_trk_dphi_cov->SetBinContent (iX+1, iY+1, h2_ljet_trk_dphi_cov->GetBinContent (iX+1, iY+1) + (ewgt*jwgt)*(ljet_trk_dphi_counts[iX])*(ljet_trk_dphi_counts[iY]));
+    //  }
+    //  for (int iX = 0; iX < nPtChBins; iX++) {
+    //    h_ljet_trk_pt_ns->SetBinContent (iX+1, h_ljet_trk_pt_ns->GetBinContent (iX+1) + (ewgt*jwgt)*(ljet_trk_pt_ns_counts[iX]));
+    //    for (int iY = 0; iY < nPtChBins; iY++)
+    //      h2_ljet_trk_pt_ns_cov->SetBinContent (iX+1, iY+1, h2_ljet_trk_pt_ns_cov->GetBinContent (iX+1, iY+1) + (ewgt*jwgt)*(ljet_trk_pt_ns_counts[iX])*(ljet_trk_pt_ns_counts[iY]));
+    //  }
+    //  for (int iX = 0; iX < nPtChBins; iX++) {
+    //    h_ljet_trk_pt_as->SetBinContent (iX+1, h_ljet_trk_pt_as->GetBinContent (iX+1) + (ewgt*jwgt)*(ljet_trk_pt_as_counts[iX]));
+    //    for (int iY = 0; iY < nPtChBins; iY++)
+    //      h2_ljet_trk_pt_as_cov->SetBinContent (iX+1, iY+1, h2_ljet_trk_pt_as_cov->GetBinContent (iX+1, iY+1) + (ewgt*jwgt)*(ljet_trk_pt_as_counts[iX])*(ljet_trk_pt_as_counts[iY]));
+    //  }
+    //}
 
 
-    if (subleading_jet != -1 && MeetsJetPtCut (akt4_hi_jet_pt[subleading_jet])) {
-      const double jwgt = GetAkt4JetWeight (akt4_hi_jet_pt[subleading_jet], akt4_hi_jet_eta[subleading_jet], akt4_hi_jet_phi[subleading_jet], 0.4);
-      if (jwgt <= 0.)
-        continue;
+    //if (subleading_jet != -1 && MeetsJetPtCut (akt4_hi_jet_pt[subleading_jet])) {
+    //  const double jwgt = GetAkt4JetWeight (akt4_hi_jet_pt[subleading_jet], akt4_hi_jet_eta[subleading_jet], akt4_hi_jet_phi[subleading_jet], 0.4);
+    //  if (jwgt <= 0.)
+    //    continue;
 
-      for (int iTrk = 0; iTrk < trk_n; iTrk++) {
+    //  for (int iTrk = 0; iTrk < trk_n; iTrk++) {
 
-        const short iPtCh = GetPtChBin (trk_pt[iTrk]);
-        if (iPtCh < 0 || iPtCh >= nPtChBins)
-          continue;
+    //    const short iPtCh = GetPtChBin (trk_pt[iTrk]);
+    //    if (iPtCh < 0 || iPtCh >= nPtChBins)
+    //      continue;
 
-        if (fabs (trk_eta[iTrk] - yboost) > 2.5 - 0.465)
-          continue;
+    //    if (fabs (trk_eta[iTrk] - yboost) > 2.5 - 0.465)
+    //      continue;
 
-        const float dphi = DeltaPhi (akt4_hi_jet_phi[subleading_jet], trk_phi[iTrk]);
-        const short iDPhi = GetDPhiBin (dphi);
-        if (iDPhi < 0 || nDPhiBins < iDPhi)
-          continue;
+    //    const float dphi = DeltaPhi (akt4_hi_jet_phi[subleading_jet], trk_phi[iTrk]);
+    //    const short iDPhi = GetDPhiBin (dphi);
+    //    if (iDPhi < 0 || nDPhiBins < iDPhi)
+    //      continue;
 
-        if (trk_pt[iTrk] > 2)
-          sljet_trk_dphi_counts[iDPhi]++;
-        if (dphi < pi/8.)
-          sljet_trk_pt_ns_counts[iPtCh]++;
-        else if (dphi > 7.*pi/8.)
-          sljet_trk_pt_as_counts[iPtCh]++;
-      }
+    //    const float teff = h2_trk_eff->GetBinContent (h2_trk_eff->FindBin (trk_pt[iTrk], trk_eta[iTrk]));
+    //    const float tpur = h2_trk_pur->GetBinContent (h2_trk_pur->FindBin (trk_pt[iTrk], trk_eta[iTrk]));
+    //    const float twgt = (teff > 0. ? tpur / teff : 0.);
 
-      for (int iX = 0; iX < nDPhiBins; iX++) {
-        h_sljet_trk_dphi->SetBinContent (iX+1, h_sljet_trk_dphi->GetBinContent (iX+1) + (ewgt*jwgt)*(sljet_trk_dphi_counts[iX]));
-        for (int iY = 0; iY < nDPhiBins; iY++)
-          h2_sljet_trk_dphi_cov->SetBinContent (iX+1, iY+1, h2_sljet_trk_dphi_cov->GetBinContent (iX+1, iY+1) + (ewgt*jwgt)*(sljet_trk_dphi_counts[iX])*(sljet_trk_dphi_counts[iY]));
-      }
-      for (int iX = 0; iX < nPtChBins; iX++) {
-        h_sljet_trk_pt_ns->SetBinContent (iX+1, h_sljet_trk_pt_ns->GetBinContent (iX+1) + (ewgt*jwgt)*(sljet_trk_pt_ns_counts[iX]));
-        for (int iY = 0; iY < nPtChBins; iY++)
-          h2_sljet_trk_pt_ns_cov->SetBinContent (iX+1, iY+1, h2_sljet_trk_pt_ns_cov->GetBinContent (iX+1, iY+1) + (ewgt*jwgt)*(sljet_trk_pt_ns_counts[iX])*(sljet_trk_pt_ns_counts[iY]));
-      }
-      for (int iX = 0; iX < nPtChBins; iX++) {
-        h_sljet_trk_pt_as->SetBinContent (iX+1, h_sljet_trk_pt_as->GetBinContent (iX+1) + (ewgt*jwgt)*(sljet_trk_pt_as_counts[iX]));
-        for (int iY = 0; iY < nPtChBins; iY++)
-          h2_sljet_trk_pt_as_cov->SetBinContent (iX+1, iY+1, h2_sljet_trk_pt_as_cov->GetBinContent (iX+1, iY+1) + (ewgt*jwgt)*(sljet_trk_pt_as_counts[iX])*(sljet_trk_pt_as_counts[iY]));
-      }
-    }
+    //    if (trk_pt[iTrk] > 2)
+    //      sljet_trk_dphi_counts[iDPhi] += twgt;
+    //    if (dphi < pi/8.)
+    //      sljet_trk_pt_ns_counts[iPtCh] += twgt;
+    //    else if (dphi > 7.*pi/8.)
+    //      sljet_trk_pt_as_counts[iPtCh] += twgt;
+    //  }
+
+    //  for (int iX = 0; iX < nDPhiBins; iX++) {
+    //    h_sljet_trk_dphi->SetBinContent (iX+1, h_sljet_trk_dphi->GetBinContent (iX+1) + (ewgt*jwgt)*(sljet_trk_dphi_counts[iX]));
+    //    for (int iY = 0; iY < nDPhiBins; iY++)
+    //      h2_sljet_trk_dphi_cov->SetBinContent (iX+1, iY+1, h2_sljet_trk_dphi_cov->GetBinContent (iX+1, iY+1) + (ewgt*jwgt)*(sljet_trk_dphi_counts[iX])*(sljet_trk_dphi_counts[iY]));
+    //  }
+    //  for (int iX = 0; iX < nPtChBins; iX++) {
+    //    h_sljet_trk_pt_ns->SetBinContent (iX+1, h_sljet_trk_pt_ns->GetBinContent (iX+1) + (ewgt*jwgt)*(sljet_trk_pt_ns_counts[iX]));
+    //    for (int iY = 0; iY < nPtChBins; iY++)
+    //      h2_sljet_trk_pt_ns_cov->SetBinContent (iX+1, iY+1, h2_sljet_trk_pt_ns_cov->GetBinContent (iX+1, iY+1) + (ewgt*jwgt)*(sljet_trk_pt_ns_counts[iX])*(sljet_trk_pt_ns_counts[iY]));
+    //  }
+    //  for (int iX = 0; iX < nPtChBins; iX++) {
+    //    h_sljet_trk_pt_as->SetBinContent (iX+1, h_sljet_trk_pt_as->GetBinContent (iX+1) + (ewgt*jwgt)*(sljet_trk_pt_as_counts[iX]));
+    //    for (int iY = 0; iY < nPtChBins; iY++)
+    //      h2_sljet_trk_pt_as_cov->SetBinContent (iX+1, iY+1, h2_sljet_trk_pt_as_cov->GetBinContent (iX+1, iY+1) + (ewgt*jwgt)*(sljet_trk_pt_as_counts[iX])*(sljet_trk_pt_as_counts[iY]));
+    //  }
+    //}
   }
   cout << "Finished event loop." << endl;
 
 
+  SaferDelete (&h2_trk_eff);
+  SaferDelete (&h2_trk_pur);
+
+
   h_evt_counts->Write ();
   h_jet_counts->Write ();
-  h_ljet_counts->Write ();
-  h_sljet_counts->Write ();
+  //h_ljet_counts->Write ();
+  //h_sljet_counts->Write ();
   h_jet_pt->Write ();
   h2_jet_pt_cov->Write ();
   h2_jet_eta_phi->Write ();
   h_jet_trk_dphi->Write ();
   h2_jet_trk_dphi_cov->Write ();
-  h_ljet_trk_dphi->Write ();
-  h2_ljet_trk_dphi_cov->Write ();
-  h_sljet_trk_dphi->Write ();
-  h2_sljet_trk_dphi_cov->Write ();
+  //h_ljet_trk_dphi->Write ();
+  //h2_ljet_trk_dphi_cov->Write ();
+  //h_sljet_trk_dphi->Write ();
+  //h2_sljet_trk_dphi_cov->Write ();
   h_jet_trk_pt_ns->Write ();
   h2_jet_trk_pt_ns_cov->Write ();
-  h_ljet_trk_pt_ns->Write ();
-  h2_ljet_trk_pt_ns_cov->Write ();
-  h_sljet_trk_pt_ns->Write ();
-  h2_sljet_trk_pt_ns_cov->Write ();
+  //h_ljet_trk_pt_ns->Write ();
+  //h2_ljet_trk_pt_ns_cov->Write ();
+  //h_sljet_trk_pt_ns->Write ();
+  //h2_sljet_trk_pt_ns_cov->Write ();
   h_jet_trk_pt_as->Write ();
   h2_jet_trk_pt_as_cov->Write ();
-  h_ljet_trk_pt_as->Write ();
-  h2_ljet_trk_pt_as_cov->Write ();
-  h_sljet_trk_pt_as->Write ();
-  h2_sljet_trk_pt_as_cov->Write ();
+  //h_ljet_trk_pt_as->Write ();
+  //h2_ljet_trk_pt_as_cov->Write ();
+  //h_sljet_trk_pt_as->Write ();
+  //h2_sljet_trk_pt_as_cov->Write ();
 
 
   outFile->Close ();

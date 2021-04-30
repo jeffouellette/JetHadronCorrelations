@@ -21,6 +21,7 @@
 #include <TLorentzVector.h>
 
 #include <iostream>
+#include <float.h>
 #include <random>
 
 using namespace std;
@@ -41,19 +42,22 @@ bool JetHadronSkimmer (const char* directory,
   else if (IsDataOverlay ())
     std::cout << "Info: In JetHadronSkimmer.cxx: File detected as data overlay, will check data quality (i.e. pile-up & detector defects)" << std::endl;
 
-  if (!IsCollisions () && IsHijing ())
-    SetupDirectories ("MC/Hijing", false);
-  else if (!IsCollisions ())
-    SetupDirectories ("MC");
+
+  if (!IsCollisions ()) {
+    if (IsHijing ())
+      SetupDirectories ("Trees/MC/Hijing", false);
+    else
+      SetupDirectories ("Trees/MC");
+  }
   else {
     if (UseJet50GeVTriggers ())
-      SetupDirectories ("50GeVJetsData");
+      SetupDirectories ("Trees/50GeVJetsData");
     else if (UseJet100GeVTriggers ())
-      SetupDirectories ("100GeVJetsData");
+      SetupDirectories ("Trees/100GeVJetsData");
     else if (UseMinBiasTriggers ())
-      SetupDirectories ("MinBiasData");
+      SetupDirectories ("Trees/MinBiasData");
   }
-    
+
 
   // this identifier here corresponds to the name of the output file
   const TString identifier = GetIdentifier (dataSet, directory, inFileName);
@@ -74,6 +78,36 @@ bool JetHadronSkimmer (const char* directory,
   }
   else
     fileIdentifier = inFileName;
+
+
+  // variables for filtering MC truth
+  double truth_jet_min_pt = 0, truth_jet_max_pt = DBL_MAX;
+  if (!IsCollisions ()) {
+    if (TString (inFileName).Contains ("JZ0")) {
+      truth_jet_min_pt = 0;
+      truth_jet_max_pt = 20;
+    }
+    else if (TString (inFileName).Contains ("JZ1")) {
+      truth_jet_min_pt = 20;
+      truth_jet_max_pt = 60;
+    }
+    else if (TString (inFileName).Contains ("JZ2")) {
+      truth_jet_min_pt = 60;
+      truth_jet_max_pt = 160;
+    }
+    else if (TString (inFileName).Contains ("JZ3")) {
+      truth_jet_min_pt = 160;
+      truth_jet_max_pt = 400;
+    }
+    else if (TString (inFileName).Contains ("JZ4")) {
+      truth_jet_min_pt = 400;
+      truth_jet_max_pt = 800;
+    }
+    else if (TString (inFileName).Contains ("JZ5")) {
+      truth_jet_min_pt = 800;
+      truth_jet_max_pt = 1300;
+    }
+  }
 
 
   // opens a TTree as a TChain from all files in a directory matching the file identifier
@@ -240,7 +274,6 @@ bool JetHadronSkimmer (const char* directory,
   tree->SetBranchAddress ("akt4_hi_jet_sub_e",        &akt4_hi_jet_sub_e);
   
 
-
   TString outTreeName = "";
   if (!Is5TeV ()) {
     std::cout << "Error: In JetHadronSkimmer.cxx::JetHadronSkimmer (const char*, const int, const char*): Unsupported beam collision energy, quitting." << std::endl;
@@ -273,8 +306,8 @@ bool JetHadronSkimmer (const char* directory,
   }
 
 
-  Trigger* jetTriggers[jet_trig_n] = {};
-  Trigger* minbiasTriggers[minbias_trig_n] = {};
+  Trigger* jetTriggers[jet_trig_n];
+  Trigger* minbiasTriggers[minbias_trig_n];
 
   if (IsCollisions ()) {
     for (int iTrig = 0; iTrig < jet_trig_n; iTrig++) {
@@ -290,26 +323,27 @@ bool JetHadronSkimmer (const char* directory,
   }
 
 
-  centBins = (DoFcalCentVar () ? fcalCentBins : zdcCentBins);
-  numCentBins = (DoFcalCentVar () ? numFcalCentBins : numZdcCentBins);
+  centBins = (DoFcalCentVar () ? fcalCentBins : (DoFineFcalCentVar () ? fineFcalCentBins : zdcCentBins));
+  numCentBins = (DoFcalCentVar () ? numFcalCentBins : (DoFineFcalCentVar () ? numFineFcalCentBins : numZdcCentBins));
 
 
   // Load files for output
   const int numFileBins = (Ispp () ? 1 : numCentBins);
   TFile* outFiles[numFileBins];
   OutTree* outTrees[numFileBins];
-  for (int iCent = 0; iCent < numFileBins; iCent++) {
-    TString fName = (numFileBins == 1 ? Form ("%s/%s.root", rootPath.Data (), identifier.Data ()) : Form ("%s/%s_iCent%i.root", rootPath.Data (), identifier.Data (), iCent));
-    outFiles[iCent] = new TFile (fName.Data (), "recreate");
-    outFiles[iCent]->Delete (Form ("%s;*", outTreeName.Data ()));
+  for (int iFile = 0; iFile < numFileBins; iFile++) {
+    TString fName = (numFileBins == 1 ? Form ("%s/%s.root", rootPath.Data (), identifier.Data ()) : Form ("%s/%s_iCent%i.root", rootPath.Data (), identifier.Data (), iFile));
+    outFiles[iFile] = new TFile (fName.Data (), "recreate");
+    //outFiles[iFile]->Delete (Form ("%s;*", outTreeName.Data ()));
 
-    outTrees[iCent] = new OutTree (outTreeName.Data (), outFiles[iCent]);
-    outTrees[iCent]->SetBranchEventInfo ();
-    outTrees[iCent]->SetBranchJets ();
-    outTrees[iCent]->SetBranchTracks ();
-    outTrees[iCent]->SetBranches ();
+    outTrees[iFile] = new OutTree (outTreeName.Data (), outFiles[iFile]);
+    outTrees[iFile]->SetBranchEventInfo ();
+    outTrees[iFile]->SetBranchJets ();
+    outTrees[iFile]->SetBranchTracks ();
+    outTrees[iFile]->SetBranches ();
   }
 
+  return true;
 
   const int nEvts = tree->GetEntries ();
 
@@ -321,6 +355,7 @@ bool JetHadronSkimmer (const char* directory,
   for (int iEvt = 0; iEvt < nEvts; iEvt++) {
     if (nEvts > 100 && iEvt % (nEvts / 100) == 0)
       std::cout << "Info: In JetHadronSkimmer.cxx: Events " << iEvt / (nEvts / 100) << "\% done...\r" << flush;
+
     tree->GetEntry (iEvt);
 
     if (IsCollisions ()) {
@@ -333,8 +368,7 @@ bool JetHadronSkimmer (const char* directory,
         event_weight = minbiasTriggers[0]->trigPrescale;
     }
     else {
-      event_weight = crossSectionPicoBarns * mcFilterEfficiency * GetJetLuminosity (); // sigma * f * L_int
-      //event_weight = mcEventWeights->at (0) * mcFilterEfficiency * GetJetLuminosity (); // sigma * f * L_int
+      event_weight = mcEventWeights->at (0) * crossSectionPicoBarns * mcFilterEfficiency * GetJetLuminosity () / mcNumberEvents; // sigma * f * L_int
       if (IsHijing ()) {
         assert (truth_event_n > 0);
         ip = impactParameter[0];
@@ -362,6 +396,19 @@ bool JetHadronSkimmer (const char* directory,
       else vz = 0;
     }
 
+
+    if (!IsCollisions ()) {
+      int iLTJ = -1;
+      for (int iTJ = 0; iTJ < akt4_truth_jet_n; iTJ++) {
+        if (iLTJ == -1 || akt4_truth_jet_pt[iTJ] > akt4_truth_jet_pt[iLTJ])
+          iLTJ = iTJ;
+      }
+
+      if (iLTJ == -1 || akt4_truth_jet_pt[iLTJ] < truth_jet_min_pt || akt4_truth_jet_pt[iLTJ] > truth_jet_max_pt)
+        continue;
+    }
+
+
     short iCent = -1;
     if (IspPb ()) {
       fcal_et_Pb = IsPeriodA () ? fcalA_et : fcalC_et; // Pb-going side is the A side in period A (all 5.02 TeV runs and 8.16 TeV runs before or including 313435)
@@ -374,7 +421,7 @@ bool JetHadronSkimmer (const char* directory,
       zdc_calibE_p = IsPeriodA () ? ZdcCalibEnergy_C : ZdcCalibEnergy_A;
       zdc_calibE_Pb *= 1e3;
       zdc_calibE_p *= 1e3;
-      iCent = GetCentBin (DoFcalCentVar () ? fcal_et_Pb : zdc_calibE_Pb);
+      iCent = GetCentBin (DoFcalCentVar () || DoFineFcalCentVar () ? fcal_et_Pb : zdc_calibE_Pb);
     }
     else if (Ispp ()) {
       fcal_et_Pb = -999;
@@ -390,6 +437,8 @@ bool JetHadronSkimmer (const char* directory,
 
     if (iCent < 0 || iCent > numCentBins-1)
       continue;
+
+    const short iFile = iCent;
 
     if (event_weight != -1) { // trigger requirement
 
@@ -479,24 +528,28 @@ bool JetHadronSkimmer (const char* directory,
         leading_jet_phi_transmin = out_akt4_hi_jet_phi[leading_jet] + pi/2.;
       }
 
-      outTrees[iCent]->Fill ();
+      outTrees[iFile]->Fill ();
 
     } // end jet trigger scope
 
   } // end event selection
   std::cout << std::endl << "Info: In JetHadronSkimmer.cxx: Finished processing events." << std::endl;
 
-  if (IspPb ()) {
-    for (int iCent = 0; iCent < numFileBins; iCent++) {
-      outFiles[iCent]->Write (0, TObject::kOverwrite);
-      outFiles[iCent]->Close ();
-      SaferDelete (&(outFiles[iCent]));
-    }
+
+  if (IsCollisions ()) {
+    for (int iTrig = 0; iTrig < jet_trig_n; iTrig++)
+      SaferDelete (&jetTriggers[iTrig]);
+    for (int iTrig = 0; iTrig < minbias_trig_n; iTrig++)
+      SaferDelete (&minbiasTriggers[iTrig]);
   }
-  else if (Ispp ()) {
-    outFiles[0]->Write ();//0, TObject::kOverwrite);
-    outFiles[0]->Close ();
-    SaferDelete (&(outFiles[0]));
+  SaferDelete (&tree);
+
+
+  for (int iFile = 0; iFile < numFileBins; iFile++) {
+    outFiles[iFile]->Write (0, TObject::kOverwrite);
+    outFiles[iFile]->Close ();
+    SaferDelete (&(outFiles[iFile]));
+    SaferDelete (&(outTrees[iFile]));
   }
 
 

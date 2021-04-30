@@ -1,5 +1,5 @@
-#ifndef __PlotZDCAnalysis_C__
-#define __PlotZDCAnalysis_C__
+#ifndef __PlotCentralityAnalysis_C__
+#define __PlotCentralityAnalysis_C__
 
 #include <TFile.h>
 #include <TH1D.h>
@@ -11,10 +11,13 @@
 
 #include <Utilities.h>
 
+#include "Params.h"
+
 #include <iostream>
 #include <fstream>
 
 using namespace std;
+using namespace JetHadronCorrelations;
 
 TGraphErrors* TProfY2TGE (TProfile* py) {
   TGraphErrors* g = new TGraphErrors ();
@@ -34,9 +37,9 @@ TGraphErrors* TProfX2TGE (TProfile* px) {
   return g;
 }
 
-void PlotZDCAnalysis () {
 
-  TFile* inFile = new TFile ("rootFiles/ZDCAnalysis/Nominal/outFile.root", "read");
+void PlotCentralityAnalysis () { 
+  TFile* inFile = new TFile ("rootFiles/CentralityAnalysis/Nominal/outFile.root", "read");
 
   int runs[6] = {312796, 312837, 312937, 312945, 312968, 314199};
 
@@ -56,6 +59,10 @@ void PlotZDCAnalysis () {
   TH2D* h2_mb_Pb_fcal_et_zdc_calibE[6] = {};
   TH2D* h2_jet_Pb_fcal_et_zdc_calibE_sum = nullptr;
   TH2D* h2_mb_Pb_fcal_et_zdc_calibE_sum = nullptr;
+
+  TH1D* h_jet_Pb_fcal_et_zdcSelected = nullptr;
+  TH1D* h_mb_Pb_fcal_et_zdcSelected = nullptr;
+  TH1D* h_ratio_Pb_fcal_et_zdcSelected = nullptr;
 
   for (int iRun = 0; iRun < 6; iRun++) {
     h_jet_Pb_fcal_et[iRun] = (TH1D*) inFile->Get (Form ("h_jet_Pb_fcal_et_run%i", runs[iRun]));
@@ -87,20 +94,24 @@ void PlotZDCAnalysis () {
     h2_mb_Pb_fcal_et_zdc_calibE_sum->Add (h2_mb_Pb_fcal_et_zdc_calibE[iRun]);
   }
 
-  h_jet_Pb_fcal_et_sum->Scale (1. / h_jet_Pb_fcal_et_sum->Integral (h_jet_Pb_fcal_et_sum->FindBin (49.03), h_jet_Pb_fcal_et_sum->GetNbinsX ()));
-  h_mb_Pb_fcal_et_sum->Scale (1. / h_mb_Pb_fcal_et_sum->Integral (h_mb_Pb_fcal_et_sum->FindBin (49.03), h_mb_Pb_fcal_et_sum->GetNbinsX ()));
-  h_jet_Pb_zdc_calibE_sum->Scale (1. / h_jet_Pb_zdc_calibE_sum->Integral (h_jet_Pb_zdc_calibE_sum->FindBin (65.9228), h_jet_Pb_zdc_calibE_sum->GetNbinsX ()));
-  h_mb_Pb_zdc_calibE_sum->Scale (1. / h_mb_Pb_zdc_calibE_sum->Integral (h_mb_Pb_zdc_calibE_sum->FindBin (65.9228), h_mb_Pb_zdc_calibE_sum->GetNbinsX ()));
+  h_jet_Pb_fcal_et_sum->Scale (1. / h_jet_Pb_fcal_et_sum->Integral (h_jet_Pb_fcal_et_sum->FindBin (fcalCentBins[1]), h_jet_Pb_fcal_et_sum->GetNbinsX ()));
+  h_mb_Pb_fcal_et_sum->Scale (1. / h_mb_Pb_fcal_et_sum->Integral (h_mb_Pb_fcal_et_sum->FindBin (fcalCentBins[1]), h_mb_Pb_fcal_et_sum->GetNbinsX ()));
+  h_jet_Pb_zdc_calibE_sum->Scale (1. / h_jet_Pb_zdc_calibE_sum->Integral (h_jet_Pb_zdc_calibE_sum->FindBin (zdcCentBins[1]), h_jet_Pb_zdc_calibE_sum->GetNbinsX ()));
+  h_mb_Pb_zdc_calibE_sum->Scale (1. / h_mb_Pb_zdc_calibE_sum->Integral (h_mb_Pb_zdc_calibE_sum->FindBin (zdcCentBins[1]), h_mb_Pb_zdc_calibE_sum->GetNbinsX ()));
 
   h_ratio_Pb_fcal_et_sum = (TH1D*) h_jet_Pb_fcal_et_sum->Clone ("h_ratio_Pb_fcal_et_sum");
   h_ratio_Pb_fcal_et_sum->Divide (h_mb_Pb_fcal_et_sum); 
   h_ratio_Pb_zdc_calibE_sum = (TH1D*) h_jet_Pb_zdc_calibE_sum->Clone ("h_ratio_Pb_zdc_calibE_sum");
   h_ratio_Pb_zdc_calibE_sum->Divide (h_mb_Pb_zdc_calibE_sum); 
 
-  //TH2D* h2_jet_Pb_fcal_et_zdc_calibE_run312796 = (TH2D*) inFile->Get ("h2_jet_Pb_fcal_et_zdc_calibE_run312796");
-  //TH2D* h2_mb_Pb_fcal_et_zdc_calibE_run312796 = (TH2D*) inFile->Get ("h2_mb_Pb_fcal_et_zdc_calibE_run312796");
-  //TH2D* h2_jet_Pb_fcal_et_zdc_calibE_run312968 = (TH2D*) inFile->Get ("h2_jet_Pb_fcal_et_zdc_calibE_run312796");
-  //TH2D* h2_mb_Pb_fcal_et_zdc_calibE_run312968 = (TH2D*) inFile->Get ("h2_mb_Pb_fcal_et_zdc_calibE_run312796");
+  h_jet_Pb_fcal_et_zdcSelected = h2_jet_Pb_fcal_et_zdc_calibE_sum->ProjectionX ("h_jet_Pb_fcal_et_zdcSelected", h2_jet_Pb_fcal_et_zdc_calibE_sum->GetYaxis ()->FindBin (zdcCentBins[1]), h2_jet_Pb_fcal_et_zdc_calibE_sum->GetYaxis ()->GetNbins ());
+  h_mb_Pb_fcal_et_zdcSelected = h2_mb_Pb_fcal_et_zdc_calibE_sum->ProjectionX ("h_mb_Pb_fcal_et_zdcSelected", h2_mb_Pb_fcal_et_zdc_calibE_sum->GetYaxis ()->FindBin (zdcCentBins[1]), h2_mb_Pb_fcal_et_zdc_calibE_sum->GetYaxis ()->GetNbins ());
+
+  h_jet_Pb_fcal_et_zdcSelected->Scale (1. / h_jet_Pb_fcal_et_zdcSelected->Integral (h_jet_Pb_fcal_et_zdcSelected->FindBin (fcalCentBins[1]), h_jet_Pb_fcal_et_zdcSelected->GetNbinsX ()));
+  h_mb_Pb_fcal_et_zdcSelected->Scale (1. / h_mb_Pb_fcal_et_zdcSelected->Integral (h_mb_Pb_fcal_et_zdcSelected->FindBin (fcalCentBins[1]), h_mb_Pb_fcal_et_zdcSelected->GetNbinsX ()));
+
+  h_ratio_Pb_fcal_et_zdcSelected = (TH1D*) h_jet_Pb_fcal_et_zdcSelected->Clone ("h_ratio_Pb_fcal_et_zdcSelected");
+  h_ratio_Pb_fcal_et_zdcSelected->Divide (h_mb_Pb_fcal_et_zdcSelected);
 
 
   for (int iRun = 0; iRun < 6; iRun++) {
@@ -226,7 +237,7 @@ void PlotZDCAnalysis () {
     subPadBorder->DrawLineNDC (1.-c->GetRightMargin (), 1.-c->GetTopMargin (), 0.6, 1.-c->GetTopMargin ());
     subPadBorder->DrawLineNDC (0.6, 1.-c->GetTopMargin (), 0.6, 0.6);
    
-    c->SaveAs (Form ("%s/Plots/ZDCAnalysis/run%i_zdc.pdf", workPath.Data (), runs[iRun]));
+    c->SaveAs (Form ("%s/Plots/CentralityAnalysis/run%i_zdc.pdf", workPath.Data (), runs[iRun]));
   }
 
 
@@ -266,7 +277,7 @@ void PlotZDCAnalysis () {
     uPad->cd ();
     uPad->SetLogy ();
 
-    TH1D* h = h_jet_Pb_zdc_calibE_sum;
+    TH1D* h = (TH1D*) h_jet_Pb_zdc_calibE_sum->Clone ("htemp");
     h->GetYaxis ()->SetTitle ("A.U. (normalized in 0-20%)");
 
     h->GetYaxis ()->SetTitleOffset (1.2 * h->GetYaxis ()->GetTitleOffset ());
@@ -289,8 +300,9 @@ void PlotZDCAnalysis () {
     h->GetYaxis ()->SetLabelSize (24);
 
     h->DrawCopy ("hist");
+    SaferDelete (&h);
 
-    h = h_mb_Pb_zdc_calibE_sum;
+    h = (TH1D*) h_mb_Pb_zdc_calibE_sum->Clone ("htemp");
 
     h->SetLineColor (kRed+1);
 
@@ -331,6 +343,7 @@ void PlotZDCAnalysis () {
     }
 
     h->DrawCopy ("hist same");
+    SaferDelete (&h);
 
     myText (0.20, 0.900, kBlack, "#bf{#it{ATLAS}} Internal", 0.036);
     myText (0.20, 0.860, kBlack, "#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV", 0.032);
@@ -345,7 +358,7 @@ void PlotZDCAnalysis () {
     ymin = 7e-2;
     ymax = 2e1;
 
-    h = h_ratio_Pb_zdc_calibE_sum;
+    h = (TH1D*) h_ratio_Pb_zdc_calibE_sum->Clone ("htemp");
     h->GetXaxis ()->SetTitle ("Calibrated #Sigma#it{E}_{ZDC}^{Pb} [TeV]");
     h->GetYaxis ()->SetTitle ("J50 / MB");
 
@@ -367,6 +380,7 @@ void PlotZDCAnalysis () {
     h->GetYaxis ()->SetLabelSize (24);
 
     h->DrawCopy ("hist");
+    SaferDelete (&h);
 
     divs->DrawLine (0, 1, 175, 1);
 
@@ -377,7 +391,7 @@ void PlotZDCAnalysis () {
     ymin = 4e-5;
     ymax = 2e-1;
 
-    h = h_jet_Pb_zdc_calibE_sum;
+    h = (TH1D*) h_jet_Pb_zdc_calibE_sum->Clone ("htemp");
 
     h->GetXaxis ()->SetTitleOffset (999);
     h->GetYaxis ()->SetTitleOffset (999);
@@ -395,9 +409,12 @@ void PlotZDCAnalysis () {
     h->GetYaxis ()->SetLabelSize (14);
 
     h->DrawCopy ("hist");
+    SaferDelete (&h);
 
-    h = h_mb_Pb_zdc_calibE_sum;
+    h = (TH1D*) h_mb_Pb_zdc_calibE_sum->Clone ("htemp");
+
     h->DrawCopy ("hist same");
+    SaferDelete (&h);
 
     c->cd ();
     TLine* subPadBorder = new TLine ();
@@ -407,7 +424,7 @@ void PlotZDCAnalysis () {
     subPadBorder->DrawLineNDC (0.6, 1.-tMargin*0.7, 0.6, 0.6*0.7+0.3);
 
 
-    c->SaveAs (Form ("%s/Plots/ZDCAnalysis/allruns_zdc.pdf", workPath.Data ()));
+    c->SaveAs (Form ("%s/Plots/CentralityAnalysis/allruns_zdc.pdf", workPath.Data ()));
   }
 
 
@@ -441,7 +458,7 @@ void PlotZDCAnalysis () {
     uPad->cd ();
     uPad->SetLogy ();
 
-    TH1D* h = h_jet_Pb_fcal_et_sum;
+    TH1D* h = (TH1D*) h_jet_Pb_fcal_et_sum->Clone ("htemp");
     h->GetYaxis ()->SetTitle ("A.U. (normalized in 0-20%)");
 
     h->GetYaxis ()->SetTitleOffset (1.2 * h->GetYaxis ()->GetTitleOffset ());
@@ -464,27 +481,36 @@ void PlotZDCAnalysis () {
     h->GetYaxis ()->SetLabelSize (24);
 
     h->DrawCopy ("hist");
+    SaferDelete (&h);
 
-    h = h_mb_Pb_fcal_et_sum;
+    h = (TH1D*) h_mb_Pb_fcal_et_sum->Clone ("htemp");
 
     h->SetLineColor (kRed+1);
 
-    double xq[12];
-    double yq[12];
-    TString percs[12];
-    xq[0] = 0.00;   yq[0] = 0;        percs[0] = "100%";
-    xq[1] = 0.10;   yq[1] = 3.54;     percs[1] = "90%";
-    xq[2] = 0.20;   yq[2] = 7.60;     percs[2] = "80%";
-    xq[3] = 0.30;   yq[3] = 12.27;    percs[3] = "70%";
-    xq[4] = 0.40;   yq[4] = 17.51;    percs[4] = "60%";
-    xq[5] = 0.50;   yq[5] = 23.45;    percs[5] = "50%";
-    xq[6] = 0.60;   yq[6] = 30.29;    percs[6] = "40%";
-    xq[7] = 0.70;   yq[7] = 38.49;    percs[7] = "30%";
-    xq[8] = 0.80;   yq[8] = 49.03;    percs[8] = "20%";
-    xq[9] = 0.90;   yq[9] = 65.08;    percs[9] = "10%";
-    xq[10] = 0.95;  yq[10] = 79.45;   percs[10] = "5%";
-    xq[11] = 0.99;  yq[11] = 109.01;  percs[11] = "1%";
-    for (int i = 0; i < 12; i++)
+    double xq[19];
+    double yq[19];
+    TString percs[19];
+    xq[0] = 0.00;   yq[0] = 0;                    percs[0] = "100%";
+    xq[1] = 0.10;   yq[1] = 3.54;                 percs[1] = "90%";
+    xq[2] = 0.20;   yq[2] = 7.60;                 percs[2] = "80%";
+    xq[3] = 0.30;   yq[3] = 12.27;                percs[3] = "70%";
+    xq[4] = 0.40;   yq[4] = 17.51;                percs[4] = "60%";
+    xq[5] = 0.50;   yq[5] = 23.45;                percs[5] = "50%";
+    xq[6] = 0.60;   yq[6] = 30.29;                percs[6] = "40%";
+    xq[7] = 0.70;   yq[7] = 38.49;                percs[7] = "30%";
+    xq[8] = 0.80;   yq[8] = 49.03;                percs[8] = "20%";
+    xq[9] = 0.82;   yq[9] = 0.8*49.03+0.2*65.08;  percs[9] = "18%";
+    xq[10] = 0.84;  yq[10] = 0.6*49.03+0.4*65.08; percs[10] = "16%";
+    xq[11] = 0.86;  yq[11] = 0.4*49.03+0.6*65.08; percs[11] = "14%";
+    xq[12] = 0.88;  yq[12] = 0.2*49.03+0.8*65.08; percs[12] = "12%";
+    xq[13] = 0.90;  yq[13] = 65.08;               percs[13] = "10%";
+    xq[14] = 0.92;  yq[14] = 0.8*65.08+0.2*110;   percs[14] = "8%";
+    xq[15] = 0.94;  yq[15] = 0.6*65.08+0.4*110;   percs[15] = "6%";
+    xq[16] = 0.96;  yq[16] = 0.4*65.08+0.6*110;   percs[16] = "4%";
+    xq[17] = 0.98;  yq[17] = 0.2*65.08+0.8*110;   percs[17] = "2%";
+    xq[18] = 0.99;  yq[18] = 109.01;              percs[18] = "1%";
+    h->GetQuantiles (19, yq, xq);
+    for (int i = 0; i < 19; i++)
       cout << xq[i] << ", " << yq[i] << endl;
 
     TLine* divs = new TLine ();
@@ -494,12 +520,277 @@ void PlotZDCAnalysis () {
     tl->SetTextFont (43);
     tl->SetTextSize (14);
     divs->SetLineStyle (2);
-    for (int i = 1; i < 12; i++) {
+    for (int i = 1; i < 19; i++) {
       divs->DrawLine (yq[i], ymin, yq[i], h->GetBinContent (h->FindBin (yq[i])));
       tl->DrawLatex (yq[i]+0.20, exp (0.1*log(ymax/ymin)) * ymin, percs[i].Data ());
     }
 
     h->DrawCopy ("hist same");
+    SaferDelete (&h);
+
+    myText (0.65, 0.900, kBlack, "#bf{#it{ATLAS}} Internal", 0.036);
+    myText (0.65, 0.860, kBlack, "#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV", 0.032);
+    myText (0.65, 0.820, kBlack, "All runs", 0.032);
+    myText (0.65, 0.740, kBlue+3, "J50 Trigger", 0.032);
+    myText (0.65, 0.700, kRed+1, "MinBias Trigger", 0.032);
+
+
+    dPad->cd ();
+    dPad->SetLogy ();
+
+    ymin = 7e-2;
+    ymax = 2e1;
+
+    h = (TH1D*) h_ratio_Pb_fcal_et_sum->Clone ("htemp");
+    h->GetXaxis ()->SetTitle ("#Sigma#it{E}_{T}^{Pb-FCal} [GeV]");
+    h->GetYaxis ()->SetTitle ("J50 / MB");
+
+    h->GetXaxis ()->SetTitleOffset (2.4 * h->GetXaxis ()->GetTitleOffset ());
+    h->GetYaxis ()->SetTitleOffset (1.2 * h->GetYaxis ()->GetTitleOffset ());
+    h->GetYaxis ()->CenterTitle ();
+
+    h->SetLineColor (kBlue+3);
+
+    h->GetYaxis ()->SetRangeUser (ymin, ymax);
+
+    h->GetXaxis ()->SetTitleFont (43);
+    h->GetXaxis ()->SetTitleSize (26);
+    h->GetYaxis ()->SetTitleFont (43);
+    h->GetYaxis ()->SetTitleSize (26);
+    h->GetXaxis ()->SetLabelFont (43);
+    h->GetXaxis ()->SetLabelSize (24);
+    h->GetYaxis ()->SetLabelFont (43);
+    h->GetYaxis ()->SetLabelSize (24);
+
+    h->DrawCopy ("hist");
+    SaferDelete (&h);
+
+    divs->DrawLine (-30, 1, 220, 1);
+
+    c->SaveAs (Form ("%s/Plots/CentralityAnalysis/allruns_fcal_et.pdf", workPath.Data ()));
+  }
+
+
+
+  {
+    TCanvas* c = new TCanvas ("c3", "", 800, 800);
+
+    gPad->SetLogz ();
+    gPad->SetFillColor (kBlue+3);
+    gPad->Update ();
+
+    gPad->SetBottomMargin (0.13);
+    gPad->SetLeftMargin (0.13);
+    gPad->SetRightMargin (0.15);
+    gPad->SetTopMargin (0.06);
+
+    TH2D* h = (TH2D*) h2_jet_Pb_fcal_et_zdc_calibE_sum->Clone ("htemp");
+    h->RebinY (4);
+    TGraphErrors* g_px = TProfX2TGE (h->ProfileX ("h_px"));
+    TGraphErrors* g_py = TProfY2TGE (h->ProfileY ("h_py"));
+
+    h->GetXaxis ()->SetTitle ("#Sigma#it{E}_{T}^{FCal, Pb} [GeV]");
+    h->GetYaxis ()->SetTitle ("Calibrated #Sigma#it{E}_{ZDC}^{Pb} [TeV]");
+    h->GetZaxis ()->SetTitle ("");
+
+    h->GetXaxis ()->SetTitleOffset (1.2 * h->GetXaxis ()->GetTitleOffset ());
+    h->GetYaxis ()->SetTitleOffset (1.2 * h->GetYaxis ()->GetTitleOffset ());
+
+    h->GetXaxis ()->SetTitleFont (43);
+    h->GetXaxis ()->SetTitleSize (26);
+    h->GetYaxis ()->SetTitleFont (43);
+    h->GetYaxis ()->SetTitleSize (26);
+    h->GetZaxis ()->SetTitleFont (43);
+    h->GetZaxis ()->SetTitleSize (26);
+
+    h->GetXaxis ()->SetLabelFont (43);
+    h->GetXaxis ()->SetLabelSize (22);
+    h->GetYaxis ()->SetLabelFont (43);
+    h->GetYaxis ()->SetLabelSize (22);
+    h->GetZaxis ()->SetLabelFont (43);
+    h->GetZaxis ()->SetLabelSize (22);
+
+    h->GetXaxis ()->SetAxisColor (kWhite);
+    h->GetXaxis ()->SetLabelColor (kWhite);
+    h->GetXaxis ()->SetTitleColor (kWhite);
+    h->GetYaxis ()->SetAxisColor (kWhite);
+    h->GetYaxis ()->SetLabelColor (kWhite);
+    h->GetYaxis ()->SetTitleColor (kWhite);
+    h->GetZaxis ()->SetAxisColor (kWhite);
+    h->GetZaxis ()->SetLabelColor (kWhite);
+    h->GetZaxis ()->SetTitleColor (kWhite);
+
+    h->DrawCopy ("colz");
+    SaferDelete (&h);
+
+    g_px->SetLineColor (kWhite);
+    g_py->SetLineColor (kWhite);
+    g_px->SetLineWidth (2);
+    g_py->SetLineWidth (2);
+
+    g_px->SetMarkerColor (kWhite);
+    g_py->SetMarkerColor (kWhite);
+    g_px->SetMarkerStyle (kDot);
+    g_py->SetMarkerStyle (kDot);
+
+    g_px->Draw ("P");
+    g_py->Draw ("P");
+
+    myText (0.15, 0.96, kWhite, "All runs, J50 Trigger", 0.032);
+
+    c->SaveAs (Form ("%s/Plots/CentralityAnalysis/J50_zdc_fcalet_correlation.pdf", workPath.Data ()));
+  }
+
+
+
+  {
+    TCanvas* c = new TCanvas ("c4", "", 800, 800);
+
+    gPad->SetLogz ();
+    gPad->SetFillColor (kBlue+3);
+    gPad->Update ();
+
+    gPad->SetBottomMargin (0.13);
+    gPad->SetLeftMargin (0.13);
+    gPad->SetRightMargin (0.15);
+    gPad->SetTopMargin (0.06);
+
+    TH2D* h = (TH2D*) h2_mb_Pb_fcal_et_zdc_calibE_sum->Clone ("htemp");
+    h->RebinY (4);
+    TGraphErrors* g_px = TProfX2TGE (h->ProfileX ("h_px"));
+    TGraphErrors* g_py = TProfY2TGE (h->ProfileY ("h_py"));
+
+    h->GetXaxis ()->SetTitle ("#Sigma#it{E}_{T}^{FCal, Pb} [GeV]");
+    h->GetYaxis ()->SetTitle ("Calibrated #Sigma#it{E}_{ZDC}^{Pb} [TeV]");
+    h->GetZaxis ()->SetTitle ("");
+
+    h->GetXaxis ()->SetTitleOffset (1.2 * h->GetXaxis ()->GetTitleOffset ());
+    h->GetYaxis ()->SetTitleOffset (1.2 * h->GetYaxis ()->GetTitleOffset ());
+
+    h->GetXaxis ()->SetTitleFont (43);
+    h->GetXaxis ()->SetTitleSize (26);
+    h->GetYaxis ()->SetTitleFont (43);
+    h->GetYaxis ()->SetTitleSize (26);
+    h->GetZaxis ()->SetTitleFont (43);
+    h->GetZaxis ()->SetTitleSize (26);
+
+    h->GetXaxis ()->SetLabelFont (43);
+    h->GetXaxis ()->SetLabelSize (22);
+    h->GetYaxis ()->SetLabelFont (43);
+    h->GetYaxis ()->SetLabelSize (22);
+    h->GetZaxis ()->SetLabelFont (43);
+    h->GetZaxis ()->SetLabelSize (22);
+
+    h->GetXaxis ()->SetAxisColor (kWhite);
+    h->GetXaxis ()->SetLabelColor (kWhite);
+    h->GetXaxis ()->SetTitleColor (kWhite);
+    h->GetYaxis ()->SetAxisColor (kWhite);
+    h->GetYaxis ()->SetLabelColor (kWhite);
+    h->GetYaxis ()->SetTitleColor (kWhite);
+    h->GetZaxis ()->SetAxisColor (kWhite);
+    h->GetZaxis ()->SetLabelColor (kWhite);
+    h->GetZaxis ()->SetTitleColor (kWhite);
+
+    h->DrawCopy ("colz");
+    SaferDelete (&h);
+
+    g_px->SetLineColor (kWhite);
+    g_py->SetLineColor (kWhite);
+    g_px->SetLineWidth (2);
+    g_py->SetLineWidth (2);
+
+    g_px->SetMarkerColor (kWhite);
+    g_py->SetMarkerColor (kWhite);
+    g_px->SetMarkerStyle (kDot);
+    g_py->SetMarkerStyle (kDot);
+
+    g_px->Draw ("P");
+    g_py->Draw ("P");
+
+    myText (0.15, 0.96, kWhite, "All runs, MinBias Trigger", 0.032);
+   
+    c->SaveAs (Form ("%s/Plots/CentralityAnalysis/MB_zdc_fcalet_correlation.pdf", workPath.Data ()));
+  }
+
+
+
+  {
+    TCanvas* c = new TCanvas ("c5", "", 800, 800);
+
+    const double bMargin = 0.20;
+    const double lMargin = 0.11;
+    const double rMargin = 0.04;
+    const double tMargin = 0.04;
+
+    TPad* uPad = new TPad ("c5_uPad", "", 0.0, 0.3, 1.0, 1.0);
+    TPad* dPad = new TPad ("c5_dPad", "", 0.0, 0.0, 1.0, 0.3);
+
+    uPad->SetBottomMargin (0);
+    uPad->SetLeftMargin (lMargin);
+    uPad->SetRightMargin (rMargin);
+    uPad->SetTopMargin (tMargin);
+
+    dPad->SetBottomMargin (bMargin);
+    dPad->SetLeftMargin (lMargin);
+    dPad->SetRightMargin (rMargin);
+    dPad->SetTopMargin (0);
+
+    uPad->Draw ();
+    dPad->Draw ();
+
+
+    uPad->cd ();
+    uPad->SetLogy ();
+
+    TH1D* h = (TH1D*) h_jet_Pb_fcal_et_sum->Clone ("htemp");
+    h->GetYaxis ()->SetTitle ("A.U. (normalized in 0-20%)");
+
+    h->GetYaxis ()->SetTitleOffset (1.2 * h->GetYaxis ()->GetTitleOffset ());
+
+    double ymin = 5e-7;
+    double ymax = 1e0;
+
+    h->SetLineColor (kBlue+3);
+
+    h->GetYaxis ()->SetRangeUser (ymin, ymax);
+
+    h->GetXaxis ()->SetTitleFont (43);
+    h->GetXaxis ()->SetTitleSize (0);
+    h->GetYaxis ()->SetTitleFont (43);
+    h->GetYaxis ()->SetTitleSize (26);
+    h->GetXaxis ()->SetLabelFont (43);
+    h->GetXaxis ()->SetLabelSize (0);
+    h->GetYaxis ()->SetLabelFont (43);
+    h->GetYaxis ()->SetLabelSize (24);
+
+    h->DrawCopy ("hist");
+    SaferDelete (&h);
+
+    h = (TH1D*) h_mb_Pb_fcal_et_sum->Clone ("htemp");
+
+    h->SetLineColor (kRed+1);
+
+    h->DrawCopy ("hist same");
+    SaferDelete (&h);
+
+
+    h = (TH1D*) h_jet_Pb_fcal_et_zdcSelected->Clone ("htemp");
+
+    h->SetLineColor (kBlue+3);
+    h->SetLineStyle (2);
+
+    h->DrawCopy ("hist same");
+    SaferDelete (&h);
+
+
+    h = (TH1D*) h_mb_Pb_fcal_et_zdcSelected->Clone ("htemp");
+
+    h->SetLineColor (kRed+1);
+    h->SetLineStyle (2);
+
+    h->DrawCopy ("hist same");
+    SaferDelete (&h);
+
 
     myText (0.65, 0.900, kBlack, "#bf{#it{ATLAS}} Internal", 0.036);
     myText (0.65, 0.860, kBlack, "#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV", 0.032);
@@ -536,154 +827,23 @@ void PlotZDCAnalysis () {
     h->GetYaxis ()->SetLabelSize (24);
 
     h->DrawCopy ("hist");
+    SaferDelete (&h);
 
-    divs->DrawLine (-30, 1, 220, 1);
+    h = (TH1D*) h_ratio_Pb_fcal_et_zdcSelected->Clone ("htemp");
 
-    c->SaveAs (Form ("%s/Plots/ZDCAnalysis/allruns_fcal_et.pdf", workPath.Data ()));
+    h->SetLineColor (kBlue+3);
+    h->SetLineStyle (2);
+
+    h->DrawCopy ("hist same");
+    SaferDelete (&h);
+
+    TLine* tline = new TLine ();
+    tline->SetLineStyle (2);
+    tline->DrawLine (-30, 1, 220, 1);
+
+    c->SaveAs (Form ("%s/Plots/CentralityAnalysis/allruns_fcal_et_zdcSelected.pdf", workPath.Data ()));
   }
-
-
-
-  {
-    TCanvas* c = new TCanvas ("c3", "", 800, 800);
-
-    gPad->SetLogz ();
-    gPad->SetFillColor (kBlue+3);
-    gPad->Update ();
-
-    gPad->SetBottomMargin (0.13);
-    gPad->SetLeftMargin (0.13);
-    gPad->SetRightMargin (0.15);
-    gPad->SetTopMargin (0.06);
-
-    TH2D* h = h2_jet_Pb_fcal_et_zdc_calibE_sum;
-    h->RebinY (4);
-    h->GetXaxis ()->SetTitle ("#Sigma#it{E}_{T}^{FCal, Pb} [GeV]");
-    h->GetYaxis ()->SetTitle ("Calibrated #Sigma#it{E}_{ZDC}^{Pb} [TeV]");
-    h->GetZaxis ()->SetTitle ("");
-
-    h->GetXaxis ()->SetTitleOffset (1.2 * h->GetXaxis ()->GetTitleOffset ());
-    h->GetYaxis ()->SetTitleOffset (1.2 * h->GetYaxis ()->GetTitleOffset ());
-
-    h->GetXaxis ()->SetTitleFont (43);
-    h->GetXaxis ()->SetTitleSize (26);
-    h->GetYaxis ()->SetTitleFont (43);
-    h->GetYaxis ()->SetTitleSize (26);
-    h->GetZaxis ()->SetTitleFont (43);
-    h->GetZaxis ()->SetTitleSize (26);
-
-    h->GetXaxis ()->SetLabelFont (43);
-    h->GetXaxis ()->SetLabelSize (22);
-    h->GetYaxis ()->SetLabelFont (43);
-    h->GetYaxis ()->SetLabelSize (22);
-    h->GetZaxis ()->SetLabelFont (43);
-    h->GetZaxis ()->SetLabelSize (22);
-
-    h->GetXaxis ()->SetAxisColor (kWhite);
-    h->GetXaxis ()->SetLabelColor (kWhite);
-    h->GetXaxis ()->SetTitleColor (kWhite);
-    h->GetYaxis ()->SetAxisColor (kWhite);
-    h->GetYaxis ()->SetLabelColor (kWhite);
-    h->GetYaxis ()->SetTitleColor (kWhite);
-    h->GetZaxis ()->SetAxisColor (kWhite);
-    h->GetZaxis ()->SetLabelColor (kWhite);
-    h->GetZaxis ()->SetTitleColor (kWhite);
-
-    h->Draw ("colz");
-
-
-    TGraphErrors* g_px = TProfX2TGE (h->ProfileX ("h_px"));
-    TGraphErrors* g_py = TProfY2TGE (h->ProfileY ("h_py"));
-
-    g_px->SetLineColor (kWhite);
-    g_py->SetLineColor (kWhite);
-    g_px->SetLineWidth (2);
-    g_py->SetLineWidth (2);
-
-    g_px->SetMarkerColor (kWhite);
-    g_py->SetMarkerColor (kWhite);
-    g_px->SetMarkerStyle (kDot);
-    g_py->SetMarkerStyle (kDot);
-
-    g_px->Draw ("P");
-    g_py->Draw ("P");
-
-    myText (0.15, 0.96, kWhite, "All runs, J50 Trigger", 0.032);
-
-    c->SaveAs (Form ("%s/Plots/ZDCAnalysis/J50_zdc_fcalet_correlation.pdf", workPath.Data ()));
-  }
-
-
-
-  {
-    TCanvas* c = new TCanvas ("c4", "", 800, 800);
-
-    gPad->SetLogz ();
-    gPad->SetFillColor (kBlue+3);
-    gPad->Update ();
-
-    gPad->SetBottomMargin (0.13);
-    gPad->SetLeftMargin (0.13);
-    gPad->SetRightMargin (0.15);
-    gPad->SetTopMargin (0.06);
-
-    TH2D* h = h2_mb_Pb_fcal_et_zdc_calibE_sum;
-    h->RebinY (4);
-
-    h->GetXaxis ()->SetTitle ("#Sigma#it{E}_{T}^{FCal, Pb} [GeV]");
-    h->GetYaxis ()->SetTitle ("Calibrated #Sigma#it{E}_{ZDC}^{Pb} [TeV]");
-    h->GetZaxis ()->SetTitle ("");
-
-    h->GetXaxis ()->SetTitleOffset (1.2 * h->GetXaxis ()->GetTitleOffset ());
-    h->GetYaxis ()->SetTitleOffset (1.2 * h->GetYaxis ()->GetTitleOffset ());
-
-    h->GetXaxis ()->SetTitleFont (43);
-    h->GetXaxis ()->SetTitleSize (26);
-    h->GetYaxis ()->SetTitleFont (43);
-    h->GetYaxis ()->SetTitleSize (26);
-    h->GetZaxis ()->SetTitleFont (43);
-    h->GetZaxis ()->SetTitleSize (26);
-
-    h->GetXaxis ()->SetLabelFont (43);
-    h->GetXaxis ()->SetLabelSize (22);
-    h->GetYaxis ()->SetLabelFont (43);
-    h->GetYaxis ()->SetLabelSize (22);
-    h->GetZaxis ()->SetLabelFont (43);
-    h->GetZaxis ()->SetLabelSize (22);
-
-    h->GetXaxis ()->SetAxisColor (kWhite);
-    h->GetXaxis ()->SetLabelColor (kWhite);
-    h->GetXaxis ()->SetTitleColor (kWhite);
-    h->GetYaxis ()->SetAxisColor (kWhite);
-    h->GetYaxis ()->SetLabelColor (kWhite);
-    h->GetYaxis ()->SetTitleColor (kWhite);
-    h->GetZaxis ()->SetAxisColor (kWhite);
-    h->GetZaxis ()->SetLabelColor (kWhite);
-    h->GetZaxis ()->SetTitleColor (kWhite);
-
-    h->Draw ("colz");
-
-
-    TGraphErrors* g_px = TProfX2TGE (h->ProfileX ("h_px"));
-    TGraphErrors* g_py = TProfY2TGE (h->ProfileY ("h_py"));
-
-    g_px->SetLineColor (kWhite);
-    g_py->SetLineColor (kWhite);
-    g_px->SetLineWidth (2);
-    g_py->SetLineWidth (2);
-
-    g_px->SetMarkerColor (kWhite);
-    g_py->SetMarkerColor (kWhite);
-    g_px->SetMarkerStyle (kDot);
-    g_py->SetMarkerStyle (kDot);
-
-    g_px->Draw ("P");
-    g_py->Draw ("P");
-
-    myText (0.15, 0.96, kWhite, "All runs, MinBias Trigger", 0.032);
-   
-    c->SaveAs (Form ("%s/Plots/ZDCAnalysis/MB_zdc_fcalet_correlation.pdf", workPath.Data ()));
-  }
+    
 }
 
 #endif

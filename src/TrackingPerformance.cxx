@@ -342,7 +342,13 @@ bool TrackingPerformance (const char* directory,
   cout << endl << "Info: In TrackingPerformance.cxx: Finished event loop." << endl;
 
 
+  SaferDelete (&tree);
+
+
+  outFile->cd ();
+
   h_truth_matching_prob->Write ();
+  SaferDelete (&h_truth_matching_prob);
 
   h2_truth_matched_reco_tracks->Write ();
   SaferDelete (&h2_truth_matched_reco_tracks);

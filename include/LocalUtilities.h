@@ -4,6 +4,7 @@
 
 #include <TString.h>
 #include <TH1D.h>
+#include <TH2D.h>
 #include <TFile.h>
 
 #include <vector>
@@ -19,8 +20,8 @@ static const std::vector <DataType> AllDataType = { DataType::Collisions, DataTy
 enum class TriggerType { None, Jet50GeV, Jet100GeV, MinBias }; // types of triggers in this analysis
 static const std::vector <TriggerType> AllTriggerType = { TriggerType::None, TriggerType::Jet50GeV, TriggerType::Jet100GeV, TriggerType::MinBias };
 
-enum class SystFlag { None, HITightVar, PionsOnlyVar, WithPileupVar, FcalCentVar, JetES5PercUpVar, JetES5PercDownVar, JetES5PercSmearVar, JetES2PercUpVar, JetES2PercDownVar, JetES2PercSmearVar }; // types of systematic variations
-static const std::vector <SystFlag> AllSystFlag = { SystFlag::None, SystFlag::HITightVar, SystFlag::PionsOnlyVar, SystFlag::WithPileupVar, SystFlag::FcalCentVar, SystFlag::JetES5PercUpVar, SystFlag::JetES5PercDownVar, SystFlag::JetES5PercSmearVar, SystFlag::JetES2PercUpVar, SystFlag::JetES2PercDownVar, SystFlag::JetES2PercSmearVar };
+enum class SystFlag { None, HITightVar, PionsOnlyVar, WithPileupVar, FcalCentVar, FineFcalCentVar, JetES5PercUpVar, JetES5PercDownVar, JetES5PercSmearVar, JetES2PercUpVar, JetES2PercDownVar, JetES2PercSmearVar }; // types of systematic variations
+static const std::vector <SystFlag> AllSystFlag = { SystFlag::None, SystFlag::HITightVar, SystFlag::PionsOnlyVar, SystFlag::WithPileupVar, SystFlag::FcalCentVar, SystFlag::FineFcalCentVar, SystFlag::JetES5PercUpVar, SystFlag::JetES5PercDownVar, SystFlag::JetES5PercSmearVar, SystFlag::JetES2PercUpVar, SystFlag::JetES2PercDownVar, SystFlag::JetES2PercSmearVar };
 
 
 TString ToTString (const CollisionSystem collSys);
@@ -67,6 +68,7 @@ bool DoHITightVar (const SystFlag sFlag);
 bool DoPionsOnlyVar (const SystFlag sFlag);
 bool DoWithPileupVar (const SystFlag sFlag);
 bool DoFcalCentVar (const SystFlag sFlag);
+bool DoFineFcalCentVar (const SystFlag sFlag);
 bool DoJetES5PercUpVar (const SystFlag sFlag);
 bool DoJetES5PercDownVar (const SystFlag sFlag);
 bool DoJetES5PercSmearVar (const SystFlag sFlag);
@@ -108,6 +110,7 @@ bool DoHITightVar ();
 bool DoPionsOnlyVar ();
 bool DoWithPileupVar ();
 bool DoFcalCentVar ();
+bool DoFineFcalCentVar ();
 bool DoJetES5PercUpVar ();
 bool DoJetES5PercDownVar ();
 bool DoJetES5PercSmearVar ();
@@ -138,13 +141,6 @@ bool GetMCWeights (TString fname);
  * Returns a copy of the histogram detailing the Zdc cuts.
  */
 TH1D* GetZdcCuts ();
-
-
-/**
- * Returns the appropriate file in the given directory.
- * For MC, inFileName MUST be specified.
- */
-TFile* GetFile (const char* directory, const int dataSet, const char* inFileName);
 
 
 /**
@@ -181,6 +177,18 @@ bool MeetsTrackCuts (int iTrk);
  * Returns the appropriate per-jet reweighting factor. Takes in coordinates for an anti-kT R=0.4 HI jet (pT, eta, & phi).
  */
 double GetAkt4JetWeight (const float jpt, const float jeta, const float jphi, const float jetr = 0.4);
+
+
+/**
+ * Returns the tracking efficiency histograms.
+ */
+TH2D* LoadTrackingEfficiency ();
+
+
+/**
+ * Returns the tracking purity histograms.
+ */
+TH2D* LoadTrackingPurity ();
 
 } // end namespace
 

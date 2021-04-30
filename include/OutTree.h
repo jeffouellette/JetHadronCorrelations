@@ -49,7 +49,7 @@ float out_trk_phi[max_trk_n];
 float out_trk_charge[max_trk_n];
 float out_trk_d0[max_trk_n];
 float out_trk_z0[max_trk_n];
-bool  out_trk_truth_matched[10000];
+bool  out_trk_truth_matched[max_trk_n];
 
 int   out_akt4_hi_jet_n;
 float out_akt4_hi_jet_pt[max_akt4_hi_jet_n];
@@ -82,6 +82,10 @@ struct OutTree {
   OutTree (const char* name, TFile* file) {
     tree = new TTree (name, name);
     tree->SetDirectory (file);
+  }
+  ~OutTree () {
+    if (tree != nullptr)
+      SaferDelete (&tree);
   }
 
   void SetBranchEventInfo     (const bool _branchEventInfo = true)    { branchEventInfo = _branchEventInfo; }

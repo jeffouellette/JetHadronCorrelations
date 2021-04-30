@@ -1,14 +1,14 @@
 #! /bin/bash
 
-#declare -a vardirs=("Nominal" "JetES5PercUpVar" "JetES5PercDownVar" "JetES5PercSmearVar" "JetES2PercUpVar" "JetES2PercDownVar" "JetES2PercSmearVar" "FcalCentVar")
-declare -a vardirs=("FcalCentVar")
+#declare -a vardirs=("Nominal" "JetES5PercUpVar" "JetES5PercDownVar" "JetES5PercSmearVar" "JetES2PercUpVar" "JetES2PercDownVar" "JetES2PercSmearVar" "FcalCentVar" "FineFcalCentVar")
+declare -a vardirs=("Nominal" "JetES5PercUpVar" "JetES5PercDownVar" "JetES5PercSmearVar" "JetES2PercUpVar" "JetES2PercDownVar" "JetES2PercSmearVar")
 declare -a resdirs=("60GeVJets" "30GeVJets")
 
 for resdir in ${resdirs[@]}; do
 
   for vardir in ${vardirs[@]}; do
 
-    histpath=rootFiles/${resdir}/JetsHists/${vardir}
+    histpath=rootFiles/Histograms/${resdir}/JetsHists/${vardir}
 
     hadd -f ${histpath}/data17_5TeV_hists.root \
             ${histpath}/340644_hists.root \
@@ -33,7 +33,7 @@ for resdir in ${resdirs[@]}; do
             ${histpath}/312968_*_hists.root \
             ${histpath}/314199_*_hists.root
  
-    histpath=rootFiles/${resdir}/MixedHists/${vardir}
+    histpath=rootFiles/Histograms/${resdir}/MixedHists/${vardir}
 
     hadd -f ${histpath}/data16_5TeV_hists.root \
             ${histpath}/312796_*_hists.root \

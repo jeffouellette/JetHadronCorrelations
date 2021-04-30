@@ -129,16 +129,14 @@ bool CentralityAnalysis (const char* directory,
   }
 
 
-  if (IsPbPb ()) {
-    tree->SetBranchAddress ("cluster_sumGap_A",  &cluster_sumGap_A);
-    tree->SetBranchAddress ("cluster_sumGap_C",  &cluster_sumGap_C);
-    tree->SetBranchAddress ("cluster_edgeGap_A", &cluster_edgeGap_A);
-    tree->SetBranchAddress ("cluster_edgeGap_C", &cluster_edgeGap_C);
-    tree->SetBranchAddress ("sumGap_A",          &sumGap_A);
-    tree->SetBranchAddress ("sumGap_C",          &sumGap_C);
-    tree->SetBranchAddress ("edgeGap_A",         &edgeGap_A);
-    tree->SetBranchAddress ("edgeGap_C",         &edgeGap_C);
-  }
+  tree->SetBranchAddress ("cluster_sumGap_A",  &cluster_sumGap_A);
+  tree->SetBranchAddress ("cluster_sumGap_C",  &cluster_sumGap_C);
+  tree->SetBranchAddress ("cluster_edgeGap_A", &cluster_edgeGap_A);
+  tree->SetBranchAddress ("cluster_edgeGap_C", &cluster_edgeGap_C);
+  tree->SetBranchAddress ("sumGap_A",          &sumGap_A);
+  tree->SetBranchAddress ("sumGap_C",          &sumGap_C);
+  tree->SetBranchAddress ("edgeGap_A",         &edgeGap_A);
+  tree->SetBranchAddress ("edgeGap_C",         &edgeGap_C);
 
 
   TString outTreeName = "";
@@ -173,8 +171,9 @@ bool CentralityAnalysis (const char* directory,
   }
 
 
-  Trigger* jetTriggers[jet_trig_n] = {};
-  Trigger* minbiasTriggers[minbias_trig_n] = {};
+  Trigger* jetTriggers[jet_trig_n];
+  Trigger* minbiasTriggers[minbias_trig_n];
+  Trigger* zdcL1Triggers[zdc_L1_trig_n];
 
   if (IsCollisions ()) {
     for (int iTrig = 0; iTrig < jet_trig_n; iTrig++) {
@@ -187,11 +186,24 @@ bool CentralityAnalysis (const char* directory,
       tree->SetBranchAddress ((minbias_trig_name[iTrig]+"_decision").c_str (), &(minbiasTriggers[iTrig]->trigDecision));
       tree->SetBranchAddress ((minbias_trig_name[iTrig]+"_prescale").c_str (), &(minbiasTriggers[iTrig]->trigPrescale));
     }
+    if (!Ispp ()) {
+      for (int iTrig = 0; iTrig < zdc_L1_trig_n; iTrig++) {
+        zdcL1Triggers[iTrig] = new Trigger (zdc_L1_trig_name[iTrig]);
+        tree->SetBranchAddress ((zdc_L1_trig_name[iTrig]+"_decision").c_str (), &(zdcL1Triggers[iTrig]->trigDecision));
+        tree->SetBranchAddress ((zdc_L1_trig_name[iTrig]+"_prescale").c_str (), &(zdcL1Triggers[iTrig]->trigPrescale));
+      }
+    }
   }
 
 
   // Load files for output
   TFile* outFile = new TFile (Form ("%s/%s.root", rootPath.Data (), identifier.Data ()), "recreate");
+
+  TH1D* h_mb_instMu = new TH1D (Form ("h2_mb_instMu_run%i", dataSet), ";#mu_{inst};", 1000, 0, 5);
+  h_mb_instMu->Sumw2 ();
+  TH1D* h_mb_avgMu = new TH1D (Form ("h2_mb_avgMu_run%i", dataSet), ";#mu_{avg};", 1000, 0, 5);
+  h_mb_avgMu->Sumw2 ();
+
   TH2D* h2_mb_Pb_fcal_et_zdc_calibE = new TH2D (Form ("h2_mb_Pb_fcal_et_zdc_calibE_run%i", dataSet), "", 80, -100, 300, 1400, 0, 175);
   TH2D* h2_jet_Pb_fcal_et_zdc_calibE = new TH2D (Form ("h2_jet_Pb_fcal_et_zdc_calibE_run%i", dataSet), "", 80, -100, 300, 1400, 0, 175);
 
@@ -242,29 +254,46 @@ bool CentralityAnalysis (const char* directory,
         hasPrimaryVert = true;
         vz = vert_z[iVert];
       }
-      if (vert_type[iVert] == 3)
+      if (vert_type[iVert] == 3 && vert_ntrk[iVert] > 6)
         hasPileup = true;
     }
     if (!hasPrimaryVert || hasPileup || fabs (vz) > 150)
       continue;
 
-    float fcal_et_Pb = 0, fcal_et_p = 0, zdc_calibE_Pb = 0, zdc_calibE_p = 0;
+    float fcal_et_Pb = 0, fcal_et_p = 0, zdc_calibE_Pb = 0, zdc_calibE_p = 0, edgeGap_Pb = 0, edgeGap_p = 0;
+    bool zdc_Pb_decision = false, zdc_p_decision = false;
     if (IspPb ()) {
       fcal_et_Pb = IsPeriodA () ? fcalA_et : fcalC_et; // Pb-going side is the A side in period A (runs < 313435)
       fcal_et_p = IsPeriodA () ? fcalC_et : fcalA_et;
       zdc_calibE_Pb = IsPeriodA () ? ZdcCalibEnergy_A : ZdcCalibEnergy_C;
       zdc_calibE_p = IsPeriodA () ? ZdcCalibEnergy_C : ZdcCalibEnergy_A;
+      edgeGap_Pb = IsPeriodA () ? edgeGap_A : edgeGap_C;
+      edgeGap_p = IsPeriodA () ? edgeGap_C : edgeGap_A;
+      zdc_Pb_decision = IsPeriodA () ? zdcL1Triggers[0]->trigDecision : zdcL1Triggers[1]->trigDecision;
+      zdc_p_decision = IsPeriodA () ? zdcL1Triggers[1]->trigDecision : zdcL1Triggers[0]->trigDecision;
     }
     else if (Ispp ()) {
       fcal_et_Pb = -999;
       fcal_et_p = fcalA_et + fcalC_et;
       zdc_calibE_Pb = -999;
       zdc_calibE_p = ZdcCalibEnergy_A + ZdcCalibEnergy_C;
+      edgeGap_Pb = -999;
+      edgeGap_p = -999;
     }
     zdc_calibE_Pb *= 1e3;
     zdc_calibE_p *= 1e3;
 
+    if (IspPb ()) {
+      if (edgeGap_Pb > 1.8)
+        continue; // cut on diffractive type events
+      if (!zdc_Pb_decision)
+        continue; // require Pb-going ZDC trigger fired
+    }
+
     if (minbiasTriggers[0]->trigDecision) {
+      h_mb_instMu->Fill (actualInteractionsPerCrossing);
+      h_mb_avgMu->Fill (averageInteractionsPerCrossing);
+
       h2_mb_Pb_fcal_et_zdc_calibE->Fill (fcal_et_Pb, zdc_calibE_Pb);
 
       h_mb_Pb_fcal_et->Fill (fcal_et_Pb);
@@ -290,19 +319,52 @@ bool CentralityAnalysis (const char* directory,
   } // end event loop
   cout << endl << "Info: In CentralityAnalysis.cxx: Finished processing events." << endl;
 
+
+  if (IsCollisions ()) {
+    for (int iTrig = 0; iTrig < jet_trig_n; iTrig++)
+      SaferDelete (&jetTriggers[iTrig]);
+    for (int iTrig = 0; iTrig < minbias_trig_n; iTrig++)
+      SaferDelete (&minbiasTriggers[iTrig]);
+    if (!Ispp ()) {
+      for (int iTrig = 0; iTrig < zdc_L1_trig_n; iTrig++)
+        SaferDelete (&zdcL1Triggers[iTrig]);
+    }
+  }
+  SaferDelete (&tree);
+
+
+  outFile->cd ();
+
+  h_mb_instMu->Write ();
+  SaferDelete (&h_mb_instMu);
+  h_mb_avgMu->Write ();
+  SaferDelete (&h_mb_avgMu);
+
   h2_mb_Pb_fcal_et_zdc_calibE->Write ();
+  SaferDelete (&h2_mb_Pb_fcal_et_zdc_calibE);
   h_mb_Pb_fcal_et->Write ();
+  SaferDelete (&h_mb_Pb_fcal_et);
   h_mb_p_fcal_et->Write ();
+  SaferDelete (&h_mb_p_fcal_et);
   h_mb_Pb_zdc_calibE->Write ();
+  SaferDelete (&h_mb_Pb_zdc_calibE);
   h_mb_Pb_zdc_calibE_cut->Write ();
+  SaferDelete (&h_mb_Pb_zdc_calibE_cut);
   h_mb_p_zdc_calibE->Write ();
+  SaferDelete (&h_mb_p_zdc_calibE);
 
   h2_jet_Pb_fcal_et_zdc_calibE->Write ();
+  SaferDelete (&h2_jet_Pb_fcal_et_zdc_calibE);
   h_jet_Pb_fcal_et->Write ();
+  SaferDelete (&h_jet_Pb_fcal_et);
   h_jet_p_fcal_et->Write ();
+  SaferDelete (&h_jet_p_fcal_et);
   h_jet_Pb_zdc_calibE->Write ();
+  SaferDelete (&h_jet_Pb_zdc_calibE);
   h_jet_Pb_zdc_calibE_cut->Write ();
+  SaferDelete (&h_jet_Pb_zdc_calibE_cut);
   h_jet_p_zdc_calibE->Write ();
+  SaferDelete (&h_jet_p_zdc_calibE);
 
   outFile->Close ();
   SaferDelete (&outFile);

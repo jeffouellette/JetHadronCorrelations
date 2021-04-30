@@ -5,6 +5,7 @@
 #include "OutTree.h"
 #include "TreeVariables.h"
 #include "LocalUtilities.h"
+#include "Variations.h"
 
 #include <ArrayTemplates.h>
 #include <Utilities.h>
@@ -34,23 +35,6 @@ const Color_t systColors[10] = {kRed+1, kAzure-2, kGreen+2, kViolet-3, kMagenta,
 TLine* l = new TLine ();
 TLatex* tl = new TLatex ();
 
-const int nVar = 4;
-std::vector <TString> variations = {"JetES5PercUpVar", "JetES5PercDownVar", "JetES2PercUpVar", "JetES2PercDownVar"};
-
-std::map <TString, MyStyle> varStyles = {
-  {"JetES5PercUpVar",   MyStyle (kPink+5, 3)},
-  {"JetES5PercDownVar", MyStyle (kPink+5, 2)},
-  {"JetES2PercUpVar",   MyStyle (kAzure+2, 3)},
-  {"JetES2PercDownVar", MyStyle (kAzure+2, 2)}
-};
-std::map <TString, TString> varFullNames = {
-  {"JetES5PercUpVar",   "JES 5\% up"},
-  {"JetES5PercDownVar", "JES 5\% down"},
-  {"JetES2PercUpVar",   "JES 2\% up"},
-  {"JetES2PercDownVar", "JES 2\% down"}
-};
-
-
 void PlotJets (const char* tag, const char* inFileTag) {
 
   SetupDirectories ("Data");
@@ -59,8 +43,8 @@ void PlotJets (const char* tag, const char* inFileTag) {
 
   TH1D** h_evt_counts = new TH1D*[2];
   TH1D** h_jet_counts = new TH1D*[2];
-  TH1D** h_ljet_counts = new TH1D*[2];
-  TH1D** h_sljet_counts = new TH1D*[2];
+  //TH1D** h_ljet_counts = new TH1D*[2];
+  //TH1D** h_sljet_counts = new TH1D*[2];
 
   TH1D** h_jet_pt = new TH1D*[2];
   TH2D** h2_jet_pt_cov = new TH2D*[2];
@@ -88,12 +72,12 @@ void PlotJets (const char* tag, const char* inFileTag) {
 
     h_evt_counts[0] = (TH1D*) inFile->Get ("h_evt_counts_ref");
     h_jet_counts[0] = (TH1D*) inFile->Get ("h_jet_counts_ref");
-    h_ljet_counts[0] = (TH1D*) inFile->Get ("h_ljet_counts_ref");
-    h_sljet_counts[0] = (TH1D*) inFile->Get ("h_sljet_counts_ref");
+    //h_ljet_counts[0] = (TH1D*) inFile->Get ("h_ljet_counts_ref");
+    //h_sljet_counts[0] = (TH1D*) inFile->Get ("h_sljet_counts_ref");
     h_evt_counts[1] = (TH1D*) inFile->Get ("h_evt_counts");
     h_jet_counts[1] = (TH1D*) inFile->Get ("h_jet_counts");
-    h_ljet_counts[1] = (TH1D*) inFile->Get ("h_ljet_counts");
-    h_sljet_counts[1] = (TH1D*) inFile->Get ("h_sljet_counts");
+    //h_ljet_counts[1] = (TH1D*) inFile->Get ("h_ljet_counts");
+    //h_sljet_counts[1] = (TH1D*) inFile->Get ("h_sljet_counts");
 
     h_jet_pt[0] = (TH1D*) inFile->Get ("h_jet_pt_ref");
     h_jet_pt[1] = (TH1D*) inFile->Get ("h_jet_pt");

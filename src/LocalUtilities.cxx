@@ -22,6 +22,12 @@
 namespace JetHadronCorrelations {
 
 
+TString workPath = TString (std::getenv ("JETHADRONCORR_PATH"));
+TString extWorkPath = TString (std::getenv ("JETHADRONCORR_DATA_PATH")) + "/";
+TString rootPath = extWorkPath + "rootFiles/";
+TString dataPath = extWorkPath + "data/";
+
+
 TString ToTString (const CollisionSystem collSys) {
   switch (collSys) {
     case CollisionSystem::pp15:       return TString ("pp15_5TeV");
@@ -70,6 +76,7 @@ TString ToTString (const SystFlag sFlag) {
     case SystFlag::PionsOnlyVar:            return TString ("PionsOnlyVar");
     case SystFlag::WithPileupVar:           return TString ("WithPileupVar");
     case SystFlag::FcalCentVar:             return TString ("FcalCentVar");
+    case SystFlag::FineFcalCentVar:         return TString ("FineFcalCentVar");
     case SystFlag::JetES5PercUpVar:         return TString ("JetES5PercUpVar");
     case SystFlag::JetES5PercDownVar:       return TString ("JetES5PercDownVar");
     case SystFlag::JetES5PercSmearVar:      return TString ("JetES5PercSmearVar");
@@ -299,6 +306,12 @@ bool DoFcalCentVar (const SystFlag sFlag) {
 
 
 
+bool DoFineFcalCentVar (const SystFlag sFlag) {
+  return sFlag == SystFlag::FineFcalCentVar;
+}
+
+
+
 bool DoJetES5PercUpVar (const SystFlag sFlag) {
   return sFlag == SystFlag::JetES5PercUpVar;
 }
@@ -509,6 +522,12 @@ bool DoFcalCentVar () {
 
 
 
+bool DoFineFcalCentVar () {
+  return DoFineFcalCentVar (systFlag);
+}
+
+
+
 bool DoJetES5PercUpVar () {
   return DoJetES5PercUpVar (systFlag);
 }
@@ -575,6 +594,8 @@ void SetupDirectories (const TString dataSubDir, const bool addSubDir) {
       rootPath = rootPath + "WithPileupVar/";
     else if (DoFcalCentVar ())
       rootPath = rootPath + "FcalCentVar/";
+    else if (DoFineFcalCentVar ())
+      rootPath = rootPath + "FineFcalCentVar/";
     else if (DoJetES5PercUpVar ())
       rootPath = rootPath + "JetES5PercUpVar/";
     else if (DoJetES5PercDownVar ())
@@ -647,66 +668,6 @@ TH1D* GetZdcCuts () {
   return h_zdcCuts;
 }
 
-
-
-/**
- * Returns the appropriate file in the given directory.
- * For MC, inFileName MUST be specified.
- * If dataSet == 0, will assume this is a "PhysCont" sample, i.e. an entire collision system in 1 data set.
- */
-TFile* GetFile (const char* directory, const int dataSet, const char* inFileName) {
-  TFile* file = nullptr;
-
-  // First figure out the file we are looking for
-  TString fileIdentifier;
-  if (TString (inFileName) == "") {
-    if (IsCollisions ())
-      fileIdentifier = to_string (dataSet);
-    else {
-      cout << "Error: In LocalUtilities.cxx::GetFile (const char*, const int, const char*): Cannot identify this MC file! Will return null!" << endl;
-      return nullptr;
-    }
-  }
-  else
-    fileIdentifier = inFileName;
-
-  // Now get the list of files
-  const TString dataPathTemp = dataPath + "/" + directory + "/";
-  TSystemDirectory dir (dataPathTemp.Data (), dataPathTemp.Data ());
-  TList* sysfiles = dir.GetListOfFiles ();
-  if (!sysfiles) {
-    cout << "Error: In LocalUtilities.cxx::GetFile (const char*, const int, const char*): Cannot get list of files! Will return null!" << endl;
-    return nullptr;
-  }
-  TSystemFile* sysfile;
-  TString fname;
-  TIter next (sysfiles);
-
-  while ((sysfile = (TSystemFile*)next ())) {
-    fname = sysfile->GetName ();
-    if (!sysfile->IsDirectory () && fname.EndsWith (".root")) {
-      if (fname.Contains (fileIdentifier)) {
-        break;
-      }
-    }
-  }
-
-  if (!fname.Contains (fileIdentifier)) {
-    cout << "Error: In LocalUtilities.cxx::GetFile (const char*, const int, const char*): TFile cannot be found for given data set. Will return null!" << endl;
-    return nullptr;
-  }
-
-  const TString sourceName = dataPathTemp + fname;
-
-  cout << "Info: In LocalUtilities.cxx::GetFile (const char*, const int, const char*): Resolved file at " << sourceName << endl;
-  file = new TFile (sourceName, "read");
-  
-  if (!file) {
-    cout << "Error: In LocalUtilities.cxx::GetFile (const char*, const int, const char*): TFile not obtained for given data set. Will return null!" << endl;
-    return nullptr;
-  }
-  else return file;
-} 
 
 
 /**
@@ -817,6 +778,7 @@ TString GetIdentifier (const int dataSet, const char* directory, const char* inF
 }
 
 
+
 /**
  * Returns the proper jet trigger luminosity for this data set in nb^-1
  */
@@ -829,6 +791,7 @@ double GetJetLuminosity () {
 }
 
 
+
 /**
  * Returns true if this jet passes selection criteria.
  */
@@ -839,6 +802,7 @@ bool MeetsJetAcceptanceCuts (int iJ) {
     return false;
   return true;
 }
+
 
 
 /**
@@ -855,6 +819,7 @@ bool MeetsJetPtCut (double jpt) {
     return false;
   return true;
 }
+
 
 
 /**
@@ -881,6 +846,7 @@ bool MeetsTrackCuts (int iTrk) {
 }
 
 
+
 /**
  * Returns the appropriate per-jet reweighting factor. Takes in coordinates for an anti-kT R=0.4 HI jet (pT, eta, & phi).
  * Returns 0 if the jet is outside the acceptance.
@@ -889,6 +855,54 @@ double GetAkt4JetWeight (const float jpt, const float jeta, const float jphi, co
   const double accept = ((IspPb () & InDisabledHEC (jeta, jphi)) || fabs (jeta) > 2.8 ? 0. : 1.);
   const double hecwgt = (IspPb () && jeta > 1.1 && jeta < 3.6 ? (2.*M_PI / (3.*M_PI/2. - 2*jetr)) : 1.);
   return accept * hecwgt;
+}
+
+
+
+/**
+ * Returns the tracking efficiency histograms.
+ */
+TH2D* LoadTrackingEfficiency () {
+  TDirectory* gdir = gDirectory;
+
+  TString fname = Form ("%s/TrackingPerformance/Nominal/outFile.root", rootPath.Data ());
+  std::cout << "Trying to resolve tracking performance file in " << fname.Data () << std::endl;
+  TFile* infile = new TFile (fname, "read");
+
+  TH2D* h2 = (TH2D*) infile->Get (Form ("h_truth_matched_reco_tracks_%s", "pp"))->Clone ("h2_tracking_efficiency");
+  h2->Divide ((TH2D*) infile->Get (Form ("h_truth_tracks_%s", "pp")));
+  std::cout << "Loaded tracking efficiencies, closing file" << std::endl;
+
+  h2->SetDirectory (gdir);
+
+  infile->Close ();
+  SaferDelete (&infile);
+
+  return h2;
+}
+
+
+
+/**
+ * Returns the tracking purity histograms.
+ */
+TH2D* LoadTrackingPurity () {
+  TDirectory* gdir = gDirectory;
+
+  TString fname = Form ("%s/TrackingPerformance/Nominal/outFile.root", rootPath.Data ());
+  std::cout << "Trying to resolve tracking performance file in " << fname.Data () << std::endl;
+  TFile* infile = new TFile (fname, "read");
+
+  TH2D* h2 = (TH2D*) infile->Get (Form ("h2_primary_reco_tracks_%s", "pp"))->Clone ("h2_tracking_purity");
+  h2->Divide ((TH2D*) infile->Get (Form ("h2_reco_tracks_%s", "pp")));
+  std::cout << "Loaded tracking purities, closing file" << std::endl;
+
+  h2->SetDirectory (gdir);
+
+  infile->Close ();
+  SaferDelete (&infile);
+
+  return h2;
 }
 
 
