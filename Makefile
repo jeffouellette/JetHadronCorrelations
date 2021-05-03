@@ -6,11 +6,16 @@ libraries = LocalUtilities
 algorithms = JetHadronSkimmer CentralityAnalysis TrackingPerformance TrackMomentumResolution JetEnergyResolution
 binaries = Process RunCorrelator
 
+.PHONY : libs algs bins directories clean
+
+all : directories libs algs bins
+
 libs : $(libraries)
 algs : $(algorithms)
 bins : $(binaries)
 
-all : libs algs bins
+directories :
+	mkdir -p bin lib obj
 
 LocalUtilities : src/LocalUtilities.cxx
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) -shared -o lib/lib$@.so src/$@.cxx
