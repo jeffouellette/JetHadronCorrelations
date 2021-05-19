@@ -1,5 +1,6 @@
 #include "JetHadronSkimmer.h"
 #include "CentralityAnalysis.h"
+#include "JetSubtractedEnergy.h"
 #include "TrackingPerformance.h"
 #include "TrackMomentumResolution.h"
 #include "JetEnergyResolution.h"
@@ -79,6 +80,10 @@ int main (int argc, char** argv) {
   else if (alg == "CentralityAnalysis") {
     std::cout << "Info: In Process.cxx: Running CentralityAnalysis algorithm..." << std::endl;
     success = JetHadronCorrelations::CentralityAnalysis (subdir, dataSet, inFileName);
+  }
+  else if (alg == "JetSubtractedEnergy") {
+    std::cout << "Info: In Process.cxx: Running JetSubtractedEnergy algorithm..." << std::endl;
+    success = JetHadronCorrelations::JetSubtractedEnergy (subdir, dataSet, inFileName);
   }
   else if (alg == "TrackingPerformance") {
     std::cout << "Info: In Process.cxx: Running TrackingPerformance algorithm..." << std::endl;

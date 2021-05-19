@@ -5,8 +5,11 @@ GetEnv = True
 InitialDir = /atlasgpfs01/usatlas/workarea/jeff/JetHadronCorrelations/run
 accounting_group = group_atlas.boulder
 
-Arguments = CentralityAnalysis main_030 $(runNumber) pPb16_5TeV Collisions MinBias $(syst)
-Error = errors/$(runNumber).err
-Log = logs/$(runNumber).log
-Output = outputs/$(runNumber).out
+alg = CentralityAnalysis
+gridRun = 031
+
+Arguments = $(alg) data_$(gridRun) $(runNumber) pPb16_5TeV Collisions MinBias $(syst)
+Error = errors/$(alg)_$(runNumber)_$(syst).err
+Log = /tmp/jeff/logs/$(alg)_$(runNumber)_$(syst).log
+Output = outputs/$(alg)_$(runNumber)_$(syst).out
 Queue runNumber in (312796 312837 312937 312945 312968 314199)

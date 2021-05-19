@@ -28,6 +28,7 @@ TString rootPath = extWorkPath + "rootFiles/";
 TString dataPath = extWorkPath + "data/";
 
 
+
 TString ToTString (const CollisionSystem collSys) {
   switch (collSys) {
     case CollisionSystem::pp15:       return TString ("pp15_5TeV");
@@ -671,6 +672,36 @@ TH1D* GetZdcCuts () {
 
 
 /**
+ * Returns the probability histogram of each FCal ET value in 0-20% ZDC events.
+ */
+TH1D* GetFCalZdcWeights () {
+  TDirectory* gdir = gDirectory;
+  
+  TString fname = Form ("%s/aux/CentralityDistributions.root", workPath.Data ());
+  std::cout << "Trying to resolve centrality distributions file in " << fname.Data () << std::endl;
+  TFile* infile = new TFile (fname, "read");
+
+  TH2D* h2 = (TH2D*) infile->Get ("h2_mb_Pb_fcal_et_zdc_calibE");
+  TH1D* h = (TH1D*) h2->ProjectionX ("h_fcal_et_zdcWeights", h2->GetYaxis ()->FindBin (zdcCentBins[numZdcCentBins-1]), h2->GetYaxis ()->GetNbins ());
+
+  //TH1D* h_fcal = (TH1D*) h2->ProjectionX ("h_fcal_et");
+  //h->Divide (h_fcal);
+  //SaferDelete (&h_fcal);
+
+  h->Scale (1./h->Integral ());
+  std::cout << "Loaded centrality distribution, closing file" << std::endl;
+
+  h->SetDirectory (gdir);
+
+  infile->Close ();
+  SaferDelete (&infile);
+
+  return h;
+}
+
+
+
+/**
  * Returns an abbreviated, unique identifier for a given dataset.
  */
 TString GetIdentifier (const int dataSet, const char* directory, const char* inFileName) {
@@ -869,8 +900,8 @@ TH2D* LoadTrackingEfficiency () {
   std::cout << "Trying to resolve tracking performance file in " << fname.Data () << std::endl;
   TFile* infile = new TFile (fname, "read");
 
-  TH2D* h2 = (TH2D*) infile->Get (Form ("h_truth_matched_reco_tracks_%s", "pp"))->Clone ("h2_tracking_efficiency");
-  h2->Divide ((TH2D*) infile->Get (Form ("h_truth_tracks_%s", "pp")));
+  TH2D* h2 = (TH2D*) infile->Get (Form ("h2_truth_matched_reco_tracks_%s", "pp"))->Clone ("h2_tracking_efficiency");
+  h2->Divide ((TH2D*) infile->Get (Form ("h2_truth_tracks_%s", "pp")));
   std::cout << "Loaded tracking efficiencies, closing file" << std::endl;
 
   h2->SetDirectory (gdir);
@@ -903,6 +934,32 @@ TH2D* LoadTrackingPurity () {
   SaferDelete (&infile);
 
   return h2;
+}
+
+
+
+/**
+ * Converts a TProfile to a TGraph assuming the x-axis of the TProfile is the y-axis of the TGraph.
+ */
+TGraphErrors* TProfY2TGE (TProfile* py) {
+  TGraphErrors* g = new TGraphErrors ();
+  for (int iX = 1; iX <= py->GetNbinsX (); iX++) {
+    g->SetPoint (g->GetN (), py->GetBinContent (iX), py->GetBinCenter (iX));
+    g->SetPointError (g->GetN ()-1, py->GetBinError (iX), py->GetBinWidth (iX) / 2.);
+  }
+  return g;
+}
+
+/**
+ * Converts a TProfile to a TGraph assuming the x-axis of the TProfile is the x-axis of the TGraph.
+ */
+TGraphErrors* TProfX2TGE (TProfile* px) {
+  TGraphErrors* g = new TGraphErrors ();
+  for (int iX = 1; iX <= px->GetNbinsX (); iX++) {
+    g->SetPoint (g->GetN (), px->GetBinCenter (iX), px->GetBinContent (iX));
+    g->SetPointError (g->GetN ()-1, px->GetBinWidth (iX) / 2., px->GetBinError (iX));
+  }
+  return g;
 }
 
 

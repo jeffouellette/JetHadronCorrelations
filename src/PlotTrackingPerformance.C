@@ -11,34 +11,17 @@
 
 #include <Utilities.h>
 
-#include <iostream>
-#include <fstream>
+#include "Params.h"
+#include "LocalUtilities.h"
 
-using namespace std;
-
-TGraphErrors* TProfY2TGE (TProfile* py) {
-  TGraphErrors* g = new TGraphErrors ();
-  for (int iX = 1; iX <= py->GetNbinsX (); iX++) {
-    g->SetPoint (g->GetN (), py->GetBinContent (iX), py->GetBinCenter (iX));
-    g->SetPointError (g->GetN ()-1, 0, py->GetBinWidth (iX) / 2.);
-  }
-  return g;
-}
-
-TGraphErrors* TProfX2TGE (TProfile* px) {
-  TGraphErrors* g = new TGraphErrors ();
-  for (int iX = 1; iX <= px->GetNbinsX (); iX++) {
-    g->SetPoint (g->GetN (), px->GetBinCenter (iX), px->GetBinContent (iX));
-    g->SetPointError (g->GetN ()-1, px->GetBinWidth (iX) / 2., 0);
-  }
-  return g;
-}
+using namespace JetHadronCorrelations;
 
 const Color_t binColors[10] = {kRed+1, kAzure-2, kGreen+2, kViolet-3, kMagenta, kCyan+1, kOrange-3, kGreen-7, kBlue+1, kPink-5};
 
+
 void PlotTrackingPerformance () {
 
-  TFile* inFile = new TFile ("rootFiles/TrackingPerformance/Nominal/outFile.root", "read");
+  TFile* inFile = new TFile (Form ("%s/TrackingPerformance/Nominal/outFile.root", rootPath.Data ()), "read");
 
 //  TH1D* h_truth_matching_prob[2] = {};
 // = new TH1D (Form ("h_truth_matching_prob_%s", sys.Data ()), ";Truth matching prob.;N_{ch}^{rec}", 200, 0, 1);
@@ -77,8 +60,8 @@ void PlotTrackingPerformance () {
   for (int iSys : {0}) {
     const TString sys = (iSys == 0 ? "pp" : "pPb");
 
-    h2_truth_matched_reco_tracks[iSys] = (TH2D*) inFile->Get (Form ("h_truth_matched_reco_tracks_%s", sys.Data ()));
-    h2_truth_tracks[iSys] = (TH2D*) inFile->Get (Form ("h_truth_tracks_%s", sys.Data ()));
+    h2_truth_matched_reco_tracks[iSys] = (TH2D*) inFile->Get (Form ("h2_truth_matched_reco_tracks_%s", sys.Data ()));
+    h2_truth_tracks[iSys] = (TH2D*) inFile->Get (Form ("h2_truth_tracks_%s", sys.Data ()));
     h2_primary_reco_tracks[iSys] = (TH2D*) inFile->Get (Form ("h2_primary_reco_tracks_%s", sys.Data ()));
     h2_reco_tracks[iSys] = (TH2D*) inFile->Get (Form ("h2_reco_tracks_%s", sys.Data ()));
 
@@ -224,6 +207,100 @@ void PlotTrackingPerformance () {
   }
 
 
+
+  {
+    TCanvas* c = new TCanvas ("c3", "", 800, 800);
+
+    gPad->SetLogy ();
+
+    gPad->SetBottomMargin (0.11);
+    gPad->SetLeftMargin (0.11);
+    gPad->SetRightMargin (0.15);
+    gPad->SetTopMargin (0.04);
+
+    TH2D* h2 = (TH2D*) h2_efficiency[0]->Clone ("temp");
+    h2->GetXaxis ()->SetTitle ("#eta");
+    h2->GetYaxis ()->SetTitle ("#it{p}_{T}^{ch} [GeV]");
+    h2->GetZaxis ()->SetTitle ("Track Reco. Efficiency");
+
+    double zmin = 0.5;
+    double zmax = 1;
+
+    h2->SetLineWidth (0);
+
+    h2->GetZaxis ()->SetRangeUser (zmin, zmax);
+    h2->GetYaxis ()->SetMoreLogLabels ();
+
+    h2->GetXaxis ()->SetTitleFont (43);
+    h2->GetXaxis ()->SetTitleSize (26);
+    h2->GetYaxis ()->SetTitleFont (43);
+    h2->GetYaxis ()->SetTitleSize (26);
+    h2->GetZaxis ()->SetTitleFont (43);
+    h2->GetZaxis ()->SetTitleSize (26);
+    h2->GetZaxis ()->SetTitleOffset (1.4*h2->GetZaxis ()->GetTitleOffset ());
+    h2->GetXaxis ()->SetLabelFont (43);
+    h2->GetXaxis ()->SetLabelSize (24);
+    h2->GetYaxis ()->SetLabelFont (43);
+    h2->GetYaxis ()->SetLabelSize (24);
+    h2->GetZaxis ()->SetLabelFont (43);
+    h2->GetZaxis ()->SetLabelSize (24);
+
+    h2->DrawCopy ("colz");
+    SaferDelete (&h2);
+
+    myText (0.62, 0.88, kBlack, "#bf{#it{ATLAS}} Internal", 0.036);
+    myText (0.62, 0.84, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.036);
+
+    c->SaveAs (Form ("%s/Plots/TrackingPerformance/EfficiencyMap_pp.pdf", workPath.Data ()));
+  }
+
+
+
+  {
+    TCanvas* c = new TCanvas ("c4", "", 800, 800);
+
+    gPad->SetLogy ();
+
+    gPad->SetBottomMargin (0.11);
+    gPad->SetLeftMargin (0.11);
+    gPad->SetRightMargin (0.15);
+    gPad->SetTopMargin (0.04);
+
+    TH2D* h2 = (TH2D*) h2_purity[0]->Clone ("temp");
+    h2->GetXaxis ()->SetTitle ("#eta");
+    h2->GetYaxis ()->SetTitle ("#it{p}_{T}^{ch} [GeV]");
+    h2->GetZaxis ()->SetTitle ("Primary track fraction");
+
+    double zmin = 0.8;
+    double zmax = 1;
+
+    h2->SetLineWidth (0);
+
+    h2->GetZaxis ()->SetRangeUser (zmin, zmax);
+    h2->GetYaxis ()->SetMoreLogLabels ();
+
+    h2->GetXaxis ()->SetTitleFont (43);
+    h2->GetXaxis ()->SetTitleSize (26);
+    h2->GetYaxis ()->SetTitleFont (43);
+    h2->GetYaxis ()->SetTitleSize (26);
+    h2->GetZaxis ()->SetTitleFont (43);
+    h2->GetZaxis ()->SetTitleSize (26);
+    h2->GetZaxis ()->SetTitleOffset (1.4*h2->GetZaxis ()->GetTitleOffset ());
+    h2->GetXaxis ()->SetLabelFont (43);
+    h2->GetXaxis ()->SetLabelSize (24);
+    h2->GetYaxis ()->SetLabelFont (43);
+    h2->GetYaxis ()->SetLabelSize (24);
+    h2->GetZaxis ()->SetLabelFont (43);
+    h2->GetZaxis ()->SetLabelSize (24);
+
+    h2->DrawCopy ("colz");
+    SaferDelete (&h2);
+
+    myText (0.62, 0.88, kBlack, "#bf{#it{ATLAS}} Internal", 0.036);
+    myText (0.62, 0.84, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.036);
+
+    c->SaveAs (Form ("%s/Plots/TrackingPerformance/PurityMap_pp.pdf", workPath.Data ()));
+  }
 
 }
 

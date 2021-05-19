@@ -37,6 +37,16 @@ bool JetHadronSkimmer (const char* directory,
   std::cout << "Info: In JetHadronSkimmer.cxx: Printing systematic onfiguration:";
   std::cout << std::endl;
 
+  if (Ispp () && (DoFcalCentVar () || DoFineFcalCentVar ())) {
+    std::cout << "Info: In JetHadronSkimmer.cxx: FCal centrality variations are programmed to do nothing in pp (exiting gracefully)." << std::endl;
+    return true;
+  }
+
+  if (IspPb () && UseJet100GeVTriggers ()) {
+    std::cout << "Info: In JetHadronSkimmer.cxx: No J100 trigger available in p+Pb, please use J50 trigger (exiting gracefully)." << std::endl;
+    return true;
+  }
+
   if (IsHijing ())
     std::cout << "Info: In JetHadronSkimmer.cxx: File detected as Hijing, will not check for data quality whatsoever" << std::endl;
   else if (IsDataOverlay ())
@@ -114,15 +124,37 @@ bool JetHadronSkimmer (const char* directory,
   TChain* tree = new TChain ("bush", "bush");
   {
     TString pattern = "*.root";
-    std::cout << "DataPath = " << dataPath;
+    std::cout << "DataPath = " << dataPath << std::endl;
     auto dir = gSystem->OpenDirectory (dataPath + directory);
     while (const char* f = gSystem->GetDirEntry (dir)) {
       TString file = TString (f);
+
+      if (IsCollisions ()) {
+        if (Ispp ()) {
+          if (UseMinBiasTriggers () && !file.Contains ("MinBias"))
+            continue;
+          if (!UseMinBiasTriggers () && !file.Contains ("Main"))
+            continue;
+        }
+        if (IspPb ()) {
+          if (!file.Contains ("Main"))
+            continue;
+        }
+      }
+
       if (!file.Contains (fileIdentifier))
         continue;
       std::cout << "Adding " << dataPath + directory + "/" + file + "/*.root" << " to TChain" << std::endl;
       tree->Add (dataPath + directory + "/" + file + "/*.root");
       break;
+    }
+    if (tree->GetEntries () == 0) {
+      std::cout << "Info: In JetHadronSkimmer.cxx: Chain has " << tree->GetEntries () << " entries, exiting gracefully." << std::endl;
+      return true;
+    }
+    if (tree->GetListOfFiles ()->GetEntries () == 0) {
+      std::cout << "Info: In JetHadronSkimmer.cxx: Chain has " << tree->GetListOfFiles () ->GetEntries () << " files, exiting gracefully." << std::endl;
+      return true;
     }
     std::cout << "Info: In JetHadronSkimmer.cxx: Chain has " << tree->GetListOfFiles ()->GetEntries () << " files, " << tree->GetEntries () << " entries" << std::endl;
   }
@@ -310,21 +342,25 @@ bool JetHadronSkimmer (const char* directory,
   Trigger* minbiasTriggers[minbias_trig_n];
 
   if (IsCollisions ()) {
-    for (int iTrig = 0; iTrig < jet_trig_n; iTrig++) {
-      jetTriggers[iTrig] = new Trigger (jet_trig_name[iTrig]);
-      tree->SetBranchAddress ((jet_trig_name[iTrig]+"_decision").c_str (), &(jetTriggers[iTrig]->trigDecision));
-      tree->SetBranchAddress ((jet_trig_name[iTrig]+"_prescale").c_str (), &(jetTriggers[iTrig]->trigPrescale));
+    if (UseJet50GeVTriggers () || UseJet100GeVTriggers ()) {
+      for (int iTrig = 0; iTrig < jet_trig_n; iTrig++) {
+        jetTriggers[iTrig] = new Trigger (jet_trig_name[iTrig]);
+        tree->SetBranchAddress ((jet_trig_name[iTrig]+"_decision").c_str (), &(jetTriggers[iTrig]->trigDecision));
+        tree->SetBranchAddress ((jet_trig_name[iTrig]+"_prescale").c_str (), &(jetTriggers[iTrig]->trigPrescale));
+      }
     }
-    for (int iTrig = 0; iTrig < minbias_trig_n; iTrig++) {
-      minbiasTriggers[iTrig] = new Trigger (minbias_trig_name[iTrig]);
-      tree->SetBranchAddress ((minbias_trig_name[iTrig]+"_decision").c_str (), &(minbiasTriggers[iTrig]->trigDecision));
-      tree->SetBranchAddress ((minbias_trig_name[iTrig]+"_prescale").c_str (), &(minbiasTriggers[iTrig]->trigPrescale));
+    else if (UseMinBiasTriggers ()) {
+      for (int iTrig = 0; iTrig < minbias_trig_n; iTrig++) {
+        minbiasTriggers[iTrig] = new Trigger (minbias_trig_name[iTrig]);
+        tree->SetBranchAddress ((minbias_trig_name[iTrig]+"_decision").c_str (), &(minbiasTriggers[iTrig]->trigDecision));
+        tree->SetBranchAddress ((minbias_trig_name[iTrig]+"_prescale").c_str (), &(minbiasTriggers[iTrig]->trigPrescale));
+      }
     }
   }
 
 
-  centBins = (DoFcalCentVar () ? fcalCentBins : (DoFineFcalCentVar () ? fineFcalCentBins : zdcCentBins));
-  numCentBins = (DoFcalCentVar () ? numFcalCentBins : (DoFineFcalCentVar () ? numFineFcalCentBins : numZdcCentBins));
+  //*centBins = (DoFcalCentVar () ? fcalCentBins : (DoFineFcalCentVar () ? fineFcalCentBins : zdcCentBins));
+  const int numCentBins = (DoFcalCentVar () ? numFcalCentBins : (DoFineFcalCentVar () ? numFineFcalCentBins : numZdcCentBins));
 
 
   // Load files for output
@@ -343,7 +379,11 @@ bool JetHadronSkimmer (const char* directory,
     outTrees[iFile]->SetBranches ();
   }
 
-  return true;
+
+  //TH1D* h_fineFcalWgts = nullptr;
+  //if (DoFineFcalCentVar ())
+  //  h_fineFcalWgts = GetFCalZdcWeights ();
+
 
   const int nEvts = tree->GetEntries ();
 
@@ -361,11 +401,14 @@ bool JetHadronSkimmer (const char* directory,
     if (IsCollisions ()) {
       event_weight = -1;
       if (UseJet50GeVTriggers () && jetTriggers[0]->trigDecision)
-        event_weight = jetTriggers[0]->trigPrescale;
+        //event_weight = jetTriggers[0]->trigPrescale;
+        event_weight = 1;
       else if (UseJet100GeVTriggers () && jetTriggers[1]->trigDecision)
-        event_weight = jetTriggers[1]->trigPrescale;
+        //event_weight = jetTriggers[1]->trigPrescale;
+        event_weight = 1;
       else if (UseMinBiasTriggers () && minbiasTriggers[0]->trigDecision)
-        event_weight = minbiasTriggers[0]->trigPrescale;
+        //event_weight = minbiasTriggers[0]->trigPrescale;
+        event_weight = 1;
     }
     else {
       event_weight = mcEventWeights->at (0) * crossSectionPicoBarns * mcFilterEfficiency * GetJetLuminosity () / mcNumberEvents; // sigma * f * L_int
@@ -397,6 +440,7 @@ bool JetHadronSkimmer (const char* directory,
     }
 
 
+    // MC only -- filter sample based on min/max of pThat range
     if (!IsCollisions ()) {
       int iLTJ = -1;
       for (int iTJ = 0; iTJ < akt4_truth_jet_n; iTJ++) {
@@ -421,7 +465,13 @@ bool JetHadronSkimmer (const char* directory,
       zdc_calibE_p = IsPeriodA () ? ZdcCalibEnergy_C : ZdcCalibEnergy_A;
       zdc_calibE_Pb *= 1e3;
       zdc_calibE_p *= 1e3;
-      iCent = GetCentBin (DoFcalCentVar () || DoFineFcalCentVar () ? fcal_et_Pb : zdc_calibE_Pb);
+
+      if (DoFcalCentVar ())
+        iCent = GetFcalCentBin (fcal_et_Pb);
+      else if (DoFineFcalCentVar ())
+        iCent = GetFineFcalCentBin (fcal_et_Pb);
+      else
+        iCent = GetZdcCentBin (zdc_calibE_Pb);
     }
     else if (Ispp ()) {
       fcal_et_Pb = -999;
@@ -438,9 +488,16 @@ bool JetHadronSkimmer (const char* directory,
     if (iCent < 0 || iCent > numCentBins-1)
       continue;
 
+    //if (IspPb () && iCent < 1)
+    //  continue;
+
+    //if (DoFineFcalCentVar ()) {
+    //  event_weight *= h_fineFcalWgts->GetBinContent (h_fineFcalWgts->FindBin (fcal_et_Pb));
+    //}
+
     const short iFile = iCent;
 
-    if (event_weight != -1) { // trigger requirement
+    if (event_weight > 0) { // trigger requirement
 
       out_akt4_hi_jet_n = 0;
       for (int iJ = 0; iJ < akt4_hi_jet_n; iJ++) {
@@ -537,19 +594,21 @@ bool JetHadronSkimmer (const char* directory,
 
 
   if (IsCollisions ()) {
-    for (int iTrig = 0; iTrig < jet_trig_n; iTrig++)
-      SaferDelete (&jetTriggers[iTrig]);
-    for (int iTrig = 0; iTrig < minbias_trig_n; iTrig++)
-      SaferDelete (&minbiasTriggers[iTrig]);
+    if (UseJet50GeVTriggers () || UseJet100GeVTriggers ()) {
+      for (int iTrig = 0; iTrig < jet_trig_n; iTrig++)
+        SaferDelete (&jetTriggers[iTrig]);
+    }
+    else if (UseMinBiasTriggers ()) {
+      for (int iTrig = 0; iTrig < minbias_trig_n; iTrig++)
+        SaferDelete (&minbiasTriggers[iTrig]);
+    }
   }
   SaferDelete (&tree);
-
 
   for (int iFile = 0; iFile < numFileBins; iFile++) {
     outFiles[iFile]->Write (0, TObject::kOverwrite);
     outFiles[iFile]->Close ();
     SaferDelete (&(outFiles[iFile]));
-    SaferDelete (&(outTrees[iFile]));
   }
 
 

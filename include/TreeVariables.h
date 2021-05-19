@@ -500,7 +500,15 @@ float trk_truth_vz[max_trk_n];
 int trk_truth_nIn[max_trk_n];
 bool trk_truth_isHadron[max_trk_n];
 
-// Truth Jets info
+// Anti-kT R=0.2 Truth Jets info
+const static int max_akt2_truth_jet_n = 40;
+int akt2_truth_jet_n;
+float akt2_truth_jet_pt[max_akt2_truth_jet_n];
+float akt2_truth_jet_eta[max_akt2_truth_jet_n];
+float akt2_truth_jet_phi[max_akt2_truth_jet_n];
+float akt2_truth_jet_e[max_akt2_truth_jet_n];
+
+// Anti-kT R=0.4 Truth Jets info
 const static int max_akt4_truth_jet_n = 40;
 int akt4_truth_jet_n;
 float akt4_truth_jet_pt[max_akt4_truth_jet_n];
@@ -508,7 +516,7 @@ float akt4_truth_jet_eta[max_akt4_truth_jet_n];
 float akt4_truth_jet_phi[max_akt4_truth_jet_n];
 float akt4_truth_jet_e[max_akt4_truth_jet_n];
 
-// EMTopo Jets info
+// Anti-kT R=0.4 EMTopo Jets info
 const static int max_akt4_emtopo_jet_n = 40;
 int akt4_emtopo_jet_n;
 float akt4_emtopo_jet_pt[max_akt4_emtopo_jet_n];
@@ -517,7 +525,27 @@ float akt4_emtopo_jet_phi[max_akt4_emtopo_jet_n];
 float akt4_emtopo_jet_e[max_akt4_emtopo_jet_n];
 bool akt4_emtopo_jet_LooseBad[max_akt4_emtopo_jet_n];
 
-// HI Jets info
+// Anti-kT R=0.2 HI Jets info
+const static int max_akt2_hi_jet_n = 40;
+int akt2_hi_jet_n;
+float akt2_hi_jet_pt[max_akt2_hi_jet_n];
+float akt2_hi_jet_eta[max_akt2_hi_jet_n];
+float akt2_hi_jet_phi[max_akt2_hi_jet_n];
+float akt2_hi_jet_e[max_akt2_hi_jet_n];
+float akt2_hi_jet_pt_precalib[max_akt2_hi_jet_n];
+float akt2_hi_jet_eta_precalib[max_akt2_hi_jet_n];
+float akt2_hi_jet_e_precalib[max_akt2_hi_jet_n];
+float akt2_hi_jet_pt_etajes[max_akt2_hi_jet_n];
+float akt2_hi_jet_eta_etajes[max_akt2_hi_jet_n];
+float akt2_hi_jet_e_etajes[max_akt2_hi_jet_n];
+float akt2_hi_jet_pt_xcalib[max_akt2_hi_jet_n];
+float akt2_hi_jet_eta_xcalib[max_akt2_hi_jet_n];
+float akt2_hi_jet_e_xcalib[max_akt2_hi_jet_n];
+float akt2_hi_jet_sub_et[max_akt2_hi_jet_n];
+float akt2_hi_jet_sub_e[max_akt2_hi_jet_n];
+bool akt2_hi_jet_LooseBad[max_akt2_hi_jet_n];
+
+// Anti-kT R=0.4 HI Jets info
 const static int max_akt4_hi_jet_n = 40;
 int akt4_hi_jet_n;
 float akt4_hi_jet_pt[max_akt4_hi_jet_n];

@@ -36,7 +36,7 @@ TH1D*** h_avg_tmr = nullptr;
 
 void AnalyzeTrackMomentumResolution () {
 
-  TFile* inFile = new TFile (Form ("%s/rootFiles/TrackMomentumResolution/Nominal/allSamples.root", workPath.Data ()), "read");
+  TFile* inFile = new TFile (Form ("%s/TrackMomentumResolution/Nominal/allSamples.root", rootPath.Data ()), "read");
 
   h_tms = new TH1D***[2];
   for (int iSys : systems) {
@@ -52,7 +52,7 @@ void AnalyzeTrackMomentumResolution () {
 
 
 
-  TFile* outFile = new TFile (Form ("%s/rootFiles/TrackMomentumResolution/Nominal/summary.root", workPath.Data ()), "recreate");
+  TFile* outFile = new TFile (Form ("%s/TrackMomentumResolution/Nominal/summary.root", rootPath.Data ()), "recreate");
 
   h2_avg_tms = new TH2D*[2];
   h2_avg_tmr = new TH2D*[2];

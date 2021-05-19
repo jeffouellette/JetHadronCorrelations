@@ -1,7 +1,7 @@
-#ifndef __JetEnergyResolution_cxx__
-#define __JetEnergyResolution_cxx__
+#ifndef __JetPerformance_cxx__
+#define __JetPerformance_cxx__
 
-#include "JetEnergyResolution.h"
+#include "JetPerformance.h"
 #include "Params.h"
 #include "TreeVariables.h"
 #include "Trigger.h"
@@ -20,29 +20,29 @@ using namespace std;
 
 namespace JetHadronCorrelations {
 
-bool JetEnergyResolution (const char* directory,
-                          const int dataSet,
-                          const char* inFileName,
-                          const char* eventWeightsFileName) {
+bool JetPerformance (const char* directory,
+                     const int dataSet,
+                     const char* inFileName,
+                     const char* eventWeightsFileName) {
  
-  cout << "Info: In JetEnergyResolution.cxx: Entered JetEnergyResolution routine." << endl;
-  cout << "Info: In JetEnergyResolution.cxx: Printing systematic onfiguration:";
+  cout << "Info: In JetPerformance.cxx: Entered JetPerformance routine." << endl;
+  cout << "Info: In JetPerformance.cxx: Printing systematic onfiguration:";
 
-  SetupDirectories ("JetEnergyResolution");
+  SetupDirectories ("JetPerformance");
 
   if (IsCollisions ()) {
-    cout << "Error: In JetEnergyResolution.cxx: Trying to calculate jet performance in data! Quitting." << endl;
+    cout << "Error: In JetPerformance.cxx: Trying to calculate jet performance in data! Quitting." << endl;
     return false;
   }
 
   if (IsDataOverlay ())
-    cout << "Info: In JetEnergyResolution.cxx: Running over data overlay, will check data conditions" << endl;
+    cout << "Info: In JetPerformance.cxx: Running over data overlay, will check data conditions" << endl;
   if (IsHijing ())
-    cout << "Info: In JetEnergyResolution.cxx: Running over Hijing sample" << endl;
+    cout << "Info: In JetPerformance.cxx: Running over Hijing sample" << endl;
 
   const TString identifier = GetIdentifier (dataSet, directory, inFileName);
-  cout << "Info: In JetEnergyResolution.cxx: File Identifier: " << identifier << endl;
-  cout << "Info: In JetEnergyResolution.cxx: Saving output to " << rootPath << endl;
+  cout << "Info: In JetPerformance.cxx: File Identifier: " << identifier << endl;
+  cout << "Info: In JetPerformance.cxx: Saving output to " << rootPath << endl;
 
 
   // creates a file identifier pattern that we will use to identify the directory containing the input files
@@ -52,7 +52,7 @@ bool JetEnergyResolution (const char* directory,
       fileIdentifier = to_string (dataSet);
     }
     else {
-      std::cout << "Error: In JetEnergyResolution.cxx: Cannot identify this MC file! Quitting." << std::endl;
+      std::cout << "Error: In JetPerformance.cxx: Cannot identify this MC file! Quitting." << std::endl;
       return false;
     }
   }
@@ -74,7 +74,7 @@ bool JetEnergyResolution (const char* directory,
       tree->Add (dataPath + directory + "/" + file + "/*.root");
       break;
     }
-    std::cout << "Info: In JetEnergyResolution.cxx: Chain has " << tree->GetListOfFiles ()->GetEntries () << " files, " << tree->GetEntries () << " entries" << std::endl;
+    std::cout << "Info: In JetPerformance.cxx: Chain has " << tree->GetListOfFiles ()->GetEntries () << " files, " << tree->GetEntries () << " entries" << std::endl;
   }
 
   //TFile* eventWeightsFile = nullptr;
@@ -82,7 +82,7 @@ bool JetEnergyResolution (const char* directory,
 
   //eventWeightsFile = new TFile (eventWeightsFileName, "read");
   //h_weights = (TH1D*) eventWeightsFile->Get (Form ("h_PbPb%s_weights_%s", doNchWeighting ? "Nch" : "FCal", isHijing ? "hijing" : "mc"));
-  //cout << "Info: In JetEnergyResolution.cxx: Found FCal weighting histogram, " << h_weights->GetName () << endl;
+  //cout << "Info: In JetPerformance.cxx: Found FCal weighting histogram, " << h_weights->GetName () << endl;
 
   //First sort jets & tracks into many, smaller TTrees.
   //This is where the sorting based on event information (e.g. centrality, Ntrk, jet pT) will go.
@@ -137,29 +137,6 @@ bool JetEnergyResolution (const char* directory,
 
 
   if (!IsCollisions ()) {
-    tree->SetBranchAddress ("akt2_truth_jet_n",     &akt2_truth_jet_n);
-    tree->SetBranchAddress ("akt2_truth_jet_pt",    &akt2_truth_jet_pt);
-    tree->SetBranchAddress ("akt2_truth_jet_eta",   &akt2_truth_jet_eta);
-    tree->SetBranchAddress ("akt2_truth_jet_phi",   &akt2_truth_jet_phi);
-    tree->SetBranchAddress ("akt2_truth_jet_e",     &akt2_truth_jet_e);
-  }
-
-  tree->SetBranchAddress ("akt2_hi_jet_n",            &akt2_hi_jet_n);
-  tree->SetBranchAddress ("akt2_hi_jet_pt_precalib",  &akt2_hi_jet_pt_precalib);
-  tree->SetBranchAddress ("akt2_hi_jet_pt_etajes",    &akt2_hi_jet_pt_etajes);
-  tree->SetBranchAddress ("akt2_hi_jet_pt_xcalib",    &akt2_hi_jet_pt_xcalib);
-  tree->SetBranchAddress ("akt2_hi_jet_eta_precalib", &akt2_hi_jet_eta_precalib);
-  tree->SetBranchAddress ("akt2_hi_jet_eta_etajes",   &akt2_hi_jet_eta_etajes);
-  tree->SetBranchAddress ("akt2_hi_jet_eta_xcalib",   &akt2_hi_jet_eta_xcalib);
-  tree->SetBranchAddress ("akt2_hi_jet_phi",          &akt2_hi_jet_phi);
-  tree->SetBranchAddress ("akt2_hi_jet_e_precalib",   &akt2_hi_jet_e_precalib);
-  tree->SetBranchAddress ("akt2_hi_jet_e_etajes",     &akt2_hi_jet_e_etajes);
-  tree->SetBranchAddress ("akt2_hi_jet_e_xcalib",     &akt2_hi_jet_e_xcalib);
-  tree->SetBranchAddress ("akt2_hi_jet_sub_et",       &akt2_hi_jet_sub_et);
-  tree->SetBranchAddress ("akt2_hi_jet_sub_e",        &akt2_hi_jet_sub_e);
-
-
-  if (!IsCollisions ()) {
     tree->SetBranchAddress ("akt4_truth_jet_n",     &akt4_truth_jet_n);
     tree->SetBranchAddress ("akt4_truth_jet_pt",    &akt4_truth_jet_pt);
     tree->SetBranchAddress ("akt4_truth_jet_eta",   &akt4_truth_jet_eta);
@@ -182,7 +159,7 @@ bool JetEnergyResolution (const char* directory,
   tree->SetBranchAddress ("akt4_hi_jet_sub_e",        &akt4_hi_jet_sub_e);
 
 
-  cout << "Info : In JetEnergyResolution.cxx: Saving histograms to " << Form ("%s/%s.root", rootPath.Data (), identifier.Data ()) << endl;
+  cout << "Info : In JetPerformance.cxx: Saving histograms to " << Form ("%s/%s.root", rootPath.Data (), identifier.Data ()) << endl;
   TFile* outFile = new TFile (Form ("%s/%s.root", rootPath.Data (), identifier.Data ()), "recreate");
 
   TString sys;
@@ -196,36 +173,21 @@ bool JetEnergyResolution (const char* directory,
   const double enJBins[] = {10, 12, 15, 18, 22, 26, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 100, 120, 140, 160, 180, 200, 220, 240, 260, 280, 300, 320, 360, 400, 450, 500};
   const int numEnJBins = sizeof (enJBins) / sizeof (enJBins[0]) - 1;
 
-  TH1D*** h_r2_jpts = new TH1D**[numEnJBins];
-  TH1D*** h_r2_jes = new TH1D**[numEnJBins];
-  TH1D*** h_r2_jetacorr = new TH1D**[numEnJBins];
-  TH1D*** h_r4_jpts = new TH1D**[numEnJBins];
-  TH1D*** h_r4_jes = new TH1D**[numEnJBins];
-  TH1D*** h_r4_jetacorr = new TH1D**[numEnJBins];
+  TH1D*** h_jpts = new TH1D**[numEnJBins];
+  TH1D*** h_jes = new TH1D**[numEnJBins];
+  TH1D*** h_jetacorr = new TH1D**[numEnJBins];
 
   for (int iEnJ = 0; iEnJ < numEnJBins; iEnJ++) {
-    h_r2_jpts[iEnJ] = new TH1D*[numFinerEtaBins];
-    h_r2_jes[iEnJ] = new TH1D*[numFinerEtaBins];
-    h_r2_jetacorr[iEnJ] = new TH1D*[numFinerEtaBins];
-
-    h_r4_jpts[iEnJ] = new TH1D*[numFinerEtaBins];
-    h_r4_jes[iEnJ] = new TH1D*[numFinerEtaBins];
-    h_r4_jetacorr[iEnJ] = new TH1D*[numFinerEtaBins];
-
+    h_jpts[iEnJ] = new TH1D*[numFinerEtaBins];
+    h_jes[iEnJ] = new TH1D*[numFinerEtaBins];
+    h_jetacorr[iEnJ] = new TH1D*[numFinerEtaBins];
     for (int iEta = 0; iEta < numFinerEtaBins; iEta++) {
-      h_r2_jpts[iEnJ][iEta] = new TH1D (Form ("h_r2_jpts_%s_iEnJ%i_iEta%i", sys.Data (), iEnJ, iEta), "#it{p}_{T}^{reco} / #it{p}_{T}^{truth}", 140, 0.3, 1.7);
-      h_r2_jpts[iEnJ][iEta]->Sumw2 ();
-      h_r2_jes[iEnJ][iEta] = new TH1D (Form ("h_r2_jes_%s_iEnJ%i_iEta%i", sys.Data (), iEnJ, iEta), "#it{E}_{reco} / #it{E}_{truth}", 140, 0.3, 1.7);
-      h_r2_jes[iEnJ][iEta]->Sumw2 ();
-      h_r2_jetacorr[iEnJ][iEta] = new TH1D (Form ("h_r2_jetacorr_%s_iEnJ%i_iEta%i", sys.Data (), iEnJ, iEta), "#eta_{reco} - #eta_{truth}", 80, -0.2, 0.2);
-      h_r2_jetacorr[iEnJ][iEta]->Sumw2 ();
-
-      h_r4_jpts[iEnJ][iEta] = new TH1D (Form ("h_r4_jpts_%s_iEnJ%i_iEta%i", sys.Data (), iEnJ, iEta), "#it{p}_{T}^{reco} / #it{p}_{T}^{truth}", 140, 0.3, 1.7);
-      h_r4_jpts[iEnJ][iEta]->Sumw2 ();
-      h_r4_jes[iEnJ][iEta] = new TH1D (Form ("h_r4_jes_%s_iEnJ%i_iEta%i", sys.Data (), iEnJ, iEta), "#it{E}_{reco} / #it{E}_{truth}", 140, 0.3, 1.7);
-      h_r4_jes[iEnJ][iEta]->Sumw2 ();
-      h_r4_jetacorr[iEnJ][iEta] = new TH1D (Form ("h_r4_jetacorr_%s_iEnJ%i_iEta%i", sys.Data (), iEnJ, iEta), "#eta_{reco} - #eta_{truth}", 80, -0.2, 0.2);
-      h_r4_jetacorr[iEnJ][iEta]->Sumw2 ();
+      h_jpts[iEnJ][iEta] = new TH1D (Form ("h_jpts_%s_iEnJ%i_iEta%i", sys.Data (), iEnJ, iEta), "#it{p}_{T}^{reco} / #it{p}_{T}^{truth}", 140, 0.3, 1.7);
+      h_jpts[iEnJ][iEta]->Sumw2 ();
+      h_jes[iEnJ][iEta] = new TH1D (Form ("h_jes_%s_iEnJ%i_iEta%i", sys.Data (), iEnJ, iEta), "#it{E}_{reco} / #it{E}_{truth}", 140, 0.3, 1.7);
+      h_jes[iEnJ][iEta]->Sumw2 ();
+      h_jetacorr[iEnJ][iEta] = new TH1D (Form ("h_jetacorr_%s_iEnJ%i_iEta%i", sys.Data (), iEnJ, iEta), "#eta_{reco} - #eta_{truth}", 80, -0.2, 0.2);
+      h_jetacorr[iEnJ][iEta]->Sumw2 ();
     } // end loop over iEta
   } // end loop over iEnJ
 
@@ -236,7 +198,7 @@ bool JetEnergyResolution (const char* directory,
   // Loop over events
   for (int iEvt = 0; iEvt < nEvts; iEvt++) {
     if (nEvts > 100 && iEvt % (nEvts / 100) == 0)
-      cout << "Info: In JetEnergyResolution.cxx: Event loop " << iEvt / (nEvts / 100) << "\% done...\r" << flush;
+      cout << "Info: In JetPerformance.cxx: Event loop " << iEvt / (nEvts / 100) << "\% done...\r" << flush;
     tree->GetEntry (iEvt);
 
     bool hasPrimary = false;
@@ -252,49 +214,6 @@ bool JetEnergyResolution (const char* directory,
     if (!hasPrimary || hasPileup || fabs (vz) > 150)
     //if (!hasPrimary || fabs (vz) > 150)
       continue;
-
-    for (int iJet = 0; iJet < akt2_hi_jet_n; iJet++) {
-      if (!MeetsJetAcceptanceCuts (iJet))
-        continue;
-
-      const float jpt = akt2_hi_jet_pt_xcalib[iJet];
-      const float jeta = akt2_hi_jet_eta_xcalib[iJet];
-      const float jphi = akt2_hi_jet_phi[iJet];
-      const float jen = akt2_hi_jet_e_xcalib[iJet];
-
-      int iTJet = -1;
-      for (int jTJet = 0; jTJet < akt2_truth_jet_n; jTJet++) {
-        if (iTJet == -1 || DeltaR (jeta, akt2_truth_jet_eta[jTJet], jphi, akt2_truth_jet_phi[jTJet]) < DeltaR (jeta, akt2_truth_jet_eta[iTJet], jphi, akt2_truth_jet_phi[iTJet]))
-          iTJet = jTJet;
-      }
-
-      if (iTJet == -1 || DeltaR (jeta, akt2_truth_jet_eta[iTJet], jphi, akt2_truth_jet_phi[iTJet]) > 0.2)
-        continue;
-
-      const float tjpt = akt2_truth_jet_pt[iTJet];
-      const float tjeta = akt2_truth_jet_eta[iTJet];
-      //const float tjphi = akt2_truth_jet_phi[iTJet];
-      const float tjen = akt2_truth_jet_e[iTJet];
-
-      short iEnJ = -1;
-      if (enJBins[0] <= tjpt) {
-        iEnJ = 0;
-        while (iEnJ < numEnJBins && enJBins[iEnJ+1] < tjpt) iEnJ++;
-      }
-
-      short iEta = -1;
-      if (finerEtaBins[0] <= tjeta) {
-        iEta = 0;
-        while (iEta < numFinerEtaBins && finerEtaBins[iEta+1] < tjeta) iEta++;
-      }
-
-      if (iEnJ >= 0 && iEnJ < numEnJBins && iEta >= 0 && iEta < numFinerEtaBins) {
-        h_r2_jpts[iEnJ][iEta]->Fill (jpt / tjpt);
-        h_r2_jes[iEnJ][iEta]->Fill (jen / tjen);
-        h_r2_jetacorr[iEnJ][iEta]->Fill (jeta - tjeta);
-      }
-    } // end loop over R=0.2 jets
-
 
     for (int iJet = 0; iJet < akt4_hi_jet_n; iJet++) {
       if (!MeetsJetAcceptanceCuts (iJet))
@@ -332,13 +251,13 @@ bool JetEnergyResolution (const char* directory,
       }
 
       if (iEnJ >= 0 && iEnJ < numEnJBins && iEta >= 0 && iEta < numFinerEtaBins) {
-        h_r4_jpts[iEnJ][iEta]->Fill (jpt / tjpt);
-        h_r4_jes[iEnJ][iEta]->Fill (jen / tjen);
-        h_r4_jetacorr[iEnJ][iEta]->Fill (jeta - tjeta);
+        h_jpts[iEnJ][iEta]->Fill (jpt / tjpt);
+        h_jes[iEnJ][iEta]->Fill (jen / tjen);
+        h_jetacorr[iEnJ][iEta]->Fill (jeta - tjeta);
       }
-    } // end loop over R=0.4 jets
+    }
   } // end event loop
-  cout << endl << "Info: In JetEnergyResolution.cxx: Finished event loop." << endl;
+  cout << endl << "Info: In JetPerformance.cxx: Finished event loop." << endl;
 
 
   SaferDelete (&tree);
@@ -348,19 +267,12 @@ bool JetEnergyResolution (const char* directory,
 
   for (int iEnJ = 0; iEnJ < numEnJBins; iEnJ++) {
     for (int iEta = 0; iEta < numFinerEtaBins; iEta++) {
-      h_r2_jpts[iEnJ][iEta]->Write ();
-      SaferDelete (&(h_r2_jpts[iEnJ][iEta]));
-      h_r2_jes[iEnJ][iEta]->Write ();
-      SaferDelete (&(h_r2_jes[iEnJ][iEta]));
-      h_r2_jetacorr[iEnJ][iEta]->Write ();
-      SaferDelete (&(h_r2_jetacorr[iEnJ][iEta]));
-
-      h_r4_jpts[iEnJ][iEta]->Write ();
-      SaferDelete (&(h_r4_jpts[iEnJ][iEta]));
-      h_r4_jes[iEnJ][iEta]->Write ();
-      SaferDelete (&(h_r4_jes[iEnJ][iEta]));
-      h_r4_jetacorr[iEnJ][iEta]->Write ();
-      SaferDelete (&(h_r4_jetacorr[iEnJ][iEta]));
+      h_jpts[iEnJ][iEta]->Write ();
+      SaferDelete (&(h_jpts[iEnJ][iEta]));
+      h_jes[iEnJ][iEta]->Write ();
+      SaferDelete (&(h_jes[iEnJ][iEta]));
+      h_jetacorr[iEnJ][iEta]->Write ();
+      SaferDelete (&(h_jetacorr[iEnJ][iEta]));
     } // end loop over iEta
   } // end loop over iEnJ
 

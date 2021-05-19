@@ -42,7 +42,7 @@ const Color_t colors[11] =    {kBlack, kRed+1, kAzure-2, kGreen+2, kViolet-3, kM
 
 void PlotTrackMomentumResolution () {
 
-  TFile* inFile = new TFile (Form ("%s/rootFiles/TrackMomentumResolution/Nominal/summary.root", workPath.Data ()), "read");
+  TFile* inFile = new TFile (Form ("%s/TrackMomentumResolution/Nominal/summary.root", rootPath.Data ()), "read");
 
   h2_avg_tms = new TH2D*[2];
   h2_avg_tmr = new TH2D*[2];

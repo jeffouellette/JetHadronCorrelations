@@ -7,7 +7,7 @@ accounting_group = group_atlas.boulder
 
 
 # Useful variables to set:
-# Analysis-level minimum/maximum jet pT; 30, 60, or 120 (minimum); 0 (maximum)
+# Analysis-level minimum/maximum jet pT; 15, 30, 60, or 120 (minimum); 0 (maximum)
 #minjpt=30
 maxjpt=0
 
@@ -22,24 +22,23 @@ mixdir=MinBiasData
 #vardir=JetES5PercSmearVar
 
 # Centrality selection
-# 1 = 0-20%, 0 = everything else
-cent=1
+#cent=1
 
 
-# p+Pb non-mixed
-Arguments = $(minjpt) $(maxjpt) pPb16_5TeV $(minjpt)GeVJets_data16 ./rootFiles/Histograms/$(minjpt)GeVJets/JetsHists/$(vardir)/$(run)_iCent$(cent)_hists.root ./rootFiles/Trees/$(sigdir)/$(vardir)/$(run)_iCent$(cent).root
-Error = run/errors/$(minjpt)GeVJets_JetsHists_$(run)_iCent$(cent)_$(vardir).err
-Log = /tmp/jeff/logs/$(minjpt)GeVJets_JetsHists_$(run)_iCent$(cent)_$(vardir).log
-Output = run/outputs/$(minjpt)GeVJets_JetsHists_$(run)_iCent$(cent)_$(vardir).out
-Queue run in (312796 312837 312937 312945 312968 314199)
-
-
-# p+Pb mixed
-Arguments = $(minjpt) $(maxjpt) pPb16_5TeV $(minjpt)GeVJets_mixed_data16 ./rootFiles/Histograms/$(minjpt)GeVJets/MixedHists/$(vardir)/$(run)_iCent$(cent)_hists.root ./rootFiles/Trees/$(sigdir)/$(vardir)/$(run)_iCent$(cent).root ./rootFiles/Trees/$(mixdir)/$(vardir)/$(run)_iCent$(cent).root
-Error = run/errors/$(minjpt)GeVJets_MixedHists_$(run)_iCent$(cent)_$(vardir).err
-Log = /tmp/jeff/logs/$(minjpt)GeVJets_MixedHists_$(run)_iCent$(cent)_$(vardir).log
-Output = run/outputs/$(minjpt)GeVJets_MixedHists_$(run)_iCent$(cent)_$(vardir).out
-Queue run in (312796 312837 312937 312945 312968 314199)
+## p+Pb non-mixed
+#Arguments = $(minjpt) $(maxjpt) pPb16_5TeV $(minjpt)GeVJets_data16 ./rootFiles/Histograms/$(minjpt)GeVJets/JetsHists/$(vardir)/$(run)_iCent$(cent)_hists.root ./rootFiles/Trees/$(sigdir)/$(vardir)/$(run)_iCent$(cent).root
+#Error = run/errors/$(minjpt)GeVJets_JetsHists_$(run)_iCent$(cent)_$(vardir).err
+#Log = /tmp/jeff/logs/$(minjpt)GeVJets_JetsHists_$(run)_iCent$(cent)_$(vardir).log
+#Output = run/outputs/$(minjpt)GeVJets_JetsHists_$(run)_iCent$(cent)_$(vardir).out
+#Queue run in (312796 312837 312937 312945 312968 314199)
+#
+#
+## p+Pb mixed
+#Arguments = $(minjpt) $(maxjpt) pPb16_5TeV $(minjpt)GeVJets_mixed_data16 ./rootFiles/Histograms/$(minjpt)GeVJets/MixedHists/$(vardir)/$(run)_iCent$(cent)_hists.root ./rootFiles/Trees/$(sigdir)/$(vardir)/$(run)_iCent$(cent).root ./rootFiles/Trees/$(mixdir)/$(vardir)/$(run)_iCent$(cent).root
+#Error = run/errors/$(minjpt)GeVJets_MixedHists_$(run)_iCent$(cent)_$(vardir).err
+#Log = /tmp/jeff/logs/$(minjpt)GeVJets_MixedHists_$(run)_iCent$(cent)_$(vardir).log
+#Output = run/outputs/$(minjpt)GeVJets_MixedHists_$(run)_iCent$(cent)_$(vardir).out
+#Queue run in (312796 312837 312937 312945 312968 314199)
 
 
 # pp
@@ -47,4 +46,12 @@ Arguments = $(minjpt) $(maxjpt) pp17_5TeV $(minjpt)GeVJets_data17 ./rootFiles/Hi
 Error = run/errors/$(minjpt)GeVJets_JetsHists_$(run)_$(vardir).err
 Log = /tmp/jeff/logs/$(minjpt)GeVJets_JetsHists_$(run)_$(vardir).log
 Output = run/outputs/$(minjpt)GeVJets_JetsHists_$(run)_$(vardir).out
+Queue run in (340644 340683 340697 340718 340814 340849 340850 340910 340925 340973 341027 341123 341184)
+
+
+# pp
+Arguments = $(minjpt) $(maxjpt) pp17_5TeV $(minjpt)GeVJets_mixed_data17 ./rootFiles/Histograms/$(minjpt)GeVJets/MixedHists/$(vardir)/$(run)_hists.root ./rootFiles/Trees/$(sigdir)/$(vardir)/$(run).root ./rootFiles/Trees/$(mixdir)/$(vardir)/$(run).root
+Error = run/errors/$(minjpt)GeVJets_MixedHists_$(run)_$(vardir).err
+Log = /tmp/jeff/logs/$(minjpt)GeVJets_MixedHists_$(run)_$(vardir).log
+Output = run/outputs/$(minjpt)GeVJets_MixedHists_$(run)_$(vardir).out
 Queue run in (340644 340683 340697 340718 340814 340849 340850 340910 340925 340973 341027 341123 341184)

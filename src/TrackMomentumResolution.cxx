@@ -66,7 +66,7 @@ bool TrackMomentumResolution (const char* directory,
   TChain* tree = new TChain ("bush", "bush");
   {
     TString pattern = "*.root";
-    std::cout << "DataPath = " << dataPath;
+    std::cout << "DataPath = " << dataPath << std::endl;
     auto dir = gSystem->OpenDirectory (dataPath + directory);
     while (const char* f = gSystem->GetDirEntry (dir)) {
       TString file = TString (f);

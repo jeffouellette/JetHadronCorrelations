@@ -29,23 +29,22 @@ TColor* tcolor = new TColor ();
 const Color_t myBlue = (Color_t) tcolor->GetColor (45, 64, 245);
 const Color_t myPurple = (Color_t) tcolor->GetColor (130,  10, 130);
 const Color_t myRed = (Color_t) tcolor->GetColor (255,  12,  73);
+const Color_t myGreen = (Color_t) tcolor->GetColor ( 54, 167,  80);
+const Color_t myOrange = (Color_t) tcolor->GetColor (255,  68,   0);
 
 const Color_t systColors[10] = {kRed+1, kAzure-2, kGreen+2, kViolet-3, kMagenta, kCyan+1, kOrange-3, kGreen-7, kBlue+1, kPink-5};
 
 TLine* l = new TLine ();
 TLatex* tl = new TLatex ();
 
-void PlotJets (const char* tag, const char* inFileTag) {
-
-  SetupDirectories ("Data");
+void PlotJets (const char* inFileTag) {
 
   TFile* inFile = nullptr;
 
   TH1D** h_evt_counts = new TH1D*[2];
   TH1D** h_jet_counts = new TH1D*[2];
   //TH1D** h_ljet_counts = new TH1D*[2];
-  //TH1D** h_sljet_counts = new TH1D*[2];
-
+  //TH1D** h_sljet_counts = new TH1D*[2]; 
   TH1D** h_jet_pt = new TH1D*[2];
   TH2D** h2_jet_pt_cov = new TH2D*[2];
 
@@ -66,7 +65,7 @@ void PlotJets (const char* tag, const char* inFileTag) {
   {
     TString inFileName = inFileTag;
     inFileName.ReplaceAll (".root", "");
-    inFileName = Form ("./rootFiles/Results/PlotJets_%s.root", inFileName.Data ());
+    inFileName = Form ("%s/Results/PlotJets_%s.root", rootPath.Data (), inFileName.Data ());
     std::cout << "Reading " << inFileName.Data () << std::endl;
     inFile = new TFile (inFileName, "read");
 
@@ -96,6 +95,9 @@ void PlotJets (const char* tag, const char* inFileTag) {
   
       h_jet_pt_ratio_syst[iVar] = (TH1D*) inFile->Get (Form ("h_jet_pt_ratio_%s", variations[iVar].Data ()));
     }
+
+    h2_jet_eta_phi[0] = (TH2D*) inFile->Get ("h2_jet_eta_phi_ref");
+    h2_jet_eta_phi[1] = (TH2D*) inFile->Get ("h2_jet_eta_phi");
   }
 
 
@@ -129,8 +131,8 @@ void PlotJets (const char* tag, const char* inFileTag) {
     TH1D* h = nullptr;
     TGAE* g = nullptr;
 
-    double ymin=5e-7;
-    double ymax=8e-2;
+    double ymin=1e-7;
+    double ymax=1e0;
 
     uPad->cd ();
     uPad->SetLogy ();
@@ -143,7 +145,7 @@ void PlotJets (const char* tag, const char* inFileTag) {
     h->GetXaxis ()->SetTitleSize (0.028/fPad);
     h->GetXaxis ()->SetLabelSize (0.028/fPad);
     h->GetXaxis ()->SetTitleOffset (2.1*fPad);
-    h->GetYaxis ()->SetTitle ("(1/N_{evt}) (dN_{jet} / d#it{p}_{T}^{jet})");
+    h->GetYaxis ()->SetTitle ("(1 / N_{jet}) (dN_{jet} / d#it{p}_{T}^{jet})");
     h->GetYaxis ()->SetTitleSize (0.028/fPad);
     h->GetYaxis ()->SetLabelSize (0.028/fPad);
     h->GetYaxis ()->SetTitleOffset (1.8*fPad);
@@ -162,6 +164,7 @@ void PlotJets (const char* tag, const char* inFileTag) {
     SaferDelete (&g);
     h = h_jet_pt[0];
     g = make_graph (h);
+    ResetXErrors (g);
     g->SetMarkerStyle (kFullCircle);
     g->SetMarkerSize (0.8);
     g->SetMarkerColor (myBlue);
@@ -183,6 +186,7 @@ void PlotJets (const char* tag, const char* inFileTag) {
     SaferDelete (&g);
     h = h_jet_pt[1];
     g = make_graph (h);
+    ResetXErrors (g);
     g->SetMarkerStyle (kFullCircle);
     g->SetMarkerSize (0.8);
     g->SetMarkerColor (myRed);
@@ -198,15 +202,20 @@ void PlotJets (const char* tag, const char* inFileTag) {
     myText (0.50, 0.78, kBlack, "#bf{#it{ATLAS}} Internal", 0.028/fPad);
     myMarkerText (0.50, 0.72, myRed, kFullCircle, "#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV, #bf{0-20%}", 0.8, 0.028/fPad, true);
     myMarkerText (0.50, 0.66, myBlue, kFullCircle, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.8, 0.028/fPad, true);
-    myText (0.50, 0.60, kBlack, strcmp (tag, "30GeVJets") == 0 ? "Minimum bias trigger" : "J50 Trigger", 0.028/fPad);
+    //myText (0.50, 0.60, kBlack, strcmp (tag, "30GeVJets") == 0 ? "Minimum bias trigger" : "J50 Trigger", 0.028/fPad);
 
 
     dPad->cd ();
 
-    ymin=0.51;
-    ymax=1.49;
-
     h = (TH1D*) h_jet_pt_ratio->Clone ("h");
+
+    //float avgy = 0;
+    //for (int i = 1; i <= h->GetNbinsX (); i++) avgy += h->GetBinContent (i) / h->GetNbinsX ();
+    //ymin = 0.3*avgy;
+    //ymax = 3*avgy;
+    ymin=0.7;
+    ymax=1.3;
+
     h->Reset ();
     for (int i = 1; i <= h->GetNbinsX (); i++) h->SetBinContent (i, 1);
     h->GetXaxis ()->SetMoreLogLabels ();
@@ -215,7 +224,7 @@ void PlotJets (const char* tag, const char* inFileTag) {
     h->GetXaxis ()->SetTitleSize (0.028/(1-fPad));
     h->GetXaxis ()->SetLabelSize (0.028/(1-fPad));
     h->GetXaxis ()->SetTitleOffset (3.2*(1-fPad));
-    h->GetYaxis ()->SetTitle ("#it{I}_{#it{p}A} = #it{p}+Pb / #it{pp}");
+    h->GetYaxis ()->SetTitle ("#it{p}+Pb / #it{pp}");
     h->GetYaxis ()->SetTitleSize (0.028/(1-fPad));
     h->GetYaxis ()->SetLabelSize (0.028/(1-fPad));
     h->GetYaxis ()->SetTitleOffset (1.8*(1-fPad));
@@ -248,24 +257,24 @@ void PlotJets (const char* tag, const char* inFileTag) {
     ((TGAE*) g->Clone ())->Draw ("p");
     SaferDelete (&g);
 
-    c->SaveAs (Form ("%s/Plots/JetPtSpectrum_%s.pdf", workPath.Data (), tag));
+    c->SaveAs (Form ("%s/Plots/JetPtSpectrum.pdf", workPath.Data ()));
   }
 
 
 
-  //{
-  //  TCanvas* c = new TCanvas ("c2", "", 800, 800);
-  //  c->SetRightMargin (0.18);
-  //  c->SetLeftMargin (0.15);
-  //  c->SetTopMargin (0.04);
-  //  c->SetBottomMargin (0.15);
+  {
+    TCanvas* c = new TCanvas ("c2", "", 800, 800);
+    c->SetRightMargin (0.18);
+    c->SetLeftMargin (0.15);
+    c->SetTopMargin (0.04);
+    c->SetBottomMargin (0.15);
 
-  //  TH2D* h2 = h2_jet_eta_phi[1];
+    TH2D* h2 = h2_jet_eta_phi[1];
 
-  //  h2->Draw ("colz");
+    h2->Draw ("colz");
 
-  //  c->SaveAs (Form ("%s/Plots/JetEtaPhiSpectrum.pdf", workPath.Data ()));
-  //}
+    c->SaveAs (Form ("%s/Plots/JetEtaPhiSpectrum.pdf", workPath.Data ()));
+  }
 
 
 }

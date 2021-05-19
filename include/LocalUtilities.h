@@ -6,6 +6,8 @@
 #include <TH1D.h>
 #include <TH2D.h>
 #include <TFile.h>
+#include <TGraphErrors.h>
+#include <TProfile.h>
 
 #include <vector>
 
@@ -144,6 +146,12 @@ TH1D* GetZdcCuts ();
 
 
 /**
+ * Returns the probability histogram of each FCal ET value in 0-20% ZDC events.
+ */
+TH1D* GetFCalZdcWeights ();
+
+
+/**
  * Returns an abbreviated, unique identifier for a given dataset.
  */
 TString GetIdentifier (const int dataSet, const char* directory, const char* inFileName);
@@ -189,6 +197,19 @@ TH2D* LoadTrackingEfficiency ();
  * Returns the tracking purity histograms.
  */
 TH2D* LoadTrackingPurity ();
+
+
+/**
+ * Converts a TProfile to a TGraph assuming the x-axis of the TProfile is the y-axis of the TGraph.
+ */
+TGraphErrors* TProfY2TGE (TProfile* py);
+
+
+/**
+ * Converts a TProfile to a TGraph assuming the x-axis of the TProfile is the x-axis of the TGraph.
+ */
+TGraphErrors* TProfX2TGE (TProfile* px);
+
 
 } // end namespace
 

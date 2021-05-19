@@ -7,7 +7,9 @@
 #include "LocalUtilities.h"
 #include "Variations.h"
 
+#include <ArrayTemplates.h>
 #include <Utilities.h>
+#include <MyStyle.h>
 
 #include <TColor.h>
 #include <TLine.h>
@@ -16,134 +18,134 @@
 #include <TH1D.h>
 #include <TH2D.h>
 #include <TF1.h>
+#include <TString.h>
 #include <TLorentzVector.h>
 
 #include <iostream>
+#include <vector>
+#include <map>
 #include <math.h>
 
 using namespace JetHadronCorrelations;
 
 TColor* tcolor = new TColor ();
-const Color_t myBlue = (Color_t) tcolor->GetColor (45, 64, 245);
+const Color_t myBlue = (Color_t) tcolor->GetColor ( 45,  64, 245);
 const Color_t myPurple = (Color_t) tcolor->GetColor (130,  10, 130);
 const Color_t myRed = (Color_t) tcolor->GetColor (255,  12,  73);
+const Color_t myGreen = (Color_t) tcolor->GetColor ( 54, 167,  80);
+const Color_t myOrange = (Color_t) tcolor->GetColor (255,  68,   0);
 
 TLine* l = new TLine ();
 
-void PlotDPhi (const char* tag, const char* inFileTag) {
 
-  SetupDirectories ("Data");
+void PlotDPhi (const char* tag, const char* inFileTag) {
 
   TFile* inFile = nullptr;
 
-  TH1D** h_evt_counts = new TH1D*[2];
-  TH1D** h_jet_counts = new TH1D*[2];
-  //TH1D** h_ljet_counts = new TH1D*[2];
-  //TH1D** h_sljet_counts = new TH1D*[2];
-  TH1D** h_evt_counts_bkg = new TH1D*[2];
-  TH1D** h_jet_counts_bkg = new TH1D*[2];
-  //TH1D** h_ljet_counts_bkg = new TH1D*[2];
-  //TH1D** h_sljet_counts_bkg = new TH1D*[2];
+  TH1D*  h_evt_counts_ref = nullptr;
+  TH1D*  h_jet_counts_ref = nullptr;
+  TH1D*  h_evt_counts_ref_bkg = nullptr;
+  TH1D*  h_jet_counts_ref_bkg = nullptr;
+  TH1D** h_evt_counts = new TH1D*[numZdcCentBins];
+  TH1D** h_jet_counts = new TH1D*[numZdcCentBins];
+  TH1D** h_evt_counts_bkg = new TH1D*[numZdcCentBins];
+  TH1D** h_jet_counts_bkg = new TH1D*[numZdcCentBins];
 
-  TH1D** h_jet_trk_dphi = new TH1D*[2];
-  TH2D** h2_jet_trk_dphi_cov = new TH2D*[2];
-  //TH1D** h_ljet_trk_dphi = new TH1D*[2];
-  //TH2D** h2_ljet_trk_dphi_cov = new TH2D*[2];
-  //TH1D** h_sljet_trk_dphi = new TH1D*[2];
-  //TH2D** h2_sljet_trk_dphi_cov = new TH2D*[2];
-  TH1D** h_jet_trk_dphi_bkg = new TH1D*[2];
-  TH2D** h2_jet_trk_dphi_cov_bkg = new TH2D*[2];
-  //TH1D** h_ljet_trk_dphi_bkg = new TH1D*[2];
-  //TH2D** h2_ljet_trk_dphi_cov_bkg = new TH2D*[2];
-  //TH1D** h_sljet_trk_dphi_bkg = new TH1D*[2];
-  //TH2D** h2_sljet_trk_dphi_cov_bkg = new TH2D*[2];
+  TH1D**  h_jet_trk_dphi_ref = Get1DArray <TH1D*> (nPtChSelections);
+  TH2D**  h2_jet_trk_dphi_cov_ref = Get1DArray <TH2D*> (nPtChSelections);
+  TH1D**  h_jet_trk_dphi_ref_bkg = Get1DArray <TH1D*> (nPtChSelections);
+  TH2D**  h2_jet_trk_dphi_cov_ref_bkg = Get1DArray <TH2D*> (nPtChSelections);
+  TH1D*** h_jet_trk_dphi = Get2DArray <TH1D*> (numZdcCentBins, nPtChSelections);
+  TH2D*** h2_jet_trk_dphi_cov = Get2DArray <TH2D*> (numZdcCentBins, nPtChSelections);
+  TH1D*** h_jet_trk_dphi_bkg = Get2DArray <TH1D*> (numZdcCentBins, nPtChSelections);
+  TH2D*** h2_jet_trk_dphi_cov_bkg = Get2DArray <TH2D*> (numZdcCentBins, nPtChSelections);
 
-  TH1D** h_jet_trk_dphi_sig = new TH1D*[2];
-  //TH1D** h_ljet_trk_dphi_sig = new TH1D*[2];
-  //TH1D** h_sljet_trk_dphi_sig = new TH1D*[2];
+  TH1D**  h_jet_trk_dphi_ref_sig = Get1DArray <TH1D*> (nPtChSelections);
+  TH1D*** h_jet_trk_dphi_sig = Get2DArray <TH1D*> (numZdcCentBins, nPtChSelections);
 
-  TH1D* h_jet_trk_dphi_iaa = nullptr;
-  //TH1D* h_ljet_trk_dphi_iaa = nullptr;
-  //TH1D* h_sljet_trk_dphi_iaa = nullptr;
+  TH1D*** h_jet_trk_dphi_iaa = Get2DArray <TH1D*> (numZdcCentBins, nPtChSelections);
 
-  TGAE** g_jet_trk_dphi_syst = new TGAE*[2];
-  //TGAE** g_ljet_trk_dphi_syst = new TGAE*[2];
-  //TGAE** g_sljet_trk_dphi_syst = new TGAE*[2];
-  TGAE** g_jet_trk_dphi_bkg_syst = new TGAE*[2];
-  //TGAE** g_ljet_trk_dphi_bkg_syst = new TGAE*[2];
-  //TGAE** g_sljet_trk_dphi_bkg_syst = new TGAE*[2];
+  TGAE**  g_jet_trk_dphi_ref_syst = Get1DArray <TGAE*> (nPtChSelections);
+  TGAE**  g_jet_trk_dphi_ref_bkg_syst = Get1DArray <TGAE*> (nPtChSelections);
+  TGAE*** g_jet_trk_dphi_syst = Get2DArray <TGAE*> (numZdcCentBins, nPtChSelections);
+  TGAE*** g_jet_trk_dphi_bkg_syst = Get2DArray <TGAE*> (numZdcCentBins, nPtChSelections);
 
-  TGAE** g_jet_trk_dphi_sig_syst = new TGAE*[2];
-  //TGAE** g_ljet_trk_dphi_sig_syst = new TGAE*[2];
-  //TGAE** g_sljet_trk_dphi_sig_syst = new TGAE*[2];
+  TGAE**  g_jet_trk_dphi_ref_sig_syst = Get1DArray <TGAE*> (nPtChSelections);
+  TGAE*** g_jet_trk_dphi_sig_syst = Get2DArray <TGAE*> (numZdcCentBins, nPtChSelections);
 
-  TGAE* g_jet_trk_dphi_iaa_syst = nullptr;
-  //TGAE* g_ljet_trk_dphi_iaa_syst = nullptr;
-  //TGAE* g_sljet_trk_dphi_iaa_syst = nullptr;
+  TGAE*** g_jet_trk_dphi_iaa_syst = Get2DArray <TGAE*> (numZdcCentBins, nPtChSelections);
+
+  TH1D***  h_jet_trk_dphi_ref_syst = Get2DArray <TH1D*> (nPtChSelections, nVar);
+  TH1D***  h_jet_trk_dphi_ref_bkg_syst = Get2DArray <TH1D*> (nPtChSelections, nVar);
+  TH1D**** h_jet_trk_dphi_syst = Get3DArray <TH1D*> (numZdcCentBins, nPtChSelections, nVar);
+  TH1D**** h_jet_trk_dphi_bkg_syst = Get3DArray <TH1D*> (numZdcCentBins, nPtChSelections, nVar);
+
+  TH1D***  h_jet_trk_dphi_ref_sig_syst = Get2DArray <TH1D*> (nPtChSelections, nVar);
+  TH1D**** h_jet_trk_dphi_sig_syst = Get3DArray <TH1D*> (numZdcCentBins, nPtChSelections, nVar);
+
+  TH1D**** h_jet_trk_dphi_iaa_syst = Get3DArray <TH1D*> (numZdcCentBins, nPtChSelections, nVar);
 
 
 
   {
     TString inFileName = inFileTag;
     inFileName.ReplaceAll (".root", "");
-    inFileName = Form ("./rootFiles/Results/PlotDPhi_%s.root", inFileName.Data ());
+    inFileName = Form ("%s/Results/PlotDPhi_%s.root", rootPath.Data (), inFileName.Data ());
     std::cout << "Reading " << inFileName.Data () << std::endl;
     inFile = new TFile (inFileName, "read");
 
-    h_evt_counts[0] = (TH1D*) inFile->Get ("h_evt_counts_ref");
-    h_jet_counts[0] = (TH1D*) inFile->Get ("h_jet_counts_ref");
-    //h_ljet_counts[0] = (TH1D*) inFile->Get ("h_ljet_counts_ref");
-    //h_sljet_counts[0] = (TH1D*) inFile->Get ("h_sljet_counts_ref");
-    h_evt_counts[1] = (TH1D*) inFile->Get ("h_evt_counts");
-    h_jet_counts[1] = (TH1D*) inFile->Get ("h_jet_counts");
-    //h_ljet_counts[1] = (TH1D*) inFile->Get ("h_ljet_counts");
-    //h_sljet_counts[1] = (TH1D*) inFile->Get ("h_sljet_counts");
-    h_evt_counts_bkg[1] = (TH1D*) inFile->Get ("h_evt_counts_bkg");
-    h_jet_counts_bkg[1] = (TH1D*) inFile->Get ("h_jet_counts_bkg");
-    //h_ljet_counts_bkg[1] = (TH1D*) inFile->Get ("h_ljet_counts_bkg");
-    //h_sljet_counts_bkg[1] = (TH1D*) inFile->Get ("h_sljet_counts_bkg");
+    h_evt_counts_ref = (TH1D*) inFile->Get ("h_evt_counts_ref_Nominal");
+    h_jet_counts_ref = (TH1D*) inFile->Get ("h_jet_counts_ref_Nominal");
+    h_evt_counts_ref_bkg = (TH1D*) inFile->Get ("h_evt_counts_ref_bkg_Nominal");
+    h_jet_counts_ref_bkg = (TH1D*) inFile->Get ("h_jet_counts_ref_bkg_Nominal");
 
-    h_jet_trk_dphi[0] = (TH1D*) inFile->Get ("h_jet_trk_dphi_ref");
-    //h_ljet_trk_dphi[0] = (TH1D*) inFile->Get ("h_ljet_trk_dphi_ref");
-    //h_sljet_trk_dphi[0] = (TH1D*) inFile->Get ("h_sljet_trk_dphi_ref");
-    h_jet_trk_dphi[1] = (TH1D*) inFile->Get ("h_jet_trk_dphi");
-    //h_ljet_trk_dphi[1] = (TH1D*) inFile->Get ("h_ljet_trk_dphi");
-    //h_sljet_trk_dphi[1] = (TH1D*) inFile->Get ("h_sljet_trk_dphi");
-    h_jet_trk_dphi_bkg[1] = (TH1D*) inFile->Get ("h_jet_trk_dphi_bkg");
-    //h_ljet_trk_dphi_bkg[1] = (TH1D*) inFile->Get ("h_ljet_trk_dphi_bkg");
-    //h_sljet_trk_dphi_bkg[1] = (TH1D*) inFile->Get ("h_sljet_trk_dphi_bkg");
+    for (int iCent = 0; iCent < numZdcCentBins; iCent++) { 
+      h_evt_counts[iCent] = (TH1D*) inFile->Get (Form ("h_evt_counts_pPb_iCent%i_Nominal", iCent));
+      h_jet_counts[iCent] = (TH1D*) inFile->Get (Form ("h_jet_counts_pPb_iCent%i_Nominal", iCent));
+      h_evt_counts_bkg[iCent] = (TH1D*) inFile->Get (Form ("h_evt_counts_pPb_bkg_iCent%i_Nominal", iCent));
+      h_jet_counts_bkg[iCent] = (TH1D*) inFile->Get (Form ("h_jet_counts_pPb_bkg_iCent%i_Nominal", iCent));
+    }
 
-    h_jet_trk_dphi_sig[0] = (TH1D*) inFile->Get ("h_jet_trk_dphi_ref_sig");
-    //h_ljet_trk_dphi_sig[0] = (TH1D*) inFile->Get ("h_ljet_trk_dphi_ref_sig");
-    //h_sljet_trk_dphi_sig[0] = (TH1D*) inFile->Get ("h_sljet_trk_dphi_ref_sig");
-    h_jet_trk_dphi_sig[1] = (TH1D*) inFile->Get ("h_jet_trk_dphi_sig");
-    //h_ljet_trk_dphi_sig[1] = (TH1D*) inFile->Get ("h_ljet_trk_dphi_sig");
-    //h_sljet_trk_dphi_sig[1] = (TH1D*) inFile->Get ("h_sljet_trk_dphi_sig");
+    for (int iPtCh = 0; iPtCh < nPtChSelections; iPtCh++) {
 
-    h_jet_trk_dphi_iaa = (TH1D*) inFile->Get ("h_jet_trk_dphi_iaa");
-    //h_ljet_trk_dphi_iaa = (TH1D*) inFile->Get ("h_ljet_trk_dphi_iaa");
-    //h_sljet_trk_dphi_iaa = (TH1D*) inFile->Get ("h_ljet_trk_dphi_iaa");
+      g_jet_trk_dphi_ref_syst[iPtCh] = (TGAE*) inFile->Get (Form ("g_jet_trk_dphi_%s_ref_syst", pTChSelections[iPtCh].Data ()));
+      g_jet_trk_dphi_ref_bkg_syst[iPtCh] = (TGAE*) inFile->Get (Form ("g_jet_trk_dphi_%s_ref_bkg_syst", pTChSelections[iPtCh].Data ()));
+      g_jet_trk_dphi_ref_sig_syst[iPtCh] = (TGAE*) inFile->Get (Form ("g_jet_trk_dphi_%s_ref_sig_syst", pTChSelections[iPtCh].Data ()));
 
-    g_jet_trk_dphi_syst[0] = (TGAE*) inFile->Get ("g_jet_trk_dphi_ref_syst");
-    //g_ljet_trk_dphi_syst[0] = (TGAE*) inFile->Get ("g_ljet_trk_dphi_ref_syst");
-    //g_sljet_trk_dphi_syst[0] = (TGAE*) inFile->Get ("g_sljet_trk_dphi_ref_syst");
-    g_jet_trk_dphi_syst[1] = (TGAE*) inFile->Get ("g_jet_trk_dphi_syst");
-    //g_ljet_trk_dphi_syst[1] = (TGAE*) inFile->Get ("g_ljet_trk_dphi_syst");
-    //g_sljet_trk_dphi_syst[1] = (TGAE*) inFile->Get ("g_sljet_trk_dphi_syst");
-    g_jet_trk_dphi_bkg_syst[1] = (TGAE*) inFile->Get ("g_jet_trk_dphi_bkg_syst");
-    //g_ljet_trk_dphi_bkg_syst[1] = (TGAE*) inFile->Get ("g_ljet_trk_dphi_bkg_syst");
-    //g_sljet_trk_dphi_bkg_syst[1] = (TGAE*) inFile->Get ("g_sljet_trk_dphi_bkg_syst");
+      h_jet_trk_dphi_ref[iPtCh] = (TH1D*) inFile->Get (Form ("h_jet_trk_dphi_%s_pp_Nominal", pTChSelections[iPtCh].Data ()));
+      h_jet_trk_dphi_ref_bkg[iPtCh] = (TH1D*) inFile->Get (Form ("h_jet_trk_dphi_%s_ref_bkg_Nominal", pTChSelections[iPtCh].Data ()));
+      h_jet_trk_dphi_ref_sig[iPtCh] = (TH1D*) inFile->Get (Form ("h_jet_trk_dphi_%s_ref_sig_Nominal", pTChSelections[iPtCh].Data ()));
 
-    g_jet_trk_dphi_sig_syst[0] = (TGAE*) inFile->Get ("g_jet_trk_dphi_ref_sig_syst");
-    //g_ljet_trk_dphi_sig_syst[0] = (TGAE*) inFile->Get ("g_ljet_trk_dphi_ref_sig_syst");
-    //g_sljet_trk_dphi_sig_syst[0] = (TGAE*) inFile->Get ("g_sljet_trk_dphi_ref_sig_syst");
-    g_jet_trk_dphi_sig_syst[1] = (TGAE*) inFile->Get ("g_jet_trk_dphi_sig_syst");
-    //g_ljet_trk_dphi_sig_syst[1] = (TGAE*) inFile->Get ("g_ljet_trk_dphi_sig_syst");
-    //g_sljet_trk_dphi_sig_syst[1] = (TGAE*) inFile->Get ("g_sljet_trk_dphi_sig_syst");
+      for (int iCent = 0; iCent < numZdcCentBins; iCent++) { 
 
-    g_jet_trk_dphi_iaa_syst = (TGAE*) inFile->Get ("g_jet_trk_dphi_iaa_syst");
-    //g_ljet_trk_dphi_iaa_syst = (TGAE*) inFile->Get ("g_ljet_trk_dphi_iaa_syst");
-    //g_sljet_trk_dphi_iaa_syst = (TGAE*) inFile->Get ("g_sljet_trk_dphi_iaa_syst");
+        g_jet_trk_dphi_syst[iCent][iPtCh] = (TGAE*) inFile->Get (Form ("g_jet_trk_dphi_%s_syst_iCent%i", pTChSelections[iPtCh].Data (), iCent));
+        g_jet_trk_dphi_bkg_syst[iCent][iPtCh] = (TGAE*) inFile->Get (Form ("g_jet_trk_dphi_%s_bkg_syst_iCent%i", pTChSelections[iPtCh].Data (), iCent));
+        g_jet_trk_dphi_sig_syst[iCent][iPtCh] = (TGAE*) inFile->Get (Form ("g_jet_trk_dphi_%s_sig_syst_iCent%i", pTChSelections[iPtCh].Data (), iCent));
+        g_jet_trk_dphi_iaa_syst[iCent][iPtCh] = (TGAE*) inFile->Get (Form ("g_jet_trk_dphi_%s_iaa_syst_iCent%i", pTChSelections[iPtCh].Data (), iCent));
+
+        h_jet_trk_dphi[iCent][iPtCh] = (TH1D*) inFile->Get (Form ("h_jet_trk_dphi_%s_pPb_iCent%i_Nominal", pTChSelections[iPtCh].Data (), iCent));
+        h_jet_trk_dphi_bkg[iCent][iPtCh] = (TH1D*) inFile->Get (Form ("h_jet_trk_dphi_%s_pPb_bkg_iCent%i_Nominal", pTChSelections[iPtCh].Data (), iCent));
+        h_jet_trk_dphi_sig[iCent][iPtCh] = (TH1D*) inFile->Get (Form ("h_jet_trk_dphi_%s_pPb_sig_iCent%i_Nominal", pTChSelections[iPtCh].Data (), iCent));
+        h_jet_trk_dphi_iaa[iCent][iPtCh] = (TH1D*) inFile->Get (Form ("h_jet_trk_dphi_%s_iaa_iCent%i_Nominal", pTChSelections[iPtCh].Data (), iCent));
+
+      }
+
+      for (int iVar = 1; iVar < nVar; iVar++) {
+
+        h_jet_trk_dphi_ref_syst[iPtCh][iVar] = (TH1D*) inFile->Get (Form ("h_jet_trk_dphi_%s_pp_%s", pTChSelections[iPtCh].Data (), variations[iVar].Data ()));
+        h_jet_trk_dphi_ref_bkg_syst[iPtCh][iVar] = (TH1D*) inFile->Get (Form ("h_jet_trk_dphi_%s_ref_bkg_%s", pTChSelections[iPtCh].Data (), variations[iVar].Data ()));
+        h_jet_trk_dphi_ref_sig_syst[iPtCh][iVar] = (TH1D*) inFile->Get (Form ("h_jet_trk_dphi_%s_ref_sig_%s", pTChSelections[iPtCh].Data (), variations[iVar].Data ()));
+
+        for (int iCent = 0; iCent < numZdcCentBins; iCent++) {
+
+          h_jet_trk_dphi_syst[iCent][iPtCh][iVar] = (TH1D*) inFile->Get (Form ("h_jet_trk_dphi_%s_pPb_iCent%i_%s", pTChSelections[iPtCh].Data (), iCent, variations[iVar].Data ()));
+          h_jet_trk_dphi_bkg_syst[iCent][iPtCh][iVar] = (TH1D*) inFile->Get (Form ("h_jet_trk_dphi_%s_pPb_bkg_iCent%i_%s", pTChSelections[iPtCh].Data (), iCent, variations[iVar].Data ()));
+          h_jet_trk_dphi_sig_syst[iCent][iPtCh][iVar] = (TH1D*) inFile->Get (Form ("h_jet_trk_dphi_%s_pPb_sig_iCent%i_%s", pTChSelections[iPtCh].Data (), iCent, variations[iVar].Data ()));
+          h_jet_trk_dphi_iaa_syst[iCent][iPtCh][iVar] = (TH1D*) inFile->Get (Form ("h_jet_trk_dphi_%s_iaa_iCent%i_%s", pTChSelections[iPtCh].Data (), iCent, variations[iVar].Data ()));
+
+        }
+      }
+    }
   }
 
 
@@ -154,8 +156,294 @@ void PlotDPhi (const char* tag, const char* inFileTag) {
 
 
 
-  {
-    const char* canvasName = "c_jet_trk_dphi";
+  for (int iPtCh = 0; iPtCh < nPtChSelections; iPtCh++) {
+    for (int iCent = 0; iCent < numZdcCentBins; iCent++) {
+      const char* canvasName = Form ("c_jet_trk_dphi_%s_iCent%i", pTChSelections[iPtCh].Data (), iCent);
+      TCanvas* c = new TCanvas (canvasName, "", 800, 1120);
+      c->cd ();
+      const double fuPad = 480./1120.;
+      const double fdPad = 320./1120.;
+      const double fcPad = 1.0 - fuPad - fdPad;
+      TPad* uPad = new TPad (Form ("%s_uPad", canvasName), "", 0.0, 1.0-fuPad, 1.0, 1.0);
+      TPad* cPad = new TPad (Form ("%s_uPad", canvasName), "", 0.0, fdPad, 1.0, 1.0-fuPad);
+      TPad* dPad = new TPad (Form ("%s_dPad", canvasName), "", 0.0, 0.0, 1.0, fdPad);
+
+      uPad->SetBottomMargin (0);
+      cPad->SetTopMargin (0);
+      cPad->SetBottomMargin (0);
+      dPad->SetTopMargin (0);
+      dPad->SetBottomMargin (0.25);
+      uPad->Draw ();
+      cPad->Draw ();
+      dPad->Draw ();
+
+      TH1D* h = nullptr; 
+      TGAE* g = nullptr;
+
+      uPad->cd (); 
+
+      float ymin = -4;
+      float ymax = 33;
+
+      h = (TH1D*) h_jet_trk_dphi_ref[iPtCh]->Clone ("h");
+      h->Reset ();
+      h->GetYaxis ()->SetRangeUser (ymin, ymax);
+      h->GetXaxis ()->SetTitle ("#Delta#phi_{ch,jet}");
+      h->GetXaxis ()->SetTitleSize (0.028/fuPad);
+      h->GetXaxis ()->SetLabelSize (0.028/fuPad);
+      h->GetXaxis ()->SetTitleOffset (2.1*fuPad);
+      h->GetYaxis ()->SetTitle ("(1/N_{jet}) (dN_{ch} / d#Delta#phi)");
+      h->GetYaxis ()->SetTitleSize (0.028/fuPad);
+      h->GetYaxis ()->SetLabelSize (0.028/fuPad);
+      h->GetYaxis ()->SetTitleOffset (2.1*fuPad);
+
+      h->SetLineWidth (1);
+      h->SetLineStyle (2);
+      h->DrawCopy ("hist ][");
+      SaferDelete (&h);
+
+      TBox* shadedBox = new TBox (7.*pi/8., ymin, pi, ymax);
+      shadedBox->SetFillColorAlpha (kGray, 0.3);
+      shadedBox->Draw ();
+      l->DrawLine (7.*pi/8., ymin, 7.*pi/8., ymax);
+
+      shadedBox = new TBox (0, ymin, pi/8., ymax);
+      shadedBox->SetFillColorAlpha (kGray, 0.3);
+      shadedBox->Draw ();
+      l->DrawLine (pi/8., ymin, pi/8., ymax);
+
+      g = g_jet_trk_dphi_ref_syst[iPtCh];
+      g->SetMarkerStyle (0);
+      g->SetMarkerSize (0.);
+      g->SetLineColor (myBlue);
+      g->SetLineWidth (1);
+      ((TGAE*) g->Clone ())->Draw ("5");
+      h = h_jet_trk_dphi_ref[iPtCh];
+      g = make_graph (h);
+      ResetXErrors (g);
+      g->SetMarkerStyle (kFullCircle);
+      g->SetMarkerSize (0.8);
+      g->SetMarkerColor (myBlue);
+      g->SetLineColor (myBlue);
+      g->SetLineWidth (2);
+      ((TGAE*) g->Clone ())->Draw ("p");
+      g->SetMarkerStyle (kOpenCircle);
+      g->SetMarkerColor (kBlack);
+      g->SetLineWidth (0);
+      ((TGAE*) g->Clone ())->Draw ("p");
+      SaferDelete (&g);
+
+      g = g_jet_trk_dphi_ref_bkg_syst[iPtCh];
+      g->SetMarkerStyle (0);
+      g->SetMarkerSize (0.);
+      g->SetLineColor (myPurple);
+      g->SetLineWidth (1);
+      ((TGAE*) g->Clone ())->Draw ("5");
+      h = h_jet_trk_dphi_ref_bkg[iPtCh];
+      g = make_graph (h);
+      ResetXErrors (g);
+      g->SetMarkerStyle (kOpenCircle);
+      g->SetMarkerSize (0.8);
+      g->SetMarkerColor (myPurple);
+      g->SetLineColor (myPurple);
+      g->SetLineWidth (2);
+      ((TGAE*) g->Clone ())->Draw ("p");
+      SaferDelete (&g);
+
+      g = g_jet_trk_dphi_syst[iCent][iPtCh];
+      g->SetMarkerStyle (0);
+      g->SetMarkerSize (0.);
+      g->SetLineColor (myRed);
+      g->SetLineWidth (1);
+      ((TGAE*) g->Clone ())->Draw ("5");
+      h = h_jet_trk_dphi[iCent][iPtCh];
+      g = make_graph (h);
+      ResetXErrors (g);
+      g->SetMarkerStyle (kFullCircle);
+      g->SetMarkerSize (0.8);
+      g->SetMarkerColor (myRed);
+      g->SetLineColor (myRed);
+      g->SetLineWidth (2);
+      ((TGAE*) g->Clone ())->Draw ("p");
+      g->SetMarkerStyle (kOpenCircle);
+      g->SetMarkerColor (kBlack);
+      g->SetLineWidth (0);
+      ((TGAE*) g->Clone ())->Draw ("p");
+      SaferDelete (&g);
+
+      g = g_jet_trk_dphi_bkg_syst[iCent][iPtCh];
+      g->SetMarkerStyle (0);
+      g->SetMarkerSize (0.);
+      g->SetLineColor (myGreen);
+      g->SetLineWidth (1);
+      ((TGAE*) g->Clone ())->Draw ("5");
+      h = h_jet_trk_dphi_bkg[iCent][iPtCh];
+      g = make_graph (h);
+      ResetXErrors (g);
+      g->SetMarkerStyle (kOpenCircle);
+      g->SetMarkerSize (0.8);
+      g->SetMarkerColor (myGreen);
+      g->SetLineColor (myGreen);
+      g->SetLineWidth (2);
+      ((TGAE*) g->Clone ())->Draw ("p");
+      SaferDelete (&g);
+
+      myText (0.30, 0.83, kBlack, "#bf{#it{ATLAS}} Internal", 0.022/fuPad);
+      myText (0.30, 0.77, kBlack, Form ("#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV, #bf{ZDC %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.020/fuPad);
+      myText (0.30, 0.71, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.020/fuPad);
+      myText (0.30, 0.65, kBlack, "Jet-hadron correlations", 0.020/fuPad);
+      myText (0.30, 0.59, kBlack, Form ("#it{p}_{T}^{jet} > %s, %s", GetJetPtStr (tag).Data (), pTChStrs[pTChSelections[iPtCh]].Data ()), 0.020/fuPad);
+      myText (0.30, 0.53, kBlack, "|#eta_{ch} - #it{y}_{CoM}| < 2.035", 0.020/fuPad);
+
+
+      cPad->cd (); 
+
+      ymin = -4;
+      ymax = 28;
+
+      h = (TH1D*) h_jet_trk_dphi_ref_sig[iPtCh]->Clone ("h");
+      h->Reset ();
+      h->GetXaxis ()->SetMoreLogLabels ();
+      h->GetYaxis ()->SetRangeUser (ymin, ymax);
+      h->GetXaxis ()->SetTitle ("#Delta#phi_{ch,jet}");
+      h->GetXaxis ()->SetTitleSize (0.028/fdPad);
+      h->GetXaxis ()->SetLabelSize (0.028/fdPad);
+      h->GetXaxis ()->SetTitleOffset (3.8*fdPad);
+      //h->GetXaxis ()->SetLabelOffset (-0.05*fdPad);
+      h->GetYaxis ()->SetTitle ("(Sig.+Bkg.) - Bkg.");
+      h->GetYaxis ()->SetTitleSize (0.028/fdPad);
+      h->GetYaxis ()->SetLabelSize (0.028/fdPad);
+      h->GetYaxis ()->SetTitleOffset (2.1*fdPad);
+      h->GetYaxis ()->CenterTitle ();
+
+      h->SetLineWidth (1);
+      h->SetLineStyle (2);
+      h->DrawCopy ("hist ][");
+      SaferDelete (&h);
+
+      shadedBox = new TBox (7.*pi/8., ymin, pi, ymax);
+      shadedBox->SetFillColorAlpha (kGray, 0.3);
+      shadedBox->Draw ();
+      l->DrawLine (7.*pi/8., ymin, 7.*pi/8., ymax);
+
+      shadedBox = new TBox (0, ymin, pi/8., ymax);
+      shadedBox->SetFillColorAlpha (kGray, 0.3);
+      shadedBox->Draw ();
+      l->DrawLine (pi/8., ymin, pi/8., ymax);
+
+      g = g_jet_trk_dphi_ref_sig_syst[iPtCh];
+      g->SetMarkerStyle (0);
+      g->SetMarkerSize (0.);
+      g->SetLineColor (myBlue);
+      g->SetLineWidth (1);
+      ((TGAE*) g->Clone ())->Draw ("5");
+      h = h_jet_trk_dphi_ref_sig[iPtCh];
+      g = make_graph (h);
+      ResetXErrors (g);
+      g->SetLineColor (myBlue);
+      g->SetLineWidth (2);
+      g->SetMarkerColor (myBlue);
+      g->SetMarkerStyle (kFullCircle);
+      g->SetMarkerSize (0.8);
+      ((TGAE*) g->Clone ())->Draw ("p");
+      g->SetMarkerStyle (kOpenCircle);
+      g->SetMarkerColor (kBlack);
+      g->SetLineWidth (0);
+      ((TGAE*) g->Clone ())->Draw ("p");
+      SaferDelete (&g);
+
+      g = g_jet_trk_dphi_sig_syst[iCent][iPtCh];
+      g->SetMarkerStyle (0);
+      g->SetMarkerSize (0.);
+      g->SetLineColor (myRed);
+      g->SetLineWidth (1);
+      ((TGAE*) g->Clone ())->Draw ("5");
+      h = h_jet_trk_dphi_sig[iCent][iPtCh];
+      g = make_graph (h);
+      ResetXErrors (g);
+      g->SetLineColor (myRed);
+      g->SetLineWidth (2);
+      g->SetMarkerColor (myRed);
+      g->SetMarkerStyle (kFullCircle);
+      g->SetMarkerSize (0.8);
+      ((TGAE*) g->Clone ())->Draw ("p");
+      g->SetMarkerStyle (kOpenCircle);
+      g->SetMarkerColor (kBlack);
+      g->SetLineWidth (0);
+      ((TGAE*) g->Clone ())->Draw ("p");
+      SaferDelete (&g);
+
+      myBoxText2 (0.36, 0.84, myRed, kFullCircle, "#it{p}+Pb jet-tagged events", 0.8, 0.020/fcPad, true);
+      myBoxText2 (0.36, 0.75, myBlue, kFullCircle, "#it{pp} jet-tagged events", 0.8, 0.020/fcPad, true);
+      myBoxText2 (0.36, 0.66, myGreen, kOpenCircle, "#it{p}+Pb bkgd.", 0.8, 0.020/fcPad);
+      myBoxText2 (0.36, 0.57, myPurple, kOpenCircle, "#it{pp} bkgd.", 0.8, 0.020/fcPad);
+
+
+      dPad->cd (); 
+
+      ymin = strcmp (tag, "30GeVJets") == 0 || strcmp (tag, "15GeVJets") == 0 ? 0.8 : 0.83;
+      ymax = strcmp (tag, "30GeVJets") == 0 || strcmp (tag, "15GeVJets") == 0 ? 1.4 : 1.17;
+
+      h = (TH1D*) h_jet_trk_dphi_iaa[iCent][iPtCh]->Clone ("h");
+      h->Reset ();
+      for (int i = 1; i <= h->GetNbinsX (); i++) h->SetBinContent (i, 1);
+      h->GetXaxis ()->SetMoreLogLabels ();
+      h->GetYaxis ()->SetRangeUser (ymin, ymax);
+      h->GetXaxis ()->SetTitle ("#Delta#phi_{ch,jet}");
+      h->GetXaxis ()->SetTitleSize (0.028/fdPad);
+      h->GetXaxis ()->SetLabelSize (0.028/fdPad);
+      h->GetXaxis ()->SetTitleOffset (3.8*fdPad);
+      //h->GetXaxis ()->SetLabelOffset (-0.05*fdPad);
+      h->GetYaxis ()->SetTitle ("#it{I}_{#it{p}A} = #it{p}+Pb / #it{pp}");
+      h->GetYaxis ()->SetTitleSize (0.028/fdPad);
+      h->GetYaxis ()->SetLabelSize (0.028/fdPad);
+      h->GetYaxis ()->SetTitleOffset (2.1*fdPad);
+      h->GetYaxis ()->CenterTitle ();
+
+      h->SetLineWidth (1);
+      h->SetLineStyle (2);
+      h->DrawCopy ("hist ][");
+      SaferDelete (&h);
+
+      shadedBox = new TBox (7.*pi/8., ymin, pi, ymax);
+      shadedBox->SetFillColorAlpha (kGray, 0.3);
+      shadedBox->Draw ();
+      l->DrawLine (7.*pi/8., ymin, 7.*pi/8., ymax);
+
+      shadedBox = new TBox (0, ymin, pi/8., ymax);
+      shadedBox->SetFillColorAlpha (kGray, 0.3);
+      shadedBox->Draw ();
+      l->DrawLine (pi/8., ymin, pi/8., ymax);
+
+      g = g_jet_trk_dphi_iaa_syst[iCent][iPtCh];
+      g->SetMarkerStyle (0);
+      g->SetMarkerSize (0.);
+      g->SetLineColor (myRed);
+      g->SetLineWidth (1);
+      ((TGAE*) g->Clone ())->Draw ("5");
+      h = h_jet_trk_dphi_iaa[iCent][iPtCh];
+      g = make_graph (h);
+      ResetXErrors (g);
+      g->SetLineColor (myRed);
+      g->SetLineWidth (2);
+      g->SetMarkerColor (myRed);
+      g->SetMarkerStyle (kFullCircle);
+      g->SetMarkerSize (0.8);
+      ((TGAE*) g->Clone ())->Draw ("p");
+      g->SetMarkerStyle (kOpenCircle);
+      g->SetMarkerColor (kBlack);
+      g->SetLineWidth (0);
+      ((TGAE*) g->Clone ())->Draw ("p");
+      SaferDelete (&g);
+
+      c->SaveAs (Form ("%s/Plots/DPhi/JetTagged_HadronYields_%i-%i%%_comparison_dphi_%s_%s.pdf", workPath.Data (), zdcCentPercs[iCent+1], zdcCentPercs[iCent], pTChSelections[iPtCh].Data (), tag));
+    }
+  }
+
+
+
+  for (int iCent = 0; iCent < numZdcCentBins; iCent++) {
+    const char* canvasName = Form ("c_jet_trk_dphi_FcalvsZdc_iCent%i", iCent);
     TCanvas* c = new TCanvas (canvasName, "", 800, 1120);
     c->cd ();
     const double fuPad = 480./1120.;
@@ -182,7 +470,7 @@ void PlotDPhi (const char* tag, const char* inFileTag) {
     float ymin = -4;
     float ymax = 33;
 
-    h = (TH1D*) h_jet_trk_dphi[1]->Clone ("h");
+    h = (TH1D*) h_jet_trk_dphi_ref[3]->Clone ("h");
     h->Reset ();
     h->GetYaxis ()->SetRangeUser (ymin, ymax);
     h->GetXaxis ()->SetTitle ("#Delta#phi_{ch,jet}");
@@ -199,41 +487,39 @@ void PlotDPhi (const char* tag, const char* inFileTag) {
     h->DrawCopy ("hist ][");
     SaferDelete (&h);
 
-    TBox* shadedBox = new TBox (7.*pi/8., ymin, pi, ymax);                             
-    shadedBox->SetFillColorAlpha (kGray, 0.3);                                   
-    shadedBox->Draw ();                                                          
-    l->DrawLine (7.*pi/8., ymin, 7.*pi/8., ymax);       
+    TBox* shadedBox = new TBox (7.*pi/8., ymin, pi, ymax);
+    shadedBox->SetFillColorAlpha (kGray, 0.3);
+    shadedBox->Draw ();
+    l->DrawLine (7.*pi/8., ymin, 7.*pi/8., ymax);
 
-    g = g_jet_trk_dphi_syst[0];
-    g->SetMarkerStyle (0);
-    g->SetMarkerSize (0.);
-    g->SetLineColor (myBlue);
-    g->SetLineWidth (1);
-    ((TGAE*) g->Clone ())->Draw ("5");
-    SaferDelete (&g);
-    h = h_jet_trk_dphi[0];
+    shadedBox = new TBox (0, ymin, pi/8., ymax);
+    shadedBox->SetFillColorAlpha (kGray, 0.3);
+    shadedBox->Draw ();
+    l->DrawLine (pi/8., ymin, pi/8., ymax);
+
+    h = h_jet_trk_dphi_ref[3];
     g = make_graph (h);
     ResetXErrors (g);
     g->SetMarkerStyle (kFullCircle);
     g->SetMarkerSize (0.8);
-    g->SetMarkerColor (myBlue);
-    g->SetLineColor (myBlue);
-    g->SetLineWidth (2);
-    ((TGAE*) g->Clone ())->Draw ("p");
-    g->SetMarkerStyle (kOpenCircle);
     g->SetMarkerColor (kBlack);
-    g->SetLineWidth (0);
+    g->SetLineColor (kBlack);
+    g->SetLineWidth (2);
     ((TGAE*) g->Clone ())->Draw ("p");
     SaferDelete (&g);
 
-    g = g_jet_trk_dphi_syst[1];
-    g->SetMarkerStyle (0);
-    g->SetMarkerSize (0.);
-    g->SetLineColor (myRed);
-    g->SetLineWidth (1);
-    ((TGAE*) g->Clone ())->Draw ("5");
+    h = h_jet_trk_dphi_ref_bkg[3];
+    g = make_graph (h);
+    ResetXErrors (g);
+    g->SetMarkerStyle (kOpenCircle);
+    g->SetMarkerSize (0.8);
+    g->SetMarkerColor (kBlack);
+    g->SetLineColor (kBlack);
+    g->SetLineWidth (2);
+    ((TGAE*) g->Clone ())->Draw ("p");
     SaferDelete (&g);
-    h = h_jet_trk_dphi[1];
+
+    h = h_jet_trk_dphi[iCent][3];
     g = make_graph (h);
     ResetXErrors (g);
     g->SetMarkerStyle (kFullCircle);
@@ -248,30 +534,62 @@ void PlotDPhi (const char* tag, const char* inFileTag) {
     ((TGAE*) g->Clone ())->Draw ("p");
     SaferDelete (&g);
 
-    g = g_jet_trk_dphi_bkg_syst[1];
-    g->SetMarkerStyle (0);
-    g->SetMarkerSize (0.);
-    g->SetLineColor (kBlack);
-    g->SetLineWidth (1);
-    ((TGAE*) g->Clone ())->Draw ("5");
-    SaferDelete (&g);
-    h = h_jet_trk_dphi_bkg[1];
+    h = h_jet_trk_dphi_bkg[iCent][3];
     g = make_graph (h);
     ResetXErrors (g);
-    g->SetMarkerStyle (kOpenCircle);
+    g->SetMarkerStyle (kFullCircle);
     g->SetMarkerSize (0.8);
-    g->SetMarkerColor (kBlack);
-    g->SetLineColor (kBlack);
+    g->SetMarkerColor (myGreen);
+    g->SetLineColor (myGreen);
     g->SetLineWidth (2);
+    ((TGAE*) g->Clone ())->Draw ("p");
+    g->SetMarkerStyle (kOpenCircle);
+    g->SetMarkerColor (kBlack);
+    g->SetLineWidth (0);
     ((TGAE*) g->Clone ())->Draw ("p");
     SaferDelete (&g);
 
-    myText (0.23, 0.83, kBlack, "#bf{#it{ATLAS}} Internal", 0.022/fuPad);
-    myText (0.23, 0.77, kBlack, "2016 #it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV, #bf{0-20%}", 0.020/fuPad);
-    myText (0.23, 0.71, kBlack, "2017 #it{pp}, #sqrt{s} = 5.02 TeV", 0.020/fuPad);
-    myText (0.23, 0.65, kBlack, "Jet-hadron correlations", 0.020/fuPad);
-    myText (0.23, 0.59, kBlack, Form ("#it{p}_{T}^{jet} > %i GeV, #it{p}_{T}^{ch} > 2 GeV", strcmp (tag, "30GeVJets") == 0 ? 30 : 60), 0.020/fuPad);
-    myText (0.23, 0.53, kBlack, "|#eta_{ch} - #it{y}_{CoM}| < 2.035", 0.020/fuPad);
+    int iVar = 0;
+    while (iVar < nVar && strcmp (variations[iVar], "FcalCentVar") != 0) iVar++;
+    if (iVar == nVar)
+      std::cout << "Cannot find FCal centrality binned result??? Please check!" << std::endl;
+
+    h = h_jet_trk_dphi_syst[iCent][3][iVar];
+    g = make_graph (h);
+    ResetXErrors (g);
+    g->SetMarkerStyle (kFullSquare);
+    g->SetMarkerSize (0.8);
+    g->SetMarkerColor (myBlue);
+    g->SetLineColor (myBlue);
+    g->SetLineWidth (2);
+    ((TGAE*) g->Clone ())->Draw ("p");
+    g->SetMarkerStyle (kOpenSquare);
+    g->SetMarkerColor (kBlack);
+    g->SetLineWidth (0);
+    ((TGAE*) g->Clone ())->Draw ("p");
+    SaferDelete (&g);
+
+    h = h_jet_trk_dphi_bkg_syst[iCent][3][iVar];
+    g = make_graph (h);
+    ResetXErrors (g);
+    g->SetMarkerStyle (kFullSquare);
+    g->SetMarkerSize (0.8);
+    g->SetMarkerColor (myOrange);
+    g->SetLineColor (myOrange);
+    g->SetLineWidth (2);
+    ((TGAE*) g->Clone ())->Draw ("p");
+    g->SetMarkerStyle (kOpenSquare);
+    g->SetMarkerColor (kBlack);
+    g->SetLineWidth (0);
+    ((TGAE*) g->Clone ())->Draw ("p");
+    SaferDelete (&g);
+
+    myText (0.30, 0.83, kBlack, "#bf{#it{ATLAS}} Internal", 0.022/fuPad);
+    myText (0.30, 0.77, kBlack, "#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV", 0.020/fuPad);
+    myText (0.30, 0.71, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.020/fuPad);
+    myText (0.30, 0.65, kBlack, "Jet-hadron correlations", 0.020/fuPad);
+    myText (0.30, 0.59, kBlack, Form ("#it{p}_{T}^{jet} > %s, #it{p}_{T}^{ch} > 2 GeV", GetJetPtStr (tag).Data ()), 0.020/fuPad);
+    myText (0.30, 0.53, kBlack, "|#eta_{ch} - #it{y}_{CoM}| < 2.035", 0.020/fuPad);
 
 
     cPad->cd (); 
@@ -279,7 +597,7 @@ void PlotDPhi (const char* tag, const char* inFileTag) {
     ymin = -4;
     ymax = 28;
 
-    h = (TH1D*) h_jet_trk_dphi_sig[1]->Clone ("h");
+    h = (TH1D*) h_jet_trk_dphi_ref_sig[3]->Clone ("h");
     h->Reset ();
     h->GetXaxis ()->SetMoreLogLabels ();
     h->GetYaxis ()->SetRangeUser (ymin, ymax);
@@ -299,41 +617,28 @@ void PlotDPhi (const char* tag, const char* inFileTag) {
     h->DrawCopy ("hist ][");
     SaferDelete (&h);
 
-    shadedBox = new TBox (7.*pi/8., ymin, pi, ymax);                             
-    shadedBox->SetFillColorAlpha (kGray, 0.3);                                   
-    shadedBox->Draw ();                                                          
-    l->DrawLine (7.*pi/8., ymin, 7.*pi/8., ymax);       
+    shadedBox = new TBox (7.*pi/8., ymin, pi, ymax);
+    shadedBox->SetFillColorAlpha (kGray, 0.3);
+    shadedBox->Draw ();
+    l->DrawLine (7.*pi/8., ymin, 7.*pi/8., ymax);
 
-    g = g_jet_trk_dphi_sig_syst[0];
-    g->SetMarkerStyle (0);
-    g->SetMarkerSize (0.);
-    g->SetLineColor (myBlue);
-    g->SetLineWidth (1);
-    ((TGAE*) g->Clone ())->Draw ("5");
-    SaferDelete (&g);
-    h = h_jet_trk_dphi_sig[0];
+    shadedBox = new TBox (0, ymin, pi/8., ymax);
+    shadedBox->SetFillColorAlpha (kGray, 0.3);
+    shadedBox->Draw ();
+    l->DrawLine (pi/8., ymin, pi/8., ymax);
+
+    h = h_jet_trk_dphi_ref_sig[3];
     g = make_graph (h);
     ResetXErrors (g);
-    g->SetLineColor (myBlue);
+    g->SetLineColor (kBlack);
     g->SetLineWidth (2);
-    g->SetMarkerColor (myBlue);
-    g->SetMarkerStyle (kFullCircle);
-    g->SetMarkerSize (0.8);
-    ((TGAE*) g->Clone ())->Draw ("p");
-    g->SetMarkerStyle (kOpenCircle);
     g->SetMarkerColor (kBlack);
-    g->SetLineWidth (0);
+    g->SetMarkerStyle (kOpenCircle);
+    g->SetMarkerSize (0.8);
     ((TGAE*) g->Clone ())->Draw ("p");
     SaferDelete (&g);
 
-    g = g_jet_trk_dphi_sig_syst[1];
-    g->SetMarkerStyle (0);
-    g->SetMarkerSize (0.);
-    g->SetLineColor (myRed);
-    g->SetLineWidth (1);
-    ((TGAE*) g->Clone ())->Draw ("5");
-    SaferDelete (&g);
-    h = h_jet_trk_dphi_sig[1];
+    h = h_jet_trk_dphi_sig[iCent][3];
     g = make_graph (h);
     ResetXErrors (g);
     g->SetLineColor (myRed);
@@ -348,17 +653,35 @@ void PlotDPhi (const char* tag, const char* inFileTag) {
     ((TGAE*) g->Clone ())->Draw ("p");
     SaferDelete (&g);
 
-    myMarkerText (0.29, 0.84, myRed, kFullCircle, "#it{p}+Pb jet-tagged events", 0.8, 0.020/fcPad, true);
-    myMarkerText (0.29, 0.75, myBlue, kFullCircle, "#it{pp} jet-tagged events", 0.8, 0.020/fcPad, true);
-    myMarkerText (0.29, 0.66, kBlack, kOpenCircle, "#it{p}+Pb mixed events", 0.8, 0.020/fcPad);
+    h = h_jet_trk_dphi_sig_syst[iCent][3][iVar];
+    g = make_graph (h);
+    ResetXErrors (g);
+    g->SetLineColor (myBlue);
+    g->SetLineWidth (2);
+    g->SetMarkerColor (myBlue);
+    g->SetMarkerStyle (kFullSquare);
+    g->SetMarkerSize (0.8);
+    ((TGAE*) g->Clone ())->Draw ("p");
+    g->SetMarkerStyle (kOpenSquare);
+    g->SetMarkerColor (kBlack);
+    g->SetLineWidth (0);
+    ((TGAE*) g->Clone ())->Draw ("p");
+    SaferDelete (&g);
+
+    myMarkerText (0.36, 0.84, myRed, kFullCircle, Form ("#it{p}+Pb #bf{ZDC %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.8, 0.020/fcPad, true);
+    myMarkerText (0.36, 0.75, myGreen, kFullCircle, Form ("#it{p}+Pb bkgd., #bf{ZDC %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.8, 0.020/fcPad, true);
+    myMarkerText (0.36, 0.66, myBlue, kFullSquare, Form ("#it{p}+Pb #bf{FCal %i-%i%%}", fcalCentPercs[iCent+1], fcalCentPercs[iCent]), 0.8, 0.020/fcPad, true);
+    myMarkerText (0.36, 0.57, myOrange, kFullSquare, Form ("#it{p}+Pb bkgd., #bf{FCal %i-%i%%}", fcalCentPercs[iCent+1], fcalCentPercs[iCent]), 0.8, 0.020/fcPad, true);
+    myMarkerText (0.36, 0.48, kBlack, kFullCircle, "#it{pp} jet-tagged events", 0.8, 0.020/fcPad);
+    myMarkerText (0.36, 0.39, kBlack, kOpenCircle, "#it{pp} bkgd.", 0.8, 0.020/fcPad);
 
 
     dPad->cd (); 
 
-    ymin = strcmp (tag, "30GeVJets") == 0 ? 0.8 : 0.83;
-    ymax = strcmp (tag, "30GeVJets") == 0 ? 1.4 : 1.17;
+    ymin = 0.5;
+    ymax = 1.4;
 
-    h = (TH1D*) h_jet_trk_dphi_iaa->Clone ("h");
+    h = (TH1D*) h_jet_trk_dphi_iaa[iCent][3]->Clone ("h");
     h->Reset ();
     for (int i = 1; i <= h->GetNbinsX (); i++) h->SetBinContent (i, 1);
     h->GetXaxis ()->SetMoreLogLabels ();
@@ -379,24 +702,22 @@ void PlotDPhi (const char* tag, const char* inFileTag) {
     h->DrawCopy ("hist ][");
     SaferDelete (&h);
 
-    shadedBox = new TBox (7.*pi/8., ymin, pi, ymax);                             
-    shadedBox->SetFillColorAlpha (kGray, 0.3);                                   
-    shadedBox->Draw ();                                                          
-    l->DrawLine (7.*pi/8., ymin, 7.*pi/8., ymax);       
+    shadedBox = new TBox (7.*pi/8., ymin, pi, ymax);
+    shadedBox->SetFillColorAlpha (kGray, 0.3);
+    shadedBox->Draw ();
+    l->DrawLine (7.*pi/8., ymin, 7.*pi/8., ymax);
 
-    g = g_jet_trk_dphi_iaa_syst;
-    g->SetMarkerStyle (0);
-    g->SetMarkerSize (0.);
-    g->SetLineColor (myBlue);
-    g->SetLineWidth (1);
-    ((TGAE*) g->Clone ())->Draw ("5");
-    SaferDelete (&g);
-    h = h_jet_trk_dphi_iaa;
+    shadedBox = new TBox (0, ymin, pi/8., ymax);
+    shadedBox->SetFillColorAlpha (kGray, 0.3);
+    shadedBox->Draw ();
+    l->DrawLine (pi/8., ymin, pi/8., ymax);
+
+    h = h_jet_trk_dphi_iaa[iCent][3];
     g = make_graph (h);
     ResetXErrors (g);
-    g->SetLineColor (myBlue);
+    g->SetLineColor (myRed);
     g->SetLineWidth (2);
-    g->SetMarkerColor (myBlue);
+    g->SetMarkerColor (myRed);
     g->SetMarkerStyle (kFullCircle);
     g->SetMarkerSize (0.8);
     ((TGAE*) g->Clone ())->Draw ("p");
@@ -406,265 +727,509 @@ void PlotDPhi (const char* tag, const char* inFileTag) {
     ((TGAE*) g->Clone ())->Draw ("p");
     SaferDelete (&g);
 
-    c->SaveAs (Form ("%s/Plots/JetTagged_HadronYields_Central_comparison_dphi_%s.pdf", workPath.Data (), tag));
+    h = h_jet_trk_dphi_iaa_syst[iCent][3][iVar];
+    g = make_graph (h);
+    ResetXErrors (g);
+    g->SetLineColor (myBlue);
+    g->SetLineWidth (2);
+    g->SetMarkerColor (myBlue);
+    g->SetMarkerStyle (kFullSquare);
+    g->SetMarkerSize (0.8);
+    ((TGAE*) g->Clone ())->Draw ("p");
+    g->SetMarkerStyle (kOpenSquare);
+    g->SetMarkerColor (kBlack);
+    g->SetLineWidth (0);
+    ((TGAE*) g->Clone ())->Draw ("p");
+    SaferDelete (&g);
+
+    c->SaveAs (Form ("%s/Plots/DPhi/JetTagged_HadronYields_%i-%i%%_FCalvsZDC_dphi_gt2_lt4_%s.pdf", workPath.Data (), zdcCentPercs[iCent+1], zdcCentPercs[iCent], tag));
   }
 
 
 
-  //{
-  //  const char* canvasName = "c_ljet_trk_dphi";
-  //  TCanvas* c = new TCanvas (canvasName, "", 800, 1120);
-  //  c->cd ();
-  //  const double fuPad = 480./1120.;
-  //  const double fdPad = 320./1120.;
-  //  const double fcPad = 1.0 - fuPad - fdPad;
-  //  TPad* uPad = new TPad (Form ("%s_uPad", canvasName), "", 0.0, 1.0-fuPad, 1.0, 1.0);
-  //  TPad* cPad = new TPad (Form ("%s_uPad", canvasName), "", 0.0, fdPad, 1.0, 1.0-fuPad);
-  //  TPad* dPad = new TPad (Form ("%s_dPad", canvasName), "", 0.0, 0.0, 1.0, fdPad);
+  for (int iCent = 0; iCent < numZdcCentBins; iCent++) {
+    const char* canvasName = Form ("c_jet_trk_dphi_gt0p5_lt1_FcalvsZdc_iCent%i", iCent);
+    TCanvas* c = new TCanvas (canvasName, "", 800, 1120);
+    c->cd ();
+    const double fuPad = 480./1120.;
+    const double fdPad = 320./1120.;
+    const double fcPad = 1.0 - fuPad - fdPad;
+    TPad* uPad = new TPad (Form ("%s_uPad", canvasName), "", 0.0, 1.0-fuPad, 1.0, 1.0);
+    TPad* cPad = new TPad (Form ("%s_uPad", canvasName), "", 0.0, fdPad, 1.0, 1.0-fuPad);
+    TPad* dPad = new TPad (Form ("%s_dPad", canvasName), "", 0.0, 0.0, 1.0, fdPad);
 
-  //  uPad->SetBottomMargin (0);
-  //  cPad->SetTopMargin (0);
-  //  cPad->SetBottomMargin (0);
-  //  dPad->SetTopMargin (0);
-  //  dPad->SetBottomMargin (0.25);
-  //  uPad->Draw ();
-  //  cPad->Draw ();
-  //  dPad->Draw ();
+    uPad->SetBottomMargin (0);
+    cPad->SetTopMargin (0);
+    cPad->SetBottomMargin (0);
+    dPad->SetTopMargin (0);
+    dPad->SetBottomMargin (0.25);
+    uPad->Draw ();
+    cPad->Draw ();
+    dPad->Draw ();
 
-  //  TH1D* h = nullptr; 
-  //  TGAE* g = nullptr;
+    TH1D* h = nullptr; 
+    TGAE* g = nullptr;
 
-  //  uPad->cd (); 
+    uPad->cd (); 
 
-  //  float ymin = -4;
-  //  float ymax = 33;
+    float ymin = -4;
+    float ymax = 33;
 
-  //  h = (TH1D*) h_ljet_trk_dphi[1]->Clone ("h");
-  //  h->Reset ();
-  //  h->GetYaxis ()->SetRangeUser (ymin, ymax);
-  //  h->GetXaxis ()->SetTitle ("#Delta#phi_{ch,leading jet}");
-  //  h->GetXaxis ()->SetTitleSize (0.028/fuPad);
-  //  h->GetXaxis ()->SetLabelSize (0.028/fuPad);
-  //  h->GetXaxis ()->SetTitleOffset (2.1*fuPad);
-  //  h->GetYaxis ()->SetTitle ("(1/N_{jet}) (dN_{ch} / d#Delta#phi)");
-  //  h->GetYaxis ()->SetTitleSize (0.028/fuPad);
-  //  h->GetYaxis ()->SetLabelSize (0.028/fuPad);
-  //  h->GetYaxis ()->SetTitleOffset (2.1*fuPad);
+    h = (TH1D*) h_jet_trk_dphi_ref[0]->Clone ("h");
+    h->Reset ();
+    h->GetYaxis ()->SetRangeUser (ymin, ymax);
+    h->GetXaxis ()->SetTitle ("#Delta#phi_{ch,jet}");
+    h->GetXaxis ()->SetTitleSize (0.028/fuPad);
+    h->GetXaxis ()->SetLabelSize (0.028/fuPad);
+    h->GetXaxis ()->SetTitleOffset (2.1*fuPad);
+    h->GetYaxis ()->SetTitle ("(1/N_{jet}) (dN_{ch} / d#Delta#phi)");
+    h->GetYaxis ()->SetTitleSize (0.028/fuPad);
+    h->GetYaxis ()->SetLabelSize (0.028/fuPad);
+    h->GetYaxis ()->SetTitleOffset (2.1*fuPad);
 
-  //  h->SetLineWidth (1);
-  //  h->SetLineStyle (2);
-  //  h->DrawCopy ("hist ][");
-  //  SaferDelete (&h);
+    h->SetLineWidth (1);
+    h->SetLineStyle (2);
+    h->DrawCopy ("hist ][");
+    SaferDelete (&h);
 
-  //  TBox* shadedBox = new TBox (7.*pi/8., ymin, pi, ymax);                             
-  //  shadedBox->SetFillColorAlpha (kGray, 0.3);                                   
-  //  shadedBox->Draw ();                                                          
-  //  l->DrawLine (7.*pi/8., ymin, 7.*pi/8., ymax);       
+    TBox* shadedBox = new TBox (7.*pi/8., ymin, pi, ymax);
+    shadedBox->SetFillColorAlpha (kGray, 0.3);
+    shadedBox->Draw ();
+    l->DrawLine (7.*pi/8., ymin, 7.*pi/8., ymax);
 
-  //  g = g_ljet_trk_dphi_syst[0];
-  //  g->SetMarkerStyle (0);
-  //  g->SetMarkerSize (0.);
-  //  g->SetLineColor (myBlue);
-  //  g->SetLineWidth (1);
-  //  ((TGAE*) g->Clone ())->Draw ("5");
-  //  SaferDelete (&g);
-  //  h = h_ljet_trk_dphi[0];
-  //  g = make_graph (h);
-  //  ResetXErrors (g);
-  //  g->SetMarkerStyle (kFullCircle);
-  //  g->SetMarkerSize (0.8);
-  //  g->SetMarkerColor (myBlue);
-  //  g->SetLineColor (myBlue);
-  //  g->SetLineWidth (2);
-  //  ((TGAE*) g->Clone ())->Draw ("p");
-  //  g->SetMarkerStyle (kOpenCircle);
-  //  g->SetMarkerColor (kBlack);
-  //  g->SetLineWidth (0);
-  //  ((TGAE*) g->Clone ())->Draw ("p");
-  //  SaferDelete (&g);
+    shadedBox = new TBox (0, ymin, pi/8., ymax);
+    shadedBox->SetFillColorAlpha (kGray, 0.3);
+    shadedBox->Draw ();
+    l->DrawLine (pi/8., ymin, pi/8., ymax);
 
-  //  g = g_ljet_trk_dphi_syst[1];
-  //  g->SetMarkerStyle (0);
-  //  g->SetMarkerSize (0.);
-  //  g->SetLineColor (myRed);
-  //  g->SetLineWidth (1);
-  //  ((TGAE*) g->Clone ())->Draw ("5");
-  //  SaferDelete (&g);
-  //  h = h_ljet_trk_dphi[1];
-  //  g = make_graph (h);
-  //  ResetXErrors (g);
-  //  g->SetMarkerStyle (kFullCircle);
-  //  g->SetMarkerSize (0.8);
-  //  g->SetMarkerColor (myRed);
-  //  g->SetLineColor (myRed);
-  //  g->SetLineWidth (2);
-  //  ((TGAE*) g->Clone ())->Draw ("p");
-  //  g->SetMarkerStyle (kOpenCircle);
-  //  g->SetMarkerColor (kBlack);
-  //  g->SetLineWidth (0);
-  //  ((TGAE*) g->Clone ())->Draw ("p");
-  //  SaferDelete (&g);
+    h = h_jet_trk_dphi_ref[0];
+    g = make_graph (h);
+    ResetXErrors (g);
+    g->SetMarkerStyle (kFullCircle);
+    g->SetMarkerSize (0.8);
+    g->SetMarkerColor (kBlack);
+    g->SetLineColor (kBlack);
+    g->SetLineWidth (2);
+    ((TGAE*) g->Clone ())->Draw ("p");
+    SaferDelete (&g);
 
-  //  g = g_ljet_trk_dphi_bkg_syst[1];
-  //  g->SetMarkerStyle (0);
-  //  g->SetMarkerSize (0.);
-  //  g->SetLineColor (kBlack);
-  //  g->SetLineWidth (1);
-  //  ((TGAE*) g->Clone ())->Draw ("5");
-  //  SaferDelete (&g);
-  //  h = h_ljet_trk_dphi_bkg[1];
-  //  g = make_graph (h);
-  //  ResetXErrors (g);
-  //  g->SetMarkerStyle (kOpenCircle);
-  //  g->SetMarkerSize (0.8);
-  //  g->SetMarkerColor (kBlack);
-  //  g->SetLineColor (kBlack);
-  //  g->SetLineWidth (2);
-  //  ((TGAE*) g->Clone ())->Draw ("p");
-  //  SaferDelete (&g);
+    h = h_jet_trk_dphi_ref_bkg[0];
+    g = make_graph (h);
+    ResetXErrors (g);
+    g->SetMarkerStyle (kOpenCircle);
+    g->SetMarkerSize (0.8);
+    g->SetMarkerColor (kBlack);
+    g->SetLineColor (kBlack);
+    g->SetLineWidth (2);
+    ((TGAE*) g->Clone ())->Draw ("p");
+    SaferDelete (&g);
 
-  //  myText (0.23, 0.83, kBlack, "#bf{#it{ATLAS}} Internal", 0.022/fuPad);
-  //  myText (0.23, 0.77, kBlack, "2016 #it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV, #bf{0-20%}", 0.020/fuPad);
-  //  myText (0.23, 0.71, kBlack, "2017 #it{pp}, #sqrt{s} = 5.02 TeV", 0.020/fuPad);
-  //  myText (0.23, 0.65, kBlack, "Leading jet-hadron correlations", 0.020/fuPad);
-  //  myText (0.23, 0.59, kBlack, Form ("#it{p}_{T}^{jet} > %i GeV, #it{p}_{T}^{ch} > 2 GeV", strcmp (tag, "30GeVJets") == 0 ? 30 : 60), 0.020/fuPad);
-  //  myText (0.23, 0.53, kBlack, "|#eta_{ch} - #it{y}_{CoM}| < 2.035", 0.020/fuPad);
+    h = h_jet_trk_dphi[iCent][0];
+    g = make_graph (h);
+    ResetXErrors (g);
+    g->SetMarkerStyle (kFullCircle);
+    g->SetMarkerSize (0.8);
+    g->SetMarkerColor (myRed);
+    g->SetLineColor (myRed);
+    g->SetLineWidth (2);
+    ((TGAE*) g->Clone ())->Draw ("p");
+    g->SetMarkerStyle (kOpenCircle);
+    g->SetMarkerColor (kBlack);
+    g->SetLineWidth (0);
+    ((TGAE*) g->Clone ())->Draw ("p");
+    SaferDelete (&g);
 
+    h = h_jet_trk_dphi_bkg[iCent][0];
+    g = make_graph (h);
+    ResetXErrors (g);
+    g->SetMarkerStyle (kFullCircle);
+    g->SetMarkerSize (0.8);
+    g->SetMarkerColor (myGreen);
+    g->SetLineColor (myGreen);
+    g->SetLineWidth (2);
+    ((TGAE*) g->Clone ())->Draw ("p");
+    g->SetMarkerStyle (kOpenCircle);
+    g->SetMarkerColor (kBlack);
+    g->SetLineWidth (0);
+    ((TGAE*) g->Clone ())->Draw ("p");
+    SaferDelete (&g);
 
-  //  cPad->cd (); 
+    int iVar = 0;
+    while (iVar < nVar && strcmp (variations[iVar], "FcalCentVar") != 0) iVar++;
+    if (iVar == nVar)
+      std::cout << "Cannot find FCal centrality binned result??? Please check!" << std::endl;
 
-  //  ymin = -4;
-  //  ymax = 28;
+    h = h_jet_trk_dphi_syst[iCent][0][iVar];
+    g = make_graph (h);
+    ResetXErrors (g);
+    g->SetMarkerStyle (kFullSquare);
+    g->SetMarkerSize (0.8);
+    g->SetMarkerColor (myBlue);
+    g->SetLineColor (myBlue);
+    g->SetLineWidth (2);
+    ((TGAE*) g->Clone ())->Draw ("p");
+    g->SetMarkerStyle (kOpenSquare);
+    g->SetMarkerColor (kBlack);
+    g->SetLineWidth (0);
+    ((TGAE*) g->Clone ())->Draw ("p");
+    SaferDelete (&g);
 
-  //  h = (TH1D*) h_ljet_trk_dphi_sig[1]->Clone ("h");
-  //  h->Reset ();
-  //  h->GetXaxis ()->SetMoreLogLabels ();
-  //  h->GetYaxis ()->SetRangeUser (ymin, ymax);
-  //  h->GetXaxis ()->SetTitle ("#Delta#phi_{ch,jet}");
-  //  h->GetXaxis ()->SetTitleSize (0.028/fdPad);
-  //  h->GetXaxis ()->SetLabelSize (0.028/fdPad);
-  //  h->GetXaxis ()->SetTitleOffset (3.8*fdPad);
-  //  //h->GetXaxis ()->SetLabelOffset (-0.05*fdPad);
-  //  h->GetYaxis ()->SetTitle ("(Sig.+Bkg.) - Bkg.");
-  //  h->GetYaxis ()->SetTitleSize (0.028/fdPad);
-  //  h->GetYaxis ()->SetLabelSize (0.028/fdPad);
-  //  h->GetYaxis ()->SetTitleOffset (2.1*fdPad);
-  //  h->GetYaxis ()->CenterTitle ();
+    h = h_jet_trk_dphi_bkg_syst[iCent][0][iVar];
+    g = make_graph (h);
+    ResetXErrors (g);
+    g->SetMarkerStyle (kFullSquare);
+    g->SetMarkerSize (0.8);
+    g->SetMarkerColor (myOrange);
+    g->SetLineColor (myOrange);
+    g->SetLineWidth (2);
+    ((TGAE*) g->Clone ())->Draw ("p");
+    g->SetMarkerStyle (kOpenSquare);
+    g->SetMarkerColor (kBlack);
+    g->SetLineWidth (0);
+    ((TGAE*) g->Clone ())->Draw ("p");
+    SaferDelete (&g);
 
-  //  h->SetLineWidth (1);
-  //  h->SetLineStyle (2);
-  //  h->DrawCopy ("hist ][");
-  //  SaferDelete (&h);
-
-  //  shadedBox = new TBox (7.*pi/8., ymin, pi, ymax);                             
-  //  shadedBox->SetFillColorAlpha (kGray, 0.3);                                   
-  //  shadedBox->Draw ();                                                          
-  //  l->DrawLine (7.*pi/8., ymin, 7.*pi/8., ymax);       
-
-  //  g = g_ljet_trk_dphi_sig_syst[0];
-  //  g->SetMarkerStyle (0);
-  //  g->SetMarkerSize (0.);
-  //  g->SetLineColor (myBlue);
-  //  g->SetLineWidth (1);
-  //  ((TGAE*) g->Clone ())->Draw ("5");
-  //  SaferDelete (&g);
-  //  h = h_ljet_trk_dphi_sig[0];
-  //  g = make_graph (h);
-  //  ResetXErrors (g);
-  //  g->SetLineColor (myBlue);
-  //  g->SetLineWidth (2);
-  //  g->SetMarkerColor (myBlue);
-  //  g->SetMarkerStyle (kFullCircle);
-  //  g->SetMarkerSize (0.8);
-  //  ((TGAE*) g->Clone ())->Draw ("p");
-  //  g->SetMarkerStyle (kOpenCircle);
-  //  g->SetMarkerColor (kBlack);
-  //  g->SetLineWidth (0);
-  //  ((TGAE*) g->Clone ())->Draw ("p");
-  //  SaferDelete (&g);
-
-  //  g = g_ljet_trk_dphi_sig_syst[1];
-  //  g->SetMarkerStyle (0);
-  //  g->SetMarkerSize (0.);
-  //  g->SetLineColor (myRed);
-  //  g->SetLineWidth (1);
-  //  ((TGAE*) g->Clone ())->Draw ("5");
-  //  SaferDelete (&g);
-  //  h = h_ljet_trk_dphi_sig[1];
-  //  g = make_graph (h);
-  //  ResetXErrors (g);
-  //  g->SetLineColor (myRed);
-  //  g->SetLineWidth (2);
-  //  g->SetMarkerColor (myRed);
-  //  g->SetMarkerStyle (kFullCircle);
-  //  g->SetMarkerSize (0.8);
-  //  ((TGAE*) g->Clone ())->Draw ("p");
-  //  g->SetMarkerStyle (kOpenCircle);
-  //  g->SetMarkerColor (kBlack);
-  //  g->SetLineWidth (0);
-  //  ((TGAE*) g->Clone ())->Draw ("p");
-  //  SaferDelete (&g);
-
-  //  myMarkerText (0.29, 0.84, myRed, kFullCircle, "#it{p}+Pb jet-tagged events", 0.8, 0.020/fcPad, true);
-  //  myMarkerText (0.29, 0.75, myBlue, kFullCircle, "#it{pp} jet-tagged events", 0.8, 0.020/fcPad, true);
-  //  myMarkerText (0.29, 0.66, kBlack, kOpenCircle, "#it{p}+Pb mixed events", 0.8, 0.020/fcPad);
+    myText (0.30, 0.83, kBlack, "#bf{#it{ATLAS}} Internal", 0.022/fuPad);
+    myText (0.30, 0.77, kBlack, "#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV", 0.020/fuPad);
+    myText (0.30, 0.71, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.020/fuPad);
+    myText (0.30, 0.65, kBlack, "Jet-hadron correlations", 0.020/fuPad);
+    myText (0.30, 0.59, kBlack, Form ("#it{p}_{T}^{jet} > %s, 0.5 < #it{p}_{T}^{ch} < 1 GeV", GetJetPtStr (tag).Data ()), 0.020/fuPad);
+    myText (0.30, 0.53, kBlack, "|#eta_{ch} - #it{y}_{CoM}| < 2.035", 0.020/fuPad);
 
 
-  //  dPad->cd (); 
+    cPad->cd (); 
 
-  //  ymin = 0.83;
-  //  ymax = 1.17;
+    ymin = -4;
+    ymax = 28;
 
-  //  h = (TH1D*) h_ljet_trk_dphi_iaa->Clone ("h");
-  //  h->Reset ();
-  //  for (int i = 1; i <= h->GetNbinsX (); i++) h->SetBinContent (i, 1);
-  //  h->GetXaxis ()->SetMoreLogLabels ();
-  //  h->GetYaxis ()->SetRangeUser (ymin, ymax);
-  //  h->GetXaxis ()->SetTitle ("#Delta#phi_{ch,jet}");
-  //  h->GetXaxis ()->SetTitleSize (0.028/fdPad);
-  //  h->GetXaxis ()->SetLabelSize (0.028/fdPad);
-  //  h->GetXaxis ()->SetTitleOffset (3.8*fdPad);
-  //  //h->GetXaxis ()->SetLabelOffset (-0.05*fdPad);
-  //  h->GetYaxis ()->SetTitle ("#it{I}_{#it{p}A} = #it{p}+Pb / #it{pp}");
-  //  h->GetYaxis ()->SetTitleSize (0.028/fdPad);
-  //  h->GetYaxis ()->SetLabelSize (0.028/fdPad);
-  //  h->GetYaxis ()->SetTitleOffset (2.1*fdPad);
-  //  h->GetYaxis ()->CenterTitle ();
+    h = (TH1D*) h_jet_trk_dphi_ref_sig[0]->Clone ("h");
+    h->Reset ();
+    h->GetXaxis ()->SetMoreLogLabels ();
+    h->GetYaxis ()->SetRangeUser (ymin, ymax);
+    h->GetXaxis ()->SetTitle ("#Delta#phi_{ch,jet}");
+    h->GetXaxis ()->SetTitleSize (0.028/fdPad);
+    h->GetXaxis ()->SetLabelSize (0.028/fdPad);
+    h->GetXaxis ()->SetTitleOffset (3.8*fdPad);
+    //h->GetXaxis ()->SetLabelOffset (-0.05*fdPad);
+    h->GetYaxis ()->SetTitle ("(Sig.+Bkg.) - Bkg.");
+    h->GetYaxis ()->SetTitleSize (0.028/fdPad);
+    h->GetYaxis ()->SetLabelSize (0.028/fdPad);
+    h->GetYaxis ()->SetTitleOffset (2.1*fdPad);
+    h->GetYaxis ()->CenterTitle ();
 
-  //  h->SetLineWidth (1);
-  //  h->SetLineStyle (2);
-  //  h->DrawCopy ("hist ][");
-  //  SaferDelete (&h);
+    h->SetLineWidth (1);
+    h->SetLineStyle (2);
+    h->DrawCopy ("hist ][");
+    SaferDelete (&h);
 
-  //  shadedBox = new TBox (7.*pi/8., ymin, pi, ymax);                             
-  //  shadedBox->SetFillColorAlpha (kGray, 0.3);                                   
-  //  shadedBox->Draw ();                                                          
-  //  l->DrawLine (7.*pi/8., ymin, 7.*pi/8., ymax);       
+    shadedBox = new TBox (7.*pi/8., ymin, pi, ymax);
+    shadedBox->SetFillColorAlpha (kGray, 0.3);
+    shadedBox->Draw ();
+    l->DrawLine (7.*pi/8., ymin, 7.*pi/8., ymax);
 
-  //  g = g_ljet_trk_dphi_iaa_syst;
-  //  g->SetMarkerStyle (0);
-  //  g->SetMarkerSize (0.);
-  //  g->SetLineColor (myBlue);
-  //  g->SetLineWidth (1);
-  //  ((TGAE*) g->Clone ())->Draw ("5");
-  //  SaferDelete (&g);
-  //  h = h_ljet_trk_dphi_iaa;
-  //  g = make_graph (h);
-  //  ResetXErrors (g);
-  //  g->SetLineColor (myBlue);
-  //  g->SetLineWidth (2);
-  //  g->SetMarkerColor (myBlue);
-  //  g->SetMarkerStyle (kFullCircle);
-  //  g->SetMarkerSize (0.8);
-  //  ((TGAE*) g->Clone ())->Draw ("p");
-  //  g->SetMarkerStyle (kOpenCircle);
-  //  g->SetMarkerColor (kBlack);
-  //  g->SetLineWidth (0);
-  //  ((TGAE*) g->Clone ())->Draw ("p");
-  //  SaferDelete (&g);
+    shadedBox = new TBox (0, ymin, pi/8., ymax);
+    shadedBox->SetFillColorAlpha (kGray, 0.3);
+    shadedBox->Draw ();
+    l->DrawLine (pi/8., ymin, pi/8., ymax);
 
-  //  c->SaveAs (Form ("%s/Plots/LeadingJetTagged_HadronYields_Central_comparison_dphi_%s.pdf", workPath.Data (), tag)); 
-  //}
+    h = h_jet_trk_dphi_ref_sig[0];
+    g = make_graph (h);
+    ResetXErrors (g);
+    g->SetLineColor (kBlack);
+    g->SetLineWidth (2);
+    g->SetMarkerColor (kBlack);
+    g->SetMarkerStyle (kOpenCircle);
+    g->SetMarkerSize (0.8);
+    ((TGAE*) g->Clone ())->Draw ("p");
+    SaferDelete (&g);
+
+    h = h_jet_trk_dphi_sig[iCent][0];
+    g = make_graph (h);
+    ResetXErrors (g);
+    g->SetLineColor (myRed);
+    g->SetLineWidth (2);
+    g->SetMarkerColor (myRed);
+    g->SetMarkerStyle (kFullCircle);
+    g->SetMarkerSize (0.8);
+    ((TGAE*) g->Clone ())->Draw ("p");
+    g->SetMarkerStyle (kOpenCircle);
+    g->SetMarkerColor (kBlack);
+    g->SetLineWidth (0);
+    ((TGAE*) g->Clone ())->Draw ("p");
+    SaferDelete (&g);
+
+    h = h_jet_trk_dphi_sig_syst[iCent][0][iVar];
+    g = make_graph (h);
+    ResetXErrors (g);
+    g->SetLineColor (myBlue);
+    g->SetLineWidth (2);
+    g->SetMarkerColor (myBlue);
+    g->SetMarkerStyle (kFullSquare);
+    g->SetMarkerSize (0.8);
+    ((TGAE*) g->Clone ())->Draw ("p");
+    g->SetMarkerStyle (kOpenSquare);
+    g->SetMarkerColor (kBlack);
+    g->SetLineWidth (0);
+    ((TGAE*) g->Clone ())->Draw ("p");
+    SaferDelete (&g);
+
+    myMarkerText (0.36, 0.84, myRed, kFullCircle, Form ("#it{p}+Pb #bf{ZDC %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.8, 0.020/fcPad, true);
+    myMarkerText (0.36, 0.75, myGreen, kFullCircle, Form ("#it{p}+Pb bkgd., #bf{ZDC %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.8, 0.020/fcPad, true);
+    myMarkerText (0.36, 0.66, myBlue, kFullSquare, Form ("#it{p}+Pb #bf{FCal %i-%i%%}", fcalCentPercs[iCent+1], fcalCentPercs[iCent]), 0.8, 0.020/fcPad, true);
+    myMarkerText (0.36, 0.57, myOrange, kFullSquare, Form ("#it{p}+Pb bkgd., #bf{FCal %i-%i%%}", fcalCentPercs[iCent+1], fcalCentPercs[iCent]), 0.8, 0.020/fcPad, true);
+    myMarkerText (0.36, 0.48, kBlack, kFullCircle, "#it{pp} jet-tagged events", 0.8, 0.020/fcPad);
+    myMarkerText (0.36, 0.39, kBlack, kOpenCircle, "#it{pp} bkgd.", 0.8, 0.020/fcPad);
+
+
+    dPad->cd (); 
+
+    ymin = 0.1;
+    ymax = 1.2;
+
+    h = (TH1D*) h_jet_trk_dphi_iaa[iCent][0]->Clone ("h");
+    h->Reset ();
+    for (int i = 1; i <= h->GetNbinsX (); i++) h->SetBinContent (i, 1);
+    h->GetXaxis ()->SetMoreLogLabels ();
+    h->GetYaxis ()->SetRangeUser (ymin, ymax);
+    h->GetXaxis ()->SetTitle ("#Delta#phi_{ch,jet}");
+    h->GetXaxis ()->SetTitleSize (0.028/fdPad);
+    h->GetXaxis ()->SetLabelSize (0.028/fdPad);
+    h->GetXaxis ()->SetTitleOffset (3.8*fdPad);
+    //h->GetXaxis ()->SetLabelOffset (-0.05*fdPad);
+    h->GetYaxis ()->SetTitle ("#it{I}_{#it{p}A} = #it{p}+Pb / #it{pp}");
+    h->GetYaxis ()->SetTitleSize (0.028/fdPad);
+    h->GetYaxis ()->SetLabelSize (0.028/fdPad);
+    h->GetYaxis ()->SetTitleOffset (2.1*fdPad);
+    h->GetYaxis ()->CenterTitle ();
+
+    h->SetLineWidth (1);
+    h->SetLineStyle (2);
+    h->DrawCopy ("hist ][");
+    SaferDelete (&h);
+
+    shadedBox = new TBox (7.*pi/8., ymin, pi, ymax);
+    shadedBox->SetFillColorAlpha (kGray, 0.3);
+    shadedBox->Draw ();
+    l->DrawLine (7.*pi/8., ymin, 7.*pi/8., ymax);
+
+    shadedBox = new TBox (0, ymin, pi/8., ymax);
+    shadedBox->SetFillColorAlpha (kGray, 0.3);
+    shadedBox->Draw ();
+    l->DrawLine (pi/8., ymin, pi/8., ymax);
+
+    h = h_jet_trk_dphi_iaa[iCent][0];
+    g = make_graph (h);
+    ResetXErrors (g);
+    g->SetLineColor (myRed);
+    g->SetLineWidth (2);
+    g->SetMarkerColor (myRed);
+    g->SetMarkerStyle (kFullCircle);
+    g->SetMarkerSize (0.8);
+    ((TGAE*) g->Clone ())->Draw ("p");
+    g->SetMarkerStyle (kOpenCircle);
+    g->SetMarkerColor (kBlack);
+    g->SetLineWidth (0);
+    ((TGAE*) g->Clone ())->Draw ("p");
+    SaferDelete (&g);
+
+    h = h_jet_trk_dphi_iaa_syst[iCent][0][iVar];
+    g = make_graph (h);
+    ResetXErrors (g);
+    g->SetLineColor (myBlue);
+    g->SetLineWidth (2);
+    g->SetMarkerColor (myBlue);
+    g->SetMarkerStyle (kFullSquare);
+    g->SetMarkerSize (0.8);
+    ((TGAE*) g->Clone ())->Draw ("p");
+    g->SetMarkerStyle (kOpenSquare);
+    g->SetMarkerColor (kBlack);
+    g->SetLineWidth (0);
+    ((TGAE*) g->Clone ())->Draw ("p");
+    SaferDelete (&g);
+
+    c->SaveAs (Form ("%s/Plots/DPhi/JetTagged_HadronYields_%i-%i%%_FCalvsZDC_dphi_gt0p5_lt1_%s.pdf", workPath.Data (), zdcCentPercs[iCent+1], zdcCentPercs[iCent], tag));
+  }
+
+
+
+  /*
+  for (int iPtCh = 0; iPtCh < nPtChSelections; iPtCh++) {
+    for (int iCent = 0; iCent < numZdcCentBins; iCent++) {
+      const char* canvasName = Form ("c_jet_trk_dphi_%s_pPb_iCent%i_syst", pTChSelections[iPtCh].Data (), iCent);
+      TCanvas* c = new TCanvas (canvasName, "", 800, 800);
+
+      TH1D* h = nullptr; 
+      TGAE* g = nullptr;
+
+      c->cd (); 
+
+      float ymin = -20;
+      float ymax = 20;
+
+      c->Clear ();
+
+      h = (TH1D*) h_jet_trk_dphi[iCent][iPtCh]->Clone ("h");
+      h->Reset ();
+      h->GetYaxis ()->SetRangeUser (ymin, ymax);
+      h->GetXaxis ()->SetTitle ("#Delta#phi_{ch,jet}");
+      //h->GetXaxis ()->SetTitleSize (0.028);
+      //h->GetXaxis ()->SetLabelSize (0.028);
+      h->GetYaxis ()->SetTitle ("#delta N_{ch} / N_{ch} [%]");
+      //h->GetYaxis ()->SetTitleSize (0.028);
+      //h->GetYaxis ()->SetLabelSize (0.028);
+
+      h->SetLineWidth (1);
+      h->SetLineStyle (2);
+      h->DrawCopy ("hist ][");
+      SaferDelete (&h);
+
+      for (int iVar = 1; iVar < nVar; iVar++) {
+        h = (TH1D*) h_jet_trk_dphi_syst[iCent][iPtCh][iVar]->Clone ("htemp");
+        SaveRelativeErrors (h, h_jet_trk_dphi[iCent][iPtCh], true);
+        for (int iX = 1; iX <= h->GetNbinsX (); iX++) h->SetBinContent (iX, 100*h->GetBinContent (iX) - 100);
+        g = make_graph (h);
+        ResetXErrors (g);
+        ResetTGAEErrors (g);
+
+        g->SetLineColor (varStyles[variations[iVar]].first);
+        g->SetLineStyle (varStyles[variations[iVar]].second);
+        g->SetLineWidth (3);
+        ((TGAE*) g->Clone ())->Draw ("L");
+        SaferDelete (&g);
+        SaferDelete (&h);
+      }
+
+      myText (0.22, 0.89, kBlack, "#bf{#it{ATLAS}} Internal", 0.032);
+      myText (0.22, 0.85, kBlack, Form ("#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV, #bf{ZDC %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.032);
+      myText (0.22, 0.81, kBlack, Form ("#it{p}_{T}^{jet} > %s, %s", GetJetPtStr (tag).Data (), pTChStrs[pTChSelections[iPtCh]].Data ()), 0.032);
+      for (int iVar = 1; iVar < nVar; iVar++)
+        myLineColorText (0.25, 0.77-iVar*0.040, varStyles[variations[iVar]].first, varStyles[variations[iVar]].second, varFullNames[variations[iVar]], 1.0, 0.028);
+      
+
+      //c->SaveAs (Form ("%s/Plots/Systematics/TotalJetTaggedYield_%s_dphi_%s_syst.pdf", workPath.Data (), iSys == 0 ? "pp" : Form ("pPb_%i-%i%%", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), tag));
+      c->SaveAs (Form ("%s/Plots/Systematics/TotalJetTaggedYield_%s_dphi_%s_%s_syst.pdf", workPath.Data (), Form ("pPb_%i-%i%%", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), pTChSelections[iPtCh].Data (), tag));
+    }
+  }
+
+
+
+  for (int iPtCh = 0; iPtCh < nPtChSelections; iPtCh++) {
+    for (int iCent = 0; iCent < numZdcCentBins; iCent++) {
+      const char* canvasName = Form ("c_jet_trk_dphi_%s_pPb_sig_iCent%i_syst", pTChSelections[iPtCh].Data (), iCent);
+      TCanvas* c = new TCanvas (canvasName, "", 800, 800);
+
+      TH1D* h = nullptr; 
+      TGAE* g = nullptr;
+
+      c->cd (); 
+
+      float ymin = -20;
+      float ymax = 20;
+
+      c->Clear ();
+
+      h = (TH1D*) h_jet_trk_dphi_sig[iCent][iPtCh]->Clone ("h");
+      h->Reset ();
+      h->GetYaxis ()->SetRangeUser (ymin, ymax);
+      h->GetXaxis ()->SetTitle ("#Delta#phi_{ch,jet}");
+      //h->GetXaxis ()->SetTitleSize (0.028);
+      //h->GetXaxis ()->SetLabelSize (0.028);
+      h->GetYaxis ()->SetTitle ("#delta N_{ch} / N_{ch} [%]");
+      //h->GetYaxis ()->SetTitleSize (0.028);
+      //h->GetYaxis ()->SetLabelSize (0.028);
+
+      h->SetLineWidth (1);
+      h->SetLineStyle (2);
+      h->DrawCopy ("hist ][");
+      SaferDelete (&h);
+
+      for (int iVar = 1; iVar < nVar; iVar++) {
+        h = (TH1D*) h_jet_trk_dphi_sig_syst[iCent][iPtCh][iVar]->Clone ("htemp");
+        SaveRelativeErrors (h, h_jet_trk_dphi_sig[iCent][iPtCh], true);
+        for (int iX = 1; iX <= h->GetNbinsX (); iX++) h->SetBinContent (iX, 100*h->GetBinContent (iX) - 100);
+        g = make_graph (h);
+        ResetXErrors (g);
+        ResetTGAEErrors (g);
+
+        g->SetLineColor (varStyles[variations[iVar]].first);
+        g->SetLineStyle (varStyles[variations[iVar]].second);
+        g->SetLineWidth (3);
+        ((TGAE*) g->Clone ())->Draw ("L");
+        SaferDelete (&g);
+        SaferDelete (&h);
+      }
+
+      myText (0.22, 0.89, kBlack, "#bf{#it{ATLAS}} Internal", 0.032);
+      myText (0.22, 0.85, kBlack, Form ("#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV, #bf{ZDC %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.032);
+      myText (0.22, 0.81, kBlack, Form ("#it{p}_{T}^{jet} > %s, %s", GetJetPtStr (tag).Data (), pTChStrs[pTChSelections[iPtCh]].Data ()), 0.032);
+      for (int iVar = 1; iVar < nVar; iVar++)
+        myLineColorText (0.25, 0.77-iVar*0.040, varStyles[variations[iVar]].first, varStyles[variations[iVar]].second, varFullNames[variations[iVar]], 1.0, 0.028);
+      
+
+      //c->SaveAs (Form ("%s/Plots/Systematics/SignalJetTaggedYield_%s_dphi_%s_syst.pdf", workPath.Data (), iSys == 0 ? "pp" : Form ("pPb_%i-%i%%", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), tag));
+      c->SaveAs (Form ("%s/Plots/Systematics/SignalJetTaggedYield_%s_dphi_%s_%s_syst.pdf", workPath.Data (), Form ("pPb_%i-%i%%", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), pTChSelections[iPtCh].Data (), tag));
+    }
+  }
+
+
+
+  for (int iPtCh = 0; iPtCh < nPtChSelections; iPtCh++) {
+    for (int iCent = 0; iCent < numZdcCentBins; iCent++) {
+      const char* canvasName = Form ("c_jet_trk_dphi_%s_iaa_iCent%i_syst", pTChSelections[iPtCh].Data (), iCent);
+      TCanvas* c = new TCanvas (canvasName, "", 800, 800);
+
+      TH1D* h = nullptr; 
+      TGAE* g = nullptr;
+
+      c->cd (); 
+
+      float ymin = -20;
+      float ymax = 20;
+
+
+      h = (TH1D*) h_jet_trk_dphi_iaa[iCent][iPtCh]->Clone ("h");
+      h->Reset ();
+      h->GetYaxis ()->SetRangeUser (ymin, ymax);
+      h->GetXaxis ()->SetTitle ("#Delta#phi_{ch,jet}");
+      //h->GetXaxis ()->SetTitleSize (0.028);
+      //h->GetXaxis ()->SetLabelSize (0.028);
+      h->GetYaxis ()->SetTitle ("#delta I_{pA} / I_{pA} [%]");
+      //h->GetYaxis ()->SetTitleSize (0.028);
+      //h->GetYaxis ()->SetLabelSize (0.028);
+
+      h->SetLineWidth (1);
+      h->SetLineStyle (2);
+      h->DrawCopy ("hist ][");
+      SaferDelete (&h);
+
+      for (int iVar = 1; iVar < nVar; iVar++) {
+        h = (TH1D*) h_jet_trk_dphi_iaa_syst[iCent][iPtCh][iVar]->Clone ("htemp");
+        SaveRelativeErrors (h, h_jet_trk_dphi_iaa[iCent][iPtCh], true);
+        for (int iX = 1; iX <= h->GetNbinsX (); iX++) h->SetBinContent (iX, 100*h->GetBinContent (iX) - 100);
+        g = make_graph (h);
+        ResetXErrors (g);
+        ResetTGAEErrors (g);
+
+        g->SetLineColor (varStyles[variations[iVar]].first);
+        g->SetLineStyle (varStyles[variations[iVar]].second);
+        g->SetLineWidth (3);
+        ((TGAE*) g->Clone ())->Draw ("L");
+        SaferDelete (&g);
+        SaferDelete (&h);
+      }
+
+      myText (0.22, 0.89, kBlack, "#bf{#it{ATLAS}} Internal", 0.032);
+      myText (0.22, 0.85, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.032);
+      myText (0.22, 0.81, kBlack, Form ("#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV, #bf{ZDC %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.032);
+      myText (0.22, 0.77, kBlack, Form ("#it{p}_{T}^{jet} > %s, %s", GetJetPtStr (tag).Data (), pTChStrs[pTChSelections[iPtCh]].Data ()), 0.032);
+      for (int iVar = 1; iVar < nVar; iVar++)
+        myLineColorText (0.25, 0.73-iVar*0.040, varStyles[variations[iVar]].first, varStyles[variations[iVar]].second, varFullNames[variations[iVar]], 1.0, 0.028);
+      
+
+      c->SaveAs (Form ("%s/Plots/Systematics/JetTagged_IpA_%i-%i%%_dphi_%s_%s_syst.pdf", workPath.Data (), zdcCentPercs[iCent+1], zdcCentPercs[iCent], pTChSelections[iPtCh].Data (), tag));
+    }
+  }
+  */
 
 }
 

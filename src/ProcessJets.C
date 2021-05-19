@@ -18,7 +18,7 @@
 
 using namespace JetHadronCorrelations;
 
-void ProcessJets (const char* tag, const char* outFileTag) {
+void ProcessJets (const char* tag, const char* outFileTag, const int iCent) {
 
   TFile* inFile = nullptr;
 
@@ -46,20 +46,20 @@ void ProcessJets (const char* tag, const char* outFileTag) {
 
   TString outFileName = outFileTag;
   outFileName.ReplaceAll (".root", "");
-  outFileName = Form ("./rootFiles/Results/PlotJets_%s.root", outFileName.Data ());
+  outFileName = Form ("%s/Results/PlotJets_%s.root", rootPath.Data (), outFileName.Data ());
   std::cout << "Writing " << outFileName.Data () << std::endl;
   TFile* outFile = new TFile (outFileName.Data (), "recreate");
 
 
   for (int iVar = 0; iVar < nVar; iVar++) {
     {
-      TString inFileName = Form ("./rootFiles/Histograms/%s/JetsHists/%s/data16_5TeV_hists.root", tag, variations[iVar].Data ());
+      TString inFileName = Form ("%s/Histograms/%s/JetsHists/%s/data16_5TeV_iCent%i_hists.root", rootPath.Data (), tag, variations[iVar].Data (), iCent);
       std::cout << "Reading " << inFileName.Data () << std::endl;
       inFile = new TFile (inFileName.Data (), "read");
       outFile->cd ();
 
       h_evt_counts[1][iVar] = (TH1D*) inFile->Get (Form ("h_evt_counts_%s_data16", tag))->Clone (Form ("h_evt_counts_%s_pPb_%s", tag, variations[iVar].Data ()));
-      h_jet_counts[1][iVar] = (TH1D*) inFile->Get (Form ("h_jet_counts_%s_data16", tag))->Clone (Form ("h_evt_counts_%s_pPb_%s", tag, variations[iVar].Data ()));
+      h_jet_counts[1][iVar] = (TH1D*) inFile->Get (Form ("h_jet_counts_%s_data16", tag))->Clone (Form ("h_jet_counts_%s_pPb_%s", tag, variations[iVar].Data ()));
       //h_ljet_counts[1][iVar] = (TH1D*) inFile->Get (Form ("h_ljet_counts_%s_data16", tag))->Clone (Form ("h_evt_counts_%s_pPb_%s", tag, variations[iVar].Data ()));
       //h_sljet_counts[1][iVar] = (TH1D*) inFile->Get (Form ("h_sljet_counts_%s_data16", tag))->Clone (Form ("h_sljet_counts_%s_pPb_%s", tag, variations[iVar].Data ()));
       h_jet_pt[1][iVar] = (TH1D*) inFile->Get (Form ("h_jet_pt_%s_data16", tag))->Clone (Form ("h_jet_pt_%s_pPb_%s", tag, variations[iVar].Data ()));
@@ -69,24 +69,28 @@ void ProcessJets (const char* tag, const char* outFileTag) {
       inFile->Close ();
   
       const double nEvts = h_evt_counts[1][iVar]->GetBinContent (1); // total number of accepted evts
+      const double nJets = h_jet_counts[1][iVar]->GetBinContent (2); // total number of accepted jets
 
       h_jet_pt[1][iVar]->Rebin (2);
       h2_jet_pt_cov[1][iVar]->RebinX (2);
       h2_jet_pt_cov[1][iVar]->RebinY (2);
   
       CalcUncertainties (h_jet_pt[1][iVar], h2_jet_pt_cov[1][iVar], nEvts);
+
+      h_jet_pt[1][iVar]->Scale (nEvts / nJets);
+      h2_jet_pt_cov[1][iVar]->Scale (pow (nEvts / nJets, 2));
     }
 
 
 
     {
-      TString inFileName = Form ("./rootFiles/Histograms/%s/JetsHists/%s/data17_5TeV_hists.root", tag, variations[iVar].Data ());
+      TString inFileName = Form ("%s/Histograms/%s/JetsHists/%s/data17_5TeV_hists.root", rootPath.Data (), tag, variations[iVar].Data ());
       std::cout << "Reading " << inFileName.Data () << std::endl;
       inFile = new TFile (inFileName.Data (), "read");
       outFile->cd ();
 
       h_evt_counts[0][iVar] = (TH1D*) inFile->Get (Form ("h_evt_counts_%s_data17", tag))->Clone (Form ("h_evt_counts_%s_pp_%s", tag, variations[iVar].Data ()));
-      h_jet_counts[0][iVar] = (TH1D*) inFile->Get (Form ("h_jet_counts_%s_data17", tag))->Clone (Form ("h_evt_counts_%s_pp_%s", tag, variations[iVar].Data ()));
+      h_jet_counts[0][iVar] = (TH1D*) inFile->Get (Form ("h_jet_counts_%s_data17", tag))->Clone (Form ("h_jet_counts_%s_pp_%s", tag, variations[iVar].Data ()));
       //h_ljet_counts[0][iVar] = (TH1D*) inFile->Get (Form ("h_ljet_counts_%s_data17", tag))->Clone (Form ("h_evt_counts_%s_pp_%s", tag, variations[iVar].Data ()));
       //h_sljet_counts[0][iVar] = (TH1D*) inFile->Get (Form ("h_sljet_counts_%s_data17", tag))->Clone (Form ("h_sljet_counts_%s_pp_%s", tag, variations[iVar].Data ()));
       h_jet_pt[0][iVar] = (TH1D*) inFile->Get (Form ("h_jet_pt_%s_data17", tag))->Clone (Form ("h_jet_pt_%s_pp_%s", tag, variations[iVar].Data ()));
@@ -96,18 +100,25 @@ void ProcessJets (const char* tag, const char* outFileTag) {
       inFile->Close ();
 
       const double nEvts = h_evt_counts[0][iVar]->GetBinContent (1); // total number of accepted evts
+      const double nJets = h_jet_counts[0][iVar]->GetBinContent (1); // total number of accepted jets
 
       h_jet_pt[0][iVar]->Rebin (2);
       h2_jet_pt_cov[0][iVar]->RebinX (2);
       h2_jet_pt_cov[0][iVar]->RebinY (2);
 
       CalcUncertainties (h_jet_pt[0][iVar], h2_jet_pt_cov[0][iVar], nEvts);
+
+      h_jet_pt[0][iVar]->Scale (nEvts / nJets);
+      h2_jet_pt_cov[0][iVar]->Scale (pow (nEvts / nJets, 2));
+
+      //h_jet_pt[0][iVar]->Scale (1e-1);
+      //h2_jet_pt_cov[0][iVar]->Scale (1e-2);
     }
 
 
 
     //{
-    //  inFile = new TFile (Form ("./rootFiles/Histograms/%s/MixedHists/Nominal/data16_5TeV_hists.root", tag), "read");
+    //  inFile = new TFile (Form ("%s/Histograms/%s/MixedHists/Nominal/data16_5TeV_hists.root", rootPath.Data (), tag), "read");
 
     //  h_evt_counts_bkg[1] = (TH1D*) inFile->Get ("h_evt_counts_minbias_data16");
     //  h_jet_counts_bkg[1] = (TH1D*) inFile->Get ("h_jet_counts_minbias_data16");
@@ -198,6 +209,9 @@ void ProcessJets (const char* tag, const char* outFileTag) {
   
       h_jet_pt_ratio[iVar]->Write (Form ("h_jet_pt_ratio_%s", variations[iVar].Data ()));
     }
+
+    h2_jet_eta_phi[0][0]->Write ("h2_jet_eta_phi_ref");
+    h2_jet_eta_phi[1][0]->Write ("h2_jet_eta_phi");
   
     outFile->Close ();
   }

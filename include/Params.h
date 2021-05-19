@@ -7,6 +7,7 @@
 
 #include <TString.h>
 
+#include <fstream>
 #include <string>
 #include <set>
 #include <math.h>
@@ -58,31 +59,80 @@ extern double jet_min_pt;
 extern double jet_max_pt;
 
 
-// Centrality classes for mixing events
-// See centralities defined in Kurt's note: https://cds.cern.ch/record/2301540/files/ATL-COM-DAPR-2018-002.pdf
-double fcalCentBins[] = {
- -1000,     // 100%
-   //  2.21,  // 90%
-   //  4.94,  // 80%
-   //  8.24,  // 70%
-   // 12.14,  // 60%
-   // 16.71,  // 50%
-   // 22.11,  // 40%
-   // 28.64,  // 30%
-    37.07,  // 20%
-   // 39.13,  // 18%
-   // 41.40,  // 16%
-   // 43.90,  // 14%
-   // 46.71,  // 12%
-   // 49.94,  // 10%
-   // 53.78,  // 8%
-   // 58.54,  // 6%
-   // 64.96,  // 4%
-   // 75.34,  // 2%
-   // 85.08,  // 1%
-   220     // "0%" -- really just an upper bound for sanity
+TString GetJetPtStr (const char* tag) {
+  if (strcmp (tag, "15GeVJets") == 0)
+    return "15 GeV";
+  if (strcmp (tag, "30GeVJets") == 0)
+    return "30 GeV";
+  if (strcmp (tag, "60GeVJets") == 0)
+    return "60 GeV";
+  if (strcmp (tag, "120GeVJets") == 0)
+    return "120 GeV";
+  return "??? GeV";
+}
+
+
+const std::vector <TString> pTChSelections = {"gt0p5_lt1", "gt1_lt1p5", "gt1p5_lt2", "gt2_lt4", "gt4_lt6", "gt6_lt8", "gt8_lt10", "gt10_lt15", "gt15_lt20", "gt20_lt30"};
+const int nPtChSelections = pTChSelections.size ();
+
+std::map <TString, TString> pTChStrs = {
+  {"gt0p5_lt1", "#it{p}_{T}^{ch} = 0.5-1 GeV"},
+  {"gt1_lt1p5", "#it{p}_{T}^{ch} = 1-1.5 GeV"},
+  {"gt1p5_lt2", "#it{p}_{T}^{ch} = 1.5-2 GeV"},
+  {"gt2_lt4", "#it{p}_{T}^{ch} = 2-4 GeV"},
+  {"gt4_lt6", "#it{p}_{T}^{ch} = 4-6 GeV"},
+  {"gt6_lt8", "#it{p}_{T}^{ch} = 6-8 GeV"},
+  {"gt8_lt10", "#it{p}_{T}^{ch} = 8-10 GeV"},
+  {"gt10_lt15", "#it{p}_{T}^{ch} = 10-15 GeV"},
+  {"gt15_lt20", "#it{p}_{T}^{ch} = 15-20 GeV"},
+  {"gt20_lt30", "#it{p}_{T}^{ch} = 20-30 GeV"}
 };
-int numFcalCentBins = sizeof (fcalCentBins) / sizeof (fcalCentBins[0]) - 1;
+
+std::map <TString, std::pair <double, double>> pTChStrCuts = {
+  {"gt0p5_lt1", std::pair <double, double> (0.5, 1)},
+  {"gt1_lt1p5", std::pair <double, double> (1, 1.5)},
+  {"gt1p5_lt2", std::pair <double, double> (1.5, 2)},
+  {"gt2_lt4", std::pair <double, double> (2, 4)},
+  {"gt4_lt6", std::pair <double, double> (4, 6)},
+  {"gt6_lt8", std::pair <double, double> (6, 8)},
+  {"gt8_lt10", std::pair <double, double> (8, 10)},
+  {"gt10_lt15", std::pair <double, double> (10, 15)},
+  {"gt15_lt20", std::pair <double, double> (15, 20)},
+  {"gt20_lt30", std::pair <double, double> (20, 30)}
+};
+
+
+// Centrality classes for mixing events
+// See Run 2 centrality discussion in Kurt's note: https://cds.cern.ch/record/2301540/
+// See Run 1 centrality overview in Dennis' note: https://cds.cern.ch/record/1545591/
+int numFcalCentBins = 5;
+
+double* InitFCalCentBins () {
+  std::ifstream cutsfile;
+  cutsfile.open (Form ("%s/aux/FCalCentCuts.dat", workPath.Data ()));
+
+  double* cuts = new double[numFcalCentBins+1];
+  int iCent = 0;
+  std::string perc, dummy;
+  double cut;
+  while (cutsfile && iCent <= numFcalCentBins) {
+    cutsfile >> perc >> dummy;
+    cut = atof (dummy.c_str ());
+    if (strcmp (perc.c_str (), "100%") == 0 || 
+        strcmp (perc.c_str (), "80%") == 0 ||
+        strcmp (perc.c_str (), "60%") == 0 ||
+        strcmp (perc.c_str (), "40%") == 0 ||
+        strcmp (perc.c_str (), "20%") == 0 ||
+        strcmp (perc.c_str (), "0%") == 0)
+      cuts[iCent++] = cut;
+  }
+
+  return cuts;
+}
+
+double* fcalCentBins = InitFCalCentBins ();
+//extern double* fcalCentBins;
+int fcalCentPercs[] = {100, 80, 60, 40, 20, 0};
 
 
 /**
@@ -101,29 +151,54 @@ short GetFcalCentBin (const float fcal_et) {
   return i-1;
 }
 
-double fineFcalCentBins[] = {
- -1000,     // 100%
-   //  2.21,  // 90%
-   //  4.94,  // 80%
-   //  8.24,  // 70%
-   // 12.14,  // 60%
-   // 16.71,  // 50%
-   // 22.11,  // 40%
-   // 28.64,  // 30%
-    37.07,  // 20%
-    39.13,  // 18%
-    41.40,  // 16%
-    43.90,  // 14%
-    46.71,  // 12%
-    49.94,  // 10%
-    53.78,  // 8%
-    58.54,  // 6%
-    64.96,  // 4%
-    75.34,  // 2%
-   // 85.08,  // 1%
-   220     // "0%" -- really just an upper bound for sanity
-};
-int numFineFcalCentBins = sizeof (fineFcalCentBins) / sizeof (fineFcalCentBins[0]) - 1;
+
+int numFineFcalCentBins = 100;
+
+double* InitFineFCalCentBins () {
+  std::ifstream cutsfile;
+  cutsfile.open (Form ("%s/aux/FCalCentCuts.dat", workPath.Data ()));
+
+  double* cuts = new double[numFineFcalCentBins+1];
+  int iCent = 0;
+  std::string perc, dummy;
+  double cut;
+  while (cutsfile && iCent <= numFineFcalCentBins) {
+    cutsfile >> perc >> dummy;
+    cut = atof (dummy.c_str ());
+    //if (strcmp (perc.c_str (), "100%") == 0 || 
+    //    strcmp (perc.c_str (), "80%") == 0 ||
+    //    strcmp (perc.c_str (), "60%") == 0 ||
+    //    strcmp (perc.c_str (), "40%") == 0 ||
+    //    strcmp (perc.c_str (), "20%") == 0 ||
+    //    strcmp (perc.c_str (), "19%") == 0 ||
+    //    strcmp (perc.c_str (), "18%") == 0 ||
+    //    strcmp (perc.c_str (), "17%") == 0 ||
+    //    strcmp (perc.c_str (), "16%") == 0 ||
+    //    strcmp (perc.c_str (), "15%") == 0 ||
+    //    strcmp (perc.c_str (), "14%") == 0 ||
+    //    strcmp (perc.c_str (), "13%") == 0 ||
+    //    strcmp (perc.c_str (), "12%") == 0 ||
+    //    strcmp (perc.c_str (), "11%") == 0 ||
+    //    strcmp (perc.c_str (), "10%") == 0 ||
+    //    strcmp (perc.c_str (), "9%") == 0 ||
+    //    strcmp (perc.c_str (), "8%") == 0 ||
+    //    strcmp (perc.c_str (), "7%") == 0 ||
+    //    strcmp (perc.c_str (), "6%") == 0 ||
+    //    strcmp (perc.c_str (), "5%") == 0 ||
+    //    strcmp (perc.c_str (), "4%") == 0 ||
+    //    strcmp (perc.c_str (), "3%") == 0 ||
+    //    strcmp (perc.c_str (), "2%") == 0 ||
+    //    strcmp (perc.c_str (), "1%") == 0 ||
+    //    strcmp (perc.c_str (), "0%") == 0)
+    cuts[iCent++] = cut;
+  }
+
+  return cuts;
+}
+
+double* fineFcalCentBins = InitFineFCalCentBins ();
+//extern double* fineFcalCentBins;
+int fineFcalCentPercs[] = {100, 99, 98, 97, 96, 95, 94, 93, 92, 91, 90, 89, 88, 87, 86, 85, 84, 83, 82, 81, 80, 79, 78, 77, 76, 75, 74, 73, 72, 71, 70, 69, 68, 67, 66, 65, 64, 63, 62, 61, 60, 59, 58, 57, 56, 55, 54, 53, 52, 51, 50, 49, 48, 47, 46, 45, 44, 43, 42, 41, 40, 39, 38, 37, 36, 35, 34, 33, 32, 31, 30, 29, 28, 27, 26, 25, 24, 23, 22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0};
 
 
 /**
@@ -143,27 +218,35 @@ short GetFineFcalCentBin (const float fcal_et) {
 }
 
 
-double zdcCentBins[] = {
-/* CALIBRATED ENERGIES (over all runs) */
-   0,         // "100%"
- //  3.62017,   // 90%
- // 14.9817,    // 80%
- // 26.5908,    // 70%
- // 36.3317,    // 60%
- // 44.8672,    // 50%
- // 52.3714,    // 40%
- // 59.1911,    // 30%
-  65.9228,    // 20%
- // 73.9471,    // 10%
- // 79.9879,    // 5%
- // 86.4855,    // 2%
- // 90.7422,    // 1%
- // 94.6261,    // 0.5%
- // 99.3721,    // 0.2%
- //102.71,      // 0.1%
- 140          // "0%"
-};
-int numZdcCentBins = sizeof (zdcCentBins) / sizeof (zdcCentBins[0]) - 1; // no bin needed for pp
+int numZdcCentBins = 5;
+
+double* InitZdcCentBins () {
+  std::ifstream cutsfile;
+  cutsfile.open (Form ("%s/aux/ZdcCentCuts.dat", workPath.Data ()));
+
+  double* cuts = new double[numZdcCentBins+1];
+  int iCent = 0;
+  std::string perc, dummy;
+  double cut;
+  std::getline (cutsfile, dummy); // first line is a comment
+  while (cutsfile && iCent <= numZdcCentBins) {
+    cutsfile >> perc >> dummy;
+    cut = atof (dummy.c_str ());
+    if (strcmp (perc.c_str (), "100%") == 0 || 
+        strcmp (perc.c_str (), "80%") == 0 ||
+        strcmp (perc.c_str (), "60%") == 0 ||
+        strcmp (perc.c_str (), "40%") == 0 ||
+        strcmp (perc.c_str (), "20%") == 0 ||
+        strcmp (perc.c_str (), "0%") == 0)
+      cuts[iCent++] = cut;
+  }
+
+  return cuts;
+}
+
+double* zdcCentBins = InitZdcCentBins ();
+//extern double* zdcCentBins;
+int zdcCentPercs[] = {100, 80, 60, 40, 20, 0};
 
 
 short GetZdcCentBin (const float zdc_E) {
@@ -179,29 +262,13 @@ short GetZdcCentBin (const float zdc_E) {
 }
 
 
-double* centBins = nullptr;
-int numCentBins = 0;
-
-short GetCentBin (const float val) {
-  if (numCentBins == 0 || val < centBins[0])
-    return -1;
-  short i = 0;
-  while (i < numCentBins) {
-    i++;
-    if (val < centBins[i])
-      break;
-  }
-  return i-1;
-}
-
-
 // Run vs approx. luminosity in nb^-1 for 2016 p+Pb data at 8.16 TeV
 // p+Pb (period A) 313063 313067 313100 313107 313136 313187 313259 313285 313295 313333 313435
 //                 0.03   1.24   9.66   11.92  10.40  3.67   5.12   4.74   10.69  4.13   0.39
 // Pb+p (period B) 313572 313574 313575 313603 313629 313630 313688 313695 313833 313878 313929 313935 313984 314014 314077 314105 314112 314157 314170
 //                 0.01   1.33   7.54   8.69   6.86   7.90   7.96   4.53   5.11   2.16   0.63   10.96  2.40   7.36   10.19  6.50   10.49  9.83   4.92
 
-// 
+
 const set<int> groupA = {313063, 313067, 313100, 313107};
 const set<int> groupB = {313136, 313187, 313259, 313285};
 const set<int> groupC = {313295, 313333, 313435};
