@@ -10,6 +10,7 @@
 #include <ArrayTemplates.h>
 #include <Utilities.h>
 #include <MyStyle.h>
+#include <MyColors.h>
 
 #include <TColor.h>
 #include <TLine.h>
@@ -28,12 +29,6 @@
 
 using namespace JetHadronCorrelations;
 
-TColor* tcolor = new TColor ();
-const Color_t myBlue = (Color_t) tcolor->GetColor ( 45,  64, 245);
-const Color_t myPurple = (Color_t) tcolor->GetColor (130,  10, 130);
-const Color_t myRed = (Color_t) tcolor->GetColor (255,  12,  73);
-const Color_t myGreen = (Color_t) tcolor->GetColor ( 54, 167,  80);
-const Color_t myOrange = (Color_t) tcolor->GetColor (255,  68,   0);
 
 TLine* l = new TLine ();
 
@@ -202,15 +197,15 @@ void PlotDPhi (const char* tag, const char* inFileTag) {
       h->DrawCopy ("hist ][");
       SaferDelete (&h);
 
-      TBox* shadedBox = new TBox (7.*pi/8., ymin, pi, ymax);
+      TBox* shadedBox = new TBox (7.*M_PI/8., ymin, M_PI, ymax);
       shadedBox->SetFillColorAlpha (kGray, 0.3);
       shadedBox->Draw ();
-      l->DrawLine (7.*pi/8., ymin, 7.*pi/8., ymax);
+      l->DrawLine (7.*M_PI/8., ymin, 7.*M_PI/8., ymax);
 
-      shadedBox = new TBox (0, ymin, pi/8., ymax);
+      shadedBox = new TBox (0, ymin, M_PI/8., ymax);
       shadedBox->SetFillColorAlpha (kGray, 0.3);
       shadedBox->Draw ();
-      l->DrawLine (pi/8., ymin, pi/8., ymax);
+      l->DrawLine (M_PI/8., ymin, M_PI/8., ymax);
 
       g = g_jet_trk_dphi_ref_syst[iPtCh];
       g->SetMarkerStyle (0);
@@ -321,15 +316,15 @@ void PlotDPhi (const char* tag, const char* inFileTag) {
       h->DrawCopy ("hist ][");
       SaferDelete (&h);
 
-      shadedBox = new TBox (7.*pi/8., ymin, pi, ymax);
+      shadedBox = new TBox (7.*M_PI/8., ymin, M_PI, ymax);
       shadedBox->SetFillColorAlpha (kGray, 0.3);
       shadedBox->Draw ();
-      l->DrawLine (7.*pi/8., ymin, 7.*pi/8., ymax);
+      l->DrawLine (7.*M_PI/8., ymin, 7.*M_PI/8., ymax);
 
-      shadedBox = new TBox (0, ymin, pi/8., ymax);
+      shadedBox = new TBox (0, ymin, M_PI/8., ymax);
       shadedBox->SetFillColorAlpha (kGray, 0.3);
       shadedBox->Draw ();
-      l->DrawLine (pi/8., ymin, pi/8., ymax);
+      l->DrawLine (M_PI/8., ymin, M_PI/8., ymax);
 
       g = g_jet_trk_dphi_ref_sig_syst[iPtCh];
       g->SetMarkerStyle (0);
@@ -405,15 +400,15 @@ void PlotDPhi (const char* tag, const char* inFileTag) {
       h->DrawCopy ("hist ][");
       SaferDelete (&h);
 
-      shadedBox = new TBox (7.*pi/8., ymin, pi, ymax);
+      shadedBox = new TBox (7.*M_PI/8., ymin, M_PI, ymax);
       shadedBox->SetFillColorAlpha (kGray, 0.3);
       shadedBox->Draw ();
-      l->DrawLine (7.*pi/8., ymin, 7.*pi/8., ymax);
+      l->DrawLine (7.*M_PI/8., ymin, 7.*M_PI/8., ymax);
 
-      shadedBox = new TBox (0, ymin, pi/8., ymax);
+      shadedBox = new TBox (0, ymin, M_PI/8., ymax);
       shadedBox->SetFillColorAlpha (kGray, 0.3);
       shadedBox->Draw ();
-      l->DrawLine (pi/8., ymin, pi/8., ymax);
+      l->DrawLine (M_PI/8., ymin, M_PI/8., ymax);
 
       g = g_jet_trk_dphi_iaa_syst[iCent][iPtCh];
       g->SetMarkerStyle (0);
@@ -487,15 +482,15 @@ void PlotDPhi (const char* tag, const char* inFileTag) {
     h->DrawCopy ("hist ][");
     SaferDelete (&h);
 
-    TBox* shadedBox = new TBox (7.*pi/8., ymin, pi, ymax);
+    TBox* shadedBox = new TBox (7.*M_PI/8., ymin, M_PI, ymax);
     shadedBox->SetFillColorAlpha (kGray, 0.3);
     shadedBox->Draw ();
-    l->DrawLine (7.*pi/8., ymin, 7.*pi/8., ymax);
+    l->DrawLine (7.*M_PI/8., ymin, 7.*M_PI/8., ymax);
 
-    shadedBox = new TBox (0, ymin, pi/8., ymax);
+    shadedBox = new TBox (0, ymin, M_PI/8., ymax);
     shadedBox->SetFillColorAlpha (kGray, 0.3);
     shadedBox->Draw ();
-    l->DrawLine (pi/8., ymin, pi/8., ymax);
+    l->DrawLine (M_PI/8., ymin, M_PI/8., ymax);
 
     h = h_jet_trk_dphi_ref[3];
     g = make_graph (h);
@@ -617,15 +612,15 @@ void PlotDPhi (const char* tag, const char* inFileTag) {
     h->DrawCopy ("hist ][");
     SaferDelete (&h);
 
-    shadedBox = new TBox (7.*pi/8., ymin, pi, ymax);
+    shadedBox = new TBox (7.*M_PI/8., ymin, M_PI, ymax);
     shadedBox->SetFillColorAlpha (kGray, 0.3);
     shadedBox->Draw ();
-    l->DrawLine (7.*pi/8., ymin, 7.*pi/8., ymax);
+    l->DrawLine (7.*M_PI/8., ymin, 7.*M_PI/8., ymax);
 
-    shadedBox = new TBox (0, ymin, pi/8., ymax);
+    shadedBox = new TBox (0, ymin, M_PI/8., ymax);
     shadedBox->SetFillColorAlpha (kGray, 0.3);
     shadedBox->Draw ();
-    l->DrawLine (pi/8., ymin, pi/8., ymax);
+    l->DrawLine (M_PI/8., ymin, M_PI/8., ymax);
 
     h = h_jet_trk_dphi_ref_sig[3];
     g = make_graph (h);
@@ -702,15 +697,15 @@ void PlotDPhi (const char* tag, const char* inFileTag) {
     h->DrawCopy ("hist ][");
     SaferDelete (&h);
 
-    shadedBox = new TBox (7.*pi/8., ymin, pi, ymax);
+    shadedBox = new TBox (7.*M_PI/8., ymin, M_PI, ymax);
     shadedBox->SetFillColorAlpha (kGray, 0.3);
     shadedBox->Draw ();
-    l->DrawLine (7.*pi/8., ymin, 7.*pi/8., ymax);
+    l->DrawLine (7.*M_PI/8., ymin, 7.*M_PI/8., ymax);
 
-    shadedBox = new TBox (0, ymin, pi/8., ymax);
+    shadedBox = new TBox (0, ymin, M_PI/8., ymax);
     shadedBox->SetFillColorAlpha (kGray, 0.3);
     shadedBox->Draw ();
-    l->DrawLine (pi/8., ymin, pi/8., ymax);
+    l->DrawLine (M_PI/8., ymin, M_PI/8., ymax);
 
     h = h_jet_trk_dphi_iaa[iCent][3];
     g = make_graph (h);
@@ -792,15 +787,15 @@ void PlotDPhi (const char* tag, const char* inFileTag) {
     h->DrawCopy ("hist ][");
     SaferDelete (&h);
 
-    TBox* shadedBox = new TBox (7.*pi/8., ymin, pi, ymax);
+    TBox* shadedBox = new TBox (7.*M_PI/8., ymin, M_PI, ymax);
     shadedBox->SetFillColorAlpha (kGray, 0.3);
     shadedBox->Draw ();
-    l->DrawLine (7.*pi/8., ymin, 7.*pi/8., ymax);
+    l->DrawLine (7.*M_PI/8., ymin, 7.*M_PI/8., ymax);
 
-    shadedBox = new TBox (0, ymin, pi/8., ymax);
+    shadedBox = new TBox (0, ymin, M_PI/8., ymax);
     shadedBox->SetFillColorAlpha (kGray, 0.3);
     shadedBox->Draw ();
-    l->DrawLine (pi/8., ymin, pi/8., ymax);
+    l->DrawLine (M_PI/8., ymin, M_PI/8., ymax);
 
     h = h_jet_trk_dphi_ref[0];
     g = make_graph (h);
@@ -922,15 +917,15 @@ void PlotDPhi (const char* tag, const char* inFileTag) {
     h->DrawCopy ("hist ][");
     SaferDelete (&h);
 
-    shadedBox = new TBox (7.*pi/8., ymin, pi, ymax);
+    shadedBox = new TBox (7.*M_PI/8., ymin, M_PI, ymax);
     shadedBox->SetFillColorAlpha (kGray, 0.3);
     shadedBox->Draw ();
-    l->DrawLine (7.*pi/8., ymin, 7.*pi/8., ymax);
+    l->DrawLine (7.*M_PI/8., ymin, 7.*M_PI/8., ymax);
 
-    shadedBox = new TBox (0, ymin, pi/8., ymax);
+    shadedBox = new TBox (0, ymin, M_PI/8., ymax);
     shadedBox->SetFillColorAlpha (kGray, 0.3);
     shadedBox->Draw ();
-    l->DrawLine (pi/8., ymin, pi/8., ymax);
+    l->DrawLine (M_PI/8., ymin, M_PI/8., ymax);
 
     h = h_jet_trk_dphi_ref_sig[0];
     g = make_graph (h);
@@ -1007,15 +1002,15 @@ void PlotDPhi (const char* tag, const char* inFileTag) {
     h->DrawCopy ("hist ][");
     SaferDelete (&h);
 
-    shadedBox = new TBox (7.*pi/8., ymin, pi, ymax);
+    shadedBox = new TBox (7.*M_PI/8., ymin, M_PI, ymax);
     shadedBox->SetFillColorAlpha (kGray, 0.3);
     shadedBox->Draw ();
-    l->DrawLine (7.*pi/8., ymin, 7.*pi/8., ymax);
+    l->DrawLine (7.*M_PI/8., ymin, 7.*M_PI/8., ymax);
 
-    shadedBox = new TBox (0, ymin, pi/8., ymax);
+    shadedBox = new TBox (0, ymin, M_PI/8., ymax);
     shadedBox->SetFillColorAlpha (kGray, 0.3);
     shadedBox->Draw ();
-    l->DrawLine (pi/8., ymin, pi/8., ymax);
+    l->DrawLine (M_PI/8., ymin, M_PI/8., ymax);
 
     h = h_jet_trk_dphi_iaa[iCent][0];
     g = make_graph (h);

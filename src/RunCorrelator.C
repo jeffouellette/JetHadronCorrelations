@@ -2,6 +2,7 @@
 #define __RunCorrelator_C__
 
 #include "Params.h"
+#include "CentralityDefs.h"
 #include "OutTree.h"
 #include "TreeVariables.h"
 #include "LocalUtilities.h"
@@ -81,33 +82,34 @@ void Correlator (const char* tag, const char* outFileName, TTree* jetsTree, TTre
   TH1D* h_jet_pt = new TH1D (Form ("h_jet_pt_%s", tag), ";#it{p}_{T}^{jet} [GeV];(1/N_{jet}) (dN_{jet}/d#it{p}_{T}) [GeV^{-1}]", nPtJBins, pTJBins);
   TH2D* h2_jet_pt_cov = new TH2D (Form ("h2_jet_pt_cov_%s", tag), ";#it{p}_{T}^{jet} [GeV];#it{p}_{T}^{jet} [GeV];Covariance", nPtJBins, pTJBins, nPtJBins, pTJBins);
 
-  TH2D* h2_jet_eta_phi = new TH2D (Form ("h2_jet_eta_phi_%s", tag), ";#eta^{jet};#phi^{jet};Counts", 40, -3.2, 3.2, 40, -pi, pi);
+  TH2D* h2_jet_eta_phi = new TH2D (Form ("h2_jet_eta_phi_%s", tag), ";#eta^{jet};#phi^{jet};Counts", 40, -3.2, 3.2, 40, -M_PI, M_PI);
 
-  TH1D* h_jet_trk_dphi_gt0p5_lt1 = new TH1D (Form ("h_jet_trk_dphi_gt0p5_lt1_%s", tag), ";#Delta#phi;(1/N_{jet}) (dN_{trk}/d#Delta#phi)", nDPhiBins, 0, pi);
-  TH2D* h2_jet_trk_dphi_gt0p5_lt1_cov = new TH2D (Form ("h2_jet_trk_dphi_gt0p5_lt1_cov_%s", tag), ";#Delta#phi;#Delta#phi;Covariance", nDPhiBins, 0, pi, nDPhiBins, 0, pi);
-  TH1D* h_jet_trk_dphi_gt1_lt1p5 = new TH1D (Form ("h_jet_trk_dphi_gt1_lt1p5_%s", tag), ";#Delta#phi;(1/N_{jet}) (dN_{trk}/d#Delta#phi)", nDPhiBins, 0, pi);
-  TH2D* h2_jet_trk_dphi_gt1_lt1p5_cov = new TH2D (Form ("h2_jet_trk_dphi_gt1_lt1p5_cov_%s", tag), ";#Delta#phi;#Delta#phi;Covariance", nDPhiBins, 0, pi, nDPhiBins, 0, pi);
-  TH1D* h_jet_trk_dphi_gt1p5_lt2 = new TH1D (Form ("h_jet_trk_dphi_gt1p5_lt2_%s", tag), ";#Delta#phi;(1/N_{jet}) (dN_{trk}/d#Delta#phi)", nDPhiBins, 0, pi);
-  TH2D* h2_jet_trk_dphi_gt1p5_lt2_cov = new TH2D (Form ("h2_jet_trk_dphi_gt1p5_lt2_cov_%s", tag), ";#Delta#phi;#Delta#phi;Covariance", nDPhiBins, 0, pi, nDPhiBins, 0, pi);
-  TH1D* h_jet_trk_dphi_gt2_lt4 = new TH1D (Form ("h_jet_trk_dphi_gt2_lt4_%s", tag), ";#Delta#phi;(1/N_{jet}) (dN_{trk}/d#Delta#phi)", nDPhiBins, 0, pi);
-  TH2D* h2_jet_trk_dphi_gt2_lt4_cov = new TH2D (Form ("h2_jet_trk_dphi_gt2_lt4_cov_%s", tag), ";#Delta#phi;#Delta#phi;Covariance", nDPhiBins, 0, pi, nDPhiBins, 0, pi);
-  TH1D* h_jet_trk_dphi_gt4_lt6 = new TH1D (Form ("h_jet_trk_dphi_gt4_lt6_%s", tag), ";#Delta#phi;(1/N_{jet}) (dN_{trk}/d#Delta#phi)", nDPhiBins, 0, pi);
-  TH2D* h2_jet_trk_dphi_gt4_lt6_cov = new TH2D (Form ("h2_jet_trk_dphi_gt4_lt6_cov_%s", tag), ";#Delta#phi;#Delta#phi;Covariance", nDPhiBins, 0, pi, nDPhiBins, 0, pi);
-  TH1D* h_jet_trk_dphi_gt6_lt8 = new TH1D (Form ("h_jet_trk_dphi_gt6_lt8_%s", tag), ";#Delta#phi;(1/N_{jet}) (dN_{trk}/d#Delta#phi)", nDPhiBins, 0, pi);
-  TH2D* h2_jet_trk_dphi_gt6_lt8_cov = new TH2D (Form ("h2_jet_trk_dphi_gt6_lt8_cov_%s", tag), ";#Delta#phi;#Delta#phi;Covariance", nDPhiBins, 0, pi, nDPhiBins, 0, pi);
-  TH1D* h_jet_trk_dphi_gt8_lt10 = new TH1D (Form ("h_jet_trk_dphi_gt8_lt10_%s", tag), ";#Delta#phi;(1/N_{jet}) (dN_{trk}/d#Delta#phi)", nDPhiBins, 0, pi);
-  TH2D* h2_jet_trk_dphi_gt8_lt10_cov = new TH2D (Form ("h2_jet_trk_dphi_gt8_lt10_cov_%s", tag), ";#Delta#phi;#Delta#phi;Covariance", nDPhiBins, 0, pi, nDPhiBins, 0, pi);
-  TH1D* h_jet_trk_dphi_gt10_lt15 = new TH1D (Form ("h_jet_trk_dphi_gt10_lt15_%s", tag), ";#Delta#phi;(1/N_{jet}) (dN_{trk}/d#Delta#phi)", nDPhiBins, 0, pi);
-  TH2D* h2_jet_trk_dphi_gt10_lt15_cov = new TH2D (Form ("h2_jet_trk_dphi_gt10_lt15_cov_%s", tag), ";#Delta#phi;#Delta#phi;Covariance", nDPhiBins, 0, pi, nDPhiBins, 0, pi);
-  TH1D* h_jet_trk_dphi_gt15_lt20 = new TH1D (Form ("h_jet_trk_dphi_gt15_lt20_%s", tag), ";#Delta#phi;(1/N_{jet}) (dN_{trk}/d#Delta#phi)", nDPhiBins, 0, pi);
-  TH2D* h2_jet_trk_dphi_gt15_lt20_cov = new TH2D (Form ("h2_jet_trk_dphi_gt15_lt20_cov_%s", tag), ";#Delta#phi;#Delta#phi;Covariance", nDPhiBins, 0, pi, nDPhiBins, 0, pi);
-  TH1D* h_jet_trk_dphi_gt20_lt30 = new TH1D (Form ("h_jet_trk_dphi_gt20_lt30_%s", tag), ";#Delta#phi;(1/N_{jet}) (dN_{trk}/d#Delta#phi)", nDPhiBins, 0, pi);
-  TH2D* h2_jet_trk_dphi_gt20_lt30_cov = new TH2D (Form ("h2_jet_trk_dphi_gt20_lt30_cov_%s", tag), ";#Delta#phi;#Delta#phi;Covariance", nDPhiBins, 0, pi, nDPhiBins, 0, pi);
+  TH1D* h_jet_trk_dphi_gt0p5_lt1 = new TH1D (Form ("h_jet_trk_dphi_gt0p5_lt1_%s", tag), ";#Delta#phi;(1/N_{jet}) (dN_{ch}/d#Delta#phi)", nDPhiBins, dPhiBins);
+  TH2D* h2_jet_trk_dphi_gt0p5_lt1_cov = new TH2D (Form ("h2_jet_trk_dphi_gt0p5_lt1_cov_%s", tag), ";#Delta#phi;#Delta#phi;Covariance", nDPhiBins, dPhiBins, nDPhiBins, dPhiBins);
+  TH1D* h_jet_trk_dphi_gt1_lt1p5 = new TH1D (Form ("h_jet_trk_dphi_gt1_lt1p5_%s", tag), ";#Delta#phi;(1/N_{jet}) (dN_{ch}/d#Delta#phi)", nDPhiBins, dPhiBins);
+  TH2D* h2_jet_trk_dphi_gt1_lt1p5_cov = new TH2D (Form ("h2_jet_trk_dphi_gt1_lt1p5_cov_%s", tag), ";#Delta#phi;#Delta#phi;Covariance", nDPhiBins, dPhiBins, nDPhiBins, dPhiBins);
+  TH1D* h_jet_trk_dphi_gt1p5_lt2 = new TH1D (Form ("h_jet_trk_dphi_gt1p5_lt2_%s", tag), ";#Delta#phi;(1/N_{jet}) (dN_{ch}/d#Delta#phi)", nDPhiBins, dPhiBins);
+  TH2D* h2_jet_trk_dphi_gt1p5_lt2_cov = new TH2D (Form ("h2_jet_trk_dphi_gt1p5_lt2_cov_%s", tag), ";#Delta#phi;#Delta#phi;Covariance", nDPhiBins, dPhiBins, nDPhiBins, dPhiBins);
+  TH1D* h_jet_trk_dphi_gt2_lt4 = new TH1D (Form ("h_jet_trk_dphi_gt2_lt4_%s", tag), ";#Delta#phi;(1/N_{jet}) (dN_{ch}/d#Delta#phi)", nDPhiBins, dPhiBins);
+  TH2D* h2_jet_trk_dphi_gt2_lt4_cov = new TH2D (Form ("h2_jet_trk_dphi_gt2_lt4_cov_%s", tag), ";#Delta#phi;#Delta#phi;Covariance", nDPhiBins, dPhiBins, nDPhiBins, dPhiBins);
+  TH1D* h_jet_trk_dphi_gt4_lt6 = new TH1D (Form ("h_jet_trk_dphi_gt4_lt6_%s", tag), ";#Delta#phi;(1/N_{jet}) (dN_{ch}/d#Delta#phi)", nDPhiBins, dPhiBins);
+  TH2D* h2_jet_trk_dphi_gt4_lt6_cov = new TH2D (Form ("h2_jet_trk_dphi_gt4_lt6_cov_%s", tag), ";#Delta#phi;#Delta#phi;Covariance", nDPhiBins, dPhiBins, nDPhiBins, dPhiBins);
+  TH1D* h_jet_trk_dphi_gt6_lt8 = new TH1D (Form ("h_jet_trk_dphi_gt6_lt8_%s", tag), ";#Delta#phi;(1/N_{jet}) (dN_{ch}/d#Delta#phi)", nDPhiBins, dPhiBins);
+  TH2D* h2_jet_trk_dphi_gt6_lt8_cov = new TH2D (Form ("h2_jet_trk_dphi_gt6_lt8_cov_%s", tag), ";#Delta#phi;#Delta#phi;Covariance", nDPhiBins, dPhiBins, nDPhiBins, dPhiBins);
+  TH1D* h_jet_trk_dphi_gt8_lt10 = new TH1D (Form ("h_jet_trk_dphi_gt8_lt10_%s", tag), ";#Delta#phi;(1/N_{jet}) (dN_{ch}/d#Delta#phi)", nDPhiBins, dPhiBins);
+  TH2D* h2_jet_trk_dphi_gt8_lt10_cov = new TH2D (Form ("h2_jet_trk_dphi_gt8_lt10_cov_%s", tag), ";#Delta#phi;#Delta#phi;Covariance", nDPhiBins, dPhiBins, nDPhiBins, dPhiBins);
+  TH1D* h_jet_trk_dphi_gt10_lt15 = new TH1D (Form ("h_jet_trk_dphi_gt10_lt15_%s", tag), ";#Delta#phi;(1/N_{jet}) (dN_{ch}/d#Delta#phi)", nDPhiBins, dPhiBins);
+  TH2D* h2_jet_trk_dphi_gt10_lt15_cov = new TH2D (Form ("h2_jet_trk_dphi_gt10_lt15_cov_%s", tag), ";#Delta#phi;#Delta#phi;Covariance", nDPhiBins, dPhiBins, nDPhiBins, dPhiBins);
+  TH1D* h_jet_trk_dphi_gt15_lt20 = new TH1D (Form ("h_jet_trk_dphi_gt15_lt20_%s", tag), ";#Delta#phi;(1/N_{jet}) (dN_{ch}/d#Delta#phi)", nDPhiBins, dPhiBins);
+  TH2D* h2_jet_trk_dphi_gt15_lt20_cov = new TH2D (Form ("h2_jet_trk_dphi_gt15_lt20_cov_%s", tag), ";#Delta#phi;#Delta#phi;Covariance", nDPhiBins, dPhiBins, nDPhiBins, dPhiBins);
+  TH1D* h_jet_trk_dphi_gt20_lt30 = new TH1D (Form ("h_jet_trk_dphi_gt20_lt30_%s", tag), ";#Delta#phi;(1/N_{jet}) (dN_{ch}/d#Delta#phi)", nDPhiBins, dPhiBins);
+  TH2D* h2_jet_trk_dphi_gt20_lt30_cov = new TH2D (Form ("h2_jet_trk_dphi_gt20_lt30_cov_%s", tag), ";#Delta#phi;#Delta#phi;Covariance", nDPhiBins, dPhiBins, nDPhiBins, dPhiBins);
 
-  TH1D* h_jet_trk_pt_ns = new TH1D (Form ("h_jet_trk_pt_ns_%s", tag), ";#it{p}_{T}^{ch} [GeV];(1/N_{jet}) (dN_{trk}/d#it{p}_{T})", nPtChBins, pTChBins);
+  TH1D* h_jet_trk_pt_ns = new TH1D (Form ("h_jet_trk_pt_ns_%s", tag), ";#it{p}_{T}^{ch} [GeV];(1/N_{jet}) (dN_{ch}/d#it{p}_{T}) [GeV^{-1}}", nPtChBins, pTChBins);
   TH2D* h2_jet_trk_pt_ns_cov = new TH2D (Form ("h2_jet_trk_pt_ns_cov_%s", tag), ";#it{p}_{T}^{ch} [GeV];#it{p}_{T}^{ch} [GeV];Covariance", nPtChBins, pTChBins, nPtChBins, pTChBins);
-
-  TH1D* h_jet_trk_pt_as = new TH1D (Form ("h_jet_trk_pt_as_%s", tag), ";#it{p}_{T}^{ch} [GeV];(1/N_{jet}) (dN_{trk}/d#it{p}_{T})", nPtChBins, pTChBins);
+  TH1D* h_jet_trk_pt_perp = new TH1D (Form ("h_jet_trk_pt_perp_%s", tag), ";#it{p}_{T}^{ch} [GeV];(1/N_{jet}) (dN_{ch}/d#it{p}_{T}) [GeV^{-1}}", nPtChBins, pTChBins);
+  TH2D* h2_jet_trk_pt_perp_cov = new TH2D (Form ("h2_jet_trk_pt_perp_cov_%s", tag), ";#it{p}_{T}^{ch} [GeV];#it{p}_{T}^{ch} [GeV];Covariance", nPtChBins, pTChBins, nPtChBins, pTChBins);
+  TH1D* h_jet_trk_pt_as = new TH1D (Form ("h_jet_trk_pt_as_%s", tag), ";#it{p}_{T}^{ch} [GeV];(1/N_{jet}) (dN_{ch}/d#it{p}_{T}) [GeV^{-1}}", nPtChBins, pTChBins);
   TH2D* h2_jet_trk_pt_as_cov = new TH2D (Form ("h2_jet_trk_pt_as_cov_%s", tag), ";#it{p}_{T}^{ch} [GeV];#it{p}_{T}^{ch} [GeV];Covariance", nPtChBins, pTChBins, nPtChBins, pTChBins);
 
 
@@ -126,6 +128,7 @@ void Correlator (const char* tag, const char* outFileName, TTree* jetsTree, TTre
   double jet_trk_dphi_gt20_lt30_counts[nDPhiBins];
 
   double jet_trk_pt_ns_counts[nPtChBins];
+  double jet_trk_pt_perp_counts[nPtChBins];
   double jet_trk_pt_as_counts[nPtChBins];
 
   const int nEvts = (doMixing ? 20. : 1.) * (jetsTree->GetEntries ());
@@ -153,6 +156,7 @@ void Correlator (const char* tag, const char* outFileName, TTree* jetsTree, TTre
     }
     for (int iX = 0; iX < nPtChBins; iX++) {
       jet_trk_pt_ns_counts[iX] = 0;
+      jet_trk_pt_perp_counts[iX] = 0;
       jet_trk_pt_as_counts[iX] = 0;
     }
 
@@ -164,9 +168,9 @@ void Correlator (const char* tag, const char* outFileName, TTree* jetsTree, TTre
 
     const double yboost = GetBoost (run_number);
 
-    //const short iCent = (GetZdcCentBin (zdc_calibE_Pb));
-    //if (IspPb () && iCent != numZdcCentBins-1 && iCent != numZdcCentBins-2) // only look at 0-10% or 10-20% central events
-    //  continue;
+    const short iMixCent = (IspPb () ? GetFcalMixBin (fcal_et_Pb) : GetppMixBin (fcal_et_p));
+    if (iMixCent < 0 || numFcalMixBins <= iMixCent)
+      continue;
 
     // TODO -- add event level weights!
     //const double ewgt = event_weight;
@@ -199,8 +203,9 @@ void Correlator (const char* tag, const char* outFileName, TTree* jetsTree, TTre
       do {
         iTrkEvt = (iTrkEvt + 1) % nTrkEvts;
         tracksTree->GetEntry (iTrkEvt);
-        goodEvent = true;
-        //goodEvent = (GetZdcCentBin (zdc_calibE_Pb_matching) == iCent); // TODO -- mixing categories!
+        //goodEvent = true; // for disabling any mixing categories
+        // mixing categories
+        goodEvent = (Ispp () ? GetFcalMixBin (fcal_et_Pb_matching) : GetppMixBin (fcal_et_p_matching)) == iMixCent;
       }
       while (!goodEvent && iTrkEvt != oldTrkEvt);
     }
@@ -246,6 +251,7 @@ void Correlator (const char* tag, const char* outFileName, TTree* jetsTree, TTre
       }
       for (int iX = 0; iX < nPtChBins; iX++) {
         jet_trk_pt_ns_counts[iX] = 0;
+        jet_trk_pt_perp_counts[iX] = 0;
         jet_trk_pt_as_counts[iX] = 0;
       }
 
@@ -266,7 +272,7 @@ void Correlator (const char* tag, const char* outFileName, TTree* jetsTree, TTre
 
         const double trk_y = trk_eta[iTrk];
         
-        if (fabs (trk_eta[iTrk] - yboost) > 2.5 - 0.465)
+        if (fabs (trk_y - yboost) > 2.5 - 0.465)
           continue;
 
         const float dphi = DeltaPhi (akt4_hi_jet_phi[iJet], trk_phi[iTrk]);
@@ -299,9 +305,11 @@ void Correlator (const char* tag, const char* outFileName, TTree* jetsTree, TTre
         else if (20 < trk_pt[iTrk] && trk_pt[iTrk] < 30)
           jet_trk_dphi_gt20_lt30_counts[iDPhi] += twgt;
 
-        if (dphi < pi/8.)
+        if (dphi < M_PI/8.)
           jet_trk_pt_ns_counts[iPtCh] += twgt;
-        else if (dphi > 7.*pi/8.)
+        else if (M_PI/3. < dphi && dphi < 2.*M_PI/3.)
+          jet_trk_pt_perp_counts[iPtCh] += twgt;
+        else if (dphi > 7.*M_PI/8.)
           jet_trk_pt_as_counts[iPtCh] += twgt;
       }
 
@@ -362,6 +370,11 @@ void Correlator (const char* tag, const char* outFileName, TTree* jetsTree, TTre
           h2_jet_trk_pt_ns_cov->SetBinContent (iX+1, iY+1, h2_jet_trk_pt_ns_cov->GetBinContent (iX+1, iY+1) + (ewgt*jwgt)*(jet_trk_pt_ns_counts[iX])*(jet_trk_pt_ns_counts[iY]));
       }
       for (int iX = 0; iX < nPtChBins; iX++) {
+        h_jet_trk_pt_perp->SetBinContent (iX+1, h_jet_trk_pt_perp->GetBinContent (iX+1) + (ewgt*jwgt)*(jet_trk_pt_perp_counts[iX]));
+        for (int iY = 0; iY < nPtChBins; iY++)
+          h2_jet_trk_pt_perp_cov->SetBinContent (iX+1, iY+1, h2_jet_trk_pt_perp_cov->GetBinContent (iX+1, iY+1) + (ewgt*jwgt)*(jet_trk_pt_perp_counts[iX])*(jet_trk_pt_perp_counts[iY]));
+      }
+      for (int iX = 0; iX < nPtChBins; iX++) {
         h_jet_trk_pt_as->SetBinContent (iX+1, h_jet_trk_pt_as->GetBinContent (iX+1) + (ewgt*jwgt)*(jet_trk_pt_as_counts[iX]));
         for (int iY = 0; iY < nPtChBins; iY++)
           h2_jet_trk_pt_as_cov->SetBinContent (iX+1, iY+1, h2_jet_trk_pt_as_cov->GetBinContent (iX+1, iY+1) + (ewgt*jwgt)*(jet_trk_pt_as_counts[iX])*(jet_trk_pt_as_counts[iY]));
@@ -405,6 +418,8 @@ void Correlator (const char* tag, const char* outFileName, TTree* jetsTree, TTre
 
   h_jet_trk_pt_ns->Write ();
   h2_jet_trk_pt_ns_cov->Write ();
+  h_jet_trk_pt_perp->Write ();
+  h2_jet_trk_pt_perp_cov->Write ();
   h_jet_trk_pt_as->Write ();
   h2_jet_trk_pt_as_cov->Write ();
 

@@ -3,6 +3,7 @@
 
 #include "JetSubtractedEnergy.h"
 #include "Params.h"
+#include "CentralityDefs.h"
 #include "TreeVariables.h"
 #include "LocalUtilities.h"
 #include "Trigger.h"

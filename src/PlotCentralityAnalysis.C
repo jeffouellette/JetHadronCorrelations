@@ -10,6 +10,7 @@
 #include <TCanvas.h>
 
 #include <Utilities.h>
+#include <MyColors.h>
 
 #include "Params.h"
 #include "LocalUtilities.h"
@@ -20,40 +21,32 @@
 using namespace std;
 using namespace JetHadronCorrelations;
 
-TGraphErrors* TProfY2TGE (TProfile* py) {
-  TGraphErrors* g = new TGraphErrors ();
-  for (int iX = 1; iX <= py->GetNbinsX (); iX++) {
-    g->SetPoint (g->GetN (), py->GetBinContent (iX), py->GetBinCenter (iX));
-    g->SetPointError (g->GetN ()-1, 0, py->GetBinWidth (iX) / 2.);
-  }
-  return g;
-}
-
-TGraphErrors* TProfX2TGE (TProfile* px) {
-  TGraphErrors* g = new TGraphErrors ();
-  for (int iX = 1; iX <= px->GetNbinsX (); iX++) {
-    g->SetPoint (g->GetN (), px->GetBinCenter (iX), px->GetBinContent (iX));
-    g->SetPointError (g->GetN ()-1, px->GetBinWidth (iX) / 2., 0);
-  }
-  return g;
-}
-
 
 void PlotCentralityAnalysis () { 
 
-  TFile* inFile = new TFile (Form ("%s/CentralityAnalysis/Nominal/allRuns.root", rootPath.Data ()), "read");
-
-  int runs[6] = {312796, 312837, 312937, 312945, 312968, 314199};
+  TFile* inFile = nullptr;
 
 
-  TH1D* h_jet_Pb_fcal_et[6] = {};
-  TH1D* h_mb_Pb_fcal_et[6] = {};
+  int iZdc20Percent = 0;
+  while (iZdc20Percent < numZdcCentBins && zdcCentPercs[iZdc20Percent] > 20) iZdc20Percent++;
+  int iFcal20Percent = 0;
+  while (iFcal20Percent < numFcalCentBins && fcalCentPercs[iFcal20Percent] > 100) iFcal20Percent++;
+
+
+  TH1D* h_jet_Pb_fcal_et[npPbRuns] = {};
+  TH1D* h_mb_Pb_fcal_et[npPbRuns] = {};
   TH1D* h_jet_Pb_fcal_et_sum = nullptr;
   TH1D* h_mb_Pb_fcal_et_sum = nullptr;
   TH1D* h_ratio_Pb_fcal_et_sum = nullptr;
 
-  TH1D* h_jet_Pb_zdc_calibE[6] = {};
-  TH1D* h_mb_Pb_zdc_calibE[6] = {};
+  TH1D* h_jet_p_fcal_et[nppRuns] = {};
+  TH1D* h_mb_p_fcal_et[nppRuns] = {};
+  TH1D* h_jet_p_fcal_et_sum = nullptr;
+  TH1D* h_mb_p_fcal_et_sum = nullptr;
+  TH1D* h_ratio_p_fcal_et_sum = nullptr;
+
+  TH1D* h_jet_Pb_zdc_calibE[npPbRuns] = {};
+  TH1D* h_mb_Pb_zdc_calibE[npPbRuns] = {};
   TH1D* h_jet_Pb_zdc_calibE_sum = nullptr;
   TH1D* h_mb_Pb_zdc_calibE_sum = nullptr;
   TH1D* h_ratio_Pb_zdc_calibE_sum = nullptr; // ratio of jet-tagged / MB events
@@ -64,18 +57,58 @@ void PlotCentralityAnalysis () {
   TH2D* h2_jet_Pb_fcal_et_Pb_q2 = nullptr;
   TH2D* h2_mb_Pb_fcal_et_Pb_q2 = nullptr;
 
-  TH1D* h_jet_Pb_fcal_et_zdcSelected = nullptr;
-  TH1D* h_mb_Pb_fcal_et_zdcSelected = nullptr;
-  TH1D* h_ratio_Pb_fcal_et_zdcSelected = nullptr;
+  TH1D* h_jet_Pb_fcal_et_zdc_0t20 = nullptr;
+  TH1D* h_mb_Pb_fcal_et_zdc_0t20 = nullptr;
+  TH1D* h_ratio_Pb_fcal_et_zdc_0t20 = nullptr;
+  TH1D* h_jet_Pb_fcal_et_zdc_20t40 = nullptr;
+  TH1D* h_mb_Pb_fcal_et_zdc_20t40 = nullptr;
+  TH1D* h_ratio_Pb_fcal_et_zdc_20t40 = nullptr;
+  TH1D* h_jet_Pb_fcal_et_zdc_40t60 = nullptr;
+  TH1D* h_mb_Pb_fcal_et_zdc_40t60 = nullptr;
+  TH1D* h_ratio_Pb_fcal_et_zdc_40t60 = nullptr;
+  TH1D* h_jet_Pb_fcal_et_zdc_60t80 = nullptr;
+  TH1D* h_mb_Pb_fcal_et_zdc_60t80 = nullptr;
+  TH1D* h_ratio_Pb_fcal_et_zdc_60t80 = nullptr;
+  TH1D* h_jet_Pb_fcal_et_zdc_80t100 = nullptr;
+  TH1D* h_mb_Pb_fcal_et_zdc_80t100 = nullptr;
+  TH1D* h_ratio_Pb_fcal_et_zdc_80t100 = nullptr;
 
-  TH3D* h3_mb_Pb_fcal_et_Pb_q2_Pb_zdc_calibE = (TH3D*) inFile->Get ("h3_mb_Pb_fcal_et_Pb_q2_Pb_zdc_calibE");
-  TH3D* h3_jet_Pb_fcal_et_Pb_q2_Pb_zdc_calibE = (TH3D*) inFile->Get ("h3_jet_Pb_fcal_et_Pb_q2_Pb_zdc_calibE");
+  TH3D* h3_mb_Pb_fcal_et_Pb_q2_Pb_zdc_calibE = nullptr;
+  TH3D* h3_jet_Pb_fcal_et_Pb_q2_Pb_zdc_calibE = nullptr;
 
-  for (int iRun = 0; iRun < 6; iRun++) {
-    h_jet_Pb_fcal_et[iRun] = (TH1D*) inFile->Get (Form ("h_jet_Pb_fcal_et_run%i", runs[iRun]));
-    h_mb_Pb_fcal_et[iRun] = (TH1D*) inFile->Get (Form ("h_mb_Pb_fcal_et_run%i", runs[iRun]));
-    h_jet_Pb_zdc_calibE[iRun] = (TH1D*) inFile->Get (Form ("h_jet_Pb_zdc_calibE_run%i", runs[iRun]));
-    h_mb_Pb_zdc_calibE[iRun] = (TH1D*) inFile->Get (Form ("h_mb_Pb_zdc_calibE_run%i", runs[iRun]));
+
+  inFile = new TFile (Form ("%s/CentralityAnalysis/Nominal/allppRuns.root", rootPath.Data ()), "read");
+
+  for (int iRun = 0; iRun < nppRuns; iRun++) {
+    h_jet_p_fcal_et[iRun] = (TH1D*) inFile->Get (Form ("h_jet_p_fcal_et_run%i", ppRuns[iRun]));
+    h_mb_p_fcal_et[iRun] = (TH1D*) inFile->Get (Form ("h_mb_p_fcal_et_run%i", ppRuns[iRun]));
+  }
+  h_jet_p_fcal_et_sum = (TH1D*) h_jet_p_fcal_et[0]->Clone ("h_jet_p_fcal_et_sum");
+  h_mb_p_fcal_et_sum = (TH1D*) h_mb_p_fcal_et[0]->Clone ("h_mb_p_fcal_et_sum");
+  h_jet_p_fcal_et_sum->Reset ();
+  h_mb_p_fcal_et_sum->Reset ();
+  for (int iRun = 0; iRun < nppRuns; iRun++) {
+    if (h_jet_p_fcal_et[iRun]) h_jet_p_fcal_et_sum->Add (h_jet_p_fcal_et[iRun]);
+    if (h_mb_p_fcal_et[iRun]) h_mb_p_fcal_et_sum->Add (h_mb_p_fcal_et[iRun]);
+  }
+  h_jet_p_fcal_et_sum->Scale (1./ h_jet_p_fcal_et_sum->Integral (), "width");
+  h_mb_p_fcal_et_sum->Scale (1./ h_mb_p_fcal_et_sum->Integral (), "width");
+
+  h_ratio_p_fcal_et_sum = (TH1D*) h_jet_p_fcal_et_sum->Clone ("h_ratio_p_fcal_et_sum");
+  h_ratio_p_fcal_et_sum->Divide (h_mb_p_fcal_et_sum); 
+
+
+  inFile = new TFile (Form ("%s/CentralityAnalysis/Nominal/allpPbRuns.root", rootPath.Data ()), "read");
+
+
+  h3_mb_Pb_fcal_et_Pb_q2_Pb_zdc_calibE = (TH3D*) inFile->Get ("h3_mb_Pb_fcal_et_Pb_q2_Pb_zdc_calibE");
+  h3_jet_Pb_fcal_et_Pb_q2_Pb_zdc_calibE = (TH3D*) inFile->Get ("h3_jet_Pb_fcal_et_Pb_q2_Pb_zdc_calibE");
+
+  for (int iRun = 0; iRun < npPbRuns; iRun++) {
+    h_jet_Pb_fcal_et[iRun] = (TH1D*) inFile->Get (Form ("h_jet_Pb_fcal_et_run%i", pPbRuns[iRun]));
+    h_mb_Pb_fcal_et[iRun] = (TH1D*) inFile->Get (Form ("h_mb_Pb_fcal_et_run%i", pPbRuns[iRun]));
+    h_jet_Pb_zdc_calibE[iRun] = (TH1D*) inFile->Get (Form ("h_jet_Pb_zdc_calibE_run%i", pPbRuns[iRun]));
+    h_mb_Pb_zdc_calibE[iRun] = (TH1D*) inFile->Get (Form ("h_mb_Pb_zdc_calibE_run%i", pPbRuns[iRun]));
   }
 
   h_jet_Pb_fcal_et_sum = (TH1D*) h_jet_Pb_fcal_et[0]->Clone ("h_jet_Pb_fcal_et_sum");
@@ -86,7 +119,7 @@ void PlotCentralityAnalysis () {
   h_mb_Pb_zdc_calibE_sum = (TH1D*) h_mb_Pb_zdc_calibE[0]->Clone ("h_mb_Pb_zdc_calibE_sum");
   h_jet_Pb_zdc_calibE_sum->Reset ();
   h_mb_Pb_zdc_calibE_sum->Reset ();
-  for (int iRun = 0; iRun < 6; iRun++) {
+  for (int iRun = 0; iRun < npPbRuns; iRun++) {
     if (h_jet_Pb_fcal_et[iRun]) h_jet_Pb_fcal_et_sum->Add (h_jet_Pb_fcal_et[iRun]);
     if (h_mb_Pb_fcal_et[iRun]) h_mb_Pb_fcal_et_sum->Add (h_mb_Pb_fcal_et[iRun]);
     if (h_jet_Pb_zdc_calibE[iRun]) h_jet_Pb_zdc_calibE_sum->Add (h_jet_Pb_zdc_calibE[iRun]);
@@ -96,24 +129,48 @@ void PlotCentralityAnalysis () {
   h2_jet_Pb_fcal_et_zdc_calibE = (TH2D*) inFile->Get ("h2_jet_Pb_fcal_et_zdc_calibE");//h3_jet_Pb_fcal_et_Pb_q2_Pb_zdc_calibE->Project3D ("zx");
   h2_mb_Pb_fcal_et_zdc_calibE = (TH2D*) inFile->Get ("h2_mb_Pb_fcal_et_zdc_calibE");//h3_mb_Pb_fcal_et_Pb_q2_Pb_zdc_calibE->Project3D ("zx");
 
-  h_jet_Pb_fcal_et_sum->Scale (1. / h_jet_Pb_fcal_et_sum->Integral (h_jet_Pb_fcal_et_sum->FindBin (fcalCentBins[1]), h_jet_Pb_fcal_et_sum->GetNbinsX ()));
-  h_mb_Pb_fcal_et_sum->Scale (1. / h_mb_Pb_fcal_et_sum->Integral (h_mb_Pb_fcal_et_sum->FindBin (fcalCentBins[1]), h_mb_Pb_fcal_et_sum->GetNbinsX ()));
-  h_jet_Pb_zdc_calibE_sum->Scale (1. / h_jet_Pb_zdc_calibE_sum->Integral (h_jet_Pb_zdc_calibE_sum->FindBin (zdcCentBins[1]), h_jet_Pb_zdc_calibE_sum->GetNbinsX ()));
-  h_mb_Pb_zdc_calibE_sum->Scale (1. / h_mb_Pb_zdc_calibE_sum->Integral (h_mb_Pb_zdc_calibE_sum->FindBin (zdcCentBins[1]), h_mb_Pb_zdc_calibE_sum->GetNbinsX ()));
+  h_jet_Pb_fcal_et_sum->Scale (1. / h_jet_Pb_fcal_et_sum->Integral (h_jet_Pb_fcal_et_sum->FindBin (fcalCentBins[iFcal20Percent]), h_jet_Pb_fcal_et_sum->GetNbinsX ()), "width");
+  h_mb_Pb_fcal_et_sum->Scale (1. / h_mb_Pb_fcal_et_sum->Integral (h_mb_Pb_fcal_et_sum->FindBin (fcalCentBins[iFcal20Percent]), h_mb_Pb_fcal_et_sum->GetNbinsX ()), "width");
+  h_jet_Pb_zdc_calibE_sum->Scale (1. / h_jet_Pb_zdc_calibE_sum->Integral (h_jet_Pb_zdc_calibE_sum->FindBin (zdcCentBins[iZdc20Percent]), h_jet_Pb_zdc_calibE_sum->GetNbinsX ()), "width");
+  h_mb_Pb_zdc_calibE_sum->Scale (1. / h_mb_Pb_zdc_calibE_sum->Integral (h_mb_Pb_zdc_calibE_sum->FindBin (zdcCentBins[iZdc20Percent]), h_mb_Pb_zdc_calibE_sum->GetNbinsX ()), "width");
 
   h_ratio_Pb_fcal_et_sum = (TH1D*) h_jet_Pb_fcal_et_sum->Clone ("h_ratio_Pb_fcal_et_sum");
   h_ratio_Pb_fcal_et_sum->Divide (h_mb_Pb_fcal_et_sum); 
   h_ratio_Pb_zdc_calibE_sum = (TH1D*) h_jet_Pb_zdc_calibE_sum->Clone ("h_ratio_Pb_zdc_calibE_sum");
   h_ratio_Pb_zdc_calibE_sum->Divide (h_mb_Pb_zdc_calibE_sum); 
 
-  h_jet_Pb_fcal_et_zdcSelected = h2_jet_Pb_fcal_et_zdc_calibE->ProjectionX ("h_jet_Pb_fcal_et_zdcSelected", h2_jet_Pb_fcal_et_zdc_calibE->GetYaxis ()->FindBin (zdcCentBins[1]), h2_jet_Pb_fcal_et_zdc_calibE->GetYaxis ()->GetNbins ());
-  h_mb_Pb_fcal_et_zdcSelected = h2_mb_Pb_fcal_et_zdc_calibE->ProjectionX ("h_mb_Pb_fcal_et_zdcSelected", h2_mb_Pb_fcal_et_zdc_calibE->GetYaxis ()->FindBin (zdcCentBins[1]), h2_mb_Pb_fcal_et_zdc_calibE->GetYaxis ()->GetNbins ());
+  h_jet_Pb_fcal_et_zdc_0t20 = h2_jet_Pb_fcal_et_zdc_calibE->ProjectionX ("h_jet_Pb_fcal_et_zdc_0t20", h2_jet_Pb_fcal_et_zdc_calibE->GetYaxis ()->FindBin (zdcCentBins[4]), h2_jet_Pb_fcal_et_zdc_calibE->GetYaxis ()->FindBin (zdcCentBins[5]));
+  h_mb_Pb_fcal_et_zdc_0t20 = h2_mb_Pb_fcal_et_zdc_calibE->ProjectionX ("h_mb_Pb_fcal_et_zdc_0t20", h2_mb_Pb_fcal_et_zdc_calibE->GetYaxis ()->FindBin (zdcCentBins[4]), h2_mb_Pb_fcal_et_zdc_calibE->GetYaxis ()->FindBin (zdcCentBins[5]));
+  h_jet_Pb_fcal_et_zdc_20t40 = h2_jet_Pb_fcal_et_zdc_calibE->ProjectionX ("h_jet_Pb_fcal_et_zdc_20t40", h2_jet_Pb_fcal_et_zdc_calibE->GetYaxis ()->FindBin (zdcCentBins[3]), h2_jet_Pb_fcal_et_zdc_calibE->GetYaxis ()->FindBin (zdcCentBins[4]));
+  h_mb_Pb_fcal_et_zdc_20t40 = h2_mb_Pb_fcal_et_zdc_calibE->ProjectionX ("h_mb_Pb_fcal_et_zdc_20t40", h2_mb_Pb_fcal_et_zdc_calibE->GetYaxis ()->FindBin (zdcCentBins[3]), h2_mb_Pb_fcal_et_zdc_calibE->GetYaxis ()->FindBin (zdcCentBins[4]));
+  h_jet_Pb_fcal_et_zdc_40t60 = h2_jet_Pb_fcal_et_zdc_calibE->ProjectionX ("h_jet_Pb_fcal_et_zdc_40t60", h2_jet_Pb_fcal_et_zdc_calibE->GetYaxis ()->FindBin (zdcCentBins[2]), h2_jet_Pb_fcal_et_zdc_calibE->GetYaxis ()->FindBin (zdcCentBins[3]));
+  h_mb_Pb_fcal_et_zdc_40t60 = h2_mb_Pb_fcal_et_zdc_calibE->ProjectionX ("h_mb_Pb_fcal_et_zdc_40t60", h2_mb_Pb_fcal_et_zdc_calibE->GetYaxis ()->FindBin (zdcCentBins[2]), h2_mb_Pb_fcal_et_zdc_calibE->GetYaxis ()->FindBin (zdcCentBins[3]));
+  h_jet_Pb_fcal_et_zdc_60t80 = h2_jet_Pb_fcal_et_zdc_calibE->ProjectionX ("h_jet_Pb_fcal_et_zdc_60t80", h2_jet_Pb_fcal_et_zdc_calibE->GetYaxis ()->FindBin (zdcCentBins[1]), h2_jet_Pb_fcal_et_zdc_calibE->GetYaxis ()->FindBin (zdcCentBins[2]));
+  h_mb_Pb_fcal_et_zdc_60t80 = h2_mb_Pb_fcal_et_zdc_calibE->ProjectionX ("h_mb_Pb_fcal_et_zdc_60t80", h2_mb_Pb_fcal_et_zdc_calibE->GetYaxis ()->FindBin (zdcCentBins[1]), h2_mb_Pb_fcal_et_zdc_calibE->GetYaxis ()->FindBin (zdcCentBins[2]));
+  h_jet_Pb_fcal_et_zdc_80t100 = h2_jet_Pb_fcal_et_zdc_calibE->ProjectionX ("h_jet_Pb_fcal_et_zdc_80t100", h2_jet_Pb_fcal_et_zdc_calibE->GetYaxis ()->FindBin (zdcCentBins[0]), h2_jet_Pb_fcal_et_zdc_calibE->GetYaxis ()->FindBin (zdcCentBins[1]));
+  h_mb_Pb_fcal_et_zdc_80t100 = h2_mb_Pb_fcal_et_zdc_calibE->ProjectionX ("h_mb_Pb_fcal_et_zdc_80t100", h2_mb_Pb_fcal_et_zdc_calibE->GetYaxis ()->FindBin (zdcCentBins[0]), h2_mb_Pb_fcal_et_zdc_calibE->GetYaxis ()->FindBin (zdcCentBins[1]));
 
-  h_jet_Pb_fcal_et_zdcSelected->Scale (1. / h_jet_Pb_fcal_et_zdcSelected->Integral (h_jet_Pb_fcal_et_zdcSelected->FindBin (fcalCentBins[1]), h_jet_Pb_fcal_et_zdcSelected->GetNbinsX ()));
-  h_mb_Pb_fcal_et_zdcSelected->Scale (1. / h_mb_Pb_fcal_et_zdcSelected->Integral (h_mb_Pb_fcal_et_zdcSelected->FindBin (fcalCentBins[1]), h_mb_Pb_fcal_et_zdcSelected->GetNbinsX ()));
+  h_jet_Pb_fcal_et_zdc_0t20->Scale (0.2 / h_jet_Pb_fcal_et_zdc_0t20->Integral (), "width");
+  h_mb_Pb_fcal_et_zdc_0t20->Scale (0.2 / h_mb_Pb_fcal_et_zdc_0t20->Integral (), "width");
+  h_jet_Pb_fcal_et_zdc_20t40->Scale (0.2 / h_jet_Pb_fcal_et_zdc_20t40->Integral (), "width");
+  h_mb_Pb_fcal_et_zdc_20t40->Scale (0.2 / h_mb_Pb_fcal_et_zdc_20t40->Integral (), "width");
+  h_jet_Pb_fcal_et_zdc_40t60->Scale (0.2 / h_jet_Pb_fcal_et_zdc_40t60->Integral (), "width");
+  h_mb_Pb_fcal_et_zdc_40t60->Scale (0.2 / h_mb_Pb_fcal_et_zdc_40t60->Integral (), "width");
+  h_jet_Pb_fcal_et_zdc_60t80->Scale (0.2 / h_jet_Pb_fcal_et_zdc_60t80->Integral (), "width");
+  h_mb_Pb_fcal_et_zdc_60t80->Scale (0.2 / h_mb_Pb_fcal_et_zdc_60t80->Integral (), "width");
+  h_jet_Pb_fcal_et_zdc_80t100->Scale (0.2 / h_jet_Pb_fcal_et_zdc_80t100->Integral (), "width");
+  h_mb_Pb_fcal_et_zdc_80t100->Scale (0.2 / h_mb_Pb_fcal_et_zdc_80t100->Integral (), "width");
 
-  h_ratio_Pb_fcal_et_zdcSelected = (TH1D*) h_jet_Pb_fcal_et_zdcSelected->Clone ("h_ratio_Pb_fcal_et_zdcSelected");
-  h_ratio_Pb_fcal_et_zdcSelected->Divide (h_mb_Pb_fcal_et_zdcSelected);
+  h_ratio_Pb_fcal_et_zdc_0t20 = (TH1D*) h_jet_Pb_fcal_et_zdc_0t20->Clone ("h_ratio_Pb_fcal_et_zdc_0t20");
+  h_ratio_Pb_fcal_et_zdc_0t20->Divide (h_mb_Pb_fcal_et_zdc_0t20);
+  h_ratio_Pb_fcal_et_zdc_20t40 = (TH1D*) h_jet_Pb_fcal_et_zdc_20t40->Clone ("h_ratio_Pb_fcal_et_zdc_20t40");
+  h_ratio_Pb_fcal_et_zdc_20t40->Divide (h_mb_Pb_fcal_et_zdc_20t40);
+  h_ratio_Pb_fcal_et_zdc_40t60 = (TH1D*) h_jet_Pb_fcal_et_zdc_40t60->Clone ("h_ratio_Pb_fcal_et_zdc_40t60");
+  h_ratio_Pb_fcal_et_zdc_40t60->Divide (h_mb_Pb_fcal_et_zdc_40t60);
+  h_ratio_Pb_fcal_et_zdc_60t80 = (TH1D*) h_jet_Pb_fcal_et_zdc_60t80->Clone ("h_ratio_Pb_fcal_et_zdc_60t80");
+  h_ratio_Pb_fcal_et_zdc_60t80->Divide (h_mb_Pb_fcal_et_zdc_60t80);
+  h_ratio_Pb_fcal_et_zdc_80t100 = (TH1D*) h_jet_Pb_fcal_et_zdc_80t100->Clone ("h_ratio_Pb_fcal_et_zdc_80t100");
+  h_ratio_Pb_fcal_et_zdc_80t100->Divide (h_mb_Pb_fcal_et_zdc_80t100);
 
 
   double xq[101];
@@ -126,7 +183,7 @@ void PlotCentralityAnalysis () {
   }
 
 
-  //for (int iRun = 0; iRun < 6; iRun++) {
+  //for (int iRun = 0; iRun < npPbRuns; iRun++) {
   //  TCanvas* c = new TCanvas ("c1", "", 800, 800);
 
   //  gPad->SetLogy ();
@@ -206,7 +263,7 @@ void PlotCentralityAnalysis () {
   //  h->DrawCopy ("hist same");
 
   //  myText (0.20, 0.88, kBlack, "#bf{#it{ATLAS}} Internal", 0.036);
-  //  myText (0.20, 0.840, kBlack, Form ("Run %i (per. A)", runs[iRun]), 0.032);
+  //  myText (0.20, 0.840, kBlack, Form ("Run %i (per. A)", pPbRuns[iRun]), 0.032);
   //  myText (0.65, 0.550, kBlue+3, "J50 Trigger", 0.032);
   //  myText (0.65, 0.510, kRed+1, "MinBias Trigger", 0.032);
 
@@ -249,22 +306,22 @@ void PlotCentralityAnalysis () {
   //  subPadBorder->DrawLineNDC (1.-c->GetRightMargin (), 1.-c->GetTopMargin (), 0.6, 1.-c->GetTopMargin ());
   //  subPadBorder->DrawLineNDC (0.6, 1.-c->GetTopMargin (), 0.6, 0.6);
   // 
-  //  c->SaveAs (Form ("%s/Plots/CentralityAnalysis/run%i_zdc.pdf", workPath.Data (), runs[iRun]));
+  //  c->SaveAs (Form ("%s/Plots/CentralityAnalysis/run%i_zdc.pdf", workPath.Data (), pPbRuns[iRun]));
   //}
 
 
 
   {
-    TCanvas* c = new TCanvas ("c_allruns_zdc", "", 800, 1000);
+    TCanvas* c = new TCanvas ("c_allpPbRuns_zdc", "", 800, 1000);
 
     const double bMargin = 0.20;
     const double lMargin = 0.11;
     const double rMargin = 0.04;
     const double tMargin = 0.04;
 
-    TPad* uPad = new TPad ("c_allruns_zdc_uPad", "", 0.0, 0.3, 1.0, 1.0);
-    TPad* dPad = new TPad ("c_allruns_zdc_dPad", "", 0.0, 0.0, 1.0, 0.3);
-    TPad* subPad = new TPad ("c_allruns_zdc_subPad", "", 0.6, 0.6*0.7+0.3, 1.-rMargin, 1.-tMargin*0.7);
+    TPad* uPad = new TPad ("c_allpPbRuns_zdc_uPad", "", 0.0, 0.3, 1.0, 1.0);
+    TPad* dPad = new TPad ("c_allpPbRuns_zdc_dPad", "", 0.0, 0.0, 1.0, 0.3);
+    TPad* subPad = new TPad ("c_allpPbRuns_zdc_subPad", "", 0.6, 0.6*0.7+0.3, 1.-rMargin, 1.-tMargin*0.7);
 
     uPad->SetBottomMargin (0);
     uPad->SetLeftMargin (lMargin);
@@ -294,8 +351,8 @@ void PlotCentralityAnalysis () {
 
     h->GetYaxis ()->SetTitleOffset (1.2 * h->GetYaxis ()->GetTitleOffset ());
 
-    double ymin = 5e-7;
-    double ymax = 8e-2;
+    double ymin = 4e-6;
+    double ymax = 6.4e-1;
 
     h->SetLineColor (kBlue+3);
 
@@ -408,8 +465,8 @@ void PlotCentralityAnalysis () {
     subPad->cd ();
     subPad->SetLogy ();
 
-    ymin = 4e-5;
-    ymax = 2e-1;
+    ymin = 3.2e-4;
+    ymax = 1.6e0;
 
     h = (TH1D*) h_jet_Pb_zdc_calibE_sum->Clone ("htemp");
 
@@ -451,15 +508,15 @@ void PlotCentralityAnalysis () {
 
 
   {
-    TCanvas* c = new TCanvas ("c_allruns_fcal_et", "", 800, 1000);
+    TCanvas* c = new TCanvas ("c_allpPbRuns_fcal_et", "", 800, 1000);
 
     const double bMargin = 0.20;
     const double lMargin = 0.11;
     const double rMargin = 0.04;
     const double tMargin = 0.04;
 
-    TPad* uPad = new TPad ("c_allruns_fcal_et_uPad", "", 0.0, 0.3, 1.0, 1.0);
-    TPad* dPad = new TPad ("c_allruns_fcal_et_dPad", "", 0.0, 0.0, 1.0, 0.3);
+    TPad* uPad = new TPad ("c_allpPbRuns_fcal_et_uPad", "", 0.0, 0.3, 1.0, 1.0);
+    TPad* dPad = new TPad ("c_allpPbRuns_fcal_et_dPad", "", 0.0, 0.0, 1.0, 0.3);
 
     uPad->SetBottomMargin (0);
     uPad->SetLeftMargin (lMargin);
@@ -567,7 +624,7 @@ void PlotCentralityAnalysis () {
     ymax = 2e1;
 
     h = (TH1D*) h_ratio_Pb_fcal_et_sum->Clone ("htemp");
-    h->GetXaxis ()->SetTitle ("#Sigma#it{E}_{T}^{Pb-FCal} [GeV]");
+    h->GetXaxis ()->SetTitle ("#Sigma#it{E}_{T}^{FCal, Pb} [GeV]");
     h->GetYaxis ()->SetTitle ("J50 / MB");
 
     h->GetXaxis ()->SetTitleOffset (2.4 * h->GetXaxis ()->GetTitleOffset ());
@@ -592,21 +649,21 @@ void PlotCentralityAnalysis () {
 
     divs->DrawLine (-30, 1, 220, 1);
 
-    c->SaveAs (Form ("%s/Plots/CentralityAnalysis/allruns_fcal_et.pdf", workPath.Data ()));
+    c->SaveAs (Form ("%s/Plots/CentralityAnalysis/allpPbRuns_fcal_et.pdf", workPath.Data ()));
   }
 
 
 
   {
-    TCanvas* c = new TCanvas ("c_allruns_fcal_et_zdcSelected", "", 800, 800);
+    TCanvas* c = new TCanvas ("c_allppRuns_fcal_et", "", 800, 1000);
 
     const double bMargin = 0.20;
     const double lMargin = 0.11;
     const double rMargin = 0.04;
     const double tMargin = 0.04;
 
-    TPad* uPad = new TPad ("c_allruns_fcal_et_zdcSelected_uPad", "", 0.0, 0.3, 1.0, 1.0);
-    TPad* dPad = new TPad ("c_allruns_fcal_et_zdcSelected_dPad", "", 0.0, 0.0, 1.0, 0.3);
+    TPad* uPad = new TPad ("c_allppRuns_fcal_et_uPad", "", 0.0, 0.3, 1.0, 1.0);
+    TPad* dPad = new TPad ("c_allppRuns_fcal_et_dPad", "", 0.0, 0.0, 1.0, 0.3);
 
     uPad->SetBottomMargin (0);
     uPad->SetLeftMargin (lMargin);
@@ -625,17 +682,18 @@ void PlotCentralityAnalysis () {
     uPad->cd ();
     uPad->SetLogy ();
 
-    TH1D* h = (TH1D*) h_jet_Pb_fcal_et_sum->Clone ("htemp");
-    h->GetYaxis ()->SetTitle ("A.U. (normalized in 0-20%)");
+    TH1D* h = (TH1D*) h_jet_p_fcal_et_sum->Clone ("htemp");
+    h->GetYaxis ()->SetTitle ("A.U.");
 
     h->GetYaxis ()->SetTitleOffset (1.2 * h->GetYaxis ()->GetTitleOffset ());
 
-    double ymin = 5e-9;
+    double ymin = 5e-8;
     double ymax = 1e0;
 
     h->SetLineColor (kBlue+3);
 
     h->GetYaxis ()->SetRangeUser (ymin, ymax);
+
 
     h->GetXaxis ()->SetTitleFont (43);
     h->GetXaxis ()->SetTitleSize (0);
@@ -649,34 +707,58 @@ void PlotCentralityAnalysis () {
     h->DrawCopy ("hist");
     SaferDelete (&h);
 
-    h = (TH1D*) h_mb_Pb_fcal_et_sum->Clone ("htemp");
+    h = (TH1D*) h_mb_p_fcal_et_sum->Clone ("htemp");
 
     h->SetLineColor (kRed+1);
 
+    double plot_xq[17];
+    double plot_yq[17];
+    TString plot_percs[17];
+    plot_xq[0]  = 0.000; plot_percs[0]  = "100%";
+    plot_xq[1]  = 0.100; plot_percs[1]  = "90%";
+    plot_xq[2]  = 0.200; plot_percs[2]  = "80%";
+    plot_xq[3]  = 0.300; plot_percs[3]  = "70%";
+    plot_xq[4]  = 0.400; plot_percs[4]  = "60%";
+    plot_xq[5]  = 0.500; plot_percs[5]  = "50%";
+    plot_xq[6]  = 0.600; plot_percs[6]  = "40%";
+    plot_xq[7]  = 0.700; plot_percs[7]  = "30%";
+    plot_xq[8]  = 0.800; plot_percs[8]  = "20%";
+    plot_xq[9]  = 0.900; plot_percs[9]  = "10%";
+    plot_xq[10] = 0.950; plot_percs[10] = "5%";
+    plot_xq[11] = 0.980; plot_percs[11] = "2%";
+    plot_xq[12] = 0.990; plot_percs[12] = "1%";
+    plot_xq[13] = 0.995; plot_percs[13] = "0.5%";
+    plot_xq[14] = 0.998; plot_percs[14] = "0.2%";
+    plot_xq[15] = 0.999; plot_percs[15] = "0.1%";
+    plot_xq[16] = 1.000; plot_percs[16] = "0%";
+    h->GetQuantiles (17, plot_yq, plot_xq);
+    h->GetQuantiles (101, yq, xq);
+
+    ofstream cutsfile;
+    cutsfile.open (Form ("%s/aux/ppMixCuts.dat", workPath.Data ()));
+    for (int i = 0; i < 101; i++) {
+      std::cout << xq[i] << ", " << yq[i] << std::endl;
+      cutsfile << std::setw (6) << percs[i] << "\t" << yq[i] << "\n";
+    }
+    cutsfile.close ();
+
+    TLine* divs = new TLine ();
+    TLatex* tl = new TLatex ();
+    tl->SetTextAngle (-90);
+    tl->SetTextAlign (11);
+    tl->SetTextFont (43);
+    tl->SetTextSize (14);
+    divs->SetLineStyle (2);
+    for (int i = 1; i < 16; i++) {
+      divs->DrawLine (plot_yq[i], ymin, plot_yq[i], h->GetBinContent (h->FindBin (plot_yq[i])));
+      tl->DrawLatex (plot_yq[i]+0.20, exp (0.1*log(ymax/ymin)) * ymin, plot_percs[i].Data ());
+    }
+
     h->DrawCopy ("hist same");
     SaferDelete (&h);
-
-
-    h = (TH1D*) h_jet_Pb_fcal_et_zdcSelected->Clone ("htemp");
-
-    h->SetLineColor (kBlue+3);
-    h->SetLineStyle (2);
-
-    h->DrawCopy ("hist same");
-    SaferDelete (&h);
-
-
-    h = (TH1D*) h_mb_Pb_fcal_et_zdcSelected->Clone ("htemp");
-
-    h->SetLineColor (kRed+1);
-    h->SetLineStyle (2);
-
-    h->DrawCopy ("hist same");
-    SaferDelete (&h);
-
 
     myText (0.65, 0.900, kBlack, "#bf{#it{ATLAS}} Internal", 0.036);
-    myText (0.65, 0.860, kBlack, "#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV", 0.032);
+    myText (0.65, 0.860, kBlack, "#it{pp}, #sqrt{s_{NN}} = 5.02 TeV", 0.032);
     myText (0.65, 0.820, kBlack, "All runs", 0.032);
     myText (0.65, 0.740, kBlue+3, "J50 Trigger", 0.032);
     myText (0.65, 0.700, kRed+1, "MinBias Trigger", 0.032);
@@ -688,8 +770,8 @@ void PlotCentralityAnalysis () {
     ymin = 7e-2;
     ymax = 2e1;
 
-    h = (TH1D*) h_ratio_Pb_fcal_et_sum->Clone ("htemp");
-    h->GetXaxis ()->SetTitle ("#Sigma#it{E}_{T}^{Pb-FCal} [GeV]");
+    h = (TH1D*) h_ratio_p_fcal_et_sum->Clone ("htemp");
+    h->GetXaxis ()->SetTitle ("#Sigma#it{E}_{T}^{FCal} [GeV]");
     h->GetYaxis ()->SetTitle ("J50 / MB");
 
     h->GetXaxis ()->SetTitleOffset (2.4 * h->GetXaxis ()->GetTitleOffset ());
@@ -712,19 +794,94 @@ void PlotCentralityAnalysis () {
     h->DrawCopy ("hist");
     SaferDelete (&h);
 
-    h = (TH1D*) h_ratio_Pb_fcal_et_zdcSelected->Clone ("htemp");
+    divs->DrawLine (-30, 1, 220, 1);
 
-    h->SetLineColor (kBlue+3);
-    h->SetLineStyle (2);
+    c->SaveAs (Form ("%s/Plots/CentralityAnalysis/allppRuns_fcal_et.pdf", workPath.Data ()));
+  }
 
+
+
+  {
+    TCanvas* c = new TCanvas ("c_allpPbRuns_fcal_et_zdc_0t20", "", 800, 800);
+
+    const double bMargin = 0.11;
+    const double lMargin = 0.11;
+    const double rMargin = 0.04;
+    const double tMargin = 0.04;
+
+    c->SetBottomMargin (bMargin);
+    c->SetLeftMargin (lMargin);
+    c->SetRightMargin (rMargin);
+    c->SetTopMargin (tMargin);
+
+    c->Draw ();
+
+
+    c->cd ();
+    //c->SetLogy ();
+
+    TH1D* h = (TH1D*) h_mb_Pb_fcal_et_sum->Clone ("htemp");
+    //TH1D* h = (TH1D*) h_jet_Pb_fcal_et_sum->Clone ("htemp");
+    h->GetXaxis ()->SetTitle ("#Sigma#it{E}_{T}^{FCal, Pb} [GeV]");
+    h->GetYaxis ()->SetTitle ("A.U.");
+
+    h->GetXaxis ()->SetTitleOffset (0.8 * h->GetXaxis ()->GetTitleOffset ());
+    h->GetYaxis ()->SetTitleOffset (1.2 * h->GetYaxis ()->GetTitleOffset ());
+
+    //double ymin = 5e-9;
+    //double ymax = 1e0;
+    double ymin = 0;
+    double ymax = 0.038;
+
+    h->SetLineColor (kBlack);
+
+    h->GetYaxis ()->SetRangeUser (ymin, ymax);
+
+    h->GetXaxis ()->SetTitleFont (43);
+    h->GetXaxis ()->SetTitleSize (26);
+    h->GetYaxis ()->SetTitleFont (43);
+    h->GetYaxis ()->SetTitleSize (26);
+    h->GetXaxis ()->SetLabelFont (43);
+    h->GetXaxis ()->SetLabelSize (24);
+    h->GetYaxis ()->SetLabelFont (43);
+    h->GetYaxis ()->SetLabelSize (24);
+
+    h->DrawCopy ("hist");
+    SaferDelete (&h);
+
+    h = (TH1D*) h_mb_Pb_fcal_et_zdc_0t20->Clone ("htemp");
+    h->SetLineColor (colors[0]);
+    h->DrawCopy ("hist same");
+    SaferDelete (&h);
+    h = (TH1D*) h_mb_Pb_fcal_et_zdc_20t40->Clone ("htemp");
+    h->SetLineColor (colors[1]);
+    h->DrawCopy ("hist same");
+    SaferDelete (&h);
+    h = (TH1D*) h_mb_Pb_fcal_et_zdc_40t60->Clone ("htemp");
+    h->SetLineColor (colors[2]);
+    h->DrawCopy ("hist same");
+    SaferDelete (&h);
+    h = (TH1D*) h_mb_Pb_fcal_et_zdc_60t80->Clone ("htemp");
+    h->SetLineColor (colors[3]);
+    h->DrawCopy ("hist same");
+    SaferDelete (&h);
+    h = (TH1D*) h_mb_Pb_fcal_et_zdc_80t100->Clone ("htemp");
+    h->SetLineColor (colors[4]);
     h->DrawCopy ("hist same");
     SaferDelete (&h);
 
-    TLine* tline = new TLine ();
-    tline->SetLineStyle (2);
-    tline->DrawLine (-30, 1, 220, 1);
 
-    c->SaveAs (Form ("%s/Plots/CentralityAnalysis/allruns_fcal_et_zdcSelected.pdf", workPath.Data ()));
+    myText (0.65, 0.900, kBlack, "#bf{#it{ATLAS}} Internal", 0.036);
+    myText (0.65, 0.860, kBlack, "#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV", 0.032);
+    myText (0.65, 0.820, kBlack, "All runs, MinBias trigger", 0.032);
+    myText (0.56, 0.740, kBlack, "P(#Sigma#it{E}_{T}^{FCal,Pb})", 0.026);
+    myText (0.56, 0.700, colors[0], "0.2 #times P(#Sigma#it{E}_{T}^{FCal,Pb} | Zdc 0-20%)", 0.026);
+    myText (0.56, 0.660, colors[1], "0.2 #times P(#Sigma#it{E}_{T}^{FCal,Pb} | Zdc 20-40%)", 0.026);
+    myText (0.56, 0.620, colors[2], "0.2 #times P(#Sigma#it{E}_{T}^{FCal,Pb} | Zdc 40-60%)", 0.026);
+    myText (0.56, 0.580, colors[3], "0.2 #times P(#Sigma#it{E}_{T}^{FCal,Pb} | Zdc 60-80%)", 0.026);
+    myText (0.56, 0.540, colors[4], "0.2 #times P(#Sigma#it{E}_{T}^{FCal,Pb} | Zdc 80-100%)", 0.026);
+
+    c->SaveAs (Form ("%s/Plots/CentralityAnalysis/allruns_fcal_et_zdcBinned.pdf", workPath.Data ()));
   }
 
 

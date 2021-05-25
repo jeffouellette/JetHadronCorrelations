@@ -21,8 +21,7 @@ using namespace JetHadronCorrelations;
 
 void ProcessPtCh (const char* outFileTag, const char* tag1, const char* tag2 = nullptr) {
 
-  if (tag2 == nullptr)
-    tag2 = (std::string (tag1) + std::string ("_mixed")).c_str ();
+  bool doMix = (tag2 == nullptr);
 
   TFile* inFile = nullptr;
 
@@ -115,18 +114,18 @@ void ProcessPtCh (const char* outFileTag, const char* tag1, const char* tag2 = n
 
 
     {
-      TString inFileName = Form ("%s/Histograms/%s/MixedHists/%s/data17_5TeV_hists.root", rootPath.Data (), tag2, variations[iVar].Data ());
+      TString inFileName = Form ("%s/Histograms/%s/%sHists/%s/data17_5TeV_hists.root", rootPath.Data (), doMix ? tag1 : tag2, doMix ? "Mixed" : "Jets", variations[iVar].Data ());
       std::cout << "Reading " << inFileName.Data () << std::endl;
       inFile = new TFile (inFileName.Data (), "read");
       outFile->cd ();
 
-      h_evt_counts_ref_bkg[iVar] = (TH1D*) inFile->Get (Form ("h_evt_counts_%s_data17", tag2))->Clone (Form ("h_evt_counts_ref_bkg_%s", variations[iVar].Data ()));
-      h_jet_counts_ref_bkg[iVar] = (TH1D*) inFile->Get (Form ("h_jet_counts_%s_data17", tag2))->Clone (Form ("h_jet_counts_ref_bkg_%s", variations[iVar].Data ()));
+      h_evt_counts_ref_bkg[iVar] = (TH1D*) inFile->Get (Form ("h_evt_counts_%s_data17", doMix ? (std::string (tag1) + "_mixed").c_str () : tag2))->Clone (Form ("h_evt_counts_ref_bkg_%s", variations[iVar].Data ()));
+      h_jet_counts_ref_bkg[iVar] = (TH1D*) inFile->Get (Form ("h_jet_counts_%s_data17", doMix ? (std::string (tag1) + "_mixed").c_str () : tag2))->Clone (Form ("h_jet_counts_ref_bkg_%s", variations[iVar].Data ()));
 
-      h_jet_trk_pt_ns_ref_bkg[iVar] = (TH1D*) inFile->Get (Form ("h_jet_trk_pt_ns_%s_data17", tag2))->Clone (Form ("h_jet_trk_pt_ns_ref_bkg_%s", variations[iVar].Data ()));
-      h2_jet_trk_pt_ns_cov_ref_bkg[iVar] = (TH2D*) inFile->Get (Form ("h2_jet_trk_pt_ns_cov_%s_data17", tag2))->Clone (Form ("h2_jet_trk_pt_ns_cov_ref_bkg_%s", variations[iVar].Data ()));
-      h_jet_trk_pt_as_ref_bkg[iVar] = (TH1D*) inFile->Get (Form ("h_jet_trk_pt_as_%s_data17", tag2))->Clone (Form ("h_jet_trk_pt_as_ref_bkg_%s", variations[iVar].Data ()));
-      h2_jet_trk_pt_as_cov_ref_bkg[iVar] = (TH2D*) inFile->Get (Form ("h2_jet_trk_pt_as_cov_%s_data17", tag2))->Clone (Form ("h2_jet_trk_pt_as_cov_ref_bkg_%s", variations[iVar].Data ()));
+      h_jet_trk_pt_ns_ref_bkg[iVar] = (TH1D*) inFile->Get (Form ("h_jet_trk_pt_ns_%s_data17", doMix ? (std::string (tag1) + "_mixed").c_str () : tag2))->Clone (Form ("h_jet_trk_pt_ns_ref_bkg_%s", variations[iVar].Data ()));
+      h2_jet_trk_pt_ns_cov_ref_bkg[iVar] = (TH2D*) inFile->Get (Form ("h2_jet_trk_pt_ns_cov_%s_data17", doMix ? (std::string (tag1) + "_mixed").c_str () : tag2))->Clone (Form ("h2_jet_trk_pt_ns_cov_ref_bkg_%s", variations[iVar].Data ()));
+      h_jet_trk_pt_as_ref_bkg[iVar] = (TH1D*) inFile->Get (Form ("h_jet_trk_pt_as_%s_data17", doMix ? (std::string (tag1) + "_mixed").c_str () : tag2))->Clone (Form ("h_jet_trk_pt_as_ref_bkg_%s", variations[iVar].Data ()));
+      h2_jet_trk_pt_as_cov_ref_bkg[iVar] = (TH2D*) inFile->Get (Form ("h2_jet_trk_pt_as_cov_%s_data17", doMix ? (std::string (tag1) + "_mixed").c_str () : tag2))->Clone (Form ("h2_jet_trk_pt_as_cov_ref_bkg_%s", variations[iVar].Data ()));
 
       inFile->Close ();
 
@@ -159,18 +158,18 @@ void ProcessPtCh (const char* outFileTag, const char* tag1, const char* tag2 = n
 
 
     for (int iCent = 0; iCent < numZdcCentBins; iCent++) {
-      TString inFileName = Form ("%s/Histograms/%s/MixedHists/%s/data16_5TeV_iCent%i_hists.root", rootPath.Data (), tag2, variations[iVar].Data (), iCent);
+      TString inFileName = Form ("%s/Histograms/%s/%sHists/%s/data16_5TeV_iCent%i_hists.root", rootPath.Data (), doMix ? tag1 : tag2, doMix ? "Mixed" : "Jets", variations[iVar].Data (), iCent);
       std::cout << "Reading " << inFileName.Data () << std::endl;
       inFile = new TFile (inFileName.Data (), "read");
       outFile->cd ();
 
-      h_evt_counts_bkg[iCent][iVar] = (TH1D*) inFile->Get (Form ("h_evt_counts_%s_data16", tag2))->Clone (Form ("h_evt_counts_pPb_bkg_iCent%i_%s", iCent, variations[iVar].Data ()));
-      h_jet_counts_bkg[iCent][iVar] = (TH1D*) inFile->Get (Form ("h_jet_counts_%s_data16", tag2))->Clone (Form ("h_jet_counts_pPb_bkg_iCent%i_%s", iCent, variations[iVar].Data ()));
+      h_evt_counts_bkg[iCent][iVar] = (TH1D*) inFile->Get (Form ("h_evt_counts_%s_data16", doMix ? (std::string (tag1) + "_mixed").c_str () : tag2))->Clone (Form ("h_evt_counts_pPb_bkg_iCent%i_%s", iCent, variations[iVar].Data ()));
+      h_jet_counts_bkg[iCent][iVar] = (TH1D*) inFile->Get (Form ("h_jet_counts_%s_data16", doMix ? (std::string (tag1) + "_mixed").c_str () : tag2))->Clone (Form ("h_jet_counts_pPb_bkg_iCent%i_%s", iCent, variations[iVar].Data ()));
 
-      h_jet_trk_pt_ns_bkg[iCent][iVar] = (TH1D*) inFile->Get (Form ("h_jet_trk_pt_ns_%s_data16", tag2))->Clone (Form ("h_jet_trk_pt_ns_pPb_bkg_iCent%i_%s", iCent, variations[iVar].Data ()));
-      h2_jet_trk_pt_ns_cov_bkg[iCent][iVar] = (TH2D*) inFile->Get (Form ("h2_jet_trk_pt_ns_cov_%s_data16", tag2))->Clone (Form ("h2_jet_trk_pt_ns_cov_pPb_bkg_iCent%i_%s", iCent, variations[iVar].Data ()));
-      h_jet_trk_pt_as_bkg[iCent][iVar] = (TH1D*) inFile->Get (Form ("h_jet_trk_pt_as_%s_data16", tag2))->Clone (Form ("h_jet_trk_pt_as_pPb_bkg_iCent%i_%s", iCent, variations[iVar].Data ()));
-      h2_jet_trk_pt_as_cov_bkg[iCent][iVar] = (TH2D*) inFile->Get (Form ("h2_jet_trk_pt_as_cov_%s_data16", tag2))->Clone (Form ("h2_jet_trk_pt_as_cov_pPb_bkg_iCent%i_%s", iCent, variations[iVar].Data ()));
+      h_jet_trk_pt_ns_bkg[iCent][iVar] = (TH1D*) inFile->Get (Form ("h_jet_trk_pt_ns_%s_data16", doMix ? (std::string (tag1) + "_mixed").c_str () : tag2))->Clone (Form ("h_jet_trk_pt_ns_pPb_bkg_iCent%i_%s", iCent, variations[iVar].Data ()));
+      h2_jet_trk_pt_ns_cov_bkg[iCent][iVar] = (TH2D*) inFile->Get (Form ("h2_jet_trk_pt_ns_cov_%s_data16", doMix ? (std::string (tag1) + "_mixed").c_str () : tag2))->Clone (Form ("h2_jet_trk_pt_ns_cov_pPb_bkg_iCent%i_%s", iCent, variations[iVar].Data ()));
+      h_jet_trk_pt_as_bkg[iCent][iVar] = (TH1D*) inFile->Get (Form ("h_jet_trk_pt_as_%s_data16", doMix ? (std::string (tag1) + "_mixed").c_str () : tag2))->Clone (Form ("h_jet_trk_pt_as_pPb_bkg_iCent%i_%s", iCent, variations[iVar].Data ()));
+      h2_jet_trk_pt_as_cov_bkg[iCent][iVar] = (TH2D*) inFile->Get (Form ("h2_jet_trk_pt_as_cov_%s_data16", doMix ? (std::string (tag1) + "_mixed").c_str () : tag2))->Clone (Form ("h2_jet_trk_pt_as_cov_pPb_bkg_iCent%i_%s", iCent, variations[iVar].Data ()));
 
       inFile->Close ();
 

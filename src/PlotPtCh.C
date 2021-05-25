@@ -10,6 +10,7 @@
 #include <ArrayTemplates.h>
 #include <Utilities.h>
 #include <MyStyle.h>
+#include <MyColors.h>
 
 #include <TColor.h>
 #include <TLine.h>
@@ -24,14 +25,6 @@
 
 using namespace JetHadronCorrelations;
 
-TColor* tcolor = new TColor ();
-const Color_t myBlue = (Color_t) tcolor->GetColor (45, 64, 245);
-const Color_t myPurple = (Color_t) tcolor->GetColor (130,  10, 130);
-const Color_t myRed = (Color_t) tcolor->GetColor (255,  12,  73);
-const Color_t myGreen = (Color_t) tcolor->GetColor ( 54, 167,  80);
-const Color_t myOrange = (Color_t) tcolor->GetColor (255,  68,   0);
-
-const Color_t systColors[10] = {kRed+1, kAzure-2, kGreen+2, kViolet-3, kMagenta, kCyan+1, kOrange-3, kGreen-7, kBlue+1, kPink-5};
 
 TLine* l = new TLine ();
 TLatex* tl = new TLatex ();
@@ -713,30 +706,30 @@ void PlotPtCh (const char* tag, const char* inFileTag) {
     SaferDelete (&g);
 
 
-    g = (TGAE*) g_jet_trk_pt_ns_iaa_syst[iCent]->Clone ();
-    DoOffset (g, tag, iCent);
-    g->SetMarkerStyle (0);
-    g->SetMarkerSize (0.);
-    g->SetLineColor (myBlue);
-    g->SetLineWidth (1);
-    ((TGAE*) g->Clone ())->Draw ("5");
-    SaferDelete (&g);
-    h = (TH1D*) h_jet_trk_pt_ns_iaa[iCent]->Clone ("htemp");
-    DoOffset (h, tag, iCent);
-    g = make_graph (h);
-    SaferDelete (&h);
-    ResetXErrors (g);
-    g->SetLineColor (myBlue);
-    g->SetLineWidth (2);
-    g->SetMarkerColor (myBlue);
-    g->SetMarkerStyle (kFullCircle);
-    g->SetMarkerSize (0.8);
-    ((TGAE*) g->Clone ())->Draw ("p");
-    g->SetMarkerStyle (kOpenCircle);
-    g->SetMarkerColor (kBlack);
-    g->SetLineWidth (0);
-    ((TGAE*) g->Clone ())->Draw ("p");
-    SaferDelete (&g);
+    //g = (TGAE*) g_jet_trk_pt_ns_iaa_syst[iCent]->Clone ();
+    //DoOffset (g, tag, iCent);
+    //g->SetMarkerStyle (0);
+    //g->SetMarkerSize (0.);
+    //g->SetLineColor (myGreen);
+    //g->SetLineWidth (1);
+    //((TGAE*) g->Clone ())->Draw ("5");
+    //SaferDelete (&g);
+    //h = (TH1D*) h_jet_trk_pt_ns_iaa[iCent]->Clone ("htemp");
+    //DoOffset (h, tag, iCent);
+    //g = make_graph (h);
+    //SaferDelete (&h);
+    //ResetXErrors (g);
+    //g->SetLineColor (myGreen);
+    //g->SetLineWidth (2);
+    //g->SetMarkerColor (myGreen);
+    //g->SetMarkerStyle (kFullCircle);
+    //g->SetMarkerSize (0.8);
+    //((TGAE*) g->Clone ())->Draw ("p");
+    //g->SetMarkerStyle (kOpenCircle);
+    //g->SetMarkerColor (kBlack);
+    //g->SetLineWidth (0);
+    //((TGAE*) g->Clone ())->Draw ("p");
+    //SaferDelete (&g);
 
 
     drPad->cd (); 
@@ -787,30 +780,34 @@ void PlotPtCh (const char* tag, const char* inFileTag) {
     ((TGAE*) g->Clone ())->Draw ("p");
     SaferDelete (&g);
 
-    g = (TGAE*) g_jet_trk_pt_as_iaa_syst[iCent]->Clone ("g");
-    DoOffset (g, tag, iCent);
-    g->SetMarkerStyle (0);
-    g->SetMarkerSize (0.);
-    g->SetLineColor (myBlue);
-    g->SetLineWidth (1);
-    ((TGAE*) g->Clone ())->Draw ("5");
-    SaferDelete (&g);
-    h = (TH1D*) h_jet_trk_pt_as_iaa[iCent]->Clone ("htemp");
-    DoOffset (h, tag, iCent);
-    g = make_graph (h);
-    SaferDelete (&h);
-    ResetXErrors (g);
-    g->SetLineColor (myBlue);
-    g->SetLineWidth (2);
-    g->SetMarkerColor (myBlue);
-    g->SetMarkerStyle (kFullCircle);
-    g->SetMarkerSize (0.8);
-    ((TGAE*) g->Clone ())->Draw ("p");
-    g->SetMarkerStyle (kOpenCircle);
-    g->SetMarkerColor (kBlack);
-    g->SetLineWidth (0);
-    ((TGAE*) g->Clone ())->Draw ("p");
-    SaferDelete (&g);
+    //g = (TGAE*) g_jet_trk_pt_as_iaa_syst[iCent]->Clone ("g");
+    //DoOffset (g, tag, iCent);
+    //g->SetMarkerStyle (0);
+    //g->SetMarkerSize (0.);
+    //g->SetLineColor (myGreen);
+    //g->SetLineWidth (1);
+    //((TGAE*) g->Clone ())->Draw ("5");
+    //SaferDelete (&g);
+    //h = (TH1D*) h_jet_trk_pt_as_iaa[iCent]->Clone ("htemp");
+    //DoOffset (h, tag, iCent);
+    //g = make_graph (h);
+    //SaferDelete (&h);
+    //ResetXErrors (g);
+    //g->SetLineColor (myGreen);
+    //g->SetLineWidth (2);
+    //g->SetMarkerColor (myGreen);
+    //g->SetMarkerStyle (kFullCircle);
+    //g->SetMarkerSize (0.8);
+    //((TGAE*) g->Clone ())->Draw ("p");
+    //g->SetMarkerStyle (kOpenCircle);
+    //g->SetMarkerColor (kBlack);
+    //g->SetLineWidth (0);
+    //((TGAE*) g->Clone ())->Draw ("p");
+    //SaferDelete (&g);
+
+
+    myBoxText2 (0.10, 0.48, myRed, kFullCircle, "Nominal", 0.8, 0.020/fdPad, true);
+    myBoxText2 (0.10, 0.38, myGreen, kFullCircle, "Offset by #LT1 - #it{I}_{pPb}(#Delta#phi=#pi/2)#GT", 0.8, 0.020/fdPad, true);
 
     c->SaveAs (Form ("%s/Plots/PtCh/JetTagged_HadronYields_%i-%i%%_comparison_PtCh_%s.pdf", workPath.Data (), zdcCentPercs[iCent+1], zdcCentPercs[iCent], tag)); 
   }
@@ -1363,6 +1360,77 @@ void PlotPtCh (const char* tag, const char* inFileTag) {
     SaferDelete (&g);
 
     c->SaveAs (Form ("%s/Plots/PtCh/JetTagged_HadronYields_%i-%i%%_FCalvsZDC_PtCh_%s.pdf", workPath.Data (), zdcCentPercs[iCent+1], zdcCentPercs[iCent], tag)); 
+  }
+
+
+ 
+  {
+    const char* canvasName = "c_jet_trk_pt_ns_sig2bkg";
+    TCanvas* c = new TCanvas (canvasName, "", 800, 800);
+
+    TH1D* h = nullptr; 
+    TGAE* g = nullptr;
+
+    c->cd (); 
+    c->SetLogx ();
+    c->SetLogy ();
+
+    float ymin = 1e-1;
+    float ymax = 1e6;
+
+    c->Clear ();
+
+    h = (TH1D*) h_jet_trk_pt_ns_ref_sig->Clone ("h");
+    h->Divide (h_jet_trk_pt_ns_ref_bkg);
+    g = make_graph (h);
+    ResetXErrors (g);
+
+    g->GetXaxis ()->SetMoreLogLabels ();
+    g->GetYaxis ()->SetRangeUser (ymin, ymax);
+    g->GetXaxis ()->SetTitle ("#it{p}_{T}^{ch} [GeV]");
+    //g->GetXaxis ()->SetTitleSize (0.028);
+    //g->GetXaxis ()->SetLabelSize (0.028);
+    g->GetYaxis ()->SetTitle ("Sig. / Bkgd.");
+    //g->GetYaxis ()->SetTitleSize (0.028);
+    //g->GetYaxis ()->SetLabelSize (0.028);
+
+    g->SetLineColor (kBlack);
+    g->SetLineWidth (2);
+    g->SetMarkerColor (kBlack);
+    g->SetMarkerStyle (kFullCircle);
+    g->SetMarkerSize (0.8);
+
+    ((TGAE*) g->Clone ())->Draw ("AP");
+    SaferDelete (&g);
+    SaferDelete (&h);
+
+    for (int iCent = 0; iCent < numZdcCentBins; iCent++) {
+      h = (TH1D*) h_jet_trk_pt_ns_sig[iCent]->Clone ("htemp");
+      h->Divide (h_jet_trk_pt_ns_bkg[iCent]);
+      g = make_graph (h);
+      ResetXErrors (g);
+
+      g->SetLineColor (colors[iCent]);
+      g->SetLineWidth (2);
+      g->SetMarkerColor (colors[iCent]);
+      g->SetMarkerStyle (kFullCircle);
+      g->SetMarkerSize (0.8);
+
+      ((TGAE*) g->Clone ())->Draw ("P");
+      SaferDelete (&g);
+      SaferDelete (&h);
+    }
+
+    myText (0.22, 0.89, kBlack, "#bf{#it{ATLAS}} Internal", 0.032);
+    myText (0.22, 0.85, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.032);
+    myText (0.22, 0.81, kBlack, "#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV", 0.032);
+    myText (0.22, 0.77, kBlack, Form ("#it{p}_{T}^{jet} > %s, #Delta#phi_{ch,jet} < #pi/8 (near-side)", GetJetPtStr (tag).Data ()), 0.032);
+    myMarkerText (0.25, 0.72, kBlack, kFullCircle, "#bf{#it{pp}}", 0.8, 0.032, true);
+    for (int iCent = 0; iCent < numZdcCentBins; iCent++)
+      myMarkerText (0.25, 0.68-iCent*0.04, colors[iCent], kFullCircle, Form ("#bf{#it{p}+Pb, %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.8, 0.032, true);
+
+    c->SaveAs (Form ("%s/Plots/PtCh/SigToBkgd_%s_nearside_ptch_syst.pdf", workPath.Data (), tag));
+    
   }
 
 

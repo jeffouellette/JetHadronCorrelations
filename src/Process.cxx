@@ -1,3 +1,6 @@
+#ifndef __Process_cxx__
+#define __Process_cxx__
+
 #include "JetHadronSkimmer.h"
 #include "CentralityAnalysis.h"
 #include "JetSubtractedEnergy.h"
@@ -5,6 +8,7 @@
 #include "TrackMomentumResolution.h"
 #include "JetEnergyResolution.h"
 #include "Params.h"
+#include "CentralityDefs.h"
 #include "Process.h"
 
 #include <string>
@@ -102,6 +106,16 @@ int main (int argc, char** argv) {
     return 1;
   }
 
+  delete [] zdcCentBins;
+  zdcCentBins = nullptr;
+  delete [] fcalCentBins;
+  fcalCentBins = nullptr;
+  delete [] fcalMixBins;
+  fcalMixBins = nullptr;
+  delete [] fineFcalCentBins;
+  fineFcalCentBins = nullptr;
+  delete [] ppMixBins;
+  ppMixBins = nullptr;
 
   if (success) {
     std::cout << "Info: In Process.cxx: Finished algorithm!" << std::endl;
@@ -112,3 +126,5 @@ int main (int argc, char** argv) {
     return 1;
   }
 }
+
+#endif

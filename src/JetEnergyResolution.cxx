@@ -3,6 +3,7 @@
 
 #include "JetEnergyResolution.h"
 #include "Params.h"
+#include "CentralityDefs.h"
 #include "TreeVariables.h"
 #include "Trigger.h"
 #include "LocalUtilities.h"

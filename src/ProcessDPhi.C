@@ -14,12 +14,15 @@
 #include <TH2D.h>
 
 #include <iostream>
+#include <string.h>
 #include <vector>
 #include <math.h>
 
 using namespace JetHadronCorrelations;
 
-void ProcessDPhi (const char* tag, const char* outFileTag) {
+void ProcessDPhi (const char* outFileTag, const char* tag1, const char* tag2 = nullptr) {
+
+  bool doMix = (tag2 == nullptr);
 
   TFile* inFile = nullptr;
 
@@ -69,17 +72,17 @@ void ProcessDPhi (const char* tag, const char* outFileTag) {
 
     // read in pp histograms
     {
-      TString inFileName = Form ("%s/Histograms/%s/JetsHists/%s/data17_5TeV_hists.root", rootPath.Data (), tag, variations[iVar].Data ());
+      TString inFileName = Form ("%s/Histograms/%s/JetsHists/%s/data17_5TeV_hists.root", rootPath.Data (), tag1, variations[iVar].Data ());
       std::cout << "Reading " << inFileName.Data () << std::endl;
       inFile = new TFile (inFileName.Data (), "read");
       outFile->cd ();
 
-      h_evt_counts_ref[iVar] = (TH1D*) inFile->Get (Form ("h_evt_counts_%s_data17", tag))->Clone (Form ("h_evt_counts_pp_%s", variations[iVar].Data ()));
-      h_jet_counts_ref[iVar] = (TH1D*) inFile->Get (Form ("h_jet_counts_%s_data17", tag))->Clone (Form ("h_jet_counts_pp_%s", variations[iVar].Data ()));
+      h_evt_counts_ref[iVar] = (TH1D*) inFile->Get (Form ("h_evt_counts_%s_data17", tag1))->Clone (Form ("h_evt_counts_pp_%s", variations[iVar].Data ()));
+      h_jet_counts_ref[iVar] = (TH1D*) inFile->Get (Form ("h_jet_counts_%s_data17", tag1))->Clone (Form ("h_jet_counts_pp_%s", variations[iVar].Data ()));
 
       for (int iPtCh = 0; iPtCh < nPtChSelections; iPtCh++) {
-        h_jet_trk_dphi_ref[iPtCh][iVar] = (TH1D*) inFile->Get (Form ("h_jet_trk_dphi_%s_%s_data17", pTChSelections[iPtCh].Data (), tag))->Clone (Form ("h_jet_trk_dphi_%s_pp_%s", pTChSelections[iPtCh].Data (), variations[iVar].Data ()));
-        h2_jet_trk_dphi_cov_ref[iPtCh][iVar] = (TH2D*) inFile->Get (Form ("h2_jet_trk_dphi_%s_cov_%s_data17", pTChSelections[iPtCh].Data (), tag))->Clone (Form ("h2_jet_trk_dphi_%s_cov_pp_%s", pTChSelections[iPtCh].Data (), variations[iVar].Data ()));
+        h_jet_trk_dphi_ref[iPtCh][iVar] = (TH1D*) inFile->Get (Form ("h_jet_trk_dphi_%s_%s_data17", pTChSelections[iPtCh].Data (), tag1))->Clone (Form ("h_jet_trk_dphi_%s_pp_%s", pTChSelections[iPtCh].Data (), variations[iVar].Data ()));
+        h2_jet_trk_dphi_cov_ref[iPtCh][iVar] = (TH2D*) inFile->Get (Form ("h2_jet_trk_dphi_%s_cov_%s_data17", pTChSelections[iPtCh].Data (), tag1))->Clone (Form ("h2_jet_trk_dphi_%s_cov_pp_%s", pTChSelections[iPtCh].Data (), variations[iVar].Data ()));
       }
 
       inFile->Close ();
@@ -92,17 +95,17 @@ void ProcessDPhi (const char* tag, const char* outFileTag) {
 
     // read in pp histograms
     {
-      TString inFileName = Form ("%s/Histograms/%s/MixedHists/%s/data17_5TeV_hists.root", rootPath.Data (), tag, variations[iVar].Data ());
+      TString inFileName = Form ("%s/Histograms/%s/%sHists/%s/data17_5TeV_hists.root", rootPath.Data (), doMix ? tag1 : tag2, doMix ? "Mixed" : "Jets", variations[iVar].Data ());
       std::cout << "Reading " << inFileName.Data () << std::endl;
       inFile = new TFile (inFileName.Data (), "read");
       outFile->cd ();
 
-      h_evt_counts_ref_bkg[iVar] = (TH1D*) inFile->Get (Form ("h_evt_counts_%s_mixed_data17", tag))->Clone (Form ("h_evt_counts_ref_bkg_%s", variations[iVar].Data ()));
-      h_jet_counts_ref_bkg[iVar] = (TH1D*) inFile->Get (Form ("h_jet_counts_%s_mixed_data17", tag))->Clone (Form ("h_jet_counts_ref_bkg_%s", variations[iVar].Data ()));
+      h_evt_counts_ref_bkg[iVar] = (TH1D*) inFile->Get (Form ("h_evt_counts_%s_data17", doMix ? (std::string (tag1) + "_mixed").c_str () : tag2))->Clone (Form ("h_evt_counts_ref_bkg_%s", variations[iVar].Data ()));
+      h_jet_counts_ref_bkg[iVar] = (TH1D*) inFile->Get (Form ("h_jet_counts_%s_data17", doMix ? (std::string (tag1) + "_mixed").c_str () : tag2))->Clone (Form ("h_jet_counts_ref_bkg_%s", variations[iVar].Data ()));
 
       for (int iPtCh = 0; iPtCh < nPtChSelections; iPtCh++) {
-        h_jet_trk_dphi_ref_bkg[iPtCh][iVar] = (TH1D*) inFile->Get (Form ("h_jet_trk_dphi_%s_%s_mixed_data17", pTChSelections[iPtCh].Data (), tag))->Clone (Form ("h_jet_trk_dphi_%s_ref_bkg_%s", pTChSelections[iPtCh].Data (), variations[iVar].Data ()));
-        h2_jet_trk_dphi_cov_ref_bkg[iPtCh][iVar] = (TH2D*) inFile->Get (Form ("h2_jet_trk_dphi_%s_cov_%s_mixed_data17", pTChSelections[iPtCh].Data (), tag))->Clone (Form ("h2_jet_trk_dphi_%s_cov_ref_bkg_%s", pTChSelections[iPtCh].Data (), variations[iVar].Data ()));
+        h_jet_trk_dphi_ref_bkg[iPtCh][iVar] = (TH1D*) inFile->Get (Form ("h_jet_trk_dphi_%s_%s_data17", pTChSelections[iPtCh].Data (), doMix ? (std::string (tag1) + "_mixed").c_str () : tag2))->Clone (Form ("h_jet_trk_dphi_%s_ref_bkg_%s", pTChSelections[iPtCh].Data (), variations[iVar].Data ()));
+        h2_jet_trk_dphi_cov_ref_bkg[iPtCh][iVar] = (TH2D*) inFile->Get (Form ("h2_jet_trk_dphi_%s_cov_%s_data17", pTChSelections[iPtCh].Data (), doMix ? (std::string (tag1) + "_mixed").c_str () : tag2))->Clone (Form ("h2_jet_trk_dphi_%s_cov_ref_bkg_%s", pTChSelections[iPtCh].Data (), variations[iVar].Data ()));
       }
 
       inFile->Close ();
@@ -115,17 +118,17 @@ void ProcessDPhi (const char* tag, const char* outFileTag) {
 
     // read in all p+Pb centralities histograms
     for (int iCent = 0; iCent < numZdcCentBins; iCent++) {
-      TString inFileName = Form ("%s/Histograms/%s/JetsHists/%s/data16_5TeV_iCent%i_hists.root", rootPath.Data (), tag, variations[iVar].Data (), iCent);
+      TString inFileName = Form ("%s/Histograms/%s/JetsHists/%s/data16_5TeV_iCent%i_hists.root", rootPath.Data (), tag1, variations[iVar].Data (), iCent);
       std::cout << "Reading " << inFileName.Data () << std::endl;
       inFile = new TFile (inFileName.Data (), "read");
       outFile->cd ();
 
-      h_evt_counts[iCent][iVar] = (TH1D*) inFile->Get (Form ("h_evt_counts_%s_data16", tag))->Clone (Form ("h_evt_counts_pPb_iCent%i_%s", iCent, variations[iVar].Data ()));
-      h_jet_counts[iCent][iVar] = (TH1D*) inFile->Get (Form ("h_jet_counts_%s_data16", tag))->Clone (Form ("h_jet_counts_pPb_iCent%i_%s", iCent, variations[iVar].Data ()));
+      h_evt_counts[iCent][iVar] = (TH1D*) inFile->Get (Form ("h_evt_counts_%s_data16", tag1))->Clone (Form ("h_evt_counts_pPb_iCent%i_%s", iCent, variations[iVar].Data ()));
+      h_jet_counts[iCent][iVar] = (TH1D*) inFile->Get (Form ("h_jet_counts_%s_data16", tag1))->Clone (Form ("h_jet_counts_pPb_iCent%i_%s", iCent, variations[iVar].Data ()));
 
       for (int iPtCh = 0; iPtCh < nPtChSelections; iPtCh++) {
-        h_jet_trk_dphi[iCent][iPtCh][iVar] = (TH1D*) inFile->Get (Form ("h_jet_trk_dphi_%s_%s_data16", pTChSelections[iPtCh].Data (), tag))->Clone (Form ("h_jet_trk_dphi_%s_pPb_iCent%i_%s", pTChSelections[iPtCh].Data (), iCent, variations[iVar].Data ()));
-        h2_jet_trk_dphi_cov[iCent][iPtCh][iVar] = (TH2D*) inFile->Get (Form ("h2_jet_trk_dphi_%s_cov_%s_data16", pTChSelections[iPtCh].Data (), tag))->Clone (Form ("h2_jet_trk_dphi_%s_cov_pPb_iCent%i_%s", pTChSelections[iPtCh].Data (), iCent, variations[iVar].Data ()));
+        h_jet_trk_dphi[iCent][iPtCh][iVar] = (TH1D*) inFile->Get (Form ("h_jet_trk_dphi_%s_%s_data16", pTChSelections[iPtCh].Data (), tag1))->Clone (Form ("h_jet_trk_dphi_%s_pPb_iCent%i_%s", pTChSelections[iPtCh].Data (), iCent, variations[iVar].Data ()));
+        h2_jet_trk_dphi_cov[iCent][iPtCh][iVar] = (TH2D*) inFile->Get (Form ("h2_jet_trk_dphi_%s_cov_%s_data16", pTChSelections[iPtCh].Data (), tag1))->Clone (Form ("h2_jet_trk_dphi_%s_cov_pPb_iCent%i_%s", pTChSelections[iPtCh].Data (), iCent, variations[iVar].Data ()));
       }
 
       inFile->Close ();
@@ -138,17 +141,17 @@ void ProcessDPhi (const char* tag, const char* outFileTag) {
 
     // read in all p+Pb centralities mixed event histograms
     for (int iCent = 0; iCent < numZdcCentBins; iCent++) {
-      TString inFileName = Form ("%s/Histograms/%s/MixedHists/%s/data16_5TeV_iCent%i_hists.root", rootPath.Data (), tag, variations[iVar].Data (), iCent);
+      TString inFileName = Form ("%s/Histograms/%s/%sHists/%s/data16_5TeV_iCent%i_hists.root", rootPath.Data (), doMix ? tag1 : tag2, doMix ? "Mixed" : "Jets", variations[iVar].Data (), iCent);
       std::cout << "Reading " << inFileName.Data () << std::endl;
       inFile = new TFile (inFileName.Data (), "read");
       outFile->cd ();
 
-      h_evt_counts_bkg[iCent][iVar] = (TH1D*) inFile->Get (Form ("h_evt_counts_%s_mixed_data16", tag))->Clone (Form ("h_evt_counts_pPb_bkg_iCent%i_%s", iCent, variations[iVar].Data ()));
-      h_jet_counts_bkg[iCent][iVar] = (TH1D*) inFile->Get (Form ("h_jet_counts_%s_mixed_data16", tag))->Clone (Form ("h_jet_counts_pPb_bkg_iCent%i_%s", iCent, variations[iVar].Data ()));
+      h_evt_counts_bkg[iCent][iVar] = (TH1D*) inFile->Get (Form ("h_evt_counts_%s_data16", doMix ? (std::string (tag1) + "_mixed").c_str () : tag2))->Clone (Form ("h_evt_counts_pPb_bkg_iCent%i_%s", iCent, variations[iVar].Data ()));
+      h_jet_counts_bkg[iCent][iVar] = (TH1D*) inFile->Get (Form ("h_jet_counts_%s_data16", doMix ? (std::string (tag1) + "_mixed").c_str () : tag2))->Clone (Form ("h_jet_counts_pPb_bkg_iCent%i_%s", iCent, variations[iVar].Data ()));
 
       for (int iPtCh = 0; iPtCh < nPtChSelections; iPtCh++) {
-        h_jet_trk_dphi_bkg[iCent][iPtCh][iVar] = (TH1D*) inFile->Get (Form ("h_jet_trk_dphi_%s_%s_mixed_data16", pTChSelections[iPtCh].Data (), tag))->Clone (Form ("h_jet_trk_dphi_%s_pPb_bkg_iCent%i_%s", pTChSelections[iPtCh].Data (), iCent, variations[iVar].Data ()));
-        h2_jet_trk_dphi_cov_bkg[iCent][iPtCh][iVar] = (TH2D*) inFile->Get (Form ("h2_jet_trk_dphi_%s_cov_%s_mixed_data16", pTChSelections[iPtCh].Data (), tag))->Clone (Form ("h2_jet_trk_dphi_%s_cov_pPb_bkg_iCent%i_%s", pTChSelections[iPtCh].Data (), iCent, variations[iVar].Data ()));
+        h_jet_trk_dphi_bkg[iCent][iPtCh][iVar] = (TH1D*) inFile->Get (Form ("h_jet_trk_dphi_%s_%s_data16", pTChSelections[iPtCh].Data (), doMix ? (std::string (tag1) + "_mixed").c_str () : tag2))->Clone (Form ("h_jet_trk_dphi_%s_pPb_bkg_iCent%i_%s", pTChSelections[iPtCh].Data (), iCent, variations[iVar].Data ()));
+        h2_jet_trk_dphi_cov_bkg[iCent][iPtCh][iVar] = (TH2D*) inFile->Get (Form ("h2_jet_trk_dphi_%s_cov_%s_data16", pTChSelections[iPtCh].Data (), doMix ? (std::string (tag1) + "_mixed").c_str () : tag2))->Clone (Form ("h2_jet_trk_dphi_%s_cov_pPb_bkg_iCent%i_%s", pTChSelections[iPtCh].Data (), iCent, variations[iVar].Data ()));
       }
 
       inFile->Close ();

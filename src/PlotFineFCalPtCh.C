@@ -10,6 +10,7 @@
 #include <ArrayTemplates.h>
 #include <Utilities.h>
 #include <MyStyle.h>
+#include <MyColors.h>
 
 #include <TColor.h>
 #include <TLine.h>
@@ -25,16 +26,8 @@
 
 using namespace JetHadronCorrelations;
 
-TColor* tcolor = new TColor ();
-const Color_t myBlue = (Color_t) tcolor->GetColor (45, 64, 245);
-const Color_t myPurple = (Color_t) tcolor->GetColor (130,  10, 130);
-const Color_t myRed = (Color_t) tcolor->GetColor (255,  12,  73);
-const Color_t myGreen = (Color_t) tcolor->GetColor ( 54, 167,  80);
-const Color_t myOrange = (Color_t) tcolor->GetColor (255,  68,   0);
+std::vector <int> plotCents = {4, (int) std::floor (0.5*(numFineFcalCentBins+1)), numFineFcalCentBins-1};
 
-const Color_t colors[] = {kRed+1, kPink-3, kPink+9, kPink+6, kMagenta-3, kViolet-3, kViolet+7, kBlue+1, kAzure-2, kAzure+7, kAzure+6, kCyan+1, kTeal, kTeal-5, kGreen-3, kSpring+7, kSpring+5, kYellow-3, kYellow, kOrange-2, kOrange-3, kOrange+6, kOrange+10};
-
-std::vector <int> plotCents = {4, (int) std::floor (0.5*(numFineFcalCentBins+3)), numFineFcalCentBins-1};
 
 TLine* l = new TLine ();
 TLatex* tl = new TLatex ();
@@ -77,6 +70,8 @@ void PlotFineFCalPtCh (const char* tag, const char* inFileTag, const char* nomFi
   TH1D** h_jet_trk_pt_ns_iaa      = Get1DArray <TH1D*> (numFineFcalCentBins+1);
   TH1D** h_jet_trk_pt_as_iaa      = Get1DArray <TH1D*> (numFineFcalCentBins+1);
 
+  TH1D*  h_wgts_rebinned = nullptr;
+
 
   {
     TString inFileName = inFileTag;
@@ -100,6 +95,8 @@ void PlotFineFCalPtCh (const char* tag, const char* inFileTag, const char* nomFi
 
     h_jet_trk_pt_ns_iaa[numFineFcalCentBins] = (TH1D*) inFile->Get ("h_jet_trk_pt_ns_iaa_FineFcalComb");
     h_jet_trk_pt_as_iaa[numFineFcalCentBins] = (TH1D*) inFile->Get ("h_jet_trk_pt_as_iaa_FineFcalComb");
+
+    h_wgts_rebinned = (TH1D*) inFile->Get ("h_wgts_rebinned");
   }
   
 
@@ -139,6 +136,8 @@ void PlotFineFCalPtCh (const char* tag, const char* inFileTag, const char* nomFi
 
   int iZdcCent = 0;
   while (iZdcCent < numZdcCentBins && zdcCentPercs[iZdcCent] > 20) iZdcCent++;
+  int iZdcPeriph = 0;
+  while (iZdcPeriph < numZdcCentBins && zdcCentPercs[iZdcPeriph] > 100) iZdcPeriph++;
 
 
 
@@ -181,9 +180,9 @@ void PlotFineFCalPtCh (const char* tag, const char* inFileTag, const char* nomFi
       deltaize (g, 0.895+((iCent-4)/5)*0.01, true);
       
       ResetXErrors (g);
-      g->SetLineColor (colors[(iCent-4)/5]);
+      g->SetLineColor (manyColors[(iCent-4)/5]);
       g->SetLineWidth (2);
-      g->SetMarkerColor (colors[(iCent-4)/5]);
+      g->SetMarkerColor (manyColors[(iCent-4)/5]);
       g->SetMarkerStyle (kFullCircle);
       g->SetMarkerSize (0.8);
       ((TGAE*) g->Clone ())->Draw ("p");
@@ -213,7 +212,19 @@ void PlotFineFCalPtCh (const char* tag, const char* inFileTag, const char* nomFi
     g->SetLineColor (kBlack);
     g->SetLineWidth (2);
     g->SetMarkerColor (kBlack);
-    g->SetMarkerStyle (kOpenCircle);
+    g->SetMarkerStyle (kOpenSquare);
+    g->SetMarkerSize (1.2);
+    ((TGAE*) g->Clone ())->Draw ("p");
+    SaferDelete (&g);
+
+    h = (TH1D*) h_jet_trk_pt_ns_iaa_nom[iZdcPeriph]->Clone ("htemp");
+    g = make_graph (h);
+
+    ResetXErrors (g);
+    g->SetLineColor (kBlack);
+    g->SetLineWidth (2);
+    g->SetMarkerColor (kBlack);
+    g->SetMarkerStyle (kOpenTriangleUp);
     g->SetMarkerSize (1.2);
     ((TGAE*) g->Clone ())->Draw ("p");
     SaferDelete (&g);
@@ -222,12 +233,11 @@ void PlotFineFCalPtCh (const char* tag, const char* inFileTag, const char* nomFi
     myText (0.22, 0.85, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.032);
     myText (0.22, 0.81, kBlack, "#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV", 0.032);
     myText (0.22, 0.77, kBlack, Form ("#it{p}_{T}^{jet} > %s, #Delta#phi_{ch,jet} < #pi/8 (near-side)", GetJetPtStr (tag).Data ()), 0.032);
-    for (int iCent = 4; iCent < std::floor (0.5*numFineFcalCentBins)+2; iCent+=5)
-      myText (0.58, 0.53-((iCent-4)/5)*0.036, colors[(iCent-4)/5], Form ("%i-%i%%", fineFcalCentPercs[iCent+1], fineFcalCentPercs[iCent]), 0.03);
-    for (int iCent = std::floor (0.5*numFineFcalCentBins)+2; iCent < numFineFcalCentBins; iCent+=5)
-      myText (0.74, 0.53-((iCent-std::floor (0.5*numFineFcalCentBins)-2)/5)*0.036, colors[(iCent-4)/5], Form ("%i-%i%%", fineFcalCentPercs[iCent+1], fineFcalCentPercs[iCent]), 0.03);
-    myMarkerText (0.34, 0.53-8*0.036, kBlack, kFullCircle, Form ("FCal %i-%i%% (wgt'd)", fcalCentPercs[numFcalCentBins], fcalCentPercs[numFcalCentBins-1]), 1.2, 0.03, true);
-    myMarkerText (0.34, 0.53-9*0.036, kBlack, kOpenCircle, Form ("Zdc %i-%i%%", zdcCentPercs[numZdcCentBins], zdcCentPercs[numZdcCentBins-1]), 1.2, 0.03, true);
+    for (int iCent = 4; iCent < numFineFcalCentBins; iCent+=5)
+      myText (iCent < 0.5*numFineFcalCentBins ? 0.58 : 0.74, 0.53 - 0.036*0.2*(iCent < 0.5*numFineFcalCentBins ? iCent : iCent - 0.5*numFineFcalCentBins), manyColors[(iCent-4)/5], Form ("%i-%i%%", fineFcalCentPercs[iCent+1], fineFcalCentPercs[iCent]), 0.03);
+    myMarkerText (0.24, 0.54-8*0.036, kBlack, kFullCircle, "FCal 0-100% (wgt'd avg.)", 1.2, 0.03, true);
+    myMarkerText (0.24, 0.54-9*0.036, kBlack, kOpenSquare, Form ("Zdc %i-%i%%", zdcCentPercs[iZdcCent+1], zdcCentPercs[iZdcCent]), 1.2, 0.03, true);
+    myMarkerText (0.24, 0.54-10*0.036, kBlack, kOpenTriangleUp, Form ("Zdc %i-%i%%", zdcCentPercs[iZdcPeriph+1], zdcCentPercs[iZdcPeriph]), 1.2, 0.03, true);
     
 
     c->SaveAs (Form ("%s/Plots/CentralityBiasStudy/JetTagged_IpA_nearside_ptch_%s_FineFcal.pdf", workPath.Data (), tag));
@@ -274,9 +284,9 @@ void PlotFineFCalPtCh (const char* tag, const char* inFileTag, const char* nomFi
       deltaize (g, 0.895+((iCent-4)/5)*0.01, true);
       
       ResetXErrors (g);
-      g->SetLineColor (colors[(iCent-4)/5]);
+      g->SetLineColor (manyColors[(iCent-4)/5]);
       g->SetLineWidth (2);
-      g->SetMarkerColor (colors[(iCent-4)/5]);
+      g->SetMarkerColor (manyColors[(iCent-4)/5]);
       g->SetMarkerStyle (kFullCircle);
       g->SetMarkerSize (0.8);
       ((TGAE*) g->Clone ())->Draw ("p");
@@ -307,21 +317,34 @@ void PlotFineFCalPtCh (const char* tag, const char* inFileTag, const char* nomFi
     g->SetLineColor (kBlack);
     g->SetLineWidth (2);
     g->SetMarkerColor (kBlack);
-    g->SetMarkerStyle (kOpenCircle);
+    g->SetMarkerStyle (kOpenSquare);
     g->SetMarkerSize (1.2);
     ((TGAE*) g->Clone ())->Draw ("p");
     SaferDelete (&g);
+
+
+    h = (TH1D*) h_jet_trk_pt_as_iaa_nom[iZdcPeriph]->Clone ("htemp");
+    g = make_graph (h);
+
+    ResetXErrors (g);
+    g->SetLineColor (kBlack);
+    g->SetLineWidth (2);
+    g->SetMarkerColor (kBlack);
+    g->SetMarkerStyle (kOpenTriangleUp);
+    g->SetMarkerSize (1.2);
+    ((TGAE*) g->Clone ())->Draw ("p");
+    SaferDelete (&g);
+
 
     myText (0.22, 0.89, kBlack, "#bf{#it{ATLAS}} Internal", 0.032);
     myText (0.22, 0.85, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.032);
     myText (0.22, 0.81, kBlack, "#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV", 0.032);
     myText (0.22, 0.77, kBlack, Form ("#it{p}_{T}^{jet} > %s, #Delta#phi_{ch,jet} > 7#pi/8 (away-side)", GetJetPtStr (tag).Data ()), 0.032);
-    for (int iCent = 4; iCent < std::floor (0.5*numFineFcalCentBins)+2; iCent+=5)
-      myText (0.58, 0.53-((iCent-4)/5)*0.036, colors[(iCent-4)/5], Form ("%i-%i%%", fineFcalCentPercs[iCent+1], fineFcalCentPercs[iCent]), 0.03);
-    for (int iCent = std::floor (0.5*numFineFcalCentBins)+2; iCent < numFineFcalCentBins; iCent+=5)
-      myText (0.74, 0.53-((iCent-std::floor (0.5*numFineFcalCentBins)-2)/5)*0.036, colors[(iCent-4)/5], Form ("%i-%i%%", fineFcalCentPercs[iCent+1], fineFcalCentPercs[iCent]), 0.03);
-    myMarkerText (0.34, 0.53-8*0.036, kBlack, kFullCircle, Form ("FCal %i-%i%% (wgt'd)", fcalCentPercs[numFcalCentBins], fcalCentPercs[numFcalCentBins-1]), 1.2, 0.03, true);
-    myMarkerText (0.34, 0.53-9*0.036, kBlack, kOpenCircle, Form ("Zdc %i-%i%%", zdcCentPercs[numZdcCentBins], zdcCentPercs[numZdcCentBins-1]), 1.2, 0.03, true);
+    for (int iCent = 4; iCent < numFineFcalCentBins; iCent+=5)
+      myText (iCent < 0.5*numFineFcalCentBins ? 0.58 : 0.74, 0.53 - 0.036*0.2*(iCent < 0.5*numFineFcalCentBins ? iCent : iCent - 0.5*numFineFcalCentBins), manyColors[(iCent-4)/5], Form ("%i-%i%%", fineFcalCentPercs[iCent+1], fineFcalCentPercs[iCent]), 0.03);
+    myMarkerText (0.24, 0.54-8*0.036, kBlack, kFullCircle, "FCal 0-100% (wgt'd avg.)", 1.2, 0.03, true);
+    myMarkerText (0.24, 0.54-9*0.036, kBlack, kOpenSquare, Form ("Zdc %i-%i%%", zdcCentPercs[iZdcCent+1], zdcCentPercs[iZdcCent]), 1.2, 0.03, true);
+    myMarkerText (0.24, 0.54-10*0.036, kBlack, kOpenTriangleUp, Form ("Zdc %i-%i%%", zdcCentPercs[iZdcPeriph+1], zdcCentPercs[iZdcPeriph]), 1.2, 0.03, true);
     
 
     c->SaveAs (Form ("%s/Plots/CentralityBiasStudy/JetTagged_IpA_awayside_ptch_%s_FineFcal.pdf", workPath.Data (), tag));
@@ -365,12 +388,12 @@ void PlotFineFCalPtCh (const char* tag, const char* inFileTag, const char* nomFi
       h = (TH1D*) h_jet_trk_pt_ns_iaa[iCent]->Clone ("htemp");
       g = make_graph (h);
 
-      deltaize (g, 0.895+iCent*0.01, true);
+      deltaize (g, 0.895+(iCent-4)*0.002, true);
       
       ResetXErrors (g);
-      g->SetLineColor (colors[(iCent-4)/5]);
+      g->SetLineColor (manyColors[(iCent-4)/5]);
       g->SetLineWidth (2);
-      g->SetMarkerColor (colors[(iCent-4)/5]);
+      g->SetMarkerColor (manyColors[(iCent-4)/5]);
       g->SetMarkerStyle (kFullCircle);
       g->SetMarkerSize (0.8);
       ((TGAE*) g->Clone ())->Draw ("p");
@@ -401,7 +424,20 @@ void PlotFineFCalPtCh (const char* tag, const char* inFileTag, const char* nomFi
     g->SetLineColor (kBlack);
     g->SetLineWidth (2);
     g->SetMarkerColor (kBlack);
-    g->SetMarkerStyle (kOpenCircle);
+    g->SetMarkerStyle (kOpenSquare);
+    g->SetMarkerSize (1.2);
+    ((TGAE*) g->Clone ())->Draw ("p");
+    SaferDelete (&g);
+
+
+    h = (TH1D*) h_jet_trk_pt_ns_iaa_nom[iZdcPeriph]->Clone ("htemp");
+    g = make_graph (h);
+
+    ResetXErrors (g);
+    g->SetLineColor (kBlack);
+    g->SetLineWidth (2);
+    g->SetMarkerColor (kBlack);
+    g->SetMarkerStyle (kOpenTriangleUp);
     g->SetMarkerSize (1.2);
     ((TGAE*) g->Clone ())->Draw ("p");
     SaferDelete (&g);
@@ -412,9 +448,10 @@ void PlotFineFCalPtCh (const char* tag, const char* inFileTag, const char* nomFi
     myText (0.22, 0.77, kBlack, Form ("#it{p}_{T}^{jet} > %s, #Delta#phi_{ch,jet} < #pi/8 (near-side)", GetJetPtStr (tag).Data ()), 0.032);
     int i = 0;
     for (int iCent : plotCents)
-      myText (0.58, 0.53-(i++)*0.036, colors[(iCent-4)/5], Form ("%i-%i%%", fineFcalCentPercs[iCent+1], fineFcalCentPercs[iCent]), 0.03);
-    myMarkerText (0.58, 0.53-(i++)*0.036, kBlack, kFullCircle, Form ("FCal %i-%i%% (wgt'd)", fcalCentPercs[numFcalCentBins], fcalCentPercs[numFcalCentBins-1]), 1.2, 0.03, true);
-    myMarkerText (0.58, 0.53-(i++)*0.036, kBlack, kOpenCircle, Form ("Zdc %i-%i%%", zdcCentPercs[numZdcCentBins], zdcCentPercs[numZdcCentBins-1]), 1.2, 0.03, true);
+      myText (0.58, 0.53-(i++)*0.036, manyColors[(iCent-4)/5], Form ("%i-%i%%", fineFcalCentPercs[iCent+1], fineFcalCentPercs[iCent]), 0.03);
+    myMarkerText (0.58, 0.53-(i++)*0.036, kBlack, kFullCircle, "FCal 0-100% (wgt'd avg.)", 1.2, 0.03, true);
+    myMarkerText (0.58, 0.53-(i++)*0.036, kBlack, kOpenSquare, Form ("Zdc %i-%i%%", zdcCentPercs[iZdcCent+1], zdcCentPercs[iZdcCent]), 1.2, 0.03, true);
+    myMarkerText (0.58, 0.53-(i++)*0.036, kBlack, kOpenTriangleUp, Form ("Zdc %i-%i%%", zdcCentPercs[iZdcPeriph+1], zdcCentPercs[iZdcPeriph]), 1.2, 0.03, true);
     
 
     c->SaveAs (Form ("%s/Plots/CentralityBiasStudy/JetTagged_IpA_nearside_ptch_%s_FineFcal_Summary.pdf", workPath.Data (), tag));
@@ -458,12 +495,12 @@ void PlotFineFCalPtCh (const char* tag, const char* inFileTag, const char* nomFi
       h = (TH1D*) h_jet_trk_pt_as_iaa[iCent]->Clone ("htemp");
       g = make_graph (h);
 
-      deltaize (g, 0.895+iCent*0.01, true);
+      deltaize (g, 0.895+(iCent-4)*0.002, true);
       
       ResetXErrors (g);
-      g->SetLineColor (colors[(iCent-4)/5]);
+      g->SetLineColor (manyColors[(iCent-4)/5]);
       g->SetLineWidth (2);
-      g->SetMarkerColor (colors[(iCent-4)/5]);
+      g->SetMarkerColor (manyColors[(iCent-4)/5]);
       g->SetMarkerStyle (kFullCircle);
       g->SetMarkerSize (0.8);
       ((TGAE*) g->Clone ())->Draw ("p");
@@ -494,10 +531,24 @@ void PlotFineFCalPtCh (const char* tag, const char* inFileTag, const char* nomFi
     g->SetLineColor (kBlack);
     g->SetLineWidth (2);
     g->SetMarkerColor (kBlack);
-    g->SetMarkerStyle (kOpenCircle);
+    g->SetMarkerStyle (kOpenSquare);
     g->SetMarkerSize (1.2);
     ((TGAE*) g->Clone ())->Draw ("p");
     SaferDelete (&g);
+
+
+    h = (TH1D*) h_jet_trk_pt_as_iaa_nom[iZdcPeriph]->Clone ("htemp");
+    g = make_graph (h);
+
+    ResetXErrors (g);
+    g->SetLineColor (kBlack);
+    g->SetLineWidth (2);
+    g->SetMarkerColor (kBlack);
+    g->SetMarkerStyle (kOpenTriangleUp);
+    g->SetMarkerSize (1.2);
+    ((TGAE*) g->Clone ())->Draw ("p");
+    SaferDelete (&g);
+
 
     myText (0.22, 0.89, kBlack, "#bf{#it{ATLAS}} Internal", 0.032);
     myText (0.22, 0.85, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.032);
@@ -505,12 +556,39 @@ void PlotFineFCalPtCh (const char* tag, const char* inFileTag, const char* nomFi
     myText (0.22, 0.77, kBlack, Form ("#it{p}_{T}^{jet} > %s, #Delta#phi_{ch,jet} > 7#pi/8 (away-side)", GetJetPtStr (tag).Data ()), 0.032);
     int i = 0;
     for (int iCent : plotCents)
-      myText (0.58, 0.53-(i++)*0.036, colors[(iCent-4)/5], Form ("%i-%i%%", fineFcalCentPercs[iCent+1], fineFcalCentPercs[iCent]), 0.03);
-    myMarkerText (0.58, 0.53-(i++)*0.036, kBlack, kFullCircle, Form ("FCal %i-%i%% (wgt'd)", fcalCentPercs[numFcalCentBins], fcalCentPercs[numFcalCentBins-1]), 1.2, 0.03, true);
-    myMarkerText (0.58, 0.53-(i++)*0.036, kBlack, kOpenCircle, Form ("Zdc %i-%i%%", zdcCentPercs[numZdcCentBins], zdcCentPercs[numZdcCentBins-1]), 1.2, 0.03, true);
+      myText (0.58, 0.53-(i++)*0.036, manyColors[(iCent-4)/5], Form ("%i-%i%%", fineFcalCentPercs[iCent+1], fineFcalCentPercs[iCent]), 0.03);
+    myMarkerText (0.58, 0.53-(i++)*0.036, kBlack, kFullCircle, "FCal 0-100% (wgt'd avg.)", 1.2, 0.03, true);
+    myMarkerText (0.58, 0.53-(i++)*0.036, kBlack, kOpenSquare, Form ("Zdc %i-%i%%", zdcCentPercs[iZdcCent+1], zdcCentPercs[iZdcCent]), 1.2, 0.03, true);
+    myMarkerText (0.58, 0.53-(i++)*0.036, kBlack, kOpenTriangleUp, Form ("Zdc %i-%i%%", zdcCentPercs[iZdcPeriph+1], zdcCentPercs[iZdcPeriph]), 1.2, 0.03, true);
     
 
     c->SaveAs (Form ("%s/Plots/CentralityBiasStudy/JetTagged_IpA_awayside_ptch_%s_FineFcal_Summary.pdf", workPath.Data (), tag));
+  }
+
+
+
+  {
+    const char* canvasName = "c_weights";
+    TCanvas* c = new TCanvas (canvasName, "", 800, 800);
+
+    TH1D* h = nullptr; 
+
+    c->cd (); 
+
+    h = (TH1D*) h_wgts_rebinned->Clone ("h");
+    h->GetXaxis ()->SetMoreLogLabels ();
+    h->GetXaxis ()->SetTitle ("FCal-based Centrality [%]");
+    //h->GetXaxis ()->SetTitleSize (0.028);
+    //h->GetXaxis ()->SetLabelSize (0.028);
+    h->GetYaxis ()->SetTitle ("Weight");
+    //h->GetYaxis ()->SetTitleSize (0.028);
+    //h->GetYaxis ()->SetLabelSize (0.028);
+
+    h->SetLineWidth (2);
+    h->DrawCopy ("hist ][");
+    SaferDelete (&h);
+
+    c->SaveAs (Form ("%s/Plots/CentralityBiasStudy/Weights.pdf", workPath.Data ()));
   }
 }
 

@@ -60,6 +60,20 @@ bool CentralityAnalysis (const char* directory,
     auto dir = gSystem->OpenDirectory (dataPath + directory);
     while (const char* f = gSystem->GetDirEntry (dir)) {
       TString file = TString (f);
+
+      if (IsCollisions ()) {
+        if (Ispp ()) {
+          if (UseMinBiasTriggers () && !file.Contains ("MinBias"))
+            continue;
+          if (!UseMinBiasTriggers () && !file.Contains ("Main"))
+            continue;
+        }
+        if (IspPb ()) {
+          if (!file.Contains ("Main"))
+            continue;
+        }
+      }
+
       if (!file.Contains (fileIdentifier))
         continue;
       std::cout << "Adding " << dataPath + directory + "/" + file + "/*.root" << " to TChain" << std::endl;
@@ -224,9 +238,9 @@ bool CentralityAnalysis (const char* directory,
   TH1D* h_mb_p_zdc_calibE = new TH1D (Form ("h_mb_p_zdc_calibE_run%i", dataSet), "", 1280, 0, 160);
   h_mb_p_zdc_calibE->Sumw2 ();
 
-  TH1D* h_jet_Pb_fcal_et = new TH1D (Form ("h_jet_Pb_fcal_et_run%i", dataSet), "", 250, -30, 220);
+  TH1D* h_jet_Pb_fcal_et = new TH1D (Form ("h_jet_Pb_fcal_et_run%i", dataSet), "", 1250, -30, 220);
   h_jet_Pb_fcal_et->Sumw2 ();
-  TH1D* h_jet_p_fcal_et = new TH1D (Form ("h_jet_p_fcal_et_run%i", dataSet), "", 250, -30, 220);
+  TH1D* h_jet_p_fcal_et = new TH1D (Form ("h_jet_p_fcal_et_run%i", dataSet), "", 1250, -30, 220);
   h_jet_p_fcal_et->Sumw2 ();
 
   //TH1D* h_jet_Pb_fcal_et_zdcCentral = new TH1D ("h_jet_Pb_fcal_et_zdcCentral", "", 250, -30, 220);
@@ -292,7 +306,7 @@ bool CentralityAnalysis (const char* directory,
         hasPrimaryVert = true;
         vz = vert_z[iVert];
       }
-      if (vert_type[iVert] == 3 && vert_ntrk[iVert] > 6)
+      if (vert_type[iVert] == 3 && (Ispp () || vert_ntrk[iVert] > 6))
         hasPileup = true;
     }
     if (!hasPrimaryVert || hasPileup || fabs (vz) > 150)
@@ -346,15 +360,19 @@ bool CentralityAnalysis (const char* directory,
       psi3_p = atan2 (q3y_p, q3x_p) / 3.;
       psi4_p = atan2 (q4y_p, q4x_p) / 4.;
     }
+
     else if (Ispp ()) {
       fcal_et_p = fcalA_et + fcalC_et;
-      fcal_et_Pb = -999;
+      fcal_et_Pb = 0;
 
       zdc_calibE_p = ZdcCalibEnergy_A + ZdcCalibEnergy_C;
-      zdc_calibE_Pb = -999;
+      zdc_calibE_Pb = 0;
 
       edgeGap_p = -999;
       edgeGap_Pb = -999;
+
+      zdc_Pb_decision = false;
+      zdc_p_decision = false;
 
       q2x_p = fcalA_et_Cos2 + fcalC_et_Cos2;
       q2y_p = fcalA_et_Sin2 + fcalC_et_Sin2;
@@ -362,12 +380,12 @@ bool CentralityAnalysis (const char* directory,
       q3y_p = fcalA_et_Sin3 + fcalC_et_Sin3;
       q4x_p = fcalA_et_Cos4 + fcalC_et_Cos4;
       q4y_p = fcalA_et_Sin4 + fcalC_et_Sin4;
-      q2x_Pb = -999;
-      q2y_Pb = -999;
-      q3x_Pb = -999;
-      q3y_Pb = -999;
-      q4x_Pb = -999;
-      q4y_Pb = -999;
+      q2x_Pb = 0;
+      q2y_Pb = 0;
+      q3x_Pb = 0;
+      q3y_Pb = 0;
+      q4x_Pb = 0;
+      q4y_Pb = 0;
 
       q2_p = sqrt (q2x_p*q2x_p + q2y_p*q2y_p) / fcal_et_p;
       q3_p = sqrt (q3x_p*q3x_p + q3y_p*q3y_p) / fcal_et_p;
@@ -376,13 +394,14 @@ bool CentralityAnalysis (const char* directory,
       psi3_p = atan2 (q3y_p, q3x_p) / 3.;
       psi4_p = atan2 (q4y_p, q4x_p) / 4.;
 
-      q2_Pb = -999;
-      q3_Pb = -999;
-      q4_Pb = -999;
-      psi2_Pb = -999;
-      psi3_Pb = -999;
-      psi4_Pb = -999;
+      q2_Pb = 0;
+      q3_Pb = 0;
+      q4_Pb = 0;
+      psi2_Pb = 0;
+      psi3_Pb = 0;
+      psi4_Pb = 0;
     }
+
     zdc_calibE_Pb *= 1e3;
     zdc_calibE_p *= 1e3;
 
@@ -400,7 +419,7 @@ bool CentralityAnalysis (const char* directory,
       h_mb_avgMu->Fill (averageInteractionsPerCrossing);
 
       // Require Pb-going ZDC to fire, reducing UPC background contamination
-      if (zdc_Pb_decision) {
+      if (!IspPb () || zdc_Pb_decision) {
         h_mb_Pb_fcal_et->Fill (fcal_et_Pb);
         h_mb_p_fcal_et->Fill (fcal_et_p);
       }
@@ -422,7 +441,7 @@ bool CentralityAnalysis (const char* directory,
     if (jetTriggers[0]->trigDecision) {
 
       // Require Pb-going ZDC to fire, reducing UPC background contamination
-      if (zdc_Pb_decision) {
+      if (!IspPb () || zdc_Pb_decision) {
         h_jet_Pb_fcal_et->Fill (fcal_et_Pb);
         h_jet_p_fcal_et->Fill (fcal_et_p);
       }

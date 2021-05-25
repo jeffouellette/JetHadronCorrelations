@@ -191,10 +191,10 @@ void ProcessFineFCalPtCh (const char* tag, const char* outFileTag) {
       h_jet_trk_pt_as_sig[iCent]->Add (h_jet_trk_pt_as_bkg[iCent], -1);
 
       h_jet_trk_pt_ns_iaa[iCent] = (TH1D*) h_jet_trk_pt_ns_sig[iCent]->Clone (Form ("h_jet_trk_pt_ns_iaa_FineFcalCent%i", iCent));
-      h_jet_trk_pt_ns_iaa[iCent]->Divide (h_jet_trk_pt_ns_sig[0]);
+      h_jet_trk_pt_ns_iaa[iCent]->Divide (h_jet_trk_pt_ns_ref_sig);
 
       h_jet_trk_pt_as_iaa[iCent] = (TH1D*) h_jet_trk_pt_as_sig[iCent]->Clone (Form ("h_jet_trk_pt_as_iaa_FineFcalCent%i", iCent));
-      h_jet_trk_pt_as_iaa[iCent]->Divide (h_jet_trk_pt_as_sig[0]);
+      h_jet_trk_pt_as_iaa[iCent]->Divide (h_jet_trk_pt_as_ref_sig);
     }
   }
 

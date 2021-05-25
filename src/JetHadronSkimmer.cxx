@@ -3,6 +3,7 @@
 
 #include "JetHadronSkimmer.h"
 #include "Params.h"
+#include "CentralityDefs.h"
 #include "TreeVariables.h"
 #include "OutTree.h"
 #include "LocalUtilities.h"
@@ -568,7 +569,7 @@ bool JetHadronSkimmer (const char* directory,
       float sumptcw = 0, sumptccw = 0;
       for (int iTrk = 0; iTrk < out_trk_n; iTrk++) {
         float dphi = DeltaPhi (out_trk_phi[iTrk], out_akt4_hi_jet_phi[leading_jet], true);
-        if (pi/3. < fabs (dphi) && fabs (dphi) < 2.*pi/3.) {
+        if (M_PI/3. < fabs (dphi) && fabs (dphi) < 2.*M_PI/3.) {
           if (dphi < 0) // then trackphi is ccw of zphi
             sumptccw += out_trk_pt[iTrk];
           else
@@ -577,12 +578,12 @@ bool JetHadronSkimmer (const char* directory,
       } // end loop over tracks
 
       if (sumptccw > sumptcw) {
-        leading_jet_phi_transmax = out_akt4_hi_jet_phi[leading_jet] + pi/2.;
-        leading_jet_phi_transmin = out_akt4_hi_jet_phi[leading_jet] - pi/2.;
+        leading_jet_phi_transmax = out_akt4_hi_jet_phi[leading_jet] + M_PI/2.;
+        leading_jet_phi_transmin = out_akt4_hi_jet_phi[leading_jet] - M_PI/2.;
       }
       else {
-        leading_jet_phi_transmax = out_akt4_hi_jet_phi[leading_jet] - pi/2.;
-        leading_jet_phi_transmin = out_akt4_hi_jet_phi[leading_jet] + pi/2.;
+        leading_jet_phi_transmax = out_akt4_hi_jet_phi[leading_jet] - M_PI/2.;
+        leading_jet_phi_transmin = out_akt4_hi_jet_phi[leading_jet] + M_PI/2.;
       }
 
       outTrees[iFile]->Fill ();

@@ -10,6 +10,7 @@
 #include <TCanvas.h>
 
 #include <Utilities.h>
+#include <MyColors.h>
 
 #include "Params.h"
 #include "LocalUtilities.h"
@@ -19,15 +20,6 @@
 
 using namespace std;
 using namespace JetHadronCorrelations;
-
-TColor* tcolor = new TColor ();
-const Color_t myBlue = (Color_t) tcolor->GetColor (45, 64, 245);
-const Color_t myPurple = (Color_t) tcolor->GetColor (130,  10, 130);
-const Color_t myRed = (Color_t) tcolor->GetColor (255,  12,  73);
-const Color_t myGreen = (Color_t) tcolor->GetColor ( 54, 167,  80);
-const Color_t myOrange = (Color_t) tcolor->GetColor (255,  68,   0);
-
-const Color_t colors[] = {myBlue, myGreen, myOrange, myRed, myPurple};
 
 
 void PlotJetSubtractedEnergy () { 

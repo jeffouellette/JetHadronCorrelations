@@ -4,6 +4,7 @@
 #include "LocalUtilities.h"
 #include "TreeVariables.h"
 #include "Params.h"
+#include "CentralityDefs.h"
 #include "Process.h"
 #include "RunCorrelator.h"
 
@@ -16,7 +17,6 @@
 #include <math.h>
 #include <iostream>
 #include <fstream>
-#include <sys/stat.h>
 
 
 namespace JetHadronCorrelations {
