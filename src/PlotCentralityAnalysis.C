@@ -12,6 +12,7 @@
 #include <Utilities.h>
 #include <MyColors.h>
 
+#include "CentralityDefs.h"
 #include "Params.h"
 #include "LocalUtilities.h"
 
@@ -53,9 +54,6 @@ void PlotCentralityAnalysis () {
 
   TH2D* h2_jet_Pb_fcal_et_zdc_calibE = nullptr;
   TH2D* h2_mb_Pb_fcal_et_zdc_calibE = nullptr;
-
-  TH2D* h2_jet_Pb_fcal_et_Pb_q2 = nullptr;
-  TH2D* h2_mb_Pb_fcal_et_Pb_q2 = nullptr;
 
   TH1D* h_jet_Pb_fcal_et_zdc_0t20 = nullptr;
   TH1D* h_mb_Pb_fcal_et_zdc_0t20 = nullptr;
@@ -506,7 +504,6 @@ void PlotCentralityAnalysis () {
 
 
 
-
   {
     TCanvas* c = new TCanvas ("c_allpPbRuns_fcal_et", "", 800, 1000);
 
@@ -682,7 +679,7 @@ void PlotCentralityAnalysis () {
     uPad->cd ();
     uPad->SetLogy ();
 
-    TH1D* h = (TH1D*) h_jet_p_fcal_et_sum->Clone ("htemp");
+    TH1D* h = (TH1D*) h_mb_p_fcal_et_sum->Clone ("htemp");
     h->GetYaxis ()->SetTitle ("A.U.");
 
     h->GetYaxis ()->SetTitleOffset (1.2 * h->GetYaxis ()->GetTitleOffset ());
@@ -690,7 +687,7 @@ void PlotCentralityAnalysis () {
     double ymin = 5e-8;
     double ymax = 1e0;
 
-    h->SetLineColor (kBlue+3);
+    h->SetLineColor (kRed+1);
 
     h->GetYaxis ()->SetRangeUser (ymin, ymax);
 
@@ -705,11 +702,6 @@ void PlotCentralityAnalysis () {
     h->GetYaxis ()->SetLabelSize (24);
 
     h->DrawCopy ("hist");
-    SaferDelete (&h);
-
-    h = (TH1D*) h_mb_p_fcal_et_sum->Clone ("htemp");
-
-    h->SetLineColor (kRed+1);
 
     double plot_xq[17];
     double plot_yq[17];
@@ -753,14 +745,11 @@ void PlotCentralityAnalysis () {
       divs->DrawLine (plot_yq[i], ymin, plot_yq[i], h->GetBinContent (h->FindBin (plot_yq[i])));
       tl->DrawLatex (plot_yq[i]+0.20, exp (0.1*log(ymax/ymin)) * ymin, plot_percs[i].Data ());
     }
-
-    h->DrawCopy ("hist same");
     SaferDelete (&h);
 
     myText (0.65, 0.900, kBlack, "#bf{#it{ATLAS}} Internal", 0.036);
     myText (0.65, 0.860, kBlack, "#it{pp}, #sqrt{s_{NN}} = 5.02 TeV", 0.032);
     myText (0.65, 0.820, kBlack, "All runs", 0.032);
-    myText (0.65, 0.740, kBlue+3, "J50 Trigger", 0.032);
     myText (0.65, 0.700, kRed+1, "MinBias Trigger", 0.032);
 
 

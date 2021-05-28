@@ -1,6 +1,7 @@
 #ifndef __JetHadronCorrelatorPlotJets_C__
 #define __JetHadronCorrelatorPlotJets_C__
 
+#include "CentralityDefs.h"
 #include "Params.h"
 #include "OutTree.h"
 #include "TreeVariables.h"

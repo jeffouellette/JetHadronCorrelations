@@ -1,0 +1,41 @@
+Universe = vanilla
+Executable = /atlasgpfs01/usatlas/workarea/jeff/JetHadronCorrelations/bin/RunCorrelator.exe
+Priority = +1
+GetEnv = True
+InitialDir = /atlasgpfs01/usatlas/workarea/jeff/JetHadronCorrelations
+accounting_group = group_atlas.boulder
+
+
+# Useful variables to set:
+# Analysis-level minimum/maximum jet pT; 15, 30, 60, or 120 (minimum); 0 (maximum)
+#minjpt=30
+maxjpt=0
+
+
+# Input subdirectory; 50GeVJetsData, 100GeVJetsData, or MinBiasData (at the moment)
+#sigdir=MinBiasData
+
+# Input subdirectory for mixing pool; MinBiasData (at the moment)
+mixdir=MinBiasData
+
+# Variation subdirectory; Nominal, JetES5PercUpVar, JetES5PercDownVar, JetES5PercSmearVar, JetES2PercUpVar, JetES2PercDownVar, JetES2PercSmearVar, HITightVar, PionsOnlyVar, WithPileupVar, FcalCentVar (at the moment)
+#vardir=JetES5PercSmearVar
+
+# Centrality selection
+#cent=0
+
+
+## pp non-mixed
+#Arguments = $(minjpt) $(maxjpt) pp17_5TeV $(minjpt)GeVJets_data17 ./rootFiles/Histograms/$(minjpt)GeVJets/JetsHists/$(vardir)/$(run)_hists.root ./rootFiles/Trees/$(sigdir)/$(vardir)/$(run).root
+#Error = run/errors/$(minjpt)GeVJets_JetsHists_$(run)_$(vardir).err
+#Log = /tmp/jeff/logs/$(minjpt)GeVJets_JetsHists_$(run)_$(vardir).log
+#Output = run/outputs/$(minjpt)GeVJets_JetsHists_$(run)_$(vardir).out
+#Queue run in (340644 340683 340697 340718 340814 340849 340850 340910 340925 340973 341027 341123 341184)
+
+
+# pp mixed
+Arguments = $(minjpt) $(maxjpt) pp17_5TeV $(minjpt)GeVJets_mixed_data17 ./rootFiles/Histograms/$(minjpt)GeVJets/MixedHists/$(vardir)/$(run)_hists.root ./rootFiles/Trees/$(sigdir)/$(vardir)/$(run).root ./rootFiles/Trees/$(mixdir)/$(vardir)/$(run).root
+Error = run/errors/$(minjpt)GeVJets_MixedHists_$(run)_$(vardir).err
+Log = /tmp/jeff/logs/$(minjpt)GeVJets_MixedHists_$(run)_$(vardir).log
+Output = run/outputs/$(minjpt)GeVJets_MixedHists_$(run)_$(vardir).out
+Queue run in (340644 340683 340697 340718 340814 340849 340850 340910 340925 340973 341027 341123 341184)

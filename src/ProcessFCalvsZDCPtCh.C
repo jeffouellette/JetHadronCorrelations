@@ -1,6 +1,7 @@
 #ifndef __JetHadronCorrelatorProcessFCalvsZDCPtCh_C__
 #define __JetHadronCorrelatorProcessFCalvsZDCPtCh_C__
 
+#include "CentralityDefs.h"
 #include "Params.h"
 #include "OutTree.h"
 #include "TreeVariables.h"

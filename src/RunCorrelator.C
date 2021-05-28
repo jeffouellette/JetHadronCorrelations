@@ -168,10 +168,6 @@ void Correlator (const char* tag, const char* outFileName, TTree* jetsTree, TTre
 
     const double yboost = GetBoost (run_number);
 
-    const short iMixCent = (IspPb () ? GetFcalMixBin (fcal_et_Pb) : GetppMixBin (fcal_et_p));
-    if (iMixCent < 0 || numFcalMixBins <= iMixCent)
-      continue;
-
     // TODO -- add event level weights!
     //const double ewgt = event_weight;
     const double ewgt = 1.;
@@ -198,6 +194,10 @@ void Correlator (const char* tag, const char* outFileName, TTree* jetsTree, TTre
 
     // do a mixed event
     if (doMixing) {
+      const short iMixCent = (Ispp () ? GetppMixBin (fcal_et_p) : GetFcalMixBin (fcal_et_Pb));
+      if (iMixCent < 0 || (Ispp () ? numppMixBins : numFcalMixBins) <= iMixCent)
+        continue;
+
       const int oldTrkEvt = iTrkEvt;
       bool goodEvent = false;
       do {
@@ -205,7 +205,7 @@ void Correlator (const char* tag, const char* outFileName, TTree* jetsTree, TTre
         tracksTree->GetEntry (iTrkEvt);
         //goodEvent = true; // for disabling any mixing categories
         // mixing categories
-        goodEvent = (Ispp () ? GetFcalMixBin (fcal_et_Pb_matching) : GetppMixBin (fcal_et_p_matching)) == iMixCent;
+        goodEvent = (Ispp () ? GetppMixBin (fcal_et_p_matching) : GetFcalMixBin (fcal_et_Pb_matching)) == iMixCent;
       }
       while (!goodEvent && iTrkEvt != oldTrkEvt);
     }

@@ -1,16 +1,8 @@
 #ifndef __JetHadronCorrelatorPlotJets_C__
 #define __JetHadronCorrelatorPlotJets_C__
 
-#include "Params.h"
-#include "OutTree.h"
-#include "TreeVariables.h"
-#include "LocalUtilities.h"
-#include "Variations.h"
-
-#include <ArrayTemplates.h>
-#include <Utilities.h>
-#include <MyStyle.h>
-#include <MyColors.h>
+#include <iostream>
+#include <math.h>
 
 #include <TColor.h>
 #include <TLine.h>
@@ -21,8 +13,17 @@
 #include <TF1.h>
 #include <TLorentzVector.h>
 
-#include <iostream>
-#include <math.h>
+#include <ArrayTemplates.h>
+#include <Utilities.h>
+#include <MyStyle.h>
+#include <MyColors.h>
+
+#include "CentralityDefs.h"
+#include "Params.h"
+#include "OutTree.h"
+#include "TreeVariables.h"
+#include "LocalUtilities.h"
+#include "Variations.h"
 
 using namespace JetHadronCorrelations;
 

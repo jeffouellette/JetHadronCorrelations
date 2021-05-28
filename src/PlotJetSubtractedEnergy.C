@@ -13,6 +13,7 @@
 #include <MyColors.h>
 
 #include "Params.h"
+#include "CentralityDefs.h"
 #include "LocalUtilities.h"
 
 #include <iostream>

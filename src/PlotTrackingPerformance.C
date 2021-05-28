@@ -11,6 +11,7 @@
 
 #include <Utilities.h>
 
+#include "CentralityDefs.h"
 #include "Params.h"
 #include "LocalUtilities.h"
 

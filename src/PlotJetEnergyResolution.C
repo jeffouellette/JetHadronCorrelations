@@ -12,6 +12,7 @@
 #include <Utilities.h>
 
 #include "Params.h"
+#include "CentralityDefs.h"
 #include "LocalUtilities.h"
 
 using namespace JetHadronCorrelations;
