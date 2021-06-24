@@ -41,15 +41,15 @@ void PlotOffsets (const char* tag) {
   string inTag, pTChSel, centStr, offpercerr;
   double offset = 0, offerr = 0;
 
-  TGE** g_offsets = new TGE*[numZdcCentBins];
-  for (int iCent = 0; iCent < numZdcCentBins; iCent++) {
+  TGE** g_offsets = new TGE*[nZdcCentBins];
+  for (int iCent = 0; iCent < nZdcCentBins; iCent++) {
     g_offsets[iCent] = new TGE ();
   }
 
   while (!offsetsFile.eof ()) {
     offsetsFile >> inTag >> pTChSel >> centStr >> offset >> offerr >> offpercerr;
 
-    for (int iCent = 0; iCent < numZdcCentBins; iCent++) {
+    for (int iCent = 0; iCent < nZdcCentBins; iCent++) {
 
       if (TString (centStr.c_str ()) == TString (Form ("%i-%i%%", zdcCentPercs[iCent+1], zdcCentPercs[iCent]))) {
         g_offsets[iCent]->SetPoint (g_offsets[iCent]->GetN (), 0.5 * (pTChStrCuts[pTChSel].first + pTChStrCuts[pTChSel].second), -offset);
@@ -64,7 +64,7 @@ void PlotOffsets (const char* tag) {
     TCanvas* c = new TCanvas ("c", "", 800, 800);
     gPad->SetLogx ();
 
-    for (int iCent = 0; iCent < numZdcCentBins; iCent++) {
+    for (int iCent = 0; iCent < nZdcCentBins; iCent++) {
       g_offsets[iCent]->GetXaxis ()->SetTitle ("#it{p}_{T}^{ch} [GeV]");
       g_offsets[iCent]->GetYaxis ()->SetTitle ("#delta#it{I}_{pPb}");
 
@@ -83,7 +83,7 @@ void PlotOffsets (const char* tag) {
     myText (0.60, 0.780, kBlack, "#it{p}_{T}^{jet} > 60 GeV", 0.032);
     myText (0.60, 0.740, kBlack, "#Sigma#it{E}_{ZDC}^{Pb} Percentiles", 0.032);
 
-    for (int iCent = 0; iCent < numZdcCentBins; iCent++)
+    for (int iCent = 0; iCent < nZdcCentBins; iCent++)
       myText (0.6, 0.42-iCent*0.04, colors[iCent], Form ("#bf{%i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.032);
 
     myText (0.2, 0.88, kBlack, "#bf{#it{I}_{pPb} #it{increases}}", 0.032);

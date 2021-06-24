@@ -23,9 +23,9 @@ void CombineFineFCalPtCh (const char* fileTag) {
 
   TFile* file = nullptr;
 
-  TH1D** h_jet_trk_pt_ns_iaa      = Get1DArray <TH1D*> (numFineFcalCentBins);
-  TH1D** h_jet_trk_pt_perp_iaa      = Get1DArray <TH1D*> (numFineFcalCentBins);
-  TH1D** h_jet_trk_pt_as_iaa      = Get1DArray <TH1D*> (numFineFcalCentBins);
+  TH1D** h_jet_trk_pt_ns_iaa      = Get1DArray <TH1D*> (nFineFcalCentBins);
+  TH1D** h_jet_trk_pt_perp_iaa      = Get1DArray <TH1D*> (nFineFcalCentBins);
+  TH1D** h_jet_trk_pt_as_iaa      = Get1DArray <TH1D*> (nFineFcalCentBins);
 
   TH1D*  h_jet_trk_pt_ns_iaa_comb = nullptr;
   TH1D*  h_jet_trk_pt_perp_iaa_comb = nullptr;
@@ -43,7 +43,7 @@ void CombineFineFCalPtCh (const char* fileTag) {
   file->Delete ("h_jet_trk_pt_as_iaa_FineFcalComb;*");
 
 
-  for (int iCent = 0; iCent < numFineFcalCentBins; iCent++) {
+  for (int iCent = 0; iCent < nFineFcalCentBins; iCent++) {
     h_jet_trk_pt_ns_iaa[iCent] = (TH1D*) file->Get (Form ("h_jet_trk_pt_ns_iaa_FineFcalCent%i", iCent));
     h_jet_trk_pt_perp_iaa[iCent] = (TH1D*) file->Get (Form ("h_jet_trk_pt_perp_iaa_FineFcalCent%i", iCent));
     h_jet_trk_pt_as_iaa[iCent] = (TH1D*) file->Get (Form ("h_jet_trk_pt_as_iaa_FineFcalCent%i", iCent));
@@ -64,7 +64,7 @@ void CombineFineFCalPtCh (const char* fileTag) {
   TH1D* h_wgts_rebinned = new TH1D ("h_wgts_rebinned", ";#Sigma#it{E}_{T}^{FCal} percentile [%];Weight", 100, 0, 100);
 
   double sum_wgts = 0.;
-  for (int iCent = 0; iCent < numFineFcalCentBins; iCent++) {
+  for (int iCent = 0; iCent < nFineFcalCentBins; iCent++) {
 
     const double plo = fineFcalCentBins[iCent];
     const double phi = fineFcalCentBins[iCent+1];

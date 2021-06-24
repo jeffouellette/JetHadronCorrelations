@@ -18,7 +18,7 @@ maxjpt=0
 # Input subdirectory for mixing pool; MinBiasData (at the moment)
 mixdir=MinBiasData
 
-# Variation subdirectory; Nominal, JetES5PercUpVar, JetES5PercDownVar, JetES5PercSmearVar, JetES2PercUpVar, JetES2PercDownVar, JetES2PercSmearVar, HITightVar, PionsOnlyVar, WithPileupVar, FcalCentVar (at the moment)
+# Variation subdirectory; Nominal, JetES5PercUpVar, JetES5PercDownVar, JetES5PercSmearVar, JetES2PercUpVar, JetES2PercDownVar, JetES2PercSmearVar, FcalCentVar (at the moment)
 #vardir=JetES5PercSmearVar
 
 # Centrality selection

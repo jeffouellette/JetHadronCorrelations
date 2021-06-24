@@ -23,6 +23,9 @@
 using namespace JetHadronCorrelations;
 
 bool doMixing = false;
+bool doMixVar1 = false;
+bool doMixVar2 = false;
+bool doMixVar3 = false;
 
 
 void Correlator (const char* tag, const char* outFileName, TTree* jetsTree, TTree* tracksTree = nullptr) {
@@ -135,6 +138,21 @@ void Correlator (const char* tag, const char* outFileName, TTree* jetsTree, TTre
   const int nTrkEvts = tracksTree->GetEntries ();
 
 
+  // setup centrality matching bins for event mixing according to job configuration
+  double* mixCentBins = nullptr;
+  int nMixCentBins = 0;
+
+  if (Ispp ()) {
+    if (doMixVar1)      { mixCentBins = ppMixVar1Bins;  nMixCentBins = nppMixVar1Bins;  }
+    else if (doMixVar3) { mixCentBins = ppMixVar3Bins;  nMixCentBins = nppMixVar3Bins;  }
+    else                { mixCentBins = ppMixBins;      nMixCentBins = nppMixBins;      }
+  }
+  else {
+    if (doMixVar2)      { mixCentBins = fcalMixVar2Bins;  nMixCentBins = nFcalMixVar2Bins;  }
+    else                { mixCentBins = fcalMixBins;      nMixCentBins = nFcalMixBins;      }
+  }
+
+
   int iTrkEvt = 0;
   for (int iEvt = 0; iEvt < nEvts; iEvt++) {
     if (nEvts > 100 && iEvt % (nEvts / 100) == 0)                                
@@ -179,23 +197,36 @@ void Correlator (const char* tag, const char* outFileName, TTree* jetsTree, TTre
     h_evt_counts->Fill (1, ewgt);
     h_evt_counts->Fill (2, ewgt*ewgt);
 
+    double nj = 0;
+    double jwgt = 0;
 
     for (int iJet = 0; iJet < akt4_hi_jet_n; iJet++) {
       if (!MeetsJetPtCut (akt4_hi_jet_pt[iJet]))
         continue;
-      const double jwgt = GetAkt4JetWeight (akt4_hi_jet_pt[iJet], akt4_hi_jet_eta[iJet], akt4_hi_jet_phi[iJet], 0.4);
-      if (jwgt <= 0.)
+      const double thisjwgt = GetAkt4JetWeight (akt4_hi_jet_pt[iJet], akt4_hi_jet_eta[iJet], akt4_hi_jet_phi[iJet], 0.4);
+      if (thisjwgt <= 0.)
         continue;
-      h_jet_counts->Fill (0); // adds to number of jets (i.e. denominator)
-      h_jet_counts->Fill (1, ewgt*jwgt);
-      h_jet_counts->Fill (2, pow (ewgt*jwgt, 2));
+
+      nj += 1;
+      jwgt += thisjwgt;
     }
+
+    // skip events with no jets
+    if (nj == 0) {
+      continue;
+    }
+
+    h_jet_counts->Fill (0); // adds to number of jets (i.e. denominator)
+    h_jet_counts->Fill (1, ewgt*jwgt);
+    h_jet_counts->Fill (2, pow (ewgt*jwgt, 2));
 
 
     // do a mixed event
     if (doMixing) {
-      const short iMixCent = (Ispp () ? GetppMixBin (fcal_et_p) : GetFcalMixBin (fcal_et_Pb));
-      if (iMixCent < 0 || (Ispp () ? numppMixBins : numFcalMixBins) <= iMixCent)
+
+      // get the "centrality" bin for the current event
+      const short iMixCent = GetBin (mixCentBins, nMixCentBins, Ispp () ? fcal_et_p : fcal_et_Pb);
+      if (iMixCent < 0 || nMixCentBins <= iMixCent)
         continue;
 
       const int oldTrkEvt = iTrkEvt;
@@ -203,12 +234,18 @@ void Correlator (const char* tag, const char* outFileName, TTree* jetsTree, TTre
       do {
         iTrkEvt = (iTrkEvt + 1) % nTrkEvts;
         tracksTree->GetEntry (iTrkEvt);
-        //goodEvent = true; // for disabling any mixing categories
+        //goodEvent = true; // for disabling any mixing categories (must comment out mixing categories lines below!)
+
         // mixing categories
-        goodEvent = (Ispp () ? GetppMixBin (fcal_et_p_matching) : GetFcalMixBin (fcal_et_Pb_matching)) == iMixCent;
+        goodEvent = goodEvent || GetBin (mixCentBins, nMixCentBins, Ispp () ? fcal_et_p_matching : fcal_et_Pb_matching) == iMixCent;
       }
       while (!goodEvent && iTrkEvt != oldTrkEvt);
-    }
+
+      if (!goodEvent) {
+        std::cout << "Could not find a good mixed event, so I am skipping this very interesting event!" << std::endl;
+        continue;
+      }
+    } // now we have a good mixed event match (if applicable)
 
 
     for (int iJet = 0; iJet < akt4_hi_jet_n; iJet++) {
@@ -230,32 +267,34 @@ void Correlator (const char* tag, const char* outFileName, TTree* jetsTree, TTre
     }
 
 
+    // initialize all yields to 0
+    for (int iX = 0; iX < nDPhiBins; iX++) {
+      jet_trk_dphi_gt0p5_lt1_counts[iX] = 0;
+      jet_trk_dphi_gt1_lt1p5_counts[iX] = 0;
+      jet_trk_dphi_gt1p5_lt2_counts[iX] = 0;
+      jet_trk_dphi_gt2_lt4_counts[iX] = 0;
+      jet_trk_dphi_gt4_lt6_counts[iX] = 0;
+      jet_trk_dphi_gt6_lt8_counts[iX] = 0;
+      jet_trk_dphi_gt8_lt10_counts[iX] = 0;
+      jet_trk_dphi_gt10_lt15_counts[iX] = 0;
+      jet_trk_dphi_gt15_lt20_counts[iX] = 0;
+      jet_trk_dphi_gt20_lt30_counts[iX] = 0;
+    }
+    for (int iX = 0; iX < nPtChBins; iX++) {
+      jet_trk_pt_ns_counts[iX] = 0;
+      jet_trk_pt_perp_counts[iX] = 0;
+      jet_trk_pt_as_counts[iX] = 0;
+    }
+
+    // loop over all jets in the event
     for (int iJet = 0; iJet < akt4_hi_jet_n; iJet++) {
       if (!MeetsJetPtCut (akt4_hi_jet_pt[iJet]))
         continue;
-      const double jwgt = GetAkt4JetWeight (akt4_hi_jet_pt[iJet], akt4_hi_jet_eta[iJet], akt4_hi_jet_phi[iJet], 0.4);
-      if (jwgt <= 0.)
+      const double thisjwgt = GetAkt4JetWeight (akt4_hi_jet_pt[iJet], akt4_hi_jet_eta[iJet], akt4_hi_jet_phi[iJet], 0.4);
+      if (thisjwgt <= 0.)
         continue;
 
-      for (int iX = 0; iX < nDPhiBins; iX++) {
-        jet_trk_dphi_gt0p5_lt1_counts[iX] = 0;
-        jet_trk_dphi_gt1_lt1p5_counts[iX] = 0;
-        jet_trk_dphi_gt1p5_lt2_counts[iX] = 0;
-        jet_trk_dphi_gt2_lt4_counts[iX] = 0;
-        jet_trk_dphi_gt4_lt6_counts[iX] = 0;
-        jet_trk_dphi_gt6_lt8_counts[iX] = 0;
-        jet_trk_dphi_gt8_lt10_counts[iX] = 0;
-        jet_trk_dphi_gt10_lt15_counts[iX] = 0;
-        jet_trk_dphi_gt15_lt20_counts[iX] = 0;
-        jet_trk_dphi_gt20_lt30_counts[iX] = 0;
-      }
-      for (int iX = 0; iX < nPtChBins; iX++) {
-        jet_trk_pt_ns_counts[iX] = 0;
-        jet_trk_pt_perp_counts[iX] = 0;
-        jet_trk_pt_as_counts[iX] = 0;
-      }
-
-
+      // correlate charged particles with this jet  
       for (int iTrk = 0; iTrk < trk_n; iTrk++) {
         if (trk_pt[iTrk] < pTChBins[0])
           continue;
@@ -311,76 +350,105 @@ void Correlator (const char* tag, const char* outFileName, TTree* jetsTree, TTre
           jet_trk_pt_perp_counts[iPtCh] += twgt;
         else if (dphi > 7.*M_PI/8.)
           jet_trk_pt_as_counts[iPtCh] += twgt;
-      }
 
-      for (int iX = 0; iX < nDPhiBins; iX++) {
-        h_jet_trk_dphi_gt0p5_lt1->SetBinContent (iX+1, h_jet_trk_dphi_gt0p5_lt1->GetBinContent (iX+1) + (ewgt*jwgt)*(jet_trk_dphi_gt0p5_lt1_counts[iX]));
-        for (int iY = 0; iY < nDPhiBins; iY++)
-          h2_jet_trk_dphi_gt0p5_lt1_cov->SetBinContent (iX+1, iY+1, h2_jet_trk_dphi_gt0p5_lt1_cov->GetBinContent (iX+1, iY+1) + (ewgt*jwgt)*(jet_trk_dphi_gt0p5_lt1_counts[iX])*(jet_trk_dphi_gt0p5_lt1_counts[iY]));
-      }
-      for (int iX = 0; iX < nDPhiBins; iX++) {
-        h_jet_trk_dphi_gt1_lt1p5->SetBinContent (iX+1, h_jet_trk_dphi_gt1_lt1p5->GetBinContent (iX+1) + (ewgt*jwgt)*(jet_trk_dphi_gt1_lt1p5_counts[iX]));
-        for (int iY = 0; iY < nDPhiBins; iY++)
-          h2_jet_trk_dphi_gt1_lt1p5_cov->SetBinContent (iX+1, iY+1, h2_jet_trk_dphi_gt1_lt1p5_cov->GetBinContent (iX+1, iY+1) + (ewgt*jwgt)*(jet_trk_dphi_gt1_lt1p5_counts[iX])*(jet_trk_dphi_gt1_lt1p5_counts[iY]));
-      }
-      for (int iX = 0; iX < nDPhiBins; iX++) {
-        h_jet_trk_dphi_gt1p5_lt2->SetBinContent (iX+1, h_jet_trk_dphi_gt1p5_lt2->GetBinContent (iX+1) + (ewgt*jwgt)*(jet_trk_dphi_gt1p5_lt2_counts[iX]));
-        for (int iY = 0; iY < nDPhiBins; iY++)
-          h2_jet_trk_dphi_gt1p5_lt2_cov->SetBinContent (iX+1, iY+1, h2_jet_trk_dphi_gt1p5_lt2_cov->GetBinContent (iX+1, iY+1) + (ewgt*jwgt)*(jet_trk_dphi_gt1p5_lt2_counts[iX])*(jet_trk_dphi_gt1p5_lt2_counts[iY]));
-      }
-      for (int iX = 0; iX < nDPhiBins; iX++) {
-        h_jet_trk_dphi_gt2_lt4->SetBinContent (iX+1, h_jet_trk_dphi_gt2_lt4->GetBinContent (iX+1) + (ewgt*jwgt)*(jet_trk_dphi_gt2_lt4_counts[iX]));
-        for (int iY = 0; iY < nDPhiBins; iY++)
-          h2_jet_trk_dphi_gt2_lt4_cov->SetBinContent (iX+1, iY+1, h2_jet_trk_dphi_gt2_lt4_cov->GetBinContent (iX+1, iY+1) + (ewgt*jwgt)*(jet_trk_dphi_gt2_lt4_counts[iX])*(jet_trk_dphi_gt2_lt4_counts[iY]));
-      }
-      for (int iX = 0; iX < nDPhiBins; iX++) {
-        h_jet_trk_dphi_gt4_lt6->SetBinContent (iX+1, h_jet_trk_dphi_gt4_lt6->GetBinContent (iX+1) + (ewgt*jwgt)*(jet_trk_dphi_gt4_lt6_counts[iX]));
-        for (int iY = 0; iY < nDPhiBins; iY++)
-          h2_jet_trk_dphi_gt4_lt6_cov->SetBinContent (iX+1, iY+1, h2_jet_trk_dphi_gt4_lt6_cov->GetBinContent (iX+1, iY+1) + (ewgt*jwgt)*(jet_trk_dphi_gt4_lt6_counts[iX])*(jet_trk_dphi_gt4_lt6_counts[iY]));
-      }
-      for (int iX = 0; iX < nDPhiBins; iX++) {
-        h_jet_trk_dphi_gt6_lt8->SetBinContent (iX+1, h_jet_trk_dphi_gt6_lt8->GetBinContent (iX+1) + (ewgt*jwgt)*(jet_trk_dphi_gt6_lt8_counts[iX]));
-        for (int iY = 0; iY < nDPhiBins; iY++)
-          h2_jet_trk_dphi_gt6_lt8_cov->SetBinContent (iX+1, iY+1, h2_jet_trk_dphi_gt6_lt8_cov->GetBinContent (iX+1, iY+1) + (ewgt*jwgt)*(jet_trk_dphi_gt6_lt8_counts[iX])*(jet_trk_dphi_gt6_lt8_counts[iY]));
-      }
-      for (int iX = 0; iX < nDPhiBins; iX++) {
-        h_jet_trk_dphi_gt8_lt10->SetBinContent (iX+1, h_jet_trk_dphi_gt8_lt10->GetBinContent (iX+1) + (ewgt*jwgt)*(jet_trk_dphi_gt8_lt10_counts[iX]));
-        for (int iY = 0; iY < nDPhiBins; iY++)
-          h2_jet_trk_dphi_gt8_lt10_cov->SetBinContent (iX+1, iY+1, h2_jet_trk_dphi_gt8_lt10_cov->GetBinContent (iX+1, iY+1) + (ewgt*jwgt)*(jet_trk_dphi_gt8_lt10_counts[iX])*(jet_trk_dphi_gt8_lt10_counts[iY]));
-      }
-      for (int iX = 0; iX < nDPhiBins; iX++) {
-        h_jet_trk_dphi_gt10_lt15->SetBinContent (iX+1, h_jet_trk_dphi_gt10_lt15->GetBinContent (iX+1) + (ewgt*jwgt)*(jet_trk_dphi_gt10_lt15_counts[iX]));
-        for (int iY = 0; iY < nDPhiBins; iY++)
-          h2_jet_trk_dphi_gt10_lt15_cov->SetBinContent (iX+1, iY+1, h2_jet_trk_dphi_gt10_lt15_cov->GetBinContent (iX+1, iY+1) + (ewgt*jwgt)*(jet_trk_dphi_gt10_lt15_counts[iX])*(jet_trk_dphi_gt10_lt15_counts[iY]));
-      }
-      for (int iX = 0; iX < nDPhiBins; iX++) {
-        h_jet_trk_dphi_gt15_lt20->SetBinContent (iX+1, h_jet_trk_dphi_gt15_lt20->GetBinContent (iX+1) + (ewgt*jwgt)*(jet_trk_dphi_gt15_lt20_counts[iX]));
-        for (int iY = 0; iY < nDPhiBins; iY++)
-          h2_jet_trk_dphi_gt15_lt20_cov->SetBinContent (iX+1, iY+1, h2_jet_trk_dphi_gt15_lt20_cov->GetBinContent (iX+1, iY+1) + (ewgt*jwgt)*(jet_trk_dphi_gt15_lt20_counts[iX])*(jet_trk_dphi_gt15_lt20_counts[iY]));
-      }
-      for (int iX = 0; iX < nDPhiBins; iX++) {
-        h_jet_trk_dphi_gt20_lt30->SetBinContent (iX+1, h_jet_trk_dphi_gt20_lt30->GetBinContent (iX+1) + (ewgt*jwgt)*(jet_trk_dphi_gt20_lt30_counts[iX]));
-        for (int iY = 0; iY < nDPhiBins; iY++)
-          h2_jet_trk_dphi_gt20_lt30_cov->SetBinContent (iX+1, iY+1, h2_jet_trk_dphi_gt20_lt30_cov->GetBinContent (iX+1, iY+1) + (ewgt*jwgt)*(jet_trk_dphi_gt20_lt30_counts[iX])*(jet_trk_dphi_gt20_lt30_counts[iY]));
-      }
+      } // end loop over tracks
+    } // end loop over jets
 
-      for (int iX = 0; iX < nPtChBins; iX++) {
-        h_jet_trk_pt_ns->SetBinContent (iX+1, h_jet_trk_pt_ns->GetBinContent (iX+1) + (ewgt*jwgt)*(jet_trk_pt_ns_counts[iX]));
-        for (int iY = 0; iY < nPtChBins; iY++)
-          h2_jet_trk_pt_ns_cov->SetBinContent (iX+1, iY+1, h2_jet_trk_pt_ns_cov->GetBinContent (iX+1, iY+1) + (ewgt*jwgt)*(jet_trk_pt_ns_counts[iX])*(jet_trk_pt_ns_counts[iY]));
-      }
-      for (int iX = 0; iX < nPtChBins; iX++) {
-        h_jet_trk_pt_perp->SetBinContent (iX+1, h_jet_trk_pt_perp->GetBinContent (iX+1) + (ewgt*jwgt)*(jet_trk_pt_perp_counts[iX]));
-        for (int iY = 0; iY < nPtChBins; iY++)
-          h2_jet_trk_pt_perp_cov->SetBinContent (iX+1, iY+1, h2_jet_trk_pt_perp_cov->GetBinContent (iX+1, iY+1) + (ewgt*jwgt)*(jet_trk_pt_perp_counts[iX])*(jet_trk_pt_perp_counts[iY]));
-      }
-      for (int iX = 0; iX < nPtChBins; iX++) {
-        h_jet_trk_pt_as->SetBinContent (iX+1, h_jet_trk_pt_as->GetBinContent (iX+1) + (ewgt*jwgt)*(jet_trk_pt_as_counts[iX]));
-        for (int iY = 0; iY < nPtChBins; iY++)
-          h2_jet_trk_pt_as_cov->SetBinContent (iX+1, iY+1, h2_jet_trk_pt_as_cov->GetBinContent (iX+1, iY+1) + (ewgt*jwgt)*(jet_trk_pt_as_counts[iX])*(jet_trk_pt_as_counts[iY]));
-      }
+    if (nj == 0) {
+      continue;
     }
-  }
+
+
+    // calculate per-jet hadron yields for that event by dividing out the number of jets
+    for (int iX = 0; iX < nDPhiBins; iX++) {
+      jet_trk_dphi_gt0p5_lt1_counts[iX] = jet_trk_dphi_gt0p5_lt1_counts[iX] / nj;
+      jet_trk_dphi_gt1_lt1p5_counts[iX] = jet_trk_dphi_gt1_lt1p5_counts[iX] / nj;
+      jet_trk_dphi_gt1p5_lt2_counts[iX] = jet_trk_dphi_gt1p5_lt2_counts[iX] / nj;
+      jet_trk_dphi_gt2_lt4_counts[iX] = jet_trk_dphi_gt2_lt4_counts[iX] / nj;
+      jet_trk_dphi_gt4_lt6_counts[iX] = jet_trk_dphi_gt4_lt6_counts[iX] / nj;
+      jet_trk_dphi_gt6_lt8_counts[iX] = jet_trk_dphi_gt6_lt8_counts[iX] / nj;
+      jet_trk_dphi_gt8_lt10_counts[iX] = jet_trk_dphi_gt8_lt10_counts[iX] / nj;
+      jet_trk_dphi_gt10_lt15_counts[iX] = jet_trk_dphi_gt10_lt15_counts[iX] / nj;
+      jet_trk_dphi_gt15_lt20_counts[iX] = jet_trk_dphi_gt15_lt20_counts[iX] / nj;
+      jet_trk_dphi_gt20_lt30_counts[iX] = jet_trk_dphi_gt20_lt30_counts[iX] / nj;
+    }
+    for (int iX = 0; iX < nPtChBins; iX++) {
+      jet_trk_pt_ns_counts[iX] = jet_trk_pt_ns_counts[iX] / nj;
+      jet_trk_pt_perp_counts[iX] = jet_trk_pt_perp_counts[iX] / nj;
+      jet_trk_pt_as_counts[iX] = jet_trk_pt_as_counts[iX] / nj;
+    }
+
+
+    // store results in averaging, covariance histograms
+    for (int iX = 0; iX < nDPhiBins; iX++) {
+      h_jet_trk_dphi_gt0p5_lt1->SetBinContent (iX+1, h_jet_trk_dphi_gt0p5_lt1->GetBinContent (iX+1) + (ewgt*jwgt)*(jet_trk_dphi_gt0p5_lt1_counts[iX]));
+      for (int iY = 0; iY < nDPhiBins; iY++)
+        h2_jet_trk_dphi_gt0p5_lt1_cov->SetBinContent (iX+1, iY+1, h2_jet_trk_dphi_gt0p5_lt1_cov->GetBinContent (iX+1, iY+1) + (ewgt*jwgt)*(jet_trk_dphi_gt0p5_lt1_counts[iX])*(jet_trk_dphi_gt0p5_lt1_counts[iY]));
+    }
+    for (int iX = 0; iX < nDPhiBins; iX++) {
+      h_jet_trk_dphi_gt1_lt1p5->SetBinContent (iX+1, h_jet_trk_dphi_gt1_lt1p5->GetBinContent (iX+1) + (ewgt*jwgt)*(jet_trk_dphi_gt1_lt1p5_counts[iX]));
+      for (int iY = 0; iY < nDPhiBins; iY++)
+        h2_jet_trk_dphi_gt1_lt1p5_cov->SetBinContent (iX+1, iY+1, h2_jet_trk_dphi_gt1_lt1p5_cov->GetBinContent (iX+1, iY+1) + (ewgt*jwgt)*(jet_trk_dphi_gt1_lt1p5_counts[iX])*(jet_trk_dphi_gt1_lt1p5_counts[iY]));
+    }
+    for (int iX = 0; iX < nDPhiBins; iX++) {
+      h_jet_trk_dphi_gt1p5_lt2->SetBinContent (iX+1, h_jet_trk_dphi_gt1p5_lt2->GetBinContent (iX+1) + (ewgt*jwgt)*(jet_trk_dphi_gt1p5_lt2_counts[iX]));
+      for (int iY = 0; iY < nDPhiBins; iY++)
+        h2_jet_trk_dphi_gt1p5_lt2_cov->SetBinContent (iX+1, iY+1, h2_jet_trk_dphi_gt1p5_lt2_cov->GetBinContent (iX+1, iY+1) + (ewgt*jwgt)*(jet_trk_dphi_gt1p5_lt2_counts[iX])*(jet_trk_dphi_gt1p5_lt2_counts[iY]));
+    }
+    for (int iX = 0; iX < nDPhiBins; iX++) {
+      h_jet_trk_dphi_gt2_lt4->SetBinContent (iX+1, h_jet_trk_dphi_gt2_lt4->GetBinContent (iX+1) + (ewgt*jwgt)*(jet_trk_dphi_gt2_lt4_counts[iX]));
+      for (int iY = 0; iY < nDPhiBins; iY++)
+        h2_jet_trk_dphi_gt2_lt4_cov->SetBinContent (iX+1, iY+1, h2_jet_trk_dphi_gt2_lt4_cov->GetBinContent (iX+1, iY+1) + (ewgt*jwgt)*(jet_trk_dphi_gt2_lt4_counts[iX])*(jet_trk_dphi_gt2_lt4_counts[iY]));
+    }
+    for (int iX = 0; iX < nDPhiBins; iX++) {
+      h_jet_trk_dphi_gt4_lt6->SetBinContent (iX+1, h_jet_trk_dphi_gt4_lt6->GetBinContent (iX+1) + (ewgt*jwgt)*(jet_trk_dphi_gt4_lt6_counts[iX]));
+      for (int iY = 0; iY < nDPhiBins; iY++)
+        h2_jet_trk_dphi_gt4_lt6_cov->SetBinContent (iX+1, iY+1, h2_jet_trk_dphi_gt4_lt6_cov->GetBinContent (iX+1, iY+1) + (ewgt*jwgt)*(jet_trk_dphi_gt4_lt6_counts[iX])*(jet_trk_dphi_gt4_lt6_counts[iY]));
+    }
+    for (int iX = 0; iX < nDPhiBins; iX++) {
+      h_jet_trk_dphi_gt6_lt8->SetBinContent (iX+1, h_jet_trk_dphi_gt6_lt8->GetBinContent (iX+1) + (ewgt*jwgt)*(jet_trk_dphi_gt6_lt8_counts[iX]));
+      for (int iY = 0; iY < nDPhiBins; iY++)
+        h2_jet_trk_dphi_gt6_lt8_cov->SetBinContent (iX+1, iY+1, h2_jet_trk_dphi_gt6_lt8_cov->GetBinContent (iX+1, iY+1) + (ewgt*jwgt)*(jet_trk_dphi_gt6_lt8_counts[iX])*(jet_trk_dphi_gt6_lt8_counts[iY]));
+    }
+    for (int iX = 0; iX < nDPhiBins; iX++) {
+      h_jet_trk_dphi_gt8_lt10->SetBinContent (iX+1, h_jet_trk_dphi_gt8_lt10->GetBinContent (iX+1) + (ewgt*jwgt)*(jet_trk_dphi_gt8_lt10_counts[iX]));
+      for (int iY = 0; iY < nDPhiBins; iY++)
+        h2_jet_trk_dphi_gt8_lt10_cov->SetBinContent (iX+1, iY+1, h2_jet_trk_dphi_gt8_lt10_cov->GetBinContent (iX+1, iY+1) + (ewgt*jwgt)*(jet_trk_dphi_gt8_lt10_counts[iX])*(jet_trk_dphi_gt8_lt10_counts[iY]));
+    }
+    for (int iX = 0; iX < nDPhiBins; iX++) {
+      h_jet_trk_dphi_gt10_lt15->SetBinContent (iX+1, h_jet_trk_dphi_gt10_lt15->GetBinContent (iX+1) + (ewgt*jwgt)*(jet_trk_dphi_gt10_lt15_counts[iX]));
+      for (int iY = 0; iY < nDPhiBins; iY++)
+        h2_jet_trk_dphi_gt10_lt15_cov->SetBinContent (iX+1, iY+1, h2_jet_trk_dphi_gt10_lt15_cov->GetBinContent (iX+1, iY+1) + (ewgt*jwgt)*(jet_trk_dphi_gt10_lt15_counts[iX])*(jet_trk_dphi_gt10_lt15_counts[iY]));
+    }
+    for (int iX = 0; iX < nDPhiBins; iX++) {
+      h_jet_trk_dphi_gt15_lt20->SetBinContent (iX+1, h_jet_trk_dphi_gt15_lt20->GetBinContent (iX+1) + (ewgt*jwgt)*(jet_trk_dphi_gt15_lt20_counts[iX]));
+      for (int iY = 0; iY < nDPhiBins; iY++)
+        h2_jet_trk_dphi_gt15_lt20_cov->SetBinContent (iX+1, iY+1, h2_jet_trk_dphi_gt15_lt20_cov->GetBinContent (iX+1, iY+1) + (ewgt*jwgt)*(jet_trk_dphi_gt15_lt20_counts[iX])*(jet_trk_dphi_gt15_lt20_counts[iY]));
+    }
+    for (int iX = 0; iX < nDPhiBins; iX++) {
+      h_jet_trk_dphi_gt20_lt30->SetBinContent (iX+1, h_jet_trk_dphi_gt20_lt30->GetBinContent (iX+1) + (ewgt*jwgt)*(jet_trk_dphi_gt20_lt30_counts[iX]));
+      for (int iY = 0; iY < nDPhiBins; iY++)
+        h2_jet_trk_dphi_gt20_lt30_cov->SetBinContent (iX+1, iY+1, h2_jet_trk_dphi_gt20_lt30_cov->GetBinContent (iX+1, iY+1) + (ewgt*jwgt)*(jet_trk_dphi_gt20_lt30_counts[iX])*(jet_trk_dphi_gt20_lt30_counts[iY]));
+    }
+
+
+    for (int iX = 0; iX < nPtChBins; iX++) {
+      h_jet_trk_pt_ns->SetBinContent (iX+1, h_jet_trk_pt_ns->GetBinContent (iX+1) + (ewgt*jwgt)*(jet_trk_pt_ns_counts[iX]));
+      for (int iY = 0; iY < nPtChBins; iY++)
+        h2_jet_trk_pt_ns_cov->SetBinContent (iX+1, iY+1, h2_jet_trk_pt_ns_cov->GetBinContent (iX+1, iY+1) + (ewgt*jwgt)*(jet_trk_pt_ns_counts[iX])*(jet_trk_pt_ns_counts[iY]));
+    }
+    for (int iX = 0; iX < nPtChBins; iX++) {
+      h_jet_trk_pt_perp->SetBinContent (iX+1, h_jet_trk_pt_perp->GetBinContent (iX+1) + (ewgt*jwgt)*(jet_trk_pt_perp_counts[iX]));
+      for (int iY = 0; iY < nPtChBins; iY++)
+        h2_jet_trk_pt_perp_cov->SetBinContent (iX+1, iY+1, h2_jet_trk_pt_perp_cov->GetBinContent (iX+1, iY+1) + (ewgt*jwgt)*(jet_trk_pt_perp_counts[iX])*(jet_trk_pt_perp_counts[iY]));
+    }
+    for (int iX = 0; iX < nPtChBins; iX++) {
+      h_jet_trk_pt_as->SetBinContent (iX+1, h_jet_trk_pt_as->GetBinContent (iX+1) + (ewgt*jwgt)*(jet_trk_pt_as_counts[iX]));
+      for (int iY = 0; iY < nPtChBins; iY++)
+        h2_jet_trk_pt_as_cov->SetBinContent (iX+1, iY+1, h2_jet_trk_pt_as_cov->GetBinContent (iX+1, iY+1) + (ewgt*jwgt)*(jet_trk_pt_as_counts[iX])*(jet_trk_pt_as_counts[iY]));
+    }
+
+  } // end loop over events
   cout << "Finished event loop." << endl;
 
 
@@ -444,6 +512,12 @@ void RunCorrelator (const char* collSys, const char* tag, const char* outFileNam
   if (jet_max_pt == -2)
     jet_max_pt = (double) std::atof (std::getenv ("JET_MAX_PT"));
   doMixing = (tracksInFileName != nullptr);
+
+
+  doMixVar1 = (std::string (jetsInFileName).find ("MixCatVar1") != std::string::npos || (doMixing && std::string (tracksInFileName).find ("MixCatVar1") != std::string::npos));
+  doMixVar2 = (std::string (jetsInFileName).find ("MixCatVar2") != std::string::npos || (doMixing && std::string (tracksInFileName).find ("MixCatVar2") != std::string::npos));
+  doMixVar3 = (std::string (jetsInFileName).find ("MixCatVar3") != std::string::npos || (doMixing && std::string (tracksInFileName).find ("MixCatVar3") != std::string::npos));
+
 
   TFile* jetsInFile = new TFile (jetsInFileName, "read");
   TFile* tracksInFile = (tracksInFileName != nullptr ? new TFile (tracksInFileName, "read") : nullptr);

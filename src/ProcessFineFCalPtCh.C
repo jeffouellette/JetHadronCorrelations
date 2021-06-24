@@ -27,10 +27,10 @@ void ProcessFineFCalPtCh (const char* tag, const char* outFileTag) {
   TH1D*  h_jet_counts_ref         = nullptr;
   TH1D*  h_evt_counts_ref_bkg     = nullptr;
   TH1D*  h_jet_counts_ref_bkg     = nullptr;
-  TH1D** h_evt_counts             = Get1DArray <TH1D*> (numFineFcalCentBins);
-  TH1D** h_jet_counts             = Get1DArray <TH1D*> (numFineFcalCentBins);
-  TH1D** h_evt_counts_bkg         = Get1DArray <TH1D*> (numFineFcalCentBins);
-  TH1D** h_jet_counts_bkg         = Get1DArray <TH1D*> (numFineFcalCentBins);
+  TH1D** h_evt_counts             = Get1DArray <TH1D*> (nFineFcalCentBins);
+  TH1D** h_jet_counts             = Get1DArray <TH1D*> (nFineFcalCentBins);
+  TH1D** h_evt_counts_bkg         = Get1DArray <TH1D*> (nFineFcalCentBins);
+  TH1D** h_jet_counts_bkg         = Get1DArray <TH1D*> (nFineFcalCentBins);
 
   TH1D*  h_jet_trk_pt_ns_ref            = nullptr;
   TH2D*  h2_jet_trk_pt_ns_cov_ref       = nullptr;
@@ -44,29 +44,29 @@ void ProcessFineFCalPtCh (const char* tag, const char* outFileTag) {
   TH2D*  h2_jet_trk_pt_perp_cov_ref_bkg = nullptr;
   TH1D*  h_jet_trk_pt_as_ref_bkg        = nullptr;
   TH2D*  h2_jet_trk_pt_as_cov_ref_bkg   = nullptr;
-  TH1D** h_jet_trk_pt_ns                = Get1DArray <TH1D*> (numFineFcalCentBins);
-  TH2D** h2_jet_trk_pt_ns_cov           = Get1DArray <TH2D*> (numFineFcalCentBins);
-  TH1D** h_jet_trk_pt_perp              = Get1DArray <TH1D*> (numFineFcalCentBins);
-  TH2D** h2_jet_trk_pt_perp_cov         = Get1DArray <TH2D*> (numFineFcalCentBins);
-  TH1D** h_jet_trk_pt_as                = Get1DArray <TH1D*> (numFineFcalCentBins);
-  TH2D** h2_jet_trk_pt_as_cov           = Get1DArray <TH2D*> (numFineFcalCentBins);
-  TH1D** h_jet_trk_pt_ns_bkg            = Get1DArray <TH1D*> (numFineFcalCentBins);
-  TH2D** h2_jet_trk_pt_ns_cov_bkg       = Get1DArray <TH2D*> (numFineFcalCentBins);
-  TH1D** h_jet_trk_pt_perp_bkg          = Get1DArray <TH1D*> (numFineFcalCentBins);
-  TH2D** h2_jet_trk_pt_perp_cov_bkg     = Get1DArray <TH2D*> (numFineFcalCentBins);
-  TH1D** h_jet_trk_pt_as_bkg            = Get1DArray <TH1D*> (numFineFcalCentBins);
-  TH2D** h2_jet_trk_pt_as_cov_bkg       = Get1DArray <TH2D*> (numFineFcalCentBins);
+  TH1D** h_jet_trk_pt_ns                = Get1DArray <TH1D*> (nFineFcalCentBins);
+  TH2D** h2_jet_trk_pt_ns_cov           = Get1DArray <TH2D*> (nFineFcalCentBins);
+  TH1D** h_jet_trk_pt_perp              = Get1DArray <TH1D*> (nFineFcalCentBins);
+  TH2D** h2_jet_trk_pt_perp_cov         = Get1DArray <TH2D*> (nFineFcalCentBins);
+  TH1D** h_jet_trk_pt_as                = Get1DArray <TH1D*> (nFineFcalCentBins);
+  TH2D** h2_jet_trk_pt_as_cov           = Get1DArray <TH2D*> (nFineFcalCentBins);
+  TH1D** h_jet_trk_pt_ns_bkg            = Get1DArray <TH1D*> (nFineFcalCentBins);
+  TH2D** h2_jet_trk_pt_ns_cov_bkg       = Get1DArray <TH2D*> (nFineFcalCentBins);
+  TH1D** h_jet_trk_pt_perp_bkg          = Get1DArray <TH1D*> (nFineFcalCentBins);
+  TH2D** h2_jet_trk_pt_perp_cov_bkg     = Get1DArray <TH2D*> (nFineFcalCentBins);
+  TH1D** h_jet_trk_pt_as_bkg            = Get1DArray <TH1D*> (nFineFcalCentBins);
+  TH2D** h2_jet_trk_pt_as_cov_bkg       = Get1DArray <TH2D*> (nFineFcalCentBins);
 
   TH1D*  h_jet_trk_pt_ns_ref_sig    = nullptr;
   TH1D*  h_jet_trk_pt_perp_ref_sig  = nullptr;
   TH1D*  h_jet_trk_pt_as_ref_sig    = nullptr;
-  TH1D** h_jet_trk_pt_ns_sig        = Get1DArray <TH1D*> (numFineFcalCentBins);
-  TH1D** h_jet_trk_pt_perp_sig      = Get1DArray <TH1D*> (numFineFcalCentBins);
-  TH1D** h_jet_trk_pt_as_sig        = Get1DArray <TH1D*> (numFineFcalCentBins);
+  TH1D** h_jet_trk_pt_ns_sig        = Get1DArray <TH1D*> (nFineFcalCentBins);
+  TH1D** h_jet_trk_pt_perp_sig      = Get1DArray <TH1D*> (nFineFcalCentBins);
+  TH1D** h_jet_trk_pt_as_sig        = Get1DArray <TH1D*> (nFineFcalCentBins);
 
-  TH1D** h_jet_trk_pt_ns_iaa        = Get1DArray <TH1D*> (numFineFcalCentBins);
-  TH1D** h_jet_trk_pt_perp_iaa      = Get1DArray <TH1D*> (numFineFcalCentBins);
-  TH1D** h_jet_trk_pt_as_iaa        = Get1DArray <TH1D*> (numFineFcalCentBins);
+  TH1D** h_jet_trk_pt_ns_iaa        = Get1DArray <TH1D*> (nFineFcalCentBins);
+  TH1D** h_jet_trk_pt_perp_iaa      = Get1DArray <TH1D*> (nFineFcalCentBins);
+  TH1D** h_jet_trk_pt_as_iaa        = Get1DArray <TH1D*> (nFineFcalCentBins);
 
 
   TString outFileName = outFileTag;
@@ -144,7 +144,7 @@ void ProcessFineFCalPtCh (const char* tag, const char* outFileTag) {
   }
 
 
-  for (int iCent = 0; iCent < numFineFcalCentBins; iCent++) {
+  for (int iCent = 0; iCent < nFineFcalCentBins; iCent++) {
     TString inFileName = Form ("%s/Histograms/%s/JetsHists/FineFcalCentVar/data16_5TeV_iCent%i_hists.root", rootPath.Data (), tag, iCent);
     std::cout << "Reading " << inFileName.Data () << std::endl;
     inFile = new TFile (inFileName.Data (), "read");
@@ -178,7 +178,7 @@ void ProcessFineFCalPtCh (const char* tag, const char* outFileTag) {
   }
 
 
-  for (int iCent = 0; iCent < numFineFcalCentBins; iCent++) {
+  for (int iCent = 0; iCent < nFineFcalCentBins; iCent++) {
     TString inFileName = Form ("%s/Histograms/%s/MixedHists/FineFcalCentVar/data16_5TeV_iCent%i_hists.root", rootPath.Data (), tag, iCent);
     std::cout << "Reading " << inFileName.Data () << std::endl;
     inFile = new TFile (inFileName.Data (), "read");
@@ -222,7 +222,7 @@ void ProcessFineFCalPtCh (const char* tag, const char* outFileTag) {
     h_jet_trk_pt_as_ref_sig = (TH1D*) h_jet_trk_pt_as_ref->Clone (Form ("h_jet_trk_pt_as_ref_sig"));
     h_jet_trk_pt_as_ref_sig->Add (h_jet_trk_pt_as_ref_bkg, -1);
 
-    for (int iCent = 0; iCent < numFineFcalCentBins; iCent++) {
+    for (int iCent = 0; iCent < nFineFcalCentBins; iCent++) {
       h_jet_trk_pt_ns_sig[iCent] = (TH1D*) h_jet_trk_pt_ns[iCent]->Clone (Form ("h_jet_trk_pt_ns_pPb_sig_FineFcalCent%i", iCent));
       h_jet_trk_pt_ns_sig[iCent]->Add (h_jet_trk_pt_ns_bkg[iCent], -1);
 
@@ -261,7 +261,7 @@ void ProcessFineFCalPtCh (const char* tag, const char* outFileTag) {
     h_jet_trk_pt_perp_ref_bkg->Write ();
     h_jet_trk_pt_as_ref_bkg->Write ();
 
-    for (int iCent = 0; iCent < numFineFcalCentBins; iCent++) {
+    for (int iCent = 0; iCent < nFineFcalCentBins; iCent++) {
 
       h_evt_counts[iCent]->Write ();
       h_jet_counts[iCent]->Write ();

@@ -361,15 +361,15 @@ bool JetHadronSkimmer (const char* directory,
 
 
   //*centBins = (DoFcalCentVar () ? fcalCentBins : (DoFineFcalCentVar () ? fineFcalCentBins : zdcCentBins));
-  const int numCentBins = (DoFcalCentVar () ? numFcalCentBins : (DoFineFcalCentVar () ? numFineFcalCentBins : numZdcCentBins));
+  const int nCentBins = (DoFcalCentVar () ? nFcalCentBins : (DoFineFcalCentVar () ? nFineFcalCentBins : nZdcCentBins));
 
 
   // Load files for output
-  const int numFileBins = (Ispp () ? 1 : numCentBins);
-  TFile* outFiles[numFileBins];
-  OutTree* outTrees[numFileBins];
-  for (int iFile = 0; iFile < numFileBins; iFile++) {
-    TString fName = (numFileBins == 1 ? Form ("%s/%s.root", rootPath.Data (), identifier.Data ()) : Form ("%s/%s_iCent%i.root", rootPath.Data (), identifier.Data (), iFile));
+  const int nFileBins = (Ispp () ? 1 : nCentBins);
+  TFile* outFiles[nFileBins];
+  OutTree* outTrees[nFileBins];
+  for (int iFile = 0; iFile < nFileBins; iFile++) {
+    TString fName = (nFileBins == 1 ? Form ("%s/%s.root", rootPath.Data (), identifier.Data ()) : Form ("%s/%s_iCent%i.root", rootPath.Data (), identifier.Data (), iFile));
     outFiles[iFile] = new TFile (fName.Data (), "recreate");
     //outFiles[iFile]->Delete (Form ("%s;*", outTreeName.Data ()));
 
@@ -468,11 +468,11 @@ bool JetHadronSkimmer (const char* directory,
       zdc_calibE_p *= 1e3;
 
       if (DoFcalCentVar ())
-        iCent = GetFcalCentBin (fcal_et_Pb);
+        iCent = GetBin (fcalCentBins, nFcalCentBins, fcal_et_Pb);
       else if (DoFineFcalCentVar ())
-        iCent = GetFineFcalCentBin (fcal_et_Pb);
+        iCent = GetBin (fineFcalCentBins, nFineFcalCentBins, fcal_et_Pb);
       else
-        iCent = GetZdcCentBin (zdc_calibE_Pb);
+        iCent = GetBin (zdcCentBins, nZdcCentBins, zdc_calibE_Pb);
     }
     else if (Ispp ()) {
       fcal_et_Pb = -999;
@@ -486,7 +486,7 @@ bool JetHadronSkimmer (const char* directory,
       iCent = 0;
     }
 
-    if (iCent < 0 || iCent > numCentBins-1)
+    if (iCent < 0 || iCent > nCentBins-1)
       continue;
 
     //if (IspPb () && iCent < 1)
@@ -552,7 +552,13 @@ bool JetHadronSkimmer (const char* directory,
 
       out_trk_n = 0;
       for (int iTrk = 0; iTrk < trk_n; iTrk++) {
-        if (!MeetsTrackCuts (iTrk))
+
+        bool isOKTrack = false;
+        for (int iWP = 0; iWP < trackWPs.size (); iWP++) {
+          trk_wp = trackWPs[iWP];
+          isOKTrack = isOKTrack || MeetsTrackCuts (iTrk);
+        }
+        if (!isOKTrack)
           continue;
 
         out_trk_pt[out_trk_n] = trk_pt[iTrk];
@@ -561,6 +567,9 @@ bool JetHadronSkimmer (const char* directory,
         out_trk_charge[out_trk_n] = trk_charge[iTrk];
         out_trk_d0[out_trk_n] = trk_d0[iTrk];
         out_trk_z0[out_trk_n] = trk_z0[iTrk];
+        out_trk_TightPrimary[out_trk_n] = trk_TightPrimary[iTrk];
+        out_trk_HITight[out_trk_n] = trk_HItight[iTrk];
+        out_trk_HILoose[out_trk_n] = trk_HIloose[iTrk];
         if (!IsCollisions ())
           out_trk_truth_matched[out_trk_n] = (trk_prob_truth[iTrk] > 0.5);
         out_trk_n++;
@@ -606,7 +615,7 @@ bool JetHadronSkimmer (const char* directory,
   }
   SaferDelete (&tree);
 
-  for (int iFile = 0; iFile < numFileBins; iFile++) {
+  for (int iFile = 0; iFile < nFileBins; iFile++) {
     outFiles[iFile]->Write (0, TObject::kOverwrite);
     outFiles[iFile]->Close ();
     SaferDelete (&(outFiles[iFile]));

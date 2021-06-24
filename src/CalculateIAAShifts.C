@@ -36,7 +36,7 @@ void CalculateIAAShifts (const char* tag, const char* inFileTag) {
 
   TFile* inFile = nullptr;
 
-  TH1D*** h_jet_trk_dphi_iaa = Get2DArray <TH1D*> (numZdcCentBins, nPtChSelections);
+  TH1D*** h_jet_trk_dphi_iaa = Get2DArray <TH1D*> (nZdcCentBins, nPtChSelections);
 
 
   {
@@ -48,7 +48,7 @@ void CalculateIAAShifts (const char* tag, const char* inFileTag) {
 
     for (int iPtCh = 0; iPtCh < nPtChSelections; iPtCh++) {
 
-      for (int iCent = 0; iCent < numZdcCentBins; iCent++) { 
+      for (int iCent = 0; iCent < nZdcCentBins; iCent++) { 
 
         h_jet_trk_dphi_iaa[iCent][iPtCh] = (TH1D*) inFile->Get (Form ("h_jet_trk_dphi_%s_iaa_iCent%i_Nominal", pTChSelections[iPtCh].Data (), iCent));
 
@@ -65,7 +65,7 @@ void CalculateIAAShifts (const char* tag, const char* inFileTag) {
 
     for (int iPtCh = 0; iPtCh < nPtChSelections; iPtCh++) {
 
-      for (int iCent = 0; iCent < numZdcCentBins; iCent++) { 
+      for (int iCent = 0; iCent < nZdcCentBins; iCent++) { 
 
         TF1* f = new TF1 ("f", "1+[0]", 0.3*M_PI, 0.7*M_PI);
 

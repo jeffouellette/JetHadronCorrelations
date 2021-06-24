@@ -28,7 +28,7 @@
 
 using namespace JetHadronCorrelations;
 
-std::vector <int> plotCents = {4, (int) std::floor (0.5*(numFineFcalCentBins+1)), numFineFcalCentBins-1};
+std::vector <int> plotCents = {4, (int) std::floor (0.5*(nFineFcalCentBins+1)), nFineFcalCentBins-1};
 
 
 TLine* l = new TLine ();
@@ -51,37 +51,37 @@ void PlotFineFCalPtCh (const char* tag, const char* inFileTag, const char* nomFi
   TH1D*  h_jet_trk_pt_perp_ref_sig  = nullptr;
   TH1D*  h_jet_trk_pt_as_ref_sig    = nullptr;
 
-  TH1D** h_jet_trk_pt_ns_nom        = Get1DArray <TH1D*> (numZdcCentBins);
-  TH1D** h_jet_trk_pt_perp_nom      = Get1DArray <TH1D*> (numZdcCentBins);
-  TH1D** h_jet_trk_pt_as_nom        = Get1DArray <TH1D*> (numZdcCentBins);
+  TH1D** h_jet_trk_pt_ns_nom        = Get1DArray <TH1D*> (nZdcCentBins);
+  TH1D** h_jet_trk_pt_perp_nom      = Get1DArray <TH1D*> (nZdcCentBins);
+  TH1D** h_jet_trk_pt_as_nom        = Get1DArray <TH1D*> (nZdcCentBins);
 
-  TH1D** h_jet_trk_pt_ns_bkg_nom    = Get1DArray <TH1D*> (numZdcCentBins);
-  TH1D** h_jet_trk_pt_perp_bkg_nom  = Get1DArray <TH1D*> (numZdcCentBins);
-  TH1D** h_jet_trk_pt_as_bkg_nom    = Get1DArray <TH1D*> (numZdcCentBins);
+  TH1D** h_jet_trk_pt_ns_bkg_nom    = Get1DArray <TH1D*> (nZdcCentBins);
+  TH1D** h_jet_trk_pt_perp_bkg_nom  = Get1DArray <TH1D*> (nZdcCentBins);
+  TH1D** h_jet_trk_pt_as_bkg_nom    = Get1DArray <TH1D*> (nZdcCentBins);
 
-  TH1D** h_jet_trk_pt_ns_sig_nom    = Get1DArray <TH1D*> (numZdcCentBins);
-  TH1D** h_jet_trk_pt_perp_sig_nom  = Get1DArray <TH1D*> (numZdcCentBins);
-  TH1D** h_jet_trk_pt_as_sig_nom    = Get1DArray <TH1D*> (numZdcCentBins);
+  TH1D** h_jet_trk_pt_ns_sig_nom    = Get1DArray <TH1D*> (nZdcCentBins);
+  TH1D** h_jet_trk_pt_perp_sig_nom  = Get1DArray <TH1D*> (nZdcCentBins);
+  TH1D** h_jet_trk_pt_as_sig_nom    = Get1DArray <TH1D*> (nZdcCentBins);
 
-  TH1D** h_jet_trk_pt_ns_iaa_nom    = Get1DArray <TH1D*> (numZdcCentBins);
-  TH1D** h_jet_trk_pt_perp_iaa_nom  = Get1DArray <TH1D*> (numZdcCentBins);
-  TH1D** h_jet_trk_pt_as_iaa_nom    = Get1DArray <TH1D*> (numZdcCentBins);
+  TH1D** h_jet_trk_pt_ns_iaa_nom    = Get1DArray <TH1D*> (nZdcCentBins);
+  TH1D** h_jet_trk_pt_perp_iaa_nom  = Get1DArray <TH1D*> (nZdcCentBins);
+  TH1D** h_jet_trk_pt_as_iaa_nom    = Get1DArray <TH1D*> (nZdcCentBins);
 
-  TH1D** h_jet_trk_pt_ns          = Get1DArray <TH1D*> (numFineFcalCentBins+1);
-  TH1D** h_jet_trk_pt_perp        = Get1DArray <TH1D*> (numFineFcalCentBins+1);
-  TH1D** h_jet_trk_pt_as          = Get1DArray <TH1D*> (numFineFcalCentBins+1);
+  TH1D** h_jet_trk_pt_ns          = Get1DArray <TH1D*> (nFineFcalCentBins+1);
+  TH1D** h_jet_trk_pt_perp        = Get1DArray <TH1D*> (nFineFcalCentBins+1);
+  TH1D** h_jet_trk_pt_as          = Get1DArray <TH1D*> (nFineFcalCentBins+1);
 
-  TH1D** h_jet_trk_pt_ns_bkg      = Get1DArray <TH1D*> (numFineFcalCentBins+1);
-  TH1D** h_jet_trk_pt_perp_bkg    = Get1DArray <TH1D*> (numFineFcalCentBins+1);
-  TH1D** h_jet_trk_pt_as_bkg      = Get1DArray <TH1D*> (numFineFcalCentBins+1);
+  TH1D** h_jet_trk_pt_ns_bkg      = Get1DArray <TH1D*> (nFineFcalCentBins+1);
+  TH1D** h_jet_trk_pt_perp_bkg    = Get1DArray <TH1D*> (nFineFcalCentBins+1);
+  TH1D** h_jet_trk_pt_as_bkg      = Get1DArray <TH1D*> (nFineFcalCentBins+1);
 
-  TH1D** h_jet_trk_pt_ns_sig      = Get1DArray <TH1D*> (numFineFcalCentBins+1);
-  TH1D** h_jet_trk_pt_perp_sig    = Get1DArray <TH1D*> (numFineFcalCentBins+1);
-  TH1D** h_jet_trk_pt_as_sig      = Get1DArray <TH1D*> (numFineFcalCentBins+1);
+  TH1D** h_jet_trk_pt_ns_sig      = Get1DArray <TH1D*> (nFineFcalCentBins+1);
+  TH1D** h_jet_trk_pt_perp_sig    = Get1DArray <TH1D*> (nFineFcalCentBins+1);
+  TH1D** h_jet_trk_pt_as_sig      = Get1DArray <TH1D*> (nFineFcalCentBins+1);
 
-  TH1D** h_jet_trk_pt_ns_iaa      = Get1DArray <TH1D*> (numFineFcalCentBins+1);
-  TH1D** h_jet_trk_pt_perp_iaa    = Get1DArray <TH1D*> (numFineFcalCentBins+1);
-  TH1D** h_jet_trk_pt_as_iaa      = Get1DArray <TH1D*> (numFineFcalCentBins+1);
+  TH1D** h_jet_trk_pt_ns_iaa      = Get1DArray <TH1D*> (nFineFcalCentBins+1);
+  TH1D** h_jet_trk_pt_perp_iaa    = Get1DArray <TH1D*> (nFineFcalCentBins+1);
+  TH1D** h_jet_trk_pt_as_iaa      = Get1DArray <TH1D*> (nFineFcalCentBins+1);
 
   TH1D*  h_wgts_rebinned = nullptr;
 
@@ -93,7 +93,7 @@ void PlotFineFCalPtCh (const char* tag, const char* inFileTag, const char* nomFi
     std::cout << "Reading " << inFileName.Data () << std::endl;
     inFile = new TFile (inFileName, "read");
 
-    for (int iCent = 0; iCent < numFineFcalCentBins; iCent++) {
+    for (int iCent = 0; iCent < nFineFcalCentBins; iCent++) {
       h_jet_trk_pt_ns[iCent] = (TH1D*) inFile->Get (Form ("h_jet_trk_pt_ns_pPb_FineFcalCent%i", iCent));
       h_jet_trk_pt_perp[iCent] = (TH1D*) inFile->Get (Form ("h_jet_trk_pt_perp_pPb_FineFcalCent%i", iCent));
       h_jet_trk_pt_as[iCent] = (TH1D*) inFile->Get (Form ("h_jet_trk_pt_as_pPb_FineFcalCent%i", iCent));
@@ -110,9 +110,9 @@ void PlotFineFCalPtCh (const char* tag, const char* inFileTag, const char* nomFi
       h_jet_trk_pt_as_iaa[iCent] = (TH1D*) inFile->Get (Form ("h_jet_trk_pt_as_iaa_FineFcalCent%i", iCent));
     }
 
-    h_jet_trk_pt_ns_iaa[numFineFcalCentBins] = (TH1D*) inFile->Get ("h_jet_trk_pt_ns_iaa_FineFcalComb");
-    h_jet_trk_pt_perp_iaa[numFineFcalCentBins] = (TH1D*) inFile->Get ("h_jet_trk_pt_perp_iaa_FineFcalComb");
-    h_jet_trk_pt_as_iaa[numFineFcalCentBins] = (TH1D*) inFile->Get ("h_jet_trk_pt_as_iaa_FineFcalComb");
+    h_jet_trk_pt_ns_iaa[nFineFcalCentBins] = (TH1D*) inFile->Get ("h_jet_trk_pt_ns_iaa_FineFcalComb");
+    h_jet_trk_pt_perp_iaa[nFineFcalCentBins] = (TH1D*) inFile->Get ("h_jet_trk_pt_perp_iaa_FineFcalComb");
+    h_jet_trk_pt_as_iaa[nFineFcalCentBins] = (TH1D*) inFile->Get ("h_jet_trk_pt_as_iaa_FineFcalComb");
 
     h_wgts_rebinned = (TH1D*) inFile->Get ("h_wgts_rebinned");
   }
@@ -138,7 +138,7 @@ void PlotFineFCalPtCh (const char* tag, const char* inFileTag, const char* nomFi
     h_jet_trk_pt_perp_ref_sig = (TH1D*) inFile->Get ("h_jet_trk_pt_perp_ref_sig_Nominal");
     h_jet_trk_pt_as_ref_sig = (TH1D*) inFile->Get ("h_jet_trk_pt_as_ref_sig_Nominal");
 
-    for (int iCent = 0; iCent < numZdcCentBins; iCent++) {
+    for (int iCent = 0; iCent < nZdcCentBins; iCent++) {
       h_jet_trk_pt_ns_nom[iCent] = (TH1D*) inFile->Get (Form ("h_jet_trk_pt_ns_pPb_iCent%i_Nominal", iCent));
       h_jet_trk_pt_perp_nom[iCent] = (TH1D*) inFile->Get (Form ("h_jet_trk_pt_perp_pPb_iCent%i_Nominal", iCent));
       h_jet_trk_pt_as_nom[iCent] = (TH1D*) inFile->Get (Form ("h_jet_trk_pt_as_pPb_iCent%i_Nominal", iCent));
@@ -160,9 +160,9 @@ void PlotFineFCalPtCh (const char* tag, const char* inFileTag, const char* nomFi
 
 
   int iZdcCent = 0;
-  while (iZdcCent < numZdcCentBins && zdcCentPercs[iZdcCent] > 20) iZdcCent++;
+  while (iZdcCent < nZdcCentBins && zdcCentPercs[iZdcCent] > 20) iZdcCent++;
   int iZdcPeriph = 0;
-  while (iZdcPeriph < numZdcCentBins && zdcCentPercs[iZdcPeriph] > 80) iZdcPeriph++;
+  while (iZdcPeriph < nZdcCentBins && zdcCentPercs[iZdcPeriph] > 80) iZdcPeriph++;
 
 
 
@@ -198,7 +198,7 @@ void PlotFineFCalPtCh (const char* tag, const char* inFileTag, const char* nomFi
     h->DrawCopy ("hist ][");
     SaferDelete (&h);
 
-    for (int iCent = 4; iCent < numFineFcalCentBins; iCent+=5) {
+    for (int iCent = 4; iCent < nFineFcalCentBins; iCent+=5) {
       h = (TH1D*) h_jet_trk_pt_ns_iaa[iCent]->Clone ("htemp");
       g = make_graph (h);
 
@@ -218,7 +218,7 @@ void PlotFineFCalPtCh (const char* tag, const char* inFileTag, const char* nomFi
       SaferDelete (&g);
     }
 
-    h = (TH1D*) h_jet_trk_pt_ns_iaa[numFineFcalCentBins]->Clone ("htemp");
+    h = (TH1D*) h_jet_trk_pt_ns_iaa[nFineFcalCentBins]->Clone ("htemp");
     g = make_graph (h);
 
     ResetXErrors (g);
@@ -258,8 +258,8 @@ void PlotFineFCalPtCh (const char* tag, const char* inFileTag, const char* nomFi
     myText (0.22, 0.85, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.032);
     myText (0.22, 0.81, kBlack, "#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV", 0.032);
     myText (0.22, 0.77, kBlack, Form ("#it{p}_{T}^{jet} > %s, #Delta#phi_{ch,jet} < #pi/8 (near-side)", GetJetPtStr (tag).Data ()), 0.032);
-    for (int iCent = 4; iCent < numFineFcalCentBins; iCent+=5)
-      myText (iCent < 0.5*numFineFcalCentBins ? 0.58 : 0.74, 0.53 - 0.036*0.2*(iCent < 0.5*numFineFcalCentBins ? iCent : iCent - 0.5*numFineFcalCentBins), manyColors[(iCent-4)/5], Form ("%i-%i%%", fineFcalCentPercs[iCent+1], fineFcalCentPercs[iCent]), 0.03);
+    for (int iCent = 4; iCent < nFineFcalCentBins; iCent+=5)
+      myText (iCent < 0.5*nFineFcalCentBins ? 0.58 : 0.74, 0.53 - 0.036*0.2*(iCent < 0.5*nFineFcalCentBins ? iCent : iCent - 0.5*nFineFcalCentBins), manyColors[(iCent-4)/5], Form ("%i-%i%%", fineFcalCentPercs[iCent+1], fineFcalCentPercs[iCent]), 0.03);
     myMarkerText (0.24, 0.54-8*0.036, kBlack, kFullCircle, "FCal 0-100% (wgt'd avg.)", 1.2, 0.03, true);
     myMarkerText (0.24, 0.54-9*0.036, kBlack, kOpenSquare, Form ("Zdc %i-%i%%", zdcCentPercs[iZdcCent+1], zdcCentPercs[iZdcCent]), 1.2, 0.03, true);
     myMarkerText (0.24, 0.54-10*0.036, kBlack, kOpenTriangleUp, Form ("Zdc %i-%i%%", zdcCentPercs[iZdcPeriph+1], zdcCentPercs[iZdcPeriph]), 1.2, 0.03, true);
@@ -302,7 +302,7 @@ void PlotFineFCalPtCh (const char* tag, const char* inFileTag, const char* nomFi
     h->DrawCopy ("hist ][");
     SaferDelete (&h);
 
-    for (int iCent = 4; iCent < numFineFcalCentBins; iCent+=5) {
+    for (int iCent = 4; iCent < nFineFcalCentBins; iCent+=5) {
       h = (TH1D*) h_jet_trk_pt_perp_iaa[iCent]->Clone ("htemp");
       g = make_graph (h);
 
@@ -322,7 +322,7 @@ void PlotFineFCalPtCh (const char* tag, const char* inFileTag, const char* nomFi
       SaferDelete (&g);
     }
 
-    h = (TH1D*) h_jet_trk_pt_perp_iaa[numFineFcalCentBins]->Clone ("htemp");
+    h = (TH1D*) h_jet_trk_pt_perp_iaa[nFineFcalCentBins]->Clone ("htemp");
     g = make_graph (h);
 
     ResetXErrors (g);
@@ -362,8 +362,8 @@ void PlotFineFCalPtCh (const char* tag, const char* inFileTag, const char* nomFi
     myText (0.22, 0.85, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.032);
     myText (0.22, 0.81, kBlack, "#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV", 0.032);
     myText (0.22, 0.77, kBlack, Form ("#it{p}_{T}^{jet} > %s, #pi/3 < |#Delta#phi_{ch,jet}| < 2#pi/3", GetJetPtStr (tag).Data ()), 0.032);
-    for (int iCent = 4; iCent < numFineFcalCentBins; iCent+=5)
-      myText (iCent < 0.5*numFineFcalCentBins ? 0.58 : 0.74, 0.53 - 0.036*0.2*(iCent < 0.5*numFineFcalCentBins ? iCent : iCent - 0.5*numFineFcalCentBins), manyColors[(iCent-4)/5], Form ("%i-%i%%", fineFcalCentPercs[iCent+1], fineFcalCentPercs[iCent]), 0.03);
+    for (int iCent = 4; iCent < nFineFcalCentBins; iCent+=5)
+      myText (iCent < 0.5*nFineFcalCentBins ? 0.58 : 0.74, 0.53 - 0.036*0.2*(iCent < 0.5*nFineFcalCentBins ? iCent : iCent - 0.5*nFineFcalCentBins), manyColors[(iCent-4)/5], Form ("%i-%i%%", fineFcalCentPercs[iCent+1], fineFcalCentPercs[iCent]), 0.03);
     myMarkerText (0.24, 0.54-8*0.036, kBlack, kFullCircle, "FCal 0-100% (wgt'd avg.)", 1.2, 0.03, true);
     myMarkerText (0.24, 0.54-9*0.036, kBlack, kOpenSquare, Form ("Zdc %i-%i%%", zdcCentPercs[iZdcCent+1], zdcCentPercs[iZdcCent]), 1.2, 0.03, true);
     myMarkerText (0.24, 0.54-10*0.036, kBlack, kOpenTriangleUp, Form ("Zdc %i-%i%%", zdcCentPercs[iZdcPeriph+1], zdcCentPercs[iZdcPeriph]), 1.2, 0.03, true);
@@ -406,7 +406,7 @@ void PlotFineFCalPtCh (const char* tag, const char* inFileTag, const char* nomFi
     h->DrawCopy ("hist ][");
     SaferDelete (&h);
 
-    for (int iCent = 4; iCent < numFineFcalCentBins; iCent+=5) {
+    for (int iCent = 4; iCent < nFineFcalCentBins; iCent+=5) {
       h = (TH1D*) h_jet_trk_pt_as_iaa[iCent]->Clone ("htemp");
       g = make_graph (h);
 
@@ -426,7 +426,7 @@ void PlotFineFCalPtCh (const char* tag, const char* inFileTag, const char* nomFi
       SaferDelete (&g);
     }
 
-    h = (TH1D*) h_jet_trk_pt_as_iaa[numFineFcalCentBins]->Clone ("htemp");
+    h = (TH1D*) h_jet_trk_pt_as_iaa[nFineFcalCentBins]->Clone ("htemp");
     g = make_graph (h);
 
     ResetXErrors (g);
@@ -469,8 +469,8 @@ void PlotFineFCalPtCh (const char* tag, const char* inFileTag, const char* nomFi
     myText (0.22, 0.85, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.032);
     myText (0.22, 0.81, kBlack, "#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV", 0.032);
     myText (0.22, 0.77, kBlack, Form ("#it{p}_{T}^{jet} > %s, #Delta#phi_{ch,jet} > 7#pi/8 (away-side)", GetJetPtStr (tag).Data ()), 0.032);
-    for (int iCent = 4; iCent < numFineFcalCentBins; iCent+=5)
-      myText (iCent < 0.5*numFineFcalCentBins ? 0.58 : 0.74, 0.53 - 0.036*0.2*(iCent < 0.5*numFineFcalCentBins ? iCent : iCent - 0.5*numFineFcalCentBins), manyColors[(iCent-4)/5], Form ("%i-%i%%", fineFcalCentPercs[iCent+1], fineFcalCentPercs[iCent]), 0.03);
+    for (int iCent = 4; iCent < nFineFcalCentBins; iCent+=5)
+      myText (iCent < 0.5*nFineFcalCentBins ? 0.58 : 0.74, 0.53 - 0.036*0.2*(iCent < 0.5*nFineFcalCentBins ? iCent : iCent - 0.5*nFineFcalCentBins), manyColors[(iCent-4)/5], Form ("%i-%i%%", fineFcalCentPercs[iCent+1], fineFcalCentPercs[iCent]), 0.03);
     myMarkerText (0.24, 0.54-8*0.036, kBlack, kFullCircle, "FCal 0-100% (wgt'd avg.)", 1.2, 0.03, true);
     myMarkerText (0.24, 0.54-9*0.036, kBlack, kOpenSquare, Form ("Zdc %i-%i%%", zdcCentPercs[iZdcCent+1], zdcCentPercs[iZdcCent]), 1.2, 0.03, true);
     myMarkerText (0.24, 0.54-10*0.036, kBlack, kOpenTriangleUp, Form ("Zdc %i-%i%%", zdcCentPercs[iZdcPeriph+1], zdcCentPercs[iZdcPeriph]), 1.2, 0.03, true);
@@ -533,7 +533,7 @@ void PlotFineFCalPtCh (const char* tag, const char* inFileTag, const char* nomFi
       SaferDelete (&g);
     }
 
-    h = (TH1D*) h_jet_trk_pt_ns_iaa[numFineFcalCentBins]->Clone ("htemp");
+    h = (TH1D*) h_jet_trk_pt_ns_iaa[nFineFcalCentBins]->Clone ("htemp");
     g = make_graph (h);
 
     ResetXErrors (g);
@@ -640,7 +640,7 @@ void PlotFineFCalPtCh (const char* tag, const char* inFileTag, const char* nomFi
       SaferDelete (&g);
     }
 
-    h = (TH1D*) h_jet_trk_pt_as_iaa[numFineFcalCentBins]->Clone ("htemp");
+    h = (TH1D*) h_jet_trk_pt_as_iaa[nFineFcalCentBins]->Clone ("htemp");
     g = make_graph (h);
 
     ResetXErrors (g);

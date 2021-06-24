@@ -15,14 +15,14 @@ using namespace JetHadronCorrelations;
 
 typedef TGraphAsymmErrors TGAE;
 
-const int numFinerEtaBins = 56;
-const double* finerEtaBins = linspace (-2.8, 2.8, numFinerEtaBins);
+const int nFinerEtaBins = 56;
+const double* finerEtaBins = linspace (-2.8, 2.8, nFinerEtaBins);
 
 const double etaBins[] = {0, 0.3, 0.8, 1.2, 2.1, 2.8};
-const int numEtaBins = sizeof (etaBins) / sizeof (etaBins[0]) - 1;
+const int nEtaBins = sizeof (etaBins) / sizeof (etaBins[0]) - 1;
 
 const double enJBins[] = {10, 12, 15, 18, 22, 26, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 100, 120, 140, 160, 180, 200, 220, 240, 260, 280, 300, 320, 360, 400, 450, 500};
-const int numEnJBins = sizeof (enJBins) / sizeof (enJBins[0]) - 1;
+const int nEnJBins = sizeof (enJBins) / sizeof (enJBins[0]) - 1;
 
 //const vector <int> systems = {0, 1};
 const vector <int> systems = {0};
@@ -65,11 +65,11 @@ void AnalyzeJetEnergyResolution () {
 
   TFile* inFile = new TFile (Form ("%s/JetEnergyResolution/Nominal/allSamples.root", rootPath.Data ()), "read");
 
-  const int numFinerEtaBins = 90;
-  const double* finerEtaBins = linspace (-4.5, 4.5, numFinerEtaBins);
+  const int nFinerEtaBins = 90;
+  const double* finerEtaBins = linspace (-4.5, 4.5, nFinerEtaBins);
 
   const double enJBins[] = {10, 12, 15, 18, 22, 26, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 100, 120, 140, 160, 180, 200, 220, 240, 260, 280, 300, 320, 360, 400, 450, 500};
-  const int numEnJBins = sizeof (enJBins) / sizeof (enJBins[0]) - 1;
+  const int nEnJBins = sizeof (enJBins) / sizeof (enJBins[0]) - 1;
 
   h_r2_jpts = new TH1D***[2];
   h_r2_jes = new TH1D***[2];
@@ -82,25 +82,25 @@ void AnalyzeJetEnergyResolution () {
   for (int iSys : systems) {
     const TString sys = (iSys == 0 ? "pp" : "pPb");
 
-    h_r2_jpts[iSys] = new TH1D**[numEnJBins];
-    h_r2_jes[iSys] = new TH1D**[numEnJBins];
-    h_r2_jetacorr[iSys] = new TH1D**[numEnJBins];
+    h_r2_jpts[iSys] = new TH1D**[nEnJBins];
+    h_r2_jes[iSys] = new TH1D**[nEnJBins];
+    h_r2_jetacorr[iSys] = new TH1D**[nEnJBins];
 
-    h_r4_jpts[iSys] = new TH1D**[numEnJBins];
-    h_r4_jes[iSys] = new TH1D**[numEnJBins];
-    h_r4_jetacorr[iSys] = new TH1D**[numEnJBins];
+    h_r4_jpts[iSys] = new TH1D**[nEnJBins];
+    h_r4_jes[iSys] = new TH1D**[nEnJBins];
+    h_r4_jetacorr[iSys] = new TH1D**[nEnJBins];
 
-    for (int iEnJ = 0; iEnJ < numEnJBins; iEnJ++) {
+    for (int iEnJ = 0; iEnJ < nEnJBins; iEnJ++) {
 
-      h_r2_jpts[iSys][iEnJ] = new TH1D*[numFinerEtaBins];
-      h_r2_jes[iSys][iEnJ] = new TH1D*[numFinerEtaBins];
-      h_r2_jetacorr[iSys][iEnJ] = new TH1D*[numFinerEtaBins];
+      h_r2_jpts[iSys][iEnJ] = new TH1D*[nFinerEtaBins];
+      h_r2_jes[iSys][iEnJ] = new TH1D*[nFinerEtaBins];
+      h_r2_jetacorr[iSys][iEnJ] = new TH1D*[nFinerEtaBins];
 
-      h_r4_jpts[iSys][iEnJ] = new TH1D*[numFinerEtaBins];
-      h_r4_jes[iSys][iEnJ] = new TH1D*[numFinerEtaBins];
-      h_r4_jetacorr[iSys][iEnJ] = new TH1D*[numFinerEtaBins];
+      h_r4_jpts[iSys][iEnJ] = new TH1D*[nFinerEtaBins];
+      h_r4_jes[iSys][iEnJ] = new TH1D*[nFinerEtaBins];
+      h_r4_jetacorr[iSys][iEnJ] = new TH1D*[nFinerEtaBins];
 
-      for (int iEta = 0; iEta < numFinerEtaBins; iEta++) {
+      for (int iEta = 0; iEta < nFinerEtaBins; iEta++) {
 
         h_r2_jpts[iSys][iEnJ][iEta] = (TH1D*) inFile->Get (Form ("h_r2_jpts_%s_iEnJ%i_iEta%i", sys.Data (), iEnJ, iEta));
         h_r2_jes[iSys][iEnJ][iEta] = (TH1D*) inFile->Get (Form ("h_r2_jes_%s_iEnJ%i_iEta%i", sys.Data (), iEnJ, iEta));
@@ -150,62 +150,62 @@ void AnalyzeJetEnergyResolution () {
   for (int iSys : systems) {
     const TString sys = (iSys == 0 ? "pp" : "pPb");
 
-    h2_r2_avg_jpts[iSys] = new TH2D (Form ("h2_r2_avg_jpts_%s", sys.Data ()), ";#it{E}_{truth} [GeV];#eta_{truth};#LT#it{p}_{T}^{reco} / #it{p}_{T}^{truth}#GT [%]", numEnJBins, enJBins, numFinerEtaBins, finerEtaBins);
-    h2_r2_avg_jptr[iSys] = new TH2D (Form ("h2_r2_avg_jptr_%s", sys.Data ()), ";#it{E}_{truth} [GeV];#eta_{truth};#sigma / #mu #left[#it{p}_{T}^{reco} / #it{p}_{T}^{truth}#right] [%]", numEnJBins, enJBins, numFinerEtaBins, finerEtaBins);
+    h2_r2_avg_jpts[iSys] = new TH2D (Form ("h2_r2_avg_jpts_%s", sys.Data ()), ";#it{E}_{truth} [GeV];#eta_{truth};#LT#it{p}_{T}^{reco} / #it{p}_{T}^{truth}#GT [%]", nEnJBins, enJBins, nFinerEtaBins, finerEtaBins);
+    h2_r2_avg_jptr[iSys] = new TH2D (Form ("h2_r2_avg_jptr_%s", sys.Data ()), ";#it{E}_{truth} [GeV];#eta_{truth};#sigma / #mu #left[#it{p}_{T}^{reco} / #it{p}_{T}^{truth}#right] [%]", nEnJBins, enJBins, nFinerEtaBins, finerEtaBins);
 
-    h2_r4_avg_jpts[iSys] = new TH2D (Form ("h2_r4_avg_jpts_%s", sys.Data ()), ";#it{E}_{truth} [GeV];#eta_{truth};#LT#it{p}_{T}^{reco} / #it{p}_{T}^{truth}#GT [%]", numEnJBins, enJBins, numFinerEtaBins, finerEtaBins);
-    h2_r4_avg_jptr[iSys] = new TH2D (Form ("h2_r4_avg_jptr_%s", sys.Data ()), ";#it{E}_{truth} [GeV];#eta_{truth};#sigma / #mu #left[#it{p}_{T}^{reco} / #it{p}_{T}^{truth}#right] [%]", numEnJBins, enJBins, numFinerEtaBins, finerEtaBins);
+    h2_r4_avg_jpts[iSys] = new TH2D (Form ("h2_r4_avg_jpts_%s", sys.Data ()), ";#it{E}_{truth} [GeV];#eta_{truth};#LT#it{p}_{T}^{reco} / #it{p}_{T}^{truth}#GT [%]", nEnJBins, enJBins, nFinerEtaBins, finerEtaBins);
+    h2_r4_avg_jptr[iSys] = new TH2D (Form ("h2_r4_avg_jptr_%s", sys.Data ()), ";#it{E}_{truth} [GeV];#eta_{truth};#sigma / #mu #left[#it{p}_{T}^{reco} / #it{p}_{T}^{truth}#right] [%]", nEnJBins, enJBins, nFinerEtaBins, finerEtaBins);
 
-    h2_r2_avg_jes[iSys] = new TH2D (Form ("h2_r2_avg_jes_%s", sys.Data ()), ";#it{E}_{truth} [GeV];#eta_{truth};#LT#it{E}_{reco} / #it{E}_{truth}#GT [%]", numEnJBins, enJBins, numFinerEtaBins, finerEtaBins);
-    h2_r2_avg_jer[iSys] = new TH2D (Form ("h2_r2_avg_jer_%s", sys.Data ()), ";#it{E}_{truth} [GeV];#eta_{truth};#sigma / #mu #left[#it{E}_{reco} / #it{E}_{truth}#right] [%]", numEnJBins, enJBins, numFinerEtaBins, finerEtaBins);
+    h2_r2_avg_jes[iSys] = new TH2D (Form ("h2_r2_avg_jes_%s", sys.Data ()), ";#it{E}_{truth} [GeV];#eta_{truth};#LT#it{E}_{reco} / #it{E}_{truth}#GT [%]", nEnJBins, enJBins, nFinerEtaBins, finerEtaBins);
+    h2_r2_avg_jer[iSys] = new TH2D (Form ("h2_r2_avg_jer_%s", sys.Data ()), ";#it{E}_{truth} [GeV];#eta_{truth};#sigma / #mu #left[#it{E}_{reco} / #it{E}_{truth}#right] [%]", nEnJBins, enJBins, nFinerEtaBins, finerEtaBins);
 
-    h2_r4_avg_jes[iSys] = new TH2D (Form ("h2_r4_avg_jes_%s", sys.Data ()), ";#it{E}_{truth} [GeV];#eta_{truth};#LT#it{E}_{reco} / #it{E}_{truth}#GT [%]", numEnJBins, enJBins, numFinerEtaBins, finerEtaBins);
-    h2_r4_avg_jer[iSys] = new TH2D (Form ("h2_r4_avg_jer_%s", sys.Data ()), ";#it{E}_{truth} [GeV];#eta_{truth};#sigma / #mu #left[#it{E}_{reco} / #it{E}_{truth}#right] [%]", numEnJBins, enJBins, numFinerEtaBins, finerEtaBins);
+    h2_r4_avg_jes[iSys] = new TH2D (Form ("h2_r4_avg_jes_%s", sys.Data ()), ";#it{E}_{truth} [GeV];#eta_{truth};#LT#it{E}_{reco} / #it{E}_{truth}#GT [%]", nEnJBins, enJBins, nFinerEtaBins, finerEtaBins);
+    h2_r4_avg_jer[iSys] = new TH2D (Form ("h2_r4_avg_jer_%s", sys.Data ()), ";#it{E}_{truth} [GeV];#eta_{truth};#sigma / #mu #left[#it{E}_{reco} / #it{E}_{truth}#right] [%]", nEnJBins, enJBins, nFinerEtaBins, finerEtaBins);
 
-    h2_r2_avg_jetacorr[iSys] = new TH2D (Form ("h2_r2_avg_jetacorr_%s", sys.Data ()), ";#it{E}_{truth} [GeV];#eta_{truth};#LT#eta_{reco} - #eta_{truth}#GT", numEnJBins, enJBins, numFinerEtaBins, finerEtaBins);
-    h2_r2_avg_jetares[iSys] = new TH2D (Form ("h2_r2_avg_jetares_%s", sys.Data ()), ";#it{E}_{truth} [GeV];#eta_{truth};#sigma#left[#eta_{reco} - #eta_{truth}#GT#right]", numEnJBins, enJBins, numFinerEtaBins, finerEtaBins);
+    h2_r2_avg_jetacorr[iSys] = new TH2D (Form ("h2_r2_avg_jetacorr_%s", sys.Data ()), ";#it{E}_{truth} [GeV];#eta_{truth};#LT#eta_{reco} - #eta_{truth}#GT", nEnJBins, enJBins, nFinerEtaBins, finerEtaBins);
+    h2_r2_avg_jetares[iSys] = new TH2D (Form ("h2_r2_avg_jetares_%s", sys.Data ()), ";#it{E}_{truth} [GeV];#eta_{truth};#sigma#left[#eta_{reco} - #eta_{truth}#GT#right]", nEnJBins, enJBins, nFinerEtaBins, finerEtaBins);
 
-    h2_r4_avg_jetacorr[iSys] = new TH2D (Form ("h2_r4_avg_jetacorr_%s", sys.Data ()), ";#it{E}_{truth} [GeV];#eta_{truth};#LT#eta_{reco} - #eta_{truth}#GT", numEnJBins, enJBins, numFinerEtaBins, finerEtaBins);
-    h2_r4_avg_jetares[iSys] = new TH2D (Form ("h2_r4_avg_jetares_%s", sys.Data ()), ";#it{E}_{truth} [GeV];#eta_{truth};#sigma#left[#eta_{reco} - #eta_{truth}#GT#right]", numEnJBins, enJBins, numFinerEtaBins, finerEtaBins);
+    h2_r4_avg_jetacorr[iSys] = new TH2D (Form ("h2_r4_avg_jetacorr_%s", sys.Data ()), ";#it{E}_{truth} [GeV];#eta_{truth};#LT#eta_{reco} - #eta_{truth}#GT", nEnJBins, enJBins, nFinerEtaBins, finerEtaBins);
+    h2_r4_avg_jetares[iSys] = new TH2D (Form ("h2_r4_avg_jetares_%s", sys.Data ()), ";#it{E}_{truth} [GeV];#eta_{truth};#sigma#left[#eta_{reco} - #eta_{truth}#GT#right]", nEnJBins, enJBins, nFinerEtaBins, finerEtaBins);
 
 
-    h_r2_avg_jpts[iSys] = new TH1D*[numEtaBins+1];
-    h_r2_avg_jptr[iSys] = new TH1D*[numEtaBins+1];
+    h_r2_avg_jpts[iSys] = new TH1D*[nEtaBins+1];
+    h_r2_avg_jptr[iSys] = new TH1D*[nEtaBins+1];
 
-    h_r4_avg_jpts[iSys] = new TH1D*[numEtaBins+1];
-    h_r4_avg_jptr[iSys] = new TH1D*[numEtaBins+1];
+    h_r4_avg_jpts[iSys] = new TH1D*[nEtaBins+1];
+    h_r4_avg_jptr[iSys] = new TH1D*[nEtaBins+1];
 
-    h_r2_avg_jes[iSys] = new TH1D*[numEtaBins+1];
-    h_r2_avg_jer[iSys] = new TH1D*[numEtaBins+1];
+    h_r2_avg_jes[iSys] = new TH1D*[nEtaBins+1];
+    h_r2_avg_jer[iSys] = new TH1D*[nEtaBins+1];
 
-    h_r4_avg_jes[iSys] = new TH1D*[numEtaBins+1];
-    h_r4_avg_jer[iSys] = new TH1D*[numEtaBins+1];
+    h_r4_avg_jes[iSys] = new TH1D*[nEtaBins+1];
+    h_r4_avg_jer[iSys] = new TH1D*[nEtaBins+1];
 
-    h_r2_avg_jetacorr[iSys] = new TH1D*[numEtaBins+1];
-    h_r2_avg_jetares[iSys] = new TH1D*[numEtaBins+1];
+    h_r2_avg_jetacorr[iSys] = new TH1D*[nEtaBins+1];
+    h_r2_avg_jetares[iSys] = new TH1D*[nEtaBins+1];
 
-    h_r4_avg_jetacorr[iSys] = new TH1D*[numEtaBins+1];
-    h_r4_avg_jetares[iSys] = new TH1D*[numEtaBins+1];
+    h_r4_avg_jetacorr[iSys] = new TH1D*[nEtaBins+1];
+    h_r4_avg_jetares[iSys] = new TH1D*[nEtaBins+1];
 
-    for (int iEta = 0; iEta <= numEtaBins; iEta++) {
+    for (int iEta = 0; iEta <= nEtaBins; iEta++) {
 
-      h_r2_avg_jpts[iSys][iEta] = new TH1D (Form ("h_r2_avg_jpts_%s_iEta%i", sys.Data (), iEta), ";#it{E}_{truth} [GeV];#LT#it{p}_{T}^{reco} / #it{p}_{T}^{truth}#GT [%]", numEnJBins, enJBins);
-      h_r2_avg_jptr[iSys][iEta] = new TH1D (Form ("h_r2_avg_jptr_%s_iEta%i", sys.Data (), iEta), ";#it{E}_{truth} [GeV];#sigma / #mu #left[#it{p}_{T}^{reco} / #it{p}_{T}^{truth}#right] [%]", numEnJBins, enJBins);
+      h_r2_avg_jpts[iSys][iEta] = new TH1D (Form ("h_r2_avg_jpts_%s_iEta%i", sys.Data (), iEta), ";#it{E}_{truth} [GeV];#LT#it{p}_{T}^{reco} / #it{p}_{T}^{truth}#GT [%]", nEnJBins, enJBins);
+      h_r2_avg_jptr[iSys][iEta] = new TH1D (Form ("h_r2_avg_jptr_%s_iEta%i", sys.Data (), iEta), ";#it{E}_{truth} [GeV];#sigma / #mu #left[#it{p}_{T}^{reco} / #it{p}_{T}^{truth}#right] [%]", nEnJBins, enJBins);
 
-      h_r4_avg_jpts[iSys][iEta] = new TH1D (Form ("h_r4_avg_jpts_%s_iEta%i", sys.Data (), iEta), ";#it{E}_{truth} [GeV];#LT#it{p}_{T}^{reco} / #it{p}_{T}^{truth}#GT [%]", numEnJBins, enJBins);
-      h_r4_avg_jptr[iSys][iEta] = new TH1D (Form ("h_r4_avg_jptr_%s_iEta%i", sys.Data (), iEta), ";#it{E}_{truth} [GeV];#sigma / #mu #left[#it{p}_{T}^{reco} / #it{p}_{T}^{truth}#right] [%]", numEnJBins, enJBins);
+      h_r4_avg_jpts[iSys][iEta] = new TH1D (Form ("h_r4_avg_jpts_%s_iEta%i", sys.Data (), iEta), ";#it{E}_{truth} [GeV];#LT#it{p}_{T}^{reco} / #it{p}_{T}^{truth}#GT [%]", nEnJBins, enJBins);
+      h_r4_avg_jptr[iSys][iEta] = new TH1D (Form ("h_r4_avg_jptr_%s_iEta%i", sys.Data (), iEta), ";#it{E}_{truth} [GeV];#sigma / #mu #left[#it{p}_{T}^{reco} / #it{p}_{T}^{truth}#right] [%]", nEnJBins, enJBins);
 
-      h_r2_avg_jes[iSys][iEta] = new TH1D (Form ("h_r2_avg_jes_%s_iEta%i", sys.Data (), iEta), ";#it{E}_{truth} [GeV];#LT#it{E}_{reco} / #it{E}_{truth}#GT [%]", numEnJBins, enJBins);
-      h_r2_avg_jer[iSys][iEta] = new TH1D (Form ("h_r2_avg_jer_%s_iEta%i", sys.Data (), iEta), ";#it{E}_{truth} [GeV];#sigma / #mu #left[#it{E}_{reco} / #it{E}_{truth}#right] [%]", numEnJBins, enJBins);
+      h_r2_avg_jes[iSys][iEta] = new TH1D (Form ("h_r2_avg_jes_%s_iEta%i", sys.Data (), iEta), ";#it{E}_{truth} [GeV];#LT#it{E}_{reco} / #it{E}_{truth}#GT [%]", nEnJBins, enJBins);
+      h_r2_avg_jer[iSys][iEta] = new TH1D (Form ("h_r2_avg_jer_%s_iEta%i", sys.Data (), iEta), ";#it{E}_{truth} [GeV];#sigma / #mu #left[#it{E}_{reco} / #it{E}_{truth}#right] [%]", nEnJBins, enJBins);
 
-      h_r4_avg_jes[iSys][iEta] = new TH1D (Form ("h_r4_avg_jes_%s_iEta%i", sys.Data (), iEta), ";#it{E}_{truth} [GeV];#LT#it{E}_{reco} / #it{E}_{truth}#GT [%]", numEnJBins, enJBins);
-      h_r4_avg_jer[iSys][iEta] = new TH1D (Form ("h_r4_avg_jer_%s_iEta%i", sys.Data (), iEta), ";#it{E}_{truth} [GeV];#sigma / #mu #left[#it{E}_{reco} / #it{E}_{truth}#right] [%]", numEnJBins, enJBins);
+      h_r4_avg_jes[iSys][iEta] = new TH1D (Form ("h_r4_avg_jes_%s_iEta%i", sys.Data (), iEta), ";#it{E}_{truth} [GeV];#LT#it{E}_{reco} / #it{E}_{truth}#GT [%]", nEnJBins, enJBins);
+      h_r4_avg_jer[iSys][iEta] = new TH1D (Form ("h_r4_avg_jer_%s_iEta%i", sys.Data (), iEta), ";#it{E}_{truth} [GeV];#sigma / #mu #left[#it{E}_{reco} / #it{E}_{truth}#right] [%]", nEnJBins, enJBins);
 
-      h_r2_avg_jetacorr[iSys][iEta] = new TH1D (Form ("h_r2_avg_jetacorr_%s_iEta%i", sys.Data (), iEta), ";#it{E}_{truth} [GeV];#LT#eta_{reco} - #eta_{truth}#GT", numEnJBins, enJBins);
-      h_r2_avg_jetares[iSys][iEta] = new TH1D (Form ("h_r2_avg_jetares_%s_iEta%i", sys.Data (), iEta), ";#it{E}_{truth} [GeV];#sigma#left[#eta_{reco} - #eta_{truth}#GT#right]", numEnJBins, enJBins);
+      h_r2_avg_jetacorr[iSys][iEta] = new TH1D (Form ("h_r2_avg_jetacorr_%s_iEta%i", sys.Data (), iEta), ";#it{E}_{truth} [GeV];#LT#eta_{reco} - #eta_{truth}#GT", nEnJBins, enJBins);
+      h_r2_avg_jetares[iSys][iEta] = new TH1D (Form ("h_r2_avg_jetares_%s_iEta%i", sys.Data (), iEta), ";#it{E}_{truth} [GeV];#sigma#left[#eta_{reco} - #eta_{truth}#GT#right]", nEnJBins, enJBins);
 
-      h_r4_avg_jetacorr[iSys][iEta] = new TH1D (Form ("h_r4_avg_jetacorr_%s_iEta%i", sys.Data (), iEta), ";#it{E}_{truth} [GeV];#LT#eta_{reco} - #eta_{truth}#GT", numEnJBins, enJBins);
-      h_r4_avg_jetares[iSys][iEta] = new TH1D (Form ("h_r4_avg_jetares_%s_iEta%i", sys.Data (), iEta), ";#it{E}_{truth} [GeV];#sigma#left[#eta_{reco} - #eta_{truth}#GT#right]", numEnJBins, enJBins);
+      h_r4_avg_jetacorr[iSys][iEta] = new TH1D (Form ("h_r4_avg_jetacorr_%s_iEta%i", sys.Data (), iEta), ";#it{E}_{truth} [GeV];#LT#eta_{reco} - #eta_{truth}#GT", nEnJBins, enJBins);
+      h_r4_avg_jetares[iSys][iEta] = new TH1D (Form ("h_r4_avg_jetares_%s_iEta%i", sys.Data (), iEta), ";#it{E}_{truth} [GeV];#sigma#left[#eta_{reco} - #eta_{truth}#GT#right]", nEnJBins, enJBins);
 
     } // end loop over iEta
   } // end loop over iSys
@@ -215,27 +215,27 @@ void AnalyzeJetEnergyResolution () {
   for (int iSys : systems) {
     const TString sys = (iSys == 0 ? "pp" : "pPb");
 
-    for (int iEnJ = 0; iEnJ < numEnJBins; iEnJ++) {
+    for (int iEnJ = 0; iEnJ < nEnJBins; iEnJ++) {
 
-      TH1D** h_r2_jpts_integratedEta = new TH1D*[numEtaBins+1];
-      for (int iEta = 0; iEta <= numEtaBins; iEta++) {
+      TH1D** h_r2_jpts_integratedEta = new TH1D*[nEtaBins+1];
+      for (int iEta = 0; iEta <= nEtaBins; iEta++) {
         h_r2_jpts_integratedEta[iEta] = new TH1D (Form ("h_r2_jpts_integratedEta_%s_iEta%i", sys.Data (), iEta), "#it{p}_{T}^{reco} / #it{p}_{T}^{truth}", 140, 0.3, 1.7);
         h_r2_jpts_integratedEta[iEta]->Sumw2 ();
       }
 
-      for (int iFinerEta = 0; iFinerEta < numFinerEtaBins; iFinerEta++) {
+      for (int iFinerEta = 0; iFinerEta < nFinerEtaBins; iFinerEta++) {
 
         // first add to eta-integrated plot
         const float binCenter = 0.5 * fabs (finerEtaBins[iFinerEta] + finerEtaBins[iFinerEta+1]);
         int iEta = 0;
-        while (iEta < numEtaBins) {
+        while (iEta < nEtaBins) {
           if (etaBins[iEta] < binCenter && binCenter < etaBins[iEta+1])
             break;
           iEta++;
         }
 
         h_r2_jpts_integratedEta[iEta]->Add (h_r2_jpts[iSys][iEnJ][iFinerEta]);
-        h_r2_jpts_integratedEta[numEtaBins]->Add (h_r2_jpts[iSys][iEnJ][iFinerEta]);
+        h_r2_jpts_integratedEta[nEtaBins]->Add (h_r2_jpts[iSys][iEnJ][iFinerEta]);
 
         TF1* fit = new TF1 ("fit", "gaus(0)", 0.3, 1.7);
         fit->SetParameter (0, h_r2_jpts[iSys][iEnJ][iFinerEta]->Integral ());
@@ -275,7 +275,7 @@ void AnalyzeJetEnergyResolution () {
         h2_r2_avg_jptr[iSys]->SetBinError (iEnJ+1, iFinerEta+1, jptr_err * 100);
       }
 
-      for (int iEta = 0; iEta <= numEtaBins; iEta++) {
+      for (int iEta = 0; iEta <= nEtaBins; iEta++) {
 
         TF1* fit = new TF1 ("fit", "gaus(0)", 0.3, 1.7);
         fit->SetParameter (0, h_r2_jpts_integratedEta[iEta]->Integral ());
@@ -321,25 +321,25 @@ void AnalyzeJetEnergyResolution () {
 
 
 
-      TH1D** h_r4_jpts_integratedEta = new TH1D*[numEtaBins+1];
-      for (int iEta = 0; iEta <= numEtaBins; iEta++) {
+      TH1D** h_r4_jpts_integratedEta = new TH1D*[nEtaBins+1];
+      for (int iEta = 0; iEta <= nEtaBins; iEta++) {
         h_r4_jpts_integratedEta[iEta] = new TH1D (Form ("h_r4_jpts_integratedEta_%s_iEta%i", sys.Data (), iEta), "#it{p}_{T}^{reco} / #it{p}_{T}^{truth}", 140, 0.3, 1.7);
         h_r4_jpts_integratedEta[iEta]->Sumw2 ();
       }
 
-      for (int iFinerEta = 0; iFinerEta < numFinerEtaBins; iFinerEta++) {
+      for (int iFinerEta = 0; iFinerEta < nFinerEtaBins; iFinerEta++) {
 
         // first add to eta-integrated plot
         const float binCenter = 0.5 * fabs (finerEtaBins[iFinerEta] + finerEtaBins[iFinerEta+1]);
         int iEta = 0;
-        while (iEta < numEtaBins) {
+        while (iEta < nEtaBins) {
           if (etaBins[iEta] < binCenter && binCenter < etaBins[iEta+1])
             break;
           iEta++;
         }
 
         h_r4_jpts_integratedEta[iEta]->Add (h_r4_jpts[iSys][iEnJ][iFinerEta]);
-        h_r4_jpts_integratedEta[numEtaBins]->Add (h_r4_jpts[iSys][iEnJ][iFinerEta]);
+        h_r4_jpts_integratedEta[nEtaBins]->Add (h_r4_jpts[iSys][iEnJ][iFinerEta]);
 
         TF1* fit = new TF1 ("fit", "gaus(0)", 0.3, 1.7);
         fit->SetParameter (0, h_r4_jpts[iSys][iEnJ][iFinerEta]->Integral ());
@@ -379,7 +379,7 @@ void AnalyzeJetEnergyResolution () {
         h2_r4_avg_jptr[iSys]->SetBinError (iEnJ+1, iFinerEta+1, jptr_err * 100);
       }
 
-      for (int iEta = 0; iEta <= numEtaBins; iEta++) {
+      for (int iEta = 0; iEta <= nEtaBins; iEta++) {
 
         TF1* fit = new TF1 ("fit", "gaus(0)", 0.3, 1.7);
         fit->SetParameter (0, h_r4_jpts_integratedEta[iEta]->Integral ());
@@ -425,25 +425,25 @@ void AnalyzeJetEnergyResolution () {
 
 
 
-      TH1D** h_r2_jes_integratedEta = new TH1D*[numEtaBins+1];
-      for (int iEta = 0; iEta <= numEtaBins; iEta++) {
+      TH1D** h_r2_jes_integratedEta = new TH1D*[nEtaBins+1];
+      for (int iEta = 0; iEta <= nEtaBins; iEta++) {
         h_r2_jes_integratedEta[iEta] = new TH1D (Form ("h_r2_jes_integratedEta_%s_iEta%i", sys.Data (), iEta), "#it{E}_{reco} / #it{E}_{truth}", 140, 0.3, 1.7);
         h_r2_jes_integratedEta[iEta]->Sumw2 ();
       }
 
-      for (int iFinerEta = 0; iFinerEta < numFinerEtaBins; iFinerEta++) {
+      for (int iFinerEta = 0; iFinerEta < nFinerEtaBins; iFinerEta++) {
 
         // first add to eta-integrated plot
         const float binCenter = 0.5 * fabs (finerEtaBins[iFinerEta] + finerEtaBins[iFinerEta+1]);
         int iEta = 0;
-        while (iEta < numEtaBins) {
+        while (iEta < nEtaBins) {
           if (etaBins[iEta] < binCenter && binCenter < etaBins[iEta+1])
             break;
           iEta++;
         }
 
         h_r2_jes_integratedEta[iEta]->Add (h_r2_jes[iSys][iEnJ][iFinerEta]);
-        h_r2_jes_integratedEta[numEtaBins]->Add (h_r2_jes[iSys][iEnJ][iFinerEta]);
+        h_r2_jes_integratedEta[nEtaBins]->Add (h_r2_jes[iSys][iEnJ][iFinerEta]);
 
         TF1* fit = new TF1 ("fit", "gaus(0)", 0.3, 1.7);
         fit->SetParameter (0, h_r2_jes[iSys][iEnJ][iFinerEta]->Integral ());
@@ -483,7 +483,7 @@ void AnalyzeJetEnergyResolution () {
         h2_r2_avg_jer[iSys]->SetBinError (iEnJ+1, iFinerEta+1, jer_err * 100);
       }
 
-      for (int iEta = 0; iEta <= numEtaBins; iEta++) {
+      for (int iEta = 0; iEta <= nEtaBins; iEta++) {
 
         TF1* fit = new TF1 ("fit", "gaus(0)", 0.3, 1.7);
         fit->SetParameter (0, h_r2_jes_integratedEta[iEta]->Integral ());
@@ -529,25 +529,25 @@ void AnalyzeJetEnergyResolution () {
 
 
 
-      TH1D** h_r4_jes_integratedEta = new TH1D*[numEtaBins+1];
-      for (int iEta = 0; iEta <= numEtaBins; iEta++) {
+      TH1D** h_r4_jes_integratedEta = new TH1D*[nEtaBins+1];
+      for (int iEta = 0; iEta <= nEtaBins; iEta++) {
         h_r4_jes_integratedEta[iEta] = new TH1D (Form ("h_r4_jes_integratedEta_%s_iEta%i", sys.Data (), iEta), "#it{E}_{reco} / #it{E}_{truth}", 140, 0.3, 1.7);
         h_r4_jes_integratedEta[iEta]->Sumw2 ();
       }
 
-      for (int iFinerEta = 0; iFinerEta < numFinerEtaBins; iFinerEta++) {
+      for (int iFinerEta = 0; iFinerEta < nFinerEtaBins; iFinerEta++) {
 
         // first add to eta-integrated plot
         const float binCenter = 0.5 * fabs (finerEtaBins[iFinerEta] + finerEtaBins[iFinerEta+1]);
         int iEta = 0;
-        while (iEta < numEtaBins) {
+        while (iEta < nEtaBins) {
           if (etaBins[iEta] < binCenter && binCenter < etaBins[iEta+1])
             break;
           iEta++;
         }
 
         h_r4_jes_integratedEta[iEta]->Add (h_r4_jes[iSys][iEnJ][iFinerEta]);
-        h_r4_jes_integratedEta[numEtaBins]->Add (h_r4_jes[iSys][iEnJ][iFinerEta]);
+        h_r4_jes_integratedEta[nEtaBins]->Add (h_r4_jes[iSys][iEnJ][iFinerEta]);
 
         TF1* fit = new TF1 ("fit", "gaus(0)", 0.3, 1.7);
         fit->SetParameter (0, h_r4_jes[iSys][iEnJ][iFinerEta]->Integral ());
@@ -587,7 +587,7 @@ void AnalyzeJetEnergyResolution () {
         h2_r4_avg_jer[iSys]->SetBinError (iEnJ+1, iFinerEta+1, jer_err * 100);
       }
 
-      for (int iEta = 0; iEta <= numEtaBins; iEta++) {
+      for (int iEta = 0; iEta <= nEtaBins; iEta++) {
 
         TF1* fit = new TF1 ("fit", "gaus(0)", 0.3, 1.7);
         fit->SetParameter (0, h_r4_jes_integratedEta[iEta]->Integral ());
@@ -633,25 +633,25 @@ void AnalyzeJetEnergyResolution () {
 
 
 
-      TH1D** h_r2_jetacorr_integratedEta = new TH1D*[numEtaBins+1];
-      for (int iEta = 0; iEta <= numEtaBins; iEta++) {
+      TH1D** h_r2_jetacorr_integratedEta = new TH1D*[nEtaBins+1];
+      for (int iEta = 0; iEta <= nEtaBins; iEta++) {
         h_r2_jetacorr_integratedEta[iEta] = new TH1D (Form ("h_r2_jetacorr_integratedEta_%s_iEta%i", sys.Data (), iEta), "#eta_{reco} - #eta_{truth}", 80, -0.2, 0.2);
         h_r2_jetacorr_integratedEta[iEta]->Sumw2 ();
       }
 
-      for (int iFinerEta = 0; iFinerEta < numFinerEtaBins; iFinerEta++) {
+      for (int iFinerEta = 0; iFinerEta < nFinerEtaBins; iFinerEta++) {
 
         // first add to eta-integrated plot
         const float binCenter = 0.5 * fabs (finerEtaBins[iFinerEta] + finerEtaBins[iFinerEta+1]);
         int iEta = 0;
-        while (iEta < numEtaBins) {
+        while (iEta < nEtaBins) {
           if (etaBins[iEta] < binCenter && binCenter < etaBins[iEta+1])
             break;
           iEta++;
         }
 
         h_r2_jetacorr_integratedEta[iEta]->Add (h_r2_jetacorr[iSys][iEnJ][iFinerEta]);
-        h_r2_jetacorr_integratedEta[numEtaBins]->Add (h_r2_jetacorr[iSys][iEnJ][iFinerEta]);
+        h_r2_jetacorr_integratedEta[nEtaBins]->Add (h_r2_jetacorr[iSys][iEnJ][iFinerEta]);
 
         TF1* fit = new TF1 ("fit", "gaus(0)", -0.2, 0.2);
         fit->SetParameter (0, h_r2_jetacorr[iSys][iEnJ][iFinerEta]->Integral ());
@@ -691,7 +691,7 @@ void AnalyzeJetEnergyResolution () {
         h2_r2_avg_jetares[iSys]->SetBinError (iEnJ+1, iFinerEta+1, jetares_err * 100);
       }
 
-      for (int iEta = 0; iEta <= numEtaBins; iEta++) {
+      for (int iEta = 0; iEta <= nEtaBins; iEta++) {
 
         TF1* fit = new TF1 ("fit", "gaus(0)", -0.2, 0.2);
         fit->SetParameter (0, h_r2_jetacorr_integratedEta[iEta]->Integral ());
@@ -737,25 +737,25 @@ void AnalyzeJetEnergyResolution () {
 
 
 
-      TH1D** h_r4_jetacorr_integratedEta = new TH1D*[numEtaBins+1];
-      for (int iEta = 0; iEta <= numEtaBins; iEta++) {
+      TH1D** h_r4_jetacorr_integratedEta = new TH1D*[nEtaBins+1];
+      for (int iEta = 0; iEta <= nEtaBins; iEta++) {
         h_r4_jetacorr_integratedEta[iEta] = new TH1D (Form ("h_r4_jetacorr_integratedEta_%s_iEta%i", sys.Data (), iEta), "#eta_{reco} - #eta_{truth}", 80, -0.2, 0.2);
         h_r4_jetacorr_integratedEta[iEta]->Sumw2 ();
       }
 
-      for (int iFinerEta = 0; iFinerEta < numFinerEtaBins; iFinerEta++) {
+      for (int iFinerEta = 0; iFinerEta < nFinerEtaBins; iFinerEta++) {
 
         // first add to eta-integrated plot
         const float binCenter = 0.5 * fabs (finerEtaBins[iFinerEta] + finerEtaBins[iFinerEta+1]);
         int iEta = 0;
-        while (iEta < numEtaBins) {
+        while (iEta < nEtaBins) {
           if (etaBins[iEta] < binCenter && binCenter < etaBins[iEta+1])
             break;
           iEta++;
         }
 
         h_r4_jetacorr_integratedEta[iEta]->Add (h_r4_jetacorr[iSys][iEnJ][iFinerEta]);
-        h_r4_jetacorr_integratedEta[numEtaBins]->Add (h_r4_jetacorr[iSys][iEnJ][iFinerEta]);
+        h_r4_jetacorr_integratedEta[nEtaBins]->Add (h_r4_jetacorr[iSys][iEnJ][iFinerEta]);
 
         TF1* fit = new TF1 ("fit", "gaus(0)", -0.2, 0.2);
         fit->SetParameter (0, h_r4_jetacorr[iSys][iEnJ][iFinerEta]->Integral ());
@@ -795,7 +795,7 @@ void AnalyzeJetEnergyResolution () {
         h2_r4_avg_jetares[iSys]->SetBinError (iEnJ+1, iFinerEta+1, jetares_err * 100);
       }
 
-      for (int iEta = 0; iEta <= numEtaBins; iEta++) {
+      for (int iEta = 0; iEta <= nEtaBins; iEta++) {
 
         TF1* fit = new TF1 ("fit", "gaus(0)", -0.2, 0.2);
         fit->SetParameter (0, h_r4_jetacorr_integratedEta[iEta]->Integral ());
@@ -861,7 +861,7 @@ void AnalyzeJetEnergyResolution () {
     h2_r4_avg_jetacorr[iSys]->Write ();
     h2_r4_avg_jetacorr[iSys]->Write ();
 
-    for (int iEta = 0; iEta <= numEtaBins; iEta++) {
+    for (int iEta = 0; iEta <= nEtaBins; iEta++) {
       h_r2_avg_jpts[iSys][iEta]->Write ();
       h_r2_avg_jptr[iSys][iEta]->Write ();
 

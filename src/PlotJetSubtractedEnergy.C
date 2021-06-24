@@ -33,11 +33,11 @@ void PlotJetSubtractedEnergy () {
   TH2D* h2_Pb_fcal_et_jet_subEt = (TH2D*) inFile->Get ("h2_Pb_fcal_et_jet_subEt");
   TH2D* h2_Pb_fcal_et_jet_subE  = (TH2D*) inFile->Get ("h2_Pb_fcal_et_jet_subE");
 
-  const int numCentBins = (DoFcalCentVar () ? numFcalCentBins : (DoFineFcalCentVar () ? numFineFcalCentBins : numZdcCentBins));
-  TH1D** h_jet_subEt = new TH1D* [numCentBins];
-  TH1D** h_jet_subEt_ratio = new TH1D* [numCentBins];
-  TH1D** h_jet_subE = new TH1D* [numCentBins];
-  TH1D** h_jet_subE_ratio = new TH1D* [numCentBins];
+  const int nCentBins = (DoFcalCentVar () ? nFcalCentBins : (DoFineFcalCentVar () ? nFineFcalCentBins : nZdcCentBins));
+  TH1D** h_jet_subEt = new TH1D* [nCentBins];
+  TH1D** h_jet_subEt_ratio = new TH1D* [nCentBins];
+  TH1D** h_jet_subE = new TH1D* [nCentBins];
+  TH1D** h_jet_subE_ratio = new TH1D* [nCentBins];
 
   TH1D*  h_jet_subEt_ref = (TH1D*) inFile->Get ("h_jet_subEt");
   h_jet_subEt_ref->Rebin (2);
@@ -46,7 +46,7 @@ void PlotJetSubtractedEnergy () {
   h_jet_subE_ref->Rebin (2);
   h_jet_subE_ref->Scale (1./ h_jet_subE_ref->Integral (), "width");
 
-  for (int iCent = 0; iCent < numCentBins; iCent++) {
+  for (int iCent = 0; iCent < nCentBins; iCent++) {
 
     h_jet_subEt[iCent] = (TH1D*) inFile->Get (Form ("h_jet_subEt_iCent%i", iCent));
     h_jet_subEt[iCent]->Rebin (2);
@@ -117,7 +117,7 @@ void PlotJetSubtractedEnergy () {
     h->DrawCopy ("hist");
     SaferDelete (&h);
 
-    for (int iCent = 0; iCent < numCentBins; iCent++) {
+    for (int iCent = 0; iCent < nCentBins; iCent++) {
 
       h = (TH1D*) h_jet_subEt[iCent]->Clone ("htemp");
 
@@ -134,7 +134,7 @@ void PlotJetSubtractedEnergy () {
     myText (0.20, 0.740, kBlack, "#Sigma#it{E}_{ZDC}^{Pb} Percentiles", 0.032);
 
     myText (0.6, 0.860, kBlack, "#bf{#it{pp}}", 0.032);
-    for (int iCent = 0; iCent < numCentBins; iCent++)
+    for (int iCent = 0; iCent < nCentBins; iCent++)
       myText (0.6, 0.82-iCent*0.04, colors[iCent], Form ("#bf{#it{p}+Pb, %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.032);
 
 
@@ -170,7 +170,7 @@ void PlotJetSubtractedEnergy () {
     h->DrawCopy ("hist");
     SaferDelete (&h);
 
-    for (int iCent = 0; iCent < numCentBins; iCent++) {
+    for (int iCent = 0; iCent < nCentBins; iCent++) {
       h = (TH1D*) h_jet_subEt_ratio[iCent]->Clone ("htemp");
       h->SetLineColor (colors[iCent]);
 

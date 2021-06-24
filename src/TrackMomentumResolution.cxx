@@ -198,19 +198,19 @@ bool TrackMomentumResolution (const char* directory,
   else if (IspPb ())  sys = "pPb";
   else                sys = "???";
 
-  const int numFinerEtaTrkBins = 40;
-  const double* finerEtaTrkBins = linspace (-2.5, 2.5, numFinerEtaTrkBins);
+  const int nFinerEtaTrkBins = 40;
+  const double* finerEtaTrkBins = linspace (-2.5, 2.5, nFinerEtaTrkBins);
 
   const double pTchBins[] = {0.5, 0.525, 0.55, 0.575, 0.6, 0.625, 0.65, 0.675, 0.7, 0.725, 0.75, 0.775, 0.8, 0.825, 0.85, 0.875, 0.9, 0.925, 0.95, 0.975, 1, 1.05, 1.1, 1.15, 1.2, 1.25, 1.3, 1.35, 1.4, 1.45, 1.5, 1.55, 1.6, 1.65, 1.7, 1.75, 1.8, 1.85, 1.9, 1.95, 2, 2.125, 2.25, 2.375, 2.5, 2.625, 2.75, 2.875, 3, 3.125, 3.25, 3.375, 3.5, 3.625, 3.75, 3.875, 4, 4.25, 4.5, 4.75, 5, 5.25, 5.5, 5.75, 6, 6.5, 7, 7.5, 8, 8.5, 9, 9.5, 10, 10.5, 11, 11.5, 12, 13, 14, 15, 16, 17, 18, 19, 20, 22.5, 25, 27.5, 30, 32.5, 35, 37.5, 40, 42.5, 45, 47.5, 50, 52.5, 55, 57.5, 60, 65, 70, 75, 80, 90, 100};
-  const int numPtchBins = sizeof (pTchBins) / sizeof (pTchBins[0]) - 1;
+  const int nPtchBins = sizeof (pTchBins) / sizeof (pTchBins[0]) - 1;
 
-  TH1D*** h_tms = new TH1D**[numPtchBins];
+  TH1D*** h_tmr = new TH1D**[nPtchBins];
 
-  for (int iPtch = 0; iPtch < numPtchBins; iPtch++) {
-    h_tms[iPtch] = new TH1D*[numFinerEtaTrkBins];
-    for (int iEta = 0; iEta < numFinerEtaTrkBins; iEta++) {
-      h_tms[iPtch][iEta] = new TH1D (Form ("h_tms_%s_iPtch%i_iEta%i", sys.Data (), iPtch, iEta), "#it{p}_{T}^{reco} / #it{p}_{T}^{truth}", 200, 0.5, 1.5);
-      h_tms[iPtch][iEta]->Sumw2 ();
+  for (int iPtch = 0; iPtch < nPtchBins; iPtch++) {
+    h_tmr[iPtch] = new TH1D*[nFinerEtaTrkBins];
+    for (int iEta = 0; iEta < nFinerEtaTrkBins; iEta++) {
+      h_tmr[iPtch][iEta] = new TH1D (Form ("h_tmr_%s_iPtch%i_iEta%i", sys.Data (), iPtch, iEta), "Track resolution, #it{p}_{T}^{truth} / #it{p}_{T}^{reco} - 1", 2000, -1.0, 4.0);
+      h_tmr[iPtch][iEta]->Sumw2 ();
     }
   }
 
@@ -249,9 +249,11 @@ bool TrackMomentumResolution (const char* directory,
 
       const bool isFake = !isTruthMatched;
       const bool isSecondary = isTruthMatched && (trk_truth_barcode[iTrk] <= 0 || 200000 <= trk_truth_barcode[iTrk]);
+      const bool isChargedPion = isTruthMatched && abs (trk_truth_pdgid[iTrk]) == 211;
+      const bool isACommonStrangeBaryon = isTruthMatched && (abs (trk_truth_pdgid[iTrk]) == 3112 || abs (trk_truth_pdgid[iTrk]) == 3222 || abs (trk_truth_pdgid[iTrk]) == 3312 || abs (trk_truth_pdgid[iTrk]) == 3334);
 
       // primary tracks are non-fake, non-secondary tracks. Strange baryons are excluded too.
-      const bool isPrimary = !isFake && !isSecondary && (abs (trk_truth_pdgid[iTrk]) != 3112 && abs (trk_truth_pdgid[iTrk]) != 3222 && abs (trk_truth_pdgid[iTrk]) != 3312 && abs (trk_truth_pdgid[iTrk]) != 3334);
+      const bool isPrimary = !isFake && !isSecondary && !isACommonStrangeBaryon;
 
       if (!isPrimary)
         continue; // restrict to only primary tracks
@@ -260,23 +262,23 @@ bool TrackMomentumResolution (const char* directory,
       if (trk_truth_charge[iTrk] == 0 ||
           fabs (trk_truth_eta[iTrk]) > 2.5 ||
           !(trk_truth_isHadron[iTrk]) ||
-          (DoPionsOnlyVar () && abs (trk_truth_pdgid[iTrk]) != 211))
+          (DoPionsOnlyVar () && isChargedPion))
         continue;
 
       short iPtch = -1;
       if (pTchBins[0] <= trk_truth_pt[iTrk]) {
         iPtch = 0;
-        while (iPtch < numPtchBins && pTchBins[iPtch+1] < trk_truth_pt[iTrk]) iPtch++;
+        while (iPtch < nPtchBins && pTchBins[iPtch+1] < trk_truth_pt[iTrk]) iPtch++;
       }
 
       short iEta = -1;
       if (finerEtaTrkBins[0] <= trk_truth_eta[iTrk]) {
         iEta = 0;
-        while (iEta < numFinerEtaTrkBins && finerEtaTrkBins[iEta+1] < trk_truth_eta[iTrk]) iEta++;
+        while (iEta < nFinerEtaTrkBins && finerEtaTrkBins[iEta+1] < trk_truth_eta[iTrk]) iEta++;
       }
 
-      if (iPtch >= 0 && iPtch < numPtchBins && iEta >= 0 && iEta < numFinerEtaTrkBins) {
-        h_tms[iPtch][iEta]->Fill (trk_pt[iTrk] / trk_truth_pt[iTrk]);
+      if (iPtch >= 0 && iPtch < nPtchBins && iEta >= 0 && iEta < nFinerEtaTrkBins) {
+        h_tmr[iPtch][iEta]->Fill (trk_truth_pt[iTrk]/trk_pt[iTrk] - 1.);
       }
     }
   } // end event loop
@@ -288,10 +290,10 @@ bool TrackMomentumResolution (const char* directory,
 
   outFile->cd ();
 
-  for (int iPtch = 0; iPtch < numPtchBins; iPtch++) {
-    for (int iEta = 0; iEta < numFinerEtaTrkBins; iEta++) {
-      h_tms[iPtch][iEta]->Write ();
-      SaferDelete (&(h_tms[iPtch][iEta]));
+  for (int iPtch = 0; iPtch < nPtchBins; iPtch++) {
+    for (int iEta = 0; iEta < nFinerEtaTrkBins; iEta++) {
+      h_tmr[iPtch][iEta]->Write ();
+      SaferDelete (&(h_tmr[iPtch][iEta]));
     } // end loop over iEta
   } // end loop over iPtch
 

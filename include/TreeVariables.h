@@ -500,6 +500,10 @@ float trk_truth_vz[max_trk_n];
 int trk_truth_nIn[max_trk_n];
 bool trk_truth_isHadron[max_trk_n];
 
+// list of track working points
+const std::vector <bool*> trackWPs = {trk_TightPrimary, trk_HItight, trk_HIloose};
+bool* trk_wp = trk_HItight; // user-specified, defaults to HItight
+
 // Anti-kT R=0.2 Truth Jets info
 const static int max_akt2_truth_jet_n = 40;
 int akt2_truth_jet_n;

@@ -33,9 +33,9 @@ void PlotCentralityAnalysis2D () {
 
 
   int iZdc20Percent = 0;
-  while (iZdc20Percent < numZdcCentBins && zdcCentPercs[iZdc20Percent] > 20) iZdc20Percent++;
+  while (iZdc20Percent < nZdcCentBins && zdcCentPercs[iZdc20Percent] > 20) iZdc20Percent++;
   int iFcal20Percent = 0;
-  while (iFcal20Percent < numFcalCentBins && fcalCentPercs[iFcal20Percent] > 100) iFcal20Percent++;
+  while (iFcal20Percent < nFcalCentBins && fcalCentPercs[iFcal20Percent] > 100) iFcal20Percent++;
 
 
   TH2D* h2_jet_Pb_fcal_et_zdc_calibE = nullptr;
@@ -54,7 +54,7 @@ void PlotCentralityAnalysis2D () {
 
     gPad->SetBottomMargin (0.13);
     gPad->SetLeftMargin (0.13);
-    gPad->SetRightMargin (0.15);
+    gPad->SetRightMargin (0.16);
     gPad->SetTopMargin (0.06);
 
     TH2D* h = (TH2D*) h2_jet_Pb_fcal_et_zdc_calibE->Clone ("htemp");
@@ -77,40 +77,30 @@ void PlotCentralityAnalysis2D () {
     h->GetYaxis ()->SetTitle ("Calibrated #Sigma#it{E}_{ZDC}^{Pb} [TeV]");
     h->GetZaxis ()->SetTitle ("Events");
 
-    h->GetXaxis ()->SetTitleOffset (1.2 * h->GetXaxis ()->GetTitleOffset ());
-    h->GetYaxis ()->SetTitleOffset (1.2 * h->GetYaxis ()->GetTitleOffset ());
+    h->GetXaxis ()->SetTitleOffset (1.1 * h->GetXaxis ()->GetTitleOffset ());
+    h->GetYaxis ()->SetTitleOffset (1.1 * h->GetYaxis ()->GetTitleOffset ());
 
-    //h->GetXaxis ()->SetTitleFont (43);
-    //h->GetXaxis ()->SetTitleSize (26);
-    //h->GetYaxis ()->SetTitleFont (43);
-    //h->GetYaxis ()->SetTitleSize (26);
-    //h->GetZaxis ()->SetTitleFont (43);
-    //h->GetZaxis ()->SetTitleSize (26);
+    h->GetXaxis ()->SetTitleFont (43);
+    h->GetXaxis ()->SetTitleSize (30);
+    h->GetYaxis ()->SetTitleFont (43);
+    h->GetYaxis ()->SetTitleSize (30);
+    h->GetZaxis ()->SetTitleFont (43);
+    h->GetZaxis ()->SetTitleSize (30);
 
-    //h->GetXaxis ()->SetLabelFont (43);
-    //h->GetXaxis ()->SetLabelSize (22);
-    //h->GetYaxis ()->SetLabelFont (43);
-    //h->GetYaxis ()->SetLabelSize (22);
-    //h->GetZaxis ()->SetLabelFont (43);
-    //h->GetZaxis ()->SetLabelSize (22);
-
-    //h->GetXaxis ()->SetAxisColor (kWhite);
-    //h->GetXaxis ()->SetLabelColor (kWhite);
-    //h->GetXaxis ()->SetTitleColor (kWhite);
-    //h->GetYaxis ()->SetAxisColor (kWhite);
-    //h->GetYaxis ()->SetLabelColor (kWhite);
-    //h->GetYaxis ()->SetTitleColor (kWhite);
-    //h->GetZaxis ()->SetAxisColor (kWhite);
-    //h->GetZaxis ()->SetLabelColor (kWhite);
-    //h->GetZaxis ()->SetTitleColor (kWhite);
+    h->GetXaxis ()->SetLabelFont (43);
+    h->GetXaxis ()->SetLabelSize (26);
+    h->GetYaxis ()->SetLabelFont (43);
+    h->GetYaxis ()->SetLabelSize (26);
+    h->GetZaxis ()->SetLabelFont (43);
+    h->GetZaxis ()->SetLabelSize (26);
 
     h->DrawCopy ("colz");
     SaferDelete (&h);
 
     g_px->SetLineColor (kWhite);
     g_py->SetLineColor (kWhite);
-    g_px->SetLineWidth (2);
-    g_py->SetLineWidth (2);
+    g_px->SetLineWidth (1);
+    g_py->SetLineWidth (1);
 
     g_px->SetMarkerColor (kWhite);
     g_py->SetMarkerColor (kWhite);
@@ -120,8 +110,8 @@ void PlotCentralityAnalysis2D () {
     g_px->Draw ("P");
     g_py->Draw ("P");
 
-    myText (0.15, 0.96, kWhite, "#bf{#it{ATLAS}} Internal", 0.032);
-    myText (0.50, 0.96, kWhite, "#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV, J50 Trigger", 0.032);
+    myText (0.14, 0.96, kWhite, "#bf{#it{ATLAS}} Internal", 0.032);
+    myText (0.45, 0.96, kWhite, "#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV, J50 Trigger", 0.032);
 
     c->SaveAs (Form ("%s/Plots/CentralityAnalysis/J50_zdc_fcalet_correlation.pdf", workPath.Data ()));
   }
@@ -135,7 +125,7 @@ void PlotCentralityAnalysis2D () {
 
     gPad->SetBottomMargin (0.13);
     gPad->SetLeftMargin (0.13);
-    gPad->SetRightMargin (0.15);
+    gPad->SetRightMargin (0.16);
     gPad->SetTopMargin (0.06);
 
     TH2D* h = (TH2D*) h2_mb_Pb_fcal_et_zdc_calibE->Clone ("htemp");
@@ -156,40 +146,30 @@ void PlotCentralityAnalysis2D () {
     h->GetYaxis ()->SetTitle ("Calibrated #Sigma#it{E}_{ZDC}^{Pb} [TeV]");
     h->GetZaxis ()->SetTitle ("Events");
 
-    h->GetXaxis ()->SetTitleOffset (1.2 * h->GetXaxis ()->GetTitleOffset ());
-    h->GetYaxis ()->SetTitleOffset (1.2 * h->GetYaxis ()->GetTitleOffset ());
+    h->GetXaxis ()->SetTitleOffset (1.1 * h->GetXaxis ()->GetTitleOffset ());
+    h->GetYaxis ()->SetTitleOffset (1.1 * h->GetYaxis ()->GetTitleOffset ());
 
-    //h->GetXaxis ()->SetTitleFont (43);
-    //h->GetXaxis ()->SetTitleSize (26);
-    //h->GetYaxis ()->SetTitleFont (43);
-    //h->GetYaxis ()->SetTitleSize (26);
-    //h->GetZaxis ()->SetTitleFont (43);
-    //h->GetZaxis ()->SetTitleSize (26);
+    h->GetXaxis ()->SetTitleFont (43);
+    h->GetXaxis ()->SetTitleSize (30);
+    h->GetYaxis ()->SetTitleFont (43);
+    h->GetYaxis ()->SetTitleSize (30);
+    h->GetZaxis ()->SetTitleFont (43);
+    h->GetZaxis ()->SetTitleSize (30);
 
-    //h->GetXaxis ()->SetLabelFont (43);
-    //h->GetXaxis ()->SetLabelSize (22);
-    //h->GetYaxis ()->SetLabelFont (43);
-    //h->GetYaxis ()->SetLabelSize (22);
-    //h->GetZaxis ()->SetLabelFont (43);
-    //h->GetZaxis ()->SetLabelSize (22);
-
-    //h->GetXaxis ()->SetAxisColor (kWhite);
-    //h->GetXaxis ()->SetLabelColor (kWhite);
-    //h->GetXaxis ()->SetTitleColor (kWhite);
-    //h->GetYaxis ()->SetAxisColor (kWhite);
-    //h->GetYaxis ()->SetLabelColor (kWhite);
-    //h->GetYaxis ()->SetTitleColor (kWhite);
-    //h->GetZaxis ()->SetAxisColor (kWhite);
-    //h->GetZaxis ()->SetLabelColor (kWhite);
-    //h->GetZaxis ()->SetTitleColor (kWhite);
+    h->GetXaxis ()->SetLabelFont (43);
+    h->GetXaxis ()->SetLabelSize (26);
+    h->GetYaxis ()->SetLabelFont (43);
+    h->GetYaxis ()->SetLabelSize (26);
+    h->GetZaxis ()->SetLabelFont (43);
+    h->GetZaxis ()->SetLabelSize (26);
 
     h->DrawCopy ("colz");
     SaferDelete (&h);
 
     g_px->SetLineColor (kWhite);
     g_py->SetLineColor (kWhite);
-    g_px->SetLineWidth (2);
-    g_py->SetLineWidth (2);
+    g_px->SetLineWidth (1);
+    g_py->SetLineWidth (1);
 
     g_px->SetMarkerColor (kWhite);
     g_py->SetMarkerColor (kWhite);
@@ -199,8 +179,8 @@ void PlotCentralityAnalysis2D () {
     g_px->Draw ("P");
     g_py->Draw ("P");
 
-    myText (0.15, 0.96, kWhite, "#bf{#it{ATLAS}} Internal", 0.032);
-    myText (0.50, 0.96, kWhite, "#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV, MinBias Trigger", 0.032);
+    myText (0.14, 0.96, kWhite, "#bf{#it{ATLAS}} Internal", 0.032);
+    myText (0.47, 0.96, kWhite, "#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV, MinBias Trigger", 0.032);
    
     c->SaveAs (Form ("%s/Plots/CentralityAnalysis/MB_zdc_fcalet_correlation.pdf", workPath.Data ()));
   }

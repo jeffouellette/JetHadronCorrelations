@@ -27,74 +27,111 @@ void PlotTrackingPerformance () {
 //  TH1D* h_truth_matching_prob[2] = {};
 // = new TH1D (Form ("h_truth_matching_prob_%s", sys.Data ()), ";Truth matching prob.;N_{ch}^{rec}", 200, 0, 1);
 
-  const int numFinerEtaTrkBins = 40;
-  const double* finerEtaTrkBins = linspace (-2.5, 2.5, numFinerEtaTrkBins);
+  const int nFinerEtaTrkBins = 40;
+  const double* finerEtaTrkBins = linspace (-2.5, 2.5, nFinerEtaTrkBins);
 
   const double etaTrkBins[] = {0, 0.5, 1.0, 1.5, 2.0, 2.5};
-  const int numEtaTrkBins = sizeof (etaTrkBins) / sizeof (etaTrkBins[0]) - 1;
+  const int nEtaTrkBins = sizeof (etaTrkBins) / sizeof (etaTrkBins[0]) - 1;
 
 //const double pTchBins[32] = {0.5, 0.7, 1, 1.05, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.8, 2, 2.25, 2.5, 2.75, 3, 3.5, 4, 5, 6, 7, 8, 10, 12, 15, 20, 25, 30, 40, 60, 80, 100};
 //const int nPtChBins = 106;
   const double pTchBins[] = {0.5, 0.525, 0.55, 0.575, 0.6, 0.625, 0.65, 0.675, 0.7, 0.725, 0.75, 0.775, 0.8, 0.825, 0.85, 0.875, 0.9, 0.925, 0.95, 0.975, 1, 1.05, 1.1, 1.15, 1.2, 1.25, 1.3, 1.35, 1.4, 1.45, 1.5, 1.55, 1.6, 1.65, 1.7, 1.75, 1.8, 1.85, 1.9, 1.95, 2, 2.125, 2.25, 2.375, 2.5, 2.625, 2.75, 2.875, 3, 3.125, 3.25, 3.375, 3.5, 3.625, 3.75, 3.875, 4, 4.25, 4.5, 4.75, 5, 5.25, 5.5, 5.75, 6, 6.5, 7, 7.5, 8, 8.5, 9, 9.5, 10, 10.5, 11, 11.5, 12, 13, 14, 15, 16, 17, 18, 19, 20, 22.5, 25, 27.5, 30, 32.5, 35, 37.5, 40, 42.5, 45, 47.5, 50, 52.5, 55, 57.5, 60, 65, 70, 75, 80, 90, 100};
-  const int numPtchBins = sizeof (pTchBins) / sizeof (pTchBins[0]) - 1;
+  const int nPtchBins = sizeof (pTchBins) / sizeof (pTchBins[0]) - 1;
 
-  TH2D* h2_truth_matched_reco_tracks[2] = {};
-  TH2D* h2_truth_tracks[2] = {};
-  TH2D* h2_efficiency[2] = {};
+  TH1D** h_truth_matching_prob = Get1DArray <TH1D*> (3);
+
+  TH2D*** h2_truth_matched_reco_tracks = Get2DArray <TH2D*> (2, 3);
+  TH2D*** h2_truth_tracks = Get2DArray <TH2D*> (2, 3);
+  TH2D*** h2_efficiency = Get2DArray <TH2D*> (2, 3);
+
+  TH2D*** h2_primary_reco_tracks = Get2DArray <TH2D*> (2, 3);
+  TH2D*** h2_reco_tracks = Get2DArray <TH2D*> (2, 3);
+  TH2D*** h2_purity = Get2DArray <TH2D*> (2, 3);
 
 
-  TH2D* h2_primary_reco_tracks[2] = {};
-  TH2D* h2_reco_tracks[2] = {};
-  TH2D* h2_purity[2] = {};
+  TH1D**** h_truth_matched_reco_tracks = Get3DArray <TH1D*> (2, 3, nEtaTrkBins);
+  TH1D**** h_truth_tracks = Get3DArray <TH1D*> (2, 3, nEtaTrkBins);
+  TH1D**** h_efficiency = Get3DArray <TH1D*> (2, 3, nEtaTrkBins);
 
 
-  TH1D** h_truth_matched_reco_tracks[2] = {};
-  TH1D** h_truth_tracks[2] = {};
-  TH1D** h_efficiency[2] = {};
+  TH1D**** h_primary_reco_tracks = Get3DArray <TH1D*> (2, 3, nEtaTrkBins);
+  TH1D**** h_reco_tracks = Get3DArray <TH1D*> (2, 3, nEtaTrkBins);
+  TH1D**** h_purity = Get3DArray <TH1D*> (2, 3, nEtaTrkBins);
 
-  TH1D** h_primary_reco_tracks[2] = {};
-  TH1D** h_reco_tracks[2] = {};
-  TH1D** h_purity[2] = {};
+  for (int iWP = 0; iWP < trackWPs.size (); iWP++) {
+
+    h_truth_matching_prob[iWP] = new TH1D (Form ("h_truth_matching_prob_%s_%s", sys.Data (), trackWPNames[iWP].c_str ()), ";Truth matching prob.;N_{ch}^{rec}", 200, 0, 1);
+    h_truth_matching_prob[iWP]->Sumw2 ();
+
+    h2_truth_matched_reco_tracks[iWP] = new TH2D (Form ("h2_truth_matched_reco_tracks_%s_%s", sys.Data (), trackWPNames[iWP].c_str ()), ";#eta;#it{p}_{T} [GeV]", nFinerEtaTrkBins, finerEtaTrkBins, nPtchBins, pTchBins);
+    h2_truth_matched_reco_tracks[iWP]->Sumw2 ();
+
+    h2_truth_tracks[iWP] = new TH2D (Form ("h2_truth_tracks_%s_%s", sys.Data (), trackWPNames[iWP].c_str ()), ";#eta;#it{p}_{T} [GeV]", nFinerEtaTrkBins, finerEtaTrkBins, nPtchBins, pTchBins);
+    h2_truth_tracks[iWP]->Sumw2 ();
+
+
+    h2_primary_reco_tracks[iWP] = new TH2D (Form ("h2_primary_reco_tracks_%s_%s", sys.Data (), trackWPNames[iWP].c_str ()), ";#eta;#it{p}_{T} [GeV]", nFinerEtaTrkBins, finerEtaTrkBins, nPtchBins, pTchBins);
+    h2_primary_reco_tracks[iWP]->Sumw2 ();
+
+    h2_reco_tracks[iWP] = new TH2D (Form ("h2_reco_tracks_%s_%s", sys.Data (), trackWPNames[iWP].c_str ()), ";#eta;#it{p}_{T} [GeV]", nFinerEtaTrkBins, finerEtaTrkBins, nPtchBins, pTchBins);
+    h2_reco_tracks[iWP]->Sumw2 ();
+
+    for (int iEta = 0; iEta < nEtaTrkBins; iEta++) {
+      h_truth_matched_reco_tracks[iWP][iEta] = new TH1D (Form ("h_truth_matched_reco_tracks_%s_%s_iEta%i", sys.Data (), trackWPNames[iWP].c_str (), iEta), ";#it{p}_{T} [GeV]", nPtchBins, pTchBins);
+      h_truth_matched_reco_tracks[iWP][iEta]->Sumw2 ();
+
+      h_truth_tracks[iWP][iEta] = new TH1D (Form ("h_truth_tracks_%s_%s_iEta%i", sys.Data (), trackWPNames[iWP].c_str (), iEta), ";#it{p}_{T} [GeV]", nPtchBins, pTchBins);
+      h_truth_tracks[iWP][iEta]->Sumw2 ();
+
+
+      h_primary_reco_tracks[iWP][iEta] = new TH1D (Form ("h_primary_reco_tracks_%s_%s_iEta%i", sys.Data (), trackWPNames[iWP].c_str (), iEta), ";#it{p}_{T} [GeV]", nPtchBins, pTchBins);
+      h_primary_reco_tracks[iWP][iEta]->Sumw2 ();
+
+      h_reco_tracks[iWP][iEta] = new TH1D (Form ("h_reco_tracks_%s_%s_iEta%i", sys.Data (), trackWPNames[iWP].c_str (), iEta), ";#it{p}_{T} [GeV]", nPtchBins, pTchBins);
+      h_reco_tracks[iWP][iEta]->Sumw2 ();
+    }
+
+  }
 
 
   //for (int iSys : {0, 1}) {
   for (int iSys : {0}) {
     const TString sys = (iSys == 0 ? "pp" : "pPb");
 
-    h2_truth_matched_reco_tracks[iSys] = (TH2D*) inFile->Get (Form ("h2_truth_matched_reco_tracks_%s", sys.Data ()));
-    h2_truth_tracks[iSys] = (TH2D*) inFile->Get (Form ("h2_truth_tracks_%s", sys.Data ()));
-    h2_primary_reco_tracks[iSys] = (TH2D*) inFile->Get (Form ("h2_primary_reco_tracks_%s", sys.Data ()));
-    h2_reco_tracks[iSys] = (TH2D*) inFile->Get (Form ("h2_reco_tracks_%s", sys.Data ()));
+    for (int iWP = 0; iWP < trackWPs.size (); iWP++) {
 
-    h2_efficiency[iSys] = (TH2D*) h2_truth_matched_reco_tracks[iSys]->Clone (Form ("h2_efficiency_%s", sys.Data ()));
-    BinomialDivide (h2_efficiency[iSys], h2_truth_matched_reco_tracks[iSys], h2_truth_tracks[iSys]);
-    h2_purity[iSys] = (TH2D*) h2_primary_reco_tracks[iSys]->Clone (Form ("h2_purity_%s", sys.Data ()));
-    BinomialDivide (h2_purity[iSys], h2_primary_reco_tracks[iSys], h2_reco_tracks[iSys]);
+      h2_truth_matched_reco_tracks[iSys][iWP] = (TH2D*) inFile->Get (Form ("h2_truth_matched_reco_tracks_%s_%s", sys.Data (), trackWPNames[iWP].c_str ()));
+      h2_truth_tracks[iSys][iWP] = (TH2D*) inFile->Get (Form ("h2_truth_tracks_%s_%s", sys.Data (), trackWPNames[iWP].c_str ()));
 
-    h_truth_matched_reco_tracks[iSys] = new TH1D*[numEtaTrkBins];
-    h_truth_tracks[iSys] = new TH1D*[numEtaTrkBins];
-    h_efficiency[iSys] = new TH1D*[numEtaTrkBins];
+      h2_efficiency[iSys][iWP] = (TH2D*) h2_truth_matched_reco_tracks[iSys][iWP]->Clone (Form ("h2_efficiency_%s_%s", sys.Data (), trackWPNames[iWP].c_str ()));
+      BinomialDivide (h2_efficiency[iSys][iWP], h2_truth_matched_reco_tracks[iSys][iWP], h2_truth_tracks[iSys][iWP]);
 
-    h_primary_reco_tracks[iSys] = new TH1D*[numEtaTrkBins];
-    h_reco_tracks[iSys] = new TH1D*[numEtaTrkBins];
-    h_purity[iSys] = new TH1D*[numEtaTrkBins];
+      h2_primary_reco_tracks[iSys][iWP] = (TH2D*) inFile->Get (Form ("h2_primary_reco_tracks_%s_%s", sys.Data (), trackWPNames[iWP].c_str ()));
+      h2_reco_tracks[iSys][iWP] = (TH2D*) inFile->Get (Form ("h2_reco_tracks_%s_%s", sys.Data (), trackWPNames[iWP].c_str ()));
 
-    for (int iEta = 0; iEta < numEtaTrkBins; iEta++) {
-      h_truth_matched_reco_tracks[iSys][iEta] = (TH1D*) inFile->Get (Form ("h_truth_matched_reco_tracks_%s_iEta%i", sys.Data (), iEta));
-      h_truth_tracks[iSys][iEta] = (TH1D*) inFile->Get (Form ("h_truth_tracks_%s_iEta%i", sys.Data (), iEta));
+      h2_purity[iSys][iWP] = (TH2D*) h2_primary_reco_tracks[iSys][iWP]->Clone (Form ("h2_purity_%s_%s", sys.Data (), trackWPNames[iWP].c_str ()));
+      BinomialDivide (h2_purity[iSys][iWP], h2_primary_reco_tracks[iSys][iWP], h2_reco_tracks[iSys][iWP]);
 
-      h_primary_reco_tracks[iSys][iEta] = (TH1D*) inFile->Get (Form ("h_primary_reco_tracks_%s_iEta%i", sys.Data (), iEta));
-      h_reco_tracks[iSys][iEta] = (TH1D*) inFile->Get (Form ("h_reco_tracks_%s_iEta%i", sys.Data (), iEta));
+      for (int iEta = 0; iEta < nEtaTrkBins; iEta++) {
+        h_truth_matched_reco_tracks[iSys][iWP][iEta] = (TH1D*) inFile->Get (Form ("h_truth_matched_reco_tracks_%s_%s_iEta%i", sys.Data (), trackWPNames[iWP].c_str (), iEta));
+        h_truth_tracks[iSys][iWP][iEta] = (TH1D*) inFile->Get (Form ("h_truth_tracks_%s_%s_iEta%i", sys.Data (), trackWPNames[iWP].c_str (), iEta));
 
-      h_efficiency[iSys][iEta] = (TH1D*) h_truth_matched_reco_tracks[iSys][iEta]->Clone (Form ("h_efficiency_%s_iEta%i", sys.Data (), iEta));
-      BinomialDivide (h_efficiency[iSys][iEta], h_truth_matched_reco_tracks[iSys][iEta], h_truth_tracks[iSys][iEta]);
-      h_purity[iSys][iEta] = (TH1D*) h_primary_reco_tracks[iSys][iEta]->Clone (Form ("h_purity_%s_iEta%i", sys.Data (), iEta));
-      BinomialDivide (h_purity[iSys][iEta], h_primary_reco_tracks[iSys][iEta], h_reco_tracks[iSys][iEta]);
+        h_efficiency[iSys][iWP][iEta] = (TH1D*) h_truth_matched_reco_tracks[iSys][iWP][iEta]->Clone (Form ("h_efficiency_%s_%s_iEta%i", sys.Data (), trackWPNames[iWP].c_str (), iEta));
+        BinomialDivide (h_efficiency[iSys][iWP][iEta], h_truth_matched_reco_tracks[iSys][iWP][iEta], h_truth_tracks[iSys][iWP][iEta]);
+
+        h_primary_reco_tracks[iSys][iWP][iEta] = (TH1D*) inFile->Get (Form ("h_primary_reco_tracks_%s_%s_iEta%i", sys.Data (), trackWPNames[iWP].c_str (), iEta));
+        h_reco_tracks[iSys][iWP][iEta] = (TH1D*) inFile->Get (Form ("h_reco_tracks_%s_%s_iEta%i", sys.Data (), trackWPNames[iWP].c_str (), iEta));
+
+        h_purity[iSys][iWP][iEta] = (TH1D*) h_primary_reco_tracks[iSys][iWP][iEta]->Clone (Form ("h_purity_%s_%s_iEta%i", sys.Data (), trackWPNames[iWP].c_str (), iEta));
+        BinomialDivide (h_purity[iSys][iWP][iEta], h_primary_reco_tracks[iSys][iWP][iEta], h_reco_tracks[iSys][iWP][iEta]);
+      }
     }
 
   }
 
 
+
+  const short iWP = 0;
 
   {
     TCanvas* c = new TCanvas ("c1", "", 800, 800);
@@ -106,7 +143,7 @@ void PlotTrackingPerformance () {
     gPad->SetRightMargin (0.04);
     gPad->SetTopMargin (0.04);
 
-    TH1D* h = (TH1D*) h_efficiency[0][0]->Clone ("temp");
+    TH1D* h = (TH1D*) h_efficiency[iWP][0][0]->Clone ("temp");
     h->Reset ();
     for (int iX = 1; iX <= h->GetNbinsX (); iX++) h->SetBinContent (iX, 1);
     h->GetXaxis ()->SetTitle ("#it{p}_{T}^{ch} [GeV]");
@@ -131,8 +168,8 @@ void PlotTrackingPerformance () {
 
     h->DrawCopy ("hist");
 
-    for (int iEta = 0; iEta < numEtaTrkBins; iEta++) {
-      h = h_efficiency[0][iEta];
+    for (int iEta = 0; iEta < nEtaTrkBins; iEta++) {
+      h = h_efficiency[iWP][0][iEta];
 
       h->SetMarkerSize (0.8);
       h->SetMarkerColor (binColors[iEta%10]);
@@ -143,8 +180,9 @@ void PlotTrackingPerformance () {
 
     myText (0.62, 0.88, kBlack, "#bf{#it{ATLAS}} Internal", 0.036);
     myText (0.62, 0.84, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.036);
-    for (int iEta = 0; iEta < numEtaTrkBins; iEta++) {
-      myMarkerText (0.68, 0.80-iEta*0.04, binColors[iEta%10], kFullCircle, Form ("%g < |#eta| < %g", etaTrkBins[iEta], etaTrkBins[iEta+1]), 1.2, 0.036);
+    myText (0.62, 0.80, kBlack, "HITight tracks", 0.036);
+    for (int iEta = 0; iEta < nEtaTrkBins; iEta++) {
+      myLineText2 (0.68, 0.76-iEta*0.04, binColors[iEta%10], kFullCircle, Form ("%g < |#eta| < %g", etaTrkBins[iEta], etaTrkBins[iEta+1]), 1.2, 0.036);
     }
 
     c->SaveAs (Form ("%s/Plots/TrackingPerformance/EfficiencySummary.pdf", workPath.Data ()));
@@ -162,7 +200,7 @@ void PlotTrackingPerformance () {
     gPad->SetRightMargin (0.04);
     gPad->SetTopMargin (0.04);
 
-    TH1D* h = (TH1D*) h_purity[0][0]->Clone ("temp");
+    TH1D* h = (TH1D*) h_purity[iWP][0][0]->Clone ("temp");
     h->Reset ();
     for (int iX = 1; iX <= h->GetNbinsX (); iX++) h->SetBinContent (iX, 1);
     h->GetXaxis ()->SetTitle ("#it{p}_{T}^{ch} [GeV]");
@@ -187,8 +225,8 @@ void PlotTrackingPerformance () {
 
     h->DrawCopy ("hist");
 
-    for (int iEta = 0; iEta < numEtaTrkBins; iEta++) {
-      h = h_purity[0][iEta];
+    for (int iEta = 0; iEta < nEtaTrkBins; iEta++) {
+      h = h_purity[iWP][0][iEta];
 
       h->SetMarkerSize (0.8);
       h->SetMarkerColor (binColors[iEta%10]);
@@ -199,8 +237,9 @@ void PlotTrackingPerformance () {
 
     myText (0.62, 0.88, kBlack, "#bf{#it{ATLAS}} Internal", 0.036);
     myText (0.62, 0.84, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.036);
-    for (int iEta = 0; iEta < numEtaTrkBins; iEta++) {
-      myMarkerText (0.68, 0.80-iEta*0.04, binColors[iEta%10], kFullCircle, Form ("%g < |#eta| < %g", etaTrkBins[iEta], etaTrkBins[iEta+1]), 1.2, 0.036);
+    myText (0.62, 0.80, kBlack, "HITight tracks", 0.036);
+    for (int iEta = 0; iEta < nEtaTrkBins; iEta++) {
+      myLineText2 (0.68, 0.76-iEta*0.04, binColors[iEta%10], kFullCircle, Form ("%g < |#eta| < %g", etaTrkBins[iEta], etaTrkBins[iEta+1]), 1.2, 0.036);
     }
 
 
@@ -219,7 +258,7 @@ void PlotTrackingPerformance () {
     gPad->SetRightMargin (0.15);
     gPad->SetTopMargin (0.04);
 
-    TH2D* h2 = (TH2D*) h2_efficiency[0]->Clone ("temp");
+    TH2D* h2 = (TH2D*) h2_efficiency[iWP][0]->Clone ("temp");
     h2->GetXaxis ()->SetTitle ("#eta");
     h2->GetYaxis ()->SetTitle ("#it{p}_{T}^{ch} [GeV]");
     h2->GetZaxis ()->SetTitle ("Track Reco. Efficiency");
@@ -251,6 +290,7 @@ void PlotTrackingPerformance () {
 
     myText (0.62, 0.88, kBlack, "#bf{#it{ATLAS}} Internal", 0.036);
     myText (0.62, 0.84, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.036);
+    myText (0.62, 0.80, kBlack, "HITight tracks", 0.036);
 
     c->SaveAs (Form ("%s/Plots/TrackingPerformance/EfficiencyMap_pp.pdf", workPath.Data ()));
   }
@@ -267,7 +307,7 @@ void PlotTrackingPerformance () {
     gPad->SetRightMargin (0.15);
     gPad->SetTopMargin (0.04);
 
-    TH2D* h2 = (TH2D*) h2_purity[0]->Clone ("temp");
+    TH2D* h2 = (TH2D*) h2_purity[iWP][0]->Clone ("temp");
     h2->GetXaxis ()->SetTitle ("#eta");
     h2->GetYaxis ()->SetTitle ("#it{p}_{T}^{ch} [GeV]");
     h2->GetZaxis ()->SetTitle ("Primary track fraction");
@@ -299,6 +339,7 @@ void PlotTrackingPerformance () {
 
     myText (0.62, 0.88, kBlack, "#bf{#it{ATLAS}} Internal", 0.036);
     myText (0.62, 0.84, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.036);
+    myText (0.62, 0.80, kBlack, "HITight tracks", 0.036);
 
     c->SaveAs (Form ("%s/Plots/TrackingPerformance/PurityMap_pp.pdf", workPath.Data ()));
   }

@@ -19,14 +19,14 @@ using namespace JetHadronCorrelations;
 
 typedef TGraphAsymmErrors TGAE;
 
-const int numFinerEtaTrkBins = 40;
-const double* finerEtaTrkBins = linspace (-2.5, 2.5, numFinerEtaTrkBins);
+const int nFinerEtaTrkBins = 40;
+const double* finerEtaTrkBins = linspace (-2.5, 2.5, nFinerEtaTrkBins);
 
 const double etaTrkBins[6] = {0, 0.5, 1.0, 1.5, 2.0, 2.5};
-const int numEtaTrkBins = sizeof (etaTrkBins) / sizeof (etaTrkBins[0]) - 1;
+const int nEtaTrkBins = sizeof (etaTrkBins) / sizeof (etaTrkBins[0]) - 1;
 
 const double pTchBins[] = {0.5, 0.525, 0.55, 0.575, 0.6, 0.625, 0.65, 0.675, 0.7, 0.725, 0.75, 0.775, 0.8, 0.825, 0.85, 0.875, 0.9, 0.925, 0.95, 0.975, 1, 1.05, 1.1, 1.15, 1.2, 1.25, 1.3, 1.35, 1.4, 1.45, 1.5, 1.55, 1.6, 1.65, 1.7, 1.75, 1.8, 1.85, 1.9, 1.95, 2, 2.125, 2.25, 2.375, 2.5, 2.625, 2.75, 2.875, 3, 3.125, 3.25, 3.375, 3.5, 3.625, 3.75, 3.875, 4, 4.25, 4.5, 4.75, 5, 5.25, 5.5, 5.75, 6, 6.5, 7, 7.5, 8, 8.5, 9, 9.5, 10, 10.5, 11, 11.5, 12, 13, 14, 15, 16, 17, 18, 19, 20, 22.5, 25, 27.5, 30, 32.5, 35, 37.5, 40, 42.5, 45, 47.5, 50, 52.5, 55, 57.5, 60, 65, 70, 75, 80, 90, 100};
-const int numPtchBins = sizeof (pTchBins) / sizeof (pTchBins[0]) - 1;
+const int nPtchBins = sizeof (pTchBins) / sizeof (pTchBins[0]) - 1;
 
 //const vector <int> systems = {0, 1};
 const vector <int> systems = {0};
@@ -56,9 +56,9 @@ void PlotTrackMomentumResolution () {
     h2_avg_tms[iSys] = (TH2D*) inFile->Get (Form ("h2_avg_tms_%s", sys.Data ()));
     h2_avg_tmr[iSys] = (TH2D*) inFile->Get (Form ("h2_avg_tmr_%s", sys.Data ()));
 
-    h_avg_tms[iSys] = new TH1D*[numEtaTrkBins+1];
-    h_avg_tmr[iSys] = new TH1D*[numEtaTrkBins+1];
-    for (int iEta = 0; iEta <= numEtaTrkBins; iEta++) {
+    h_avg_tms[iSys] = new TH1D*[nEtaTrkBins+1];
+    h_avg_tmr[iSys] = new TH1D*[nEtaTrkBins+1];
+    for (int iEta = 0; iEta <= nEtaTrkBins; iEta++) {
       h_avg_tms[iSys][iEta] = (TH1D*) inFile->Get (Form ("h_avg_tms_%s_iEta%i", sys.Data (), iEta));
       h_avg_tmr[iSys][iEta] = (TH1D*) inFile->Get (Form ("h_avg_tmr_%s_iEta%i", sys.Data (), iEta));
     } // end loop over iEta
@@ -87,7 +87,7 @@ void PlotTrackMomentumResolution () {
     {
       gPad->SetLogx ();
 
-      TH1D* htemp = new TH1D ("htemp", "", 1, pTchBins[0], pTchBins[numPtchBins]);
+      TH1D* htemp = new TH1D ("htemp", "", 1, pTchBins[0], pTchBins[nPtchBins]);
   
       TAxis* xax = htemp->GetXaxis ();
       TAxis* yax = htemp->GetYaxis ();
@@ -134,11 +134,11 @@ void PlotTrackMomentumResolution () {
       l->SetLineStyle (2);
       l->SetLineWidth (2);
       //l->SetLineColor (kPink-8);
-      l->DrawLine (pTchBins[0], 100, pTchBins[numPtchBins], 100);
+      l->DrawLine (pTchBins[0], 100, pTchBins[nPtchBins], 100);
     }
      
 
-    for (int iEta = 0; iEta < numEtaTrkBins; iEta++) {
+    for (int iEta = 0; iEta < nEtaTrkBins; iEta++) {
       TGAE* g = make_graph (h_avg_tms[iSys][iEta]);
 
       g->SetMarkerColor (colors[iEta+1]);
@@ -148,7 +148,7 @@ void PlotTrackMomentumResolution () {
       g->Draw ("P"); 
     }
     {
-      TGAE* g = make_graph (h_avg_tms[iSys][numEtaTrkBins]);
+      TGAE* g = make_graph (h_avg_tms[iSys][nEtaTrkBins]);
 
       g->SetMarkerColor (colors[0]);
       g->SetLineColor (colors[0]);
@@ -171,7 +171,7 @@ void PlotTrackMomentumResolution () {
       tl->SetTextSize (30);
       tl->DrawLatexNDC (0.26, 0.845, "#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV");
     }
-    for (int iEta = 0; iEta < numEtaTrkBins; iEta++)
+    for (int iEta = 0; iEta < nEtaTrkBins; iEta++)
       myMarkerTextNoLine (0.3, 0.39-0.04*iEta, colors[iEta+1], kOpenCircle, Form ("%g < |#it{#eta}| < %g", etaTrkBins[iEta], etaTrkBins[iEta+1]), 1.2, 0.036);
     myMarkerTextNoLine (0.3, 0.44, colors[0], kFullCircle, "All #it{#eta}", 1.2, 0.036);
 
@@ -197,7 +197,7 @@ void PlotTrackMomentumResolution () {
     {
       gPad->SetLogx ();
 
-      TH1D* htemp = new TH1D ("htemp", "", 1, pTchBins[0], pTchBins[numPtchBins]);
+      TH1D* htemp = new TH1D ("htemp", "", 1, pTchBins[0], pTchBins[nPtchBins]);
   
       TAxis* xax = htemp->GetXaxis ();
       TAxis* yax = htemp->GetYaxis ();
@@ -243,7 +243,7 @@ void PlotTrackMomentumResolution () {
     }
      
 
-    for (int iEta = 0; iEta < numEtaTrkBins; iEta++) {
+    for (int iEta = 0; iEta < nEtaTrkBins; iEta++) {
       TGAE* g = make_graph (h_avg_tmr[iSys][iEta]);
 
       g->SetMarkerColor (colors[iEta+1]);
@@ -253,7 +253,7 @@ void PlotTrackMomentumResolution () {
       g->Draw ("P"); 
     }
     {
-      TGAE* g = make_graph (h_avg_tmr[iSys][numEtaTrkBins]);
+      TGAE* g = make_graph (h_avg_tmr[iSys][nEtaTrkBins]);
 
       g->SetMarkerColor (colors[0]);
       g->SetLineColor (colors[0]);
@@ -277,7 +277,7 @@ void PlotTrackMomentumResolution () {
       tl->DrawLatexNDC (0.26, 0.845, "#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV");
     }
 
-    for (int iEta = 0; iEta < numEtaTrkBins; iEta++)
+    for (int iEta = 0; iEta < nEtaTrkBins; iEta++)
       myMarkerTextNoLine (0.5, 0.69-0.04*iEta, colors[iEta+1], kOpenCircle, Form ("%g < |#it{#eta}| < %g", etaTrkBins[iEta], etaTrkBins[iEta+1]), 1.2, 0.036);
     myMarkerTextNoLine (0.5, 0.74, colors[0], kFullCircle, "All #it{#eta}", 1.2, 0.036);
 

@@ -193,13 +193,13 @@ bool JetSubtractedEnergy (const char* directory,
   TH2D* h2_Pb_fcal_et_jet_subEt = new TH2D ("h2_Pb_fcal_et_jet_subEt", "", 125, -30, 220, 150, 0, 15);
   TH2D* h2_Pb_fcal_et_jet_subE  = new TH2D ("h2_Pb_fcal_et_jet_subE", "", 125, -30, 220, 150, 0, 100);
 
-  const int numCentBins = (DoFcalCentVar () ? numFcalCentBins : (DoFineFcalCentVar () ? numFineFcalCentBins : numZdcCentBins));
-  const int numFileBins = (Ispp () ? 1 : numCentBins);
-  TH1D** h_jet_subEt = new TH1D* [numFileBins];
-  TH1D** h_jet_subE = new TH1D* [numFileBins];
-  for (int iFile = 0; iFile < numFileBins; iFile++) {
-    h_jet_subEt[iFile] = new TH1D (Form ("h_jet_subEt%s", numFileBins == 1 ? "" : Form ("_iCent%i", iFile)), "", 150, 0, 15);
-    h_jet_subE[iFile] = new TH1D (Form ("h_jet_subE%s", numFileBins == 1 ? "" : Form ("_iCent%i", iFile)), "", 150, 0, 100);
+  const int nCentBins = (DoFcalCentVar () ? nFcalCentBins : (DoFineFcalCentVar () ? nFineFcalCentBins : nZdcCentBins));
+  const int nFileBins = (Ispp () ? 1 : nCentBins);
+  TH1D** h_jet_subEt = new TH1D* [nFileBins];
+  TH1D** h_jet_subE = new TH1D* [nFileBins];
+  for (int iFile = 0; iFile < nFileBins; iFile++) {
+    h_jet_subEt[iFile] = new TH1D (Form ("h_jet_subEt%s", nFileBins == 1 ? "" : Form ("_iCent%i", iFile)), "", 150, 0, 15);
+    h_jet_subE[iFile] = new TH1D (Form ("h_jet_subE%s", nFileBins == 1 ? "" : Form ("_iCent%i", iFile)), "", 150, 0, 100);
   }
 
 
@@ -252,11 +252,11 @@ bool JetSubtractedEnergy (const char* directory,
       //zdc_p_decision = IsPeriodA () ? zdcL1Triggers[1]->trigDecision : zdcL1Triggers[0]->trigDecision;
 
       if (DoFcalCentVar ())
-        iCent = GetFcalCentBin (fcal_et_Pb);
+        iCent = GetBin (fcalCentBins, nFcalCentBins, fcal_et_Pb);
       else if (DoFineFcalCentVar ())
-        iCent = GetFineFcalCentBin (fcal_et_Pb);
+        iCent = GetBin (fineFcalCentBins, nFineFcalCentBins, fcal_et_Pb);
       else
-        iCent = GetZdcCentBin (zdc_calibE_Pb);
+        iCent = GetBin (zdcCentBins, nZdcCentBins, zdc_calibE_Pb);
     }
     else if (Ispp ()) {
       //fcal_et_p = fcalA_et + fcalC_et;
@@ -271,7 +271,7 @@ bool JetSubtractedEnergy (const char* directory,
       iCent = 0;
     }
 
-    if (iCent < 0 || iCent > numCentBins-1)
+    if (iCent < 0 || iCent > nCentBins-1)
       continue;
 
 
@@ -323,7 +323,7 @@ bool JetSubtractedEnergy (const char* directory,
   SaferDelete (&h2_Pb_fcal_et_jet_subEt);
   SaferDelete (&h2_Pb_fcal_et_jet_subE);
 
-  for (int iFile = 0; iFile < numFileBins; iFile++) {
+  for (int iFile = 0; iFile < nFileBins; iFile++) {
     h_jet_subEt[iFile]->Write ();
     SaferDelete (&h_jet_subEt[iFile]);
     h_jet_subE[iFile]->Write ();

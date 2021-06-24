@@ -57,6 +57,8 @@ extern TriggerType triggerType;
 extern double jet_min_pt;
 extern double jet_max_pt;
 
+// list of track working point names
+const std::vector <std::string> trackWPNames = {"trk_TightPrimary", "trk_HItight", "trk_HIloose"};
 
 TString GetJetPtStr (const char* tag) {
   if (strcmp (tag, "15GeVJets") == 0)

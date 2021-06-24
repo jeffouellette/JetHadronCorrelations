@@ -31,34 +31,34 @@ void ProcessDPhi (const char* outFileTag, const char* tag1, const char* tag2 = n
   TH1D**  h_jet_counts_ref = Get1DArray <TH1D*> (nVar);
   TH1D**  h_evt_counts_ref_bkg = Get1DArray <TH1D*> (nVar);
   TH1D**  h_jet_counts_ref_bkg = Get1DArray <TH1D*> (nVar);
-  TH1D*** h_evt_counts = Get2DArray <TH1D*> (numZdcCentBins, nVar);
-  TH1D*** h_jet_counts = Get2DArray <TH1D*> (numZdcCentBins, nVar);
-  TH1D*** h_evt_counts_bkg = Get2DArray <TH1D*> (numZdcCentBins, nVar);
-  TH1D*** h_jet_counts_bkg = Get2DArray <TH1D*> (numZdcCentBins, nVar);
+  TH1D*** h_evt_counts = Get2DArray <TH1D*> (nZdcCentBins, nVar);
+  TH1D*** h_jet_counts = Get2DArray <TH1D*> (nZdcCentBins, nVar);
+  TH1D*** h_evt_counts_bkg = Get2DArray <TH1D*> (nZdcCentBins, nVar);
+  TH1D*** h_jet_counts_bkg = Get2DArray <TH1D*> (nZdcCentBins, nVar);
 
   TH1D***  h_jet_trk_dphi_ref = Get2DArray <TH1D*> (nPtChSelections, nVar);
   TH2D***  h2_jet_trk_dphi_cov_ref = Get2DArray <TH2D*> (nPtChSelections, nVar);
   TH1D***  h_jet_trk_dphi_ref_bkg = Get2DArray <TH1D*> (nPtChSelections, nVar);
   TH2D***  h2_jet_trk_dphi_cov_ref_bkg = Get2DArray <TH2D*> (nPtChSelections, nVar);
-  TH1D**** h_jet_trk_dphi= Get3DArray <TH1D*> (numZdcCentBins, nPtChSelections, nVar);
-  TH2D**** h2_jet_trk_dphi_cov = Get3DArray <TH2D*> (numZdcCentBins, nPtChSelections, nVar);
-  TH1D**** h_jet_trk_dphi_bkg = Get3DArray <TH1D*> (numZdcCentBins, nPtChSelections, nVar);
-  TH2D**** h2_jet_trk_dphi_cov_bkg = Get3DArray <TH2D*> (numZdcCentBins, nPtChSelections, nVar);
+  TH1D**** h_jet_trk_dphi= Get3DArray <TH1D*> (nZdcCentBins, nPtChSelections, nVar);
+  TH2D**** h2_jet_trk_dphi_cov = Get3DArray <TH2D*> (nZdcCentBins, nPtChSelections, nVar);
+  TH1D**** h_jet_trk_dphi_bkg = Get3DArray <TH1D*> (nZdcCentBins, nPtChSelections, nVar);
+  TH2D**** h2_jet_trk_dphi_cov_bkg = Get3DArray <TH2D*> (nZdcCentBins, nPtChSelections, nVar);
 
   TH1D***  h_jet_trk_dphi_ref_sig = Get2DArray <TH1D*> (nPtChSelections, nVar);
-  TH1D**** h_jet_trk_dphi_sig = Get3DArray <TH1D*> (numZdcCentBins, nPtChSelections, nVar);
+  TH1D**** h_jet_trk_dphi_sig = Get3DArray <TH1D*> (nZdcCentBins, nPtChSelections, nVar);
 
-  TH1D**** h_jet_trk_dphi_iaa = Get3DArray <TH1D*> (numZdcCentBins, nPtChSelections, nVar);
+  TH1D**** h_jet_trk_dphi_iaa = Get3DArray <TH1D*> (nZdcCentBins, nPtChSelections, nVar);
 
   TGAE***  g_jet_trk_dphi_ref_syst = Get2DArray <TGAE*> (nPtChSelections, nVar);
   TGAE***  g_jet_trk_dphi_ref_bkg_syst = Get2DArray <TGAE*> (nPtChSelections, nVar);
-  TGAE**** g_jet_trk_dphi_syst = Get3DArray <TGAE*> (numZdcCentBins, nPtChSelections, nVar);
-  TGAE**** g_jet_trk_dphi_bkg_syst = Get3DArray <TGAE*> (numZdcCentBins, nPtChSelections, nVar);
+  TGAE**** g_jet_trk_dphi_syst = Get3DArray <TGAE*> (nZdcCentBins, nPtChSelections, nVar);
+  TGAE**** g_jet_trk_dphi_bkg_syst = Get3DArray <TGAE*> (nZdcCentBins, nPtChSelections, nVar);
 
   TGAE***  g_jet_trk_dphi_ref_sig_syst = Get2DArray <TGAE*> (nPtChSelections, nVar);
-  TGAE**** g_jet_trk_dphi_sig_syst = Get3DArray <TGAE*> (numZdcCentBins, nPtChSelections, nVar);
+  TGAE**** g_jet_trk_dphi_sig_syst = Get3DArray <TGAE*> (nZdcCentBins, nPtChSelections, nVar);
 
-  TGAE**** g_jet_trk_dphi_iaa_syst = Get3DArray <TGAE*> (numZdcCentBins, nPtChSelections, nVar);
+  TGAE**** g_jet_trk_dphi_iaa_syst = Get3DArray <TGAE*> (nZdcCentBins, nPtChSelections, nVar);
 
 
   TString outFileName = outFileTag;
@@ -118,7 +118,7 @@ void ProcessDPhi (const char* outFileTag, const char* tag1, const char* tag2 = n
 
 
     // read in all p+Pb centralities histograms
-    for (int iCent = 0; iCent < numZdcCentBins; iCent++) {
+    for (int iCent = 0; iCent < nZdcCentBins; iCent++) {
       TString inFileName = Form ("%s/Histograms/%s/JetsHists/%s/data16_5TeV_iCent%i_hists.root", rootPath.Data (), tag1, variations[iVar].Data (), iCent);
       std::cout << "Reading " << inFileName.Data () << std::endl;
       inFile = new TFile (inFileName.Data (), "read");
@@ -141,7 +141,7 @@ void ProcessDPhi (const char* outFileTag, const char* tag1, const char* tag2 = n
 
 
     // read in all p+Pb centralities mixed event histograms
-    for (int iCent = 0; iCent < numZdcCentBins; iCent++) {
+    for (int iCent = 0; iCent < nZdcCentBins; iCent++) {
       TString inFileName = Form ("%s/Histograms/%s/%sHists/%s/data16_5TeV_iCent%i_hists.root", rootPath.Data (), doMix ? tag1 : tag2, doMix ? "Mixed" : "Jets", variations[iVar].Data (), iCent);
       std::cout << "Reading " << inFileName.Data () << std::endl;
       inFile = new TFile (inFileName.Data (), "read");
@@ -168,7 +168,7 @@ void ProcessDPhi (const char* outFileTag, const char* tag1, const char* tag2 = n
       h_jet_trk_dphi_ref_sig[iPtCh][iVar] = (TH1D*) h_jet_trk_dphi_ref[iPtCh][iVar]->Clone (Form ("h_jet_trk_dphi_%s_ref_sig_%s", pTChSelections[iPtCh].Data (), variations[iVar].Data ()));
       h_jet_trk_dphi_ref_sig[iPtCh][iVar]->Add (h_jet_trk_dphi_ref_bkg[iPtCh][iVar], -1);
 
-      for (int iCent = 0; iCent < numZdcCentBins; iCent++) {
+      for (int iCent = 0; iCent < nZdcCentBins; iCent++) {
 
         h_jet_trk_dphi_sig[iCent][iPtCh][iVar] = (TH1D*) h_jet_trk_dphi[iCent][iPtCh][iVar]->Clone (Form ("h_jet_trk_dphi_%s_pPb_sig_iCent%i_%s", pTChSelections[iPtCh].Data (), iCent, variations[iVar].Data ()));
         h_jet_trk_dphi_sig[iCent][iPtCh][iVar]->Add (h_jet_trk_dphi_bkg[iCent][iPtCh][iVar], -1);
@@ -192,7 +192,7 @@ void ProcessDPhi (const char* outFileTag, const char* tag1, const char* tag2 = n
     ResetTGAEErrors (g_jet_trk_dphi_ref_bkg_syst[iPtCh][0]);
     ResetTGAEErrors (g_jet_trk_dphi_ref_sig_syst[iPtCh][0]);
 
-    for (int iCent = 0; iCent < numZdcCentBins; iCent++) {
+    for (int iCent = 0; iCent < nZdcCentBins; iCent++) {
 
       g_jet_trk_dphi_syst[iCent][iPtCh][0] = make_graph (h_jet_trk_dphi[iCent][iPtCh][0]);
       g_jet_trk_dphi_bkg_syst[iCent][iPtCh][0] = make_graph (h_jet_trk_dphi_bkg[iCent][iPtCh][0]);
@@ -220,7 +220,7 @@ void ProcessDPhi (const char* outFileTag, const char* tag1, const char* tag2 = n
       CalcSystematics (g_jet_trk_dphi_ref_bkg_syst[iPtCh][iVar], h_jet_trk_dphi_ref_bkg[iPtCh][0], h_jet_trk_dphi_ref_bkg[iPtCh][iVar]);
       CalcSystematics (g_jet_trk_dphi_ref_sig_syst[iPtCh][iVar], h_jet_trk_dphi_ref_sig[iPtCh][0], h_jet_trk_dphi_ref_sig[iPtCh][iVar]);
 
-      for (int iCent = 0; iCent < numZdcCentBins; iCent++) {
+      for (int iCent = 0; iCent < nZdcCentBins; iCent++) {
 
         g_jet_trk_dphi_syst[iCent][iPtCh][iVar] = new TGAE ();
         g_jet_trk_dphi_bkg_syst[iCent][iPtCh][iVar] = new TGAE ();
@@ -240,20 +240,37 @@ void ProcessDPhi (const char* outFileTag, const char* tag1, const char* tag2 = n
   // takes the maximum variation of the jet pT ES up/down variations
   // TODO
   for (int iPtCh = 0; iPtCh < nPtChSelections; iPtCh++) {
-    const int syst = 1;
 
-    AddMaxSystematic (g_jet_trk_dphi_ref_syst[iPtCh][0], g_jet_trk_dphi_ref_syst[iPtCh][syst], g_jet_trk_dphi_ref_syst[iPtCh][syst+1]);
-    AddMaxSystematic (g_jet_trk_dphi_ref_bkg_syst[iPtCh][0], g_jet_trk_dphi_ref_bkg_syst[iPtCh][syst], g_jet_trk_dphi_ref_bkg_syst[iPtCh][syst+1]);
-    AddMaxSystematic (g_jet_trk_dphi_ref_sig_syst[iPtCh][0], g_jet_trk_dphi_ref_sig_syst[iPtCh][syst], g_jet_trk_dphi_ref_sig_syst[iPtCh][syst+1]);
+    const int syst = 7; // MixCatVar1
 
-    for (int iCent = 0; iCent < numZdcCentBins; iCent++) {
+    AddMaxSystematic (g_jet_trk_dphi_ref_syst[iPtCh][0], g_jet_trk_dphi_ref_syst[iPtCh][syst], g_jet_trk_dphi_ref_syst[iPtCh][syst]);
+    AddMaxSystematic (g_jet_trk_dphi_ref_bkg_syst[iPtCh][0], g_jet_trk_dphi_ref_bkg_syst[iPtCh][syst], g_jet_trk_dphi_ref_bkg_syst[iPtCh][syst]);
+    AddMaxSystematic (g_jet_trk_dphi_ref_sig_syst[iPtCh][0], g_jet_trk_dphi_ref_sig_syst[iPtCh][syst], g_jet_trk_dphi_ref_sig_syst[iPtCh][syst]);
 
-      AddMaxSystematic (g_jet_trk_dphi_syst[iCent][iPtCh][0], g_jet_trk_dphi_syst[iCent][iPtCh][syst], g_jet_trk_dphi_syst[iCent][iPtCh][syst+1]);
-      AddMaxSystematic (g_jet_trk_dphi_bkg_syst[iCent][iPtCh][0], g_jet_trk_dphi_bkg_syst[iCent][iPtCh][syst], g_jet_trk_dphi_bkg_syst[iCent][iPtCh][syst+1]);
-      AddMaxSystematic (g_jet_trk_dphi_sig_syst[iCent][iPtCh][0], g_jet_trk_dphi_sig_syst[iCent][iPtCh][syst], g_jet_trk_dphi_sig_syst[iCent][iPtCh][syst+1]);
-      AddMaxSystematic (g_jet_trk_dphi_iaa_syst[iCent][iPtCh][0], g_jet_trk_dphi_iaa_syst[iCent][iPtCh][syst], g_jet_trk_dphi_iaa_syst[iCent][iPtCh][syst+1]);
+    for (int iCent = 0; iCent < nZdcCentBins; iCent++) {
+
+      AddMaxSystematic (g_jet_trk_dphi_syst[iCent][iPtCh][0], g_jet_trk_dphi_syst[iCent][iPtCh][syst], g_jet_trk_dphi_syst[iCent][iPtCh][syst]);
+      AddMaxSystematic (g_jet_trk_dphi_bkg_syst[iCent][iPtCh][0], g_jet_trk_dphi_bkg_syst[iCent][iPtCh][syst], g_jet_trk_dphi_bkg_syst[iCent][iPtCh][syst]);
+      AddMaxSystematic (g_jet_trk_dphi_sig_syst[iCent][iPtCh][0], g_jet_trk_dphi_sig_syst[iCent][iPtCh][syst], g_jet_trk_dphi_sig_syst[iCent][iPtCh][syst]);
+      AddMaxSystematic (g_jet_trk_dphi_iaa_syst[iCent][iPtCh][0], g_jet_trk_dphi_iaa_syst[iCent][iPtCh][syst], g_jet_trk_dphi_iaa_syst[iCent][iPtCh][syst]);
 
     }
+
+
+    //const int syst = 1; // 5% JES systematic
+
+    //AddMaxSystematic (g_jet_trk_dphi_ref_syst[iPtCh][0], g_jet_trk_dphi_ref_syst[iPtCh][syst], g_jet_trk_dphi_ref_syst[iPtCh][syst+1]);
+    //AddMaxSystematic (g_jet_trk_dphi_ref_bkg_syst[iPtCh][0], g_jet_trk_dphi_ref_bkg_syst[iPtCh][syst], g_jet_trk_dphi_ref_bkg_syst[iPtCh][syst+1]);
+    //AddMaxSystematic (g_jet_trk_dphi_ref_sig_syst[iPtCh][0], g_jet_trk_dphi_ref_sig_syst[iPtCh][syst], g_jet_trk_dphi_ref_sig_syst[iPtCh][syst+1]);
+
+    //for (int iCent = 0; iCent < nZdcCentBins; iCent++) {
+
+    //  AddMaxSystematic (g_jet_trk_dphi_syst[iCent][iPtCh][0], g_jet_trk_dphi_syst[iCent][iPtCh][syst], g_jet_trk_dphi_syst[iCent][iPtCh][syst+1]);
+    //  AddMaxSystematic (g_jet_trk_dphi_bkg_syst[iCent][iPtCh][0], g_jet_trk_dphi_bkg_syst[iCent][iPtCh][syst], g_jet_trk_dphi_bkg_syst[iCent][iPtCh][syst+1]);
+    //  AddMaxSystematic (g_jet_trk_dphi_sig_syst[iCent][iPtCh][0], g_jet_trk_dphi_sig_syst[iCent][iPtCh][syst], g_jet_trk_dphi_sig_syst[iCent][iPtCh][syst+1]);
+    //  AddMaxSystematic (g_jet_trk_dphi_iaa_syst[iCent][iPtCh][0], g_jet_trk_dphi_iaa_syst[iCent][iPtCh][syst], g_jet_trk_dphi_iaa_syst[iCent][iPtCh][syst+1]);
+
+    //}
   }
 
 
@@ -269,7 +286,7 @@ void ProcessDPhi (const char* outFileTag, const char* tag1, const char* tag2 = n
       h_evt_counts_ref_bkg[iVar]->Write ();
       h_jet_counts_ref_bkg[iVar]->Write ();
 
-      for (int iCent = 0; iCent < numZdcCentBins; iCent++) {
+      for (int iCent = 0; iCent < nZdcCentBins; iCent++) {
 
         h_evt_counts[iCent][iVar]->Write ();
         h_jet_counts[iCent][iVar]->Write ();
@@ -287,7 +304,7 @@ void ProcessDPhi (const char* outFileTag, const char* tag1, const char* tag2 = n
         h_jet_trk_dphi_ref_bkg[iPtCh][iVar]->Write ();
         h_jet_trk_dphi_ref_sig[iPtCh][iVar]->Write ();
 
-        for (int iCent = 0; iCent < numZdcCentBins; iCent++) {
+        for (int iCent = 0; iCent < nZdcCentBins; iCent++) {
 
           h_jet_trk_dphi[iCent][iPtCh][iVar]->Write ();
           h_jet_trk_dphi_bkg[iCent][iPtCh][iVar]->Write ();
@@ -301,7 +318,7 @@ void ProcessDPhi (const char* outFileTag, const char* tag1, const char* tag2 = n
       g_jet_trk_dphi_ref_bkg_syst[iPtCh][0]->Write (Form ("g_jet_trk_dphi_%s_ref_bkg_syst", pTChSelections[iPtCh].Data ()));
       g_jet_trk_dphi_ref_sig_syst[iPtCh][0]->Write (Form ("g_jet_trk_dphi_%s_ref_sig_syst", pTChSelections[iPtCh].Data ()));
 
-      for (int iCent = 0; iCent < numZdcCentBins; iCent++) {
+      for (int iCent = 0; iCent < nZdcCentBins; iCent++) {
 
         g_jet_trk_dphi_syst[iCent][iPtCh][0]->Write (Form ("g_jet_trk_dphi_%s_syst_iCent%i", pTChSelections[iPtCh].Data (), iCent));
         g_jet_trk_dphi_bkg_syst[iCent][iPtCh][0]->Write (Form ("g_jet_trk_dphi_%s_bkg_syst_iCent%i", pTChSelections[iPtCh].Data (), iCent));

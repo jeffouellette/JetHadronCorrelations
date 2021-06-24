@@ -19,14 +19,14 @@ using namespace JetHadronCorrelations;
 
 typedef TGraphAsymmErrors TGAE;
 
-const int numFinerEtaBins = 56;
-const double* finerEtaBins = linspace (-2.8, 2.8, numFinerEtaBins);
+const int nFinerEtaBins = 56;
+const double* finerEtaBins = linspace (-2.8, 2.8, nFinerEtaBins);
 
 const double etaBins[] = {0, 0.3, 0.8, 1.2, 2.1, 2.8};
-const int numEtaBins = sizeof (etaBins) / sizeof (etaBins[0]) - 1;
+const int nEtaBins = sizeof (etaBins) / sizeof (etaBins[0]) - 1;
 
 const double enJBins[] = {10, 12, 15, 18, 22, 26, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 100, 120, 140, 160, 180, 200, 220, 240, 260, 280, 300, 320, 360, 400, 450, 500};
-const int numEnJBins = sizeof (enJBins) / sizeof (enJBins[0]) - 1;
+const int nEnJBins = sizeof (enJBins) / sizeof (enJBins[0]) - 1;
 
 //const vector <int> systems = {0, 1};
 const vector <int> systems = {0};
@@ -121,25 +121,25 @@ void PlotJetEnergyResolution () {
     h2_r4_avg_jetares[iSys] = (TH2D*) inFile->Get (Form ("h2_r4_avg_jetares_%s", sys.Data ()));
 
 
-    h_r2_avg_jpts[iSys] = new TH1D*[numEtaBins+1];
-    h_r2_avg_jptr[iSys] = new TH1D*[numEtaBins+1];
+    h_r2_avg_jpts[iSys] = new TH1D*[nEtaBins+1];
+    h_r2_avg_jptr[iSys] = new TH1D*[nEtaBins+1];
 
-    h_r4_avg_jpts[iSys] = new TH1D*[numEtaBins+1];
-    h_r4_avg_jptr[iSys] = new TH1D*[numEtaBins+1];
+    h_r4_avg_jpts[iSys] = new TH1D*[nEtaBins+1];
+    h_r4_avg_jptr[iSys] = new TH1D*[nEtaBins+1];
 
-    h_r2_avg_jes[iSys] = new TH1D*[numEtaBins+1];
-    h_r2_avg_jer[iSys] = new TH1D*[numEtaBins+1];
+    h_r2_avg_jes[iSys] = new TH1D*[nEtaBins+1];
+    h_r2_avg_jer[iSys] = new TH1D*[nEtaBins+1];
 
-    h_r4_avg_jes[iSys] = new TH1D*[numEtaBins+1];
-    h_r4_avg_jer[iSys] = new TH1D*[numEtaBins+1];
+    h_r4_avg_jes[iSys] = new TH1D*[nEtaBins+1];
+    h_r4_avg_jer[iSys] = new TH1D*[nEtaBins+1];
 
-    h_r2_avg_jetacorr[iSys] = new TH1D*[numEtaBins+1];
-    h_r2_avg_jetares[iSys] = new TH1D*[numEtaBins+1];
+    h_r2_avg_jetacorr[iSys] = new TH1D*[nEtaBins+1];
+    h_r2_avg_jetares[iSys] = new TH1D*[nEtaBins+1];
 
-    h_r4_avg_jetacorr[iSys] = new TH1D*[numEtaBins+1];
-    h_r4_avg_jetares[iSys] = new TH1D*[numEtaBins+1];
+    h_r4_avg_jetacorr[iSys] = new TH1D*[nEtaBins+1];
+    h_r4_avg_jetares[iSys] = new TH1D*[nEtaBins+1];
 
-    for (int iEta = 0; iEta <= numEtaBins; iEta++) {
+    for (int iEta = 0; iEta <= nEtaBins; iEta++) {
 
       h_r2_avg_jpts[iSys][iEta] = (TH1D*) inFile->Get (Form ("h_r2_avg_jpts_%s_iEta%i", sys.Data (), iEta));
       h_r2_avg_jptr[iSys][iEta] = (TH1D*) inFile->Get (Form ("h_r2_avg_jptr_%s_iEta%i", sys.Data (), iEta));
@@ -185,7 +185,7 @@ void PlotJetEnergyResolution () {
     {
       gPad->SetLogx ();
 
-      TH1D* htemp = new TH1D ("htemp", "", 1, 30, enJBins[numEnJBins]);
+      TH1D* htemp = new TH1D ("htemp", "", 1, 30, enJBins[nEnJBins]);
   
       TAxis* xax = htemp->GetXaxis ();
       TAxis* yax = htemp->GetYaxis ();
@@ -227,11 +227,11 @@ void PlotJetEnergyResolution () {
       l->SetLineStyle (2);
       l->SetLineWidth (2);
       //l->SetLineColor (kPink-8);
-      l->DrawLine (30, 100, enJBins[numEnJBins], 100);
+      l->DrawLine (30, 100, enJBins[nEnJBins], 100);
     }
      
 
-    for (int iEta = 0; iEta < numEtaBins; iEta++) {
+    for (int iEta = 0; iEta < nEtaBins; iEta++) {
       TGAE* g = make_graph (h_r2_avg_jpts[iSys][iEta]);
 
       g->SetMarkerColor (colors[iEta+1]);
@@ -241,7 +241,7 @@ void PlotJetEnergyResolution () {
       g->Draw ("P"); 
     }
     {
-      TGAE* g = make_graph (h_r2_avg_jpts[iSys][numEtaBins]);
+      TGAE* g = make_graph (h_r2_avg_jpts[iSys][nEtaBins]);
 
       g->SetMarkerColor (colors[0]);
       g->SetLineColor (colors[0]);
@@ -264,7 +264,7 @@ void PlotJetEnergyResolution () {
       tl->SetTextSize (26);
       tl->DrawLatexNDC (0.26, 0.845, "Pythia8 #it{pp} + #it{p}+Pb Overlay, #sqrt{s_{NN}} = 5.02 TeV");
     }
-    for (int iEta = 0; iEta < numEtaBins; iEta++)
+    for (int iEta = 0; iEta < nEtaBins; iEta++)
       myMarkerTextNoLine (0.3, 0.39-0.04*iEta, colors[iEta+1], kOpenCircle, Form ("%g < |#it{#eta}| < %g", etaBins[iEta], etaBins[iEta+1]), 1.2, 0.036);
     myMarkerTextNoLine (0.3, 0.44, colors[0], kFullCircle, "All #it{#eta}", 1.2, 0.036);
 
@@ -290,7 +290,7 @@ void PlotJetEnergyResolution () {
     {
       gPad->SetLogx ();
 
-      TH1D* htemp = new TH1D ("htemp", "", 1, 30, enJBins[numEnJBins]);
+      TH1D* htemp = new TH1D ("htemp", "", 1, 30, enJBins[nEnJBins]);
   
       TAxis* xax = htemp->GetXaxis ();
       TAxis* yax = htemp->GetYaxis ();
@@ -332,11 +332,11 @@ void PlotJetEnergyResolution () {
       l->SetLineStyle (2);
       l->SetLineWidth (2);
       //l->SetLineColor (kPink-8);
-      l->DrawLine (30, 100, enJBins[numEnJBins], 100);
+      l->DrawLine (30, 100, enJBins[nEnJBins], 100);
     }
      
 
-    for (int iEta = 0; iEta < numEtaBins; iEta++) {
+    for (int iEta = 0; iEta < nEtaBins; iEta++) {
       TGAE* g = make_graph (h_r4_avg_jpts[iSys][iEta]);
 
       g->SetMarkerColor (colors[iEta+1]);
@@ -346,7 +346,7 @@ void PlotJetEnergyResolution () {
       g->Draw ("P"); 
     }
     {
-      TGAE* g = make_graph (h_r4_avg_jpts[iSys][numEtaBins]);
+      TGAE* g = make_graph (h_r4_avg_jpts[iSys][nEtaBins]);
 
       g->SetMarkerColor (colors[0]);
       g->SetLineColor (colors[0]);
@@ -369,7 +369,7 @@ void PlotJetEnergyResolution () {
       tl->SetTextSize (26);
       tl->DrawLatexNDC (0.26, 0.845, "Pythia8 #it{pp} + #it{p}+Pb Overlay, #sqrt{s_{NN}} = 5.02 TeV");
     }
-    for (int iEta = 0; iEta < numEtaBins; iEta++)
+    for (int iEta = 0; iEta < nEtaBins; iEta++)
       myMarkerTextNoLine (0.3, 0.39-0.04*iEta, colors[iEta+1], kOpenCircle, Form ("%g < |#it{#eta}| < %g", etaBins[iEta], etaBins[iEta+1]), 1.2, 0.036);
     myMarkerTextNoLine (0.3, 0.44, colors[0], kFullCircle, "All #it{#eta}", 1.2, 0.036);
 
@@ -395,7 +395,7 @@ void PlotJetEnergyResolution () {
     {
       gPad->SetLogx ();
 
-      TH1D* htemp = new TH1D ("htemp", "", 1, 30, enJBins[numEnJBins]);
+      TH1D* htemp = new TH1D ("htemp", "", 1, 30, enJBins[nEnJBins]);
   
       TAxis* xax = htemp->GetXaxis ();
       TAxis* yax = htemp->GetYaxis ();
@@ -437,11 +437,11 @@ void PlotJetEnergyResolution () {
       l->SetLineStyle (2);
       l->SetLineWidth (2);
       //l->SetLineColor (kPink-8);
-      l->DrawLine (30, 100, enJBins[numEnJBins], 100);
+      l->DrawLine (30, 100, enJBins[nEnJBins], 100);
     }
      
 
-    for (int iEta = 0; iEta < numEtaBins; iEta++) {
+    for (int iEta = 0; iEta < nEtaBins; iEta++) {
       TGAE* g = make_graph (h_r2_avg_jes[iSys][iEta]);
 
       g->SetMarkerColor (colors[iEta+1]);
@@ -451,7 +451,7 @@ void PlotJetEnergyResolution () {
       g->Draw ("P"); 
     }
     {
-      TGAE* g = make_graph (h_r2_avg_jes[iSys][numEtaBins]);
+      TGAE* g = make_graph (h_r2_avg_jes[iSys][nEtaBins]);
 
       g->SetMarkerColor (colors[0]);
       g->SetLineColor (colors[0]);
@@ -474,7 +474,7 @@ void PlotJetEnergyResolution () {
       tl->SetTextSize (26);
       tl->DrawLatexNDC (0.26, 0.845, "Pythia8 #it{pp} + #it{p}+Pb Overlay, #sqrt{s_{NN}} = 5.02 TeV");
     }
-    for (int iEta = 0; iEta < numEtaBins; iEta++)
+    for (int iEta = 0; iEta < nEtaBins; iEta++)
       myMarkerTextNoLine (0.3, 0.39-0.04*iEta, colors[iEta+1], kOpenCircle, Form ("%g < |#it{#eta}| < %g", etaBins[iEta], etaBins[iEta+1]), 1.2, 0.036);
     myMarkerTextNoLine (0.3, 0.44, colors[0], kFullCircle, "All #it{#eta}", 1.2, 0.036);
 
@@ -500,7 +500,7 @@ void PlotJetEnergyResolution () {
     {
       gPad->SetLogx ();
 
-      TH1D* htemp = new TH1D ("htemp", "", 1, 30, enJBins[numEnJBins]);
+      TH1D* htemp = new TH1D ("htemp", "", 1, 30, enJBins[nEnJBins]);
   
       TAxis* xax = htemp->GetXaxis ();
       TAxis* yax = htemp->GetYaxis ();
@@ -542,11 +542,11 @@ void PlotJetEnergyResolution () {
       l->SetLineStyle (2);
       l->SetLineWidth (2);
       //l->SetLineColor (kPink-8);
-      l->DrawLine (30, 100, enJBins[numEnJBins], 100);
+      l->DrawLine (30, 100, enJBins[nEnJBins], 100);
     }
      
 
-    for (int iEta = 0; iEta < numEtaBins; iEta++) {
+    for (int iEta = 0; iEta < nEtaBins; iEta++) {
       TGAE* g = make_graph (h_r4_avg_jes[iSys][iEta]);
 
       g->SetMarkerColor (colors[iEta+1]);
@@ -556,7 +556,7 @@ void PlotJetEnergyResolution () {
       g->Draw ("P"); 
     }
     {
-      TGAE* g = make_graph (h_r4_avg_jes[iSys][numEtaBins]);
+      TGAE* g = make_graph (h_r4_avg_jes[iSys][nEtaBins]);
 
       g->SetMarkerColor (colors[0]);
       g->SetLineColor (colors[0]);
@@ -579,7 +579,7 @@ void PlotJetEnergyResolution () {
       tl->SetTextSize (26);
       tl->DrawLatexNDC (0.26, 0.845, "Pythia8 #it{pp} + #it{p}+Pb Overlay, #sqrt{s_{NN}} = 5.02 TeV");
     }
-    for (int iEta = 0; iEta < numEtaBins; iEta++)
+    for (int iEta = 0; iEta < nEtaBins; iEta++)
       myMarkerTextNoLine (0.3, 0.39-0.04*iEta, colors[iEta+1], kOpenCircle, Form ("%g < |#it{#eta}| < %g", etaBins[iEta], etaBins[iEta+1]), 1.2, 0.036);
     myMarkerTextNoLine (0.3, 0.44, colors[0], kFullCircle, "All #it{#eta}", 1.2, 0.036);
 
@@ -605,7 +605,7 @@ void PlotJetEnergyResolution () {
     {
       gPad->SetLogx ();
 
-      TH1D* htemp = new TH1D ("htemp", "", 1, 30, enJBins[numEnJBins]);
+      TH1D* htemp = new TH1D ("htemp", "", 1, 30, enJBins[nEnJBins]);
   
       TAxis* xax = htemp->GetXaxis ();
       TAxis* yax = htemp->GetYaxis ();
@@ -646,7 +646,7 @@ void PlotJetEnergyResolution () {
     }
      
 
-    for (int iEta = 0; iEta < numEtaBins; iEta++) {
+    for (int iEta = 0; iEta < nEtaBins; iEta++) {
       TGAE* g = make_graph (h_r2_avg_jptr[iSys][iEta]);
 
       g->SetMarkerColor (colors[iEta+1]);
@@ -656,7 +656,7 @@ void PlotJetEnergyResolution () {
       g->Draw ("P"); 
     }
     {
-      TGAE* g = make_graph (h_r2_avg_jptr[iSys][numEtaBins]);
+      TGAE* g = make_graph (h_r2_avg_jptr[iSys][nEtaBins]);
 
       g->SetMarkerColor (colors[0]);
       g->SetLineColor (colors[0]);
@@ -679,7 +679,7 @@ void PlotJetEnergyResolution () {
       tl->SetTextSize (26);
       tl->DrawLatexNDC (0.26, 0.845, "Pythia8 #it{pp} + #it{p}+Pb Overlay, #sqrt{s_{NN}} = 5.02 TeV");
     }
-    for (int iEta = 0; iEta < numEtaBins; iEta++)
+    for (int iEta = 0; iEta < nEtaBins; iEta++)
       myMarkerTextNoLine (0.5, 0.69-0.04*iEta, colors[iEta+1], kOpenCircle, Form ("%g < |#it{#eta}| < %g", etaBins[iEta], etaBins[iEta+1]), 1.2, 0.036);
     myMarkerTextNoLine (0.5, 0.74, colors[0], kFullCircle, "All #it{#eta}", 1.2, 0.036);
 
@@ -705,7 +705,7 @@ void PlotJetEnergyResolution () {
     {
       gPad->SetLogx ();
 
-      TH1D* htemp = new TH1D ("htemp", "", 1, 30, enJBins[numEnJBins]);
+      TH1D* htemp = new TH1D ("htemp", "", 1, 30, enJBins[nEnJBins]);
   
       TAxis* xax = htemp->GetXaxis ();
       TAxis* yax = htemp->GetYaxis ();
@@ -746,7 +746,7 @@ void PlotJetEnergyResolution () {
     }
      
 
-    for (int iEta = 0; iEta < numEtaBins; iEta++) {
+    for (int iEta = 0; iEta < nEtaBins; iEta++) {
       TGAE* g = make_graph (h_r4_avg_jptr[iSys][iEta]);
 
       g->SetMarkerColor (colors[iEta+1]);
@@ -756,7 +756,7 @@ void PlotJetEnergyResolution () {
       g->Draw ("P"); 
     }
     {
-      TGAE* g = make_graph (h_r4_avg_jptr[iSys][numEtaBins]);
+      TGAE* g = make_graph (h_r4_avg_jptr[iSys][nEtaBins]);
 
       g->SetMarkerColor (colors[0]);
       g->SetLineColor (colors[0]);
@@ -779,7 +779,7 @@ void PlotJetEnergyResolution () {
       tl->SetTextSize (26);
       tl->DrawLatexNDC (0.26, 0.845, "Pythia8 #it{pp} + #it{p}+Pb Overlay, #sqrt{s_{NN}} = 5.02 TeV");
     }
-    for (int iEta = 0; iEta < numEtaBins; iEta++)
+    for (int iEta = 0; iEta < nEtaBins; iEta++)
       myMarkerTextNoLine (0.5, 0.69-0.04*iEta, colors[iEta+1], kOpenCircle, Form ("%g < |#it{#eta}| < %g", etaBins[iEta], etaBins[iEta+1]), 1.2, 0.036);
     myMarkerTextNoLine (0.5, 0.74, colors[0], kFullCircle, "All #it{#eta}", 1.2, 0.036);
 
@@ -805,7 +805,7 @@ void PlotJetEnergyResolution () {
     {
       gPad->SetLogx ();
 
-      TH1D* htemp = new TH1D ("htemp", "", 1, 30, enJBins[numEnJBins]);
+      TH1D* htemp = new TH1D ("htemp", "", 1, 30, enJBins[nEnJBins]);
   
       TAxis* xax = htemp->GetXaxis ();
       TAxis* yax = htemp->GetYaxis ();
@@ -846,7 +846,7 @@ void PlotJetEnergyResolution () {
     }
      
 
-    for (int iEta = 0; iEta < numEtaBins; iEta++) {
+    for (int iEta = 0; iEta < nEtaBins; iEta++) {
       TGAE* g = make_graph (h_r2_avg_jer[iSys][iEta]);
 
       g->SetMarkerColor (colors[iEta+1]);
@@ -856,7 +856,7 @@ void PlotJetEnergyResolution () {
       g->Draw ("P"); 
     }
     {
-      TGAE* g = make_graph (h_r2_avg_jer[iSys][numEtaBins]);
+      TGAE* g = make_graph (h_r2_avg_jer[iSys][nEtaBins]);
 
       g->SetMarkerColor (colors[0]);
       g->SetLineColor (colors[0]);
@@ -879,7 +879,7 @@ void PlotJetEnergyResolution () {
       tl->SetTextSize (26);
       tl->DrawLatexNDC (0.26, 0.845, "Pythia8 #it{pp} + #it{p}+Pb Overlay, #sqrt{s_{NN}} = 5.02 TeV");
     }
-    for (int iEta = 0; iEta < numEtaBins; iEta++)
+    for (int iEta = 0; iEta < nEtaBins; iEta++)
       myMarkerTextNoLine (0.5, 0.69-0.04*iEta, colors[iEta+1], kOpenCircle, Form ("%g < |#it{#eta}| < %g", etaBins[iEta], etaBins[iEta+1]), 1.2, 0.036);
     myMarkerTextNoLine (0.5, 0.74, colors[0], kFullCircle, "All #it{#eta}", 1.2, 0.036);
 
@@ -905,7 +905,7 @@ void PlotJetEnergyResolution () {
     {
       gPad->SetLogx ();
 
-      TH1D* htemp = new TH1D ("htemp", "", 1, 30, enJBins[numEnJBins]);
+      TH1D* htemp = new TH1D ("htemp", "", 1, 30, enJBins[nEnJBins]);
   
       TAxis* xax = htemp->GetXaxis ();
       TAxis* yax = htemp->GetYaxis ();
@@ -946,7 +946,7 @@ void PlotJetEnergyResolution () {
     }
      
 
-    for (int iEta = 0; iEta < numEtaBins; iEta++) {
+    for (int iEta = 0; iEta < nEtaBins; iEta++) {
       TGAE* g = make_graph (h_r4_avg_jer[iSys][iEta]);
 
       g->SetMarkerColor (colors[iEta+1]);
@@ -956,7 +956,7 @@ void PlotJetEnergyResolution () {
       g->Draw ("P"); 
     }
     {
-      TGAE* g = make_graph (h_r4_avg_jer[iSys][numEtaBins]);
+      TGAE* g = make_graph (h_r4_avg_jer[iSys][nEtaBins]);
 
       g->SetMarkerColor (colors[0]);
       g->SetLineColor (colors[0]);
@@ -979,7 +979,7 @@ void PlotJetEnergyResolution () {
       tl->SetTextSize (26);
       tl->DrawLatexNDC (0.26, 0.845, "Pythia8 #it{pp} + #it{p}+Pb Overlay, #sqrt{s_{NN}} = 5.02 TeV");
     }
-    for (int iEta = 0; iEta < numEtaBins; iEta++)
+    for (int iEta = 0; iEta < nEtaBins; iEta++)
       myMarkerTextNoLine (0.5, 0.69-0.04*iEta, colors[iEta+1], kOpenCircle, Form ("%g < |#it{#eta}| < %g", etaBins[iEta], etaBins[iEta+1]), 1.2, 0.036);
     myMarkerTextNoLine (0.5, 0.74, colors[0], kFullCircle, "All #it{#eta}", 1.2, 0.036);
 

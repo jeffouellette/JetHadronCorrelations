@@ -191,29 +191,29 @@ bool JetEnergyResolution (const char* directory,
   else if (IspPb ())  sys = "pPb";
   else                sys = "???";
 
-  const int numFinerEtaBins = 90;
-  const double* finerEtaBins = linspace (-4.5, 4.5, numFinerEtaBins);
+  const int nFinerEtaBins = 90;
+  const double* finerEtaBins = linspace (-4.5, 4.5, nFinerEtaBins);
 
   const double enJBins[] = {10, 12, 15, 18, 22, 26, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 100, 120, 140, 160, 180, 200, 220, 240, 260, 280, 300, 320, 360, 400, 450, 500};
-  const int numEnJBins = sizeof (enJBins) / sizeof (enJBins[0]) - 1;
+  const int nEnJBins = sizeof (enJBins) / sizeof (enJBins[0]) - 1;
 
-  TH1D*** h_r2_jpts = new TH1D**[numEnJBins];
-  TH1D*** h_r2_jes = new TH1D**[numEnJBins];
-  TH1D*** h_r2_jetacorr = new TH1D**[numEnJBins];
-  TH1D*** h_r4_jpts = new TH1D**[numEnJBins];
-  TH1D*** h_r4_jes = new TH1D**[numEnJBins];
-  TH1D*** h_r4_jetacorr = new TH1D**[numEnJBins];
+  TH1D*** h_r2_jpts = new TH1D**[nEnJBins];
+  TH1D*** h_r2_jes = new TH1D**[nEnJBins];
+  TH1D*** h_r2_jetacorr = new TH1D**[nEnJBins];
+  TH1D*** h_r4_jpts = new TH1D**[nEnJBins];
+  TH1D*** h_r4_jes = new TH1D**[nEnJBins];
+  TH1D*** h_r4_jetacorr = new TH1D**[nEnJBins];
 
-  for (int iEnJ = 0; iEnJ < numEnJBins; iEnJ++) {
-    h_r2_jpts[iEnJ] = new TH1D*[numFinerEtaBins];
-    h_r2_jes[iEnJ] = new TH1D*[numFinerEtaBins];
-    h_r2_jetacorr[iEnJ] = new TH1D*[numFinerEtaBins];
+  for (int iEnJ = 0; iEnJ < nEnJBins; iEnJ++) {
+    h_r2_jpts[iEnJ] = new TH1D*[nFinerEtaBins];
+    h_r2_jes[iEnJ] = new TH1D*[nFinerEtaBins];
+    h_r2_jetacorr[iEnJ] = new TH1D*[nFinerEtaBins];
 
-    h_r4_jpts[iEnJ] = new TH1D*[numFinerEtaBins];
-    h_r4_jes[iEnJ] = new TH1D*[numFinerEtaBins];
-    h_r4_jetacorr[iEnJ] = new TH1D*[numFinerEtaBins];
+    h_r4_jpts[iEnJ] = new TH1D*[nFinerEtaBins];
+    h_r4_jes[iEnJ] = new TH1D*[nFinerEtaBins];
+    h_r4_jetacorr[iEnJ] = new TH1D*[nFinerEtaBins];
 
-    for (int iEta = 0; iEta < numFinerEtaBins; iEta++) {
+    for (int iEta = 0; iEta < nFinerEtaBins; iEta++) {
       h_r2_jpts[iEnJ][iEta] = new TH1D (Form ("h_r2_jpts_%s_iEnJ%i_iEta%i", sys.Data (), iEnJ, iEta), "#it{p}_{T}^{reco} / #it{p}_{T}^{truth}", 140, 0.3, 1.7);
       h_r2_jpts[iEnJ][iEta]->Sumw2 ();
       h_r2_jes[iEnJ][iEta] = new TH1D (Form ("h_r2_jes_%s_iEnJ%i_iEta%i", sys.Data (), iEnJ, iEta), "#it{E}_{reco} / #it{E}_{truth}", 140, 0.3, 1.7);
@@ -280,16 +280,16 @@ bool JetEnergyResolution (const char* directory,
       short iEnJ = -1;
       if (enJBins[0] <= tjpt) {
         iEnJ = 0;
-        while (iEnJ < numEnJBins && enJBins[iEnJ+1] < tjpt) iEnJ++;
+        while (iEnJ < nEnJBins && enJBins[iEnJ+1] < tjpt) iEnJ++;
       }
 
       short iEta = -1;
       if (finerEtaBins[0] <= tjeta) {
         iEta = 0;
-        while (iEta < numFinerEtaBins && finerEtaBins[iEta+1] < tjeta) iEta++;
+        while (iEta < nFinerEtaBins && finerEtaBins[iEta+1] < tjeta) iEta++;
       }
 
-      if (iEnJ >= 0 && iEnJ < numEnJBins && iEta >= 0 && iEta < numFinerEtaBins) {
+      if (iEnJ >= 0 && iEnJ < nEnJBins && iEta >= 0 && iEta < nFinerEtaBins) {
         h_r2_jpts[iEnJ][iEta]->Fill (jpt / tjpt);
         h_r2_jes[iEnJ][iEta]->Fill (jen / tjen);
         h_r2_jetacorr[iEnJ][iEta]->Fill (jeta - tjeta);
@@ -323,16 +323,16 @@ bool JetEnergyResolution (const char* directory,
       short iEnJ = -1;
       if (enJBins[0] <= tjpt) {
         iEnJ = 0;
-        while (iEnJ < numEnJBins && enJBins[iEnJ+1] < tjpt) iEnJ++;
+        while (iEnJ < nEnJBins && enJBins[iEnJ+1] < tjpt) iEnJ++;
       }
 
       short iEta = -1;
       if (finerEtaBins[0] <= tjeta) {
         iEta = 0;
-        while (iEta < numFinerEtaBins && finerEtaBins[iEta+1] < tjeta) iEta++;
+        while (iEta < nFinerEtaBins && finerEtaBins[iEta+1] < tjeta) iEta++;
       }
 
-      if (iEnJ >= 0 && iEnJ < numEnJBins && iEta >= 0 && iEta < numFinerEtaBins) {
+      if (iEnJ >= 0 && iEnJ < nEnJBins && iEta >= 0 && iEta < nFinerEtaBins) {
         h_r4_jpts[iEnJ][iEta]->Fill (jpt / tjpt);
         h_r4_jes[iEnJ][iEta]->Fill (jen / tjen);
         h_r4_jetacorr[iEnJ][iEta]->Fill (jeta - tjeta);
@@ -347,8 +347,8 @@ bool JetEnergyResolution (const char* directory,
 
   outFile->cd ();
 
-  for (int iEnJ = 0; iEnJ < numEnJBins; iEnJ++) {
-    for (int iEta = 0; iEta < numFinerEtaBins; iEta++) {
+  for (int iEnJ = 0; iEnJ < nEnJBins; iEnJ++) {
+    for (int iEta = 0; iEta < nFinerEtaBins; iEta++) {
       h_r2_jpts[iEnJ][iEta]->Write ();
       SaferDelete (&(h_r2_jpts[iEnJ][iEta]));
       h_r2_jes[iEnJ][iEta]->Write ();

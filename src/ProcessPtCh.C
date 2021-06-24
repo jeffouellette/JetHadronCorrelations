@@ -30,10 +30,10 @@ void ProcessPtCh (const char* outFileTag, const char* tag1, const char* tag2 = n
   TH1D**  h_jet_counts_ref = Get1DArray <TH1D*> (nVar);
   TH1D**  h_evt_counts_ref_bkg = Get1DArray <TH1D*> (nVar);
   TH1D**  h_jet_counts_ref_bkg = Get1DArray <TH1D*> (nVar);
-  TH1D*** h_evt_counts = Get2DArray <TH1D*> (numZdcCentBins, nVar);
-  TH1D*** h_jet_counts = Get2DArray <TH1D*> (numZdcCentBins, nVar);
-  TH1D*** h_evt_counts_bkg = Get2DArray <TH1D*> (numZdcCentBins, nVar);
-  TH1D*** h_jet_counts_bkg = Get2DArray <TH1D*> (numZdcCentBins, nVar);
+  TH1D*** h_evt_counts = Get2DArray <TH1D*> (nZdcCentBins, nVar);
+  TH1D*** h_jet_counts = Get2DArray <TH1D*> (nZdcCentBins, nVar);
+  TH1D*** h_evt_counts_bkg = Get2DArray <TH1D*> (nZdcCentBins, nVar);
+  TH1D*** h_jet_counts_bkg = Get2DArray <TH1D*> (nZdcCentBins, nVar);
 
   TH1D**  h_jet_trk_pt_ns_ref = Get1DArray <TH1D*> (nVar);
   TH2D**  h2_jet_trk_pt_ns_cov_ref = Get1DArray <TH2D*> (nVar);
@@ -49,31 +49,31 @@ void ProcessPtCh (const char* outFileTag, const char* tag1, const char* tag2 = n
   TH1D**  h_jet_trk_pt_as_ref_bkg = Get1DArray <TH1D*> (nVar);
   TH2D**  h2_jet_trk_pt_as_cov_ref_bkg = Get1DArray <TH2D*> (nVar);
 
-  TH1D*** h_jet_trk_pt_ns = Get2DArray <TH1D*> (numZdcCentBins, nVar);
-  TH2D*** h2_jet_trk_pt_ns_cov = Get2DArray <TH2D*> (numZdcCentBins, nVar);
-  TH1D*** h_jet_trk_pt_perp = Get2DArray <TH1D*> (numZdcCentBins, nVar);
-  TH2D*** h2_jet_trk_pt_perp_cov = Get2DArray <TH2D*> (numZdcCentBins, nVar);
-  TH1D*** h_jet_trk_pt_as = Get2DArray <TH1D*> (numZdcCentBins, nVar);
-  TH2D*** h2_jet_trk_pt_as_cov = Get2DArray <TH2D*> (numZdcCentBins, nVar);
+  TH1D*** h_jet_trk_pt_ns = Get2DArray <TH1D*> (nZdcCentBins, nVar);
+  TH2D*** h2_jet_trk_pt_ns_cov = Get2DArray <TH2D*> (nZdcCentBins, nVar);
+  TH1D*** h_jet_trk_pt_perp = Get2DArray <TH1D*> (nZdcCentBins, nVar);
+  TH2D*** h2_jet_trk_pt_perp_cov = Get2DArray <TH2D*> (nZdcCentBins, nVar);
+  TH1D*** h_jet_trk_pt_as = Get2DArray <TH1D*> (nZdcCentBins, nVar);
+  TH2D*** h2_jet_trk_pt_as_cov = Get2DArray <TH2D*> (nZdcCentBins, nVar);
 
-  TH1D*** h_jet_trk_pt_ns_bkg = Get2DArray <TH1D*> (numZdcCentBins, nVar);
-  TH2D*** h2_jet_trk_pt_ns_cov_bkg = Get2DArray <TH2D*> (numZdcCentBins, nVar);
-  TH1D*** h_jet_trk_pt_perp_bkg = Get2DArray <TH1D*> (numZdcCentBins, nVar);
-  TH2D*** h2_jet_trk_pt_perp_cov_bkg = Get2DArray <TH2D*> (numZdcCentBins, nVar);
-  TH1D*** h_jet_trk_pt_as_bkg = Get2DArray <TH1D*> (numZdcCentBins, nVar);
-  TH2D*** h2_jet_trk_pt_as_cov_bkg = Get2DArray <TH2D*> (numZdcCentBins, nVar);
+  TH1D*** h_jet_trk_pt_ns_bkg = Get2DArray <TH1D*> (nZdcCentBins, nVar);
+  TH2D*** h2_jet_trk_pt_ns_cov_bkg = Get2DArray <TH2D*> (nZdcCentBins, nVar);
+  TH1D*** h_jet_trk_pt_perp_bkg = Get2DArray <TH1D*> (nZdcCentBins, nVar);
+  TH2D*** h2_jet_trk_pt_perp_cov_bkg = Get2DArray <TH2D*> (nZdcCentBins, nVar);
+  TH1D*** h_jet_trk_pt_as_bkg = Get2DArray <TH1D*> (nZdcCentBins, nVar);
+  TH2D*** h2_jet_trk_pt_as_cov_bkg = Get2DArray <TH2D*> (nZdcCentBins, nVar);
 
   TH1D**  h_jet_trk_pt_ns_ref_sig = Get1DArray <TH1D*> (nVar);
   TH1D**  h_jet_trk_pt_perp_ref_sig = Get1DArray <TH1D*> (nVar);
   TH1D**  h_jet_trk_pt_as_ref_sig = Get1DArray <TH1D*> (nVar);
 
-  TH1D*** h_jet_trk_pt_ns_sig = Get2DArray <TH1D*> (numZdcCentBins, nVar);
-  TH1D*** h_jet_trk_pt_perp_sig = Get2DArray <TH1D*> (numZdcCentBins, nVar);
-  TH1D*** h_jet_trk_pt_as_sig = Get2DArray <TH1D*> (numZdcCentBins, nVar);
+  TH1D*** h_jet_trk_pt_ns_sig = Get2DArray <TH1D*> (nZdcCentBins, nVar);
+  TH1D*** h_jet_trk_pt_perp_sig = Get2DArray <TH1D*> (nZdcCentBins, nVar);
+  TH1D*** h_jet_trk_pt_as_sig = Get2DArray <TH1D*> (nZdcCentBins, nVar);
 
-  TH1D*** h_jet_trk_pt_ns_iaa = Get2DArray <TH1D*> (numZdcCentBins, nVar);
-  TH1D*** h_jet_trk_pt_perp_iaa = Get2DArray <TH1D*> (numZdcCentBins, nVar);
-  TH1D*** h_jet_trk_pt_as_iaa = Get2DArray <TH1D*> (numZdcCentBins, nVar);
+  TH1D*** h_jet_trk_pt_ns_iaa = Get2DArray <TH1D*> (nZdcCentBins, nVar);
+  TH1D*** h_jet_trk_pt_perp_iaa = Get2DArray <TH1D*> (nZdcCentBins, nVar);
+  TH1D*** h_jet_trk_pt_as_iaa = Get2DArray <TH1D*> (nZdcCentBins, nVar);
 
 
   TGAE**  g_jet_trk_pt_ns_ref_syst = Get1DArray <TGAE*> (nVar);
@@ -82,23 +82,23 @@ void ProcessPtCh (const char* outFileTag, const char* tag1, const char* tag2 = n
   TGAE**  g_jet_trk_pt_ns_ref_bkg_syst = Get1DArray <TGAE*> (nVar);
   TGAE**  g_jet_trk_pt_perp_ref_bkg_syst = Get1DArray <TGAE*> (nVar);
   TGAE**  g_jet_trk_pt_as_ref_bkg_syst = Get1DArray <TGAE*> (nVar);
-  TGAE*** g_jet_trk_pt_ns_syst = Get2DArray <TGAE*> (numZdcCentBins, nVar);
-  TGAE*** g_jet_trk_pt_perp_syst = Get2DArray <TGAE*> (numZdcCentBins, nVar);
-  TGAE*** g_jet_trk_pt_as_syst = Get2DArray <TGAE*> (numZdcCentBins, nVar);
-  TGAE*** g_jet_trk_pt_ns_bkg_syst = Get2DArray <TGAE*> (numZdcCentBins, nVar);
-  TGAE*** g_jet_trk_pt_perp_bkg_syst = Get2DArray <TGAE*> (numZdcCentBins, nVar);
-  TGAE*** g_jet_trk_pt_as_bkg_syst = Get2DArray <TGAE*> (numZdcCentBins, nVar);
+  TGAE*** g_jet_trk_pt_ns_syst = Get2DArray <TGAE*> (nZdcCentBins, nVar);
+  TGAE*** g_jet_trk_pt_perp_syst = Get2DArray <TGAE*> (nZdcCentBins, nVar);
+  TGAE*** g_jet_trk_pt_as_syst = Get2DArray <TGAE*> (nZdcCentBins, nVar);
+  TGAE*** g_jet_trk_pt_ns_bkg_syst = Get2DArray <TGAE*> (nZdcCentBins, nVar);
+  TGAE*** g_jet_trk_pt_perp_bkg_syst = Get2DArray <TGAE*> (nZdcCentBins, nVar);
+  TGAE*** g_jet_trk_pt_as_bkg_syst = Get2DArray <TGAE*> (nZdcCentBins, nVar);
 
   TGAE**  g_jet_trk_pt_ns_ref_sig_syst = Get1DArray <TGAE*> (nVar);
   TGAE**  g_jet_trk_pt_perp_ref_sig_syst = Get1DArray <TGAE*> (nVar);
   TGAE**  g_jet_trk_pt_as_ref_sig_syst = Get1DArray <TGAE*> (nVar);
-  TGAE*** g_jet_trk_pt_ns_sig_syst = Get2DArray <TGAE*> (numZdcCentBins, nVar);
-  TGAE*** g_jet_trk_pt_perp_sig_syst = Get2DArray <TGAE*> (numZdcCentBins, nVar);
-  TGAE*** g_jet_trk_pt_as_sig_syst = Get2DArray <TGAE*> (numZdcCentBins, nVar);
+  TGAE*** g_jet_trk_pt_ns_sig_syst = Get2DArray <TGAE*> (nZdcCentBins, nVar);
+  TGAE*** g_jet_trk_pt_perp_sig_syst = Get2DArray <TGAE*> (nZdcCentBins, nVar);
+  TGAE*** g_jet_trk_pt_as_sig_syst = Get2DArray <TGAE*> (nZdcCentBins, nVar);
 
-  TGAE*** g_jet_trk_pt_ns_iaa_syst = Get2DArray <TGAE*> (numZdcCentBins, nVar);
-  TGAE*** g_jet_trk_pt_perp_iaa_syst = Get2DArray <TGAE*> (numZdcCentBins, nVar);
-  TGAE*** g_jet_trk_pt_as_iaa_syst = Get2DArray <TGAE*> (numZdcCentBins, nVar);
+  TGAE*** g_jet_trk_pt_ns_iaa_syst = Get2DArray <TGAE*> (nZdcCentBins, nVar);
+  TGAE*** g_jet_trk_pt_perp_iaa_syst = Get2DArray <TGAE*> (nZdcCentBins, nVar);
+  TGAE*** g_jet_trk_pt_as_iaa_syst = Get2DArray <TGAE*> (nZdcCentBins, nVar);
 
 
   TString outFileName = outFileTag;
@@ -160,7 +160,7 @@ void ProcessPtCh (const char* outFileTag, const char* tag1, const char* tag2 = n
 
 
 
-    for (int iCent = 0; iCent < numZdcCentBins; iCent++) {
+    for (int iCent = 0; iCent < nZdcCentBins; iCent++) {
       TString inFileName = Form ("%s/Histograms/%s/JetsHists/%s/data16_5TeV_iCent%i_hists.root", rootPath.Data (), tag1, variations[iVar].Data (), iCent);
       std::cout << "Reading " << inFileName.Data () << std::endl;
       inFile = new TFile (inFileName.Data (), "read");
@@ -185,7 +185,7 @@ void ProcessPtCh (const char* outFileTag, const char* tag1, const char* tag2 = n
 
 
 
-    for (int iCent = 0; iCent < numZdcCentBins; iCent++) {
+    for (int iCent = 0; iCent < nZdcCentBins; iCent++) {
       TString inFileName = Form ("%s/Histograms/%s/%sHists/%s/data16_5TeV_iCent%i_hists.root", rootPath.Data (), doMix ? tag1 : tag2, doMix ? "Mixed" : "Jets", variations[iVar].Data (), iCent);
       std::cout << "Reading " << inFileName.Data () << std::endl;
       inFile = new TFile (inFileName.Data (), "read");
@@ -220,7 +220,7 @@ void ProcessPtCh (const char* outFileTag, const char* tag1, const char* tag2 = n
       h_jet_trk_pt_as_ref_sig[iVar] = (TH1D*) h_jet_trk_pt_as_ref[iVar]->Clone (Form ("h_jet_trk_pt_as_ref_sig_%s", variations[iVar].Data ()));
       h_jet_trk_pt_as_ref_sig[iVar]->Add (h_jet_trk_pt_as_ref_bkg[iVar], -1);
 
-      for (int iCent = 0; iCent < numZdcCentBins; iCent++) {
+      for (int iCent = 0; iCent < nZdcCentBins; iCent++) {
 
         h_jet_trk_pt_ns_sig[iCent][iVar] = (TH1D*) h_jet_trk_pt_ns[iCent][iVar]->Clone (Form ("h_jet_trk_pt_ns_pPb_sig_iCent%i_%s", iCent, variations[iVar].Data ()));
         h_jet_trk_pt_ns_sig[iCent][iVar]->Add (h_jet_trk_pt_ns_bkg[iCent][iVar], -1);
@@ -271,7 +271,7 @@ void ProcessPtCh (const char* outFileTag, const char* tag1, const char* tag2 = n
     ResetTGAEErrors (g_jet_trk_pt_perp_ref_sig_syst[0]);
     ResetTGAEErrors (g_jet_trk_pt_as_ref_sig_syst[0]);
 
-    for (int iCent = 0; iCent < numZdcCentBins; iCent++) {
+    for (int iCent = 0; iCent < nZdcCentBins; iCent++) {
 
       g_jet_trk_pt_ns_syst[iCent][0] = make_graph (h_jet_trk_pt_ns[iCent][0]);
       g_jet_trk_pt_perp_syst[iCent][0] = make_graph (h_jet_trk_pt_perp[iCent][0]);
@@ -336,7 +336,7 @@ void ProcessPtCh (const char* outFileTag, const char* tag1, const char* tag2 = n
     CalcSystematics (g_jet_trk_pt_perp_ref_sig_syst[iVar], h_jet_trk_pt_perp_ref_sig[0], h_jet_trk_pt_perp_ref_sig[iVar]);
     CalcSystematics (g_jet_trk_pt_as_ref_sig_syst[iVar], h_jet_trk_pt_as_ref_sig[0], h_jet_trk_pt_as_ref_sig[iVar]);
 
-    for (int iCent = 0; iCent < numZdcCentBins; iCent++) {
+    for (int iCent = 0; iCent < nZdcCentBins; iCent++) {
 
       g_jet_trk_pt_ns_syst[iCent][iVar] = new TGAE ();
       g_jet_trk_pt_perp_syst[iCent][iVar] = new TGAE ();
@@ -376,39 +376,73 @@ void ProcessPtCh (const char* outFileTag, const char* tag1, const char* tag2 = n
 
   // takes the maximum variation of the jet pT ES up/down variations
   {
-    const int syst = 1;
+    const int syst = 7; // MixCatVar1
 
-    AddMaxSystematic (g_jet_trk_pt_ns_ref_syst[0], g_jet_trk_pt_ns_ref_syst[syst], g_jet_trk_pt_ns_ref_syst[syst+1]);
-    AddMaxSystematic (g_jet_trk_pt_perp_ref_syst[0], g_jet_trk_pt_perp_ref_syst[syst], g_jet_trk_pt_perp_ref_syst[syst+1]);
-    AddMaxSystematic (g_jet_trk_pt_as_ref_syst[0], g_jet_trk_pt_as_ref_syst[syst], g_jet_trk_pt_as_ref_syst[syst+1]);
+    AddMaxSystematic (g_jet_trk_pt_ns_ref_syst[0], g_jet_trk_pt_ns_ref_syst[syst], g_jet_trk_pt_ns_ref_syst[syst]);
+    AddMaxSystematic (g_jet_trk_pt_perp_ref_syst[0], g_jet_trk_pt_perp_ref_syst[syst], g_jet_trk_pt_perp_ref_syst[syst]);
+    AddMaxSystematic (g_jet_trk_pt_as_ref_syst[0], g_jet_trk_pt_as_ref_syst[syst], g_jet_trk_pt_as_ref_syst[syst]);
 
-    AddMaxSystematic (g_jet_trk_pt_ns_ref_bkg_syst[0], g_jet_trk_pt_ns_ref_bkg_syst[syst], g_jet_trk_pt_ns_ref_bkg_syst[syst+1]);
-    AddMaxSystematic (g_jet_trk_pt_perp_ref_bkg_syst[0], g_jet_trk_pt_perp_ref_bkg_syst[syst], g_jet_trk_pt_perp_ref_bkg_syst[syst+1]);
-    AddMaxSystematic (g_jet_trk_pt_as_ref_bkg_syst[0], g_jet_trk_pt_as_ref_bkg_syst[syst], g_jet_trk_pt_as_ref_bkg_syst[syst+1]);
+    AddMaxSystematic (g_jet_trk_pt_ns_ref_bkg_syst[0], g_jet_trk_pt_ns_ref_bkg_syst[syst], g_jet_trk_pt_ns_ref_bkg_syst[syst]);
+    AddMaxSystematic (g_jet_trk_pt_perp_ref_bkg_syst[0], g_jet_trk_pt_perp_ref_bkg_syst[syst], g_jet_trk_pt_perp_ref_bkg_syst[syst]);
+    AddMaxSystematic (g_jet_trk_pt_as_ref_bkg_syst[0], g_jet_trk_pt_as_ref_bkg_syst[syst], g_jet_trk_pt_as_ref_bkg_syst[syst]);
 
-    AddMaxSystematic (g_jet_trk_pt_ns_ref_sig_syst[0], g_jet_trk_pt_ns_ref_sig_syst[syst], g_jet_trk_pt_ns_ref_sig_syst[syst+1]);
-    AddMaxSystematic (g_jet_trk_pt_perp_ref_sig_syst[0], g_jet_trk_pt_perp_ref_sig_syst[syst], g_jet_trk_pt_perp_ref_sig_syst[syst+1]);
-    AddMaxSystematic (g_jet_trk_pt_as_ref_sig_syst[0], g_jet_trk_pt_as_ref_sig_syst[syst], g_jet_trk_pt_as_ref_sig_syst[syst+1]);
+    AddMaxSystematic (g_jet_trk_pt_ns_ref_sig_syst[0], g_jet_trk_pt_ns_ref_sig_syst[syst], g_jet_trk_pt_ns_ref_sig_syst[syst]);
+    AddMaxSystematic (g_jet_trk_pt_perp_ref_sig_syst[0], g_jet_trk_pt_perp_ref_sig_syst[syst], g_jet_trk_pt_perp_ref_sig_syst[syst]);
+    AddMaxSystematic (g_jet_trk_pt_as_ref_sig_syst[0], g_jet_trk_pt_as_ref_sig_syst[syst], g_jet_trk_pt_as_ref_sig_syst[syst]);
 
-    for (int iCent = 0; iCent < numZdcCentBins; iCent++) {
+    for (int iCent = 0; iCent < nZdcCentBins; iCent++) {
 
-      AddMaxSystematic (g_jet_trk_pt_ns_syst[iCent][0], g_jet_trk_pt_ns_syst[iCent][syst], g_jet_trk_pt_ns_syst[iCent][syst+1]);
-      AddMaxSystematic (g_jet_trk_pt_perp_syst[iCent][0], g_jet_trk_pt_perp_syst[iCent][syst], g_jet_trk_pt_perp_syst[iCent][syst+1]);
-      AddMaxSystematic (g_jet_trk_pt_as_syst[iCent][0], g_jet_trk_pt_as_syst[iCent][syst], g_jet_trk_pt_as_syst[iCent][syst+1]);
+      AddMaxSystematic (g_jet_trk_pt_ns_syst[iCent][0], g_jet_trk_pt_ns_syst[iCent][syst], g_jet_trk_pt_ns_syst[iCent][syst]);
+      AddMaxSystematic (g_jet_trk_pt_perp_syst[iCent][0], g_jet_trk_pt_perp_syst[iCent][syst], g_jet_trk_pt_perp_syst[iCent][syst]);
+      AddMaxSystematic (g_jet_trk_pt_as_syst[iCent][0], g_jet_trk_pt_as_syst[iCent][syst], g_jet_trk_pt_as_syst[iCent][syst]);
 
-      AddMaxSystematic (g_jet_trk_pt_ns_bkg_syst[iCent][0], g_jet_trk_pt_ns_bkg_syst[iCent][syst], g_jet_trk_pt_ns_bkg_syst[iCent][syst+1]);
-      AddMaxSystematic (g_jet_trk_pt_perp_bkg_syst[iCent][0], g_jet_trk_pt_perp_bkg_syst[iCent][syst], g_jet_trk_pt_perp_bkg_syst[iCent][syst+1]);
-      AddMaxSystematic (g_jet_trk_pt_as_bkg_syst[iCent][0], g_jet_trk_pt_as_bkg_syst[iCent][syst], g_jet_trk_pt_as_bkg_syst[iCent][syst+1]);
+      AddMaxSystematic (g_jet_trk_pt_ns_bkg_syst[iCent][0], g_jet_trk_pt_ns_bkg_syst[iCent][syst], g_jet_trk_pt_ns_bkg_syst[iCent][syst]);
+      AddMaxSystematic (g_jet_trk_pt_perp_bkg_syst[iCent][0], g_jet_trk_pt_perp_bkg_syst[iCent][syst], g_jet_trk_pt_perp_bkg_syst[iCent][syst]);
+      AddMaxSystematic (g_jet_trk_pt_as_bkg_syst[iCent][0], g_jet_trk_pt_as_bkg_syst[iCent][syst], g_jet_trk_pt_as_bkg_syst[iCent][syst]);
 
-      AddMaxSystematic (g_jet_trk_pt_ns_sig_syst[iCent][0], g_jet_trk_pt_ns_sig_syst[iCent][syst], g_jet_trk_pt_ns_sig_syst[iCent][syst+1]);
-      AddMaxSystematic (g_jet_trk_pt_perp_sig_syst[iCent][0], g_jet_trk_pt_perp_sig_syst[iCent][syst], g_jet_trk_pt_perp_sig_syst[iCent][syst+1]);
-      AddMaxSystematic (g_jet_trk_pt_as_sig_syst[iCent][0], g_jet_trk_pt_as_sig_syst[iCent][syst], g_jet_trk_pt_as_sig_syst[iCent][syst+1]);
+      AddMaxSystematic (g_jet_trk_pt_ns_sig_syst[iCent][0], g_jet_trk_pt_ns_sig_syst[iCent][syst], g_jet_trk_pt_ns_sig_syst[iCent][syst]);
+      AddMaxSystematic (g_jet_trk_pt_perp_sig_syst[iCent][0], g_jet_trk_pt_perp_sig_syst[iCent][syst], g_jet_trk_pt_perp_sig_syst[iCent][syst]);
+      AddMaxSystematic (g_jet_trk_pt_as_sig_syst[iCent][0], g_jet_trk_pt_as_sig_syst[iCent][syst], g_jet_trk_pt_as_sig_syst[iCent][syst]);
 
-      AddMaxSystematic (g_jet_trk_pt_ns_iaa_syst[iCent][0], g_jet_trk_pt_ns_iaa_syst[iCent][syst], g_jet_trk_pt_ns_iaa_syst[iCent][syst+1]);
-      AddMaxSystematic (g_jet_trk_pt_perp_iaa_syst[iCent][0], g_jet_trk_pt_perp_iaa_syst[iCent][syst], g_jet_trk_pt_perp_iaa_syst[iCent][syst+1]);
-      AddMaxSystematic (g_jet_trk_pt_as_iaa_syst[iCent][0], g_jet_trk_pt_as_iaa_syst[iCent][syst], g_jet_trk_pt_as_iaa_syst[iCent][syst+1]);
+      AddMaxSystematic (g_jet_trk_pt_ns_iaa_syst[iCent][0], g_jet_trk_pt_ns_iaa_syst[iCent][syst], g_jet_trk_pt_ns_iaa_syst[iCent][syst]);
+      AddMaxSystematic (g_jet_trk_pt_perp_iaa_syst[iCent][0], g_jet_trk_pt_perp_iaa_syst[iCent][syst], g_jet_trk_pt_perp_iaa_syst[iCent][syst]);
+      AddMaxSystematic (g_jet_trk_pt_as_iaa_syst[iCent][0], g_jet_trk_pt_as_iaa_syst[iCent][syst], g_jet_trk_pt_as_iaa_syst[iCent][syst]);
 
     }
+
+    //const int syst = 1; // 5% JES systematic
+
+    //AddMaxSystematic (g_jet_trk_pt_ns_ref_syst[0], g_jet_trk_pt_ns_ref_syst[syst], g_jet_trk_pt_ns_ref_syst[syst+1]);
+    //AddMaxSystematic (g_jet_trk_pt_perp_ref_syst[0], g_jet_trk_pt_perp_ref_syst[syst], g_jet_trk_pt_perp_ref_syst[syst+1]);
+    //AddMaxSystematic (g_jet_trk_pt_as_ref_syst[0], g_jet_trk_pt_as_ref_syst[syst], g_jet_trk_pt_as_ref_syst[syst+1]);
+
+    //AddMaxSystematic (g_jet_trk_pt_ns_ref_bkg_syst[0], g_jet_trk_pt_ns_ref_bkg_syst[syst], g_jet_trk_pt_ns_ref_bkg_syst[syst+1]);
+    //AddMaxSystematic (g_jet_trk_pt_perp_ref_bkg_syst[0], g_jet_trk_pt_perp_ref_bkg_syst[syst], g_jet_trk_pt_perp_ref_bkg_syst[syst+1]);
+    //AddMaxSystematic (g_jet_trk_pt_as_ref_bkg_syst[0], g_jet_trk_pt_as_ref_bkg_syst[syst], g_jet_trk_pt_as_ref_bkg_syst[syst+1]);
+
+    //AddMaxSystematic (g_jet_trk_pt_ns_ref_sig_syst[0], g_jet_trk_pt_ns_ref_sig_syst[syst], g_jet_trk_pt_ns_ref_sig_syst[syst+1]);
+    //AddMaxSystematic (g_jet_trk_pt_perp_ref_sig_syst[0], g_jet_trk_pt_perp_ref_sig_syst[syst], g_jet_trk_pt_perp_ref_sig_syst[syst+1]);
+    //AddMaxSystematic (g_jet_trk_pt_as_ref_sig_syst[0], g_jet_trk_pt_as_ref_sig_syst[syst], g_jet_trk_pt_as_ref_sig_syst[syst+1]);
+
+    //for (int iCent = 0; iCent < nZdcCentBins; iCent++) {
+
+    //  AddMaxSystematic (g_jet_trk_pt_ns_syst[iCent][0], g_jet_trk_pt_ns_syst[iCent][syst], g_jet_trk_pt_ns_syst[iCent][syst+1]);
+    //  AddMaxSystematic (g_jet_trk_pt_perp_syst[iCent][0], g_jet_trk_pt_perp_syst[iCent][syst], g_jet_trk_pt_perp_syst[iCent][syst+1]);
+    //  AddMaxSystematic (g_jet_trk_pt_as_syst[iCent][0], g_jet_trk_pt_as_syst[iCent][syst], g_jet_trk_pt_as_syst[iCent][syst+1]);
+
+    //  AddMaxSystematic (g_jet_trk_pt_ns_bkg_syst[iCent][0], g_jet_trk_pt_ns_bkg_syst[iCent][syst], g_jet_trk_pt_ns_bkg_syst[iCent][syst+1]);
+    //  AddMaxSystematic (g_jet_trk_pt_perp_bkg_syst[iCent][0], g_jet_trk_pt_perp_bkg_syst[iCent][syst], g_jet_trk_pt_perp_bkg_syst[iCent][syst+1]);
+    //  AddMaxSystematic (g_jet_trk_pt_as_bkg_syst[iCent][0], g_jet_trk_pt_as_bkg_syst[iCent][syst], g_jet_trk_pt_as_bkg_syst[iCent][syst+1]);
+
+    //  AddMaxSystematic (g_jet_trk_pt_ns_sig_syst[iCent][0], g_jet_trk_pt_ns_sig_syst[iCent][syst], g_jet_trk_pt_ns_sig_syst[iCent][syst+1]);
+    //  AddMaxSystematic (g_jet_trk_pt_perp_sig_syst[iCent][0], g_jet_trk_pt_perp_sig_syst[iCent][syst], g_jet_trk_pt_perp_sig_syst[iCent][syst+1]);
+    //  AddMaxSystematic (g_jet_trk_pt_as_sig_syst[iCent][0], g_jet_trk_pt_as_sig_syst[iCent][syst], g_jet_trk_pt_as_sig_syst[iCent][syst+1]);
+
+    //  AddMaxSystematic (g_jet_trk_pt_ns_iaa_syst[iCent][0], g_jet_trk_pt_ns_iaa_syst[iCent][syst], g_jet_trk_pt_ns_iaa_syst[iCent][syst+1]);
+    //  AddMaxSystematic (g_jet_trk_pt_perp_iaa_syst[iCent][0], g_jet_trk_pt_perp_iaa_syst[iCent][syst], g_jet_trk_pt_perp_iaa_syst[iCent][syst+1]);
+    //  AddMaxSystematic (g_jet_trk_pt_as_iaa_syst[iCent][0], g_jet_trk_pt_as_iaa_syst[iCent][syst], g_jet_trk_pt_as_iaa_syst[iCent][syst+1]);
+
+    //}
   }
 
 
@@ -428,7 +462,7 @@ void ProcessPtCh (const char* outFileTag, const char* tag1, const char* tag2 = n
     g_jet_trk_pt_perp_ref_sig_syst[0]->Write ("g_jet_trk_pt_perp_ref_sig_syst");
     g_jet_trk_pt_as_ref_sig_syst[0]->Write ("g_jet_trk_pt_as_ref_sig_syst");
 
-    for (int iCent = 0; iCent < numZdcCentBins; iCent++) {
+    for (int iCent = 0; iCent < nZdcCentBins; iCent++) {
 
       g_jet_trk_pt_ns_syst[iCent][0]->Write (Form ("g_jet_trk_pt_ns_syst_iCent%i", iCent));
       g_jet_trk_pt_perp_syst[iCent][0]->Write (Form ("g_jet_trk_pt_perp_syst_iCent%i", iCent));
@@ -468,7 +502,7 @@ void ProcessPtCh (const char* outFileTag, const char* tag1, const char* tag2 = n
       h_jet_trk_pt_perp_ref_sig[iVar]->Write ();
       h_jet_trk_pt_as_ref_sig[iVar]->Write ();
 
-      for (int iCent = 0; iCent < numZdcCentBins; iCent++) {
+      for (int iCent = 0; iCent < nZdcCentBins; iCent++) {
 
         h_evt_counts[iCent][iVar]->Write ();
         h_jet_counts[iCent][iVar]->Write ();

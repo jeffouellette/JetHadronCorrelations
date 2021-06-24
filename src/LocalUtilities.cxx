@@ -682,7 +682,7 @@ TH1D* GetFCalZdcWeights () {
   TFile* infile = new TFile (fname, "read");
 
   TH2D* h2 = (TH2D*) infile->Get ("h2_mb_Pb_fcal_et_zdc_calibE");
-  TH1D* h = (TH1D*) h2->ProjectionX ("h_fcal_et_zdcWeights", h2->GetYaxis ()->FindBin (zdcCentBins[numZdcCentBins-1]), h2->GetYaxis ()->GetNbins ());
+  TH1D* h = (TH1D*) h2->ProjectionX ("h_fcal_et_zdcWeights", h2->GetYaxis ()->FindBin (zdcCentBins[nZdcCentBins-1]), h2->GetYaxis ()->GetNbins ());
 
   //TH1D* h_fcal = (TH1D*) h2->ProjectionX ("h_fcal_et");
   //h->Divide (h_fcal);
@@ -862,9 +862,7 @@ bool MeetsTrackCuts (int iTrk) {
   if (fabs (trk_eta[iTrk]) > 2.5)
     return false; // track maximum eta
 
-  if (DoHITightVar () && !trk_HItight[iTrk])
-    return false;
-  else if (!DoHITightVar () && !trk_HIloose[iTrk])
+  if (!trk_wp[iTrk])
     return false;
 
   if (IsPbPb ()) {

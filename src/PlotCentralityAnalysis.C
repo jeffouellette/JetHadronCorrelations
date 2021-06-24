@@ -29,9 +29,9 @@ void PlotCentralityAnalysis () {
 
 
   int iZdc20Percent = 0;
-  while (iZdc20Percent < numZdcCentBins && zdcCentPercs[iZdc20Percent] > 20) iZdc20Percent++;
+  while (iZdc20Percent < nZdcCentBins && zdcCentPercs[iZdc20Percent] > 20) iZdc20Percent++;
   int iFcal20Percent = 0;
-  while (iFcal20Percent < numFcalCentBins && fcalCentPercs[iFcal20Percent] > 100) iFcal20Percent++;
+  while (iFcal20Percent < nFcalCentBins && fcalCentPercs[iFcal20Percent] > 100) iFcal20Percent++;
 
 
   TH1D* h_jet_Pb_fcal_et[npPbRuns] = {};
@@ -652,34 +652,22 @@ void PlotCentralityAnalysis () {
 
 
   {
-    TCanvas* c = new TCanvas ("c_allppRuns_fcal_et", "", 800, 1000);
+    TCanvas* c = new TCanvas ("c_allppRuns_fcal_et", "", 800, 800);
 
     const double bMargin = 0.20;
     const double lMargin = 0.11;
     const double rMargin = 0.04;
     const double tMargin = 0.04;
 
-    TPad* uPad = new TPad ("c_allppRuns_fcal_et_uPad", "", 0.0, 0.3, 1.0, 1.0);
-    TPad* dPad = new TPad ("c_allppRuns_fcal_et_dPad", "", 0.0, 0.0, 1.0, 0.3);
+    gPad->SetBottomMargin (bMargin);
+    gPad->SetLeftMargin (lMargin);
+    gPad->SetRightMargin (rMargin);
+    gPad->SetTopMargin (tMargin);
 
-    uPad->SetBottomMargin (0);
-    uPad->SetLeftMargin (lMargin);
-    uPad->SetRightMargin (rMargin);
-    uPad->SetTopMargin (tMargin);
-
-    dPad->SetBottomMargin (bMargin);
-    dPad->SetLeftMargin (lMargin);
-    dPad->SetRightMargin (rMargin);
-    dPad->SetTopMargin (0);
-
-    uPad->Draw ();
-    dPad->Draw ();
-
-
-    uPad->cd ();
-    uPad->SetLogy ();
+    gPad->SetLogy ();
 
     TH1D* h = (TH1D*) h_mb_p_fcal_et_sum->Clone ("htemp");
+    h->GetXaxis ()->SetTitle ("#Sigma#it{E}_{T}^{FCal} [GeV]");
     h->GetYaxis ()->SetTitle ("A.U.");
 
     h->GetYaxis ()->SetTitleOffset (1.2 * h->GetYaxis ()->GetTitleOffset ());
@@ -693,11 +681,11 @@ void PlotCentralityAnalysis () {
 
 
     h->GetXaxis ()->SetTitleFont (43);
-    h->GetXaxis ()->SetTitleSize (0);
+    h->GetXaxis ()->SetTitleSize (26);
     h->GetYaxis ()->SetTitleFont (43);
     h->GetYaxis ()->SetTitleSize (26);
     h->GetXaxis ()->SetLabelFont (43);
-    h->GetXaxis ()->SetLabelSize (0);
+    h->GetXaxis ()->SetLabelSize (24);
     h->GetYaxis ()->SetLabelFont (43);
     h->GetYaxis ()->SetLabelSize (24);
 
@@ -751,39 +739,6 @@ void PlotCentralityAnalysis () {
     myText (0.65, 0.860, kBlack, "#it{pp}, #sqrt{s_{NN}} = 5.02 TeV", 0.032);
     myText (0.65, 0.820, kBlack, "All runs", 0.032);
     myText (0.65, 0.700, kRed+1, "MinBias Trigger", 0.032);
-
-
-    dPad->cd ();
-    dPad->SetLogy ();
-
-    ymin = 7e-2;
-    ymax = 2e1;
-
-    h = (TH1D*) h_ratio_p_fcal_et_sum->Clone ("htemp");
-    h->GetXaxis ()->SetTitle ("#Sigma#it{E}_{T}^{FCal} [GeV]");
-    h->GetYaxis ()->SetTitle ("J50 / MB");
-
-    h->GetXaxis ()->SetTitleOffset (2.4 * h->GetXaxis ()->GetTitleOffset ());
-    h->GetYaxis ()->SetTitleOffset (1.2 * h->GetYaxis ()->GetTitleOffset ());
-    h->GetYaxis ()->CenterTitle ();
-
-    h->SetLineColor (kBlue+3);
-
-    h->GetYaxis ()->SetRangeUser (ymin, ymax);
-
-    h->GetXaxis ()->SetTitleFont (43);
-    h->GetXaxis ()->SetTitleSize (26);
-    h->GetYaxis ()->SetTitleFont (43);
-    h->GetYaxis ()->SetTitleSize (26);
-    h->GetXaxis ()->SetLabelFont (43);
-    h->GetXaxis ()->SetLabelSize (24);
-    h->GetYaxis ()->SetLabelFont (43);
-    h->GetYaxis ()->SetLabelSize (24);
-
-    h->DrawCopy ("hist");
-    SaferDelete (&h);
-
-    divs->DrawLine (-30, 1, 220, 1);
 
     c->SaveAs (Form ("%s/Plots/CentralityAnalysis/allppRuns_fcal_et.pdf", workPath.Data ()));
   }
