@@ -327,7 +327,7 @@ void PlotPtCh (const char* tag, const char* inFileTag) {
     myDraw (g, myBlue, kFullCircle, 0.8);
     SaferDelete (&g);
 
-    myDrawSyst (g_jet_trk_pt_ns_ref_syst, myPurple);
+    myDrawSyst (g_jet_trk_pt_ns_ref_bkg_syst, myPurple);
     h = h_jet_trk_pt_ns_ref_bkg;
     g = make_graph (h);
     ResetXErrors (g);
@@ -810,7 +810,7 @@ void PlotPtCh (const char* tag, const char* inFileTag) {
     h = h_jet_trk_pt_ns_ref_sig;
     g = make_graph (h);
     ResetXErrors (g);
-    myDraw (g, kBlack, kOpenCircle, 0.8);
+    myDraw (g, kBlack, kFullCircle, 0.8);
     SaferDelete (&g);
 
     h = h_jet_trk_pt_ns_sig[iCent];
@@ -855,7 +855,7 @@ void PlotPtCh (const char* tag, const char* inFileTag) {
     h = h_jet_trk_pt_as_ref_sig;
     g = make_graph (h);
     ResetXErrors (g);
-    myDraw (g, kBlack, kOpenCircle, 0.8);
+    myDraw (g, kBlack, kFullCircle, 0.8);
     SaferDelete (&g);
 
     h = h_jet_trk_pt_as_sig[iCent];
@@ -1685,7 +1685,7 @@ void PlotPtCh (const char* tag, const char* inFileTag) {
     for (int iVar = 1; iVar < nVar; iVar++)
       myLineColorText (0.25, 0.77-iVar*0.040, varStyles[variations[iVar]].first, varStyles[variations[iVar]].second, varFullNames[variations[iVar]], 1.0, 0.028);
 
-    c->SaveAs (Form ("%s/Plots/Systematics/TotalJetTaggedYield_pp_awayside_ptch_%s_syst.pdf", workPath.Data (), tag));
+    c->SaveAs (Form ("%s/Plots/Systematics/TotalJetTaggedYield_%s_awayside_ptch_%s_syst.pdf", workPath.Data (), Form ("pPb_%i-%i%%", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), tag));
   }
 
 

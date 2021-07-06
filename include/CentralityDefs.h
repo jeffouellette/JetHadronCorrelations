@@ -32,6 +32,9 @@ short GetBin (double* bins, const int nBins, const float val) {
  * Initializes centrality cuts from latest definitions (stored in aux directory).
  */
 double* InitCentBins (const char* fName, const int* percs, const int nBins) {
+  assert (percs != nullptr);
+  assert (nBins > 0);
+
   std::ifstream cutsfile;
   cutsfile.open (fName);
 
@@ -39,12 +42,17 @@ double* InitCentBins (const char* fName, const int* percs, const int nBins) {
   int iCent = 0;
   std::string perc, dummy;
   double cut;
+
   while (cutsfile && iCent <= nBins) {
     cutsfile >> perc >> dummy;
     cut = std::atof (dummy.c_str ());
     if (strcmp (perc.c_str (), Form ("%i%%", percs[iCent])) == 0)
       cuts[iCent++] = cut;
   }
+
+  //for (int i = 0; i < nBins; i++)
+  //  std::cout << cuts[i] << ", ";
+  //std::cout << cuts[nBins] << std::endl;
 
   return cuts;
 }

@@ -45,10 +45,13 @@ void PlotTrackMomentumResolution () {
 
   TFile* inFile = new TFile (Form ("%s/TrackMomentumResolution/Nominal/summary.root", rootPath.Data ()), "read");
 
-  h2_avg_tms = new TH2D*[2];
-  h2_avg_tmr = new TH2D*[2];
-  h_avg_tms = new TH1D**[2];
-  h_avg_tmr = new TH1D**[2];
+  h2_avg_tms = Get1DArray <TH2D*> (2);
+  h2_avg_tmr = Get1DArray <TH2D*> (2);
+
+  h_avg_tms = Get2DArray <TH1D*> (2, nEtaTrkBins+1);
+  h_avg_tmr = Get2DArray <TH1D*> (2, nEtaTrkBins+1);
+
+  f_tmr_fits = Get3DArray <TF1*> (2, nEtaTrkBins+1, nPtchBins);
 
   for (int iSys : systems) {
     const TString sys = (iSys == 0 ? "pp" : "pPb");
@@ -56,11 +59,13 @@ void PlotTrackMomentumResolution () {
     h2_avg_tms[iSys] = (TH2D*) inFile->Get (Form ("h2_avg_tms_%s", sys.Data ()));
     h2_avg_tmr[iSys] = (TH2D*) inFile->Get (Form ("h2_avg_tmr_%s", sys.Data ()));
 
-    h_avg_tms[iSys] = new TH1D*[nEtaTrkBins+1];
-    h_avg_tmr[iSys] = new TH1D*[nEtaTrkBins+1];
     for (int iEta = 0; iEta <= nEtaTrkBins; iEta++) {
       h_avg_tms[iSys][iEta] = (TH1D*) inFile->Get (Form ("h_avg_tms_%s_iEta%i", sys.Data (), iEta));
       h_avg_tmr[iSys][iEta] = (TH1D*) inFile->Get (Form ("h_avg_tmr_%s_iEta%i", sys.Data (), iEta));
+
+      for (int iPtch = 0; iPtch < nPtchBins; iPtch++) {
+        f_tmr_fits[iSys][iEta][iPtch] = (TF1*) inFile->Get (Form ("f_tmr_%s_iPtch%i_%s", sys.Data (), iPtch, (iEta == nEtaTrkBins ? "allEta" : Form ("iEta%i", iEta))));
+      }
     } // end loop over iEta
   } // end loop over iSys
 

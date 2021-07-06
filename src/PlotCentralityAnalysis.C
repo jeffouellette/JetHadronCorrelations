@@ -136,7 +136,7 @@ void PlotCentralityAnalysis () {
   h_ratio_Pb_fcal_et_sum->Divide (h_mb_Pb_fcal_et_sum); 
   h_ratio_Pb_zdc_calibE_sum = (TH1D*) h_jet_Pb_zdc_calibE_sum->Clone ("h_ratio_Pb_zdc_calibE_sum");
   h_ratio_Pb_zdc_calibE_sum->Divide (h_mb_Pb_zdc_calibE_sum); 
-
+  
   h_jet_Pb_fcal_et_zdc_0t20 = h2_jet_Pb_fcal_et_zdc_calibE->ProjectionX ("h_jet_Pb_fcal_et_zdc_0t20", h2_jet_Pb_fcal_et_zdc_calibE->GetYaxis ()->FindBin (zdcCentBins[4]), h2_jet_Pb_fcal_et_zdc_calibE->GetYaxis ()->FindBin (zdcCentBins[5]));
   h_mb_Pb_fcal_et_zdc_0t20 = h2_mb_Pb_fcal_et_zdc_calibE->ProjectionX ("h_mb_Pb_fcal_et_zdc_0t20", h2_mb_Pb_fcal_et_zdc_calibE->GetYaxis ()->FindBin (zdcCentBins[4]), h2_mb_Pb_fcal_et_zdc_calibE->GetYaxis ()->FindBin (zdcCentBins[5]));
   h_jet_Pb_fcal_et_zdc_20t40 = h2_jet_Pb_fcal_et_zdc_calibE->ProjectionX ("h_jet_Pb_fcal_et_zdc_20t40", h2_jet_Pb_fcal_et_zdc_calibE->GetYaxis ()->FindBin (zdcCentBins[3]), h2_jet_Pb_fcal_et_zdc_calibE->GetYaxis ()->FindBin (zdcCentBins[4]));
@@ -262,8 +262,8 @@ void PlotCentralityAnalysis () {
 
   //  myText (0.20, 0.88, kBlack, "#bf{#it{ATLAS}} Internal", 0.036);
   //  myText (0.20, 0.840, kBlack, Form ("Run %i (per. A)", pPbRuns[iRun]), 0.032);
-  //  myText (0.65, 0.550, kBlue+3, "J50 Trigger", 0.032);
-  //  myText (0.65, 0.510, kRed+1, "MinBias Trigger", 0.032);
+  //  myText (0.65, 0.550, kBlue+3, "HLT_j50_L1J15", 0.032);
+  //  myText (0.65, 0.510, kRed+1, "HLT_mb_sptrk_L1MBTS_1", 0.032);
 
   //  TPad* subPad = new TPad ("c3_subPad", "", 0.6, 0.6, 1.-c->GetRightMargin (), 1.-c->GetTopMargin ());
   //  subPad->SetTopMargin (0);
@@ -398,7 +398,6 @@ void PlotCentralityAnalysis () {
 
     ofstream cutsfile;
     cutsfile.open (Form ("%s/aux/ZdcCentCuts.dat", workPath.Data ()));
-    cutsfile << "CALIBRATED ENERGIES (over all runs)\n";
     for (int i = 0; i < 101; i++) {
       std::cout << xq[i] << ", " << yq[i] << std::endl;
       cutsfile << std::setw (6) << percs[i] << "\t" << yq[i] << "\n";
@@ -423,8 +422,8 @@ void PlotCentralityAnalysis () {
     myText (0.20, 0.900, kBlack, "#bf{#it{ATLAS}} Internal", 0.036);
     myText (0.20, 0.860, kBlack, "#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV", 0.032);
     myText (0.20, 0.820, kBlack, "All runs", 0.032);
-    myText (0.65, 0.550, kBlue+3, "J50 Trigger", 0.032);
-    myText (0.65, 0.510, kRed+1, "MinBias Trigger", 0.032);
+    myText (0.65, 0.550, kBlue+3, "HLT_j50_L1J15", 0.032);
+    myText (0.65, 0.510, kRed+1, "HLT_mb_sptrk_L1MBTS_1", 0.032);
 
 
     dPad->cd ();
@@ -435,7 +434,7 @@ void PlotCentralityAnalysis () {
 
     h = (TH1D*) h_ratio_Pb_zdc_calibE_sum->Clone ("htemp");
     h->GetXaxis ()->SetTitle ("Calibrated #Sigma#it{E}_{ZDC}^{Pb} [TeV]");
-    h->GetYaxis ()->SetTitle ("J50 / MB");
+    h->GetYaxis ()->SetTitle ("j50 / MB");
 
     h->GetXaxis ()->SetTitleOffset (2.4 * h->GetXaxis ()->GetTitleOffset ());
     h->GetYaxis ()->SetTitleOffset (1.2 * h->GetYaxis ()->GetTitleOffset ());
@@ -483,10 +482,14 @@ void PlotCentralityAnalysis () {
     h->GetYaxis ()->SetLabelFont (43);
     h->GetYaxis ()->SetLabelSize (14);
 
+    h->SetLineColor (kBlue+3);
+
     h->DrawCopy ("hist");
     SaferDelete (&h);
 
     h = (TH1D*) h_mb_Pb_zdc_calibE_sum->Clone ("htemp");
+
+    h->SetLineColor (kRed+1);
 
     h->DrawCopy ("hist same");
     SaferDelete (&h);
@@ -532,18 +535,19 @@ void PlotCentralityAnalysis () {
     uPad->cd ();
     uPad->SetLogy ();
 
-    TH1D* h = (TH1D*) h_jet_Pb_fcal_et_sum->Clone ("htemp");
+    double ymin = 5e-7;
+    double ymax = 1e0;
+
+
+    TH1D* h = (TH1D*) h_mb_Pb_fcal_et_sum->Clone ("htemp");
+
+    h->SetLineColor (kRed+1);
+
     h->GetYaxis ()->SetTitle ("A.U. (normalized in 0-20%)");
 
     h->GetYaxis ()->SetTitleOffset (1.2 * h->GetYaxis ()->GetTitleOffset ());
 
-    double ymin = 5e-7;
-    double ymax = 1e0;
-
-    h->SetLineColor (kBlue+3);
-
     h->GetYaxis ()->SetRangeUser (ymin, ymax);
-
 
     h->GetXaxis ()->SetTitleFont (43);
     h->GetXaxis ()->SetTitleSize (0);
@@ -553,13 +557,6 @@ void PlotCentralityAnalysis () {
     h->GetXaxis ()->SetLabelSize (0);
     h->GetYaxis ()->SetLabelFont (43);
     h->GetYaxis ()->SetLabelSize (24);
-
-    h->DrawCopy ("hist");
-    SaferDelete (&h);
-
-    h = (TH1D*) h_mb_Pb_fcal_et_sum->Clone ("htemp");
-
-    h->SetLineColor (kRed+1);
 
     double plot_xq[17];
     double plot_yq[17];
@@ -584,6 +581,13 @@ void PlotCentralityAnalysis () {
     h->GetQuantiles (17, plot_yq, plot_xq);
     h->GetQuantiles (101, yq, xq);
 
+    int ibin = 0;
+    while (ibin < 17 && plot_percs[ibin++] != "20%");
+
+    h->Scale (1. / h->Integral (h->FindBin (plot_yq[ibin]), h->GetNbinsX ()), "width");
+
+    h->DrawCopy ("hist");
+
     ofstream cutsfile;
     cutsfile.open (Form ("%s/aux/FCalCentCuts.dat", workPath.Data ()));
     for (int i = 0; i < 101; i++) {
@@ -604,14 +608,25 @@ void PlotCentralityAnalysis () {
       tl->DrawLatex (plot_yq[i]+0.20, exp (0.1*log(ymax/ymin)) * ymin, plot_percs[i].Data ());
     }
 
+    SaferDelete (&h);
+
+
+
+    h = (TH1D*) h_jet_Pb_fcal_et_sum->Clone ("htemp");
+
+    h->Scale (1. / h->Integral (h->FindBin (plot_yq[ibin]), h->GetNbinsX ()), "width");
+
+    h->SetLineColor (kBlue+3);
+
     h->DrawCopy ("hist same");
     SaferDelete (&h);
+
 
     myText (0.65, 0.900, kBlack, "#bf{#it{ATLAS}} Internal", 0.036);
     myText (0.65, 0.860, kBlack, "#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV", 0.032);
     myText (0.65, 0.820, kBlack, "All runs", 0.032);
-    myText (0.65, 0.740, kBlue+3, "J50 Trigger", 0.032);
-    myText (0.65, 0.700, kRed+1, "MinBias Trigger", 0.032);
+    myText (0.65, 0.740, kBlue+3, "HLT_j50_L1J15", 0.032);
+    myText (0.65, 0.700, kRed+1, "HLT_mb_sptrk_L1MBTS_1", 0.032);
 
 
     dPad->cd ();
@@ -620,9 +635,17 @@ void PlotCentralityAnalysis () {
     ymin = 7e-2;
     ymax = 2e1;
 
-    h = (TH1D*) h_ratio_Pb_fcal_et_sum->Clone ("htemp");
+    h = (TH1D*) h_ratio_Pb_fcal_et_sum->Clone ("htemp");  
+    h = (TH1D*) h_jet_Pb_fcal_et_sum->Clone ("htemp");
+    h->Scale (1. / h->Integral (h->FindBin (plot_yq[ibin]), h->GetNbinsX ()));
+    TH1D* hd = (TH1D*) h_mb_Pb_fcal_et_sum->Clone ("hd");
+    hd->Rebin (hd->GetNbinsX () / h->GetNbinsX ());
+    hd->Scale (1. / hd->Integral (hd->FindBin (plot_yq[ibin]), hd->GetNbinsX ()));
+    h->Divide (hd);
+    SaferDelete (&hd);
+
     h->GetXaxis ()->SetTitle ("#Sigma#it{E}_{T}^{FCal, Pb} [GeV]");
-    h->GetYaxis ()->SetTitle ("J50 / MB");
+    h->GetYaxis ()->SetTitle ("j50 / sptrk");
 
     h->GetXaxis ()->SetTitleOffset (2.4 * h->GetXaxis ()->GetTitleOffset ());
     h->GetYaxis ()->SetTitleOffset (1.2 * h->GetYaxis ()->GetTitleOffset ());
@@ -738,7 +761,7 @@ void PlotCentralityAnalysis () {
     myText (0.65, 0.900, kBlack, "#bf{#it{ATLAS}} Internal", 0.036);
     myText (0.65, 0.860, kBlack, "#it{pp}, #sqrt{s_{NN}} = 5.02 TeV", 0.032);
     myText (0.65, 0.820, kBlack, "All runs", 0.032);
-    myText (0.65, 0.700, kRed+1, "MinBias Trigger", 0.032);
+    myText (0.65, 0.700, kRed+1, "HLT_mb_sptrk", 0.032);
 
     c->SaveAs (Form ("%s/Plots/CentralityAnalysis/allppRuns_fcal_et.pdf", workPath.Data ()));
   }
@@ -765,6 +788,9 @@ void PlotCentralityAnalysis () {
     //c->SetLogy ();
 
     TH1D* h = (TH1D*) h_mb_Pb_fcal_et_sum->Clone ("htemp");
+    h->Rebin (2);
+    h->Scale (0.5);
+
     //TH1D* h = (TH1D*) h_jet_Pb_fcal_et_sum->Clone ("htemp");
     h->GetXaxis ()->SetTitle ("#Sigma#it{E}_{T}^{FCal, Pb} [GeV]");
     h->GetYaxis ()->SetTitle ("A.U.");
@@ -794,30 +820,40 @@ void PlotCentralityAnalysis () {
     SaferDelete (&h);
 
     h = (TH1D*) h_mb_Pb_fcal_et_zdc_0t20->Clone ("htemp");
+    h->Rebin (2);
+    h->Scale (0.5);
     h->SetLineColor (colors[0]);
     h->DrawCopy ("hist same");
     SaferDelete (&h);
     h = (TH1D*) h_mb_Pb_fcal_et_zdc_20t40->Clone ("htemp");
+    h->Rebin (2);
+    h->Scale (0.5);
     h->SetLineColor (colors[1]);
     h->DrawCopy ("hist same");
     SaferDelete (&h);
     h = (TH1D*) h_mb_Pb_fcal_et_zdc_40t60->Clone ("htemp");
+    h->Rebin (2);
+    h->Scale (0.5);
     h->SetLineColor (colors[2]);
     h->DrawCopy ("hist same");
     SaferDelete (&h);
     h = (TH1D*) h_mb_Pb_fcal_et_zdc_60t80->Clone ("htemp");
+    h->Rebin (2);
+    h->Scale (0.5);
     h->SetLineColor (colors[3]);
     h->DrawCopy ("hist same");
     SaferDelete (&h);
     h = (TH1D*) h_mb_Pb_fcal_et_zdc_80t100->Clone ("htemp");
+    h->Rebin (2);
+    h->Scale (0.5);
     h->SetLineColor (colors[4]);
     h->DrawCopy ("hist same");
     SaferDelete (&h);
 
 
-    myText (0.65, 0.900, kBlack, "#bf{#it{ATLAS}} Internal", 0.036);
-    myText (0.65, 0.860, kBlack, "#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV", 0.032);
-    myText (0.65, 0.820, kBlack, "All runs, MinBias trigger", 0.032);
+    myText (0.59, 0.900, kBlack, "#bf{#it{ATLAS}} Internal", 0.036);
+    myText (0.59, 0.860, kBlack, "#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV", 0.032);
+    myText (0.59, 0.820, kBlack, "HLT_mb_sptrk_L1MBTS_1", 0.032);
     myText (0.56, 0.740, kBlack, "P(#Sigma#it{E}_{T}^{FCal,Pb})", 0.026);
     myText (0.56, 0.700, colors[0], "0.2 #times P(#Sigma#it{E}_{T}^{FCal,Pb} | Zdc 0-20%)", 0.026);
     myText (0.56, 0.660, colors[1], "0.2 #times P(#Sigma#it{E}_{T}^{FCal,Pb} | Zdc 20-40%)", 0.026);
