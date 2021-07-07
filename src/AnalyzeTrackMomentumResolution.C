@@ -195,6 +195,8 @@ void AnalyzeTrackMomentumResolution () {
   // stores fitted TMS and TMR quantities
   double* fittedParams = new double[4];
 
+  ltmf.DoDoubleGaussian (false);
+
 
   // Main loop over all histograms to do fits to resolution function
   for (int iSys : systems) {
@@ -220,7 +222,7 @@ void AnalyzeTrackMomentumResolution () {
         TH1D* h = (TH1D*) h_tmr[iSys][iPtch][iFinerEta];
 
         // Define the TF1 fit function
-        TF1* fit = new TF1 (Form ("f_tmr_%s_iPtch%i_iEta%i", sys.Data (), iPtch, iFinerEta), &ltmf, -1.0, 4.0, 9);
+        TF1* fit = new TF1 (Form ("f_tmr_%s_iPtch%i_iEta%i", sys.Data (), iPtch, iFinerEta), &ltmf, -1.0, 4.0, ltmf.ndf ());
 
         // Perform the fit (defined in other function)
         const int fStatus = DoLogFit (h, fit);
@@ -251,7 +253,7 @@ void AnalyzeTrackMomentumResolution () {
         TH1D* h = h_tmr_integratedEta[iSys][iPtch][iEta];
 
         // Define the TF1 fit function
-        TF1* fit = new TF1 (Form ("f_tmr_%s_iPtch%i_%s_integrated", sys.Data (), iPtch, (iEta == nEtaTrkBins ? "allEta" : Form ("iEta%i", iEta))), &ltmf, -1.0, 4.0, 9);
+        TF1* fit = new TF1 (Form ("f_tmr_%s_iPtch%i_%s_integrated", sys.Data (), iPtch, (iEta == nEtaTrkBins ? "allEta" : Form ("iEta%i", iEta))), &ltmf, -1.0, 4.0, ltmf.ndf ());
 
         // Perform the fit (defined in other function)
         const int fStatus = DoLogFit (h, fit);

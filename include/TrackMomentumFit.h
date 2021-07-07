@@ -12,22 +12,22 @@ typedef long double ldouble;
  */
 class TrackMomentumFit {
   protected:
-    bool doDoubleGauss = false;
+    bool doDoubleGaussian = false;
 
   public:
 
-    void doDoubleGauss (bool doDG) {
-      doDoubleGauss = doDG;
+    void DoDoubleGaussian (bool doDG) {
+      doDoubleGaussian = doDG;
     }
-    bool doDoubleGauss () {
-      return doDoubleGauss;
+    bool DoDoubleGaussian () {
+      return doDoubleGaussian;
     }
 
     int ndf () {
-      return doDoubleGauss ? 9 : 7;
+      return DoDoubleGaussian () ? 9 : 7;
     }
 
-    virtual double operator() (double* x, double* p) {
+    virtual double Eval (double* x, double* p) {
       // single gaussian mode
       // param 0: tn
       // param 1: tp
@@ -52,11 +52,11 @@ class TrackMomentumFit {
       const ldouble tp = p[1];
       const ldouble r0 = p[2];
       const ldouble a1 = p[3];
-      const ldouble a2 = doDoubleGaussian ? p[4] : 0; // default to 0
-      const ldouble s1 = doDoubleGaussian ? p[5] : p[4];
-      const ldouble s2 = doDoubleGaussian ? p[6] : 1; // default to 1 to avoid divide by 0 errors
-      const ldouble cn = doDoubleGaussian ? p[7] : p[5];
-      const ldouble cp = doDoubleGaussian ? p[8] : p[6];
+      const ldouble a2 = DoDoubleGaussian () ? p[4] : 0; // default to 0
+      const ldouble s1 = DoDoubleGaussian () ? p[5] : p[4];
+      const ldouble s2 = DoDoubleGaussian () ? p[6] : 1; // default to 1 to avoid divide by 0 errors
+      const ldouble cn = DoDoubleGaussian () ? p[7] : p[5];
+      const ldouble cp = DoDoubleGaussian () ? p[8] : p[6];
 
       if (x[0] < tn) {
         const ldouble g_tn = a1 * std::exp (-0.5 * std::pow ((tn-r0)/s1, 2)) + a2 * std::exp (-0.5 * std::pow ((tn-r0)/s2, 2));
@@ -72,7 +72,7 @@ class TrackMomentumFit {
     }
 
     void InitParams (TF1* fit, const double integral = 1e5, const double rms = 0.05) {
-      if (doDoubleGaussian) {
+      if (!DoDoubleGaussian ()) {
         fit->SetParameter (0, -1.5*rms);
         fit->SetParameter (1, 1.5*rms);
         fit->SetParameter (2, 0);
@@ -118,6 +118,10 @@ class TrackMomentumFit {
         f2->SetParError (iParam, f1->GetParError (iParam));
       }
     }
+
+    virtual double operator () (double* x, double* p) {
+      return Eval (x, p);
+    }
 };
 
 
@@ -126,8 +130,8 @@ class TrackMomentumFit {
  */
 class LogTrackMomentumFit : public TrackMomentumFit {
   public:
-    double operator() (double* x, double* p) override {
-      return std::log (tmf (x, p));
+    double operator() (double* x, double* p) {
+      return std::log (Eval (x, p));
     }
 };
 
