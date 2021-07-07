@@ -129,11 +129,11 @@ void GetFittedScaleAndResolution (TF1* f, double* res) {
 
   // calculate the TMR from <x^2> where x is distributed according to the Gaussian core of f
   const ldouble norm = a1 * s1 + a2 * s2; // normalization factor
-  const ldouble st = (norm != 0 ? std::sqrtl (std::fabs (a1*s1*s1*s1/norm + a2*s2*s2*s2/norm)) : 0);
-  const ldouble ste = std::sqrtl (std::pow (a1e * a2 * s1*s2 * (s1*s1 - s2*s2), 2) +
-                                  std::pow (a2e * a1 * s1*s2 * (s2*s2 - s1*s1), 2) + 
-                                  std::pow (s1e * a1 * (2*a1*s1*s1*s1 + 3*a2*s1*s1*s2 - a2*s2*s2*s2), 2) + 
-                                  std::pow (s2e * a2 * (2*a2*s2*s2*s2 + 3*a1*s1*s2*s2 - a1*s1*s1*s1), 2)) / (2*st * norm*norm);
+  const ldouble st = (norm != 0 ? std::sqrt (std::fabs (a1*s1*s1*s1/norm + a2*s2*s2*s2/norm)) : 0);
+  const ldouble ste = std::sqrt (std::pow (a1e * a2 * s1*s2 * (s1*s1 - s2*s2), 2) +
+                                 std::pow (a2e * a1 * s1*s2 * (s2*s2 - s1*s1), 2) + 
+                                 std::pow (s1e * a1 * (2*a1*s1*s1*s1 + 3*a2*s1*s1*s2 - a2*s2*s2*s2), 2) + 
+                                 std::pow (s2e * a2 * (2*a2*s2*s2*s2 + 3*a1*s1*s2*s2 - a1*s1*s1*s1), 2)) / (2*st * norm*norm);
 
 
   std::cout << "  --> fit st = " << st << " +/- " << ste << " (norm = " << norm << ")" << std::endl;
