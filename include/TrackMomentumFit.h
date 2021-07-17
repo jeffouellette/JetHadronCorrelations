@@ -27,7 +27,7 @@ class TrackMomentumFit {
       return DoDoubleGaussian () ? 9 : 7;
     }
 
-    virtual double Eval (double* x, double* p) {
+    virtual double Eval (double x, double* p) {
       // single gaussian mode
       // param 0: tn
       // param 1: tp
@@ -58,17 +58,17 @@ class TrackMomentumFit {
       const ldouble cn = DoDoubleGaussian () ? p[7] : p[5];
       const ldouble cp = DoDoubleGaussian () ? p[8] : p[6];
 
-      if (x[0] < tn) {
+      if (x < tn) {
         const ldouble g_tn = a1 * std::exp (-0.5 * std::pow ((tn-r0)/s1, 2)) + a2 * std::exp (-0.5 * std::pow ((tn-r0)/s2, 2));
         const ldouble gp_tn = (r0-tn) * (a1 * std::exp (-0.5 * std::pow ((tn-r0)/s1, 2)) / std::pow (s1, 2) + a2 * std::exp (-0.5 * std::pow ((tn-r0)/s2, 2)) / std::pow (s2, 2));
-        return  g_tn * std::exp ((gp_tn * tn) / (g_tn * cn) * (std::pow (std::fabs (x[0] / tn), cn) - 1));
+        return  g_tn * std::exp ((gp_tn * tn) / (g_tn * cn) * (std::pow (std::fabs (x / tn), cn) - 1));
       }
-      if (x[0] > tp) {
+      if (x > tp) {
         const ldouble g_tp = a1 * std::exp (-0.5 * std::pow ((tp-r0)/s1, 2)) + a2 * std::exp (-0.5 * std::pow ((tp-r0)/s2, 2));
         const ldouble gp_tp = (r0-tp) * (a1 * std::exp (-0.5 * std::pow ((tp-r0)/s1, 2)) / std::pow (s1, 2) + a2 * std::exp (-0.5 * std::pow ((tp-r0)/s2, 2)) / std::pow (s2, 2));
-        return g_tp * std::exp ((gp_tp * tp) / (g_tp * cp) * (std::pow (std::fabs (x[0] / tp), cp) - 1));
+        return g_tp * std::exp ((gp_tp * tp) / (g_tp * cp) * (std::pow (std::fabs (x / tp), cp) - 1));
       }
-      return a1 * std::exp ((-0.5 * std::pow ((x[0]-r0)/s1, 2))) + a2 * std::exp ((-0.5 * std::pow ((x[0]-r0)/s2, 2)));
+      return a1 * std::exp ((-0.5 * std::pow ((x-r0)/s1, 2))) + a2 * std::exp ((-0.5 * std::pow ((x-r0)/s2, 2)));
     }
 
     void InitParams (TF1* fit, const double integral = 1e5, const double rms = 0.05) {
@@ -78,11 +78,11 @@ class TrackMomentumFit {
         fit->SetParameter (2, 0);
         fit->SetParameter (3, integral / (0.68 * rms * std::sqrt (2*M_PI)));
         fit->SetParameter (4, rms);
-        fit->SetParameter (5, 0.5);
-        fit->SetParameter (6, 0.5);
+        fit->SetParameter (5, 1);
+        fit->SetParameter (6, 1);
 
-        //fit->SetParLimits (0, -0.5, 0);
-        //fit->SetParLimits (1, 0, 0.5);
+        fit->SetParLimits (0, -0.5, 0);
+        fit->SetParLimits (1, 0, 0.5);
         fit->SetParLimits (2, -0.1, 0.1);
         //fit->SetParLimits (3, 0., 1e16);
         fit->SetParLimits (4, 0., 1.);
@@ -93,20 +93,20 @@ class TrackMomentumFit {
         fit->SetParameter (0, -1.5*rms);
         fit->SetParameter (1, 1.5*rms);
         fit->SetParameter (2, 0);
-        fit->SetParameter (3, 0.5 * integral / (0.68 * rms * std::sqrt (2*M_PI)));
-        fit->SetParameter (4, 0.5 * integral / (0.68 * rms * std::sqrt (2*M_PI)));
+        fit->SetParameter (3, integral / (0.68 * rms * std::sqrt (2*M_PI)));
+        fit->SetParameter (4, 0);
         fit->SetParameter (5, rms);
-        fit->SetParameter (6, rms);
-        fit->SetParameter (7, 1.1);
-        fit->SetParameter (8, 1.1);
+        fit->SetParameter (6, 0);
+        fit->SetParameter (7, 0.5);
+        fit->SetParameter (8, 0.5);
 
-        //fit->SetParLimits (0, -0.5, 0);
-        //fit->SetParLimits (1, 0, 0.5);
-        //fit->SetParLimits (2, -0.5, 0.5);
+        fit->SetParLimits (0, -0.5, 0);
+        fit->SetParLimits (1, 0, 0.5);
+        fit->SetParLimits (2, -0.1, 0.1);
         //fit->SetParLimits (3, 0., 1e16);
         //fit->SetParLimits (4, 0., 1e16);
-        fit->SetParLimits (5, 0., 2.);
-        fit->SetParLimits (6, 0., 2.);
+        fit->SetParLimits (5, 0., 1.);
+        fit->SetParLimits (6, 0., 1.);
         //fit->SetParLimits (7, -4, 4); 
         //fit->SetParLimits (8, -4, 4);
       }
@@ -120,7 +120,7 @@ class TrackMomentumFit {
     }
 
     virtual double operator () (double* x, double* p) {
-      return Eval (x, p);
+      return Eval (x[0], p);
     }
 };
 
@@ -131,7 +131,7 @@ class TrackMomentumFit {
 class LogTrackMomentumFit : public TrackMomentumFit {
   public:
     double operator() (double* x, double* p) {
-      return std::log (Eval (x, p));
+      return std::log (Eval (x[0], p));
     }
 };
 

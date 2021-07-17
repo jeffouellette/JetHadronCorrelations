@@ -7,6 +7,7 @@
 #include <TF1.h>
 
 #include <Utilities.h>
+#include <ArrayTemplates.h>
 
 #include "Params.h"
 #include "LocalUtilities.h"
@@ -15,871 +16,543 @@ using namespace JetHadronCorrelations;
 
 typedef TGraphAsymmErrors TGAE;
 
-const int nFinerEtaBins = 56;
-const double* finerEtaBins = linspace (-2.8, 2.8, nFinerEtaBins);
+// Number of sigma to use for second fit
+const float nSigFit2 = 1.4;
 
-const double etaBins[] = {0, 0.3, 0.8, 1.2, 2.1, 2.8};
-const int nEtaBins = sizeof (etaBins) / sizeof (etaBins[0]) - 1;
+// Minimum number of histogram entries to attempt a fit (400 is an arbitrary choice)
+const int minEntriesForFit = 400;
 
-const double enJBins[] = {10, 12, 15, 18, 22, 26, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 100, 120, 140, 160, 180, 200, 220, 240, 260, 280, 300, 320, 360, 400, 450, 500};
-const int nEnJBins = sizeof (enJBins) / sizeof (enJBins[0]) - 1;
 
-//const vector <int> systems = {0, 1};
-const vector <int> systems = {0};
+/**
+ * Wrapper function for performing a fit to a Gaussian TF1.
+ */
+TF1* DoGaussianFit (TH1D* h, double min = 0.0, double max = 2.4) {
+  std::cout << "Fitting " << h->GetName () << " to Gaussian." << std::endl;
+  // Check we have "enough" entries to perform a fit.
+  if (h->Integral () < minEntriesForFit) {
+    std::cout << "Not enough counts for fit! Will skip this histogram." << std::endl;
+    return nullptr;
+  }
+  else
+    std::cout << "Fitting " << h->GetName () << " to gaussian" << std::endl;
 
-TH1D**** h_r2_jpts = nullptr;
-TH1D**** h_r2_jes = nullptr;
-TH1D**** h_r2_jetacorr = nullptr;
-TH1D**** h_r4_jpts = nullptr;
-TH1D**** h_r4_jes = nullptr;
-TH1D**** h_r4_jetacorr = nullptr;
 
-TH2D** h2_r2_avg_jpts = nullptr;
-TH2D** h2_r2_avg_jptr = nullptr;
-TH1D*** h_r2_avg_jpts = nullptr;
-TH1D*** h_r2_avg_jptr = nullptr;
-TH2D** h2_r4_avg_jpts = nullptr;
-TH2D** h2_r4_avg_jptr = nullptr;
-TH1D*** h_r4_avg_jpts = nullptr;
-TH1D*** h_r4_avg_jptr = nullptr;
+  TF1* fit = new TF1 ("fit", "gaus(0)", min, max);
+  fit->SetParameter (0, h->Integral ());
+  fit->SetParameter (1, h->GetMean ());
+  fit->SetParameter (2, h->GetStdDev ());
 
-TH2D** h2_r2_avg_jes = nullptr;
-TH2D** h2_r2_avg_jer = nullptr;
-TH1D*** h_r2_avg_jes = nullptr;
-TH1D*** h_r2_avg_jer = nullptr;
-TH2D** h2_r4_avg_jes = nullptr;
-TH2D** h2_r4_avg_jer = nullptr;
-TH1D*** h_r4_avg_jes = nullptr;
-TH1D*** h_r4_avg_jer = nullptr;
+  h->Fit (fit, "RN0Q");
 
-TH2D** h2_r2_avg_jetacorr = nullptr;
-TH1D*** h_r2_avg_jetacorr = nullptr;
-TH2D** h2_r2_avg_jetares = nullptr;
-TH1D*** h_r2_avg_jetares = nullptr;
-TH2D** h2_r4_avg_jetacorr = nullptr;
-TH1D*** h_r4_avg_jetacorr = nullptr;
-TH2D** h2_r4_avg_jetares = nullptr;
-TH1D*** h_r4_avg_jetares = nullptr;
+  const double mean = fit->GetParameter (1);
+  const double sigma = fit->GetParameter (2);
+
+  delete fit;
+  fit = new TF1 ("fit", "gaus(0)", std::fmax (mean-nSigFit2*sigma, 0.0), std::fmin (mean+nSigFit2*sigma, 2.4));
+
+  fit->SetParameter (0, h->Integral ());
+  fit->SetParameter (1, mean);
+  fit->SetParameter (2, sigma);
+
+  h->Fit (fit, "RN0Q");
+
+  return fit;
+}
+
+
 
 void AnalyzeJetEnergyResolution () {
 
+  const int nFinerEtaBins = 56;
+  const double* finerEtaBins = linspace (-2.8, 2.8, nFinerEtaBins);
+  
+  const double etaBins[] = {-2.8, -2.1, -1.2, -0.8, -0.3, 0, 0.3, 0.8, 1.2, 2.1, 2.8};
+  const int nEtaBins = sizeof (etaBins) / sizeof (etaBins[0]) - 1;
+  
+  const double pTJBins[] = {10, 12, 15, 18, 22, 26, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 100, 120, 140, 160, 180, 200, 220, 240, 260, 280, 300, 320, 360, 400, 450, 500, 550, 600, 650, 700, 750, 800, 900, 1000, 1100, 1200, 1300};
+  const int nPtJBins = sizeof (pTJBins) / sizeof (pTJBins[0]) - 1;
+
+  const int nRespBins = 240;
+  const double* respBins = linspace (0, 2.4, nRespBins);
+
+  const int nEtaRespBins = 80;
+  const double* etaRespBins = linspace (-0.2, 0.2, nEtaRespBins);
+  
+  const std::vector <int> systems = {0, 1}; // 0 = pp, 1 = pPb
+  const int nSystems = systems.size ();
+  
+  const std::vector <JetRadius> radii = {JetRadius::R0p2, JetRadius::R0p4};
+  const int nRadii = radii.size ();
+
+
   TFile* inFile = new TFile (Form ("%s/JetEnergyResolution/Nominal/allSamples.root", rootPath.Data ()), "read");
 
-  const int nFinerEtaBins = 90;
-  const double* finerEtaBins = linspace (-4.5, 4.5, nFinerEtaBins);
-
-  const double enJBins[] = {10, 12, 15, 18, 22, 26, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 100, 120, 140, 160, 180, 200, 220, 240, 260, 280, 300, 320, 360, 400, 450, 500};
-  const int nEnJBins = sizeof (enJBins) / sizeof (enJBins[0]) - 1;
-
-  h_r2_jpts = new TH1D***[2];
-  h_r2_jes = new TH1D***[2];
-  h_r2_jetacorr = new TH1D***[2];
-
-  h_r4_jpts = new TH1D***[2];
-  h_r4_jes = new TH1D***[2];
-  h_r4_jetacorr = new TH1D***[2];
+  TH1D***** h_jpts     = Get4DArray <TH1D*> (nSystems, nRadii, nPtJBins, nFinerEtaBins);
+  TH1D***** h_jes      = Get4DArray <TH1D*> (nSystems, nRadii, nPtJBins, nFinerEtaBins);
+  TH1D***** h_jetacorr = Get4DArray <TH1D*> (nSystems, nRadii, nPtJBins, nFinerEtaBins);
 
   for (int iSys : systems) {
+
     const TString sys = (iSys == 0 ? "pp" : "pPb");
 
-    h_r2_jpts[iSys] = new TH1D**[nEnJBins];
-    h_r2_jes[iSys] = new TH1D**[nEnJBins];
-    h_r2_jetacorr[iSys] = new TH1D**[nEnJBins];
+    for (int iR = 0; iR < nRadii; iR++) {
 
-    h_r4_jpts[iSys] = new TH1D**[nEnJBins];
-    h_r4_jes[iSys] = new TH1D**[nEnJBins];
-    h_r4_jetacorr[iSys] = new TH1D**[nEnJBins];
+      const int r = (radii[iR] == JetRadius::R0p4 ? 4 : 2);
 
-    for (int iEnJ = 0; iEnJ < nEnJBins; iEnJ++) {
+      for (int iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
 
-      h_r2_jpts[iSys][iEnJ] = new TH1D*[nFinerEtaBins];
-      h_r2_jes[iSys][iEnJ] = new TH1D*[nFinerEtaBins];
-      h_r2_jetacorr[iSys][iEnJ] = new TH1D*[nFinerEtaBins];
+        for (int iEta = 0; iEta < nFinerEtaBins; iEta++) {
 
-      h_r4_jpts[iSys][iEnJ] = new TH1D*[nFinerEtaBins];
-      h_r4_jes[iSys][iEnJ] = new TH1D*[nFinerEtaBins];
-      h_r4_jetacorr[iSys][iEnJ] = new TH1D*[nFinerEtaBins];
+          h_jpts[iSys][iR][iPtJ][iEta] = (TH1D*) inFile->Get (Form ("h_r%i_jpts_%s_iPtJ%i_iEta%i", r, sys.Data (), iPtJ, iEta));
+          h_jes[iSys][iR][iPtJ][iEta] = (TH1D*) inFile->Get (Form ("h_r%i_jes_%s_iPtJ%i_iEta%i", r, sys.Data (), iPtJ, iEta));
+          h_jetacorr[iSys][iR][iPtJ][iEta] = (TH1D*) inFile->Get (Form ("h_r%i_jetacorr_%s_iPtJ%i_iEta%i", r, sys.Data (), iPtJ, iEta));
 
-      for (int iEta = 0; iEta < nFinerEtaBins; iEta++) {
+        } // end loop over iEta
 
-        h_r2_jpts[iSys][iEnJ][iEta] = (TH1D*) inFile->Get (Form ("h_r2_jpts_%s_iEnJ%i_iEta%i", sys.Data (), iEnJ, iEta));
-        h_r2_jes[iSys][iEnJ][iEta] = (TH1D*) inFile->Get (Form ("h_r2_jes_%s_iEnJ%i_iEta%i", sys.Data (), iEnJ, iEta));
-        h_r2_jetacorr[iSys][iEnJ][iEta] = (TH1D*) inFile->Get (Form ("h_r2_jetacorr_%s_iEnJ%i_iEta%i", sys.Data (), iEnJ, iEta));
+      } // end loop over iPtJ
 
-        h_r4_jpts[iSys][iEnJ][iEta] = (TH1D*) inFile->Get (Form ("h_r4_jpts_%s_iEnJ%i_iEta%i", sys.Data (), iEnJ, iEta));
-        h_r4_jes[iSys][iEnJ][iEta] = (TH1D*) inFile->Get (Form ("h_r4_jes_%s_iEnJ%i_iEta%i", sys.Data (), iEnJ, iEta));
-        h_r4_jetacorr[iSys][iEnJ][iEta] = (TH1D*) inFile->Get (Form ("h_r4_jetacorr_%s_iEnJ%i_iEta%i", sys.Data (), iEnJ, iEta));
+    } // end loop over iR
 
-      } // end loop over iEta
-    } // end loop over iEnJ
   } // end loop over iSys
 
 
   TFile* outFile = new TFile (Form ("%s/JetEnergyResolution/Nominal/summary.root", rootPath.Data ()), "recreate");
 
-  h2_r2_avg_jpts = new TH2D*[2];
-  h2_r2_avg_jptr = new TH2D*[2];
-  h_r2_avg_jpts = new TH1D**[2];
-  h_r2_avg_jptr = new TH1D**[2];
+  TH1D***** h_jes_integratedEta       = Get4DArray <TH1D*> (nSystems, nRadii, nPtJBins, nEtaBins);
+  TH1D***** h_jpts_integratedEta      = Get4DArray <TH1D*> (nSystems, nRadii, nPtJBins, nEtaBins);
+  TH1D***** h_jetacorr_integratedEta  = Get4DArray <TH1D*> (nSystems, nRadii, nPtJBins, nEtaBins);
 
-  h2_r4_avg_jpts = new TH2D*[2];
-  h2_r4_avg_jptr = new TH2D*[2];
-  h_r4_avg_jpts = new TH1D**[2];
-  h_r4_avg_jptr = new TH1D**[2];
+  TH2D**** h2_jes_integratedEta       = Get3DArray <TH2D*> (nSystems, nRadii, nEtaBins);
+  TH2D**** h2_jpts_integratedEta      = Get3DArray <TH2D*> (nSystems, nRadii, nEtaBins);
+  TH2D**** h2_jetacorr_integratedEta  = Get3DArray <TH2D*> (nSystems, nRadii, nEtaBins);
 
-  h2_r2_avg_jes = new TH2D*[2];
-  h2_r2_avg_jer = new TH2D*[2];
-  h_r2_avg_jes = new TH1D**[2];
-  h_r2_avg_jer = new TH1D**[2];
+  TH2D*** h2_avg_jpts = Get2DArray <TH2D*> (nSystems, nRadii);
+  TH2D*** h2_avg_jptr = Get2DArray <TH2D*> (nSystems, nRadii);
+  TH1D**** h_avg_jpts = Get3DArray <TH1D*> (nSystems, nRadii, nEtaBins+1);
+  TH1D**** h_avg_jptr = Get3DArray <TH1D*> (nSystems, nRadii, nEtaBins+1);
 
-  h2_r4_avg_jes = new TH2D*[2];
-  h2_r4_avg_jer = new TH2D*[2];
-  h_r4_avg_jes = new TH1D**[2];
-  h_r4_avg_jer = new TH1D**[2];
+  TH2D*** h2_avg_jes  = Get2DArray <TH2D*> (nSystems, nRadii);
+  TH2D*** h2_avg_jer  = Get2DArray <TH2D*> (nSystems, nRadii);
+  TH1D**** h_avg_jes  = Get3DArray <TH1D*> (nSystems, nRadii, nEtaBins+1);
+  TH1D**** h_avg_jer  = Get3DArray <TH1D*> (nSystems, nRadii, nEtaBins+1);
 
-  h2_r2_avg_jetacorr = new TH2D*[2];
-  h2_r2_avg_jetares = new TH2D*[2];
-  h_r2_avg_jetacorr = new TH1D**[2];
-  h_r2_avg_jetares = new TH1D**[2];
-
-  h2_r4_avg_jetacorr = new TH2D*[2];
-  h2_r4_avg_jetares = new TH2D*[2];
-  h_r4_avg_jetacorr = new TH1D**[2];
-  h_r4_avg_jetares = new TH1D**[2];
+  TH2D*** h2_avg_jetacorr = Get2DArray <TH2D*> (nSystems, nRadii);
+  TH2D*** h2_avg_jetares  = Get2DArray <TH2D*> (nSystems, nRadii);
+  TH1D**** h_avg_jetacorr = Get3DArray <TH1D*> (nSystems, nRadii, nEtaBins+1);
+  TH1D**** h_avg_jetares  = Get3DArray <TH1D*> (nSystems, nRadii, nEtaBins+1);
 
   for (int iSys : systems) {
+
     const TString sys = (iSys == 0 ? "pp" : "pPb");
 
-    h2_r2_avg_jpts[iSys] = new TH2D (Form ("h2_r2_avg_jpts_%s", sys.Data ()), ";#it{E}_{truth} [GeV];#eta_{truth};#LT#it{p}_{T}^{reco} / #it{p}_{T}^{truth}#GT [%]", nEnJBins, enJBins, nFinerEtaBins, finerEtaBins);
-    h2_r2_avg_jptr[iSys] = new TH2D (Form ("h2_r2_avg_jptr_%s", sys.Data ()), ";#it{E}_{truth} [GeV];#eta_{truth};#sigma / #mu #left[#it{p}_{T}^{reco} / #it{p}_{T}^{truth}#right] [%]", nEnJBins, enJBins, nFinerEtaBins, finerEtaBins);
+    for (int iR = 0; iR < nRadii; iR++) {
 
-    h2_r4_avg_jpts[iSys] = new TH2D (Form ("h2_r4_avg_jpts_%s", sys.Data ()), ";#it{E}_{truth} [GeV];#eta_{truth};#LT#it{p}_{T}^{reco} / #it{p}_{T}^{truth}#GT [%]", nEnJBins, enJBins, nFinerEtaBins, finerEtaBins);
-    h2_r4_avg_jptr[iSys] = new TH2D (Form ("h2_r4_avg_jptr_%s", sys.Data ()), ";#it{E}_{truth} [GeV];#eta_{truth};#sigma / #mu #left[#it{p}_{T}^{reco} / #it{p}_{T}^{truth}#right] [%]", nEnJBins, enJBins, nFinerEtaBins, finerEtaBins);
+      const int r = (radii[iR] == JetRadius::R0p4 ? 4 : 2);
 
-    h2_r2_avg_jes[iSys] = new TH2D (Form ("h2_r2_avg_jes_%s", sys.Data ()), ";#it{E}_{truth} [GeV];#eta_{truth};#LT#it{E}_{reco} / #it{E}_{truth}#GT [%]", nEnJBins, enJBins, nFinerEtaBins, finerEtaBins);
-    h2_r2_avg_jer[iSys] = new TH2D (Form ("h2_r2_avg_jer_%s", sys.Data ()), ";#it{E}_{truth} [GeV];#eta_{truth};#sigma / #mu #left[#it{E}_{reco} / #it{E}_{truth}#right] [%]", nEnJBins, enJBins, nFinerEtaBins, finerEtaBins);
+      h2_avg_jpts[iSys][iR] = new TH2D (Form ("h2_r%i_avg_jpts_%s", r, sys.Data ()), ";#it{E}_{truth} [GeV];#eta_{truth};#LT#it{p}_{T}^{reco} / #it{p}_{T}^{truth}#GT [%]", nPtJBins, pTJBins, nFinerEtaBins, finerEtaBins);
+      h2_avg_jptr[iSys][iR] = new TH2D (Form ("h2_r%i_avg_jptr_%s", r, sys.Data ()), ";#it{E}_{truth} [GeV];#eta_{truth};#sigma / #mu #left[#it{p}_{T}^{reco} / #it{p}_{T}^{truth}#right] [%]", nPtJBins, pTJBins, nFinerEtaBins, finerEtaBins);
 
-    h2_r4_avg_jes[iSys] = new TH2D (Form ("h2_r4_avg_jes_%s", sys.Data ()), ";#it{E}_{truth} [GeV];#eta_{truth};#LT#it{E}_{reco} / #it{E}_{truth}#GT [%]", nEnJBins, enJBins, nFinerEtaBins, finerEtaBins);
-    h2_r4_avg_jer[iSys] = new TH2D (Form ("h2_r4_avg_jer_%s", sys.Data ()), ";#it{E}_{truth} [GeV];#eta_{truth};#sigma / #mu #left[#it{E}_{reco} / #it{E}_{truth}#right] [%]", nEnJBins, enJBins, nFinerEtaBins, finerEtaBins);
+      h2_avg_jes[iSys][iR] = new TH2D (Form ("h2_r%i_avg_jes_%s", r, sys.Data ()), ";#it{E}_{truth} [GeV];#eta_{truth};#LT#it{E}_{reco} / #it{E}_{truth}#GT [%]", nPtJBins, pTJBins, nFinerEtaBins, finerEtaBins);
+      h2_avg_jer[iSys][iR] = new TH2D (Form ("h2_r%i_avg_jer_%s", r, sys.Data ()), ";#it{E}_{truth} [GeV];#eta_{truth};#sigma / #mu #left[#it{E}_{reco} / #it{E}_{truth}#right] [%]", nPtJBins, pTJBins, nFinerEtaBins, finerEtaBins);
 
-    h2_r2_avg_jetacorr[iSys] = new TH2D (Form ("h2_r2_avg_jetacorr_%s", sys.Data ()), ";#it{E}_{truth} [GeV];#eta_{truth};#LT#eta_{reco} - #eta_{truth}#GT", nEnJBins, enJBins, nFinerEtaBins, finerEtaBins);
-    h2_r2_avg_jetares[iSys] = new TH2D (Form ("h2_r2_avg_jetares_%s", sys.Data ()), ";#it{E}_{truth} [GeV];#eta_{truth};#sigma#left[#eta_{reco} - #eta_{truth}#GT#right]", nEnJBins, enJBins, nFinerEtaBins, finerEtaBins);
-
-    h2_r4_avg_jetacorr[iSys] = new TH2D (Form ("h2_r4_avg_jetacorr_%s", sys.Data ()), ";#it{E}_{truth} [GeV];#eta_{truth};#LT#eta_{reco} - #eta_{truth}#GT", nEnJBins, enJBins, nFinerEtaBins, finerEtaBins);
-    h2_r4_avg_jetares[iSys] = new TH2D (Form ("h2_r4_avg_jetares_%s", sys.Data ()), ";#it{E}_{truth} [GeV];#eta_{truth};#sigma#left[#eta_{reco} - #eta_{truth}#GT#right]", nEnJBins, enJBins, nFinerEtaBins, finerEtaBins);
+      h2_avg_jetacorr[iSys][iR] = new TH2D (Form ("h2_r%i_avg_jetacorr_%s", r, sys.Data ()), ";#it{E}_{truth} [GeV];#eta_{truth};#LT#eta_{reco} - #eta_{truth}#GT", nPtJBins, pTJBins, nFinerEtaBins, finerEtaBins);
+      h2_avg_jetares[iSys][iR] = new TH2D (Form ("h2_r%i_avg_jetares_%s", r, sys.Data ()), ";#it{E}_{truth} [GeV];#eta_{truth};#sigma#left[#eta_{reco} - #eta_{truth}#GT#right]", nPtJBins, pTJBins, nFinerEtaBins, finerEtaBins);
 
 
-    h_r2_avg_jpts[iSys] = new TH1D*[nEtaBins+1];
-    h_r2_avg_jptr[iSys] = new TH1D*[nEtaBins+1];
+      for (int iEta = 0; iEta <= nEtaBins; iEta++) {
 
-    h_r4_avg_jpts[iSys] = new TH1D*[nEtaBins+1];
-    h_r4_avg_jptr[iSys] = new TH1D*[nEtaBins+1];
+        h_avg_jpts[iSys][iR][iEta] = new TH1D (Form ("h_r%i_avg_jpts_%s_iEta%i", r, sys.Data (), iEta), ";#it{E}_{truth} [GeV];#LT#it{p}_{T}^{reco} / #it{p}_{T}^{truth}#GT [%]", nPtJBins, pTJBins);
+        h_avg_jptr[iSys][iR][iEta] = new TH1D (Form ("h_r%i_avg_jptr_%s_iEta%i", r, sys.Data (), iEta), ";#it{E}_{truth} [GeV];#sigma / #mu #left[#it{p}_{T}^{reco} / #it{p}_{T}^{truth}#right] [%]", nPtJBins, pTJBins);
 
-    h_r2_avg_jes[iSys] = new TH1D*[nEtaBins+1];
-    h_r2_avg_jer[iSys] = new TH1D*[nEtaBins+1];
+        h_avg_jes[iSys][iR][iEta] = new TH1D (Form ("h_r%i_avg_jes_%s_iEta%i", r, sys.Data (), iEta), ";#it{E}_{truth} [GeV];#LT#it{E}_{reco} / #it{E}_{truth}#GT [%]", nPtJBins, pTJBins);
+        h_avg_jer[iSys][iR][iEta] = new TH1D (Form ("h_r%i_avg_jer_%s_iEta%i", r, sys.Data (), iEta), ";#it{E}_{truth} [GeV];#sigma / #mu #left[#it{E}_{reco} / #it{E}_{truth}#right] [%]", nPtJBins, pTJBins);
 
-    h_r4_avg_jes[iSys] = new TH1D*[nEtaBins+1];
-    h_r4_avg_jer[iSys] = new TH1D*[nEtaBins+1];
+        h_avg_jetacorr[iSys][iR][iEta] = new TH1D (Form ("h_r%i_avg_jetacorr_%s_iEta%i", r, sys.Data (), iEta), ";#it{E}_{truth} [GeV];#LT#eta_{reco} - #eta_{truth}#GT", nPtJBins, pTJBins);
+        h_avg_jetares[iSys][iR][iEta] = new TH1D (Form ("h_r%i_avg_jetares_%s_iEta%i", r, sys.Data (), iEta), ";#it{E}_{truth} [GeV];#sigma#left[#eta_{reco} - #eta_{truth}#GT#right]", nPtJBins, pTJBins);
 
-    h_r2_avg_jetacorr[iSys] = new TH1D*[nEtaBins+1];
-    h_r2_avg_jetares[iSys] = new TH1D*[nEtaBins+1];
 
-    h_r4_avg_jetacorr[iSys] = new TH1D*[nEtaBins+1];
-    h_r4_avg_jetares[iSys] = new TH1D*[nEtaBins+1];
+        h2_jpts_integratedEta[iSys][iR][iEta] = new TH2D (Form ("h2_r%i_jpts_integratedEta_%s_iEta%i", r, sys.Data (), iEta), ";#it{p}_{T}^{truth} [GeV];#it{p}_{T}^{reco} / #it{p}_{T}^{truth};Counts", nPtJBins, pTJBins, nRespBins, respBins);
+        h2_jpts_integratedEta[iSys][iR][iEta]->Sumw2 ();
 
-    for (int iEta = 0; iEta <= nEtaBins; iEta++) {
+        h2_jes_integratedEta[iSys][iR][iEta] = new TH2D (Form ("h2_r%i_jes_integratedEta_%s_iEta%i", r, sys.Data (), iEta), ";#it{p}_{T}^{truth} [GeV];#it{E}_{reco} / #it{E}_{truth};Counts", nPtJBins, pTJBins, nRespBins, respBins);
+        h2_jes_integratedEta[iSys][iR][iEta]->Sumw2 ();
 
-      h_r2_avg_jpts[iSys][iEta] = new TH1D (Form ("h_r2_avg_jpts_%s_iEta%i", sys.Data (), iEta), ";#it{E}_{truth} [GeV];#LT#it{p}_{T}^{reco} / #it{p}_{T}^{truth}#GT [%]", nEnJBins, enJBins);
-      h_r2_avg_jptr[iSys][iEta] = new TH1D (Form ("h_r2_avg_jptr_%s_iEta%i", sys.Data (), iEta), ";#it{E}_{truth} [GeV];#sigma / #mu #left[#it{p}_{T}^{reco} / #it{p}_{T}^{truth}#right] [%]", nEnJBins, enJBins);
+        h2_jetacorr_integratedEta[iSys][iR][iEta] = new TH2D (Form ("h2_r%i_jetacorr_integratedEta_%s_iEta%i", r, sys.Data (), iEta), ";#it{p}_{T}^{truth} [GeV];#eta_{reco} - #eta_{truth};Counts", nPtJBins, pTJBins, nEtaRespBins, etaRespBins);
+        h2_jetacorr_integratedEta[iSys][iR][iEta]->Sumw2 ();
 
-      h_r4_avg_jpts[iSys][iEta] = new TH1D (Form ("h_r4_avg_jpts_%s_iEta%i", sys.Data (), iEta), ";#it{E}_{truth} [GeV];#LT#it{p}_{T}^{reco} / #it{p}_{T}^{truth}#GT [%]", nEnJBins, enJBins);
-      h_r4_avg_jptr[iSys][iEta] = new TH1D (Form ("h_r4_avg_jptr_%s_iEta%i", sys.Data (), iEta), ";#it{E}_{truth} [GeV];#sigma / #mu #left[#it{p}_{T}^{reco} / #it{p}_{T}^{truth}#right] [%]", nEnJBins, enJBins);
 
-      h_r2_avg_jes[iSys][iEta] = new TH1D (Form ("h_r2_avg_jes_%s_iEta%i", sys.Data (), iEta), ";#it{E}_{truth} [GeV];#LT#it{E}_{reco} / #it{E}_{truth}#GT [%]", nEnJBins, enJBins);
-      h_r2_avg_jer[iSys][iEta] = new TH1D (Form ("h_r2_avg_jer_%s_iEta%i", sys.Data (), iEta), ";#it{E}_{truth} [GeV];#sigma / #mu #left[#it{E}_{reco} / #it{E}_{truth}#right] [%]", nEnJBins, enJBins);
+        for (int iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
 
-      h_r4_avg_jes[iSys][iEta] = new TH1D (Form ("h_r4_avg_jes_%s_iEta%i", sys.Data (), iEta), ";#it{E}_{truth} [GeV];#LT#it{E}_{reco} / #it{E}_{truth}#GT [%]", nEnJBins, enJBins);
-      h_r4_avg_jer[iSys][iEta] = new TH1D (Form ("h_r4_avg_jer_%s_iEta%i", sys.Data (), iEta), ";#it{E}_{truth} [GeV];#sigma / #mu #left[#it{E}_{reco} / #it{E}_{truth}#right] [%]", nEnJBins, enJBins);
+          h_jpts_integratedEta[iSys][iR][iPtJ][iEta] = new TH1D (Form ("h_r%i_jpts_integratedEta_%s_iPtJ%i_iEta%i", r, sys.Data (), iPtJ, iEta), ";#it{p}_{T}^{reco} / #it{p}_{T}^{truth};Counts", nRespBins, respBins);
+          h_jpts_integratedEta[iSys][iR][iPtJ][iEta]->Sumw2 ();
 
-      h_r2_avg_jetacorr[iSys][iEta] = new TH1D (Form ("h_r2_avg_jetacorr_%s_iEta%i", sys.Data (), iEta), ";#it{E}_{truth} [GeV];#LT#eta_{reco} - #eta_{truth}#GT", nEnJBins, enJBins);
-      h_r2_avg_jetares[iSys][iEta] = new TH1D (Form ("h_r2_avg_jetares_%s_iEta%i", sys.Data (), iEta), ";#it{E}_{truth} [GeV];#sigma#left[#eta_{reco} - #eta_{truth}#GT#right]", nEnJBins, enJBins);
+          h_jes_integratedEta[iSys][iR][iPtJ][iEta] = new TH1D (Form ("h_r%i_jes_integratedEta_%s_iPtJ%i_iEta%i", r, sys.Data (), iPtJ, iEta), ";#it{E}_{reco} / #it{E}_{truth};Counts", nRespBins, respBins);
+          h_jes_integratedEta[iSys][iR][iPtJ][iEta]->Sumw2 ();
 
-      h_r4_avg_jetacorr[iSys][iEta] = new TH1D (Form ("h_r4_avg_jetacorr_%s_iEta%i", sys.Data (), iEta), ";#it{E}_{truth} [GeV];#LT#eta_{reco} - #eta_{truth}#GT", nEnJBins, enJBins);
-      h_r4_avg_jetares[iSys][iEta] = new TH1D (Form ("h_r4_avg_jetares_%s_iEta%i", sys.Data (), iEta), ";#it{E}_{truth} [GeV];#sigma#left[#eta_{reco} - #eta_{truth}#GT#right]", nEnJBins, enJBins);
+          h_jetacorr_integratedEta[iSys][iR][iPtJ][iEta] = new TH1D (Form ("h_r%i_jetacorr_integratedEta_%s_iPtJ%i_iEta%i", r, sys.Data (), iPtJ, iEta), ";#eta_{reco} - #eta_{truth};Counts", nEtaRespBins, etaRespBins);
+          h_jetacorr_integratedEta[iSys][iR][iPtJ][iEta]->Sumw2 ();
 
-    } // end loop over iEta
+        } // end loop over iPtJ
+
+      } // end loop over iEta
+
+    } // end loop over iR
+
   } // end loop over iSys
 
 
 
   for (int iSys : systems) {
+
     const TString sys = (iSys == 0 ? "pp" : "pPb");
 
-    for (int iEnJ = 0; iEnJ < nEnJBins; iEnJ++) {
+    for (int iR = 0; iR < nRadii; iR++) {
 
-      TH1D** h_r2_jpts_integratedEta = new TH1D*[nEtaBins+1];
-      for (int iEta = 0; iEta <= nEtaBins; iEta++) {
-        h_r2_jpts_integratedEta[iEta] = new TH1D (Form ("h_r2_jpts_integratedEta_%s_iEta%i", sys.Data (), iEta), "#it{p}_{T}^{reco} / #it{p}_{T}^{truth}", 140, 0.3, 1.7);
-        h_r2_jpts_integratedEta[iEta]->Sumw2 ();
-      }
+      const int r = (radii[iR] == JetRadius::R0p4 ? 4 : 2);
 
-      for (int iFinerEta = 0; iFinerEta < nFinerEtaBins; iFinerEta++) {
+      for (int iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
 
-        // first add to eta-integrated plot
-        const float binCenter = 0.5 * fabs (finerEtaBins[iFinerEta] + finerEtaBins[iFinerEta+1]);
-        int iEta = 0;
-        while (iEta < nEtaBins) {
-          if (etaBins[iEta] < binCenter && binCenter < etaBins[iEta+1])
-            break;
-          iEta++;
-        }
+        for (int iFinerEta = 0; iFinerEta < nFinerEtaBins; iFinerEta++) {
 
-        h_r2_jpts_integratedEta[iEta]->Add (h_r2_jpts[iSys][iEnJ][iFinerEta]);
-        h_r2_jpts_integratedEta[nEtaBins]->Add (h_r2_jpts[iSys][iEnJ][iFinerEta]);
+          TH1D* h = h_jpts[iSys][iR][iPtJ][iFinerEta];
 
-        TF1* fit = new TF1 ("fit", "gaus(0)", 0.3, 1.7);
-        fit->SetParameter (0, h_r2_jpts[iSys][iEnJ][iFinerEta]->Integral ());
-        fit->SetParameter (1, 1);
-        fit->SetParameter (2, 1);
+          // first add to eta-integrated plot
+          const float binCenter = 0.5 * (finerEtaBins[iFinerEta] + finerEtaBins[iFinerEta+1]);
+          int iEta = 0;
+          while (iEta < nEtaBins) {
+            if (etaBins[iEta] < binCenter && binCenter < etaBins[iEta+1])
+              break;
+            iEta++;
+          }
 
-        h_r2_jpts[iSys][iEnJ][iFinerEta]->Fit (fit, "RN0Q");
+          h_jpts_integratedEta[iSys][iR][iPtJ][iEta]->Add (h);
+          h_jpts_integratedEta[iSys][iR][iPtJ][nEtaBins]->Add (h);
 
-        double mean = fit->GetParameter (1);
-        double sigma = fit->GetParameter (2);
+          TF1* fit = DoGaussianFit (h);
 
-        delete fit;
-        fit = new TF1 ("fit", "gaus(0)", std::fmax (mean-2*sigma, 0.3), std::fmin (mean+2*sigma, 1.7));
+          if (fit) {
+            const double mean = fit->GetParameter (1);
+            const double sigma = fit->GetParameter (2);
+            const double mean_err = fit->GetParError (1);
+            const double sigma_err = fit->GetParError (2);
 
-        fit->SetParameter (0, h_r2_jpts[iSys][iEnJ][iFinerEta]->Integral ());
-        fit->SetParameter (1, mean);
-        fit->SetParameter (2, sigma);
+            delete fit;
 
-        h_r2_jpts[iSys][iEnJ][iFinerEta]->Fit (fit, "RN0Q");
+            const double jpts = mean;
+            const double jpts_err = mean_err;
+            
+            const double jptr = sigma / mean;
+            const double jptr_err = fabs (jptr) * sqrt (pow (mean_err/mean, 2) + pow (sigma_err/sigma, 2));
 
-        mean = fit->GetParameter (1);
-        sigma = fit->GetParameter (2);
-        double mean_err = fit->GetParError (1);
-        double sigma_err = fit->GetParError (2);
+            h2_avg_jpts[iSys][iR]->SetBinContent (iPtJ+1, iFinerEta+1, jpts * 100);
+            h2_avg_jpts[iSys][iR]->SetBinError (iPtJ+1, iFinerEta+1, jpts_err * 100);
+            h2_avg_jptr[iSys][iR]->SetBinContent (iPtJ+1, iFinerEta+1, jptr * 100);
+            h2_avg_jptr[iSys][iR]->SetBinError (iPtJ+1, iFinerEta+1, jptr_err * 100);
+          }
+          else {
+            h2_avg_jpts[iSys][iR]->SetBinContent (iPtJ+1, iFinerEta+1, -1);
+            h2_avg_jpts[iSys][iR]->SetBinError (iPtJ+1, iFinerEta+1, 0);
+            h2_avg_jptr[iSys][iR]->SetBinContent (iPtJ+1, iFinerEta+1, -1);
+            h2_avg_jptr[iSys][iR]->SetBinError (iPtJ+1, iFinerEta+1, 0);
+          }
 
-        delete fit;
+        } // end loop over iFinerEta
 
-        const double jpts = mean;
-        const double jpts_err = mean_err;
-        
-        const double jptr = sigma / mean;
-        const double jptr_err = fabs (jptr) * sqrt (pow (mean_err/mean, 2) + pow (sigma_err/sigma, 2));
+        for (int iEta = 0; iEta <= nEtaBins; iEta++) {
 
-        h2_r2_avg_jpts[iSys]->SetBinContent (iEnJ+1, iFinerEta+1, jpts * 100);
-        h2_r2_avg_jpts[iSys]->SetBinError (iEnJ+1, iFinerEta+1, jpts_err * 100);
-        h2_r2_avg_jptr[iSys]->SetBinContent (iEnJ+1, iFinerEta+1, jptr * 100);
-        h2_r2_avg_jptr[iSys]->SetBinError (iEnJ+1, iFinerEta+1, jptr_err * 100);
-      }
+          TH1D* h = h_jpts_integratedEta[iSys][iR][iPtJ][iEta];
 
-      for (int iEta = 0; iEta <= nEtaBins; iEta++) {
+          TF1* fit = DoGaussianFit (h);
 
-        TF1* fit = new TF1 ("fit", "gaus(0)", 0.3, 1.7);
-        fit->SetParameter (0, h_r2_jpts_integratedEta[iEta]->Integral ());
-        fit->SetParameter (1, 1);
-        fit->SetParameter (2, 1);
+          if (fit) {
+            const double mean = fit->GetParameter (1);
+            const double sigma = fit->GetParameter (2);
+            const double mean_err = fit->GetParError (1);
+            const double sigma_err = fit->GetParError (2);
 
-        h_r2_jpts_integratedEta[iEta]->Fit (fit, "RN0Q");
+            delete fit;
 
-        double mean = fit->GetParameter (1);
-        double sigma = fit->GetParameter (2);
+            const double jpts = mean;
+            const double jpts_err = mean_err;
 
-        delete fit;
-        fit = new TF1 ("fit", "gaus(0)", std::fmax (mean-2*sigma, 0.3), std::fmin (mean+2*sigma, 1.7));
+            const double jptr = sigma / mean;
+            const double jptr_err = fabs (jptr) * sqrt (pow (mean_err/mean, 2) + pow (sigma_err/sigma, 2));
 
-        fit->SetParameter (0, h_r2_jpts_integratedEta[iEta]->Integral ());
-        fit->SetParameter (1, mean);
-        fit->SetParameter (2, sigma);
+            h_avg_jpts[iSys][iR][iEta]->SetBinContent (iPtJ+1, jpts * 100);
+            h_avg_jpts[iSys][iR][iEta]->SetBinError (iPtJ+1, jpts_err * 100);
+            h_avg_jptr[iSys][iR][iEta]->SetBinContent (iPtJ+1, jptr * 100);
+            h_avg_jptr[iSys][iR][iEta]->SetBinError (iPtJ+1, jptr_err * 100);
+          }
+          else {
+            h_avg_jpts[iSys][iR][iEta]->SetBinContent (iPtJ+1, -1);
+            h_avg_jpts[iSys][iR][iEta]->SetBinError (iPtJ+1, 0);
+            h_avg_jptr[iSys][iR][iEta]->SetBinContent (iPtJ+1, -1);
+            h_avg_jptr[iSys][iR][iEta]->SetBinError (iPtJ+1, 0);
+          }
 
-        h_r2_jpts_integratedEta[iEta]->Fit (fit, "RN0Q");
+        } // end loop over iEta
 
-        mean = fit->GetParameter (1);
-        sigma = fit->GetParameter (2);
-        double mean_err = fit->GetParError (1);
-        double sigma_err = fit->GetParError (2);
 
-        delete fit;
 
-        const double jpts = mean;
-        const double jpts_err = mean_err;
+        for (int iFinerEta = 0; iFinerEta < nFinerEtaBins; iFinerEta++) {
 
-        const double jptr = sigma / mean;
-        const double jptr_err = fabs (jptr) * sqrt (pow (mean_err/mean, 2) + pow (sigma_err/sigma, 2));
+          TH1D* h = h_jes[iSys][iR][iPtJ][iFinerEta];
 
-        h_r2_avg_jpts[iSys][iEta]->SetBinContent (iEnJ+1, jpts * 100);
-        h_r2_avg_jpts[iSys][iEta]->SetBinError (iEnJ+1, jpts_err * 100);
-        h_r2_avg_jptr[iSys][iEta]->SetBinContent (iEnJ+1, jptr * 100);
-        h_r2_avg_jptr[iSys][iEta]->SetBinError (iEnJ+1, jptr_err * 100);
+          // first add to eta-integrated plot
+          const float binCenter = 0.5 * (finerEtaBins[iFinerEta] + finerEtaBins[iFinerEta+1]);
+          int iEta = 0;
+          while (iEta < nEtaBins) {
+            if (etaBins[iEta] < binCenter && binCenter < etaBins[iEta+1])
+              break;
+            iEta++;
+          }
 
-        delete h_r2_jpts_integratedEta[iEta];
-      } // end loop over iEta
+          h_jes_integratedEta[iSys][iR][iPtJ][iEta]->Add (h);
+          h_jes_integratedEta[iSys][iR][iPtJ][nEtaBins]->Add (h);
+
+          TF1* fit = DoGaussianFit (h);
+
+          if (fit) {
+            const double mean = fit->GetParameter (1);
+            const double sigma = fit->GetParameter (2);
+            const double mean_err = fit->GetParError (1);
+            const double sigma_err = fit->GetParError (2);
+
+            delete fit;
+
+            const double jes = mean;
+            const double jes_err = mean_err;
+            
+            const double jer = sigma / mean;
+            const double jer_err = fabs (jer) * sqrt (pow (mean_err/mean, 2) + pow (sigma_err/sigma, 2));
+
+            h2_avg_jes[iSys][iR]->SetBinContent (iPtJ+1, iFinerEta+1, jes * 100);
+            h2_avg_jes[iSys][iR]->SetBinError (iPtJ+1, iFinerEta+1, jes_err * 100);
+            h2_avg_jer[iSys][iR]->SetBinContent (iPtJ+1, iFinerEta+1, jer * 100);
+            h2_avg_jer[iSys][iR]->SetBinError (iPtJ+1, iFinerEta+1, jer_err * 100);
+          }
+          else {
+            h2_avg_jes[iSys][iR]->SetBinContent (iPtJ+1, iFinerEta+1, -1);
+            h2_avg_jes[iSys][iR]->SetBinError (iPtJ+1, iFinerEta+1, 0);
+            h2_avg_jer[iSys][iR]->SetBinContent (iPtJ+1, iFinerEta+1, -1);
+            h2_avg_jer[iSys][iR]->SetBinError (iPtJ+1, iFinerEta+1, 0);
+          }
+
+        } // end loop over iFinerEta
+
+        for (int iEta = 0; iEta <= nEtaBins; iEta++) {
+
+          TH1D* h = h_jes_integratedEta[iSys][iR][iPtJ][iEta];
+
+          TF1* fit = DoGaussianFit (h);
+
+          if (fit) {
+            const double mean = fit->GetParameter (1);
+            const double sigma = fit->GetParameter (2);
+            const double mean_err = fit->GetParError (1);
+            const double sigma_err = fit->GetParError (2);
+
+            delete fit;
+
+            const double jes = mean;
+            const double jes_err = mean_err;
+
+            const double jer = sigma / mean;
+            const double jer_err = fabs (jer) * sqrt (pow (mean_err/mean, 2) + pow (sigma_err/sigma, 2));
+
+            h_avg_jes[iSys][iR][iEta]->SetBinContent (iPtJ+1, jes * 100);
+            h_avg_jes[iSys][iR][iEta]->SetBinError (iPtJ+1, jes_err * 100);
+            h_avg_jer[iSys][iR][iEta]->SetBinContent (iPtJ+1, jer * 100);
+            h_avg_jer[iSys][iR][iEta]->SetBinError (iPtJ+1, jer_err * 100);
+          }
+          else {
+            h_avg_jes[iSys][iR][iEta]->SetBinContent (iPtJ+1, -1);
+            h_avg_jes[iSys][iR][iEta]->SetBinError (iPtJ+1, 0);
+            h_avg_jer[iSys][iR][iEta]->SetBinContent (iPtJ+1, -1);
+            h_avg_jer[iSys][iR][iEta]->SetBinError (iPtJ+1, 0);
+          }
+
+        } // end loop over iEta
+
+
+
+        for (int iFinerEta = 0; iFinerEta < nFinerEtaBins; iFinerEta++) {
+
+          TH1D* h = h_jetacorr[iSys][iR][iPtJ][iFinerEta];
+
+          // first add to eta-integrated plot
+          const float binCenter = 0.5 * (finerEtaBins[iFinerEta] + finerEtaBins[iFinerEta+1]);
+          int iEta = 0;
+          while (iEta < nEtaBins) {
+            if (etaBins[iEta] < binCenter && binCenter < etaBins[iEta+1])
+              break;
+            iEta++;
+          }
+
+          h_jetacorr_integratedEta[iSys][iR][iPtJ][iEta]->Add (h);
+          h_jetacorr_integratedEta[iSys][iR][iPtJ][nEtaBins]->Add (h);
+
+          TF1* fit = DoGaussianFit (h, -0.2, 0.2);
+
+          if (fit) {
+            const double mean = fit->GetParameter (1);
+            const double sigma = fit->GetParameter (2);
+            const double mean_err = fit->GetParError (1);
+            const double sigma_err = fit->GetParError (2);
+
+            delete fit;
+
+            const double jetacorr = mean;
+            const double jetacorr_err = mean_err;
+            
+            const double jetares = sigma;
+            const double jetares_err = sigma_err;
+
+            h2_avg_jetacorr[iSys][iR]->SetBinContent (iPtJ+1, iFinerEta+1, jetacorr * 100);
+            h2_avg_jetacorr[iSys][iR]->SetBinError (iPtJ+1, iFinerEta+1, jetacorr_err * 100);
+            h2_avg_jetares[iSys][iR]->SetBinContent (iPtJ+1, iFinerEta+1, jetares * 100);
+            h2_avg_jetares[iSys][iR]->SetBinError (iPtJ+1, iFinerEta+1, jetares_err * 100);
+          }
+          else {
+            h2_avg_jetacorr[iSys][iR]->SetBinContent (iPtJ+1, iFinerEta+1, -1);
+            h2_avg_jetacorr[iSys][iR]->SetBinError (iPtJ+1, iFinerEta+1, 0);
+            h2_avg_jetares[iSys][iR]->SetBinContent (iPtJ+1, iFinerEta+1, -1);
+            h2_avg_jetares[iSys][iR]->SetBinError (iPtJ+1, iFinerEta+1, 0);
+          }
+
+        } // end loop over iFinerEta
+
+        for (int iEta = 0; iEta <= nEtaBins; iEta++) {
+
+          TH1D* h = h_jetacorr_integratedEta[iSys][iR][iPtJ][iEta];
+
+          TF1* fit = DoGaussianFit (h, -0.2, 0.2);
+
+          if (fit) {
+            const double mean = fit->GetParameter (1);
+            const double sigma = fit->GetParameter (2);
+            const double mean_err = fit->GetParError (1);
+            const double sigma_err = fit->GetParError (2);
+
+            delete fit;
   
-      delete[] h_r2_jpts_integratedEta;
-
-
-
-      TH1D** h_r4_jpts_integratedEta = new TH1D*[nEtaBins+1];
-      for (int iEta = 0; iEta <= nEtaBins; iEta++) {
-        h_r4_jpts_integratedEta[iEta] = new TH1D (Form ("h_r4_jpts_integratedEta_%s_iEta%i", sys.Data (), iEta), "#it{p}_{T}^{reco} / #it{p}_{T}^{truth}", 140, 0.3, 1.7);
-        h_r4_jpts_integratedEta[iEta]->Sumw2 ();
-      }
-
-      for (int iFinerEta = 0; iFinerEta < nFinerEtaBins; iFinerEta++) {
-
-        // first add to eta-integrated plot
-        const float binCenter = 0.5 * fabs (finerEtaBins[iFinerEta] + finerEtaBins[iFinerEta+1]);
-        int iEta = 0;
-        while (iEta < nEtaBins) {
-          if (etaBins[iEta] < binCenter && binCenter < etaBins[iEta+1])
-            break;
-          iEta++;
-        }
-
-        h_r4_jpts_integratedEta[iEta]->Add (h_r4_jpts[iSys][iEnJ][iFinerEta]);
-        h_r4_jpts_integratedEta[nEtaBins]->Add (h_r4_jpts[iSys][iEnJ][iFinerEta]);
-
-        TF1* fit = new TF1 ("fit", "gaus(0)", 0.3, 1.7);
-        fit->SetParameter (0, h_r4_jpts[iSys][iEnJ][iFinerEta]->Integral ());
-        fit->SetParameter (1, 1);
-        fit->SetParameter (2, 1);
-
-        h_r4_jpts[iSys][iEnJ][iFinerEta]->Fit (fit, "RN0Q");
-
-        double mean = fit->GetParameter (1);
-        double sigma = fit->GetParameter (2);
-
-        delete fit;
-        fit = new TF1 ("fit", "gaus(0)", std::fmax (mean-2*sigma, 0.3), std::fmin (mean+2*sigma, 1.7));
-
-        fit->SetParameter (0, h_r4_jpts[iSys][iEnJ][iFinerEta]->Integral ());
-        fit->SetParameter (1, mean);
-        fit->SetParameter (2, sigma);
-
-        h_r4_jpts[iSys][iEnJ][iFinerEta]->Fit (fit, "RN0Q");
-
-        mean = fit->GetParameter (1);
-        sigma = fit->GetParameter (2);
-        double mean_err = fit->GetParError (1);
-        double sigma_err = fit->GetParError (2);
-
-        delete fit;
-
-        const double jpts = mean;
-        const double jpts_err = mean_err;
-        
-        const double jptr = sigma / mean;
-        const double jptr_err = fabs (jptr) * sqrt (pow (mean_err/mean, 2) + pow (sigma_err/sigma, 2));
-
-        h2_r4_avg_jpts[iSys]->SetBinContent (iEnJ+1, iFinerEta+1, jpts * 100);
-        h2_r4_avg_jpts[iSys]->SetBinError (iEnJ+1, iFinerEta+1, jpts_err * 100);
-        h2_r4_avg_jptr[iSys]->SetBinContent (iEnJ+1, iFinerEta+1, jptr * 100);
-        h2_r4_avg_jptr[iSys]->SetBinError (iEnJ+1, iFinerEta+1, jptr_err * 100);
-      }
-
-      for (int iEta = 0; iEta <= nEtaBins; iEta++) {
-
-        TF1* fit = new TF1 ("fit", "gaus(0)", 0.3, 1.7);
-        fit->SetParameter (0, h_r4_jpts_integratedEta[iEta]->Integral ());
-        fit->SetParameter (1, 1);
-        fit->SetParameter (2, 1);
-
-        h_r4_jpts_integratedEta[iEta]->Fit (fit, "RN0Q");
-
-        double mean = fit->GetParameter (1);
-        double sigma = fit->GetParameter (2);
-
-        delete fit;
-        fit = new TF1 ("fit", "gaus(0)", std::fmax (mean-2*sigma, 0.3), std::fmin (mean+2*sigma, 1.7));
-
-        fit->SetParameter (0, h_r4_jpts_integratedEta[iEta]->Integral ());
-        fit->SetParameter (1, mean);
-        fit->SetParameter (2, sigma);
-
-        h_r4_jpts_integratedEta[iEta]->Fit (fit, "RN0Q");
-
-        mean = fit->GetParameter (1);
-        sigma = fit->GetParameter (2);
-        double mean_err = fit->GetParError (1);
-        double sigma_err = fit->GetParError (2);
-
-        delete fit;
-
-        const double jpts = mean;
-        const double jpts_err = mean_err;
-
-        const double jptr = sigma / mean;
-        const double jptr_err = fabs (jptr) * sqrt (pow (mean_err/mean, 2) + pow (sigma_err/sigma, 2));
-
-        h_r4_avg_jpts[iSys][iEta]->SetBinContent (iEnJ+1, jpts * 100);
-        h_r4_avg_jpts[iSys][iEta]->SetBinError (iEnJ+1, jpts_err * 100);
-        h_r4_avg_jptr[iSys][iEta]->SetBinContent (iEnJ+1, jptr * 100);
-        h_r4_avg_jptr[iSys][iEta]->SetBinError (iEnJ+1, jptr_err * 100);
-
-        delete h_r4_jpts_integratedEta[iEta];
-      } // end loop over iEta
+            const double jetacorr = mean;
+            const double jetacorr_err = mean_err;
   
-      delete[] h_r4_jpts_integratedEta;
-
-
-
-      TH1D** h_r2_jes_integratedEta = new TH1D*[nEtaBins+1];
-      for (int iEta = 0; iEta <= nEtaBins; iEta++) {
-        h_r2_jes_integratedEta[iEta] = new TH1D (Form ("h_r2_jes_integratedEta_%s_iEta%i", sys.Data (), iEta), "#it{E}_{reco} / #it{E}_{truth}", 140, 0.3, 1.7);
-        h_r2_jes_integratedEta[iEta]->Sumw2 ();
-      }
-
-      for (int iFinerEta = 0; iFinerEta < nFinerEtaBins; iFinerEta++) {
-
-        // first add to eta-integrated plot
-        const float binCenter = 0.5 * fabs (finerEtaBins[iFinerEta] + finerEtaBins[iFinerEta+1]);
-        int iEta = 0;
-        while (iEta < nEtaBins) {
-          if (etaBins[iEta] < binCenter && binCenter < etaBins[iEta+1])
-            break;
-          iEta++;
-        }
-
-        h_r2_jes_integratedEta[iEta]->Add (h_r2_jes[iSys][iEnJ][iFinerEta]);
-        h_r2_jes_integratedEta[nEtaBins]->Add (h_r2_jes[iSys][iEnJ][iFinerEta]);
-
-        TF1* fit = new TF1 ("fit", "gaus(0)", 0.3, 1.7);
-        fit->SetParameter (0, h_r2_jes[iSys][iEnJ][iFinerEta]->Integral ());
-        fit->SetParameter (1, 1);
-        fit->SetParameter (2, 1);
-
-        h_r2_jes[iSys][iEnJ][iFinerEta]->Fit (fit, "RN0Q");
-
-        double mean = fit->GetParameter (1);
-        double sigma = fit->GetParameter (2);
-
-        delete fit;
-        fit = new TF1 ("fit", "gaus(0)", std::fmax (mean-2*sigma, 0.3), std::fmin (mean+2*sigma, 1.7));
-
-        fit->SetParameter (0, h_r2_jes[iSys][iEnJ][iFinerEta]->Integral ());
-        fit->SetParameter (1, mean);
-        fit->SetParameter (2, sigma);
-
-        h_r2_jes[iSys][iEnJ][iFinerEta]->Fit (fit, "RN0Q");
-
-        mean = fit->GetParameter (1);
-        sigma = fit->GetParameter (2);
-        double mean_err = fit->GetParError (1);
-        double sigma_err = fit->GetParError (2);
-
-        delete fit;
-
-        const double jes = mean;
-        const double jes_err = mean_err;
-        
-        const double jer = sigma / mean;
-        const double jer_err = fabs (jer) * sqrt (pow (mean_err/mean, 2) + pow (sigma_err/sigma, 2));
-
-        h2_r2_avg_jes[iSys]->SetBinContent (iEnJ+1, iFinerEta+1, jes * 100);
-        h2_r2_avg_jes[iSys]->SetBinError (iEnJ+1, iFinerEta+1, jes_err * 100);
-        h2_r2_avg_jer[iSys]->SetBinContent (iEnJ+1, iFinerEta+1, jer * 100);
-        h2_r2_avg_jer[iSys]->SetBinError (iEnJ+1, iFinerEta+1, jer_err * 100);
-      }
-
-      for (int iEta = 0; iEta <= nEtaBins; iEta++) {
-
-        TF1* fit = new TF1 ("fit", "gaus(0)", 0.3, 1.7);
-        fit->SetParameter (0, h_r2_jes_integratedEta[iEta]->Integral ());
-        fit->SetParameter (1, 1);
-        fit->SetParameter (2, 1);
-
-        h_r2_jes_integratedEta[iEta]->Fit (fit, "RN0Q");
-
-        double mean = fit->GetParameter (1);
-        double sigma = fit->GetParameter (2);
-
-        delete fit;
-        fit = new TF1 ("fit", "gaus(0)", std::fmax (mean-2*sigma, 0.3), std::fmin (mean+2*sigma, 1.7));
-
-        fit->SetParameter (0, h_r2_jes_integratedEta[iEta]->Integral ());
-        fit->SetParameter (1, mean);
-        fit->SetParameter (2, sigma);
-
-        h_r2_jes_integratedEta[iEta]->Fit (fit, "RN0Q");
-
-        mean = fit->GetParameter (1);
-        sigma = fit->GetParameter (2);
-        double mean_err = fit->GetParError (1);
-        double sigma_err = fit->GetParError (2);
-
-        delete fit;
-
-        const double jes = mean;
-        const double jes_err = mean_err;
-
-        const double jer = sigma / mean;
-        const double jer_err = fabs (jer) * sqrt (pow (mean_err/mean, 2) + pow (sigma_err/sigma, 2));
-
-        h_r2_avg_jes[iSys][iEta]->SetBinContent (iEnJ+1, jes * 100);
-        h_r2_avg_jes[iSys][iEta]->SetBinError (iEnJ+1, jes_err * 100);
-        h_r2_avg_jer[iSys][iEta]->SetBinContent (iEnJ+1, jer * 100);
-        h_r2_avg_jer[iSys][iEta]->SetBinError (iEnJ+1, jer_err * 100);
-
-        delete h_r2_jes_integratedEta[iEta];
-      } // end loop over iEta
+            const double jetares = sigma;
+            const double jetares_err = sigma_err;
   
-      delete[] h_r2_jes_integratedEta;
+            h_avg_jetacorr[iSys][iR][iEta]->SetBinContent (iPtJ+1, jetacorr);
+            h_avg_jetacorr[iSys][iR][iEta]->SetBinError (iPtJ+1, jetacorr_err);
+            h_avg_jetares[iSys][iR][iEta]->SetBinContent (iPtJ+1, jetares);
+            h_avg_jetares[iSys][iR][iEta]->SetBinError (iPtJ+1, jetares_err);
+          }
+          else {
+            h_avg_jetacorr[iSys][iR][iEta]->SetBinContent (iPtJ+1, -1);
+            h_avg_jetacorr[iSys][iR][iEta]->SetBinError (iPtJ+1, 0);
+            h_avg_jetares[iSys][iR][iEta]->SetBinContent (iPtJ+1, -1);
+            h_avg_jetares[iSys][iR][iEta]->SetBinError (iPtJ+1, 0);
+          }
+
+        } // end loop over iEta
+
+      } // end loop over iPtJ
+
+    } // end loop over iR
 
-
-
-      TH1D** h_r4_jes_integratedEta = new TH1D*[nEtaBins+1];
-      for (int iEta = 0; iEta <= nEtaBins; iEta++) {
-        h_r4_jes_integratedEta[iEta] = new TH1D (Form ("h_r4_jes_integratedEta_%s_iEta%i", sys.Data (), iEta), "#it{E}_{reco} / #it{E}_{truth}", 140, 0.3, 1.7);
-        h_r4_jes_integratedEta[iEta]->Sumw2 ();
-      }
-
-      for (int iFinerEta = 0; iFinerEta < nFinerEtaBins; iFinerEta++) {
-
-        // first add to eta-integrated plot
-        const float binCenter = 0.5 * fabs (finerEtaBins[iFinerEta] + finerEtaBins[iFinerEta+1]);
-        int iEta = 0;
-        while (iEta < nEtaBins) {
-          if (etaBins[iEta] < binCenter && binCenter < etaBins[iEta+1])
-            break;
-          iEta++;
-        }
-
-        h_r4_jes_integratedEta[iEta]->Add (h_r4_jes[iSys][iEnJ][iFinerEta]);
-        h_r4_jes_integratedEta[nEtaBins]->Add (h_r4_jes[iSys][iEnJ][iFinerEta]);
-
-        TF1* fit = new TF1 ("fit", "gaus(0)", 0.3, 1.7);
-        fit->SetParameter (0, h_r4_jes[iSys][iEnJ][iFinerEta]->Integral ());
-        fit->SetParameter (1, 1);
-        fit->SetParameter (2, 1);
-
-        h_r4_jes[iSys][iEnJ][iFinerEta]->Fit (fit, "RN0Q");
-
-        double mean = fit->GetParameter (1);
-        double sigma = fit->GetParameter (2);
-
-        delete fit;
-        fit = new TF1 ("fit", "gaus(0)", std::fmax (mean-2*sigma, 0.3), std::fmin (mean+2*sigma, 1.7));
-
-        fit->SetParameter (0, h_r4_jes[iSys][iEnJ][iFinerEta]->Integral ());
-        fit->SetParameter (1, mean);
-        fit->SetParameter (2, sigma);
-
-        h_r4_jes[iSys][iEnJ][iFinerEta]->Fit (fit, "RN0Q");
-
-        mean = fit->GetParameter (1);
-        sigma = fit->GetParameter (2);
-        double mean_err = fit->GetParError (1);
-        double sigma_err = fit->GetParError (2);
-
-        delete fit;
-
-        const double jes = mean;
-        const double jes_err = mean_err;
-        
-        const double jer = sigma / mean;
-        const double jer_err = fabs (jer) * sqrt (pow (mean_err/mean, 2) + pow (sigma_err/sigma, 2));
-
-        h2_r4_avg_jes[iSys]->SetBinContent (iEnJ+1, iFinerEta+1, jes * 100);
-        h2_r4_avg_jes[iSys]->SetBinError (iEnJ+1, iFinerEta+1, jes_err * 100);
-        h2_r4_avg_jer[iSys]->SetBinContent (iEnJ+1, iFinerEta+1, jer * 100);
-        h2_r4_avg_jer[iSys]->SetBinError (iEnJ+1, iFinerEta+1, jer_err * 100);
-      }
-
-      for (int iEta = 0; iEta <= nEtaBins; iEta++) {
-
-        TF1* fit = new TF1 ("fit", "gaus(0)", 0.3, 1.7);
-        fit->SetParameter (0, h_r4_jes_integratedEta[iEta]->Integral ());
-        fit->SetParameter (1, 1);
-        fit->SetParameter (2, 1);
-
-        h_r4_jes_integratedEta[iEta]->Fit (fit, "RN0Q");
-
-        double mean = fit->GetParameter (1);
-        double sigma = fit->GetParameter (2);
-
-        delete fit;
-        fit = new TF1 ("fit", "gaus(0)", std::fmax (mean-2*sigma, 0.3), std::fmin (mean+2*sigma, 1.7));
-
-        fit->SetParameter (0, h_r4_jes_integratedEta[iEta]->Integral ());
-        fit->SetParameter (1, mean);
-        fit->SetParameter (2, sigma);
-
-        h_r4_jes_integratedEta[iEta]->Fit (fit, "RN0Q");
-
-        mean = fit->GetParameter (1);
-        sigma = fit->GetParameter (2);
-        double mean_err = fit->GetParError (1);
-        double sigma_err = fit->GetParError (2);
-
-        delete fit;
-
-        const double jes = mean;
-        const double jes_err = mean_err;
-
-        const double jer = sigma / mean;
-        const double jer_err = fabs (jer) * sqrt (pow (mean_err/mean, 2) + pow (sigma_err/sigma, 2));
-
-        h_r4_avg_jes[iSys][iEta]->SetBinContent (iEnJ+1, jes * 100);
-        h_r4_avg_jes[iSys][iEta]->SetBinError (iEnJ+1, jes_err * 100);
-        h_r4_avg_jer[iSys][iEta]->SetBinContent (iEnJ+1, jer * 100);
-        h_r4_avg_jer[iSys][iEta]->SetBinError (iEnJ+1, jer_err * 100);
-
-        delete h_r4_jes_integratedEta[iEta];
-      } // end loop over iEta
-  
-      delete[] h_r4_jes_integratedEta;
-
-
-
-      TH1D** h_r2_jetacorr_integratedEta = new TH1D*[nEtaBins+1];
-      for (int iEta = 0; iEta <= nEtaBins; iEta++) {
-        h_r2_jetacorr_integratedEta[iEta] = new TH1D (Form ("h_r2_jetacorr_integratedEta_%s_iEta%i", sys.Data (), iEta), "#eta_{reco} - #eta_{truth}", 80, -0.2, 0.2);
-        h_r2_jetacorr_integratedEta[iEta]->Sumw2 ();
-      }
-
-      for (int iFinerEta = 0; iFinerEta < nFinerEtaBins; iFinerEta++) {
-
-        // first add to eta-integrated plot
-        const float binCenter = 0.5 * fabs (finerEtaBins[iFinerEta] + finerEtaBins[iFinerEta+1]);
-        int iEta = 0;
-        while (iEta < nEtaBins) {
-          if (etaBins[iEta] < binCenter && binCenter < etaBins[iEta+1])
-            break;
-          iEta++;
-        }
-
-        h_r2_jetacorr_integratedEta[iEta]->Add (h_r2_jetacorr[iSys][iEnJ][iFinerEta]);
-        h_r2_jetacorr_integratedEta[nEtaBins]->Add (h_r2_jetacorr[iSys][iEnJ][iFinerEta]);
-
-        TF1* fit = new TF1 ("fit", "gaus(0)", -0.2, 0.2);
-        fit->SetParameter (0, h_r2_jetacorr[iSys][iEnJ][iFinerEta]->Integral ());
-        fit->SetParameter (1, 1);
-        fit->SetParameter (2, 1);
-
-        h_r2_jetacorr[iSys][iEnJ][iFinerEta]->Fit (fit, "RN0Q");
-
-        double mean = fit->GetParameter (1);
-        double sigma = fit->GetParameter (2);
-
-        delete fit;
-        fit = new TF1 ("fit", "gaus(0)", std::fmax (mean-2*sigma, -0.2), std::fmin (mean+2*sigma, 0.2));
-
-        fit->SetParameter (0, h_r2_jetacorr[iSys][iEnJ][iFinerEta]->Integral ());
-        fit->SetParameter (1, mean);
-        fit->SetParameter (2, sigma);
-
-        h_r2_jetacorr[iSys][iEnJ][iFinerEta]->Fit (fit, "RN0Q");
-
-        mean = fit->GetParameter (1);
-        sigma = fit->GetParameter (2);
-        double mean_err = fit->GetParError (1);
-        double sigma_err = fit->GetParError (2);
-
-        delete fit;
-
-        const double jetacorr = mean;
-        const double jetacorr_err = mean_err;
-        
-        const double jetares = sigma;
-        const double jetares_err = sigma_err;
-
-        h2_r2_avg_jetacorr[iSys]->SetBinContent (iEnJ+1, iFinerEta+1, jetacorr * 100);
-        h2_r2_avg_jetacorr[iSys]->SetBinError (iEnJ+1, iFinerEta+1, jetacorr_err * 100);
-        h2_r2_avg_jetares[iSys]->SetBinContent (iEnJ+1, iFinerEta+1, jetares * 100);
-        h2_r2_avg_jetares[iSys]->SetBinError (iEnJ+1, iFinerEta+1, jetares_err * 100);
-      }
-
-      for (int iEta = 0; iEta <= nEtaBins; iEta++) {
-
-        TF1* fit = new TF1 ("fit", "gaus(0)", -0.2, 0.2);
-        fit->SetParameter (0, h_r2_jetacorr_integratedEta[iEta]->Integral ());
-        fit->SetParameter (1, 1);
-        fit->SetParameter (2, 1);
-
-        h_r2_jetacorr_integratedEta[iEta]->Fit (fit, "RN0Q");
-
-        double mean = fit->GetParameter (1);
-        double sigma = fit->GetParameter (2);
-
-        delete fit;
-        fit = new TF1 ("fit", "gaus(0)", std::fmax (mean-2*sigma, -0.2), std::fmin (mean+2*sigma, 0.2));
-
-        fit->SetParameter (0, h_r2_jetacorr_integratedEta[iEta]->Integral ());
-        fit->SetParameter (1, mean);
-        fit->SetParameter (2, sigma);
-
-        h_r2_jetacorr_integratedEta[iEta]->Fit (fit, "RN0Q");
-
-        mean = fit->GetParameter (1);
-        sigma = fit->GetParameter (2);
-        double mean_err = fit->GetParError (1);
-        double sigma_err = fit->GetParError (2);
-
-        delete fit;
-
-        const double jetacorr = mean;
-        const double jetacorr_err = mean_err;
-
-        const double jetares = sigma;
-        const double jetares_err = sigma_err;
-
-        h_r2_avg_jetacorr[iSys][iEta]->SetBinContent (iEnJ+1, jetacorr);
-        h_r2_avg_jetacorr[iSys][iEta]->SetBinError (iEnJ+1, jetacorr_err);
-        h_r2_avg_jetares[iSys][iEta]->SetBinContent (iEnJ+1, jetares);
-        h_r2_avg_jetares[iSys][iEta]->SetBinError (iEnJ+1, jetares_err);
-
-        delete h_r2_jetacorr_integratedEta[iEta];
-      } // end loop over iEta
-  
-      delete[] h_r2_jetacorr_integratedEta;
-
-
-
-      TH1D** h_r4_jetacorr_integratedEta = new TH1D*[nEtaBins+1];
-      for (int iEta = 0; iEta <= nEtaBins; iEta++) {
-        h_r4_jetacorr_integratedEta[iEta] = new TH1D (Form ("h_r4_jetacorr_integratedEta_%s_iEta%i", sys.Data (), iEta), "#eta_{reco} - #eta_{truth}", 80, -0.2, 0.2);
-        h_r4_jetacorr_integratedEta[iEta]->Sumw2 ();
-      }
-
-      for (int iFinerEta = 0; iFinerEta < nFinerEtaBins; iFinerEta++) {
-
-        // first add to eta-integrated plot
-        const float binCenter = 0.5 * fabs (finerEtaBins[iFinerEta] + finerEtaBins[iFinerEta+1]);
-        int iEta = 0;
-        while (iEta < nEtaBins) {
-          if (etaBins[iEta] < binCenter && binCenter < etaBins[iEta+1])
-            break;
-          iEta++;
-        }
-
-        h_r4_jetacorr_integratedEta[iEta]->Add (h_r4_jetacorr[iSys][iEnJ][iFinerEta]);
-        h_r4_jetacorr_integratedEta[nEtaBins]->Add (h_r4_jetacorr[iSys][iEnJ][iFinerEta]);
-
-        TF1* fit = new TF1 ("fit", "gaus(0)", -0.2, 0.2);
-        fit->SetParameter (0, h_r4_jetacorr[iSys][iEnJ][iFinerEta]->Integral ());
-        fit->SetParameter (1, 1);
-        fit->SetParameter (2, 1);
-
-        h_r4_jetacorr[iSys][iEnJ][iFinerEta]->Fit (fit, "RN0Q");
-
-        double mean = fit->GetParameter (1);
-        double sigma = fit->GetParameter (2);
-
-        delete fit;
-        fit = new TF1 ("fit", "gaus(0)", std::fmax (mean-2*sigma, -0.2), std::fmin (mean+2*sigma, 0.2));
-
-        fit->SetParameter (0, h_r4_jetacorr[iSys][iEnJ][iFinerEta]->Integral ());
-        fit->SetParameter (1, mean);
-        fit->SetParameter (2, sigma);
-
-        h_r4_jetacorr[iSys][iEnJ][iFinerEta]->Fit (fit, "RN0Q");
-
-        mean = fit->GetParameter (1);
-        sigma = fit->GetParameter (2);
-        double mean_err = fit->GetParError (1);
-        double sigma_err = fit->GetParError (2);
-
-        delete fit;
-
-        const double jetacorr = mean;
-        const double jetacorr_err = mean_err;
-        
-        const double jetares = sigma;
-        const double jetares_err = sigma_err;
-
-        h2_r4_avg_jetacorr[iSys]->SetBinContent (iEnJ+1, iFinerEta+1, jetacorr * 100);
-        h2_r4_avg_jetacorr[iSys]->SetBinError (iEnJ+1, iFinerEta+1, jetacorr_err * 100);
-        h2_r4_avg_jetares[iSys]->SetBinContent (iEnJ+1, iFinerEta+1, jetares * 100);
-        h2_r4_avg_jetares[iSys]->SetBinError (iEnJ+1, iFinerEta+1, jetares_err * 100);
-      }
-
-      for (int iEta = 0; iEta <= nEtaBins; iEta++) {
-
-        TF1* fit = new TF1 ("fit", "gaus(0)", -0.2, 0.2);
-        fit->SetParameter (0, h_r4_jetacorr_integratedEta[iEta]->Integral ());
-        fit->SetParameter (1, 1);
-        fit->SetParameter (2, 1);
-
-        h_r4_jetacorr_integratedEta[iEta]->Fit (fit, "RN0Q");
-
-        double mean = fit->GetParameter (1);
-        double sigma = fit->GetParameter (2);
-
-        delete fit;
-        fit = new TF1 ("fit", "gaus(0)", std::fmax (mean-2*sigma, -0.2), std::fmin (mean+2*sigma, 0.2));
-
-        fit->SetParameter (0, h_r4_jetacorr_integratedEta[iEta]->Integral ());
-        fit->SetParameter (1, mean);
-        fit->SetParameter (2, sigma);
-
-        h_r4_jetacorr_integratedEta[iEta]->Fit (fit, "RN0Q");
-
-        mean = fit->GetParameter (1);
-        sigma = fit->GetParameter (2);
-        double mean_err = fit->GetParError (1);
-        double sigma_err = fit->GetParError (2);
-
-        delete fit;
-
-        const double jetacorr = mean;
-        const double jetacorr_err = mean_err;
-
-        const double jetares = sigma;
-        const double jetares_err = sigma_err;
-
-        h_r4_avg_jetacorr[iSys][iEta]->SetBinContent (iEnJ+1, jetacorr);
-        h_r4_avg_jetacorr[iSys][iEta]->SetBinError (iEnJ+1, jetacorr_err);
-        h_r4_avg_jetares[iSys][iEta]->SetBinContent (iEnJ+1, jetares);
-        h_r4_avg_jetares[iSys][iEta]->SetBinError (iEnJ+1, jetares_err);
-
-        delete h_r4_jetacorr_integratedEta[iEta];
-      } // end loop over iEta
-  
-      delete[] h_r4_jetacorr_integratedEta;
-    } // end loop over iEnJ
   } // end loop over iSys
 
 
+
   for (int iSys : systems) {
-    h2_r2_avg_jpts[iSys]->Write ();
-    h2_r2_avg_jptr[iSys]->Write ();
 
-    h2_r4_avg_jpts[iSys]->Write ();
-    h2_r4_avg_jptr[iSys]->Write ();
+    for (int iR = 0; iR < nRadii; iR++) {
 
-    h2_r2_avg_jes[iSys]->Write ();
-    h2_r2_avg_jer[iSys]->Write ();
+      for (int iEta = 0; iEta <= nEtaBins; iEta++) {
 
-    h2_r4_avg_jes[iSys]->Write ();
-    h2_r4_avg_jer[iSys]->Write ();
+        TH2D* h2 = h2_jpts_integratedEta[iSys][iR][iEta];
+        for (int iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
+          TH1D* h = h_jpts_integratedEta[iSys][iR][iPtJ][iEta];
 
-    h2_r2_avg_jetacorr[iSys]->Write ();
-    h2_r2_avg_jetacorr[iSys]->Write ();
+          for (int iY = 1; iY <= h2->GetNbinsY (); iY++) {
 
-    h2_r4_avg_jetacorr[iSys]->Write ();
-    h2_r4_avg_jetacorr[iSys]->Write ();
+            h2->SetBinContent (iPtJ+1, iY, h2->GetBinContent (iPtJ+1, iY) + h->GetBinContent (iY));
+            h2->SetBinError (iPtJ+1, iY, std::sqrt (std::pow (h2->GetBinError (iPtJ+1, iY), 2) + std::pow (h->GetBinError (iY), 2)));
 
-    for (int iEta = 0; iEta <= nEtaBins; iEta++) {
-      h_r2_avg_jpts[iSys][iEta]->Write ();
-      h_r2_avg_jptr[iSys][iEta]->Write ();
+          } // end loop over iY
+  
+        } // end loop over iPtJ
 
-      h_r4_avg_jpts[iSys][iEta]->Write ();
-      h_r4_avg_jptr[iSys][iEta]->Write ();
 
-      h_r2_avg_jes[iSys][iEta]->Write ();
-      h_r2_avg_jer[iSys][iEta]->Write ();
+        h2 = h2_jes_integratedEta[iSys][iR][iEta];
+        for (int iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
+          TH1D* h = h_jes_integratedEta[iSys][iR][iPtJ][iEta];
 
-      h_r4_avg_jes[iSys][iEta]->Write ();
-      h_r4_avg_jer[iSys][iEta]->Write ();
+          for (int iY = 1; iY <= h2->GetNbinsY (); iY++) {
 
-      h_r2_avg_jetacorr[iSys][iEta]->Write ();
-      h_r2_avg_jetares[iSys][iEta]->Write ();
+            h2->SetBinContent (iPtJ+1, iY, h2->GetBinContent (iPtJ+1, iY) + h->GetBinContent (iY));
+            h2->SetBinError (iPtJ+1, iY, std::sqrt (std::pow (h2->GetBinError (iPtJ+1, iY), 2) + std::pow (h->GetBinError (iY), 2)));
 
-      h_r4_avg_jetacorr[iSys][iEta]->Write ();
-      h_r4_avg_jetares[iSys][iEta]->Write ();
-    } // end loop over iEta
+          } // end loop over iY
+  
+        } // end loop over iPtJ
+
+
+        h2 = h2_jetacorr_integratedEta[iSys][iR][iEta];
+        for (int iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
+          TH1D* h = h_jetacorr_integratedEta[iSys][iR][iPtJ][iEta];
+
+          for (int iY = 1; iY <= h2->GetNbinsY (); iY++) {
+
+            h2->SetBinContent (iPtJ+1, iY, h2->GetBinContent (iPtJ+1, iY) + h->GetBinContent (iY));
+            h2->SetBinError (iPtJ+1, iY, std::sqrt (std::pow (h2->GetBinError (iPtJ+1, iY), 2) + std::pow (h->GetBinError (iY), 2)));
+
+          } // end loop over iY
+  
+        } // end loop over iPtJ
+
+      } // end loop over iEta
+
+    } // end loop oveer iR
+
+  } // end loop over iSys
+
+
+
+  for (int iSys : systems) {
+
+    for (int iR = 0; iR < nRadii; iR++) {
+
+      h2_avg_jpts[iSys][iR]->Write ();
+      h2_avg_jptr[iSys][iR]->Write ();
+
+      h2_avg_jes[iSys][iR]->Write ();
+      h2_avg_jer[iSys][iR]->Write ();
+
+      h2_avg_jetacorr[iSys][iR]->Write ();
+      h2_avg_jetacorr[iSys][iR]->Write ();
+
+      for (int iEta = 0; iEta <= nEtaBins; iEta++) {
+
+        h_avg_jpts[iSys][iR][iEta]->Write ();
+        h_avg_jptr[iSys][iR][iEta]->Write ();
+
+        h_avg_jes[iSys][iR][iEta]->Write ();
+        h_avg_jer[iSys][iR][iEta]->Write ();
+
+        h_avg_jetacorr[iSys][iR][iEta]->Write ();
+        h_avg_jetares[iSys][iR][iEta]->Write ();
+
+        h2_jpts_integratedEta[iSys][iR][iEta]->Write ();
+
+        h2_jes_integratedEta[iSys][iR][iEta]->Write ();
+
+        h2_jetacorr_integratedEta[iSys][iR][iEta]->Write ();
+
+      } // end loop over iEta
+
+    } // end loop oveer iR
+
   } // end loop over iSys
 
   outFile->Close ();

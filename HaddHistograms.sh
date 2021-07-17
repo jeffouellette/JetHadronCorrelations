@@ -2,11 +2,11 @@
 
 #declare -a vardirs=("Nominal" "JetES5PercUpVar" "JetES5PercDownVar" "JetES5PercSmearVar" "JetES2PercUpVar" "JetES2PercDownVar" "JetES2PercSmearVar")
 #declare -a vardirs=("Nominal" "JetES5PercUpVar" "JetES5PercDownVar" "JetES2PercUpVar" "JetES2PercDownVar")
-#declare -a vardirs=("Nominal")
-declare -a vardirs=("Nominal" "JetES5PercUpVar" "JetES5PercDownVar" "JetES2PercUpVar" "JetES2PercDownVar" "MixCatVar1" "MixCatVar2" "MixCatVar3")
+declare -a vardirs=("Nominal")
+#declare -a vardirs=("Nominal" "JetES5PercUpVar" "JetES5PercDownVar" "JetES2PercUpVar" "JetES2PercDownVar" "MixCatVar1" "MixCatVar2" "MixCatVar3")
 #declare -a resdirs=("60GeVJets" "30GeVJets" "15GeVJets")
-#declare -a resdirs=("60GeVJets" "30GeVJets")
-declare -a resdirs=("60GeVJets")
+declare -a resdirs=("60GeVJets" "30GeVJets")
+#declare -a resdirs=("30GeVJets")
 
 for resdir in ${resdirs[@]}; do
 
@@ -38,8 +38,8 @@ for resdir in ${resdirs[@]}; do
     #          ${histpath}/312837_iCent${cent}_hists.root \
     #          ${histpath}/312937_iCent${cent}_hists.root \
     #          ${histpath}/312945_iCent${cent}_hists.root \
-    #          ${histpath}/312968_iCent${cent}_hists.root \
-    #          ${histpath}/314199_iCent${cent}_hists.root
+    #          ${histpath}/312968_iCent${cent}_hists.root
+    #          #${histpath}/314199_iCent${cent}_hists.root
 
     #done
 
@@ -67,8 +67,8 @@ for resdir in ${resdirs[@]}; do
     #          ${histpath}/312837_iCent${cent}_hists.root \
     #          ${histpath}/312937_iCent${cent}_hists.root \
     #          ${histpath}/312945_iCent${cent}_hists.root \
-    #          ${histpath}/312968_iCent${cent}_hists.root \
-    #          ${histpath}/314199_iCent${cent}_hists.root
+    #          ${histpath}/312968_iCent${cent}_hists.root
+    #          #${histpath}/314199_iCent${cent}_hists.root
 
     #done
 

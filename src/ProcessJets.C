@@ -19,30 +19,34 @@
 
 using namespace JetHadronCorrelations;
 
-void ProcessJets (const char* tag, const char* outFileTag, const int iCent) {
+void ProcessJets (const char* tag, const char* outFileTag) {
 
   TFile* inFile = nullptr;
 
-  TH1D*** h_evt_counts = Get2DArray <TH1D*> (2, nVar);
-  TH1D*** h_jet_counts = Get2DArray <TH1D*> (2, nVar);
-  //TH1D*** h_ljet_counts = Get2DArray <TH1D*> (2, nVar);
-  //TH1D*** h_sljet_counts = Get2DArray <TH1D*> (2, nVar);
-  TH1D*** h_evt_counts_bkg = Get2DArray <TH1D*> (2, nVar);
-  TH1D*** h_jet_counts_bkg = Get2DArray <TH1D*> (2, nVar);
-  //TH1D*** h_ljet_counts_bkg = Get2DArray <TH1D*> (2, nVar);
-  //TH1D*** h_sljet_counts_bkg = Get2DArray <TH1D*> (2, nVar);
+  TH1D**  h_evt_counts_ref = Get1DArray <TH1D*> (nVar);
+  TH1D**  h_jet_counts_ref = Get1DArray <TH1D*> (nVar);
+  TH1D**  h_evt_counts_ref_bkg = Get1DArray <TH1D*> (nVar);
+  TH1D**  h_jet_counts_ref_bkg = Get1DArray <TH1D*> (nVar);
+  TH1D*** h_evt_counts = Get2DArray <TH1D*> (nZdcCentBins, nVar);
+  TH1D*** h_jet_counts = Get2DArray <TH1D*> (nZdcCentBins, nVar);
+  TH1D*** h_evt_counts_bkg = Get2DArray <TH1D*> (nZdcCentBins, nVar);
+  TH1D*** h_jet_counts_bkg = Get2DArray <TH1D*> (nZdcCentBins, nVar);
 
-  TH1D*** h_jet_pt = Get2DArray <TH1D*> (2, nVar);
-  TH2D*** h2_jet_pt_cov = Get2DArray <TH2D*> (2, nVar);
+  TH1D**  h_jet_pt_ref = Get1DArray <TH1D*> (nVar);
+  TH2D**  h2_jet_pt_cov_ref = Get1DArray <TH2D*> (nVar);
 
-  TH1D** h_jet_pt_ratio = Get1DArray <TH1D*> (nVar);
+  TH1D*** h_jet_pt = Get2DArray <TH1D*> (nZdcCentBins, nVar);
+  TH2D*** h2_jet_pt_cov = Get2DArray <TH2D*> (nZdcCentBins, nVar);
 
-  TH2D*** h2_jet_eta_phi = Get2DArray <TH2D*> (2, nVar);
+  TH1D*** h_jet_pt_ratio = Get2DArray <TH1D*> (nZdcCentBins, nVar);
 
+  TH2D**  h2_jet_eta_phi_ref = Get1DArray <TH2D*> (nVar);
+  TH2D*** h2_jet_eta_phi = Get2DArray <TH2D*> (nZdcCentBins, nVar);
 
-  TGAE*** g_jet_pt_syst = Get2DArray <TGAE*> (2, nVar);
+  TGAE**  g_jet_pt_ref_syst = Get1DArray <TGAE*> (nVar);
+  TGAE*** g_jet_pt_syst = Get2DArray <TGAE*> (nZdcCentBins, nVar);
 
-  TGAE** g_jet_pt_ratio_syst = Get1DArray <TGAE*> (nVar);
+  TGAE*** g_jet_pt_ratio_syst = Get2DArray <TGAE*> (nZdcCentBins, nVar);
 
 
   TString outFileName = outFileTag;
@@ -53,34 +57,33 @@ void ProcessJets (const char* tag, const char* outFileTag, const int iCent) {
 
 
   for (int iVar = 0; iVar < nVar; iVar++) {
-    {
+
+    for (int iCent = 0; iCent < nZdcCentBins; iCent++) {
       TString inFileName = Form ("%s/Histograms/%s/JetsHists/%s/data16_5TeV_iCent%i_hists.root", rootPath.Data (), tag, variations[iVar].Data (), iCent);
       std::cout << "Reading " << inFileName.Data () << std::endl;
       inFile = new TFile (inFileName.Data (), "read");
       outFile->cd ();
 
-      h_evt_counts[1][iVar] = (TH1D*) inFile->Get (Form ("h_evt_counts_%s_data16", tag))->Clone (Form ("h_evt_counts_%s_pPb_%s", tag, variations[iVar].Data ()));
-      h_jet_counts[1][iVar] = (TH1D*) inFile->Get (Form ("h_jet_counts_%s_data16", tag))->Clone (Form ("h_jet_counts_%s_pPb_%s", tag, variations[iVar].Data ()));
-      //h_ljet_counts[1][iVar] = (TH1D*) inFile->Get (Form ("h_ljet_counts_%s_data16", tag))->Clone (Form ("h_evt_counts_%s_pPb_%s", tag, variations[iVar].Data ()));
-      //h_sljet_counts[1][iVar] = (TH1D*) inFile->Get (Form ("h_sljet_counts_%s_data16", tag))->Clone (Form ("h_sljet_counts_%s_pPb_%s", tag, variations[iVar].Data ()));
-      h_jet_pt[1][iVar] = (TH1D*) inFile->Get (Form ("h_jet_pt_%s_data16", tag))->Clone (Form ("h_jet_pt_%s_pPb_%s", tag, variations[iVar].Data ()));
-      h2_jet_pt_cov[1][iVar] = (TH2D*) inFile->Get (Form ("h2_jet_pt_cov_%s_data16", tag))->Clone (Form ("h2_jet_pt_cov_%s_pPb_%s", tag, variations[iVar].Data ()));
-      h2_jet_eta_phi[1][iVar] = (TH2D*) inFile->Get (Form ("h2_jet_eta_phi_%s_data16", tag))->Clone (Form ("h2_jet_eta_phi_%s_pPb_%s", tag, variations[iVar].Data ()));
+      h_evt_counts[iCent][iVar] = (TH1D*) inFile->Get (Form ("h_evt_counts_%s_data16", tag))->Clone (Form ("h_evt_counts_pPb_iCent%i_%s", iCent, variations[iVar].Data ()));
+      h_jet_counts[iCent][iVar] = (TH1D*) inFile->Get (Form ("h_jet_counts_%s_data16", tag))->Clone (Form ("h_jet_counts_pPb_iCent%i_%s", iCent, variations[iVar].Data ()));
+      h_jet_pt[iCent][iVar] = (TH1D*) inFile->Get (Form ("h_jet_pt_%s_data16", tag))->Clone (Form ("h_jet_pt_pPb_iCent%i_%s", iCent, variations[iVar].Data ()));
+      h2_jet_pt_cov[iCent][iVar] = (TH2D*) inFile->Get (Form ("h2_jet_pt_cov_%s_data16", tag))->Clone (Form ("h2_jet_pt_cov_pPb_iCent%i_%s", iCent, variations[iVar].Data ()));
+      h2_jet_eta_phi[iCent][iVar] = (TH2D*) inFile->Get (Form ("h2_jet_eta_phi_%s_data16", tag))->Clone (Form ("h2_jet_eta_phi_pPb_iCent%i_%s", iCent, variations[iVar].Data ()));
 
       inFile->Close ();
   
-      const double nEvts = h_evt_counts[1][iVar]->GetBinContent (1); // total number of accepted evts
-      const double nJets = h_jet_counts[1][iVar]->GetBinContent (2); // total number of accepted jets
+      const double nEvts = h_evt_counts[iCent][iVar]->GetBinContent (1); // total number of accepted evts
+      const double nJets = h_jet_counts[iCent][iVar]->GetBinContent (2); // total number of accepted jets
 
-      h_jet_pt[1][iVar]->Rebin (2);
-      h2_jet_pt_cov[1][iVar]->RebinX (2);
-      h2_jet_pt_cov[1][iVar]->RebinY (2);
+      h_jet_pt[iCent][iVar]->Rebin (2);
+      h2_jet_pt_cov[iCent][iVar]->RebinX (2);
+      h2_jet_pt_cov[iCent][iVar]->RebinY (2);
   
-      CalcUncertainties (h_jet_pt[1][iVar], h2_jet_pt_cov[1][iVar], nEvts);
+      CalcUncertainties (h_jet_pt[iCent][iVar], h2_jet_pt_cov[iCent][iVar], nEvts);
 
-      h_jet_pt[1][iVar]->Scale (nEvts / nJets);
-      h2_jet_pt_cov[1][iVar]->Scale (pow (nEvts / nJets, 2));
-    }
+      h_jet_pt[iCent][iVar]->Scale (nEvts / nJets);
+      h2_jet_pt_cov[iCent][iVar]->Scale (pow (nEvts / nJets, 2));
+    } // end loop over iCent
 
 
 
@@ -90,30 +93,25 @@ void ProcessJets (const char* tag, const char* outFileTag, const int iCent) {
       inFile = new TFile (inFileName.Data (), "read");
       outFile->cd ();
 
-      h_evt_counts[0][iVar] = (TH1D*) inFile->Get (Form ("h_evt_counts_%s_data17", tag))->Clone (Form ("h_evt_counts_%s_pp_%s", tag, variations[iVar].Data ()));
-      h_jet_counts[0][iVar] = (TH1D*) inFile->Get (Form ("h_jet_counts_%s_data17", tag))->Clone (Form ("h_jet_counts_%s_pp_%s", tag, variations[iVar].Data ()));
-      //h_ljet_counts[0][iVar] = (TH1D*) inFile->Get (Form ("h_ljet_counts_%s_data17", tag))->Clone (Form ("h_evt_counts_%s_pp_%s", tag, variations[iVar].Data ()));
-      //h_sljet_counts[0][iVar] = (TH1D*) inFile->Get (Form ("h_sljet_counts_%s_data17", tag))->Clone (Form ("h_sljet_counts_%s_pp_%s", tag, variations[iVar].Data ()));
-      h_jet_pt[0][iVar] = (TH1D*) inFile->Get (Form ("h_jet_pt_%s_data17", tag))->Clone (Form ("h_jet_pt_%s_pp_%s", tag, variations[iVar].Data ()));
-      h2_jet_pt_cov[0][iVar] = (TH2D*) inFile->Get (Form ("h2_jet_pt_cov_%s_data17", tag))->Clone (Form ("h2_jet_pt_cov_%s_pp_%s", tag, variations[iVar].Data ()));
-      h2_jet_eta_phi[0][iVar] = (TH2D*) inFile->Get (Form ("h2_jet_eta_phi_%s_data17", tag))->Clone (Form ("h2_jet_eta_phi_%s_pp_%s", tag, variations[iVar].Data ()));
+      h_evt_counts_ref[iVar] = (TH1D*) inFile->Get (Form ("h_evt_counts_%s_data17", tag))->Clone (Form ("h_evt_counts_ref_%s", variations[iVar].Data ()));
+      h_jet_counts_ref[iVar] = (TH1D*) inFile->Get (Form ("h_jet_counts_%s_data17", tag))->Clone (Form ("h_jet_counts_ref_%s", variations[iVar].Data ()));
+      h_jet_pt_ref[iVar] = (TH1D*) inFile->Get (Form ("h_jet_pt_%s_data17", tag))->Clone (Form ("h_jet_pt_ref_%s", variations[iVar].Data ()));
+      h2_jet_pt_cov_ref[iVar] = (TH2D*) inFile->Get (Form ("h2_jet_pt_cov_%s_data17", tag))->Clone (Form ("h2_jet_pt_cov_ref_%s", variations[iVar].Data ()));
+      h2_jet_eta_phi_ref[iVar] = (TH2D*) inFile->Get (Form ("h2_jet_eta_phi_%s_data17", tag))->Clone (Form ("h2_jet_eta_phi_ref_%s", variations[iVar].Data ()));
 
       inFile->Close ();
 
-      const double nEvts = h_evt_counts[0][iVar]->GetBinContent (1); // total number of accepted evts
-      const double nJets = h_jet_counts[0][iVar]->GetBinContent (1); // total number of accepted jets
+      const double nEvts = h_evt_counts_ref[iVar]->GetBinContent (1); // total number of accepted evts
+      const double nJets = h_jet_counts_ref[iVar]->GetBinContent (1); // total number of accepted jets
 
-      h_jet_pt[0][iVar]->Rebin (2);
-      h2_jet_pt_cov[0][iVar]->RebinX (2);
-      h2_jet_pt_cov[0][iVar]->RebinY (2);
+      h_jet_pt_ref[iVar]->Rebin (2);
+      h2_jet_pt_cov_ref[iVar]->RebinX (2);
+      h2_jet_pt_cov_ref[iVar]->RebinY (2);
 
-      CalcUncertainties (h_jet_pt[0][iVar], h2_jet_pt_cov[0][iVar], nEvts);
+      CalcUncertainties (h_jet_pt_ref[iVar], h2_jet_pt_cov_ref[iVar], nEvts);
 
-      h_jet_pt[0][iVar]->Scale (nEvts / nJets);
-      h2_jet_pt_cov[0][iVar]->Scale (pow (nEvts / nJets, 2));
-
-      //h_jet_pt[0][iVar]->Scale (1e-1);
-      //h2_jet_pt_cov[0][iVar]->Scale (1e-2);
+      h_jet_pt_ref[iVar]->Scale (nEvts / nJets);
+      h2_jet_pt_cov_ref[iVar]->Scale (pow (nEvts / nJets, 2));
     }
 
 
@@ -123,96 +121,110 @@ void ProcessJets (const char* tag, const char* outFileTag, const int iCent) {
 
     //  h_evt_counts_bkg[1] = (TH1D*) inFile->Get ("h_evt_counts_minbias_data16");
     //  h_jet_counts_bkg[1] = (TH1D*) inFile->Get ("h_jet_counts_minbias_data16");
-    //  h_ljet_counts_bkg[1] = (TH1D*) inFile->Get ("h_ljet_counts_minbias_data16");
-    //  h_sljet_counts_bkg[1] = (TH1D*) inFile->Get ("h_sljet_counts_minbias_data16");
 
     //  const double nEvts = h_evt_counts_bkg[1]->GetBinContent (1); // total number of accepted evts
     //  const double nJets = h_jet_counts_bkg[1]->GetBinContent (1); // total number of accepted jets
-    //  const double nLJets = h_ljet_counts_bkg[1]->GetBinContent (1); // total number of accepted leading jets
-    //  const double nSLJets = h_sljet_counts_bkg[1]->GetBinContent (1); // total number of accepted subleading jets
     //}
 
 
-    {
-      h_jet_pt_ratio[iVar] = (TH1D*) h_jet_pt[1][iVar]->Clone (Form ("h_jet_pt_ratio_%s", variations[iVar].Data ()));
-      h_jet_pt_ratio[iVar]->Divide (h_jet_pt[0][iVar]);
-    }
-  }
+    for (int iCent = 0; iCent < nZdcCentBins; iCent++) {
+      h_jet_pt_ratio[iCent][iVar] = (TH1D*) h_jet_pt[iCent][iVar]->Clone (Form ("h_jet_pt_ratio_iCent%i_%s", iCent, variations[iVar].Data ()));
+      h_jet_pt_ratio[iCent][iVar]->Divide (h_jet_pt_ref[iVar]);
+    } // end loop over iCent
+  } // end loop over iVar
 
 
 
   {
-    g_jet_pt_syst[0][0] = make_graph (h_jet_pt[0][0]);
-    g_jet_pt_syst[1][0] = make_graph (h_jet_pt[1][0]);
+    g_jet_pt_ref_syst[0] = make_graph (h_jet_pt_ref[0]);
 
-    g_jet_pt_ratio_syst[0] = make_graph (h_jet_pt_ratio[0]);
+    ResetTGAEErrors (g_jet_pt_ref_syst[0]);
 
-    ResetTGAEErrors (g_jet_pt_syst[0][0]);
-    ResetTGAEErrors (g_jet_pt_syst[1][0]);
+    for (int iCent = 0; iCent < nZdcCentBins; iCent++) {
+      g_jet_pt_syst[iCent][0] = make_graph (h_jet_pt[iCent][0]);
+      g_jet_pt_ratio_syst[iCent][0] = make_graph (h_jet_pt_ratio[iCent][0]);
 
-    ResetTGAEErrors (g_jet_pt_ratio_syst[0]);
+      ResetTGAEErrors (g_jet_pt_syst[iCent][0]);
+      ResetTGAEErrors (g_jet_pt_ratio_syst[iCent][0]);
+    } // end loop over iCent
   }
 
 
 
   for (int iVar = 1; iVar < nVar; iVar++) {
-    g_jet_pt_syst[0][iVar] = new TGAE ();
-    g_jet_pt_syst[1][iVar] = new TGAE ();
+    g_jet_pt_ref_syst[iVar] = new TGAE ();
 
-    g_jet_pt_ratio_syst[iVar] = new TGAE ();
+    CalcSystematics (g_jet_pt_ref_syst[iVar], h_jet_pt_ref[0], h_jet_pt_ref[iVar]);
 
-    CalcSystematics (g_jet_pt_syst[0][iVar], h_jet_pt[0][0], h_jet_pt[0][iVar]);
-    CalcSystematics (g_jet_pt_syst[1][iVar], h_jet_pt[1][0], h_jet_pt[1][iVar]);
+    for (int iCent = 0; iCent < nZdcCentBins; iCent++) {
+      g_jet_pt_syst[iCent][iVar] = new TGAE ();
 
-    CalcSystematics (g_jet_pt_ratio_syst[iVar], h_jet_pt_ratio[0], h_jet_pt_ratio[iVar]);
-  }
+      g_jet_pt_ratio_syst[iCent][iVar] = new TGAE ();
+
+      CalcSystematics (g_jet_pt_syst[iCent][iVar], h_jet_pt[iCent][0], h_jet_pt[iCent][iVar]);
+
+      CalcSystematics (g_jet_pt_ratio_syst[iCent][iVar], h_jet_pt_ratio[iCent][0], h_jet_pt_ratio[iCent][iVar]);
+    } // end loop over iCent
+  } // end loop over iVar
 
 
 
+/*
   // takes the maximum variation of the jet pT ES up/down variations
   {
     const int syst = 1;
 
-    AddMaxSystematic (g_jet_pt_syst[0][0], g_jet_pt_syst[0][syst], g_jet_pt_syst[0][syst+1]);
-    AddMaxSystematic (g_jet_pt_syst[1][0], g_jet_pt_syst[1][syst], g_jet_pt_syst[1][syst+1]);
+    AddMaxSystematic (g_jet_pt_ref_syst[0], g_jet_pt_ref_syst[syst], g_jet_pt_ref_syst[syst+1]);
 
-    AddMaxSystematic (g_jet_pt_ratio_syst[0], g_jet_pt_ratio_syst[syst], g_jet_pt_ratio_syst[syst+1]);
+    for (int iCent = 0; iCent < nZdcCentBins; iCent++) {
+      AddMaxSystematic (g_jet_pt_syst[iCent][0], g_jet_pt_syst[iCent][syst], g_jet_pt_syst[iCent][syst+1]);
+
+      AddMaxSystematic (g_jet_pt_ratio_ref_syst, g_jet_pt_ratio_syst[iCent][syst], g_jet_pt_ratio_syst[iCent][syst+1]);
+    } // end loop over iCent
   }
+*/
 
 
 
   {
     outFile->cd ();
 
-    h_evt_counts[0][0]->Write ("h_evt_counts_ref");
-    h_jet_counts[0][0]->Write ("h_jet_counts_ref");
-    //h_ljet_counts[0][0]->Write ("h_ljet_counts_ref");
-    //h_sljet_counts[0][0]->Write ("h_sljet_counts_ref");
-    h_evt_counts[1][0]->Write ("h_evt_counts");
-    h_jet_counts[1][0]->Write ("h_jet_counts");
-    //h_ljet_counts[1][0]->Write ("h_ljet_counts");
-    //h_sljet_counts[1][0]->Write ("h_sljet_counts");
 
-    h_jet_pt[0][0]->Write ("h_jet_pt_ref");
-    h_jet_pt[1][0]->Write ("h_jet_pt");
+    h_evt_counts_ref[0]->Write ();
+    h_jet_counts_ref[0]->Write ();
 
-    h_jet_pt_ratio[0]->Write ("h_jet_pt_ratio");
+    h_jet_pt_ref[0]->Write ();
 
-    g_jet_pt_syst[0][0]->Write ("g_jet_pt_ref_syst");
-    g_jet_pt_syst[1][0]->Write ("g_jet_pt_syst");
+    g_jet_pt_ref_syst[0]->Write ("g_jet_pt_ref_syst");
 
-    g_jet_pt_ratio_syst[0]->Write ("g_jet_pt_ratio_syst");
+    for (int iCent = 0; iCent < nZdcCentBins; iCent++) {
+      h_evt_counts[iCent][0]->Write ();
+      h_jet_counts[iCent][0]->Write ();
+
+      h_jet_pt[iCent][0]->Write ();
+      h_jet_pt_ratio[iCent][0]->Write ();
+
+      g_jet_pt_syst[iCent][0]->Write (Form ("g_jet_pt_syst_iCent%i", iCent));
+      g_jet_pt_ratio_syst[iCent][0]->Write (Form ("g_jet_pt_ratio_syst_iCent%i", iCent));
+    } // end loop over iCent
 
 
-    for (int iVar = 1; iVar < nVar; iVar++) {
-      h_jet_pt[0][iVar]->Write (Form ("h_jet_pt_ref_%s", variations[iVar].Data ()));
-      h_jet_pt[1][iVar]->Write (Form ("h_jet_pt_%s", variations[iVar].Data ()));
-  
-      h_jet_pt_ratio[iVar]->Write (Form ("h_jet_pt_ratio_%s", variations[iVar].Data ()));
-    }
+    for (int iVar = 0; iVar < nVar; iVar++) {
+      h_jet_pt_ref[iVar]->Write ();
 
-    h2_jet_eta_phi[0][0]->Write ("h2_jet_eta_phi_ref");
-    h2_jet_eta_phi[1][0]->Write ("h2_jet_eta_phi");
+      for (int iCent = 0; iCent < nZdcCentBins; iCent++) {
+        h_jet_pt[iCent][iVar]->Write ();
+        h_jet_pt_ratio[iCent][iVar]->Write ();
+      } // end loop over iCent
+    } // end loop over iVar
+
+
+    h2_jet_eta_phi_ref[0]->Write ();
+
+    for (int iCent = 0; iCent < nZdcCentBins; iCent++) {
+      h2_jet_eta_phi[iCent][0]->Write ();
+    } // end loop over iCent
+
   
     outFile->Close ();
   }

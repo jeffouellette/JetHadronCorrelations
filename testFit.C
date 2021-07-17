@@ -7,6 +7,7 @@ TH1D* h = nullptr;
 TFile* inFile = nullptr;
 double stddev, inte;
 
+LogTrackMomentumFit ltmf;
 TrackMomentumFit tmf;
 
 void testFit () {
@@ -14,15 +15,36 @@ void testFit () {
   ltmf.DoDoubleGaussian (false);
   tmf.DoDoubleGaussian (false);
 
-  //inFile = new TFile ("rootFiles/TrackMomentumResolution/Nominal/summary.root", "read");
+  //inFile = new TFile ("rootFiles/TrackMomentumResolution/Nominal/summary_test.root", "read");
   inFile = new TFile ("rootFiles/TrackMomentumResolution/Nominal/allSamples.root", "read");
   
-  h = (TH1D*) inFile->Get ("h_tmr_pp_iPtch4_iEta20");
+  //h = (TH1D*) inFile->Get ("h_tmr_pp_iPtch0_iEta0");
+  h = (TH1D*) inFile->Get ("h_tmr_pp_iPtch0_iEta0")->Clone ("htemp");
+  h->Reset ();
+
+  for (int iFinerEta = 0; iFinerEta < nFinerEtaTrkBins; iFinerEta++) {
+  
+    // First add to the relevant eta-integrated histograms
+    const float binCenter = 0.5 * fabs (finerEtaTrkBins[iFinerEta] + finerEtaTrkBins[iFinerEta+1]);
+    int iEta = 0;
+    while (iEta < nEtaTrkBins) {
+      if (etaTrkBins[iEta] < binCenter && binCenter < etaTrkBins[iEta+1])
+        break;
+      iEta++;
+    }
+    if (iEta == 0)
+      h->Add ((TH1D*) inFile->Get (Form ("h_tmr_pp_iPtch0_iEta%i", iFinerEta)));
+  }
+
+  std::cout << h->GetEntries () << std::endl;
   //h = (TH1D*) inFile->Get ("h_tmr_integratedEta_pp_iPtch0_iEta1");
+  h->Rebin (2);
+  //h->Scale (1, "width");
 
-  f = new TF1 ("f", &ltmf, -1.0, 4.0, ltmf.ndf ()); 
+  f = new TF1 ("f", &ltmf, -1.0, 1.0, ltmf.ndf ()); 
 
-  DoLogFit (h, f);
+
+  DoLogFit (h, f, ltmf);
   ////h->Rebin (2);
 
 
@@ -38,9 +60,10 @@ void testFit () {
   //
   //stddev = h->GetStdDev ();
   //inte = h->Integral (h->FindBin (-stddev), h->FindBin (stddev));
-  //f = new TF1 ("f", &ltmf, -1.0, 4.0, 9); 
-  fdraw = new TF1 ("fdraw", &tmf, -1.0, 4.0, tmf.ndf ());
-  
+  //f = new TF1 ("f", &ltmf, -1.0, 1.0, 9); 
+  fdraw = new TF1 ("fdraw", &tmf, -1.0, 1.0, tmf.ndf ());
+ 
+  h->Scale (1., "width"); 
   //g->Draw ("AP");
   h->Draw ("e1");
   gPad->SetLogy();

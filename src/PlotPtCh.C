@@ -253,12 +253,15 @@ void PlotPtCh (const char* tag, const char* inFileTag) {
 
   for (int iCent = 0; iCent < nZdcCentBins; iCent++) {
     const char* canvasName = Form ("c_jet_trk_pt_iCent%i", iCent);
+
     TCanvas* c = new TCanvas (canvasName, "", 1200, 1120);
     c->cd ();
+
     const double fuPad = 480./1120.;
     const double fdPad = 320./1120.;
     const double fcPad = 1.0 - fuPad - fdPad;
     const double fxPad = 0.42;
+
     TPad* ulPad = new TPad (Form ("%s_ulPad", canvasName), "", 0.0, 1.0-fuPad, fxPad+0.1, 1.0);
     TPad* clPad = new TPad (Form ("%s_clPad", canvasName), "", 0.0, fdPad, fxPad+0.1, 1.0-fuPad);
     TPad* dlPad = new TPad (Form ("%s_dlPad", canvasName), "", 0.0, 0.0, fxPad+0.1, fdPad);
@@ -320,21 +323,21 @@ void PlotPtCh (const char* tag, const char* inFileTag) {
     h->DrawCopy ("hist ][");
     SaferDelete (&h);
 
-    myDrawSyst (g_jet_trk_pt_ns_ref_syst, myBlue);
+    //myDrawSyst (g_jet_trk_pt_ns_ref_syst, myBlue);
     h = h_jet_trk_pt_ns_ref;
     g = make_graph (h);
     ResetXErrors (g);
     myDraw (g, myBlue, kFullCircle, 0.8);
     SaferDelete (&g);
 
-    myDrawSyst (g_jet_trk_pt_ns_ref_bkg_syst, myPurple);
+    //myDrawSyst (g_jet_trk_pt_ns_ref_bkg_syst, myPurple);
     h = h_jet_trk_pt_ns_ref_bkg;
     g = make_graph (h);
     ResetXErrors (g);
     myDraw (g, myPurple, kOpenCircle, 0.8);
     SaferDelete (&g);
 
-    myDrawSyst (g_jet_trk_pt_ns_syst[iCent], myRed);
+    //myDrawSyst (g_jet_trk_pt_ns_syst[iCent], myRed);
     h = h_jet_trk_pt_ns[iCent];
     g = make_graph (h);
     ResetXErrors (g);
@@ -342,7 +345,7 @@ void PlotPtCh (const char* tag, const char* inFileTag) {
     SaferDelete (&g);
 
     g = g_jet_trk_pt_ns_bkg_syst[iCent];
-    myDrawSyst (g_jet_trk_pt_ns_bkg_syst[iCent], myGreen);
+    //myDrawSyst (g_jet_trk_pt_ns_bkg_syst[iCent], myGreen);
     h = h_jet_trk_pt_ns_bkg[iCent];
     g = make_graph (h);
     ResetXErrors (g);
@@ -378,28 +381,28 @@ void PlotPtCh (const char* tag, const char* inFileTag) {
     h->DrawCopy ("hist ][");
     SaferDelete (&h);
 
-    myDrawSyst (g_jet_trk_pt_as_ref_syst, myBlue);
+    //myDrawSyst (g_jet_trk_pt_as_ref_syst, myBlue);
     h = h_jet_trk_pt_as_ref;
     g = make_graph (h);
     ResetXErrors (g);
     myDraw (g, myBlue, kFullCircle, 0.8);
     SaferDelete (&g);
 
-    myDrawSyst (g_jet_trk_pt_as_ref_bkg_syst, myPurple);
+    //myDrawSyst (g_jet_trk_pt_as_ref_bkg_syst, myPurple);
     h = h_jet_trk_pt_as_ref_bkg;
     g = make_graph (h);
     ResetXErrors (g);
     myDraw (g, myPurple, kOpenCircle, 0.8);
     SaferDelete (&g);
 
-    myDrawSyst (g_jet_trk_pt_as_syst[iCent], myRed);
+    //myDrawSyst (g_jet_trk_pt_as_syst[iCent], myRed);
     h = h_jet_trk_pt_as[iCent];
     g = make_graph (h);
     ResetXErrors (g);
     myDraw (g, myRed, kFullCircle, 0.8);
     SaferDelete (&g);
 
-    myDrawSyst (g_jet_trk_pt_as_bkg_syst[iCent], myGreen);
+    //myDrawSyst (g_jet_trk_pt_as_bkg_syst[iCent], myGreen);
     h = h_jet_trk_pt_as_bkg[iCent];
     g = make_graph (h);
     ResetXErrors (g);
@@ -437,14 +440,14 @@ void PlotPtCh (const char* tag, const char* inFileTag) {
     h->DrawCopy ("hist ][");
     SaferDelete (&h);
 
-    myDrawSyst (g_jet_trk_pt_ns_ref_sig_syst, myBlue);
+    //myDrawSyst (g_jet_trk_pt_ns_ref_sig_syst, myBlue);
     h = h_jet_trk_pt_ns_ref_sig;
     g = make_graph (h);
     ResetXErrors (g);
     myDraw (g, myBlue, kFullCircle, 0.8);
     SaferDelete (&g);
 
-    myDrawSyst (g_jet_trk_pt_ns_sig_syst[iCent], myRed);
+    //myDrawSyst (g_jet_trk_pt_ns_sig_syst[iCent], myRed);
     h = h_jet_trk_pt_ns_sig[iCent];
     g = make_graph (h);
     ResetXErrors (g);
@@ -478,14 +481,14 @@ void PlotPtCh (const char* tag, const char* inFileTag) {
     h->DrawCopy ("hist ][");
     SaferDelete (&h);
 
-    myDrawSyst (g_jet_trk_pt_as_ref_sig_syst, myBlue);
+    //myDrawSyst (g_jet_trk_pt_as_ref_sig_syst, myBlue);
     h = h_jet_trk_pt_as_ref_sig;
     g = make_graph (h);
     ResetXErrors (g);
     myDraw (g, myBlue, kFullCircle, 0.8);
     SaferDelete (&g);
 
-    myDrawSyst (g_jet_trk_pt_as_sig_syst[iCent], myRed);
+    //myDrawSyst (g_jet_trk_pt_as_sig_syst[iCent], myRed);
     h = h_jet_trk_pt_as_sig[iCent];
     g = make_graph (h);
     ResetXErrors (g);
@@ -520,7 +523,7 @@ void PlotPtCh (const char* tag, const char* inFileTag) {
     h->DrawCopy ("hist ][");
     SaferDelete (&h);
 
-    myDrawSyst (g_jet_trk_pt_ns_iaa_syst[iCent], myRed);
+    //myDrawSyst (g_jet_trk_pt_ns_iaa_syst[iCent], myRed);
     h = h_jet_trk_pt_ns_iaa[iCent];
     g = make_graph (h);
     ResetXErrors (g);
@@ -567,7 +570,7 @@ void PlotPtCh (const char* tag, const char* inFileTag) {
     h->DrawCopy ("hist ][");
     SaferDelete (&h);
 
-    myDrawSyst (g_jet_trk_pt_as_iaa_syst[iCent], myRed);
+    //myDrawSyst (g_jet_trk_pt_as_iaa_syst[iCent], myRed);
     h = h_jet_trk_pt_as_iaa[iCent];
     g = make_graph (h);
     ResetXErrors (g);
@@ -644,8 +647,10 @@ void PlotPtCh (const char* tag, const char* inFileTag) {
 
     int iVar = 0;
     while (iVar < nVar && strcmp (variations[iVar], "FcalCentVar") != 0) iVar++;
-    if (iVar == nVar)
+    if (iVar == nVar) {
       std::cout << "Cannot find FCal centrality binned result??? Please check!" << std::endl;
+      return;
+    }
 
     TH1D* h = nullptr; 
     TGAE* g = nullptr;
@@ -1004,8 +1009,10 @@ void PlotPtCh (const char* tag, const char* inFileTag) {
 
     int iVar = 0;
     while (iVar < nVar && strcmp (variations[iVar], "NoFcalMixCatVar") != 0) iVar++;
-    if (iVar == nVar)
+    if (iVar == nVar) {
       std::cout << "Cannot find FCal matching result??? Please check!" << std::endl;
+      return;
+    }
 
     TH1D* h = nullptr; 
     TGAE* g = nullptr;

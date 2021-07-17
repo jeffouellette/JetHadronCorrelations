@@ -373,7 +373,7 @@ void ProcessPtCh (const char* outFileTag, const char* tag1, const char* tag2 = n
   }
 
 
-
+/*
   // takes the maximum variation of the jet pT ES up/down variations
   {
     const int syst = 7; // MixCatVar1
@@ -444,6 +444,7 @@ void ProcessPtCh (const char* outFileTag, const char* tag1, const char* tag2 = n
 
     //}
   }
+*/
 
 
 

@@ -7,35 +7,51 @@ accounting_group = group_atlas.boulder
 
 
 # Useful variables to set:
+# ATLAS software version
+swVersion=21.2.169
+
+# grid pass version
+gridPass=040
+
 # Analysis-level minimum/maximum jet pT; 15, 30, 60, or 120 (minimum); 0 (maximum)
 #minjpt=30
 maxjpt=0
 
+# Trigger config; MinBias, Jet50GeV, Jet100GeV
+#trig=Jet50GeV
 
-# Input subdirectory; 50GeVJetsData, 100GeVJetsData, or MinBiasData (at the moment)
-#sigdir=MinBiasData
+# Systematic config; Nominal, JetES5PercUpVar, JetES5PercDownVar, JetES5PercSmearVar, JetES2PercUpVar, JetES2PercDownVar, JetES2PercSmearVar, FcalCentVar (at the moment)
+#syst=None
 
-# Input subdirectory for mixing pool; MinBiasData (at the moment)
-mixdir=MinBiasData
+# Data streams; MinBias or Main
+#jetstream=Main
+#tracksstream=Main
 
-# Variation subdirectory; Nominal, JetES5PercUpVar, JetES5PercDownVar, JetES5PercSmearVar, JetES2PercUpVar, JetES2PercDownVar, JetES2PercSmearVar, FcalCentVar (at the moment)
-#vardir=JetES5PercSmearVar
 
-# Centrality selection
-#cent=0
-
+#Arguments are
+#[1] dataset subdirectory, e.g. data_040
+#[2] histogram tag, e.g. 60GeVJets_data16
+#[3] minimum jet pT
+#[4] maximum jet pT
+#[5] collision system variable
+#[6] dataset type variable
+#[7] trigger type variable
+#[8] systematic flag variable
+#[9] output histogram file name
+#[10] input jets file pattern
+#[11] input tracks file pattern
 
 # p+Pb non-mixed
-Arguments = $(minjpt) $(maxjpt) pPb16_5TeV $(minjpt)GeVJets_data16 ./rootFiles/Histograms/$(minjpt)GeVJets/JetsHists/$(vardir)/$(run)_iCent$(cent)_hists.root ./rootFiles/Trees/$(sigdir)/$(vardir)/$(run)_iCent$(cent).root
-Error = run/errors/$(minjpt)GeVJets_JetsHists_$(run)_iCent$(cent)_$(vardir).err
-Log = /tmp/jeff/logs/$(minjpt)GeVJets_JetsHists_$(run)_iCent$(cent)_$(vardir).log
-Output = run/outputs/$(minjpt)GeVJets_JetsHists_$(run)_iCent$(cent)_$(vardir).out
+Arguments = data_$(gridPass) $(minjpt)GeVJets_data16 $(minjpt) $(maxjpt) pPb16_5TeV Collisions $(trig) $(syst) ./rootFiles/Histograms/$(minjpt)GeVJets/JetsHists/$(syst)/$(run)_iCent_hists.root user.jeouelle.$(swVersion).hadrons.$(gridPass).data16_hip5TeV.00$(run).physics_$(jetstream).merge.AOD.r11416_p3868_Tree.root
+Error = run/errors/$(minjpt)GeVJets_JetsHists_$(run)_$(syst).err
+Log = /tmp/jeff/logs/$(minjpt)GeVJets_JetsHists_$(run)_$(syst).log
+Output = run/outputs/$(minjpt)GeVJets_JetsHists_$(run)_$(syst).out
 Queue run in (312796 312837 312937 312945 312968 314199)
 
 
 # p+Pb mixed
-Arguments = $(minjpt) $(maxjpt) pPb16_5TeV $(minjpt)GeVJets_mixed_data16 ./rootFiles/Histograms/$(minjpt)GeVJets/MixedHists/$(vardir)/$(run)_iCent$(cent)_hists.root ./rootFiles/Trees/$(sigdir)/$(vardir)/$(run)_iCent$(cent).root ./rootFiles/Trees/$(mixdir)/$(vardir)/$(run)_iCent$(cent).root
-Error = run/errors/$(minjpt)GeVJets_MixedHists_$(run)_iCent$(cent)_$(vardir).err
-Log = /tmp/jeff/logs/$(minjpt)GeVJets_MixedHists_$(run)_iCent$(cent)_$(vardir).log
-Output = run/outputs/$(minjpt)GeVJets_MixedHists_$(run)_iCent$(cent)_$(vardir).out
+Arguments = data_$(gridPass) $(minjpt)GeVJets_mixed_data16 $(minjpt) $(maxjpt) pPb16_5TeV Collisions $(trig) $(syst) ./rootFiles/Histograms/$(minjpt)GeVJets/MixedHists/$(syst)/$(run)_iCent_hists.root user.jeouelle.$(swVersion).hadrons.$(gridPass).data16_hip5TeV.00$(run).physics_$(jetstream).merge.AOD.r11416_p3868_Tree.root user.jeouelle.$(swVersion).hadrons.$(gridPass).data16_hip5TeV.00$(run).physics_$(tracksstream).merge.AOD.r11416_p3868_Tree.root
+Error = run/errors/$(minjpt)GeVJets_MixedHists_$(run)_$(syst).err
+Log = /tmp/jeff/logs/$(minjpt)GeVJets_MixedHists_$(run)_$(syst).log
+Output = run/outputs/$(minjpt)GeVJets_MixedHists_$(run)_$(syst).out
 Queue run in (312796 312837 312937 312945 312968 314199)

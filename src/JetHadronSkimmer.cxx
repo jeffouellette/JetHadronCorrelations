@@ -249,8 +249,8 @@ bool JetHadronSkimmer (const char* directory,
   tree->SetBranchAddress ("trk_eta",                &trk_eta);
   tree->SetBranchAddress ("trk_phi",                &trk_phi);
   tree->SetBranchAddress ("trk_charge",             &trk_charge);
-  tree->SetBranchAddress ("trk_HItight",            &trk_HItight);
-  tree->SetBranchAddress ("trk_HIloose",            &trk_HIloose);
+  tree->SetBranchAddress ("trk_HITight",            &trk_HITight);
+  tree->SetBranchAddress ("trk_HILoose",            &trk_HILoose);
   tree->SetBranchAddress ("trk_TightPrimary",       &trk_TightPrimary);
   tree->SetBranchAddress ("trk_d0",                 &trk_d0);
   tree->SetBranchAddress ("trk_d0sig",              &trk_d0sig);
@@ -258,16 +258,6 @@ bool JetHadronSkimmer (const char* directory,
   tree->SetBranchAddress ("trk_z0sig",              &trk_z0sig);
   tree->SetBranchAddress ("trk_theta",              &trk_theta);
   tree->SetBranchAddress ("trk_vz",                 &trk_vz);
-  tree->SetBranchAddress ("trk_nBLayerHits",        &trk_nBLayerHits);
-  tree->SetBranchAddress ("trk_nBLayerSharedHits",  &trk_nBLayerSharedHits);
-  tree->SetBranchAddress ("trk_nPixelHits",         &trk_nPixelHits);
-  tree->SetBranchAddress ("trk_nPixelDeadSensors",  &trk_nPixelDeadSensors);
-  tree->SetBranchAddress ("trk_nPixelSharedHits",   &trk_nPixelSharedHits);
-  tree->SetBranchAddress ("trk_nSCTHits",           &trk_nSCTHits);
-  tree->SetBranchAddress ("trk_nSCTDeadSensors",    &trk_nSCTDeadSensors);
-  tree->SetBranchAddress ("trk_nSCTSharedHits",     &trk_nSCTSharedHits);
-  tree->SetBranchAddress ("trk_nTRTHits",           &trk_nTRTHits);
-  tree->SetBranchAddress ("trk_nTRTSharedHits",     &trk_nTRTSharedHits);
   if (!IsCollisions ()) {
     tree->SetBranchAddress ("trk_prob_truth",     &trk_prob_truth);
     tree->SetBranchAddress ("trk_truth_pt",       &trk_truth_pt);
@@ -568,8 +558,8 @@ bool JetHadronSkimmer (const char* directory,
         out_trk_d0[out_trk_n] = trk_d0[iTrk];
         out_trk_z0[out_trk_n] = trk_z0[iTrk];
         out_trk_TightPrimary[out_trk_n] = trk_TightPrimary[iTrk];
-        out_trk_HITight[out_trk_n] = trk_HItight[iTrk];
-        out_trk_HILoose[out_trk_n] = trk_HIloose[iTrk];
+        out_trk_HITight[out_trk_n] = trk_HITight[iTrk];
+        out_trk_HILoose[out_trk_n] = trk_HILoose[iTrk];
         if (!IsCollisions ())
           out_trk_truth_matched[out_trk_n] = (trk_prob_truth[iTrk] > 0.5);
         out_trk_n++;

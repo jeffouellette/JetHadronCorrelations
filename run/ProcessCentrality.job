@@ -5,18 +5,28 @@ GetEnv = True
 InitialDir = /atlasgpfs01/usatlas/workarea/jeff/JetHadronCorrelations/run
 accounting_group = group_atlas.boulder
 
-alg = CentralityAnalysis
-gridRun = 031
-trig = MinBias
-syst = None
 
-#Arguments = $(alg) data_$(gridRun) $(runNumber) pPb16_5TeV Collisions $(trig) $(syst)
-#Error = errors/$(alg)_$(runNumber)_$(syst).err
-#Log = /tmp/jeff/logs/$(alg)_$(runNumber)_$(syst).log
-#Output = outputs/$(alg)_$(runNumber)_$(syst).out
-#Queue runNumber in (312796 312837 312937 312945 312968 314199)
+# Useful variables to set:
+# grid pass version
+gridPass=040
 
-Arguments = $(alg) data_$(gridRun) $(runNumber) pp17_5TeV Collisions $(trig) $(syst)
+# alg values: CentralityAnalysis
+alg=CentralityAnalysis
+
+# Trigger config; MinBias
+#trig=MinBias
+
+# Systematic config; Nominal
+syst=Nominal
+
+
+Arguments = $(alg) data_$(gridPass) $(runNumber) pPb16_5TeV Collisions $(trig) $(syst)
+Error = errors/$(alg)_$(runNumber)_$(syst).err
+Log = /tmp/jeff/logs/$(alg)_$(runNumber)_$(syst).log
+Output = outputs/$(alg)_$(runNumber)_$(syst).out
+Queue runNumber in (312796 312837 312937 312945 312968 314199)
+
+Arguments = $(alg) data_$(gridPass) $(runNumber) pp17_5TeV Collisions $(trig) $(syst)
 Error = errors/$(alg)_$(runNumber)_$(trig)_$(syst).err
 Log = /tmp/jeff/logs/$(alg)_$(runNumber)_$(trig)_$(syst).log
 Output = outputs/$(alg)_$(runNumber)_$(trig)_$(syst).out

@@ -11,11 +11,13 @@
 #include <AtlasUtils.h>
 
 #include <Utilities.h>
+#include <ArrayTemplates.h>
 
 #include <TSystemDirectory.h>
 
 #include <math.h>
 #include <iostream>
+#include <sstream>
 #include <fstream>
 
 
@@ -72,7 +74,7 @@ TString ToTString (const TriggerType tType) {
 
 TString ToTString (const SystFlag sFlag) {
   switch (sFlag) {
-    case SystFlag::None:                    return TString ("None");
+    case SystFlag::Nominal:                 return TString ("Nominal");
     case SystFlag::HITightVar:              return TString ("HITightVar");
     case SystFlag::PionsOnlyVar:            return TString ("PionsOnlyVar");
     case SystFlag::WithPileupVar:           return TString ("WithPileupVar");
@@ -85,6 +87,21 @@ TString ToTString (const SystFlag sFlag) {
     case SystFlag::JetES2PercDownVar:       return TString ("JetES2PercDownVar");
     case SystFlag::JetES2PercSmearVar:      return TString ("JetES2PercSmearVar");
     default:                                return TString ("???");
+  }
+}
+
+
+
+float GetRadius (const JetRadius r) {
+  switch (r) {
+    case JetRadius::R0p2:     return 0.2;
+    case JetRadius::R0p3:     return 0.3;
+    case JetRadius::R0p4:     return 0.4;
+    case JetRadius::R0p6:     return 0.6;
+    case JetRadius::R0p8:     return 0.8;
+    case JetRadius::R1p0:     return 1.0;
+    case JetRadius::Invalid:  return 0.;
+    default:                  return -1.;
   }
 }
 
@@ -587,30 +604,31 @@ void SetupDirectories (const TString dataSubDir, const bool addSubDir) {
   rootPath = extWorkPath + "rootFiles/" + dataSubDir + "/";
 
   if (addSubDir) {
-    if (DoHITightVar ())
-      rootPath = rootPath + "HITightVar/";
-    else if (DoPionsOnlyVar ())
-      rootPath = rootPath + "PionsOnlyVar/";
-    else if (DoWithPileupVar ())
-      rootPath = rootPath + "WithPileupVar/";
-    else if (DoFcalCentVar ())
-      rootPath = rootPath + "FcalCentVar/";
-    else if (DoFineFcalCentVar ())
-      rootPath = rootPath + "FineFcalCentVar/";
-    else if (DoJetES5PercUpVar ())
-      rootPath = rootPath + "JetES5PercUpVar/";
-    else if (DoJetES5PercDownVar ())
-      rootPath = rootPath + "JetES5PercDownVar/";
-    else if (DoJetES5PercSmearVar ())
-      rootPath = rootPath + "JetES5PercSmearVar/";
-    else if (DoJetES2PercUpVar ())
-      rootPath = rootPath + "JetES2PercUpVar/";
-    else if (DoJetES2PercDownVar ())
-      rootPath = rootPath + "JetES2PercDownVar/";
-    else if (DoJetES2PercSmearVar ())
-      rootPath = rootPath + "JetES2PercSmearVar/";
-    else
-      rootPath = rootPath + "Nominal/";
+    rootPath = rootPath + ToTString (systFlag) + "/";
+    //if (DoHITightVar ())
+    //  rootPath = rootPath + "HITightVar/";
+    //else if (DoPionsOnlyVar ())
+    //  rootPath = rootPath + "PionsOnlyVar/";
+    //else if (DoWithPileupVar ())
+    //  rootPath = rootPath + "WithPileupVar/";
+    //else if (DoFcalCentVar ())
+    //  rootPath = rootPath + "FcalCentVar/";
+    //else if (DoFineFcalCentVar ())
+    //  rootPath = rootPath + "FineFcalCentVar/";
+    //else if (DoJetES5PercUpVar ())
+    //  rootPath = rootPath + "JetES5PercUpVar/";
+    //else if (DoJetES5PercDownVar ())
+    //  rootPath = rootPath + "JetES5PercDownVar/";
+    //else if (DoJetES5PercSmearVar ())
+    //  rootPath = rootPath + "JetES5PercSmearVar/";
+    //else if (DoJetES2PercUpVar ())
+    //  rootPath = rootPath + "JetES2PercUpVar/";
+    //else if (DoJetES2PercDownVar ())
+    //  rootPath = rootPath + "JetES2PercDownVar/";
+    //else if (DoJetES2PercSmearVar ())
+    //  rootPath = rootPath + "JetES2PercSmearVar/";
+    //else
+    //  rootPath = rootPath + "Nominal/";
   }
 }
 
@@ -621,24 +639,18 @@ void SetupDirectories (const TString dataSubDir, const bool addSubDir) {
  */
 bool GetMCWeights (TString fname) {
   ifstream f_wgts;
-  f_wgts.open ("MC_Weights.dat");
+  f_wgts.open (Form ("%s/aux/MC_Weights.dat", workPath.Data ()));
 
-  string line;
+  std::string line;
   while (getline (f_wgts, line)) {
 
-    vector <string> words = {};
+    std::istringstream lineStream (line);
 
-    string word = "";
-    for (auto x : line) {
-        if (x == ' ') {
-            words.push_back (word);
-            word = "";
-        }
-        else {
-            word = word + x;
-        }
-    }
-    words.push_back (word);
+    std::vector <std::string> words = {};
+    std::string word;
+
+    while (lineStream >> word)
+      words.push_back (word);
 
     assert (words.size () == 4);
 
@@ -783,6 +795,8 @@ TString GetIdentifier (const int dataSet, const char* directory, const char* inF
 
   if (IsHijing ()) {
     id = id + "_Hijing";
+
+    // FROM Z+h analysis Hijing samples (now deprecated)
     if (TString (inFileName).Contains ("e4858") || TString (inFileName).Contains ("r11899") || TString (inFileName).Contains ("r11900") || TString (inFileName).Contains ("r11901") || TString (inFileName).Contains ("r11902") || TString (inFileName).Contains ("r11903"))
       id += "_SC";
     else if (TString (inFileName).Contains ("e4962") || TString (inFileName).Contains ("r11892") || TString (inFileName).Contains ("r11893") || TString (inFileName).Contains ("r11894") || TString (inFileName).Contains ("r11895") || TString (inFileName).Contains ("r11898"))
@@ -826,11 +840,13 @@ double GetJetLuminosity () {
 /**
  * Returns true if this jet passes selection criteria.
  */
-bool MeetsJetAcceptanceCuts (int iJ) {
-  if (fabs (akt4_hi_jet_eta_xcalib[iJ]) > 2.8)
-    return false;
-  if (IspPb () && InDisabledHEC (akt4_hi_jet_eta_xcalib[iJ], akt4_hi_jet_phi[iJ]))
-    return false;
+bool MeetsJetAcceptanceCuts (int iJ, const JetRadius radius) {
+  if (fabs (GetAktHIJetEta (iJ, radius)) > 2.8)
+    return false; // cut out forward jets
+  if (IspPb () && InDisabledHEC (GetAktHIJetEta (iJ, radius), GetAktHIJetPhi (iJ, radius), GetRadius (radius)))
+    return false; // cut out jets in the disabled HEC
+  if (IsCollisions () && Ispp () && UseMinBiasTriggers () && GetAktHIJetTiming (iJ, radius) > 10)
+    return false; // cut out jets with bad timing in pp if using MinBias trigger
   return true;
 }
 
@@ -877,12 +893,177 @@ bool MeetsTrackCuts (int iTrk) {
 
 
 /**
- * Returns the appropriate per-jet reweighting factor. Takes in coordinates for an anti-kT R=0.4 HI jet (pT, eta, & phi).
+ * Returns the matched truth jet within DR < pi to this HI jet.
+ * Returns -1 if no truth jet is matched within this DR range, or the radius is invalid.
+ */
+int GetAktTruthJetMatch (const int iJ, const JetRadius radius) {
+  float mindr = M_PI;
+  int match = -1;
+  const float jeta = GetAktHIJetEta (iJ, radius);
+  const float jphi = GetAktHIJetPhi (iJ, radius);
+
+  if (radius == JetRadius::R0p4) {
+    assert (akt4_hi_jet_n > iJ);
+    for (int iTJ = 0; iTJ < akt4_truth_jet_n; iTJ++) {
+      const float dr = DeltaR (jeta, akt4_truth_jet_eta[iTJ], jphi, akt4_truth_jet_phi[iTJ]);
+      if (dr < mindr) {
+        match = iTJ;
+        mindr = dr;
+      }
+    }
+  }
+
+  else if (radius == JetRadius::R0p2) {
+    assert (akt2_hi_jet_n > iJ);
+    for (int iTJ = 0; iTJ < akt2_truth_jet_n; iTJ++) {
+      const float dr = DeltaR (jeta, akt2_truth_jet_eta[iTJ], jphi, akt2_truth_jet_phi[iTJ]);
+      if (dr < mindr) {
+        match = iTJ;
+        mindr = dr;
+      }
+    }
+  }
+
+  return match;
+}
+
+
+
+/**
+ * Determines the optimal jet pT to return (EtaJES or Cross-calibrated).
+ * Jets in data must be cross-calibrated and jets in MC must not be, but jets in MC + data overlay should be cross-calibrated if they are not truth-matched.
+ * Returns NaN if radius was not recognized.
+ */
+float GetAktHIJetPt (const int iJ, const JetRadius radius) {
+  if (radius == JetRadius::R0p4) {
+    assert (akt4_hi_jet_n > iJ);
+    if (IsCollisions ())    return akt4_hi_jet_pt_xcalib[iJ];
+    if (!IsDataOverlay ())  return akt4_hi_jet_pt_etajes[iJ];
+    int TJ = GetAktTruthJetMatch (iJ, radius);
+    if (TJ >= 0 && DeltaR (GetAktHIJetEta (iJ, radius), akt4_truth_jet_eta[TJ], GetAktHIJetPhi (iJ, radius), akt4_truth_jet_phi[TJ]) < akt4_TruthMatchMaxDR)
+      return akt4_hi_jet_pt_etajes[iJ];
+    else
+      return akt4_hi_jet_pt_xcalib[iJ];
+  }
+
+  if (radius == JetRadius::R0p2) {
+    assert (akt2_hi_jet_n > iJ);
+    if (IsCollisions ())    return akt2_hi_jet_pt_xcalib[iJ];
+    if (!IsDataOverlay ())  return akt2_hi_jet_pt_etajes[iJ];
+    int TJ = GetAktTruthJetMatch (iJ, radius);
+    if (TJ >= 0 && DeltaR (GetAktHIJetEta (iJ, radius), akt2_truth_jet_eta[TJ], GetAktHIJetPhi (iJ, radius), akt2_truth_jet_phi[TJ]) < akt2_TruthMatchMaxDR)
+      return akt2_hi_jet_pt_etajes[iJ];
+    else
+      return akt2_hi_jet_pt_xcalib[iJ];
+  }
+
+  return std::nan ("");
+}
+
+
+
+/**
+ * Determines the optimal jet eta to return (EtaJES or Cross-calibrated).
+ * The cross-calibration does nothing to jet eta so this function is trivial.
+ * Returns NaN if radius was not recognized.
+ */
+float GetAktHIJetEta (const int iJ, const JetRadius radius) {
+  if (radius == JetRadius::R0p4) {
+    assert (akt4_hi_jet_n > iJ);
+    return akt4_hi_jet_eta_etajes[iJ];
+  }
+
+  if (radius == JetRadius::R0p2) {
+    assert (akt2_hi_jet_n > iJ);
+    return akt2_hi_jet_eta_etajes[iJ];
+  }
+
+  return std::nan ("");
+}
+
+
+
+/**
+ * Determines the optimal jet phi to return.
+ * The EtaJES and cross-calibration do nothing to jet phi so this function is trivial.
+ * Returns NaN if radius was not recognized.
+ */
+float GetAktHIJetPhi (const int iJ, const JetRadius radius) {
+  if (radius == JetRadius::R0p4) {
+    assert (akt4_hi_jet_n > iJ);
+    return akt4_hi_jet_phi[iJ];
+  }
+
+  if (radius == JetRadius::R0p2) {
+    assert (akt2_hi_jet_n > iJ);
+    return akt2_hi_jet_phi[iJ];
+  }
+
+  return std::nan ("");
+}
+
+
+
+/**
+ * Determines the optimal jet energy to return (EtaJES or Cross-calibrated).
+ * Jets in data must be cross-calibrated and jets in MC must not be, but jets in MC + data overlay should be cross-calibrated if they are not truth-matched.
+ * Returns NaN if radius was not recognized.
+ */
+float GetAktHIJetEn (const int iJ, const JetRadius radius) {
+  if (radius == JetRadius::R0p4) {
+    assert (akt4_hi_jet_n > iJ);
+    if (IsCollisions ())    return akt4_hi_jet_e_xcalib[iJ];
+    if (!IsDataOverlay ())  return akt4_hi_jet_e_etajes[iJ];
+    int TJ = GetAktTruthJetMatch (iJ, radius);
+    if (TJ >= 0 && DeltaR (GetAktHIJetEta (iJ, radius), akt4_truth_jet_eta[TJ], GetAktHIJetPhi (iJ, radius), akt4_truth_jet_phi[TJ]) < akt4_TruthMatchMaxDR)
+      return akt4_hi_jet_e_etajes[iJ];
+    else
+      return akt4_hi_jet_e_xcalib[iJ];
+  }
+
+  if (radius == JetRadius::R0p2) {
+    assert (akt2_hi_jet_n > iJ);
+    if (IsCollisions ())    return akt2_hi_jet_e_xcalib[iJ];
+    if (!IsDataOverlay ())  return akt2_hi_jet_e_etajes[iJ];
+    int TJ = GetAktTruthJetMatch (iJ, radius);
+    if (TJ >= 0 && DeltaR (GetAktHIJetEta (iJ, radius), akt2_truth_jet_eta[TJ], GetAktHIJetPhi (iJ, radius), akt2_truth_jet_phi[TJ]) < akt2_TruthMatchMaxDR)
+      return akt2_hi_jet_e_etajes[iJ];
+    else
+      return akt2_hi_jet_e_xcalib[iJ];
+  }
+
+  return std::nan ("");
+}
+
+
+
+/**
+ * Determines the optimal jet timing to return (depends on jet radius).
+ * Returns NaN if radius was not recognized.
+ */
+float GetAktHIJetTiming (const int iJ, const JetRadius radius) {
+  if (radius == JetRadius::R0p4) {
+    assert (akt4_hi_jet_n > iJ);
+    return akt4_hi_jet_timing[iJ];
+  }
+
+  if (radius == JetRadius::R0p2) {
+    assert (akt2_hi_jet_n > iJ);
+    return akt2_hi_jet_timing[iJ];
+  }
+
+  return std::nan ("");
+}
+
+
+
+/**
+ * Returns the appropriate per-jet reweighting factor. Takes in coordinates for an anti-kT HI jet (pT, eta, & phi).
  * Returns 0 if the jet is outside the acceptance.
  */
-double GetAkt4JetWeight (const float jpt, const float jeta, const float jphi, const float jetr) {
-  const double accept = ((IspPb () & InDisabledHEC (jeta, jphi)) || fabs (jeta) > 2.8 ? 0. : 1.);
-  const double hecwgt = (IspPb () && jeta > 1.1 && jeta < 3.6 ? (2.*M_PI / (3.*M_PI/2. - 2*jetr)) : 1.);
+double GetAktJetWeight (const float jpt, const float jeta, const float jphi, const JetRadius jetr) {
+  const double accept = ((IspPb () & InDisabledHEC (jeta, jphi, GetRadius (jetr))) || fabs (jeta) > 2.8 ? 0. : 1.);
+  const double hecwgt = (IspPb () && jeta > 1.1 && jeta < 3.6 ? (2.*M_PI / (3.*M_PI/2. - 2*GetRadius (jetr))) : 1.);
   return accept * hecwgt;
 }
 
@@ -898,8 +1079,13 @@ TH2D* LoadTrackingEfficiency () {
   std::cout << "Trying to resolve tracking performance file in " << fname.Data () << std::endl;
   TFile* infile = new TFile (fname, "read");
 
-  TH2D* h2 = (TH2D*) infile->Get (Form ("h2_truth_matched_reco_tracks_%s", "pp"))->Clone ("h2_tracking_efficiency");
-  h2->Divide ((TH2D*) infile->Get (Form ("h2_truth_tracks_%s", "pp")));
+  const std::string wp = "trk_TightPrimary";
+  const int iMult = nMultBins-1; // TODO change me for mult. unc.
+  const std::string sys = Ispp () ? "pp" : "pPb";
+  const int PID = 0; // TODO change me for part. comp. unc.
+
+  TH2D* h2 = (TH2D*) infile->Get (Form ("h2_truth_matched_primary_tracks_%s_PID%i_%s_iMult%i", sys.c_str (), PID, wp.c_str (), iMult))->Clone ("h2_tracking_efficiency");
+  h2->Divide ((TH2D*) infile->Get (Form ("h2_truth_tracks_%s_PID%i_iMult%i", sys.c_str (), PID, iMult)));
   std::cout << "Loaded tracking efficiencies, closing file" << std::endl;
 
   h2->SetDirectory (gdir);
@@ -922,8 +1108,12 @@ TH2D* LoadTrackingPurity () {
   std::cout << "Trying to resolve tracking performance file in " << fname.Data () << std::endl;
   TFile* infile = new TFile (fname, "read");
 
-  TH2D* h2 = (TH2D*) infile->Get (Form ("h2_primary_reco_tracks_%s", "pp"))->Clone ("h2_tracking_purity");
-  h2->Divide ((TH2D*) infile->Get (Form ("h2_reco_tracks_%s", "pp")));
+  const std::string wp = "trk_TightPrimary";
+  const int iMult = nMultBins-1;
+  const std::string sys = Ispp () ? "pp" : "pPb";
+
+  TH2D* h2 = (TH2D*) infile->Get (Form ("h2_primary_tracks_%s_%s_iMult%i", sys.c_str (), wp.c_str (), iMult))->Clone ("h2_tracking_purity");
+  h2->Divide ((TH2D*) infile->Get (Form ("h2_reco_tracks_%s_%s_iMult%i", sys.c_str (), wp.c_str (), iMult)));
   std::cout << "Loaded tracking purities, closing file" << std::endl;
 
   h2->SetDirectory (gdir);
@@ -932,6 +1122,33 @@ TH2D* LoadTrackingPurity () {
   SaferDelete (&infile);
 
   return h2;
+}
+
+
+
+/**
+ * Returns array of functions that fit the tracking purity.
+ */
+TF1** LoadTrackingPurityFuncs () {
+  TString fname = Form ("%s/aux/TrackingPerformance.root", workPath.Data ());
+  std::cout << "Trying to resolve tracking performance file in " << fname.Data () << std::endl;
+  TFile* infile = new TFile (fname, "read");
+
+  const std::string wp = "trk_TightPrimary";
+  const int iMult = nMultBins-1;
+  const std::string sys = Ispp () ? "pp" : "pPb";
+
+  TF1** f_trk_pur = Get1DArray <TF1*> (nEtaTrkBins);
+
+  for (int iEta = 0; iEta < nEtaTrkBins; iEta++)
+    f_trk_pur[iEta] = (TF1*) ((TF1*) infile->Get (Form ("f_primary_rate_%s_%s_iMult%i_iEta%i", sys.c_str (), wp.c_str (), iMult, iEta)))->Clone (Form ("f_primary_rate_iMult%i_iEta%i", iMult, iEta));
+
+  std::cout << "Loaded tracking purity functions" << std::endl;
+
+  infile->Close ();
+  SaferDelete (&infile);
+
+  return f_trk_pur;
 }
 
 

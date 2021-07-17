@@ -14,12 +14,12 @@
 //std::vector <TString> variations = {"Nominal", "JetES5PercUpVar", "JetES5PercDownVar", "JetES5PercSmearVar", "JetES2PercUpVar", "JetES2PercDownVar", "JetES2PercSmearVar"};
 //const int nVar = 9;
 //std::vector <TString> variations = {"Nominal", "JetES5PercUpVar", "JetES5PercDownVar", "JetES2PercUpVar", "JetES2PercDownVar", "FcalCentVar", "FcalMixCatVar", "pPbFcalMixCatVar", "ppFcalMixCatVar"};
-const int nVar = 10;
-std::vector <TString> variations = {"Nominal", "JetES5PercUpVar", "JetES5PercDownVar", "FcalCentVar", "NoFcalMixCatVar", "pPbFcalMixCatVar", "ppFcalMixCatVar", "MixCatVar1", "MixCatVar2", "MixCatVar3"};
+//const int nVar = 10;
+//std::vector <TString> variations = {"Nominal", "JetES5PercUpVar", "JetES5PercDownVar", "FcalCentVar", "NoFcalMixCatVar", "pPbFcalMixCatVar", "ppFcalMixCatVar", "MixCatVar1", "MixCatVar2", "MixCatVar3"};
 //const int nVar = 5;
 //std::vector <TString> variations = {"Nominal", "JetES5PercUpVar", "JetES5PercDownVar", "JetES2PercUpVar", "JetES2PercDownVar"};
-//const int nVar = 1;
-//std::vector <TString> variations = {"Nominal"};
+const int nVar = 1;
+std::vector <TString> variations = {"Nominal"};
 
 
 std::map <TString, MyStyle> varStyles = {

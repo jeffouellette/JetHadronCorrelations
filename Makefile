@@ -4,7 +4,7 @@ LDFLAGS=`root-config --glibs --ldflags` -Llib -L${ROOT_UTILS_PATH}/lib -L${ATLAS
 
 libraries = LocalUtilities
 algorithms = JetHadronSkimmer CentralityAnalysis JetSubtractedEnergy TrackingPerformance TrackMomentumResolution JetEnergyResolution
-binaries = Process RunCorrelator
+binaries = Process AnalyzeTrackMomentumResolution RunCorrelator
 
 .PHONY : libs algs bins directories clean
 
@@ -24,8 +24,11 @@ LocalUtilities : src/LocalUtilities.cxx
 Process : $(libraries) $(algorithms) src/Process.cxx
 	$(CXX) $(CXXFLAGS) src/Process.cxx $(LDFLAGS) $(libraries:%=-l%) $(algorithms:%=-l%) -o bin/Process.exe
 
-RunCorrelator : $(libraries) src/RunCorrelator.C
-	$(CXX) $(CXXFLAGS) src/RunCorrelator.C $(LDFLAGS) $(libraries:%=-l%) $(algorithms:%=-l%) -o bin/RunCorrelator.exe
+RunCorrelator : $(libraries) src/RunCorrelator.cxx
+	$(CXX) $(CXXFLAGS) src/RunCorrelator.cxx $(LDFLAGS) $(libraries:%=-l%) $(algorithms:%=-l%) -o bin/RunCorrelator.exe
+
+AnalyzeTrackMomentumResolution : $(libraries) src/AnalyzeTrackMomentumResolution.C
+	$(CXX) $(CXXFLAGS) src/AnalyzeTrackMomentumResolution.C $(LDFLAGS) $(libraries:%=-l%) $(algorithms:%=-l%) -o bin/AnalyzeTrackMomentumResolution.exe
 
 obj/%.o : src/%.cxx
 	$(CXX) $(CXXFLAGS) -c -o $@ $<

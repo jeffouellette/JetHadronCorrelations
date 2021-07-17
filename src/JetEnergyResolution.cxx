@@ -9,6 +9,7 @@
 #include "LocalUtilities.h"
 
 #include <Utilities.h>
+#include <ArrayTemplates.h>
 
 #include <TChain.h>
 #include <TSystem.h>
@@ -41,6 +42,7 @@ bool JetEnergyResolution (const char* directory,
   if (IsHijing ())
     cout << "Info: In JetEnergyResolution.cxx: Running over Hijing sample" << endl;
 
+  // this identifier here corresponds to the name of the output file
   const TString identifier = GetIdentifier (dataSet, directory, inFileName);
   cout << "Info: In JetEnergyResolution.cxx: File Identifier: " << identifier << endl;
   cout << "Info: In JetEnergyResolution.cxx: Saving output to " << rootPath << endl;
@@ -78,16 +80,49 @@ bool JetEnergyResolution (const char* directory,
     std::cout << "Info: In JetEnergyResolution.cxx: Chain has " << tree->GetListOfFiles ()->GetEntries () << " files, " << tree->GetEntries () << " entries" << std::endl;
   }
 
-  //TFile* eventWeightsFile = nullptr;
-  //TH1D* h_weights = nullptr;
 
-  //eventWeightsFile = new TFile (eventWeightsFileName, "read");
-  //h_weights = (TH1D*) eventWeightsFile->Get (Form ("h_PbPb%s_weights_%s", doNchWeighting ? "Nch" : "FCal", isHijing ? "hijing" : "mc"));
-  //cout << "Info: In JetEnergyResolution.cxx: Found FCal weighting histogram, " << h_weights->GetName () << endl;
+  if (!IsHijing ()) {
+    assert (crossSectionPicoBarns > 0);
+    assert (mcFilterEfficiency > 0);
+    assert (mcNumberEvents > 0);
+  }
 
-  //First sort jets & tracks into many, smaller TTrees.
-  //This is where the sorting based on event information (e.g. centrality, Ntrk, jet pT) will go.
-  //Event mixing will take place based on these categories so that total memory usage at any point in time is minimized.
+
+  // variables for filtering MC truth
+  double truth_jet_min_pt = 0, truth_jet_max_pt = DBL_MAX;
+  if (TString (inFileName).Contains ("JZ0")) {
+    truth_jet_min_pt = 0;
+    truth_jet_max_pt = 20;
+  }
+  else if (TString (inFileName).Contains ("JZ1")) {
+    truth_jet_min_pt = 20;
+    truth_jet_max_pt = 60;
+  }
+  else if (TString (inFileName).Contains ("JZ2")) {
+    truth_jet_min_pt = 60;
+    truth_jet_max_pt = 160;
+  }
+  else if (TString (inFileName).Contains ("JZ3")) {
+    truth_jet_min_pt = 160;
+    truth_jet_max_pt = 400;
+  }
+  else if (TString (inFileName).Contains ("JZ4")) {
+    truth_jet_min_pt = 400;
+    truth_jet_max_pt = 800;
+  }
+  else if (TString (inFileName).Contains ("JZ5")) {
+    truth_jet_min_pt = 800;
+    truth_jet_max_pt = 1300;
+  }
+  if (truth_jet_min_pt != 0)
+    std::cout << "Checking for leading truth jet with pT > " << truth_jet_min_pt << std::endl;
+  if (truth_jet_max_pt != DBL_MAX)
+    std::cout << "Checking for leading truth jet with pT < " << truth_jet_max_pt << std::endl;
+
+
+  std::cout << "Anti-kT R=0.2 jets truth matched to within dR < " << akt2_TruthMatchMaxDR << std::endl;
+  std::cout << "Anti-kT R=0.4 jets truth matched to within dR < " << akt4_TruthMatchMaxDR << std::endl;
+
 
   tree->SetBranchAddress ("run_number",     &run_number);
   tree->SetBranchAddress ("event_number",   &event_number);
@@ -129,21 +164,12 @@ bool JetEnergyResolution (const char* directory,
   tree->SetBranchAddress ("fcalC_et",       &fcalC_et);
 
 
-  if (!Ispp ()) {
-    tree->SetBranchAddress ("ZdcCalibEnergy_A",   &ZdcCalibEnergy_A);
-    tree->SetBranchAddress ("ZdcCalibEnergy_C",   &ZdcCalibEnergy_C);
-    tree->SetBranchAddress ("ZdcRawEnergy_A",     &ZdcRawEnergy_A);
-    tree->SetBranchAddress ("ZdcRawEnergy_C",     &ZdcRawEnergy_C);
-  }
+  tree->SetBranchAddress ("akt2_truth_jet_n",     &akt2_truth_jet_n);
+  tree->SetBranchAddress ("akt2_truth_jet_pt",    &akt2_truth_jet_pt);
+  tree->SetBranchAddress ("akt2_truth_jet_eta",   &akt2_truth_jet_eta);
+  tree->SetBranchAddress ("akt2_truth_jet_phi",   &akt2_truth_jet_phi);
+  tree->SetBranchAddress ("akt2_truth_jet_e",     &akt2_truth_jet_e);
 
-
-  if (!IsCollisions ()) {
-    tree->SetBranchAddress ("akt2_truth_jet_n",     &akt2_truth_jet_n);
-    tree->SetBranchAddress ("akt2_truth_jet_pt",    &akt2_truth_jet_pt);
-    tree->SetBranchAddress ("akt2_truth_jet_eta",   &akt2_truth_jet_eta);
-    tree->SetBranchAddress ("akt2_truth_jet_phi",   &akt2_truth_jet_phi);
-    tree->SetBranchAddress ("akt2_truth_jet_e",     &akt2_truth_jet_e);
-  }
 
   tree->SetBranchAddress ("akt2_hi_jet_n",            &akt2_hi_jet_n);
   tree->SetBranchAddress ("akt2_hi_jet_pt_precalib",  &akt2_hi_jet_pt_precalib);
@@ -160,13 +186,12 @@ bool JetEnergyResolution (const char* directory,
   tree->SetBranchAddress ("akt2_hi_jet_sub_e",        &akt2_hi_jet_sub_e);
 
 
-  if (!IsCollisions ()) {
-    tree->SetBranchAddress ("akt4_truth_jet_n",     &akt4_truth_jet_n);
-    tree->SetBranchAddress ("akt4_truth_jet_pt",    &akt4_truth_jet_pt);
-    tree->SetBranchAddress ("akt4_truth_jet_eta",   &akt4_truth_jet_eta);
-    tree->SetBranchAddress ("akt4_truth_jet_phi",   &akt4_truth_jet_phi);
-    tree->SetBranchAddress ("akt4_truth_jet_e",     &akt4_truth_jet_e);
-  }
+  tree->SetBranchAddress ("akt4_truth_jet_n",     &akt4_truth_jet_n);
+  tree->SetBranchAddress ("akt4_truth_jet_pt",    &akt4_truth_jet_pt);
+  tree->SetBranchAddress ("akt4_truth_jet_eta",   &akt4_truth_jet_eta);
+  tree->SetBranchAddress ("akt4_truth_jet_phi",   &akt4_truth_jet_phi);
+  tree->SetBranchAddress ("akt4_truth_jet_e",     &akt4_truth_jet_e);
+
 
   tree->SetBranchAddress ("akt4_hi_jet_n",            &akt4_hi_jet_n);
   tree->SetBranchAddress ("akt4_hi_jet_pt_precalib",  &akt4_hi_jet_pt_precalib);
@@ -191,44 +216,48 @@ bool JetEnergyResolution (const char* directory,
   else if (IspPb ())  sys = "pPb";
   else                sys = "???";
 
-  const int nFinerEtaBins = 90;
-  const double* finerEtaBins = linspace (-4.5, 4.5, nFinerEtaBins);
+  const int nFinerEtaBins = 56;
+  const double* finerEtaBins = linspace (-2.8, 2.8, nFinerEtaBins);
 
-  const double enJBins[] = {10, 12, 15, 18, 22, 26, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 100, 120, 140, 160, 180, 200, 220, 240, 260, 280, 300, 320, 360, 400, 450, 500};
-  const int nEnJBins = sizeof (enJBins) / sizeof (enJBins[0]) - 1;
+  const int nRespBins = 240;
+  const double* respBins = linspace (0, 2.4, nRespBins);
 
-  TH1D*** h_r2_jpts = new TH1D**[nEnJBins];
-  TH1D*** h_r2_jes = new TH1D**[nEnJBins];
-  TH1D*** h_r2_jetacorr = new TH1D**[nEnJBins];
-  TH1D*** h_r4_jpts = new TH1D**[nEnJBins];
-  TH1D*** h_r4_jes = new TH1D**[nEnJBins];
-  TH1D*** h_r4_jetacorr = new TH1D**[nEnJBins];
+  const int nEtaRespBins = 80;
+  const double* etaRespBins = linspace (-0.2, 0.2, nEtaRespBins);
 
-  for (int iEnJ = 0; iEnJ < nEnJBins; iEnJ++) {
-    h_r2_jpts[iEnJ] = new TH1D*[nFinerEtaBins];
-    h_r2_jes[iEnJ] = new TH1D*[nFinerEtaBins];
-    h_r2_jetacorr[iEnJ] = new TH1D*[nFinerEtaBins];
+  const double pTJBins[] = {10, 12, 15, 18, 22, 26, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 100, 120, 140, 160, 180, 200, 220, 240, 260, 280, 300, 320, 360, 400, 450, 500, 550, 600, 650, 700, 750, 800, 900, 1000, 1100, 1200, 1300};
+  const int nPtJBins = sizeof (pTJBins) / sizeof (pTJBins[0]) - 1;
 
-    h_r4_jpts[iEnJ] = new TH1D*[nFinerEtaBins];
-    h_r4_jes[iEnJ] = new TH1D*[nFinerEtaBins];
-    h_r4_jetacorr[iEnJ] = new TH1D*[nFinerEtaBins];
+
+  // Initialize a bunch of histograms --
+  TH1D*** h_r2_jpts     = Get2DArray <TH1D*> (nPtJBins, nFinerEtaBins);
+  TH1D*** h_r2_jes      = Get2DArray <TH1D*> (nPtJBins, nFinerEtaBins);
+  TH1D*** h_r2_jetacorr = Get2DArray <TH1D*> (nPtJBins, nFinerEtaBins);
+  TH1D*** h_r4_jpts     = Get2DArray <TH1D*> (nPtJBins, nFinerEtaBins);
+  TH1D*** h_r4_jes      = Get2DArray <TH1D*> (nPtJBins, nFinerEtaBins);
+  TH1D*** h_r4_jetacorr = Get2DArray <TH1D*> (nPtJBins, nFinerEtaBins);
+
+  for (int iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
 
     for (int iEta = 0; iEta < nFinerEtaBins; iEta++) {
-      h_r2_jpts[iEnJ][iEta] = new TH1D (Form ("h_r2_jpts_%s_iEnJ%i_iEta%i", sys.Data (), iEnJ, iEta), "#it{p}_{T}^{reco} / #it{p}_{T}^{truth}", 140, 0.3, 1.7);
-      h_r2_jpts[iEnJ][iEta]->Sumw2 ();
-      h_r2_jes[iEnJ][iEta] = new TH1D (Form ("h_r2_jes_%s_iEnJ%i_iEta%i", sys.Data (), iEnJ, iEta), "#it{E}_{reco} / #it{E}_{truth}", 140, 0.3, 1.7);
-      h_r2_jes[iEnJ][iEta]->Sumw2 ();
-      h_r2_jetacorr[iEnJ][iEta] = new TH1D (Form ("h_r2_jetacorr_%s_iEnJ%i_iEta%i", sys.Data (), iEnJ, iEta), "#eta_{reco} - #eta_{truth}", 80, -0.2, 0.2);
-      h_r2_jetacorr[iEnJ][iEta]->Sumw2 ();
 
-      h_r4_jpts[iEnJ][iEta] = new TH1D (Form ("h_r4_jpts_%s_iEnJ%i_iEta%i", sys.Data (), iEnJ, iEta), "#it{p}_{T}^{reco} / #it{p}_{T}^{truth}", 140, 0.3, 1.7);
-      h_r4_jpts[iEnJ][iEta]->Sumw2 ();
-      h_r4_jes[iEnJ][iEta] = new TH1D (Form ("h_r4_jes_%s_iEnJ%i_iEta%i", sys.Data (), iEnJ, iEta), "#it{E}_{reco} / #it{E}_{truth}", 140, 0.3, 1.7);
-      h_r4_jes[iEnJ][iEta]->Sumw2 ();
-      h_r4_jetacorr[iEnJ][iEta] = new TH1D (Form ("h_r4_jetacorr_%s_iEnJ%i_iEta%i", sys.Data (), iEnJ, iEta), "#eta_{reco} - #eta_{truth}", 80, -0.2, 0.2);
-      h_r4_jetacorr[iEnJ][iEta]->Sumw2 ();
+      h_r2_jpts[iPtJ][iEta] = new TH1D (Form ("h_r2_jpts_%s_iPtJ%i_iEta%i", sys.Data (), iPtJ, iEta), ";#it{p}_{T}^{reco} / #it{p}_{T}^{truth};Counts", nRespBins, respBins);
+      h_r2_jpts[iPtJ][iEta]->Sumw2 ();
+      h_r2_jes[iPtJ][iEta] = new TH1D (Form ("h_r2_jes_%s_iPtJ%i_iEta%i", sys.Data (), iPtJ, iEta), ";#it{E}_{reco} / #it{E}_{truth};Counts", nRespBins, respBins);
+      h_r2_jes[iPtJ][iEta]->Sumw2 ();
+      h_r2_jetacorr[iPtJ][iEta] = new TH1D (Form ("h_r2_jetacorr_%s_iPtJ%i_iEta%i", sys.Data (), iPtJ, iEta), ";#eta_{reco} - #eta_{truth};Counts", nEtaRespBins, etaRespBins);
+      h_r2_jetacorr[iPtJ][iEta]->Sumw2 ();
+
+      h_r4_jpts[iPtJ][iEta] = new TH1D (Form ("h_r4_jpts_%s_iPtJ%i_iEta%i", sys.Data (), iPtJ, iEta), ";#it{p}_{T}^{reco} / #it{p}_{T}^{truth};Counts", nRespBins, respBins);
+      h_r4_jpts[iPtJ][iEta]->Sumw2 ();
+      h_r4_jes[iPtJ][iEta] = new TH1D (Form ("h_r4_jes_%s_iPtJ%i_iEta%i", sys.Data (), iPtJ, iEta), ";#it{E}_{reco} / #it{E}_{truth};Counts", nRespBins, respBins);
+      h_r4_jes[iPtJ][iEta]->Sumw2 ();
+      h_r4_jetacorr[iPtJ][iEta] = new TH1D (Form ("h_r4_jetacorr_%s_iPtJ%i_iEta%i", sys.Data (), iPtJ, iEta), ";#eta_{reco} - #eta_{truth};Counts", nEtaRespBins, etaRespBins);
+      h_r4_jetacorr[iPtJ][iEta]->Sumw2 ();
+
     } // end loop over iEta
-  } // end loop over iEnJ
+
+  } // end loop over iPtJ
 
   
 
@@ -240,47 +269,59 @@ bool JetEnergyResolution (const char* directory,
       cout << "Info: In JetEnergyResolution.cxx: Event loop " << iEvt / (nEvts / 100) << "\% done...\r" << flush;
     tree->GetEntry (iEvt);
 
-    bool hasPrimary = false;
-    bool hasPileup = false;
-    float vz = -999;
-    for (int iVert = 0; iVert < nvert; iVert++) {
-      const bool isPrimary = (vert_type[iVert] == 1);
-      hasPrimary = hasPrimary || isPrimary;
-      hasPileup = hasPileup || (vert_type[iVert] == 3);
-      if (isPrimary)
-        vz = vert_z[iVert];
-    }
-    if (!hasPrimary || hasPileup || fabs (vz) > 150)
-    //if (!hasPrimary || fabs (vz) > 150)
-      continue;
-
-    for (int iJet = 0; iJet < akt2_hi_jet_n; iJet++) {
-      if (!MeetsJetAcceptanceCuts (iJet))
+    // reject events with pileup vertices or too high z-vertex
+    {
+      bool hasPrimary = false;
+      bool hasPileup = false;
+      float vz = -999;
+      for (int iVert = 0; iVert < nvert; iVert++) {
+        const bool isPrimary = (vert_type[iVert] == 1);
+        hasPrimary = hasPrimary || isPrimary;
+        hasPileup = hasPileup || (vert_type[iVert] == 3);
+        if (isPrimary)
+          vz = vert_z[iVert];
+      }
+      if (!hasPrimary || hasPileup || fabs (vz) > 150)
+      //if (!hasPrimary || fabs (vz) > 150)
         continue;
+    }
 
-      const float jpt = akt2_hi_jet_pt_xcalib[iJet];
-      const float jeta = akt2_hi_jet_eta_xcalib[iJet];
-      const float jphi = akt2_hi_jet_phi[iJet];
-      const float jen = akt2_hi_jet_e_xcalib[iJet];
 
-      int iTJet = -1;
-      for (int jTJet = 0; jTJet < akt2_truth_jet_n; jTJet++) {
-        if (iTJet == -1 || DeltaR (jeta, akt2_truth_jet_eta[jTJet], jphi, akt2_truth_jet_phi[jTJet]) < DeltaR (jeta, akt2_truth_jet_eta[iTJet], jphi, akt2_truth_jet_phi[iTJet]))
-          iTJet = jTJet;
+    // Filter sample based on min/max of pThat range
+    if (!IsHijing ()) {
+      int iLTJ = -1;
+      for (int iTJ = 0; iTJ < akt4_truth_jet_n; iTJ++) {
+        if (iLTJ == -1 || akt4_truth_jet_pt[iTJ] > akt4_truth_jet_pt[iLTJ])
+          iLTJ = iTJ;
       }
 
-      if (iTJet == -1 || DeltaR (jeta, akt2_truth_jet_eta[iTJet], jphi, akt2_truth_jet_phi[iTJet]) > 0.2)
+      if (iLTJ == -1 || akt4_truth_jet_pt[iLTJ] < truth_jet_min_pt || akt4_truth_jet_pt[iLTJ] > truth_jet_max_pt)
+        continue;
+    }
+
+
+    for (int iJet = 0; iJet < akt2_hi_jet_n; iJet++) {
+      if (!MeetsJetAcceptanceCuts (iJet, JetRadius::R0p2))
+        continue;
+
+      const float jpt = GetAktHIJetPt (iJet, JetRadius::R0p2);
+      const float jeta = GetAktHIJetEta (iJet, JetRadius::R0p2);
+      const float jphi = GetAktHIJetPhi (iJet, JetRadius::R0p2);
+      const float jen = GetAktHIJetEn (iJet, JetRadius::R0p2);
+
+      const int iTJet = GetAktTruthJetMatch (iJet, JetRadius::R0p2);
+      if (iTJet == -1 || DeltaR (jeta, akt2_truth_jet_eta[iTJet], jphi, akt2_truth_jet_phi[iTJet]) > akt2_TruthMatchMaxDR)
         continue;
 
       const float tjpt = akt2_truth_jet_pt[iTJet];
       const float tjeta = akt2_truth_jet_eta[iTJet];
-      //const float tjphi = akt2_truth_jet_phi[iTJet];
+      const float tjphi = akt2_truth_jet_phi[iTJet];
       const float tjen = akt2_truth_jet_e[iTJet];
 
-      short iEnJ = -1;
-      if (enJBins[0] <= tjpt) {
-        iEnJ = 0;
-        while (iEnJ < nEnJBins && enJBins[iEnJ+1] < tjpt) iEnJ++;
+      short iPtJ = -1;
+      if (pTJBins[0] <= tjpt) {
+        iPtJ = 0;
+        while (iPtJ < nPtJBins && pTJBins[iPtJ+1] < tjpt) iPtJ++;
       }
 
       short iEta = -1;
@@ -289,41 +330,36 @@ bool JetEnergyResolution (const char* directory,
         while (iEta < nFinerEtaBins && finerEtaBins[iEta+1] < tjeta) iEta++;
       }
 
-      if (iEnJ >= 0 && iEnJ < nEnJBins && iEta >= 0 && iEta < nFinerEtaBins) {
-        h_r2_jpts[iEnJ][iEta]->Fill (jpt / tjpt);
-        h_r2_jes[iEnJ][iEta]->Fill (jen / tjen);
-        h_r2_jetacorr[iEnJ][iEta]->Fill (jeta - tjeta);
+      if (iPtJ >= 0 && iPtJ < nPtJBins && iEta >= 0 && iEta < nFinerEtaBins) {
+        h_r2_jpts[iPtJ][iEta]->Fill (jpt / tjpt);
+        h_r2_jes[iPtJ][iEta]->Fill (jen / tjen);
+        h_r2_jetacorr[iPtJ][iEta]->Fill (jeta - tjeta);
       }
     } // end loop over R=0.2 jets
 
 
     for (int iJet = 0; iJet < akt4_hi_jet_n; iJet++) {
-      if (!MeetsJetAcceptanceCuts (iJet))
+      if (!MeetsJetAcceptanceCuts (iJet, JetRadius::R0p4))
         continue;
 
-      const float jpt = akt4_hi_jet_pt_xcalib[iJet];
-      const float jeta = akt4_hi_jet_eta_xcalib[iJet];
-      const float jphi = akt4_hi_jet_phi[iJet];
-      const float jen = akt4_hi_jet_e_xcalib[iJet];
+      const float jpt = GetAktHIJetPt (iJet, JetRadius::R0p4);
+      const float jeta = GetAktHIJetEta (iJet, JetRadius::R0p4);
+      const float jphi = GetAktHIJetPhi (iJet, JetRadius::R0p4);
+      const float jen = GetAktHIJetEn (iJet, JetRadius::R0p4);
 
-      int iTJet = -1;
-      for (int jTJet = 0; jTJet < akt4_truth_jet_n; jTJet++) {
-        if (iTJet == -1 || DeltaR (jeta, akt4_truth_jet_eta[jTJet], jphi, akt4_truth_jet_phi[jTJet]) < DeltaR (jeta, akt4_truth_jet_eta[iTJet], jphi, akt4_truth_jet_phi[iTJet]))
-          iTJet = jTJet;
-      }
-
-      if (iTJet == -1 || DeltaR (jeta, akt4_truth_jet_eta[iTJet], jphi, akt4_truth_jet_phi[iTJet]) > 0.2)
+      const int iTJet = GetAktTruthJetMatch (iJet, JetRadius::R0p4);
+      if (iTJet == -1 || DeltaR (jeta, akt4_truth_jet_eta[iTJet], jphi, akt4_truth_jet_phi[iTJet]) > akt4_TruthMatchMaxDR)
         continue;
 
       const float tjpt = akt4_truth_jet_pt[iTJet];
       const float tjeta = akt4_truth_jet_eta[iTJet];
-      //const float tjphi = akt4_truth_jet_phi[iTJet];
+      const float tjphi = akt4_truth_jet_phi[iTJet];
       const float tjen = akt4_truth_jet_e[iTJet];
 
-      short iEnJ = -1;
-      if (enJBins[0] <= tjpt) {
-        iEnJ = 0;
-        while (iEnJ < nEnJBins && enJBins[iEnJ+1] < tjpt) iEnJ++;
+      short iPtJ = -1;
+      if (pTJBins[0] <= tjpt) {
+        iPtJ = 0;
+        while (iPtJ < nPtJBins && pTJBins[iPtJ+1] < tjpt) iPtJ++;
       }
 
       short iEta = -1;
@@ -332,10 +368,10 @@ bool JetEnergyResolution (const char* directory,
         while (iEta < nFinerEtaBins && finerEtaBins[iEta+1] < tjeta) iEta++;
       }
 
-      if (iEnJ >= 0 && iEnJ < nEnJBins && iEta >= 0 && iEta < nFinerEtaBins) {
-        h_r4_jpts[iEnJ][iEta]->Fill (jpt / tjpt);
-        h_r4_jes[iEnJ][iEta]->Fill (jen / tjen);
-        h_r4_jetacorr[iEnJ][iEta]->Fill (jeta - tjeta);
+      if (iPtJ >= 0 && iPtJ < nPtJBins && iEta >= 0 && iEta < nFinerEtaBins) {
+        h_r4_jpts[iPtJ][iEta]->Fill (jpt / tjpt);
+        h_r4_jes[iPtJ][iEta]->Fill (jen / tjen);
+        h_r4_jetacorr[iPtJ][iEta]->Fill (jeta - tjeta);
       }
     } // end loop over R=0.4 jets
   } // end event loop
@@ -347,23 +383,23 @@ bool JetEnergyResolution (const char* directory,
 
   outFile->cd ();
 
-  for (int iEnJ = 0; iEnJ < nEnJBins; iEnJ++) {
+  for (int iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
     for (int iEta = 0; iEta < nFinerEtaBins; iEta++) {
-      h_r2_jpts[iEnJ][iEta]->Write ();
-      SaferDelete (&(h_r2_jpts[iEnJ][iEta]));
-      h_r2_jes[iEnJ][iEta]->Write ();
-      SaferDelete (&(h_r2_jes[iEnJ][iEta]));
-      h_r2_jetacorr[iEnJ][iEta]->Write ();
-      SaferDelete (&(h_r2_jetacorr[iEnJ][iEta]));
+      h_r2_jpts[iPtJ][iEta]->Write ();
+      SaferDelete (&(h_r2_jpts[iPtJ][iEta]));
+      h_r2_jes[iPtJ][iEta]->Write ();
+      SaferDelete (&(h_r2_jes[iPtJ][iEta]));
+      h_r2_jetacorr[iPtJ][iEta]->Write ();
+      SaferDelete (&(h_r2_jetacorr[iPtJ][iEta]));
 
-      h_r4_jpts[iEnJ][iEta]->Write ();
-      SaferDelete (&(h_r4_jpts[iEnJ][iEta]));
-      h_r4_jes[iEnJ][iEta]->Write ();
-      SaferDelete (&(h_r4_jes[iEnJ][iEta]));
-      h_r4_jetacorr[iEnJ][iEta]->Write ();
-      SaferDelete (&(h_r4_jetacorr[iEnJ][iEta]));
+      h_r4_jpts[iPtJ][iEta]->Write ();
+      SaferDelete (&(h_r4_jpts[iPtJ][iEta]));
+      h_r4_jes[iPtJ][iEta]->Write ();
+      SaferDelete (&(h_r4_jes[iPtJ][iEta]));
+      h_r4_jetacorr[iPtJ][iEta]->Write ();
+      SaferDelete (&(h_r4_jetacorr[iPtJ][iEta]));
     } // end loop over iEta
-  } // end loop over iEnJ
+  } // end loop over iPtJ
 
   outFile->Write (0, TObject::kOverwrite);
   outFile->Close ();

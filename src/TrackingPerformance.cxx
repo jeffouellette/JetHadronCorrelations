@@ -17,8 +17,6 @@
 
 #include <iostream>
 
-using namespace std;
-
 namespace JetHadronCorrelations {
 
 bool TrackingPerformance (const char* directory,
@@ -26,20 +24,20 @@ bool TrackingPerformance (const char* directory,
                           const char* inFileName,
                           const char* eventWeightsFileName) {
  
-  cout << "Info: In TrackingPerformance.cxx: Entered TrackingPerformance routine." << endl;
-  cout << "Info: In TrackingPerformance.cxx: Printing systematic onfiguration:";
+  std::cout << "Info: In TrackingPerformance.cxx: Entered TrackingPerformance routine." << std::endl;
+  std::cout << "Info: In TrackingPerformance.cxx: Printing systematic onfiguration:";
 
   SetupDirectories ("TrackingPerformance");
 
   if (IsCollisions ()) {
-    cout << "Error: In TrackingPerformance.cxx: Trying to calculate tracking performance in data! Quitting." << endl;
+    std::cout << "Error: In TrackingPerformance.cxx: Trying to calculate tracking performance in data! Quitting." << std::endl;
     return false;
   }
 
   if (IsDataOverlay ())
-    cout << "Info: In TrackingPerformance.cxx: Running over data overlay, will check data conditions" << endl;
+    std::cout << "Info: In TrackingPerformance.cxx: Running over data overlay, will check data conditions" << std::endl;
   if (IsHijing ())
-    cout << "Info: In TrackingPerformance.cxx: Running over Hijing sample" << endl;
+    std::cout << "Info: In TrackingPerformance.cxx: Running over Hijing sample" << std::endl;
 
   // this identifier here corresponds to the name of the output file
   const TString identifier = GetIdentifier (dataSet, directory, inFileName);
@@ -51,7 +49,7 @@ bool TrackingPerformance (const char* directory,
   TString fileIdentifier;
   if (TString (inFileName) == "") {
     if (IsCollisions ()) {
-      fileIdentifier = to_string (dataSet);
+      fileIdentifier = std::to_string (dataSet);
     }
     else {
       std::cout << "Error: In TrackingPerformance.cxx: Cannot identify this MC file! Quitting." << std::endl;
@@ -79,13 +77,44 @@ bool TrackingPerformance (const char* directory,
     std::cout << "Info: In TrackingPerformance.cxx: Chain has " << tree->GetListOfFiles ()->GetEntries () << " files, " << tree->GetEntries () << " entries" << std::endl;
   }
 
-  // TODO: event weights
-  //TFile* eventWeightsFile = nullptr;
-  //TH1D* h_weights = nullptr;
 
-  //eventWeightsFile = new TFile (eventWeightsFileName, "read");
-  //h_weights = (TH1D*) eventWeightsFile->Get (Form ("h_PbPb%s_weights_%s", doNchWeighting ? "Nch" : "FCal", isHijing ? "hijing" : "mc"));
-  //cout << "Info: In TrackingPerformance.cxx: Found FCal weighting histogram, " << h_weights->GetName () << endl;
+  if (!IsHijing ()) {
+    assert (crossSectionPicoBarns > 0);
+    assert (mcFilterEfficiency > 0);
+    assert (mcNumberEvents > 0);
+  }
+
+
+  // variables for filtering MC truth
+  double truth_jet_min_pt = 0, truth_jet_max_pt = DBL_MAX;
+  if (TString (inFileName).Contains ("JZ0")) {
+    truth_jet_min_pt = 0;
+    truth_jet_max_pt = 20;
+  }
+  else if (TString (inFileName).Contains ("JZ1")) {
+    truth_jet_min_pt = 20;
+    truth_jet_max_pt = 60;
+  }
+  else if (TString (inFileName).Contains ("JZ2")) {
+    truth_jet_min_pt = 60;
+    truth_jet_max_pt = 160;
+  }
+  else if (TString (inFileName).Contains ("JZ3")) {
+    truth_jet_min_pt = 160;
+    truth_jet_max_pt = 400;
+  }
+  else if (TString (inFileName).Contains ("JZ4")) {
+    truth_jet_min_pt = 400;
+    truth_jet_max_pt = 800;
+  }
+  else if (TString (inFileName).Contains ("JZ5")) {
+    truth_jet_min_pt = 800;
+    truth_jet_max_pt = 1300;
+  }
+  if (truth_jet_min_pt != 0)
+    std::cout << "Checking for leading truth jet with pT > " << truth_jet_min_pt << std::endl;
+  if (truth_jet_max_pt != DBL_MAX)
+    std::cout << "Checking for leading truth jet with pT < " << truth_jet_max_pt << std::endl;
 
 
   tree->SetBranchAddress ("run_number",     &run_number);
@@ -100,10 +129,9 @@ bool TrackingPerformance (const char* directory,
   tree->SetBranchAddress ("averageInteractionsPerCrossing", &averageInteractionsPerCrossing);
 
 
-  if (!IsCollisions ()) {
-    tree->SetBranchAddress ("mcEventWeights", &mcEventWeights);
-  }
-  if (!IsCollisions () && IsHijing ()) {
+  tree->SetBranchAddress ("mcEventWeights", &mcEventWeights);
+
+  if (IsHijing ()) {
     tree->SetBranchAddress ("truth_event_n",      &(truth_event_n));
     tree->SetBranchAddress ("nPart1",             &nPart1);
     tree->SetBranchAddress ("nPart2",             &nPart2);
@@ -128,24 +156,14 @@ bool TrackingPerformance (const char* directory,
   tree->SetBranchAddress ("fcalC_et",       &fcalC_et);
 
 
-  if (!Ispp ()) {
-    tree->SetBranchAddress ("ZdcCalibEnergy_A",   &ZdcCalibEnergy_A);
-    tree->SetBranchAddress ("ZdcCalibEnergy_C",   &ZdcCalibEnergy_C);
-    tree->SetBranchAddress ("ZdcRawEnergy_A",     &ZdcRawEnergy_A);
-    tree->SetBranchAddress ("ZdcRawEnergy_C",     &ZdcRawEnergy_C);
-  }
-
-
-  if (!IsCollisions ()) {
-    tree->SetBranchAddress ("truth_trk_n",        &truth_trk_n);
-    tree->SetBranchAddress ("truth_trk_pt",       &truth_trk_pt);
-    tree->SetBranchAddress ("truth_trk_eta",      &truth_trk_eta);
-    tree->SetBranchAddress ("truth_trk_phi",      &truth_trk_phi);
-    tree->SetBranchAddress ("truth_trk_charge",   &truth_trk_charge);
-    tree->SetBranchAddress ("truth_trk_pdgid",    &truth_trk_pdgid);
-    tree->SetBranchAddress ("truth_trk_barcode",  &truth_trk_barcode);
-    tree->SetBranchAddress ("truth_trk_isHadron", &truth_trk_isHadron);
-  }
+  tree->SetBranchAddress ("truth_trk_n",        &truth_trk_n);
+  tree->SetBranchAddress ("truth_trk_pt",       &truth_trk_pt);
+  tree->SetBranchAddress ("truth_trk_eta",      &truth_trk_eta);
+  tree->SetBranchAddress ("truth_trk_phi",      &truth_trk_phi);
+  tree->SetBranchAddress ("truth_trk_charge",   &truth_trk_charge);
+  tree->SetBranchAddress ("truth_trk_pdgid",    &truth_trk_pdgid);
+  tree->SetBranchAddress ("truth_trk_barcode",  &truth_trk_barcode);
+  tree->SetBranchAddress ("truth_trk_isHadron", &truth_trk_isHadron);
 
   tree->SetBranchAddress ("ntrk",                   &trk_n);
   tree->SetBranchAddress ("trk_pt",                 &trk_pt);
@@ -153,42 +171,38 @@ bool TrackingPerformance (const char* directory,
   tree->SetBranchAddress ("trk_phi",                &trk_phi);
   tree->SetBranchAddress ("trk_charge",             &trk_charge);
   tree->SetBranchAddress ("trk_TightPrimary",       &trk_TightPrimary);
-  tree->SetBranchAddress ("trk_HItight",            &trk_HItight);
-  tree->SetBranchAddress ("trk_HIloose",            &trk_HIloose);
+  tree->SetBranchAddress ("trk_HITight",            &trk_HITight);
+  tree->SetBranchAddress ("trk_HILoose",            &trk_HILoose);
   tree->SetBranchAddress ("trk_d0",                 &trk_d0);
   tree->SetBranchAddress ("trk_d0sig",              &trk_d0sig);
   tree->SetBranchAddress ("trk_z0",                 &trk_z0);
   tree->SetBranchAddress ("trk_z0sig",              &trk_z0sig);
   tree->SetBranchAddress ("trk_theta",              &trk_theta);
   tree->SetBranchAddress ("trk_vz",                 &trk_vz);
-  tree->SetBranchAddress ("trk_nBLayerHits",        &trk_nBLayerHits);
-  tree->SetBranchAddress ("trk_nBLayerSharedHits",  &trk_nBLayerSharedHits);
-  tree->SetBranchAddress ("trk_nPixelHits",         &trk_nPixelHits);
-  tree->SetBranchAddress ("trk_nPixelDeadSensors",  &trk_nPixelDeadSensors);
-  tree->SetBranchAddress ("trk_nPixelSharedHits",   &trk_nPixelSharedHits);
-  tree->SetBranchAddress ("trk_nSCTHits",           &trk_nSCTHits);
-  tree->SetBranchAddress ("trk_nSCTDeadSensors",    &trk_nSCTDeadSensors);
-  tree->SetBranchAddress ("trk_nSCTSharedHits",     &trk_nSCTSharedHits);
-  tree->SetBranchAddress ("trk_nTRTHits",           &trk_nTRTHits);
-  tree->SetBranchAddress ("trk_nTRTSharedHits",     &trk_nTRTSharedHits);
-  if (!IsCollisions ()) {
-    tree->SetBranchAddress ("trk_prob_truth",     &trk_prob_truth);
-    tree->SetBranchAddress ("trk_truth_pt",       &trk_truth_pt);
-    tree->SetBranchAddress ("trk_truth_eta",      &trk_truth_eta);
-    tree->SetBranchAddress ("trk_truth_phi",      &trk_truth_phi);
-    tree->SetBranchAddress ("trk_truth_charge",   &trk_truth_charge);
-    tree->SetBranchAddress ("trk_truth_type",     &trk_truth_type);
-    tree->SetBranchAddress ("trk_truth_orig",     &trk_truth_orig);
-    tree->SetBranchAddress ("trk_truth_barcode",  &trk_truth_barcode);
-    tree->SetBranchAddress ("trk_truth_pdgid",    &trk_truth_pdgid);
-    tree->SetBranchAddress ("trk_truth_vz",       &trk_truth_vz);
-    tree->SetBranchAddress ("trk_truth_nIn",      &trk_truth_nIn);
-    tree->SetBranchAddress ("trk_truth_isHadron", &trk_truth_isHadron);
-  }
+
+  tree->SetBranchAddress ("trk_prob_truth",     &trk_prob_truth);
+  tree->SetBranchAddress ("trk_truth_pt",       &trk_truth_pt);
+  tree->SetBranchAddress ("trk_truth_eta",      &trk_truth_eta);
+  tree->SetBranchAddress ("trk_truth_phi",      &trk_truth_phi);
+  tree->SetBranchAddress ("trk_truth_charge",   &trk_truth_charge);
+  tree->SetBranchAddress ("trk_truth_type",     &trk_truth_type);
+  tree->SetBranchAddress ("trk_truth_orig",     &trk_truth_orig);
+  tree->SetBranchAddress ("trk_truth_barcode",  &trk_truth_barcode);
+  tree->SetBranchAddress ("trk_truth_pdgid",    &trk_truth_pdgid);
+  tree->SetBranchAddress ("trk_truth_vz",       &trk_truth_vz);
+  tree->SetBranchAddress ("trk_truth_nIn",      &trk_truth_nIn);
+  tree->SetBranchAddress ("trk_truth_isHadron", &trk_truth_isHadron);
 
 
-  cout << "Info : In TrackingPerformance.cxx: Saving histograms to " << Form ("%s/%s/%s.root", rootPath.Data (), IsHijing () ? "../Hijing/" : "", identifier.Data ()) << endl;
-  TFile* outFile = new TFile (Form ("%s/%s/%s.root", rootPath.Data (), IsHijing () ? "../Hijing/" : "", identifier.Data ()), "recreate");
+  tree->SetBranchAddress ("akt4_truth_jet_n",     &akt4_truth_jet_n);
+  tree->SetBranchAddress ("akt4_truth_jet_pt",    &akt4_truth_jet_pt);
+  tree->SetBranchAddress ("akt4_truth_jet_eta",   &akt4_truth_jet_eta);
+  tree->SetBranchAddress ("akt4_truth_jet_phi",   &akt4_truth_jet_phi);
+  tree->SetBranchAddress ("akt4_truth_jet_e",     &akt4_truth_jet_e);
+
+
+  cout << "Info : In TrackingPerformance.cxx: Saving histograms to " << Form ("%s/%s.root", rootPath.Data (), identifier.Data ()) << endl;
+  TFile* outFile = new TFile (Form ("%s/%s.root", rootPath.Data (), identifier.Data ()), "recreate");
 
   TString sys;
   if (Ispp ())        sys = "pp";
@@ -198,64 +212,129 @@ bool TrackingPerformance (const char* directory,
   const int nFinerEtaTrkBins = 40;
   const double* finerEtaTrkBins = linspace (-2.5, 2.5, nFinerEtaTrkBins);
 
-  const double etaTrkBins[] = {0, 0.5, 1.0, 1.5, 2.0, 2.5};
-  const int nEtaTrkBins = sizeof (etaTrkBins) / sizeof (etaTrkBins[0]) - 1;
-
-//const double pTchBins[32] = {0.5, 0.7, 1, 1.05, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.8, 2, 2.25, 2.5, 2.75, 3, 3.5, 4, 5, 6, 7, 8, 10, 12, 15, 20, 25, 30, 40, 60, 80, 100};
-//const int nPtChBins = 106;
-  const double pTchBins[] = {0.5, 0.525, 0.55, 0.575, 0.6, 0.625, 0.65, 0.675, 0.7, 0.725, 0.75, 0.775, 0.8, 0.825, 0.85, 0.875, 0.9, 0.925, 0.95, 0.975, 1, 1.05, 1.1, 1.15, 1.2, 1.25, 1.3, 1.35, 1.4, 1.45, 1.5, 1.55, 1.6, 1.65, 1.7, 1.75, 1.8, 1.85, 1.9, 1.95, 2, 2.125, 2.25, 2.375, 2.5, 2.625, 2.75, 2.875, 3, 3.125, 3.25, 3.375, 3.5, 3.625, 3.75, 3.875, 4, 4.25, 4.5, 4.75, 5, 5.25, 5.5, 5.75, 6, 6.5, 7, 7.5, 8, 8.5, 9, 9.5, 10, 10.5, 11, 11.5, 12, 13, 14, 15, 16, 17, 18, 19, 20, 22.5, 25, 27.5, 30, 32.5, 35, 37.5, 40, 42.5, 45, 47.5, 50, 52.5, 55, 57.5, 60, 65, 70, 75, 80, 90, 100};
+  const double pTchBins[] = {0.5, 0.525, 0.55, 0.575, 0.6, 0.625, 0.65, 0.675, 0.7, 0.725, 0.75, 0.775, 0.8, 0.825, 0.85, 0.875, 0.9, 0.925, 0.95, 0.975, 1, 1.05, 1.1, 1.15, 1.2, 1.25, 1.3, 1.35, 1.4, 1.45, 1.5, 1.55, 1.6, 1.65, 1.7, 1.75, 1.8, 1.85, 1.9, 1.95, 2, 2.125, 2.25, 2.375, 2.5, 2.625, 2.75, 2.875, 3, 3.125, 3.25, 3.375, 3.5, 3.625, 3.75, 3.875, 4, 4.25, 4.5, 4.75, 5, 5.25, 5.5, 5.75, 6, 6.5, 7, 7.5, 8, 8.5, 9, 9.5, 10, 10.5, 11, 11.5, 12, 13, 14, 15, 16, 17, 18, 19, 20, 22.5, 25, 27.5, 30, 32.5, 35, 37.5, 40, 42.5, 45, 50, 55, 60, 70, 80, 100};
   const int nPtchBins = sizeof (pTchBins) / sizeof (pTchBins[0]) - 1;
 
-  TH1D** h_truth_matching_prob = Get1DArray <TH1D*> (3);
-
-  TH2D** h2_truth_matched_reco_tracks = Get1DArray <TH2D*> (3);
-  TH2D** h2_truth_tracks = Get1DArray <TH2D*> (3);
-
-  TH2D** h2_primary_reco_tracks = Get1DArray <TH2D*> (3);
-  TH2D** h2_reco_tracks = Get1DArray <TH2D*> (3);
+                    //pi+, k+,  p+,   e-, mu-, sigma+, sigma-, xi-,  omega-, everyone
+  const int PIDs[] = {211, 321, 2212, 11, 13,  3222,   3112,   3312, 3334,   0};
+  const int nPIDs = sizeof (PIDs) / sizeof (PIDs[0]);
 
 
-  TH1D*** h_truth_matched_reco_tracks = Get2DArray <TH1D*> (3, nEtaTrkBins);
-  TH1D*** h_truth_tracks = Get2DArray <TH1D*> (3, nEtaTrkBins);
+  // Initialize a bunch of histograms --
+  TH1D** h_truth_matching_prob = Get1DArray <TH1D*> (trackWPs.size ());
+
+  TH2D**** h2_truth_matched_primary_tracks = Get3DArray <TH2D*> (nPIDs, trackWPs.size (), nMultBins);
+  TH2D***  h2_truth_tracks                 = Get2DArray <TH2D*> (nPIDs, nMultBins);
+  TH2D***  h2_truth_tracks_wgt2            = Get2DArray <TH2D*> (nPIDs, nMultBins);
+
+  TH2D*** h2_fake_tracks        = Get2DArray <TH2D*> (trackWPs.size (), nMultBins);
+  TH2D*** h2_secondary_tracks   = Get2DArray <TH2D*> (trackWPs.size (), nMultBins);
+  TH2D*** h2_strange_tracks     = Get2DArray <TH2D*> (trackWPs.size (), nMultBins);
+  TH2D*** h2_primary_tracks     = Get2DArray <TH2D*> (trackWPs.size (), nMultBins);
+  TH2D*** h2_reco_tracks        = Get2DArray <TH2D*> (trackWPs.size (), nMultBins);
+  TH2D*** h2_reco_tracks_wgt2   = Get2DArray <TH2D*> (trackWPs.size (), nMultBins);
 
 
-  TH1D*** h_primary_reco_tracks = Get2DArray <TH1D*> (3, nEtaTrkBins);
-  TH1D*** h_reco_tracks = Get2DArray <TH1D*> (3, nEtaTrkBins);
+  TH1D***** h_truth_matched_primary_tracks = Get4DArray <TH1D*> (nPIDs, trackWPs.size (), nMultBins, nEtaTrkBins);
+  TH1D****  h_truth_tracks                 = Get3DArray <TH1D*> (nPIDs, nMultBins, nEtaTrkBins);
+  TH1D****  h_truth_tracks_wgt2            = Get3DArray <TH1D*> (nPIDs, nMultBins, nEtaTrkBins);
+
+  TH1D**** h_fake_tracks        = Get3DArray <TH1D*> (trackWPs.size (), nMultBins, nEtaTrkBins);
+  TH1D**** h_secondary_tracks   = Get3DArray <TH1D*> (trackWPs.size (), nMultBins, nEtaTrkBins);
+  TH1D**** h_strange_tracks     = Get3DArray <TH1D*> (trackWPs.size (), nMultBins, nEtaTrkBins);
+  TH1D**** h_primary_tracks     = Get3DArray <TH1D*> (trackWPs.size (), nMultBins, nEtaTrkBins);
+  TH1D**** h_reco_tracks        = Get3DArray <TH1D*> (trackWPs.size (), nMultBins, nEtaTrkBins);
+  TH1D**** h_reco_tracks_wgt2   = Get3DArray <TH1D*> (trackWPs.size (), nMultBins, nEtaTrkBins);
+
+
+  for (int iPID = 0; iPID < nPIDs; iPID++) {
+
+    for (int iMult = 0; iMult < nMultBins; iMult++) {
+
+      h2_truth_tracks[iPID][iMult] = new TH2D (Form ("h2_truth_tracks_%s_PID%i_iMult%i", sys.Data (), PIDs[iPID], iMult), ";#eta;#it{p}_{T} [GeV]", nFinerEtaTrkBins, finerEtaTrkBins, nPtchBins, pTchBins);
+      h2_truth_tracks[iPID][iMult]->Sumw2 ();
+
+      h2_truth_tracks_wgt2[iPID][iMult] = new TH2D (Form ("h2_truth_tracks_wgt2_%s_PID%i_iMult%i", sys.Data (), PIDs[iPID], iMult), ";#eta;#it{p}_{T} [GeV]", nFinerEtaTrkBins, finerEtaTrkBins, nPtchBins, pTchBins);
+      h2_truth_tracks_wgt2[iPID][iMult]->Sumw2 ();
+
+      for (int iEta = 0; iEta < nEtaTrkBins; iEta++) {
+
+        h_truth_tracks[iPID][iMult][iEta] = new TH1D (Form ("h_truth_tracks_%s_PID%i_iMult%i_iEta%i", sys.Data (), PIDs[iPID], iMult, iEta), ";#it{p}_{T} [GeV]", nPtchBins, pTchBins);
+        h_truth_tracks[iPID][iMult][iEta]->Sumw2 ();
+
+        h_truth_tracks_wgt2[iPID][iMult][iEta] = new TH1D (Form ("h_truth_tracks_wgt2_%s_PID%i_iMult%i_iEta%i", sys.Data (), PIDs[iPID], iMult, iEta), ";#it{p}_{T} [GeV]", nPtchBins, pTchBins);
+        h_truth_tracks_wgt2[iPID][iMult][iEta]->Sumw2 ();
+
+      } // end loop over iEta
+
+    } // end loop over iMult
+
+
+    for (int iWP = 0; iWP < trackWPs.size (); iWP++) {
+
+      for (int iMult = 0; iMult < nMultBins; iMult++) {
+
+        h2_truth_matched_primary_tracks[iPID][iWP][iMult] = new TH2D (Form ("h2_truth_matched_primary_tracks_%s_PID%i_%s_iMult%i", sys.Data (), PIDs[iPID], trackWPNames[iWP].c_str (), iMult), ";#eta;#it{p}_{T} [GeV]", nFinerEtaTrkBins, finerEtaTrkBins, nPtchBins, pTchBins);
+        h2_truth_matched_primary_tracks[iPID][iWP][iMult]->Sumw2 ();
+
+        for (int iEta = 0; iEta < nEtaTrkBins; iEta++) {
+
+          h_truth_matched_primary_tracks[iPID][iWP][iMult][iEta] = new TH1D (Form ("h_truth_matched_primary_tracks_%s_PID%i_%s_iMult%i_iEta%i", sys.Data (), PIDs[iPID], trackWPNames[iWP].c_str (), iMult, iEta), ";#it{p}_{T} [GeV]", nPtchBins, pTchBins);
+          h_truth_matched_primary_tracks[iPID][iWP][iMult][iEta]->Sumw2 ();
+
+        } // end loop over iEta
+
+      } // end loop over iMult
+
+    } // end loop over iWP
+
+  } // end loop over iPID
+
 
   for (int iWP = 0; iWP < trackWPs.size (); iWP++) {
 
     h_truth_matching_prob[iWP] = new TH1D (Form ("h_truth_matching_prob_%s_%s", sys.Data (), trackWPNames[iWP].c_str ()), ";Truth matching prob.;N_{ch}^{rec}", 200, 0, 1);
     h_truth_matching_prob[iWP]->Sumw2 ();
 
-    h2_truth_matched_reco_tracks[iWP] = new TH2D (Form ("h2_truth_matched_reco_tracks_%s_%s", sys.Data (), trackWPNames[iWP].c_str ()), ";#eta;#it{p}_{T} [GeV]", nFinerEtaTrkBins, finerEtaTrkBins, nPtchBins, pTchBins);
-    h2_truth_matched_reco_tracks[iWP]->Sumw2 ();
+    for (int iMult = 0; iMult < nMultBins; iMult++) {
 
-    h2_truth_tracks[iWP] = new TH2D (Form ("h2_truth_tracks_%s_%s", sys.Data (), trackWPNames[iWP].c_str ()), ";#eta;#it{p}_{T} [GeV]", nFinerEtaTrkBins, finerEtaTrkBins, nPtchBins, pTchBins);
-    h2_truth_tracks[iWP]->Sumw2 ();
+      h2_fake_tracks[iWP][iMult] = new TH2D (Form ("h2_fake_tracks_%s_%s_iMult%i", sys.Data (), trackWPNames[iWP].c_str (), iMult), ";#eta;#it{p}_{T} [GeV]", nFinerEtaTrkBins, finerEtaTrkBins, nPtchBins, pTchBins);
+      h2_fake_tracks[iWP][iMult]->Sumw2 ();
+      h2_secondary_tracks[iWP][iMult] = new TH2D (Form ("h2_secondary_tracks_%s_%s_iMult%i", sys.Data (), trackWPNames[iWP].c_str (), iMult), ";#eta;#it{p}_{T} [GeV]", nFinerEtaTrkBins, finerEtaTrkBins, nPtchBins, pTchBins);
+      h2_secondary_tracks[iWP][iMult]->Sumw2 ();
+      h2_strange_tracks[iWP][iMult] = new TH2D (Form ("h2_strange_tracks_%s_%s_iMult%i", sys.Data (), trackWPNames[iWP].c_str (), iMult), ";#eta;#it{p}_{T} [GeV]", nFinerEtaTrkBins, finerEtaTrkBins, nPtchBins, pTchBins);
+      h2_strange_tracks[iWP][iMult]->Sumw2 ();
+      h2_primary_tracks[iWP][iMult] = new TH2D (Form ("h2_primary_tracks_%s_%s_iMult%i", sys.Data (), trackWPNames[iWP].c_str (), iMult), ";#eta;#it{p}_{T} [GeV]", nFinerEtaTrkBins, finerEtaTrkBins, nPtchBins, pTchBins);
+      h2_primary_tracks[iWP][iMult]->Sumw2 ();
 
+      h2_reco_tracks[iWP][iMult] = new TH2D (Form ("h2_reco_tracks_%s_%s_iMult%i", sys.Data (), trackWPNames[iWP].c_str (), iMult), ";#eta;#it{p}_{T} [GeV]", nFinerEtaTrkBins, finerEtaTrkBins, nPtchBins, pTchBins);
+      h2_reco_tracks[iWP][iMult]->Sumw2 ();
 
-    h2_primary_reco_tracks[iWP] = new TH2D (Form ("h2_primary_reco_tracks_%s_%s", sys.Data (), trackWPNames[iWP].c_str ()), ";#eta;#it{p}_{T} [GeV]", nFinerEtaTrkBins, finerEtaTrkBins, nPtchBins, pTchBins);
-    h2_primary_reco_tracks[iWP]->Sumw2 ();
+      h2_reco_tracks_wgt2[iWP][iMult] = new TH2D (Form ("h2_reco_tracks_wgt2_%s_%s_iMult%i", sys.Data (), trackWPNames[iWP].c_str (), iMult), ";#eta;#it{p}_{T} [GeV]", nFinerEtaTrkBins, finerEtaTrkBins, nPtchBins, pTchBins);
+      h2_reco_tracks_wgt2[iWP][iMult]->Sumw2 ();
 
-    h2_reco_tracks[iWP] = new TH2D (Form ("h2_reco_tracks_%s_%s", sys.Data (), trackWPNames[iWP].c_str ()), ";#eta;#it{p}_{T} [GeV]", nFinerEtaTrkBins, finerEtaTrkBins, nPtchBins, pTchBins);
-    h2_reco_tracks[iWP]->Sumw2 ();
+      for (int iEta = 0; iEta < nEtaTrkBins; iEta++) {
 
-    for (int iEta = 0; iEta < nEtaTrkBins; iEta++) {
-      h_truth_matched_reco_tracks[iWP][iEta] = new TH1D (Form ("h_truth_matched_reco_tracks_%s_%s_iEta%i", sys.Data (), trackWPNames[iWP].c_str (), iEta), ";#it{p}_{T} [GeV]", nPtchBins, pTchBins);
-      h_truth_matched_reco_tracks[iWP][iEta]->Sumw2 ();
+        h_fake_tracks[iWP][iMult][iEta] = new TH1D (Form ("h_fake_tracks_%s_%s_iMult%i_iEta%i", sys.Data (), trackWPNames[iWP].c_str (), iMult, iEta), ";#it{p}_{T} [GeV]", nPtchBins, pTchBins);
+        h_fake_tracks[iWP][iMult][iEta]->Sumw2 ();
+        h_secondary_tracks[iWP][iMult][iEta] = new TH1D (Form ("h_secondary_tracks_%s_%s_iMult%i_iEta%i", sys.Data (), trackWPNames[iWP].c_str (), iMult, iEta), ";#it{p}_{T} [GeV]", nPtchBins, pTchBins);
+        h_secondary_tracks[iWP][iMult][iEta]->Sumw2 ();
+        h_strange_tracks[iWP][iMult][iEta] = new TH1D (Form ("h_strange_tracks_%s_%s_iMult%i_iEta%i", sys.Data (), trackWPNames[iWP].c_str (), iMult, iEta), ";#it{p}_{T} [GeV]", nPtchBins, pTchBins);
+        h_strange_tracks[iWP][iMult][iEta]->Sumw2 ();
+        h_primary_tracks[iWP][iMult][iEta] = new TH1D (Form ("h_primary_tracks_%s_%s_iMult%i_iEta%i", sys.Data (), trackWPNames[iWP].c_str (), iMult, iEta), ";#it{p}_{T} [GeV]", nPtchBins, pTchBins);
+        h_primary_tracks[iWP][iMult][iEta]->Sumw2 ();
 
-      h_truth_tracks[iWP][iEta] = new TH1D (Form ("h_truth_tracks_%s_%s_iEta%i", sys.Data (), trackWPNames[iWP].c_str (), iEta), ";#it{p}_{T} [GeV]", nPtchBins, pTchBins);
-      h_truth_tracks[iWP][iEta]->Sumw2 ();
+        h_reco_tracks[iWP][iMult][iEta] = new TH1D (Form ("h_reco_tracks_%s_%s_iMult%i_iEta%i", sys.Data (), trackWPNames[iWP].c_str (), iMult, iEta), ";#it{p}_{T} [GeV]", nPtchBins, pTchBins);
+        h_reco_tracks[iWP][iMult][iEta]->Sumw2 ();
 
+        h_reco_tracks_wgt2[iWP][iMult][iEta] = new TH1D (Form ("h_reco_tracks_wgt2_%s_%s_iMult%i_iEta%i", sys.Data (), trackWPNames[iWP].c_str (), iMult, iEta), ";#it{p}_{T} [GeV]", nPtchBins, pTchBins);
+        h_reco_tracks_wgt2[iWP][iMult][iEta]->Sumw2 ();
 
-      h_primary_reco_tracks[iWP][iEta] = new TH1D (Form ("h_primary_reco_tracks_%s_%s_iEta%i", sys.Data (), trackWPNames[iWP].c_str (), iEta), ";#it{p}_{T} [GeV]", nPtchBins, pTchBins);
-      h_primary_reco_tracks[iWP][iEta]->Sumw2 ();
+      } // end loop over iEta
 
-      h_reco_tracks[iWP][iEta] = new TH1D (Form ("h_reco_tracks_%s_%s_iEta%i", sys.Data (), trackWPNames[iWP].c_str (), iEta), ";#it{p}_{T} [GeV]", nPtchBins, pTchBins);
-      h_reco_tracks[iWP][iEta]->Sumw2 ();
-    }
+    } // end loop over iMult
 
-  }
+  } // end loop over iWP
 
 
   const int nEvts = tree->GetEntries ();
@@ -263,26 +342,51 @@ bool TrackingPerformance (const char* directory,
   // Loop over events
   for (int iEvt = 0; iEvt < nEvts; iEvt++) {
     if (nEvts > 100 && iEvt % (nEvts / 100) == 0)
-      cout << "Info: In TrackingPerformance.cxx: Event loop " << iEvt / (nEvts / 100) << "\% done...\r" << flush;
+      std::cout << "Info: In TrackingPerformance.cxx: Event loop " << iEvt / (nEvts / 100) << "\% done...\r" << std::flush;
     tree->GetEntry (iEvt);
 
-    bool hasPrimary = false;
-    bool hasPileup = false;
-    float vz = -999;
-    for (int iVert = 0; iVert < nvert; iVert++) {
-      const bool isPrimary = (vert_type[iVert] == 1);
-      hasPrimary = hasPrimary || isPrimary;
-      hasPileup = hasPileup || (vert_type[iVert] == 3);
-      if (isPrimary)
-        vz = vert_z[iVert];
+    // reject events with pileup vertices or too high z-vertex
+    {
+      bool hasPrimary = false;
+      bool hasPileup = false;
+      float vz = -999;
+      for (int iVert = 0; iVert < nvert; iVert++) {
+        const bool isPrimary = (vert_type[iVert] == 1);
+        hasPrimary = hasPrimary || isPrimary;
+        hasPileup = hasPileup || (vert_type[iVert] == 3);
+        if (isPrimary)
+          vz = vert_z[iVert];
+      }
+      if (!hasPrimary || hasPileup || fabs (vz) > 150)
+      //if (!hasPrimary || fabs (vz) > 150)
+        continue;
     }
-    if (!hasPrimary || hasPileup || fabs (vz) > 150)
-    //if (!hasPrimary || fabs (vz) > 150)
+
+
+    // Filter sample based on min/max of pThat range
+    if (!IsHijing ()) {
+      int iLTJ = -1;
+      for (int iTJ = 0; iTJ < akt4_truth_jet_n; iTJ++) {
+        if (iLTJ == -1 || akt4_truth_jet_pt[iTJ] > akt4_truth_jet_pt[iLTJ])
+          iLTJ = iTJ;
+      }
+
+      if (iLTJ == -1 || akt4_truth_jet_pt[iLTJ] < truth_jet_min_pt || akt4_truth_jet_pt[iLTJ] > truth_jet_max_pt)
+        continue;
+    }
+
+
+    // Get multiplicity bin for event
+    int iMult = 0;
+    while (iMult < nMultBins-1 && multBins[iMult+1] < trk_n)
+      iMult++;
+    if (nMultBins < iMult)
       continue;
 
 
-    const float eventWeight = 1;
-    //const float eventWeight = ((isPbPb && !isHijing) ? h_weights->GetBinContent (h_weights->FindFixBin (doNchWeighting ? trk_n : fcalA_et+fcalC_et)) : 1); // weight is 1 for pp
+    const double eventWeight = 1;
+    //const double eventWeight = (IsHijing () ? 1 : mcEventWeights->at (0) * crossSectionPicoBarns * mcFilterEfficiency * GetJetLuminosity () / mcNumberEvents); // sigma * f * L_int
+
 
     for (int iTrk = 0; iTrk < trk_n; iTrk++) {
 
@@ -299,65 +403,144 @@ bool TrackingPerformance (const char* directory,
         const bool isTruthMatched = (trk_prob_truth[iTrk] > 0.5);
 
         const bool isFake = !isTruthMatched;
+
         const bool isSecondary = isTruthMatched && (trk_truth_barcode[iTrk] <= 0 || 200000 <= trk_truth_barcode[iTrk]);
 
-        // primary tracks are non-fake, non-secondary tracks. Strange baryons are excluded too.
-        const bool isPrimary = !isFake && !isSecondary && (abs (trk_truth_pdgid[iTrk]) != 3112 && abs (trk_truth_pdgid[iTrk]) != 3222 && abs (trk_truth_pdgid[iTrk]) != 3312 && abs (trk_truth_pdgid[iTrk]) != 3334);
+        const bool isStrangeBaryon = !isFake && !isSecondary && (abs (trk_truth_pdgid[iTrk]) == 3112 || abs (trk_truth_pdgid[iTrk]) == 3222 || abs (trk_truth_pdgid[iTrk]) == 3312 || abs (trk_truth_pdgid[iTrk]) == 3334);
+
+        // primary tracks are non-fake, non-secondary tracks.
+        const bool isPrimary = !isFake && !isSecondary;// && !isStrangeBaryon;
 
         short iEtaReco = 0;
         while (etaTrkBins[iEtaReco+1] < fabs (trk_eta[iTrk]))
           iEtaReco++;
 
-        if (isPrimary) {
-          h2_primary_reco_tracks[iWP]->Fill (trk_eta[iTrk], trk_pt[iTrk], eventWeight);
-          h_primary_reco_tracks[iWP][iEtaReco]->Fill (trk_pt[iTrk], eventWeight);
 
-          if (trk_truth_charge[iTrk] != 0 &&
-              fabs (trk_truth_eta[iTrk]) <= 2.5 &&
-              trk_truth_isHadron[iTrk] &&
-              (!DoPionsOnlyVar () || abs (trk_truth_pdgid[iTrk] == 211))) {
+        if (!IsDataOverlay ()) {
 
-            short iEtaTruth = 0;
-            while (etaTrkBins[iEtaTruth+1] < fabs (trk_truth_eta[iTrk]))
-              iEtaTruth++;
+          if (isFake) {
+            h2_fake_tracks[iWP][iMult]->Fill (trk_eta[iTrk], trk_pt[iTrk], eventWeight);
+            h_fake_tracks[iWP][iMult][iEtaReco]->Fill (trk_pt[iTrk], eventWeight);
+            h2_fake_tracks[iWP][nMultBins-1]->Fill (trk_eta[iTrk], trk_pt[iTrk], eventWeight);
+            h_fake_tracks[iWP][nMultBins-1][iEtaReco]->Fill (trk_pt[iTrk], eventWeight);
+          }
+          else if (isSecondary) {
+            h2_secondary_tracks[iWP][iMult]->Fill (trk_eta[iTrk], trk_pt[iTrk], eventWeight);
+            h_secondary_tracks[iWP][iMult][iEtaReco]->Fill (trk_pt[iTrk], eventWeight);
+            h2_secondary_tracks[iWP][nMultBins-1]->Fill (trk_eta[iTrk], trk_pt[iTrk], eventWeight);
+            h_secondary_tracks[iWP][nMultBins-1][iEtaReco]->Fill (trk_pt[iTrk], eventWeight);
+          }
+          else if (isStrangeBaryon) {
+            h2_strange_tracks[iWP][iMult]->Fill (trk_eta[iTrk], trk_pt[iTrk], eventWeight);
+            h_strange_tracks[iWP][iMult][iEtaReco]->Fill (trk_pt[iTrk], eventWeight);
+            h2_strange_tracks[iWP][nMultBins-1]->Fill (trk_eta[iTrk], trk_pt[iTrk], eventWeight);
+            h_strange_tracks[iWP][nMultBins-1][iEtaReco]->Fill (trk_pt[iTrk], eventWeight);
+          }
+          else if (isPrimary) {
+            h2_primary_tracks[iWP][iMult]->Fill (trk_eta[iTrk], trk_pt[iTrk], eventWeight);
+            h_primary_tracks[iWP][iMult][iEtaReco]->Fill (trk_pt[iTrk], eventWeight);
+            h2_primary_tracks[iWP][nMultBins-1]->Fill (trk_eta[iTrk], trk_pt[iTrk], eventWeight);
+            h_primary_tracks[iWP][nMultBins-1][iEtaReco]->Fill (trk_pt[iTrk], eventWeight);
+          }
 
-            h2_truth_matched_reco_tracks[iWP]->Fill (trk_truth_eta[iTrk], trk_truth_pt[iTrk], eventWeight); 
-            h_truth_matched_reco_tracks[iWP][iEtaTruth]->Fill (trk_truth_pt[iTrk], eventWeight);
-            //h2_truth_matched_reco_tracks->Fill (trk_eta[iTrk], trk_pt[iTrk], eventWeight); // do a simple unfolding
-            //h_truth_matched_reco_tracks[iEtaReco]->Fill (trk_pt[iTrk], eventWeight);
+          h2_reco_tracks[iWP][iMult]->Fill (trk_eta[iTrk], trk_pt[iTrk], eventWeight);
+          h_reco_tracks[iWP][iMult][iEtaReco]->Fill (trk_pt[iTrk], eventWeight);
+          h2_reco_tracks[iWP][nMultBins-1]->Fill (trk_eta[iTrk], trk_pt[iTrk], eventWeight);
+          h_reco_tracks[iWP][nMultBins-1][iEtaReco]->Fill (trk_pt[iTrk], eventWeight);
+
+          h2_reco_tracks_wgt2[iWP][iMult]->Fill (trk_eta[iTrk], trk_pt[iTrk], eventWeight*eventWeight);
+          h_reco_tracks_wgt2[iWP][iMult][iEtaReco]->Fill (trk_pt[iTrk], eventWeight*eventWeight);
+          h2_reco_tracks_wgt2[iWP][nMultBins-1]->Fill (trk_eta[iTrk], trk_pt[iTrk], eventWeight*eventWeight);
+          h_reco_tracks_wgt2[iWP][nMultBins-1][iEtaReco]->Fill (trk_pt[iTrk], eventWeight*eventWeight);
+
+        }
+
+
+        if (!IsHijing () && (isPrimary || isStrangeBaryon)) {
+
+          if (trk_truth_charge[iTrk] == 0 || fabs (trk_truth_eta[iTrk]) > 2.5)
+            continue; // truth-level acceptance cut
+
+          short iEtaTruth = 0;
+          while (etaTrkBins[iEtaTruth+1] < fabs (trk_truth_eta[iTrk]))
+            iEtaTruth++;
+
+          short iPID = 0;
+          while (iPID < nPIDs-1 && PIDs[iPID] != trk_truth_pdgid[iTrk])
+            iPID++;
+
+          if (0 <= iPID && iPID < nPIDs-1) {
+            h2_truth_matched_primary_tracks[iPID][iWP][iMult]->Fill (trk_truth_eta[iTrk], trk_truth_pt[iTrk], eventWeight); 
+            h_truth_matched_primary_tracks[iPID][iWP][iMult][iEtaTruth]->Fill (trk_truth_pt[iTrk], eventWeight);
+            h2_truth_matched_primary_tracks[iPID][iWP][nMultBins-1]->Fill (trk_truth_eta[iTrk], trk_truth_pt[iTrk], eventWeight); 
+            h_truth_matched_primary_tracks[iPID][iWP][nMultBins-1][iEtaTruth]->Fill (trk_truth_pt[iTrk], eventWeight);
+          }
+
+          if (isPrimary && trk_truth_isHadron[iTrk]) {
+            h2_truth_matched_primary_tracks[nPIDs-1][iWP][iMult]->Fill (trk_truth_eta[iTrk], trk_truth_pt[iTrk], eventWeight); 
+            h_truth_matched_primary_tracks[nPIDs-1][iWP][iMult][iEtaTruth]->Fill (trk_truth_pt[iTrk], eventWeight);
+            h2_truth_matched_primary_tracks[nPIDs-1][iWP][nMultBins-1]->Fill (trk_truth_eta[iTrk], trk_truth_pt[iTrk], eventWeight); 
+            h_truth_matched_primary_tracks[nPIDs-1][iWP][nMultBins-1][iEtaTruth]->Fill (trk_truth_pt[iTrk], eventWeight);
           }
 
         }
 
-        h2_reco_tracks[iWP]->Fill (trk_eta[iTrk], trk_pt[iTrk], eventWeight);
-        h_reco_tracks[iWP][iEtaReco]->Fill (trk_pt[iTrk], eventWeight);
       } // end loop over WPs
+
     } // end loop over reco tracks
 
 
-    for (int iTTrk = 0; iTTrk < truth_trk_n; iTTrk++) {
-      if (truth_trk_barcode[iTTrk] <= 0 || 200000 <= truth_trk_barcode[iTTrk] || abs (truth_trk_pdgid[iTTrk]) == 3112 || abs (truth_trk_pdgid[iTTrk]) == 3222 || abs (truth_trk_pdgid[iTTrk]) == 3312 || abs (truth_trk_pdgid[iTTrk]) == 3334)
-        continue; // select primary truth particles
+    if (!IsHijing ()) {
 
-      if (truth_trk_charge[iTTrk] != 0 &&
-          fabs (truth_trk_eta[iTTrk]) <= 2.5 &&
-          truth_trk_isHadron[iTTrk] &&
-          (!DoPionsOnlyVar () || abs (truth_trk_pdgid[iTTrk] == 211))) {
+      for (int iTTrk = 0; iTTrk < truth_trk_n; iTTrk++) {
+
+        if (truth_trk_charge[iTTrk] == 0 || fabs (truth_trk_eta[iTTrk]) > 2.5)
+          continue; // truth-level acceptance cut
+
+        const bool isSecondary = (truth_trk_barcode[iTTrk] <= 0 || 200000 <= truth_trk_barcode[iTTrk]);
+        if (isSecondary)
+          continue; // don't work with secondaries
+
+        const bool isStrangeBaryon = !isSecondary && (abs (truth_trk_pdgid[iTTrk]) == 3112 || abs (truth_trk_pdgid[iTTrk]) == 3222 || abs (truth_trk_pdgid[iTTrk]) == 3312 || abs (truth_trk_pdgid[iTTrk]) == 3334);
+
+        const bool isPrimary = !isSecondary;// && !isStrangeBaryon;
 
         short iEta = 0;
         while (etaTrkBins[iEta+1] < fabs (truth_trk_eta[iTTrk]))
           iEta++;
 
-        for (int iWP = 0; iWP < trackWPs.size (); iWP++) {
-          //h2_truth_tracks[iWP]->Fill (truth_trk_eta[iTTrk], truth_trk_pt[iTTrk], 1);
-          h2_truth_tracks[iWP]->Fill (truth_trk_eta[iTTrk], truth_trk_pt[iTTrk], eventWeight);
-          h_truth_tracks[iWP][iEta]->Fill (truth_trk_pt[iTTrk], eventWeight);
+        short iPID = 0;
+        while (iPID < nPIDs-1 && PIDs[iPID] != truth_trk_pdgid[iTTrk])
+          iPID++;
+
+        if (0 <= iPID && iPID < nPIDs-1) {
+          h2_truth_tracks[iPID][iMult]->Fill (truth_trk_eta[iTTrk], truth_trk_pt[iTTrk], eventWeight); 
+          h_truth_tracks[iPID][iMult][iEta]->Fill (truth_trk_pt[iTTrk], eventWeight);
+          h2_truth_tracks[iPID][nMultBins-1]->Fill (truth_trk_eta[iTTrk], truth_trk_pt[iTTrk], eventWeight); 
+          h_truth_tracks[iPID][nMultBins-1][iEta]->Fill (truth_trk_pt[iTTrk], eventWeight);
+
+          h2_truth_tracks_wgt2[iPID][iMult]->Fill (truth_trk_eta[iTTrk], truth_trk_pt[iTTrk], eventWeight*eventWeight);
+          h_truth_tracks_wgt2[iPID][iMult][iEta]->Fill (truth_trk_pt[iTTrk], eventWeight*eventWeight);
+          h2_truth_tracks_wgt2[iPID][nMultBins-1]->Fill (truth_trk_eta[iTTrk], truth_trk_pt[iTTrk], eventWeight*eventWeight);
+          h_truth_tracks_wgt2[iPID][nMultBins-1][iEta]->Fill (truth_trk_pt[iTTrk], eventWeight*eventWeight);
         }
-      }
+
+        if (isPrimary && truth_trk_isHadron[iTTrk]) {
+          h2_truth_tracks[nPIDs-1][iMult]->Fill (truth_trk_eta[iTTrk], truth_trk_pt[iTTrk], eventWeight);
+          h_truth_tracks[nPIDs-1][iMult][iEta]->Fill (truth_trk_pt[iTTrk], eventWeight);
+          h2_truth_tracks[nPIDs-1][nMultBins-1]->Fill (truth_trk_eta[iTTrk], truth_trk_pt[iTTrk], eventWeight);
+          h_truth_tracks[nPIDs-1][nMultBins-1][iEta]->Fill (truth_trk_pt[iTTrk], eventWeight);
+
+          h2_truth_tracks_wgt2[nPIDs-1][nMultBins-1]->Fill (truth_trk_eta[iTTrk], truth_trk_pt[iTTrk], eventWeight*eventWeight);
+          h_truth_tracks_wgt2[nPIDs-1][nMultBins-1][iEta]->Fill (truth_trk_pt[iTTrk], eventWeight*eventWeight);
+        }
+
+      } // end loop over truth tracks
+
     }
 
   } // end event loop
-  cout << endl << "Info: In TrackingPerformance.cxx: Finished event loop." << endl;
+  std::cout << std::endl << "Info: In TrackingPerformance.cxx: Finished event loop." << std::endl;
 
 
   SaferDelete (&tree);
@@ -365,38 +548,94 @@ bool TrackingPerformance (const char* directory,
 
   outFile->cd ();
 
+
+  for (int iPID = 0; iPID < nPIDs; iPID++) {
+
+    for (int iMult = 0; iMult < nMultBins; iMult++) {
+
+      h2_truth_tracks[iPID][iMult]->Write ();
+      SaferDelete (&h2_truth_tracks[iPID][iMult]);
+
+      h2_truth_tracks_wgt2[iPID][iMult]->Write ();
+      SaferDelete (&h2_truth_tracks_wgt2[iPID][iMult]);
+
+      for (int iEta = 0; iEta < nEtaTrkBins; iEta++) {
+
+        h_truth_tracks[iPID][iMult][iEta]->Write ();
+        SaferDelete (&h_truth_tracks[iPID][iMult][iEta]);
+
+        h_truth_tracks_wgt2[iPID][iMult][iEta]->Write ();
+        SaferDelete (&h_truth_tracks_wgt2[iPID][iMult][iEta]);
+
+      } // end loop over iEta
+
+    } // end loop over iMult
+
+    for (int iWP = 0; iWP < trackWPs.size (); iWP++) {
+
+      for (int iMult = 0; iMult < nMultBins; iMult++) {
+
+        h2_truth_matched_primary_tracks[iPID][iWP][iMult]->Write ();
+        SaferDelete (&h2_truth_matched_primary_tracks[iPID][iWP][iMult]);
+
+        for (int iEta = 0; iEta < nEtaTrkBins; iEta++) {
+
+          h_truth_matched_primary_tracks[iPID][iWP][iMult][iEta]->Write ();
+          SaferDelete (&h_truth_matched_primary_tracks[iPID][iWP][iMult][iEta]);
+
+        } // end loop over iEta
+
+      } // end loop over iMult
+
+    } // end loop over iWP
+
+  } // end loop over iPID
+
+
   for (int iWP = 0; iWP < trackWPs.size (); iWP++) {
 
     h_truth_matching_prob[iWP]->Write ();
     SaferDelete (&h_truth_matching_prob[iWP]);
 
-    h2_truth_matched_reco_tracks[iWP]->Write ();
-    SaferDelete (&h2_truth_matched_reco_tracks[iWP]);
+    for (int iMult = 0; iMult < nMultBins; iMult++) {
 
-    h2_truth_tracks[iWP]->Write ();
-    SaferDelete (&h2_truth_tracks[iWP]);
+      h2_fake_tracks[iWP][iMult]->Write ();
+      SaferDelete (&h2_fake_tracks[iWP][iMult]);
+      h2_secondary_tracks[iWP][iMult]->Write ();
+      SaferDelete (&h2_secondary_tracks[iWP][iMult]);
+      h2_strange_tracks[iWP][iMult]->Write ();
+      SaferDelete (&h2_strange_tracks[iWP][iMult]);
+      h2_primary_tracks[iWP][iMult]->Write ();
+      SaferDelete (&h2_primary_tracks[iWP][iMult]);
 
-    h2_primary_reco_tracks[iWP]->Write ();
-    SaferDelete (&h2_primary_reco_tracks[iWP]);
+      h2_reco_tracks[iWP][iMult]->Write ();
+      SaferDelete (&h2_reco_tracks[iWP][iMult]);
 
-    h2_reco_tracks[iWP]->Write ();
-    SaferDelete (&h2_reco_tracks[iWP]);
+      h2_reco_tracks_wgt2[iWP][iMult]->Write ();
+      SaferDelete (&h2_reco_tracks_wgt2[iWP][iMult]);
 
-    for (int iEta = 0; iEta < nEtaTrkBins; iEta++) {
-      h_truth_matched_reco_tracks[iWP][iEta]->Write ();
-      SaferDelete (&h_truth_matched_reco_tracks[iWP][iEta]);
+      for (int iEta = 0; iEta < nEtaTrkBins; iEta++) {
 
-      h_truth_tracks[iWP][iEta]->Write ();
-      SaferDelete (&h_truth_tracks[iWP][iEta]);
+        h_fake_tracks[iWP][iMult][iEta]->Write ();
+        SaferDelete (&h_fake_tracks[iWP][iMult][iEta]);
+        h_secondary_tracks[iWP][iMult][iEta]->Write ();
+        SaferDelete (&h_secondary_tracks[iWP][iMult][iEta]);
+        h_strange_tracks[iWP][iMult][iEta]->Write ();
+        SaferDelete (&h_strange_tracks[iWP][iMult][iEta]);
+        h_primary_tracks[iWP][iMult][iEta]->Write ();
+        SaferDelete (&h_primary_tracks[iWP][iMult][iEta]);
 
-      h_primary_reco_tracks[iWP][iEta]->Write ();
-      SaferDelete (&h_primary_reco_tracks[iWP][iEta]);
+        h_reco_tracks[iWP][iMult][iEta]->Write ();
+        SaferDelete (&h_reco_tracks[iWP][iMult][iEta]);
 
-      h_reco_tracks[iWP][iEta]->Write ();
-      SaferDelete (&h_reco_tracks[iWP][iEta]);
-    }
+        h_reco_tracks_wgt2[iWP][iMult][iEta]->Write ();
+        SaferDelete (&h_reco_tracks_wgt2[iWP][iMult][iEta]);
 
-  }
+      } // end loop over iEta
+
+    } // end loop over iMult
+
+  } // end loop over iWP
 
   outFile->Write (0, TObject::kOverwrite);
   outFile->Close ();

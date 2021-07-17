@@ -209,28 +209,28 @@ void PlotDPhi (const char* tag, const char* inFileTag) {
       shadedBox->Draw ();
       l->DrawLine (M_PI/8., ymin, M_PI/8., ymax);
 
-      myDrawSyst (g_jet_trk_dphi_ref_syst[iPtCh], myBlue);
+      //myDrawSyst (g_jet_trk_dphi_ref_syst[iPtCh], myBlue);
       h = h_jet_trk_dphi_ref[iPtCh];
       g = make_graph (h);
       ResetXErrors (g);
       myDraw (g, myBlue, kFullCircle, 0.8);
       SaferDelete (&g);
 
-      myDrawSyst (g_jet_trk_dphi_ref_bkg_syst[iPtCh], myPurple);
+      //myDrawSyst (g_jet_trk_dphi_ref_bkg_syst[iPtCh], myPurple);
       h = h_jet_trk_dphi_ref_bkg[iPtCh];
       g = make_graph (h);
       ResetXErrors (g);
       myDraw (g, myPurple, kOpenCircle, 0.8);
       SaferDelete (&g);
 
-      myDrawSyst (g_jet_trk_dphi_syst[iCent][iPtCh], myRed);
+      //myDrawSyst (g_jet_trk_dphi_syst[iCent][iPtCh], myRed);
       h = h_jet_trk_dphi[iCent][iPtCh];
       g = make_graph (h);
       ResetXErrors (g);
       myDraw (g, myRed, kFullCircle, 0.8);
       SaferDelete (&g);
 
-      myDrawSyst (g_jet_trk_dphi_bkg_syst[iCent][iPtCh], myGreen);
+      //myDrawSyst (g_jet_trk_dphi_bkg_syst[iCent][iPtCh], myGreen);
       h = h_jet_trk_dphi_bkg[iCent][iPtCh];
       g = make_graph (h);
       ResetXErrors (g);
@@ -280,14 +280,14 @@ void PlotDPhi (const char* tag, const char* inFileTag) {
       shadedBox->Draw ();
       l->DrawLine (M_PI/8., ymin, M_PI/8., ymax);
 
-      myDrawSyst (g_jet_trk_dphi_ref_sig_syst[iPtCh], myBlue);
+      //myDrawSyst (g_jet_trk_dphi_ref_sig_syst[iPtCh], myBlue);
       h = h_jet_trk_dphi_ref_sig[iPtCh];
       g = make_graph (h);
       ResetXErrors (g);
       myDraw (g, myBlue, kFullCircle, 0.8);
       SaferDelete (&g);
 
-      myDrawSyst (g_jet_trk_dphi_sig_syst[iCent][iPtCh], myRed);
+      //myDrawSyst (g_jet_trk_dphi_sig_syst[iCent][iPtCh], myRed);
       h = h_jet_trk_dphi_sig[iCent][iPtCh];
       g = make_graph (h);
       ResetXErrors (g);
@@ -336,7 +336,7 @@ void PlotDPhi (const char* tag, const char* inFileTag) {
       shadedBox->Draw ();
       l->DrawLine (M_PI/8., ymin, M_PI/8., ymax);
 
-      myDrawSyst (g_jet_trk_dphi_iaa_syst[iCent][iPtCh], myRed);
+      //myDrawSyst (g_jet_trk_dphi_iaa_syst[iCent][iPtCh], myRed);
       h = h_jet_trk_dphi_iaa[iCent][iPtCh];
       g = make_graph (h);
       ResetXErrors (g);
@@ -371,8 +371,10 @@ void PlotDPhi (const char* tag, const char* inFileTag) {
 
     int iVar = 0;
     while (iVar < nVar && strcmp (variations[iVar], "FcalCentVar") != 0) iVar++;
-    if (iVar == nVar)
+    if (iVar == nVar) {
       std::cout << "Cannot find FCal centrality binned result??? Please check!" << std::endl;
+      return;
+    }
 
     TH1D* h = nullptr; 
     TGAE* g = nullptr;
@@ -592,8 +594,10 @@ void PlotDPhi (const char* tag, const char* inFileTag) {
 
     int iVar = 0;
     while (iVar < nVar && strcmp (variations[iVar], "FcalCentVar") != 0) iVar++;
-    if (iVar == nVar)
+    if (iVar == nVar) {
       std::cout << "Cannot find FCal centrality binned result??? Please check!" << std::endl;
+      return;
+    }
 
     TH1D* h = nullptr; 
     TGAE* g = nullptr;

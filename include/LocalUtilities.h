@@ -4,6 +4,7 @@
 #include <TString.h>
 #include <TH1D.h>
 #include <TH2D.h>
+#include <TF1.h>
 #include <TFile.h>
 #include <TGraphErrors.h>
 #include <TProfile.h>
@@ -21,14 +22,17 @@ static const std::vector <DataType> AllDataType = { DataType::Collisions, DataTy
 enum class TriggerType { None, Jet50GeV, Jet100GeV, MinBias }; // types of triggers in this analysis
 static const std::vector <TriggerType> AllTriggerType = { TriggerType::None, TriggerType::Jet50GeV, TriggerType::Jet100GeV, TriggerType::MinBias };
 
-enum class SystFlag { None, HITightVar, PionsOnlyVar, WithPileupVar, FcalCentVar, FineFcalCentVar, JetES5PercUpVar, JetES5PercDownVar, JetES5PercSmearVar, JetES2PercUpVar, JetES2PercDownVar, JetES2PercSmearVar }; // types of systematic variations
-static const std::vector <SystFlag> AllSystFlag = { SystFlag::None, SystFlag::HITightVar, SystFlag::PionsOnlyVar, SystFlag::WithPileupVar, SystFlag::FcalCentVar, SystFlag::FineFcalCentVar, SystFlag::JetES5PercUpVar, SystFlag::JetES5PercDownVar, SystFlag::JetES5PercSmearVar, SystFlag::JetES2PercUpVar, SystFlag::JetES2PercDownVar, SystFlag::JetES2PercSmearVar };
+enum class SystFlag { Nominal, HITightVar, PionsOnlyVar, WithPileupVar, FcalCentVar, FineFcalCentVar, JetES5PercUpVar, JetES5PercDownVar, JetES5PercSmearVar, JetES2PercUpVar, JetES2PercDownVar, JetES2PercSmearVar }; // types of systematic variations
+static const std::vector <SystFlag> AllSystFlag = { SystFlag::Nominal, SystFlag::HITightVar, SystFlag::PionsOnlyVar, SystFlag::WithPileupVar, SystFlag::FcalCentVar, SystFlag::FineFcalCentVar, SystFlag::JetES5PercUpVar, SystFlag::JetES5PercDownVar, SystFlag::JetES5PercSmearVar, SystFlag::JetES2PercUpVar, SystFlag::JetES2PercDownVar, SystFlag::JetES2PercSmearVar };
+
+enum class JetRadius { R0p2, R0p3, R0p4, R0p6, R0p8, R1p0, Invalid };
 
 
 TString ToTString (const CollisionSystem collSys);
 TString ToTString (const DataType dType);
 TString ToTString (const TriggerType tType);
 TString ToTString (const SystFlag sFlag);
+float   GetRadius (const JetRadius r);
 
 
 bool SetCollisionSystem (TString ts);
@@ -165,7 +169,7 @@ double GetJetLuminosity ();
 /**
  * Returns true if this jet passes selection criteria.
  */
-bool MeetsJetAcceptanceCuts (int iJ);
+bool MeetsJetAcceptanceCuts (int iJ, const JetRadius radius = JetRadius::R0p4);
 
 
 /**
@@ -181,9 +185,56 @@ bool MeetsTrackCuts (int iTrk);
 
 
 /**
- * Returns the appropriate per-jet reweighting factor. Takes in coordinates for an anti-kT R=0.4 HI jet (pT, eta, & phi).
+ * Returns the matched truth jet within DR < 1 to this HI jet.
+ * Returns -1 if no truth jet is matched within this DR range, or the radius is invalid.
  */
-double GetAkt4JetWeight (const float jpt, const float jeta, const float jphi, const float jetr = 0.4);
+int GetAktTruthJetMatch (const int iJ, const JetRadius radius = JetRadius::R0p4);
+
+
+/**
+ * Determines the optimal jet pT to return (EtaJES or Cross-calibrated).
+ * Jets in data must be cross-calibrated and jets in MC must not be, but jets in MC + data overlay should be cross-calibrated if they are not truth-matched.
+ * Returns NaN if radius was not recognized.
+ */
+float GetAktHIJetPt (const int iJ, const JetRadius radius = JetRadius::R0p4);
+
+
+/**
+ * Determines the optimal jet eta to return (EtaJES or Cross-calibrated).
+ * The cross-calibration does nothing to jet eta so this function is trivial.
+ * Returns NaN if radius was not recognized.
+ */
+float GetAktHIJetEta (const int iJ, const JetRadius radius = JetRadius::R0p4);
+
+
+/**
+ * Determines the optimal jet phi to return.
+ * The EtaJES and cross-calibration do nothing to jet phi so this function is trivial.
+ * Returns NaN if radius was not recognized.
+ */
+float GetAktHIJetPhi (const int iJ, const JetRadius radius = JetRadius::R0p4);
+
+
+/**
+ * Determines the optimal jet energy to return (EtaJES or Cross-calibrated).
+ * Jets in data must be cross-calibrated and jets in MC must not be, but jets in MC + data overlay should be cross-calibrated if they are not truth-matched.
+ * Returns NaN if radius was not recognized.
+ */
+float GetAktHIJetEn (const int iJ, const JetRadius radius = JetRadius::R0p4);
+
+
+/**
+ * Determines the optimal jet timing to return (depends on jet radius).
+ * Returns NaN if radius was not recognized.
+ */
+float GetAktHIJetTiming (const int iJ, const JetRadius radius);
+
+
+/**
+ * Returns the appropriate per-jet reweighting factor. Takes in coordinates for an anti-kT HI jet (pT, eta, & phi).
+ * Returns 0 if the jet is outside the acceptance.
+ */
+double GetAktJetWeight (const float jpt, const float jeta, const float jphi, const JetRadius jetr = JetRadius::R0p4);
 
 
 /**
@@ -196,6 +247,12 @@ TH2D* LoadTrackingEfficiency ();
  * Returns the tracking purity histograms.
  */
 TH2D* LoadTrackingPurity ();
+
+
+/**
+ * Returns array of functions that fit the tracking purity.
+ */
+TF1** LoadTrackingPurityFuncs ();
 
 
 /**

@@ -7,6 +7,9 @@
 #include <vector>
 
 
+float event_weight = 0;
+
+
 // event info 
 unsigned int run_number;
 unsigned int lumi_block;
@@ -239,6 +242,14 @@ int vert_ntrk[max_nvert];
 int vert_type[max_nvert];
 float vert_sumpt[max_nvert];
 
+int nvert_matching;
+float vert_x_matching[max_nvert];
+float vert_y_matching[max_nvert];
+float vert_z_matching[max_nvert];
+int vert_ntrk_matching[max_nvert];
+int vert_type_matching[max_nvert];
+float vert_sumpt_matching[max_nvert];
+
 // FCal Et info
 float fcalA_et;
 float fcalC_et;
@@ -255,11 +266,31 @@ float fcalC_et_Cos4;
 float fcalA_et_Sin4;
 float fcalC_et_Sin4;
 
+float fcalA_et_matching;
+float fcalC_et_matching;
+float fcalA_et_Cos2_matching;
+float fcalC_et_Cos2_matching;
+float fcalA_et_Sin2_matching;
+float fcalC_et_Sin2_matching;
+float fcalA_et_Cos3_matching;
+float fcalC_et_Cos3_matching;
+float fcalA_et_Sin3_matching;
+float fcalC_et_Sin3_matching;
+float fcalA_et_Cos4_matching;
+float fcalC_et_Cos4_matching;
+float fcalA_et_Sin4_matching;
+float fcalC_et_Sin4_matching;
+
 // ZDC energies
 float  ZdcRawEnergy_A;
 float  ZdcRawEnergy_C;
 float  ZdcCalibEnergy_A;
 float  ZdcCalibEnergy_C;
+
+float  ZdcRawEnergy_A_matching;
+float  ZdcRawEnergy_C_matching;
+float  ZdcCalibEnergy_A_matching;
+float  ZdcCalibEnergy_C_matching;
 
 // Sum of gaps and edge gaps for UPC background
 float cluster_sumGap_A;
@@ -271,184 +302,184 @@ float sumGap_C;
 float edgeGap_A;
 float edgeGap_C;
 
-// Photon info
-const static int max_photon_n = 1000;
-int photon_n;
-float photon_pt_precalib[max_photon_n];
-float photon_pt[max_photon_n];
-float photon_eta[max_photon_n];
-float photon_etaBE[max_photon_n];
-float photon_phi[max_photon_n];
-bool photon_matched[max_photon_trig_n][max_photon_n];
-bool photon_tight[max_photon_n];
-bool photon_medium[max_photon_n];
-bool photon_loose[max_photon_n];
-unsigned int photon_isem[max_photon_n];
-int photon_convFlag[max_photon_n];
-float photon_Rconv[max_photon_n];
-float photon_etcone20[max_photon_n];
-float photon_etcone30[max_photon_n];
-float photon_etcone40[max_photon_n];
-float photon_topoetcone20[max_photon_n];
-float photon_topoetcone30[max_photon_n];
-float photon_topoetcone40[max_photon_n];
-float photon_Rhad1[max_photon_n];
-float photon_Rhad[max_photon_n];
-float photon_e277[max_photon_n];
-float photon_Reta[max_photon_n];
-float photon_Rphi[max_photon_n];
-float photon_weta1[max_photon_n];
-float photon_weta2[max_photon_n];
-float photon_wtots1[max_photon_n];
-float photon_f1[max_photon_n];
-float photon_f3[max_photon_n];
-float photon_fracs1[max_photon_n];
-float photon_DeltaE[max_photon_n];
-float photon_Eratio[max_photon_n];
-float photon_pt_sys[max_photon_n];
-float photon_eta_sys[max_photon_n];
-float photon_phi_sys[max_photon_n];
+//// Photon info
+//const static int max_photon_n = 1000;
+//int photon_n;
+//float photon_pt_precalib[max_photon_n];
+//float photon_pt[max_photon_n];
+//float photon_eta[max_photon_n];
+//float photon_etaBE[max_photon_n];
+//float photon_phi[max_photon_n];
+//bool photon_matched[max_photon_trig_n][max_photon_n];
+//bool photon_tight[max_photon_n];
+//bool photon_medium[max_photon_n];
+//bool photon_loose[max_photon_n];
+//unsigned int photon_isem[max_photon_n];
+//int photon_convFlag[max_photon_n];
+//float photon_Rconv[max_photon_n];
+//float photon_etcone20[max_photon_n];
+//float photon_etcone30[max_photon_n];
+//float photon_etcone40[max_photon_n];
+//float photon_topoetcone20[max_photon_n];
+//float photon_topoetcone30[max_photon_n];
+//float photon_topoetcone40[max_photon_n];
+//float photon_Rhad1[max_photon_n];
+//float photon_Rhad[max_photon_n];
+//float photon_e277[max_photon_n];
+//float photon_Reta[max_photon_n];
+//float photon_Rphi[max_photon_n];
+//float photon_weta1[max_photon_n];
+//float photon_weta2[max_photon_n];
+//float photon_wtots1[max_photon_n];
+//float photon_f1[max_photon_n];
+//float photon_f3[max_photon_n];
+//float photon_fracs1[max_photon_n];
+//float photon_DeltaE[max_photon_n];
+//float photon_Eratio[max_photon_n];
+//float photon_pt_sys[max_photon_n];
+//float photon_eta_sys[max_photon_n];
+//float photon_phi_sys[max_photon_n];
 
-// Truth photon info
-const static int max_truth_photon_n = 1000;
-int truth_photon_n;
-float truth_photon_pt[max_truth_photon_n];
-float truth_photon_eta[max_truth_photon_n];
-float truth_photon_phi[max_truth_photon_n];
-int truth_photon_barcode[max_truth_photon_n];
+//// Truth photon info
+//const static int max_truth_photon_n = 1000;
+//int truth_photon_n;
+//float truth_photon_pt[max_truth_photon_n];
+//float truth_photon_eta[max_truth_photon_n];
+//float truth_photon_phi[max_truth_photon_n];
+//int truth_photon_barcode[max_truth_photon_n];
 
-// Electrons info 
-const static int max_electron_n = 1000;
-int electron_n;
-float electron_pt_precalib[max_electron_n];
-float electron_pt[max_electron_n];
-float electron_eta[max_electron_n];
-float electron_etaBE[max_electron_n];
-float electron_phi[max_electron_n];
-int electron_charge[max_electron_n];
-bool electron_lhtight[max_electron_n];
-bool electron_lhmedium[max_electron_n];
-bool electron_lhloose[max_electron_n];
-bool electron_lhmediuhi[max_electron_n];
-bool electron_lhloose_hi[max_electron_n];
-bool electron_matched[max_electron_trig_n][max_electron_n];
-float electron_etcone20[max_electron_n];
-float electron_etcone30[max_electron_n];
-float electron_etcone40[max_electron_n];
-float electron_topoetcone20[max_electron_n];
-float electron_topoetcone30[max_electron_n];
-float electron_topoetcone40[max_electron_n];
-int electron_ntrk[max_electron_n];
-float electron_id_track_pt[max_electron_n];
-float electron_id_track_eta[max_electron_n];
-float electron_id_track_phi[max_electron_n];
-float electron_id_track_charge[max_electron_n];
-float electron_id_track_d0[max_electron_n];
-float electron_id_track_d0sig[max_electron_n];
-float electron_id_track_z0[max_electron_n];
-float electron_id_track_z0sig[max_electron_n];
-float electron_id_track_theta[max_electron_n];
-float electron_id_track_vz[max_electron_n];
-bool electron_id_track_tightprimary[max_electron_n];
-bool electron_id_track_hiloose[max_electron_n];
-bool electron_id_track_hitight[max_electron_n];
-float electron_Rhad1[max_electron_n];
-float electron_Rhad[max_electron_n];
-float electron_e277[max_electron_n];
-float electron_Reta[max_electron_n];
-float electron_Rphi[max_electron_n];
-float electron_weta1[max_electron_n];
-float electron_weta2[max_electron_n];
-float electron_wtots1[max_electron_n];
-float electron_f1[max_electron_n];
-float electron_f3[max_electron_n];
-float electron_fracs1[max_electron_n];
-float electron_DeltaE[max_electron_n];
-float electron_Eratio[max_electron_n];
-float electron_pt_sys[max_electron_n];
-float electron_eta_sys[max_electron_n];
-float electron_phi_sys[max_electron_n];
+//// Electrons info 
+//const static int max_electron_n = 1000;
+//int electron_n;
+//float electron_pt_precalib[max_electron_n];
+//float electron_pt[max_electron_n];
+//float electron_eta[max_electron_n];
+//float electron_etaBE[max_electron_n];
+//float electron_phi[max_electron_n];
+//int electron_charge[max_electron_n];
+//bool electron_lhtight[max_electron_n];
+//bool electron_lhmedium[max_electron_n];
+//bool electron_lhloose[max_electron_n];
+//bool electron_lhmediuhi[max_electron_n];
+//bool electron_lhloose_hi[max_electron_n];
+//bool electron_matched[max_electron_trig_n][max_electron_n];
+//float electron_etcone20[max_electron_n];
+//float electron_etcone30[max_electron_n];
+//float electron_etcone40[max_electron_n];
+//float electron_topoetcone20[max_electron_n];
+//float electron_topoetcone30[max_electron_n];
+//float electron_topoetcone40[max_electron_n];
+//int electron_ntrk[max_electron_n];
+//float electron_id_track_pt[max_electron_n];
+//float electron_id_track_eta[max_electron_n];
+//float electron_id_track_phi[max_electron_n];
+//float electron_id_track_charge[max_electron_n];
+//float electron_id_track_d0[max_electron_n];
+//float electron_id_track_d0sig[max_electron_n];
+//float electron_id_track_z0[max_electron_n];
+//float electron_id_track_z0sig[max_electron_n];
+//float electron_id_track_theta[max_electron_n];
+//float electron_id_track_vz[max_electron_n];
+//bool electron_id_track_tightprimary[max_electron_n];
+//bool electron_id_track_hiloose[max_electron_n];
+//bool electron_id_track_hitight[max_electron_n];
+//float electron_Rhad1[max_electron_n];
+//float electron_Rhad[max_electron_n];
+//float electron_e277[max_electron_n];
+//float electron_Reta[max_electron_n];
+//float electron_Rphi[max_electron_n];
+//float electron_weta1[max_electron_n];
+//float electron_weta2[max_electron_n];
+//float electron_wtots1[max_electron_n];
+//float electron_f1[max_electron_n];
+//float electron_f3[max_electron_n];
+//float electron_fracs1[max_electron_n];
+//float electron_DeltaE[max_electron_n];
+//float electron_Eratio[max_electron_n];
+//float electron_pt_sys[max_electron_n];
+//float electron_eta_sys[max_electron_n];
+//float electron_phi_sys[max_electron_n];
 
-// Truth electrons info
-const static int max_truth_electron_n = 1000;
-int truth_electron_n;
-float truth_electron_pt[max_truth_electron_n];
-float truth_electron_eta[max_truth_electron_n];
-float truth_electron_phi[max_truth_electron_n];
-int truth_electron_charge[max_truth_electron_n];
-int truth_electron_barcode[max_truth_electron_n];
+//// Truth electrons info
+//const static int max_truth_electron_n = 1000;
+//int truth_electron_n;
+//float truth_electron_pt[max_truth_electron_n];
+//float truth_electron_eta[max_truth_electron_n];
+//float truth_electron_phi[max_truth_electron_n];
+//int truth_electron_charge[max_truth_electron_n];
+//int truth_electron_barcode[max_truth_electron_n];
 
-// EGamma calorimeter cluster info, see https://ucatlas.github.io/RootCoreDocumentation/2.4.28/dc/d4b/CaloCluster__v1_8h_source.html
-const static int max_cluster_n = 250;
-int cluster_n;
-float cluster_pt[max_cluster_n];
-float cluster_et[max_cluster_n];
-float cluster_eta[max_cluster_n];
-float cluster_phi[max_cluster_n];
-float cluster_energyBE[max_cluster_n];
-float cluster_etaBE[max_cluster_n];
-float cluster_phiBE[max_cluster_n];
-float cluster_calE[max_cluster_n];
-float cluster_calEta[max_cluster_n];
-float cluster_calPhi[max_cluster_n];
-int cluster_size[max_cluster_n];
-int cluster_status[max_cluster_n];
+//// EGamma calorimeter cluster info, see https://ucatlas.github.io/RootCoreDocumentation/2.4.28/dc/d4b/CaloCluster__v1_8h_source.html
+//const static int max_cluster_n = 250;
+//int cluster_n;
+//float cluster_pt[max_cluster_n];
+//float cluster_et[max_cluster_n];
+//float cluster_eta[max_cluster_n];
+//float cluster_phi[max_cluster_n];
+//float cluster_energyBE[max_cluster_n];
+//float cluster_etaBE[max_cluster_n];
+//float cluster_phiBE[max_cluster_n];
+//float cluster_calE[max_cluster_n];
+//float cluster_calEta[max_cluster_n];
+//float cluster_calPhi[max_cluster_n];
+//int cluster_size[max_cluster_n];
+//int cluster_status[max_cluster_n];
 
-// Truth muons info
-const static int max_truth_muon_n = 1000;
-int truth_muon_n;
-float truth_muon_pt[max_truth_muon_n];
-float truth_muon_eta[max_truth_muon_n];
-float truth_muon_phi[max_truth_muon_n];
-int truth_muon_charge[max_truth_muon_n];
-int truth_muon_barcode[max_truth_muon_n];
+//// Truth muons info
+//const static int max_truth_muon_n = 1000;
+//int truth_muon_n;
+//float truth_muon_pt[max_truth_muon_n];
+//float truth_muon_eta[max_truth_muon_n];
+//float truth_muon_phi[max_truth_muon_n];
+//int truth_muon_charge[max_truth_muon_n];
+//int truth_muon_barcode[max_truth_muon_n];
 
-// Muons info
-const static int max_muon_n = 40;
-int muon_n;
-float muon_pt_precalib[max_muon_n];
-float muon_pt[max_muon_n];
-float muon_ms_pt_precalib[max_muon_n];
-float muon_ms_pt[max_muon_n];
-float muon_eta[max_muon_n];
-float muon_phi[max_muon_n];
-int muon_charge[max_muon_n];
-bool muon_tight[max_muon_n];
-bool muon_medium[max_muon_n];
-bool muon_loose[max_muon_n];
-bool muon_matched[max_muon_trig_n][max_muon_n];
-float muon_etcone20[max_muon_n];
-float muon_etcone30[max_muon_n];
-float muon_etcone40[max_muon_n];
-float muon_topoetcone20[max_muon_n];
-float muon_topoetcone30[max_muon_n];
-float muon_topoetcone40[max_muon_n];
-float muon_id_track_pt[max_muon_n];
-float muon_id_track_eta[max_muon_n];
-float muon_id_track_phi[max_muon_n];
-float muon_id_track_charge[max_muon_n];
-float muon_id_track_d0[max_muon_n];
-float muon_id_track_d0sig[max_muon_n];
-float muon_id_track_z0[max_muon_n];
-float muon_id_track_z0sig[max_muon_n];
-float muon_id_track_theta[max_muon_n];
-float muon_id_track_vz[max_muon_n];
-bool muon_id_track_tightprimary[max_muon_n];
-bool muon_id_track_hiloose[max_muon_n];
-bool muon_id_track_hitight[max_muon_n];
-float muon_ms_track_pt[max_muon_n];
-float muon_ms_track_eta[max_muon_n];
-float muon_ms_track_phi[max_muon_n];
-float muon_ms_track_charge[max_muon_n];
-float muon_ms_track_d0[max_muon_n];
-float muon_ms_track_d0sig[max_muon_n];
-float muon_ms_track_z0[max_muon_n];
-float muon_ms_track_z0sig[max_muon_n];
-float muon_ms_track_theta[max_muon_n];
-float muon_ms_track_vz[max_muon_n];
-std::vector <std::vector <double>> muon_pt_sys;
-std::vector <std::vector <double>> muon_eta_sys;
-std::vector <std::vector <double>> muon_phi_sys;
+//// Muons info
+//const static int max_muon_n = 40;
+//int muon_n;
+//float muon_pt_precalib[max_muon_n];
+//float muon_pt[max_muon_n];
+//float muon_ms_pt_precalib[max_muon_n];
+//float muon_ms_pt[max_muon_n];
+//float muon_eta[max_muon_n];
+//float muon_phi[max_muon_n];
+//int muon_charge[max_muon_n];
+//bool muon_tight[max_muon_n];
+//bool muon_medium[max_muon_n];
+//bool muon_loose[max_muon_n];
+//bool muon_matched[max_muon_trig_n][max_muon_n];
+//float muon_etcone20[max_muon_n];
+//float muon_etcone30[max_muon_n];
+//float muon_etcone40[max_muon_n];
+//float muon_topoetcone20[max_muon_n];
+//float muon_topoetcone30[max_muon_n];
+//float muon_topoetcone40[max_muon_n];
+//float muon_id_track_pt[max_muon_n];
+//float muon_id_track_eta[max_muon_n];
+//float muon_id_track_phi[max_muon_n];
+//float muon_id_track_charge[max_muon_n];
+//float muon_id_track_d0[max_muon_n];
+//float muon_id_track_d0sig[max_muon_n];
+//float muon_id_track_z0[max_muon_n];
+//float muon_id_track_z0sig[max_muon_n];
+//float muon_id_track_theta[max_muon_n];
+//float muon_id_track_vz[max_muon_n];
+//bool muon_id_track_tightprimary[max_muon_n];
+//bool muon_id_track_hiloose[max_muon_n];
+//bool muon_id_track_hitight[max_muon_n];
+//float muon_ms_track_pt[max_muon_n];
+//float muon_ms_track_eta[max_muon_n];
+//float muon_ms_track_phi[max_muon_n];
+//float muon_ms_track_charge[max_muon_n];
+//float muon_ms_track_d0[max_muon_n];
+//float muon_ms_track_d0sig[max_muon_n];
+//float muon_ms_track_z0[max_muon_n];
+//float muon_ms_track_z0sig[max_muon_n];
+//float muon_ms_track_theta[max_muon_n];
+//float muon_ms_track_vz[max_muon_n];
+//std::vector <std::vector <double>> muon_pt_sys;
+//std::vector <std::vector <double>> muon_eta_sys;
+//std::vector <std::vector <double>> muon_phi_sys;
 
 // Truth tracks info
 const static int max_truth_trk_n = 10000;
@@ -468,25 +499,29 @@ float trk_pt[max_trk_n];
 float trk_eta[max_trk_n];
 float trk_phi[max_trk_n];
 float trk_charge[max_trk_n];
-bool trk_HItight[max_trk_n];
-bool trk_HIloose[max_trk_n];
-bool trk_TightPrimary[max_trk_n];
+bool trk_Loose[max_trk_n]; //!
+bool trk_LoosePrimary[max_trk_n]; //!
+bool trk_TightPrimary[max_trk_n]; //!
+bool trk_HITight[max_trk_n]; //!
+bool trk_HILoose[max_trk_n]; //!
 float trk_d0[max_trk_n];
 float trk_d0sig[max_trk_n];
 float trk_z0[max_trk_n];
 float trk_z0sig[max_trk_n];
 float trk_theta[max_trk_n];
 float trk_vz[max_trk_n];
-int trk_nBLayerHits[max_trk_n];
-int trk_nBLayerSharedHits[max_trk_n];
-int trk_nPixelHits[max_trk_n];
-int trk_nPixelDeadSensors[max_trk_n];
-int trk_nPixelSharedHits[max_trk_n];
-int trk_nSCTHits[max_trk_n];
-int trk_nSCTDeadSensors[max_trk_n];
-int trk_nSCTSharedHits[max_trk_n];
-int trk_nTRTHits[max_trk_n];
-int trk_nTRTSharedHits[max_trk_n];
+char trk_nBLayerHits[max_trk_n]; //!
+char trk_nBLayerSharedHits[max_trk_n]; //!
+char trk_nPixelHits[max_trk_n]; //!
+char trk_nPixelHoles[max_trk_n]; //!
+char trk_nPixelSharedHits[max_trk_n]; //!
+char trk_nPixelDeadSensors[max_trk_n]; //!
+char trk_nSCTHits[max_trk_n]; //!
+char trk_nSCTHoles[max_trk_n]; //!
+char trk_nSCTDoubleHoles[max_trk_n]; //!
+char trk_nSCTSharedHits[max_trk_n]; //!
+char trk_nSCTDeadSensors[max_trk_n]; //!
+float trk_pixeldEdx[max_trk_n]; //!
 float trk_prob_truth[max_trk_n];
 float trk_truth_pt[max_trk_n];
 float trk_truth_eta[max_trk_n];
@@ -501,8 +536,9 @@ int trk_truth_nIn[max_trk_n];
 bool trk_truth_isHadron[max_trk_n];
 
 // list of track working points
-const std::vector <bool*> trackWPs = {trk_TightPrimary, trk_HItight, trk_HIloose};
-bool* trk_wp = trk_HItight; // user-specified, defaults to HItight
+const std::vector <bool*> trackWPs = {trk_TightPrimary, trk_HITight, trk_HILoose};
+const std::vector <std::string> trackWPStrs = {"TightPrimary", "HITight", "HILoose"};
+bool* trk_wp = trk_TightPrimary; // user-specified, defaults to TightPrimary
 
 // Anti-kT R=0.2 Truth Jets info
 const static int max_akt2_truth_jet_n = 40;
@@ -529,6 +565,9 @@ float akt4_emtopo_jet_phi[max_akt4_emtopo_jet_n];
 float akt4_emtopo_jet_e[max_akt4_emtopo_jet_n];
 bool akt4_emtopo_jet_LooseBad[max_akt4_emtopo_jet_n];
 
+const static int nJESSys = 21;
+const static int nJERSys = 10;
+
 // Anti-kT R=0.2 HI Jets info
 const static int max_akt2_hi_jet_n = 40;
 int akt2_hi_jet_n;
@@ -548,6 +587,9 @@ float akt2_hi_jet_e_xcalib[max_akt2_hi_jet_n];
 float akt2_hi_jet_sub_et[max_akt2_hi_jet_n];
 float akt2_hi_jet_sub_e[max_akt2_hi_jet_n];
 bool akt2_hi_jet_LooseBad[max_akt2_hi_jet_n];
+float* akt2_hi_jet_pt_sys_JES_ALL[nJESSys]; //!
+float* akt2_hi_jet_pt_sys_JER_ALL[nJERSys]; //!
+float akt2_hi_jet_timing[max_akt2_hi_jet_n]; //!
 
 // Anti-kT R=0.4 HI Jets info
 const static int max_akt4_hi_jet_n = 40;
@@ -568,6 +610,9 @@ float akt4_hi_jet_e_xcalib[max_akt4_hi_jet_n];
 float akt4_hi_jet_sub_et[max_akt4_hi_jet_n];
 float akt4_hi_jet_sub_e[max_akt4_hi_jet_n];
 bool akt4_hi_jet_LooseBad[max_akt4_hi_jet_n];
+float* akt4_hi_jet_pt_sys_JES_ALL[nJESSys]; //!
+float* akt4_hi_jet_pt_sys_JER_ALL[nJERSys]; //!
+float akt4_hi_jet_timing[max_akt4_hi_jet_n]; //!
 
 
 #endif

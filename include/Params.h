@@ -27,6 +27,9 @@ const double muon_mass = 0.105658;
 const float min_trk_pt = 0.4;
 const float min_akt4_hi_jet_pt = 30;
 
+const float akt2_TruthMatchMaxDR = 0.1; // Truth-matching maximum dR for R=0.2 jets
+const float akt4_TruthMatchMaxDR = 0.2; // Truth-matching maximum dR for R=0.4 jets
+
 extern TString workPath;
 extern TString extWorkPath;
 extern TString rootPath;
@@ -115,6 +118,12 @@ const int npPbRuns = sizeof (pPbRuns) / sizeof(pPbRuns[0]);
 
 const int ppRuns[] = {340644, 340683, 340697, 340718, 340814, 340849, 340850, 340910, 340925, 340973, 341027, 341123, 341184};
 const int nppRuns = sizeof (ppRuns) / sizeof (ppRuns[0]);
+
+const double multBins[] = {-0.5, 60.5, 120.5, 999.5};
+const int nMultBins = sizeof (multBins) / sizeof (multBins[0]); // last bin is inclusive in multiplicity
+
+const double etaTrkBins[] = {0, 0.5, 1.0, 1.5, 2.0, 2.5};
+const int nEtaTrkBins = sizeof (etaTrkBins) / sizeof (etaTrkBins[0]) - 1;
 
 
 const int nPtJBins = 60;

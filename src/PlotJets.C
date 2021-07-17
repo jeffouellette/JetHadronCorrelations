@@ -32,29 +32,35 @@ TLine* l = new TLine ();
 TLatex* tl = new TLatex ();
 
 
-void PlotJets (const char* inFileTag) {
+void PlotJets (const char* tag, const char* inFileTag) {
 
   TFile* inFile = nullptr;
 
-  TH1D** h_evt_counts = new TH1D*[2];
-  TH1D** h_jet_counts = new TH1D*[2];
-  //TH1D** h_ljet_counts = new TH1D*[2];
-  //TH1D** h_sljet_counts = new TH1D*[2]; 
-  TH1D** h_jet_pt = new TH1D*[2];
-  TH2D** h2_jet_pt_cov = new TH2D*[2];
+  TH1D*  h_evt_counts_ref = nullptr;
+  TH1D*  h_jet_counts_ref = nullptr;
+  TH1D** h_evt_counts = Get1DArray <TH1D*> (nZdcCentBins);
+  TH1D** h_jet_counts = Get1DArray <TH1D*> (nZdcCentBins);
 
-  TH1D* h_jet_pt_ratio = nullptr;
+  TH1D*   h_jet_pt_ref = nullptr;
+  TH2D*   h2_jet_pt_cov_ref = nullptr;
 
-  TH2D** h2_jet_eta_phi = new TH2D*[2];
+  TH1D**  h_jet_pt = Get1DArray <TH1D*> (nZdcCentBins);
+  TH2D**  h2_jet_pt_cov = Get1DArray <TH2D*> (nZdcCentBins);
 
-  TGAE** g_jet_pt_syst = new TGAE*[2];
+  TH1D**  h_jet_pt_ratio = Get1DArray <TH1D*> (nZdcCentBins);
 
-  TGAE* g_jet_pt_ratio_syst = nullptr;
+  TH2D*   h2_jet_eta_phi_ref = nullptr;
+  TH2D**  h2_jet_eta_phi = Get1DArray <TH2D*> (nZdcCentBins);
 
+  TGAE*   g_jet_pt_ref_syst = nullptr;
+  TGAE**  g_jet_pt_syst = Get1DArray <TGAE*> (nZdcCentBins);
 
-  TH1D*** h_jet_pt_syst = Get2DArray <TH1D*> (2, nVar);
+  TGAE**  g_jet_pt_ratio_syst = Get1DArray <TGAE*> (nZdcCentBins);
 
-  TH1D** h_jet_pt_ratio_syst = Get1DArray <TH1D*> (nVar);
+  TH1D**  h_jet_pt_ref_syst = Get1DArray <TH1D*> (nVar);
+  TH1D*** h_jet_pt_syst = Get2DArray <TH1D*> (nZdcCentBins, nVar);
+
+  TH1D*** h_jet_pt_ratio_syst = Get2DArray <TH1D*> (nZdcCentBins, nVar);
 
 
   {
@@ -64,35 +70,36 @@ void PlotJets (const char* inFileTag) {
     std::cout << "Reading " << inFileName.Data () << std::endl;
     inFile = new TFile (inFileName, "read");
 
-    h_evt_counts[0] = (TH1D*) inFile->Get ("h_evt_counts_ref");
-    h_jet_counts[0] = (TH1D*) inFile->Get ("h_jet_counts_ref");
-    //h_ljet_counts[0] = (TH1D*) inFile->Get ("h_ljet_counts_ref");
-    //h_sljet_counts[0] = (TH1D*) inFile->Get ("h_sljet_counts_ref");
-    h_evt_counts[1] = (TH1D*) inFile->Get ("h_evt_counts");
-    h_jet_counts[1] = (TH1D*) inFile->Get ("h_jet_counts");
-    //h_ljet_counts[1] = (TH1D*) inFile->Get ("h_ljet_counts");
-    //h_sljet_counts[1] = (TH1D*) inFile->Get ("h_sljet_counts");
+    h_evt_counts_ref = (TH1D*) inFile->Get ("h_evt_counts_ref_Nominal");
+    h_jet_counts_ref = (TH1D*) inFile->Get ("h_jet_counts_ref_Nominal");
 
-    h_jet_pt[0] = (TH1D*) inFile->Get ("h_jet_pt_ref");
-    h_jet_pt[1] = (TH1D*) inFile->Get ("h_jet_pt");
+    h_jet_pt_ref = (TH1D*) inFile->Get ("h_jet_pt_ref_Nominal");
 
-    h_jet_pt_ratio = (TH1D*) inFile->Get ("h_jet_pt_ratio");
+    g_jet_pt_ref_syst = (TGAE*) inFile->Get ("g_jet_pt_ref_syst");
 
-    g_jet_pt_syst[0] = (TGAE*) inFile->Get ("g_jet_pt_ref_syst");
-    g_jet_pt_syst[1] = (TGAE*) inFile->Get ("g_jet_pt_syst");
+    h2_jet_eta_phi_ref = (TH2D*) inFile->Get ("h2_jet_eta_phi_ref_Nominal");
 
-    g_jet_pt_ratio_syst = (TGAE*) inFile->Get ("g_jet_pt_ratio_syst");
+    for (int iCent = 0; iCent < nZdcCentBins; iCent++) {
+      h_evt_counts[iCent] = (TH1D*) inFile->Get (Form ("h_evt_counts_pPb_iCent%i_Nominal", iCent));
+      h_jet_counts[iCent] = (TH1D*) inFile->Get (Form ("h_jet_counts_pPb_iCent%i_Nominal", iCent));
+
+      h_jet_pt[iCent] = (TH1D*) inFile->Get (Form ("h_jet_pt_pPb_iCent%i_Nominal", iCent));
+      h_jet_pt_ratio[iCent] = (TH1D*) inFile->Get (Form ("h_jet_pt_ratio_iCent%i_Nominal", iCent));
+
+      g_jet_pt_syst[iCent] = (TGAE*) inFile->Get (Form ("g_jet_pt_syst_pPb_iCent%i", iCent));
+      g_jet_pt_ratio_syst[iCent] = (TGAE*) inFile->Get (Form ("g_jet_pt_ratio_syst_iCent%i", iCent));
+
+      h2_jet_eta_phi[iCent] = (TH2D*) inFile->Get (Form ("h2_jet_eta_phi_pPb_iCent%i_Nominal", iCent));
+    } // end loop over iCent
 
 
     for (int iVar = 1; iVar < nVar; iVar++) {
-      h_jet_pt_syst[0][iVar] = (TH1D*) inFile->Get (Form ("h_jet_pt_ref_%s", variations[iVar].Data ()));
-      h_jet_pt_syst[1][iVar] = (TH1D*) inFile->Get (Form ("h_jet_pt_%s", variations[iVar].Data ()));
-  
-      h_jet_pt_ratio_syst[iVar] = (TH1D*) inFile->Get (Form ("h_jet_pt_ratio_%s", variations[iVar].Data ()));
-    }
-
-    h2_jet_eta_phi[0] = (TH2D*) inFile->Get ("h2_jet_eta_phi_ref");
-    h2_jet_eta_phi[1] = (TH2D*) inFile->Get ("h2_jet_eta_phi");
+      h_jet_pt_ref_syst[iVar] = (TH1D*) inFile->Get (Form ("h_jet_pt_ref_%s", variations[iVar].Data ()));
+      for (int iCent = 0; iCent < nZdcCentBins; iCent++) {
+        h_jet_pt_syst[iCent][iVar] = (TH1D*) inFile->Get (Form ("h_jet_pt_pPb_iCent%i_%s", iCent, variations[iVar].Data ()));
+        h_jet_pt_ratio_syst[iCent][iVar] = (TH1D*) inFile->Get (Form ("h_jet_pt_ratio_iCent%i_%s", iCent, variations[iVar].Data ()));
+      } // end loop over iCent
+    } // end loop over iVar
   }
 
 
@@ -103,10 +110,12 @@ void PlotJets (const char* inFileTag) {
 
 
 
-  {
-    const char* canvasName = "c_jet_pt";
+  for (int iCent = 0; iCent < nZdcCentBins; iCent++) {
+    const char* canvasName = Form ("c_jet_pt_iCent%i", iCent);
+
     TCanvas* c = new TCanvas (canvasName, "", 800, 920);
     c->cd ();
+
     const double fPad = 600./920.;
     TPad* uPad = new TPad (Form ("%s_uPad", canvasName), "", 0, 1-fPad, 1, 1.0);
     TPad* dPad = new TPad (Form ("%s_dPad", canvasName), "", 0, 0.0, 1, 1-fPad);
@@ -120,6 +129,7 @@ void PlotJets (const char* inFileTag) {
     dPad->SetLeftMargin (0.12);
     uPad->SetRightMargin (0.03);
     dPad->SetRightMargin (0.03);
+
     uPad->Draw ();
     dPad->Draw ();
 
@@ -130,9 +140,10 @@ void PlotJets (const char* inFileTag) {
     double ymax=1e0;
 
     uPad->cd ();
+    uPad->SetLogx();
     uPad->SetLogy ();
 
-    h = (TH1D*) h_jet_pt[0]->Clone ("h");
+    h = (TH1D*) h_jet_pt_ref->Clone ("h");
     h->Reset ();
     h->GetXaxis ()->SetMoreLogLabels ();
     h->GetYaxis ()->SetRangeUser (ymin, ymax);
@@ -150,67 +161,33 @@ void PlotJets (const char* inFileTag) {
     h->DrawCopy ("hist ][");
     SaferDelete (&h);
 
-    g = g_jet_pt_syst[0];
-    g->SetMarkerStyle (0);
-    g->SetMarkerSize (0.);
-    g->SetLineColor (myBlue);
-    g->SetLineWidth (1);
-    ((TGAE*) g->Clone ())->Draw ("5");
-    SaferDelete (&g);
-    h = h_jet_pt[0];
+    //myDrawSyst (g_jet_pt_ref_syst, myBlue);
+    h = h_jet_pt_ref;
     g = make_graph (h);
     ResetXErrors (g);
-    g->SetMarkerStyle (kFullCircle);
-    g->SetMarkerSize (0.8);
-    g->SetMarkerColor (myBlue);
-    g->SetLineColor (myBlue);
-    g->SetLineWidth (2);
-    ((TGAE*) g->Clone ())->Draw ("p");
-    g->SetMarkerStyle (kOpenCircle);
-    g->SetMarkerColor (kBlack);
-    g->SetLineWidth (0);
-    ((TGAE*) g->Clone ())->Draw ("p");
+    myDraw (g, myBlue, kFullCircle, 0.8);
     SaferDelete (&g);
 
-    g = g_jet_pt_syst[1];
-    g->SetMarkerStyle (0);
-    g->SetMarkerSize (0.);
-    g->SetLineColor (myRed);
-    g->SetLineWidth (1);
-    ((TGAE*) g->Clone ())->Draw ("5");
-    SaferDelete (&g);
-    h = h_jet_pt[1];
+    //myDrawSyst (g_jet_pt_syst[iCent], myRed);
+    h = h_jet_pt[iCent];
     g = make_graph (h);
     ResetXErrors (g);
-    g->SetMarkerStyle (kFullCircle);
-    g->SetMarkerSize (0.8);
-    g->SetMarkerColor (myRed);
-    g->SetLineColor (myRed);
-    g->SetLineWidth (2);
-    ((TGAE*) g->Clone ())->Draw ("p");
-    g->SetMarkerStyle (kOpenCircle);
-    g->SetMarkerColor (kBlack);
-    g->SetLineWidth (0);
-    ((TGAE*) g->Clone ())->Draw ("p");
+    myDraw (g, myRed, kFullCircle, 0.8);
     SaferDelete (&g);
 
     myText (0.50, 0.78, kBlack, "#bf{#it{ATLAS}} Internal", 0.028/fPad);
-    myMarkerText (0.50, 0.72, myRed, kFullCircle, "#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV, #bf{0-20%}", 0.8, 0.028/fPad, true);
+    myMarkerText (0.50, 0.72, myRed, kFullCircle, Form ("#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV, #bf{ZDC %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.8, 0.028/fPad, true);
     myMarkerText (0.50, 0.66, myBlue, kFullCircle, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.8, 0.028/fPad, true);
     //myText (0.50, 0.60, kBlack, strcmp (tag, "30GeVJets") == 0 ? "Minimum bias trigger" : "J50 Trigger", 0.028/fPad);
 
 
     dPad->cd ();
+    dPad->SetLogx();
 
-    h = (TH1D*) h_jet_pt_ratio->Clone ("h");
+    ymin=0.6;
+    ymax=1.4;
 
-    //float avgy = 0;
-    //for (int i = 1; i <= h->GetNbinsX (); i++) avgy += h->GetBinContent (i) / h->GetNbinsX ();
-    //ymin = 0.3*avgy;
-    //ymax = 3*avgy;
-    ymin=0.7;
-    ymax=1.3;
-
+    h = (TH1D*) h_jet_pt_ratio[iCent]->Clone ("h");
     h->Reset ();
     for (int i = 1; i <= h->GetNbinsX (); i++) h->SetBinContent (i, 1);
     h->GetXaxis ()->SetMoreLogLabels ();
@@ -230,36 +207,46 @@ void PlotJets (const char* inFileTag) {
     h->DrawCopy ("hist ][");
     SaferDelete (&h);
 
-    g = g_jet_pt_ratio_syst;
-    g->SetMarkerStyle (0);
-    g->SetMarkerSize (0.);
-    g->SetLineColor (myBlue);
-    g->SetLineWidth (1);
-    ((TGAE*) g->Clone ())->Draw ("5");
-    SaferDelete (&g);
-    h = h_jet_pt_ratio;
+    //myDrawSyst (g_jet_pt_ratio_syst[iCent], myBlue);
+    h = h_jet_pt_ratio[iCent];
     g = make_graph (h);
     ResetXErrors (g);
-    g->SetLineColor (myBlue);
-    g->SetLineWidth (2);
-    g->SetMarkerColor (myBlue);
-    g->SetMarkerStyle (kFullCircle);
-    g->SetMarkerSize (0.8);
-    ((TGAE*) g->Clone ())->Draw ("p");
-    g->SetMarkerStyle (kOpenCircle);
-    g->SetMarkerColor (kBlack);
-    g->SetLineWidth (0);
-    ((TGAE*) g->Clone ())->Draw ("p");
+    myDraw (g, myBlue, kFullCircle, 0.8);
     SaferDelete (&g);
 
-    c->SaveAs (Form ("%s/Plots/JetPtSpectrum.pdf", workPath.Data ()));
+    c->SaveAs (Form ("%s/Plots/JetPtSpectrum_%s.pdf", workPath.Data (), tag));
   }
 
 
 
   {
-    TCanvas* c = new TCanvas ("c2", "", 800, 800);
-    c->SetRightMargin (0.18);
+    const char* canvasName = "c_jet_eta_phi_ref";
+
+    TCanvas* c = new TCanvas (canvasName, "", 880, 800);
+
+    c->SetRightMargin (0.15);
+    c->SetLeftMargin (0.15);
+    c->SetTopMargin (0.04);
+    c->SetBottomMargin (0.15);
+
+    TH2D* h2 = h2_jet_eta_phi_ref;
+
+    h2->Draw ("colz");
+
+    myText (0.22, 0.89, kBlack, "#bf{#it{ATLAS}} Internal", 0.032);
+    myText (0.22, 0.85, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.032);
+    myText (0.22, 0.81, kBlack, TString (tag).Contains ("30GeVJets") ? "#it{p}_{T}^{jet} > 30 GeV" : "#it{p}_{T}^{jet} > 60 GeV", 0.032);
+
+    c->SaveAs (Form ("%s/Plots/JetDistributions/JetEtaPhiSpectrum_pp_%s.pdf", workPath.Data (), tag));
+  }
+
+
+
+  for (int iCent = 0; iCent < nZdcCentBins; iCent++) {
+    const char* canvasName = Form ("c_jet_eta_phi_iCent%i", iCent);
+
+    TCanvas* c = new TCanvas (canvasName, "", 880, 800);
+    c->SetRightMargin (0.15);
     c->SetLeftMargin (0.15);
     c->SetTopMargin (0.04);
     c->SetBottomMargin (0.15);
@@ -268,7 +255,11 @@ void PlotJets (const char* inFileTag) {
 
     h2->Draw ("colz");
 
-    c->SaveAs (Form ("%s/Plots/JetEtaPhiSpectrum.pdf", workPath.Data ()));
+    myText (0.22, 0.89, kBlack, "#bf{#it{ATLAS}} Internal", 0.032);
+    myText (0.22, 0.85, kBlack, Form ("#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV, #bf{ZDC %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.032);
+    myText (0.22, 0.81, kBlack, TString (tag).Contains ("30GeVJets") ? "#it{p}_{T}^{jet} > 30 GeV" : "#it{p}_{T}^{jet} > 60 GeV", 0.032);
+
+    c->SaveAs (Form ("%s/Plots/JetDistributions/JetEtaPhiSpectrum_pPb_iCent%i_%s.pdf", workPath.Data (), iCent, tag));
   }
 
 

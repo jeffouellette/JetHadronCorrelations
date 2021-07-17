@@ -50,11 +50,8 @@ int main (int argc, char** argv) {
   }
 
   const char* inFileName            = (argc > argn && argv[argn] ? argv[argn++] : "");
-  if (!IsCollisions ()) {
-    GetMCWeights (inFileName);
-  }
-
-  const char* eventWeightsFileName  = (argc > argn && argv[argn] ? argv[argn++] : "");
+  if (!GetMCWeights (inFileName))
+    std::cout << "In Process.cxx: Failed to get event weights, please check." << std::endl;
 
   std::cout << "Info: In Process.cxx: Configuration set to";
   std::cout << "\n\talg = " << alg;
@@ -66,13 +63,11 @@ int main (int argc, char** argv) {
   std::cout << "\n\tSystFlag = " << ToTString (systFlag);
   std::cout << "\n\tinFileName = " << inFileName;
   if (crossSectionPicoBarns != 0.)
-    std::cout << "\n\tcrossSectionPicoBarns = " << crossSectionPicoBarns;
+    std::cout << "\n\t  --> deduced crossSectionPicoBarns = " << crossSectionPicoBarns;
   if (mcFilterEfficiency != 0.)
-    std::cout << "\n\tmcFilterEfficiency = " << mcFilterEfficiency;
+    std::cout << "\n\t  --> deduced mcFilterEfficiency = " << mcFilterEfficiency;
   if (mcNumberEvents != 0.)
-    std::cout << "\n\tmcNumberEvents = " << mcNumberEvents;
-  if (string (eventWeightsFileName) != "")
-    std::cout << "\n\teventWeightsFileName = " << eventWeightsFileName;
+    std::cout << "\n\t  --> deduced mcNumberEvents = " << mcNumberEvents;
   std::cout << std::endl;
 
 

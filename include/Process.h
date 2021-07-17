@@ -14,7 +14,7 @@ int mcNumberEvents = 0;
 CollisionSystem collisionSystem = CollisionSystem::pp15; // default is pp15
 DataType dataType = DataType::Collisions; // default is collisions
 TriggerType triggerType = TriggerType::None; // default is no triggers
-SystFlag systFlag = SystFlag::None; // default is no systematics
+SystFlag systFlag = SystFlag::Nominal; // default is no systematics
 
 }
 
