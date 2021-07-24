@@ -26,7 +26,7 @@ bool CentralityAnalysis (const char* directory,
                          const int dataSet,
                          const char* inFileName) {
 
-  cout << "Info: In CentralityAnalysis.cxx: Entered CentralityAnalysis routine." << endl;
+  std::cout << "Info: In CentralityAnalysis.cxx: Entered CentralityAnalysis routine." << std::endl;
 
   SetupDirectories ("CentralityAnalysis");
 
@@ -182,22 +182,25 @@ bool CentralityAnalysis (const char* directory,
   }
 
 
-  Trigger* jetTriggers[jet_trig_n];
-  Trigger* minbiasTriggers[minbias_trig_n];
+  Trigger* jetTrigger = nullptr;
+  Trigger* minbiasTrigger = nullptr;
   Trigger* zdcL1Triggers[zdc_L1_trig_n];
 
   if (IsCollisions ()) {
-    for (int iTrig = 0; iTrig < jet_trig_n; iTrig++) {
-      jetTriggers[iTrig] = new Trigger (jet_trig_name[iTrig]);
-      tree->SetBranchAddress ((jet_trig_name[iTrig]+"_decision").c_str (), &(jetTriggers[iTrig]->trigDecision));
-      tree->SetBranchAddress ((jet_trig_name[iTrig]+"_prescale").c_str (), &(jetTriggers[iTrig]->trigPrescale));
+
+    if ((Ispp () && UseJetTriggers ()) || IspPb ()) {
+      jetTrigger = new Trigger (jet_trig_name[0]);
+      tree->SetBranchAddress ((jet_trig_name[0]+"_decision").c_str (), &(jetTrigger->trigDecision));
+      tree->SetBranchAddress ((jet_trig_name[0]+"_prescale").c_str (), &(jetTrigger->trigPrescale));
     }
-    for (int iTrig = 0; iTrig < minbias_trig_n; iTrig++) {
-      minbiasTriggers[iTrig] = new Trigger (minbias_trig_name[iTrig]);
-      tree->SetBranchAddress ((minbias_trig_name[iTrig]+"_decision").c_str (), &(minbiasTriggers[iTrig]->trigDecision));
-      tree->SetBranchAddress ((minbias_trig_name[iTrig]+"_prescale").c_str (), &(minbiasTriggers[iTrig]->trigPrescale));
+
+    if ((Ispp () && UseMinBiasTriggers ()) || IspPb ()) {
+      minbiasTrigger = new Trigger (minbias_trig_name[0]);
+      tree->SetBranchAddress ((minbias_trig_name[0]+"_decision").c_str (), &(minbiasTrigger->trigDecision));
+      tree->SetBranchAddress ((minbias_trig_name[0]+"_prescale").c_str (), &(minbiasTrigger->trigPrescale));
     }
-    if (!Ispp ()) {
+
+    if (IspPb ()) {
       for (int iTrig = 0; iTrig < zdc_L1_trig_n; iTrig++) {
         zdcL1Triggers[iTrig] = new Trigger (zdc_L1_trig_name[iTrig]);
         tree->SetBranchAddress ((zdc_L1_trig_name[iTrig]+"_decision").c_str (), &(zdcL1Triggers[iTrig]->trigDecision));
@@ -208,7 +211,7 @@ bool CentralityAnalysis (const char* directory,
 
 
   // Load files for output
-  TFile* outFile = new TFile (Form ("%s/%s.root", rootPath.Data (), identifier.Data ()), "recreate");
+  TFile* outFile = new TFile (Form ("%s/%s%s.root", rootPath.Data (), identifier.Data (), Ispp () ? (UseMinBiasTriggers () ? "_mb" : "j50") : ""), "recreate");
 
   const int nMuBins = 600;
   const double* muBins = logspace (1e-5, 1e1, nMuBins);
@@ -289,7 +292,7 @@ bool CentralityAnalysis (const char* directory,
   // First loop over events
   for (int iEvt = 0; iEvt < nEvts; iEvt++) {
     if (nEvts > 0 && iEvt % (nEvts / 100) == 0)
-      cout << "Info: In CentralityAnalysis.cxx: Events " << iEvt / (nEvts / 100) << "\% done...\r" << flush;
+      std::cout << "Info: In CentralityAnalysis.cxx: Events " << iEvt / (nEvts / 100) << "\% done...\r" << std::flush;
 
     tree->GetEntry (iEvt);
 
@@ -298,19 +301,22 @@ bool CentralityAnalysis (const char* directory,
     if (IsPbPb () && (IsCollisions () || IsDataOverlay ()) && isOOTPU)
       continue; // check for out-of-time pile-up
 
-    bool hasPrimaryVert = false;
-    bool hasPileup = false;
-    float vz = -999;
-    for (int iVert = 0; iVert < nvert; iVert++) {
-      if (vert_type[iVert] == 1) {
-        hasPrimaryVert = true;
-        vz = vert_z[iVert];
+    // vertexing cuts, require no pileup vertices and primary vertex with |vz| < 150mm
+    {
+      bool hasPrimary = false;
+      bool hasPileup = false;
+      float vz = -999;
+      for (int iVert = 0; iVert < nvert; iVert++) {
+        if (vert_type[iVert] == 1) {
+          hasPrimary = true;
+          vz = vert_z[iVert];
+        }
+        else if (vert_type[iVert] == 3 && (Ispp () || vert_ntrk[iVert] > 6))
+          hasPileup = true;
       }
-      if (vert_type[iVert] == 3 && (Ispp () || vert_ntrk[iVert] > 6))
-        hasPileup = true;
+      if (hasPileup || std::fabs (vz) > 150 || !hasPrimary)
+        continue;
     }
-    if (!hasPrimaryVert || hasPileup || fabs (vz) > 150)
-      continue;
 
     float fcal_et_Pb = 0, fcal_et_p = 0;
     float zdc_calibE_Pb = 0, zdc_calibE_p = 0;
@@ -346,19 +352,19 @@ bool CentralityAnalysis (const char* directory,
       q4x_p = IsPeriodA () ? fcalC_et_Cos4 : fcalA_et_Cos4;
       q4y_p = IsPeriodA () ? fcalC_et_Sin4 : fcalA_et_Sin4;
 
-      q2_Pb = sqrt (q2x_Pb*q2x_Pb + q2y_Pb*q2y_Pb) / fcal_et_Pb;
-      q3_Pb = sqrt (q3x_Pb*q3x_Pb + q3y_Pb*q3y_Pb) / fcal_et_Pb;
-      q4_Pb = sqrt (q4x_Pb*q4x_Pb + q4y_Pb*q4y_Pb) / fcal_et_Pb;
-      psi2_Pb = atan2 (q2y_Pb, q2x_Pb) / 2.;
-      psi3_Pb = atan2 (q3y_Pb, q3x_Pb) / 3.;
-      psi4_Pb = atan2 (q4y_Pb, q4x_Pb) / 4.;
+      q2_Pb = std::sqrt (q2x_Pb*q2x_Pb + q2y_Pb*q2y_Pb) / fcal_et_Pb;
+      q3_Pb = std::sqrt (q3x_Pb*q3x_Pb + q3y_Pb*q3y_Pb) / fcal_et_Pb;
+      q4_Pb = std::sqrt (q4x_Pb*q4x_Pb + q4y_Pb*q4y_Pb) / fcal_et_Pb;
+      psi2_Pb = std::atan2 (q2y_Pb, q2x_Pb) / 2.;
+      psi3_Pb = std::atan2 (q3y_Pb, q3x_Pb) / 3.;
+      psi4_Pb = std::atan2 (q4y_Pb, q4x_Pb) / 4.;
 
-      q2_p = sqrt (q2x_p*q2x_p + q2y_p*q2y_p) / fcal_et_p;
-      q3_p = sqrt (q3x_p*q3x_p + q3y_p*q3y_p) / fcal_et_p;
-      q4_p = sqrt (q4x_p*q4x_p + q4y_p*q4y_p) / fcal_et_p;
-      psi2_p = atan2 (q2y_p, q2x_p) / 2.;
-      psi3_p = atan2 (q3y_p, q3x_p) / 3.;
-      psi4_p = atan2 (q4y_p, q4x_p) / 4.;
+      q2_p = std::sqrt (q2x_p*q2x_p + q2y_p*q2y_p) / fcal_et_p;
+      q3_p = std::sqrt (q3x_p*q3x_p + q3y_p*q3y_p) / fcal_et_p;
+      q4_p = std::sqrt (q4x_p*q4x_p + q4y_p*q4y_p) / fcal_et_p;
+      psi2_p = std::atan2 (q2y_p, q2x_p) / 2.;
+      psi3_p = std::atan2 (q3y_p, q3x_p) / 3.;
+      psi4_p = std::atan2 (q4y_p, q4x_p) / 4.;
     }
 
     else if (Ispp ()) {
@@ -387,12 +393,12 @@ bool CentralityAnalysis (const char* directory,
       q4x_Pb = 0;
       q4y_Pb = 0;
 
-      q2_p = sqrt (q2x_p*q2x_p + q2y_p*q2y_p) / fcal_et_p;
-      q3_p = sqrt (q3x_p*q3x_p + q3y_p*q3y_p) / fcal_et_p;
-      q4_p = sqrt (q4x_p*q4x_p + q4y_p*q4y_p) / fcal_et_p;
-      psi2_p = atan2 (q2y_p, q2x_p) / 2.;
-      psi3_p = atan2 (q3y_p, q3x_p) / 3.;
-      psi4_p = atan2 (q4y_p, q4x_p) / 4.;
+      q2_p = std::sqrt (q2x_p*q2x_p + q2y_p*q2y_p) / fcal_et_p;
+      q3_p = std::sqrt (q3x_p*q3x_p + q3y_p*q3y_p) / fcal_et_p;
+      q4_p = std::sqrt (q4x_p*q4x_p + q4y_p*q4y_p) / fcal_et_p;
+      psi2_p = std::atan2 (q2y_p, q2x_p) / 2.;
+      psi3_p = std::atan2 (q3y_p, q3x_p) / 3.;
+      psi4_p = std::atan2 (q4y_p, q4x_p) / 4.;
 
       q2_Pb = 0;
       q3_Pb = 0;
@@ -414,7 +420,7 @@ bool CentralityAnalysis (const char* directory,
     }
 
 
-    if (minbiasTriggers[0]->trigDecision) {
+    if (minbiasTrigger && minbiasTrigger->trigDecision) {
       h_mb_instMu->Fill (actualInteractionsPerCrossing);
       h_mb_avgMu->Fill (averageInteractionsPerCrossing);
 
@@ -438,7 +444,7 @@ bool CentralityAnalysis (const char* directory,
       h3_mb_Pb_fcal_et_p_q4_Pb_zdc_calibE->Fill (fcal_et_Pb, q4_p, zdc_calibE_Pb);
     }
 
-    if (jetTriggers[0]->trigDecision) {
+    if (jetTrigger && jetTrigger->trigDecision) {
 
       // Require Pb-going ZDC to fire, reducing UPC background contamination
       if (!IspPb () || zdc_Pb_decision) {
@@ -460,14 +466,12 @@ bool CentralityAnalysis (const char* directory,
       h3_jet_Pb_fcal_et_p_q4_Pb_zdc_calibE->Fill (fcal_et_Pb, q4_p, zdc_calibE_Pb);
     }
   } // end event loop
-  cout << endl << "Info: In CentralityAnalysis.cxx: Finished processing events." << endl;
+  std::cout << std::endl << "Info: In CentralityAnalysis.cxx: Finished processing events." << std::endl;
 
 
   if (IsCollisions ()) {
-    for (int iTrig = 0; iTrig < jet_trig_n; iTrig++)
-      SaferDelete (&jetTriggers[iTrig]);
-    for (int iTrig = 0; iTrig < minbias_trig_n; iTrig++)
-      SaferDelete (&minbiasTriggers[iTrig]);
+    SaferDelete (&jetTrigger);
+    SaferDelete (&minbiasTrigger);
     if (!Ispp ()) {
       for (int iTrig = 0; iTrig < zdc_L1_trig_n; iTrig++)
         SaferDelete (&zdcL1Triggers[iTrig]);

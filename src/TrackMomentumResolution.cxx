@@ -26,26 +26,23 @@ bool TrackMomentumResolution (const char* directory,
                                  const char* inFileName,
                                  const char* eventWeightsFileName) {
  
-  cout << "Info: In TrackMomentumResolution.cxx: Entered TrackMomentumResolution routine." << endl;
-  cout << "Info: In TrackMomentumResolution.cxx: Printing systematic onfiguration:";
-  cout << "\n\tDoHITightVar (): " << DoHITightVar () << endl;
-  cout << "\n\tDoPionsOnlyVar (): " << DoPionsOnlyVar () << endl;
+  std::cout << "Info: In TrackMomentumResolution.cxx: Entered TrackMomentumResolution routine." << std::endl;
 
   SetupDirectories ("TrackMomentumResolution");
 
   if (IsCollisions ()) {
-    cout << "Error: In TrackMomentumResolution.cxx: Trying to calculate tracking performance in data! Quitting." << endl;
+    std::cout << "Error: In TrackMomentumResolution.cxx: Trying to calculate tracking performance in data! Quitting." << std::endl;
     return false;
   }
 
   if (IsDataOverlay ())
-    cout << "Info: In TrackMomentumResolution.cxx: Running over data overlay, will check data conditions" << endl;
+    std::cout << "Info: In TrackMomentumResolution.cxx: Running over data overlay, will check data conditions" << std::endl;
   if (IsHijing ())
-    cout << "Info: In TrackMomentumResolution.cxx: Running over Hijing sample" << endl;
+    std::cout << "Info: In TrackMomentumResolution.cxx: Running over Hijing sample" << std::endl;
 
   const TString identifier = GetIdentifier (dataSet, directory, inFileName);
-  cout << "Info: In TrackMomentumResolution.cxx: File Identifier: " << identifier << endl;
-  cout << "Info: In TrackMomentumResolution.cxx: Saving output to " << rootPath << endl;
+  std::cout << "Info: In TrackMomentumResolution.cxx: File Identifier: " << identifier << std::endl;
+  std::cout << "Info: In TrackMomentumResolution.cxx: Saving output to " << rootPath << std::endl;
 
 
   // creates a file identifier pattern that we will use to identify the directory containing the input files
@@ -80,16 +77,23 @@ bool TrackMomentumResolution (const char* directory,
     std::cout << "Info: In TrackMomentumResolution.cxx: Chain has " << tree->GetListOfFiles ()->GetEntries () << " files, " << tree->GetEntries () << " entries" << std::endl;
   }
 
-  //TFile* eventWeightsFile = nullptr;
-  //TH1D* h_weights = nullptr;
 
-  //eventWeightsFile = new TFile (eventWeightsFileName, "read");
-  //h_weights = (TH1D*) eventWeightsFile->Get (Form ("h_PbPb%s_weights_%s", doNchWeighting ? "Nch" : "FCal", isHijing ? "hijing" : "mc"));
-  //cout << "Info: In TrackMomentumResolution.cxx: Found FCal weighting histogram, " << h_weights->GetName () << endl;
+  if (!IsHijing ()) {
+    assert (crossSectionPicoBarns > 0);
+    assert (mcFilterEfficiency > 0);
+    assert (mcNumberEvents > 0);
+  }
 
-  //First sort jets & tracks into many, smaller TTrees.
-  //This is where the sorting based on event information (e.g. centrality, Ntrk, jet pT) will go.
-  //Event mixing will take place based on these categories so that total memory usage at any point in time is minimized.
+
+  // variables for filtering MC truth
+  const float truth_jet_min_pt = GetJZXR04MinPt (TString (inFileName));
+  const float truth_jet_max_pt = GetJZXR04MaxPt (TString (inFileName));
+  if (truth_jet_min_pt != 0)
+    std::cout << "Checking for leading truth jet with pT > " << truth_jet_min_pt << std::endl;
+  if (truth_jet_max_pt != FLT_MAX)
+    std::cout << "Checking for leading truth jet with pT < " << truth_jet_max_pt << std::endl;
+
+
 
   tree->SetBranchAddress ("run_number",     &run_number);
   tree->SetBranchAddress ("event_number",   &event_number);
@@ -180,7 +184,7 @@ bool TrackMomentumResolution (const char* directory,
   }
 
 
-  cout << "Info : In TrackMomentumResolution.cxx: Saving histograms to " << Form ("%s/%s.root", rootPath.Data (), identifier.Data ()) << endl;
+  std::cout << "Info : In TrackMomentumResolution.cxx: Saving histograms to " << Form ("%s/%s.root", rootPath.Data (), identifier.Data ()) << std::endl;
   TFile* outFile = new TFile (Form ("%s/%s.root", rootPath.Data (), identifier.Data ()), "recreate");
 
   TString sys;
@@ -223,27 +227,46 @@ bool TrackMomentumResolution (const char* directory,
   }
   
 
+  const JetRadius r0p4 = JetRadius::R0p4;
   const int nEvts = tree->GetEntries ();
 
   // Loop over events
   for (int iEvt = 0; iEvt < nEvts; iEvt++) {
     if (nEvts > 100 && iEvt % (nEvts / 100) == 0)
-      cout << "Info: In TrackMomentumResolution.cxx: Event loop " << iEvt / (nEvts / 100) << "\% done...\r" << flush;
+      std::cout << "Info: In TrackMomentumResolution.cxx: Event loop " << iEvt / (nEvts / 100) << "\% done...\r" << std::flush;
     tree->GetEntry (iEvt);
 
-    bool hasPrimary = false;
-    bool hasPileup = false;
-    float vz = -999;
-    for (int iVert = 0; iVert < nvert; iVert++) {
-      const bool isPrimary = (vert_type[iVert] == 1);
-      hasPrimary = hasPrimary || isPrimary;
-      hasPileup = hasPileup || (vert_type[iVert] == 3);
-      if (isPrimary)
-        vz = vert_z[iVert];
+    // vertexing cuts, require no pileup vertices and primary vertex with |vz| < 150mm
+    {
+      bool hasPrimary = false;
+      bool hasPileup = false;
+      float vz = -999;
+      for (int iVert = 0; iVert < nvert; iVert++) {
+        if (vert_type[iVert] == 1) {
+          hasPrimary = true;
+          vz = vert_z[iVert];
+        }
+        else if (vert_type[iVert] == 3)
+          hasPileup = true;
+      }
+      if (hasPileup || std::fabs (vz) > 150 || !hasPrimary)
+        continue;
     }
-    if (!hasPrimary || hasPileup || fabs (vz) > 150)
-    //if (!hasPrimary || fabs (vz) > 150)
-      continue;
+
+
+    // Filter sample based on min/max of pThat range
+    if (!IsHijing ()) {
+      int iLTJ = -1;
+      const int nTJ = GetAktTruthJetN (r0p4);
+      for (int iTJ = 0; iTJ < nTJ; iTJ++) {
+        if (iLTJ == -1 || GetAktTruthJetPt (iTJ, r0p4) > GetAktTruthJetPt (iLTJ, r0p4))
+          iLTJ = iTJ;
+      }
+
+      if (iLTJ == -1 || GetAktTruthJetPt (iLTJ, r0p4) < truth_jet_min_pt || GetAktTruthJetPt (iLTJ, r0p4) > truth_jet_max_pt)
+        continue;
+    }
+
 
     const float eventWeight = 1;
     //const float eventWeight = ((isPbPb && !isHijing) ? h_weights->GetBinContent (h_weights->FindFixBin (doNchWeighting ? ntrk : fcalA_et+fcalC_et)) : 1); // weight is 1 for pp
@@ -256,8 +279,8 @@ bool TrackMomentumResolution (const char* directory,
 
       const bool isFake = !isTruthMatched;
       const bool isSecondary = isTruthMatched && (trk_truth_barcode[iTrk] <= 0 || 200000 <= trk_truth_barcode[iTrk]);
-      const bool isChargedPion = isTruthMatched && abs (trk_truth_pdgid[iTrk]) == 211;
-      const bool isStrangeBaryon = isTruthMatched && (abs (trk_truth_pdgid[iTrk]) == 3112 || abs (trk_truth_pdgid[iTrk]) == 3222 || abs (trk_truth_pdgid[iTrk]) == 3312 || abs (trk_truth_pdgid[iTrk]) == 3334);
+      //const bool isChargedPion = isTruthMatched && std::abs (trk_truth_pdgid[iTrk]) == 211;
+      const bool isStrangeBaryon = isTruthMatched && (std::abs (trk_truth_pdgid[iTrk]) == 3112 || std::abs (trk_truth_pdgid[iTrk]) == 3222 || std::abs (trk_truth_pdgid[iTrk]) == 3312 || std::abs (trk_truth_pdgid[iTrk]) == 3334);
 
       // primary tracks are non-fake, non-secondary tracks. Strange baryons are excluded too.
       const bool isPrimary = !isFake && !isSecondary && !isStrangeBaryon;
@@ -267,9 +290,8 @@ bool TrackMomentumResolution (const char* directory,
 
       // now cut on the truth-level info
       if (trk_truth_charge[iTrk] == 0 ||
-          fabs (trk_truth_eta[iTrk]) > 2.5 ||
-          !(trk_truth_isHadron[iTrk]) ||
-          (DoPionsOnlyVar () && isChargedPion))
+          std::fabs (trk_truth_eta[iTrk]) > 2.5 ||
+          !(trk_truth_isHadron[iTrk]))
         continue;
 
       short iPtch = -1;
@@ -291,7 +313,7 @@ bool TrackMomentumResolution (const char* directory,
       }
     }
   } // end event loop
-  cout << endl << "Info: In TrackMomentumResolution.cxx: Finished event loop." << endl;
+  std::cout << std::endl << "Info: In TrackMomentumResolution.cxx: Finished event loop." << std::endl;
 
 
   SaferDelete (&tree);

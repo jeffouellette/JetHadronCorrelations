@@ -5,12 +5,11 @@
  * Implements a trigger struct.
  * Author: Jeff Ouellette
  * Dated: 4/25/2018
- * Last modified: 11/12/2020
+ * Last modified: 7/23/2021
  */
 
 #include <string>
 
-using namespace std;
 
 /**
  * A trigger struct stores information about a trigger, mainly decision & prescale information.
@@ -20,7 +19,7 @@ using namespace std;
 struct Trigger {
     
   public:
-    string name = "";
+    std::string name = "";
 
     bool trigDecision = false;
     float trigPrescale = -1;

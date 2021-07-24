@@ -290,7 +290,7 @@ void AnalyzeTrackMomentumResolution () {
     for (int iFinerEta = 0; iFinerEta < nFinerEtaTrkBins; iFinerEta++) {
 
       // First add to the relevant eta-integrated histograms
-      const float binCenter = 0.5 * fabs (finerEtaTrkBins[iFinerEta] + finerEtaTrkBins[iFinerEta+1]);
+      const float binCenter = 0.5 * std::fabs (finerEtaTrkBins[iFinerEta] + finerEtaTrkBins[iFinerEta+1]);
       int iEta = 0;
       while (iEta < nEtaTrkBins) {
         if (etaTrkBins[iEta] < binCenter && binCenter < etaTrkBins[iEta+1])
@@ -310,7 +310,7 @@ void AnalyzeTrackMomentumResolution () {
       for (int iFinerEta = 0; iFinerEta < nFinerEtaTrkBins; iFinerEta++) {
 
         // First add to the relevant eta-integrated histograms
-        const float binCenter = 0.5 * fabs (finerEtaTrkBins[iFinerEta] + finerEtaTrkBins[iFinerEta+1]);
+        const float binCenter = 0.5 * std::fabs (finerEtaTrkBins[iFinerEta] + finerEtaTrkBins[iFinerEta+1]);
         int iEta = 0;
         while (iEta < nEtaTrkBins) {
           if (etaTrkBins[iEta] < binCenter && binCenter < etaTrkBins[iEta+1])

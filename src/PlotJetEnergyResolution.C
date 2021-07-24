@@ -37,7 +37,8 @@ void PlotJetEnergyResolution () {
   const vector <int> systems = {0, 1}; // 0 = pp, 1 = pPb
   const int nSystems = systems.size ();
   
-  const std::vector <JetRadius> radii = {JetRadius::R0p2, JetRadius::R0p4};
+  //const std::vector <JetRadius> radii = {JetRadius::R0p2, JetRadius::R0p4};
+  const std::vector <JetRadius> radii = {JetRadius::R0p4}; // for testing
   const int nRadii = radii.size ();
 
 
@@ -134,6 +135,7 @@ void PlotJetEnergyResolution () {
           gPad->SetLogx ();
 
           TH1D* htemp = new TH1D ("htemp", "", 1, 20, pTJBins[nPtJBins]);
+          htemp->SetBinContent (1, 100);
       
           TAxis* xax = htemp->GetXaxis ();
           TAxis* yax = htemp->GetYaxis ();
@@ -150,7 +152,8 @@ void PlotJetEnergyResolution () {
           const double ymax = 108;
           yax->SetRangeUser (ymin, ymax);
 
-          htemp->SetLineWidth (0);
+          htemp->SetLineWidth (2);
+          htemp->SetLineStyle (2);
 
           htemp->DrawCopy ("");
           SaferDelete (&htemp);
@@ -172,11 +175,6 @@ void PlotJetEnergyResolution () {
           tl->DrawLatex (300, yoff, "300");
           tl->DrawLatex (500, yoff, "500");
           tl->DrawLatex (800, yoff, "800");
-
-          l->SetLineStyle (2);
-          l->SetLineWidth (2);
-          //l->SetLineColor (kPink-8);
-          l->DrawLine (20, 100, pTJBins[nPtJBins], 100);
         }
 
         for (int iEta = 0; iEta < nEtaBins; iEta++)
@@ -192,7 +190,7 @@ void PlotJetEnergyResolution () {
           tl->DrawLatexNDC (0.22, 0.850, "Pythia8 #it{pp}, #sqrt{s} = 5.02 TeV");
         else if (iSys == 1)
           tl->DrawLatexNDC (0.22, 0.845, "Pythia8 + #it{p}+Pb Overlay, #sqrt{s_{NN}} = 5.02 TeV");
-        tl->DrawLatexNDC (0.22, 0.810, Form ("Anti-k_{T} HI Jets, R=0.%i", r));
+        tl->DrawLatexNDC (0.22, 0.810, Form ("Anti-#it{k}_{T} HI Jets, R=0.%i", r));
         for (int iEta = 0; iEta < nEtaBins; iEta++)
           myLineText2 (0.3+(2*iEta>=nEtaBins ? 0.24 : 0), 0.328-0.032*(iEta%(nEtaBins/2)), systColors[iEta], kOpenCircle, Form ("%g < #it{#eta} < %g", etaBins[iEta], etaBins[iEta+1]), 1.2, 0.026, true);
         myLineText2 (0.3, 0.36, kBlack, kFullCircle, "|#it{#eta}| < 2.8", 1.2, 0.026, true);
@@ -219,6 +217,7 @@ void PlotJetEnergyResolution () {
           gPad->SetLogx ();
 
           TH1D* htemp = new TH1D ("htemp", "", 1, 20, pTJBins[nPtJBins]);
+          htemp->SetBinContent (1, 100);
       
           TAxis* xax = htemp->GetXaxis ();
           TAxis* yax = htemp->GetYaxis ();
@@ -235,7 +234,8 @@ void PlotJetEnergyResolution () {
           const double ymax = 108;
           yax->SetRangeUser (ymin, ymax);
 
-          htemp->SetLineWidth (0);
+          htemp->SetLineWidth (2);
+          htemp->SetLineStyle (2);
 
           htemp->DrawCopy ("");
           SaferDelete (&htemp);
@@ -257,11 +257,6 @@ void PlotJetEnergyResolution () {
           tl->DrawLatex (300, yoff, "300");
           tl->DrawLatex (500, yoff, "500");
           tl->DrawLatex (800, yoff, "800");
-
-          l->SetLineStyle (2);
-          l->SetLineWidth (2);
-          //l->SetLineColor (kPink-8);
-          l->DrawLine (20, 100, pTJBins[nPtJBins], 100);
         }
 
         for (int iEta = 0; iEta < nEtaBins; iEta++)
@@ -277,12 +272,94 @@ void PlotJetEnergyResolution () {
           tl->DrawLatexNDC (0.22, 0.850, "Pythia8 #it{pp}, #sqrt{s} = 5.02 TeV");
         else if (iSys == 1)
           tl->DrawLatexNDC (0.22, 0.845, "Pythia8 + #it{p}+Pb Overlay, #sqrt{s_{NN}} = 5.02 TeV");
-        tl->DrawLatexNDC (0.22, 0.810, Form ("Anti-k_{T} HI Jets, R=0.%i", r));
+        tl->DrawLatexNDC (0.22, 0.810, Form ("Anti-#it{k}_{T} HI Jets, R=0.%i", r));
         for (int iEta = 0; iEta < nEtaBins; iEta++)
           myLineText2 (0.3+(2*iEta>=nEtaBins ? 0.24 : 0), 0.328-0.032*(iEta%(nEtaBins/2)), systColors[iEta], kOpenCircle, Form ("%g < #it{#eta} < %g", etaBins[iEta], etaBins[iEta+1]), 1.2, 0.026, true);
         myLineText2 (0.3, 0.36, kBlack, kFullCircle, "|#it{#eta}| < 2.8", 1.2, 0.026, true);
 
         c->SaveAs (Form ("%s/Plots/JetEnergyResolution/JES_R%i_%s.pdf", workPath.Data (), r, sys.Data ()));
+      }
+
+
+
+      // plot jet eta shift
+      {
+
+        TCanvas* c = new TCanvas (Form ("c_r%i_eta_delta_%s", r, sys.Data ()), "", 800, 800);
+        const double lMargin = 0.15;
+        const double rMargin = 0.04;
+        const double bMargin = 0.15;
+        const double tMargin = 0.04;
+
+        c->SetLeftMargin (lMargin);
+        c->SetRightMargin (rMargin);
+        c->SetBottomMargin (bMargin);
+        c->SetTopMargin (tMargin);
+
+        {
+          gPad->SetLogx ();
+
+          TH1D* htemp = new TH1D ("htemp", "", 1, 20, pTJBins[nPtJBins]);
+      
+          TAxis* xax = htemp->GetXaxis ();
+          TAxis* yax = htemp->GetYaxis ();
+
+          xax->SetTitle ("#it{p}_{T}^{truth} [GeV]");
+          xax->SetTitleOffset (0.9 * xax->GetTitleOffset ());
+          xax->SetLabelSize (0);
+
+          yax->SetTitle ("#LT#it{#eta}_{reco} - #it{#eta}_{truth}#GT");
+          yax->SetLabelFont (43);
+          yax->SetLabelSize (32);
+          yax->SetLabelOffset (1.8 * yax->GetLabelOffset ());
+          const double ymin = -0.05;
+          const double ymax = 0.05;
+          yax->SetRangeUser (ymin, ymax);
+
+          htemp->SetLineWidth (2);
+          htemp->SetLineStyle (2);
+
+          htemp->DrawCopy ("hist");
+          SaferDelete (&htemp);
+
+          tl->SetTextFont (43);
+          tl->SetTextSize (32);
+          tl->SetTextAlign (21);
+          
+          const double yoff = ymin - 0.04 * (ymax-ymin) / (1.-tMargin-bMargin);
+          //tl->DrawLatex (0.8,  yoff, "0.8");
+          //tl->DrawLatex (10, yoff, "10");
+          tl->DrawLatex (20, yoff, "20");
+          tl->DrawLatex (30, yoff, "30");
+          tl->DrawLatex (40, yoff, "40");
+          tl->DrawLatex (50, yoff, "50");
+          tl->DrawLatex (70, yoff, "70");
+          tl->DrawLatex (100, yoff, "100");
+          tl->DrawLatex (200, yoff, "200");
+          tl->DrawLatex (300, yoff, "300");
+          tl->DrawLatex (500, yoff, "500");
+          tl->DrawLatex (800, yoff, "800");
+        }
+
+        for (int iEta = 0; iEta < nEtaBins; iEta++)
+          myDraw (h_avg_jetacorr[iSys][iR][iEta], systColors[iEta], kOpenCircle, 1.0);
+        myDraw (h_avg_jetacorr[iSys][iR][nEtaBins], kBlack, kFullCircle, 1.0);
+
+        tl->SetTextColor (kBlack);
+        tl->SetTextAlign (12);
+
+        tl->SetTextSize (26);
+        tl->DrawLatexNDC (0.22, 0.890, "#bf{#it{ATLAS}} Simulation Internal");
+        if (iSys == 0)
+          tl->DrawLatexNDC (0.22, 0.850, "Pythia8 #it{pp}, #sqrt{s} = 5.02 TeV");
+        else if (iSys == 1)
+          tl->DrawLatexNDC (0.22, 0.845, "Pythia8 + #it{p}+Pb Overlay, #sqrt{s_{NN}} = 5.02 TeV");
+        tl->DrawLatexNDC (0.22, 0.810, Form ("Anti-#it{k}_{T} HI Jets, R=0.%i", r));
+        for (int iEta = 0; iEta < nEtaBins; iEta++)
+          myLineText2 (0.3+(2*iEta>=nEtaBins ? 0.24 : 0), 0.328-0.032*(iEta%(nEtaBins/2)), systColors[iEta], kOpenCircle, Form ("%g < #it{#eta} < %g", etaBins[iEta], etaBins[iEta+1]), 1.2, 0.026, true);
+        myLineText2 (0.3, 0.36, kBlack, kFullCircle, "|#it{#eta}| < 2.8", 1.2, 0.026, true);
+
+        c->SaveAs (Form ("%s/Plots/JetEnergyResolution/Eta_Delta_R%i_%s.pdf", workPath.Data (), r, sys.Data ()));
       }
 
 
@@ -356,7 +433,7 @@ void PlotJetEnergyResolution () {
           tl->DrawLatexNDC (0.22, 0.850, "Pythia8 #it{pp}, #sqrt{s} = 5.02 TeV");
         else if (iSys == 1)
           tl->DrawLatexNDC (0.22, 0.845, "Pythia8 + #it{p}+Pb Overlay, #sqrt{s_{NN}} = 5.02 TeV");
-        tl->DrawLatexNDC (0.22, 0.810, Form ("Anti-k_{T} HI Jets, R=0.%i", r));
+        tl->DrawLatexNDC (0.22, 0.810, Form ("Anti-#it{k}_{T} HI Jets, R=0.%i", r));
         for (int iEta = 0; iEta < nEtaBins; iEta++)
           myLineText2 (0.5+(2*iEta>=nEtaBins ? 0.24 : 0), 0.718-0.032*(iEta%(nEtaBins/2)), systColors[iEta], kOpenCircle, Form ("%g < #it{#eta} < %g", etaBins[iEta], etaBins[iEta+1]), 1.2, 0.026, true);
         myLineText2 (0.5, 0.75, kBlack, kFullCircle, "|#it{#eta}| < 2.8", 1.2, 0.026, true);
@@ -436,12 +513,91 @@ void PlotJetEnergyResolution () {
           tl->DrawLatexNDC (0.22, 0.850, "Pythia8 #it{pp}, #sqrt{s} = 5.02 TeV");
         else if (iSys == 1)
           tl->DrawLatexNDC (0.22, 0.845, "Pythia8 + #it{p}+Pb Overlay, #sqrt{s_{NN}} = 5.02 TeV");
-        tl->DrawLatexNDC (0.22, 0.810, Form ("Anti-k_{T} HI Jets, R=0.%i", r));
+        tl->DrawLatexNDC (0.22, 0.810, Form ("Anti-#it{k}_{T} HI Jets, R=0.%i", r));
         for (int iEta = 0; iEta < nEtaBins; iEta++)
           myLineText2 (0.5+(2*iEta>=nEtaBins ? 0.24 : 0), 0.718-0.032*(iEta%(nEtaBins/2)), systColors[iEta], kOpenCircle, Form ("%g < #it{#eta} < %g", etaBins[iEta], etaBins[iEta+1]), 1.2, 0.026, true);
         myLineText2 (0.5, 0.75, kBlack, kFullCircle, "|#it{#eta}| < 2.8", 1.2, 0.026, true);
 
         c->SaveAs (Form ("%s/Plots/JetEnergyResolution/JER_R%i_%s.pdf", workPath.Data (), r, sys.Data ()));
+      }
+
+
+      // plot jet eta resolution
+      {
+        TCanvas* c = new TCanvas (Form ("c_r%i_Eta_Resolution_%s", r, sys.Data ()), "", 800, 800);
+        const double lMargin = 0.15;
+        const double rMargin = 0.04;
+        const double bMargin = 0.15;
+        const double tMargin = 0.04;
+
+        c->SetLeftMargin (lMargin);
+        c->SetRightMargin (rMargin);
+        c->SetBottomMargin (bMargin);
+        c->SetTopMargin (tMargin);
+
+        {
+          gPad->SetLogx ();
+
+          TH1D* htemp = new TH1D ("htemp", "", 1, 20, pTJBins[nPtJBins]);
+    
+          TAxis* xax = htemp->GetXaxis ();
+          TAxis* yax = htemp->GetYaxis ();
+
+          xax->SetTitle ("#it{p}_{T}^{truth} [GeV]");
+          xax->SetTitleOffset (0.9 * xax->GetTitleOffset ());
+          xax->SetLabelSize (0);
+
+          yax->SetTitle ("#sigma #left[#it{#eta}_{reco} - #it{#eta}_{truth}#right]");
+          yax->SetLabelFont (43);
+          yax->SetLabelSize (32);
+          yax->SetLabelOffset (1.8 * yax->GetLabelOffset ());
+          const double ymin = 0;
+          const double ymax = 0.4;
+          yax->SetRangeUser (ymin, ymax);
+
+          htemp->SetLineWidth (0);
+
+          htemp->DrawCopy ("");
+          SaferDelete (&htemp);
+
+          tl->SetTextFont (43);
+          tl->SetTextSize (32);
+          tl->SetTextAlign (21);
+          
+          const double yoff = ymin - 0.04 * (ymax-ymin) / (1.-tMargin-bMargin);
+          //tl->DrawLatex (0.8,  yoff, "0.8");
+          //tl->DrawLatex (10, yoff, "10");
+          tl->DrawLatex (20, yoff, "20");
+          tl->DrawLatex (30, yoff, "30");
+          tl->DrawLatex (40, yoff, "40");
+          tl->DrawLatex (50, yoff, "50");
+          tl->DrawLatex (70, yoff, "70");
+          tl->DrawLatex (100, yoff, "100");
+          tl->DrawLatex (200, yoff, "200");
+          tl->DrawLatex (300, yoff, "300");
+          tl->DrawLatex (500, yoff, "500");
+          tl->DrawLatex (800, yoff, "800");
+        }
+
+        for (int iEta = 0; iEta < nEtaBins; iEta++)
+          myDraw (h_avg_jetares[iSys][iR][iEta], systColors[iEta], kOpenCircle, 1.0);
+        myDraw (h_avg_jetares[iSys][iR][nEtaBins], kBlack, kFullCircle, 1.0);
+
+        tl->SetTextColor (kBlack);
+        tl->SetTextAlign (12);
+
+        tl->SetTextSize (26);
+        tl->DrawLatexNDC (0.22, 0.890, "#bf{#it{ATLAS}} Simulation Internal");
+        if (iSys == 0)
+          tl->DrawLatexNDC (0.22, 0.850, "Pythia8 #it{pp}, #sqrt{s} = 5.02 TeV");
+        else if (iSys == 1)
+          tl->DrawLatexNDC (0.22, 0.845, "Pythia8 + #it{p}+Pb Overlay, #sqrt{s_{NN}} = 5.02 TeV");
+        tl->DrawLatexNDC (0.22, 0.810, Form ("Anti-#it{k}_{T} HI Jets, R=0.%i", r));
+        for (int iEta = 0; iEta < nEtaBins; iEta++)
+          myLineText2 (0.5+(2*iEta>=nEtaBins ? 0.24 : 0), 0.718-0.032*(iEta%(nEtaBins/2)), systColors[iEta], kOpenCircle, Form ("%g < #it{#eta} < %g", etaBins[iEta], etaBins[iEta+1]), 1.2, 0.026, true);
+        myLineText2 (0.5, 0.75, kBlack, kFullCircle, "|#it{#eta}| < 2.8", 1.2, 0.026, true);
+
+        c->SaveAs (Form ("%s/Plots/JetEnergyResolution/Eta_resolution_R%i_%s.pdf", workPath.Data (), r, sys.Data ()));
       }
 
 
@@ -538,7 +694,7 @@ void PlotJetEnergyResolution () {
           tl->DrawLatexNDC (0.36, 0.850, "Pythia8 #it{pp}, #sqrt{s} = 5.02 TeV");
         else if (iSys == 1)
           tl->DrawLatexNDC (0.36, 0.845, "Pythia8 + #it{p}+Pb Overlay, #sqrt{s_{NN}} = 5.02 TeV");
-        tl->DrawLatexNDC (0.36, 0.810, Form ("Anti-k_{T} HI Jets, R=0.%i", r));
+        tl->DrawLatexNDC (0.36, 0.810, Form ("Anti-#it{k}_{T} HI Jets, R=0.%i", r));
         tl->DrawLatexNDC (0.36, 0.775, iEta == nEtaBins ? "|#it{#eta}| < 2.8" : Form ("%g < #it{#eta} < %g", etaBins[iEta], etaBins[iEta+1]));
 
         c->SaveAs (Form ("%s/Plots/JetEnergyResolution/JetResponse_R%i_%s_iEta%i.pdf", workPath.Data (), r, iSys == 0 ? "pp" : "pPb", iEta));

@@ -31,8 +31,8 @@ bool doMixVar1 = false;
 bool doMixVar2 = false;
 bool doMixVar3 = false;
 
-double truth_jet_min_pt = 0;
-double truth_jet_max_pt = DBL_MAX;
+float truth_jet_min_pt = 0;
+float truth_jet_max_pt = FLT_MAX;
 
 
 
@@ -109,10 +109,10 @@ bool Correlator (const char* tag, const char* outFilePattern, TTree* jetsTree, T
     jetsTree->SetBranchAddress ("mcEventWeights", &mcEventWeights);
 
   jetsTree->SetBranchAddress ("nvert",     &nvert);
-  jetsTree->SetBranchAddress ("vert_x",    &vert_x);
-  jetsTree->SetBranchAddress ("vert_y",    &vert_y);
+  //jetsTree->SetBranchAddress ("vert_x",    &vert_x);
+  //jetsTree->SetBranchAddress ("vert_y",    &vert_y);
   jetsTree->SetBranchAddress ("vert_z",    &vert_z);
-  jetsTree->SetBranchAddress ("vert_ntrk", &vert_ntrk);
+  //jetsTree->SetBranchAddress ("vert_ntrk", &vert_ntrk);
   jetsTree->SetBranchAddress ("vert_type", &vert_type);
 
   jetsTree->SetBranchAddress ("fcalA_et",         &fcalA_et);
@@ -126,10 +126,10 @@ bool Correlator (const char* tag, const char* outFilePattern, TTree* jetsTree, T
   // get event matching & track information from the mixed event tree
   if (doMixing) {
     tracksTree->SetBranchAddress ("nvert",     &nvert_matching);
-    tracksTree->SetBranchAddress ("vert_x",    &vert_x_matching);
-    tracksTree->SetBranchAddress ("vert_y",    &vert_y_matching);
+    //tracksTree->SetBranchAddress ("vert_x",    &vert_x_matching);
+    //tracksTree->SetBranchAddress ("vert_y",    &vert_y_matching);
     tracksTree->SetBranchAddress ("vert_z",    &vert_z_matching);
-    tracksTree->SetBranchAddress ("vert_ntrk", &vert_ntrk_matching);
+    //tracksTree->SetBranchAddress ("vert_ntrk", &vert_ntrk_matching);
     tracksTree->SetBranchAddress ("vert_type", &vert_type_matching);
 
     tracksTree->SetBranchAddress ("fcalA_et",         &fcalA_et_matching);
@@ -214,7 +214,12 @@ bool Correlator (const char* tag, const char* outFilePattern, TTree* jetsTree, T
   //jetsTree->SetBranchAddress ("akt4_hi_jet_sub_et",       &akt4_hi_jet_sub_et);
   //jetsTree->SetBranchAddress ("akt4_hi_jet_sub_e",        &akt4_hi_jet_sub_e);
   jetsTree->SetBranchAddress ("akt4_hi_jet_timing",       &akt4_hi_jet_timing);
-  // END FROM JETHADRONSKIMMER
+
+  const int nJESVar = GetNJESVar ();
+  if (!IsCollisions () && nJESVar != -1) {
+    std::cout << "Info: In RunCorrelator.cxx: Branching JES variation " << nJESVar << std::endl;
+    jetsTree->SetBranchAddress (Form ("akt4_hi_jet_pt_sys_JES_%i", nJESVar), akt4_hi_jet_pt_sys_JES_ALL[nJESVar]);
+  }
 
 
   // setup centrality bins (only relevant for p+Pb)
@@ -353,11 +358,11 @@ bool Correlator (const char* tag, const char* outFilePattern, TTree* jetsTree, T
 
 
   long iTrkEvt = 0; // counter for mixed events (declared outside of loop scope to keep its value from one loop to the next)
-
+  const JetRadius r0p4 = JetRadius::R0p4;
 
   for (long iEvt = 0; iEvt < nEvts; iEvt++) {
     if (nEvts > 100 && iEvt % (nEvts / 100) == 0)                                
-      cout << iEvt / (nEvts / 100) << "\% done...\r" << flush;  
+      std::cout << iEvt / (nEvts / 100) << "\% done...\r" << std::flush;
 
     jetsTree->GetEntry (iEvt % jetsTree->GetEntries ());
 
@@ -384,7 +389,7 @@ bool Correlator (const char* tag, const char* outFilePattern, TTree* jetsTree, T
         else if (vert_type[iVert] == 3)
           hasPileup = true;
       }
-      if ((!DoWithPileupVar () && hasPileup) || fabs (vz) > 150 || !hasPrimary)
+      if (hasPileup || std::fabs (vz) > 150 || !hasPrimary)
         continue;
     }
 
@@ -393,14 +398,14 @@ bool Correlator (const char* tag, const char* outFilePattern, TTree* jetsTree, T
     // also set appropriate JZ weight
     if (!IsCollisions ()) {
       int iLTJ = -1;
-      for (int iTJ = 0; iTJ < akt4_truth_jet_n; iTJ++) {
-        if (iLTJ == -1 || akt4_truth_jet_pt[iTJ] > akt4_truth_jet_pt[iLTJ])
+      const int nTJ = GetAktTruthJetN (r0p4);
+      for (int iTJ = 0; iTJ < nTJ; iTJ++) {
+        if (iLTJ == -1 || GetAktTruthJetPt (iTJ, r0p4) > GetAktTruthJetPt (iLTJ, r0p4))
           iLTJ = iTJ;
       }
 
-      if (iLTJ == -1 || akt4_truth_jet_pt[iLTJ] < truth_jet_min_pt || akt4_truth_jet_pt[iLTJ] > truth_jet_max_pt) {
+      if (iLTJ == -1 || GetAktTruthJetPt (iLTJ, r0p4) < truth_jet_min_pt || GetAktTruthJetPt (iLTJ, r0p4) > truth_jet_max_pt)
         continue;
-      }
 
       event_weight = mcEventWeights->at (0) * crossSectionPicoBarns * mcFilterEfficiency * GetJetLuminosity () / mcNumberEvents; // sigma * f * L_int
     }
@@ -448,24 +453,26 @@ bool Correlator (const char* tag, const char* outFilePattern, TTree* jetsTree, T
     double nj = 0;
     double jwgt = 0;
 
-    for (int iJet = 0; iJet < akt4_hi_jet_n; iJet++) {
+    const int jn = GetAktHIJetN (r0p4);
+    for (int iJet = 0; iJet < jn; iJet++) {
 
-      const double jpt = GetAktHIJetPt (iJet);
-      const double jeta = GetAktHIJetEta (iJet);
-      const double jphi = GetAktHIJetPhi (iJet);
+      const double jpt = GetAktHIJetPt (iJet, r0p4, nJESVar);
+      const double jeta = GetAktHIJetEta (iJet, r0p4, nJESVar);
+      const double jphi = GetAktHIJetPhi (iJet, r0p4, nJESVar);
 
-      if (!MeetsJetAcceptanceCuts (iJet))
+      if (!MeetsJetAcceptanceCuts (iJet, r0p4, nJESVar))
         continue; // jet eta/phi & timing cuts
-      if (!MeetsJetPtCut (jpt))
-        continue; // jet pT cuts
 
-      const double thisjwgt = GetAktJetWeight (jpt, jeta, jphi);
+      const double thisjwgt = GetAktJetWeight (jpt, jeta, jphi, r0p4);
       if (thisjwgt <= 0.)
         continue; // sanity check
 
       const short iPtJ = GetPtJBin (jpt);
       if (0 <= iPtJ && iPtJ < nPtJBins)
         jet_pt_counts[iPtJ] += jwgt;
+
+      if (!MeetsJetPtCut (jpt))
+        continue; // jet pT cuts
 
       h2_jet_eta_phi[iFile]->Fill (jeta, jphi);
 
@@ -492,7 +499,7 @@ bool Correlator (const char* tag, const char* outFilePattern, TTree* jetsTree, T
 
     h_jet_counts[iFile]->Fill (0); // adds to number of jets (i.e. denominator)
     h_jet_counts[iFile]->Fill (1, ewgt*jwgt);
-    h_jet_counts[iFile]->Fill (2, pow (ewgt*jwgt, 2));
+    h_jet_counts[iFile]->Fill (2, std::pow (ewgt*jwgt, 2));
 
 
     // do mixed event procedure: get a good event to mix with here
@@ -526,7 +533,7 @@ bool Correlator (const char* tag, const char* outFilePattern, TTree* jetsTree, T
             else if (vert_type_matching[iVert] == 3)
               hasPileup = true;
           }
-          if ((DoWithPileupVar () && hasPileup) || fabs (vz) > 150 || hasPrimary)
+          if (hasPileup || std::fabs (vz) > 150 || !hasPrimary)
             continue;
         }
 
@@ -569,18 +576,18 @@ bool Correlator (const char* tag, const char* outFilePattern, TTree* jetsTree, T
 
 
     // loop over all jets in the event and correlate tracks
-    for (int iJet = 0; iJet < akt4_hi_jet_n; iJet++) {
+    for (int iJet = 0; iJet < jn; iJet++) {
 
-      const double jpt = GetAktHIJetPt (iJet);
-      const double jeta = GetAktHIJetEta (iJet);
-      const double jphi = GetAktHIJetPhi (iJet);
+      const double jpt = GetAktHIJetPt (iJet, r0p4, nJESVar);
+      const double jeta = GetAktHIJetEta (iJet, r0p4, nJESVar);
+      const double jphi = GetAktHIJetPhi (iJet, r0p4, nJESVar);
 
-      if (!MeetsJetAcceptanceCuts (iJet))
+      if (!MeetsJetAcceptanceCuts (iJet, r0p4, nJESVar))
         continue; // jet eta/phi & timing cuts
       if (!MeetsJetPtCut (jpt))
         continue; // jet pT cuts
 
-      const double thisjwgt = GetAktJetWeight (jpt, jeta, jphi);
+      const double thisjwgt = GetAktJetWeight (jpt, jeta, jphi, r0p4);
       if (thisjwgt <= 0.)
         continue; // sanity check
 
@@ -604,7 +611,7 @@ bool Correlator (const char* tag, const char* outFilePattern, TTree* jetsTree, T
         //const double trk_y = (trk_en > trk_pz ? 0.5 * std::log ((trk_en + trk_pz)/(trk_en - trk_pz)) : 0.);
 
         const double trk_y = trk_eta[iTrk];
-        if (fabs (trk_y - yboost) > 2.5 - 0.465)
+        if (std::fabs (trk_y - yboost) > 2.5 - 0.465)
           continue; // rapidity acceptance cut
 
         const float dphi = DeltaPhi (jphi, trk_phi[iTrk]);
@@ -613,7 +620,7 @@ bool Correlator (const char* tag, const char* outFilePattern, TTree* jetsTree, T
           continue; // sanity check to avoid under/over-flow
 
         short iEta = 0;
-        while (iEta < nEtaTrkBins && etaTrkBins[iEta+1] < fabs (trk_eta[iTrk]))
+        while (iEta < nEtaTrkBins && etaTrkBins[iEta+1] < std::fabs (trk_eta[iTrk]))
           iEta++;
         if (iEta == nEtaTrkBins)
           continue;
@@ -622,7 +629,7 @@ bool Correlator (const char* tag, const char* outFilePattern, TTree* jetsTree, T
         const float teff = h2_trk_eff->GetBinContent (h2_trk_eff->FindBin (trk_eta[iTrk], trk_pt[iTrk]));
         //const float tpur = h2_trk_pur->GetBinContent (h2_trk_pur->FindBin (trk_eta[iTrk], trk_pt[iTrk])); // deprecated
         const float tpur = f_trk_pur[iEta]->Eval (trk_pt[iTrk]);
-        const float twgt = (teff > 0. ? tpur / teff : 0.);
+        const float twgt = thisjwgt * (teff > 0. ? tpur / teff : 0.);
 
         if (0.5 < trk_pt[iTrk] && trk_pt[iTrk] < 1)
           jet_trk_dphi_gt0p5_lt1_counts[iDPhi] += twgt;
@@ -658,91 +665,91 @@ bool Correlator (const char* tag, const char* outFilePattern, TTree* jetsTree, T
 
     // calculate per-jet hadron yields for that event by dividing out the number of jets
     for (int iX = 0; iX < nDPhiBins; iX++) {
-      jet_trk_dphi_gt0p5_lt1_counts[iX] = jet_trk_dphi_gt0p5_lt1_counts[iX] / nj;
-      jet_trk_dphi_gt1_lt1p5_counts[iX] = jet_trk_dphi_gt1_lt1p5_counts[iX] / nj;
-      jet_trk_dphi_gt1p5_lt2_counts[iX] = jet_trk_dphi_gt1p5_lt2_counts[iX] / nj;
-      jet_trk_dphi_gt2_lt4_counts[iX] = jet_trk_dphi_gt2_lt4_counts[iX] / nj;
-      jet_trk_dphi_gt4_lt6_counts[iX] = jet_trk_dphi_gt4_lt6_counts[iX] / nj;
-      jet_trk_dphi_gt6_lt8_counts[iX] = jet_trk_dphi_gt6_lt8_counts[iX] / nj;
-      jet_trk_dphi_gt8_lt10_counts[iX] = jet_trk_dphi_gt8_lt10_counts[iX] / nj;
-      jet_trk_dphi_gt10_lt15_counts[iX] = jet_trk_dphi_gt10_lt15_counts[iX] / nj;
-      jet_trk_dphi_gt15_lt20_counts[iX] = jet_trk_dphi_gt15_lt20_counts[iX] / nj;
-      jet_trk_dphi_gt20_lt30_counts[iX] = jet_trk_dphi_gt20_lt30_counts[iX] / nj;
+      jet_trk_dphi_gt0p5_lt1_counts[iX] = jet_trk_dphi_gt0p5_lt1_counts[iX] / jwgt;
+      jet_trk_dphi_gt1_lt1p5_counts[iX] = jet_trk_dphi_gt1_lt1p5_counts[iX] / jwgt;
+      jet_trk_dphi_gt1p5_lt2_counts[iX] = jet_trk_dphi_gt1p5_lt2_counts[iX] / jwgt;
+      jet_trk_dphi_gt2_lt4_counts[iX] = jet_trk_dphi_gt2_lt4_counts[iX] / jwgt;
+      jet_trk_dphi_gt4_lt6_counts[iX] = jet_trk_dphi_gt4_lt6_counts[iX] / jwgt;
+      jet_trk_dphi_gt6_lt8_counts[iX] = jet_trk_dphi_gt6_lt8_counts[iX] / jwgt;
+      jet_trk_dphi_gt8_lt10_counts[iX] = jet_trk_dphi_gt8_lt10_counts[iX] / jwgt;
+      jet_trk_dphi_gt10_lt15_counts[iX] = jet_trk_dphi_gt10_lt15_counts[iX] / jwgt;
+      jet_trk_dphi_gt15_lt20_counts[iX] = jet_trk_dphi_gt15_lt20_counts[iX] / jwgt;
+      jet_trk_dphi_gt20_lt30_counts[iX] = jet_trk_dphi_gt20_lt30_counts[iX] / jwgt;
     }
     for (int iX = 0; iX < nPtChBins; iX++) {
-      jet_trk_pt_ns_counts[iX] = jet_trk_pt_ns_counts[iX] / nj;
-      jet_trk_pt_perp_counts[iX] = jet_trk_pt_perp_counts[iX] / nj;
-      jet_trk_pt_as_counts[iX] = jet_trk_pt_as_counts[iX] / nj;
+      jet_trk_pt_ns_counts[iX] = jet_trk_pt_ns_counts[iX] / jwgt;
+      jet_trk_pt_perp_counts[iX] = jet_trk_pt_perp_counts[iX] / jwgt;
+      jet_trk_pt_as_counts[iX] = jet_trk_pt_as_counts[iX] / jwgt;
     }
 
 
     // store results in averaging & covariance histograms
     for (int iX = 0; iX < nDPhiBins; iX++) {
-      h_jet_trk_dphi_gt0p5_lt1[iFile]->SetBinContent (iX+1, h_jet_trk_dphi_gt0p5_lt1[iFile]->GetBinContent (iX+1) + (ewgt*jwgt)*(jet_trk_dphi_gt0p5_lt1_counts[iX]));
+      h_jet_trk_dphi_gt0p5_lt1[iFile]->SetBinContent (iX+1, h_jet_trk_dphi_gt0p5_lt1[iFile]->GetBinContent (iX+1) + (ewgt)*(jet_trk_dphi_gt0p5_lt1_counts[iX]));
       for (int iY = 0; iY < nDPhiBins; iY++)
-        h2_jet_trk_dphi_gt0p5_lt1_cov[iFile]->SetBinContent (iX+1, iY+1, h2_jet_trk_dphi_gt0p5_lt1_cov[iFile]->GetBinContent (iX+1, iY+1) + (ewgt*jwgt)*(jet_trk_dphi_gt0p5_lt1_counts[iX])*(jet_trk_dphi_gt0p5_lt1_counts[iY]));
+        h2_jet_trk_dphi_gt0p5_lt1_cov[iFile]->SetBinContent (iX+1, iY+1, h2_jet_trk_dphi_gt0p5_lt1_cov[iFile]->GetBinContent (iX+1, iY+1) + (ewgt)*(jet_trk_dphi_gt0p5_lt1_counts[iX])*(jet_trk_dphi_gt0p5_lt1_counts[iY]));
     }
     for (int iX = 0; iX < nDPhiBins; iX++) {
-      h_jet_trk_dphi_gt1_lt1p5[iFile]->SetBinContent (iX+1, h_jet_trk_dphi_gt1_lt1p5[iFile]->GetBinContent (iX+1) + (ewgt*jwgt)*(jet_trk_dphi_gt1_lt1p5_counts[iX]));
+      h_jet_trk_dphi_gt1_lt1p5[iFile]->SetBinContent (iX+1, h_jet_trk_dphi_gt1_lt1p5[iFile]->GetBinContent (iX+1) + (ewgt)*(jet_trk_dphi_gt1_lt1p5_counts[iX]));
       for (int iY = 0; iY < nDPhiBins; iY++)
-        h2_jet_trk_dphi_gt1_lt1p5_cov[iFile]->SetBinContent (iX+1, iY+1, h2_jet_trk_dphi_gt1_lt1p5_cov[iFile]->GetBinContent (iX+1, iY+1) + (ewgt*jwgt)*(jet_trk_dphi_gt1_lt1p5_counts[iX])*(jet_trk_dphi_gt1_lt1p5_counts[iY]));
+        h2_jet_trk_dphi_gt1_lt1p5_cov[iFile]->SetBinContent (iX+1, iY+1, h2_jet_trk_dphi_gt1_lt1p5_cov[iFile]->GetBinContent (iX+1, iY+1) + (ewgt)*(jet_trk_dphi_gt1_lt1p5_counts[iX])*(jet_trk_dphi_gt1_lt1p5_counts[iY]));
     }
     for (int iX = 0; iX < nDPhiBins; iX++) {
-      h_jet_trk_dphi_gt1p5_lt2[iFile]->SetBinContent (iX+1, h_jet_trk_dphi_gt1p5_lt2[iFile]->GetBinContent (iX+1) + (ewgt*jwgt)*(jet_trk_dphi_gt1p5_lt2_counts[iX]));
+      h_jet_trk_dphi_gt1p5_lt2[iFile]->SetBinContent (iX+1, h_jet_trk_dphi_gt1p5_lt2[iFile]->GetBinContent (iX+1) + (ewgt)*(jet_trk_dphi_gt1p5_lt2_counts[iX]));
       for (int iY = 0; iY < nDPhiBins; iY++)
-        h2_jet_trk_dphi_gt1p5_lt2_cov[iFile]->SetBinContent (iX+1, iY+1, h2_jet_trk_dphi_gt1p5_lt2_cov[iFile]->GetBinContent (iX+1, iY+1) + (ewgt*jwgt)*(jet_trk_dphi_gt1p5_lt2_counts[iX])*(jet_trk_dphi_gt1p5_lt2_counts[iY]));
+        h2_jet_trk_dphi_gt1p5_lt2_cov[iFile]->SetBinContent (iX+1, iY+1, h2_jet_trk_dphi_gt1p5_lt2_cov[iFile]->GetBinContent (iX+1, iY+1) + (ewgt)*(jet_trk_dphi_gt1p5_lt2_counts[iX])*(jet_trk_dphi_gt1p5_lt2_counts[iY]));
     }
     for (int iX = 0; iX < nDPhiBins; iX++) {
-      h_jet_trk_dphi_gt2_lt4[iFile]->SetBinContent (iX+1, h_jet_trk_dphi_gt2_lt4[iFile]->GetBinContent (iX+1) + (ewgt*jwgt)*(jet_trk_dphi_gt2_lt4_counts[iX]));
+      h_jet_trk_dphi_gt2_lt4[iFile]->SetBinContent (iX+1, h_jet_trk_dphi_gt2_lt4[iFile]->GetBinContent (iX+1) + (ewgt)*(jet_trk_dphi_gt2_lt4_counts[iX]));
       for (int iY = 0; iY < nDPhiBins; iY++)
-        h2_jet_trk_dphi_gt2_lt4_cov[iFile]->SetBinContent (iX+1, iY+1, h2_jet_trk_dphi_gt2_lt4_cov[iFile]->GetBinContent (iX+1, iY+1) + (ewgt*jwgt)*(jet_trk_dphi_gt2_lt4_counts[iX])*(jet_trk_dphi_gt2_lt4_counts[iY]));
+        h2_jet_trk_dphi_gt2_lt4_cov[iFile]->SetBinContent (iX+1, iY+1, h2_jet_trk_dphi_gt2_lt4_cov[iFile]->GetBinContent (iX+1, iY+1) + (ewgt)*(jet_trk_dphi_gt2_lt4_counts[iX])*(jet_trk_dphi_gt2_lt4_counts[iY]));
     }
     for (int iX = 0; iX < nDPhiBins; iX++) {
-      h_jet_trk_dphi_gt4_lt6[iFile]->SetBinContent (iX+1, h_jet_trk_dphi_gt4_lt6[iFile]->GetBinContent (iX+1) + (ewgt*jwgt)*(jet_trk_dphi_gt4_lt6_counts[iX]));
+      h_jet_trk_dphi_gt4_lt6[iFile]->SetBinContent (iX+1, h_jet_trk_dphi_gt4_lt6[iFile]->GetBinContent (iX+1) + (ewgt)*(jet_trk_dphi_gt4_lt6_counts[iX]));
       for (int iY = 0; iY < nDPhiBins; iY++)
-        h2_jet_trk_dphi_gt4_lt6_cov[iFile]->SetBinContent (iX+1, iY+1, h2_jet_trk_dphi_gt4_lt6_cov[iFile]->GetBinContent (iX+1, iY+1) + (ewgt*jwgt)*(jet_trk_dphi_gt4_lt6_counts[iX])*(jet_trk_dphi_gt4_lt6_counts[iY]));
+        h2_jet_trk_dphi_gt4_lt6_cov[iFile]->SetBinContent (iX+1, iY+1, h2_jet_trk_dphi_gt4_lt6_cov[iFile]->GetBinContent (iX+1, iY+1) + (ewgt)*(jet_trk_dphi_gt4_lt6_counts[iX])*(jet_trk_dphi_gt4_lt6_counts[iY]));
     }
     for (int iX = 0; iX < nDPhiBins; iX++) {
-      h_jet_trk_dphi_gt6_lt8[iFile]->SetBinContent (iX+1, h_jet_trk_dphi_gt6_lt8[iFile]->GetBinContent (iX+1) + (ewgt*jwgt)*(jet_trk_dphi_gt6_lt8_counts[iX]));
+      h_jet_trk_dphi_gt6_lt8[iFile]->SetBinContent (iX+1, h_jet_trk_dphi_gt6_lt8[iFile]->GetBinContent (iX+1) + (ewgt)*(jet_trk_dphi_gt6_lt8_counts[iX]));
       for (int iY = 0; iY < nDPhiBins; iY++)
-        h2_jet_trk_dphi_gt6_lt8_cov[iFile]->SetBinContent (iX+1, iY+1, h2_jet_trk_dphi_gt6_lt8_cov[iFile]->GetBinContent (iX+1, iY+1) + (ewgt*jwgt)*(jet_trk_dphi_gt6_lt8_counts[iX])*(jet_trk_dphi_gt6_lt8_counts[iY]));
+        h2_jet_trk_dphi_gt6_lt8_cov[iFile]->SetBinContent (iX+1, iY+1, h2_jet_trk_dphi_gt6_lt8_cov[iFile]->GetBinContent (iX+1, iY+1) + (ewgt)*(jet_trk_dphi_gt6_lt8_counts[iX])*(jet_trk_dphi_gt6_lt8_counts[iY]));
     }
     for (int iX = 0; iX < nDPhiBins; iX++) {
-      h_jet_trk_dphi_gt8_lt10[iFile]->SetBinContent (iX+1, h_jet_trk_dphi_gt8_lt10[iFile]->GetBinContent (iX+1) + (ewgt*jwgt)*(jet_trk_dphi_gt8_lt10_counts[iX]));
+      h_jet_trk_dphi_gt8_lt10[iFile]->SetBinContent (iX+1, h_jet_trk_dphi_gt8_lt10[iFile]->GetBinContent (iX+1) + (ewgt)*(jet_trk_dphi_gt8_lt10_counts[iX]));
       for (int iY = 0; iY < nDPhiBins; iY++)
-        h2_jet_trk_dphi_gt8_lt10_cov[iFile]->SetBinContent (iX+1, iY+1, h2_jet_trk_dphi_gt8_lt10_cov[iFile]->GetBinContent (iX+1, iY+1) + (ewgt*jwgt)*(jet_trk_dphi_gt8_lt10_counts[iX])*(jet_trk_dphi_gt8_lt10_counts[iY]));
+        h2_jet_trk_dphi_gt8_lt10_cov[iFile]->SetBinContent (iX+1, iY+1, h2_jet_trk_dphi_gt8_lt10_cov[iFile]->GetBinContent (iX+1, iY+1) + (ewgt)*(jet_trk_dphi_gt8_lt10_counts[iX])*(jet_trk_dphi_gt8_lt10_counts[iY]));
     }
     for (int iX = 0; iX < nDPhiBins; iX++) {
-      h_jet_trk_dphi_gt10_lt15[iFile]->SetBinContent (iX+1, h_jet_trk_dphi_gt10_lt15[iFile]->GetBinContent (iX+1) + (ewgt*jwgt)*(jet_trk_dphi_gt10_lt15_counts[iX]));
+      h_jet_trk_dphi_gt10_lt15[iFile]->SetBinContent (iX+1, h_jet_trk_dphi_gt10_lt15[iFile]->GetBinContent (iX+1) + (ewgt)*(jet_trk_dphi_gt10_lt15_counts[iX]));
       for (int iY = 0; iY < nDPhiBins; iY++)
-        h2_jet_trk_dphi_gt10_lt15_cov[iFile]->SetBinContent (iX+1, iY+1, h2_jet_trk_dphi_gt10_lt15_cov[iFile]->GetBinContent (iX+1, iY+1) + (ewgt*jwgt)*(jet_trk_dphi_gt10_lt15_counts[iX])*(jet_trk_dphi_gt10_lt15_counts[iY]));
+        h2_jet_trk_dphi_gt10_lt15_cov[iFile]->SetBinContent (iX+1, iY+1, h2_jet_trk_dphi_gt10_lt15_cov[iFile]->GetBinContent (iX+1, iY+1) + (ewgt)*(jet_trk_dphi_gt10_lt15_counts[iX])*(jet_trk_dphi_gt10_lt15_counts[iY]));
     }
     for (int iX = 0; iX < nDPhiBins; iX++) {
-      h_jet_trk_dphi_gt15_lt20[iFile]->SetBinContent (iX+1, h_jet_trk_dphi_gt15_lt20[iFile]->GetBinContent (iX+1) + (ewgt*jwgt)*(jet_trk_dphi_gt15_lt20_counts[iX]));
+      h_jet_trk_dphi_gt15_lt20[iFile]->SetBinContent (iX+1, h_jet_trk_dphi_gt15_lt20[iFile]->GetBinContent (iX+1) + (ewgt)*(jet_trk_dphi_gt15_lt20_counts[iX]));
       for (int iY = 0; iY < nDPhiBins; iY++)
-        h2_jet_trk_dphi_gt15_lt20_cov[iFile]->SetBinContent (iX+1, iY+1, h2_jet_trk_dphi_gt15_lt20_cov[iFile]->GetBinContent (iX+1, iY+1) + (ewgt*jwgt)*(jet_trk_dphi_gt15_lt20_counts[iX])*(jet_trk_dphi_gt15_lt20_counts[iY]));
+        h2_jet_trk_dphi_gt15_lt20_cov[iFile]->SetBinContent (iX+1, iY+1, h2_jet_trk_dphi_gt15_lt20_cov[iFile]->GetBinContent (iX+1, iY+1) + (ewgt)*(jet_trk_dphi_gt15_lt20_counts[iX])*(jet_trk_dphi_gt15_lt20_counts[iY]));
     }
     for (int iX = 0; iX < nDPhiBins; iX++) {
-      h_jet_trk_dphi_gt20_lt30[iFile]->SetBinContent (iX+1, h_jet_trk_dphi_gt20_lt30[iFile]->GetBinContent (iX+1) + (ewgt*jwgt)*(jet_trk_dphi_gt20_lt30_counts[iX]));
+      h_jet_trk_dphi_gt20_lt30[iFile]->SetBinContent (iX+1, h_jet_trk_dphi_gt20_lt30[iFile]->GetBinContent (iX+1) + (ewgt)*(jet_trk_dphi_gt20_lt30_counts[iX]));
       for (int iY = 0; iY < nDPhiBins; iY++)
-        h2_jet_trk_dphi_gt20_lt30_cov[iFile]->SetBinContent (iX+1, iY+1, h2_jet_trk_dphi_gt20_lt30_cov[iFile]->GetBinContent (iX+1, iY+1) + (ewgt*jwgt)*(jet_trk_dphi_gt20_lt30_counts[iX])*(jet_trk_dphi_gt20_lt30_counts[iY]));
+        h2_jet_trk_dphi_gt20_lt30_cov[iFile]->SetBinContent (iX+1, iY+1, h2_jet_trk_dphi_gt20_lt30_cov[iFile]->GetBinContent (iX+1, iY+1) + (ewgt)*(jet_trk_dphi_gt20_lt30_counts[iX])*(jet_trk_dphi_gt20_lt30_counts[iY]));
     }
 
 
     for (int iX = 0; iX < nPtChBins; iX++) {
-      h_jet_trk_pt_ns[iFile]->SetBinContent (iX+1, h_jet_trk_pt_ns[iFile]->GetBinContent (iX+1) + (ewgt*jwgt)*(jet_trk_pt_ns_counts[iX]));
+      h_jet_trk_pt_ns[iFile]->SetBinContent (iX+1, h_jet_trk_pt_ns[iFile]->GetBinContent (iX+1) + (ewgt)*(jet_trk_pt_ns_counts[iX]));
       for (int iY = 0; iY < nPtChBins; iY++)
-        h2_jet_trk_pt_ns_cov[iFile]->SetBinContent (iX+1, iY+1, h2_jet_trk_pt_ns_cov[iFile]->GetBinContent (iX+1, iY+1) + (ewgt*jwgt)*(jet_trk_pt_ns_counts[iX])*(jet_trk_pt_ns_counts[iY]));
+        h2_jet_trk_pt_ns_cov[iFile]->SetBinContent (iX+1, iY+1, h2_jet_trk_pt_ns_cov[iFile]->GetBinContent (iX+1, iY+1) + (ewgt)*(jet_trk_pt_ns_counts[iX])*(jet_trk_pt_ns_counts[iY]));
     }
     for (int iX = 0; iX < nPtChBins; iX++) {
-      h_jet_trk_pt_perp[iFile]->SetBinContent (iX+1, h_jet_trk_pt_perp[iFile]->GetBinContent (iX+1) + (ewgt*jwgt)*(jet_trk_pt_perp_counts[iX]));
+      h_jet_trk_pt_perp[iFile]->SetBinContent (iX+1, h_jet_trk_pt_perp[iFile]->GetBinContent (iX+1) + (ewgt)*(jet_trk_pt_perp_counts[iX]));
       for (int iY = 0; iY < nPtChBins; iY++)
-        h2_jet_trk_pt_perp_cov[iFile]->SetBinContent (iX+1, iY+1, h2_jet_trk_pt_perp_cov[iFile]->GetBinContent (iX+1, iY+1) + (ewgt*jwgt)*(jet_trk_pt_perp_counts[iX])*(jet_trk_pt_perp_counts[iY]));
+        h2_jet_trk_pt_perp_cov[iFile]->SetBinContent (iX+1, iY+1, h2_jet_trk_pt_perp_cov[iFile]->GetBinContent (iX+1, iY+1) + (ewgt)*(jet_trk_pt_perp_counts[iX])*(jet_trk_pt_perp_counts[iY]));
     }
     for (int iX = 0; iX < nPtChBins; iX++) {
-      h_jet_trk_pt_as[iFile]->SetBinContent (iX+1, h_jet_trk_pt_as[iFile]->GetBinContent (iX+1) + (ewgt*jwgt)*(jet_trk_pt_as_counts[iX]));
+      h_jet_trk_pt_as[iFile]->SetBinContent (iX+1, h_jet_trk_pt_as[iFile]->GetBinContent (iX+1) + (ewgt)*(jet_trk_pt_as_counts[iX]));
       for (int iY = 0; iY < nPtChBins; iY++)
-        h2_jet_trk_pt_as_cov[iFile]->SetBinContent (iX+1, iY+1, h2_jet_trk_pt_as_cov[iFile]->GetBinContent (iX+1, iY+1) + (ewgt*jwgt)*(jet_trk_pt_as_counts[iX])*(jet_trk_pt_as_counts[iY]));
+        h2_jet_trk_pt_as_cov[iFile]->SetBinContent (iX+1, iY+1, h2_jet_trk_pt_as_cov[iFile]->GetBinContent (iX+1, iY+1) + (ewgt)*(jet_trk_pt_as_counts[iX])*(jet_trk_pt_as_counts[iY]));
     }
 
   } // end loop over events
@@ -821,15 +828,15 @@ bool RunCorrelator (const char* directory,
   }
 
   if (jet_min_pt == -2)
-    jet_min_pt = (double) std::atof (std::getenv ("JET_MIN_PT"));
+    jet_min_pt = (float) std::atof (std::getenv ("JET_MIN_PT"));
   if (jet_max_pt == -2)
-    jet_max_pt = (double) std::atof (std::getenv ("JET_MAX_PT"));
+    jet_max_pt = (float) std::atof (std::getenv ("JET_MAX_PT"));
   doMixing = (tracksInFileName != nullptr && strcmp (tracksInFileName, "") != 0);
 
 
-  doMixVar1 = (std::string (jetsInFileName).find ("MixCatVar1") != std::string::npos || (doMixing && std::string (tracksInFileName).find ("MixCatVar1") != std::string::npos));
-  doMixVar2 = (std::string (jetsInFileName).find ("MixCatVar2") != std::string::npos || (doMixing && std::string (tracksInFileName).find ("MixCatVar2") != std::string::npos));
-  doMixVar3 = (std::string (jetsInFileName).find ("MixCatVar3") != std::string::npos || (doMixing && std::string (tracksInFileName).find ("MixCatVar3") != std::string::npos));
+  doMixVar1 = (TString (jetsInFileName).Contains ("MixCatVar1") || (doMixing && TString (tracksInFileName).Contains ("MixCatVar1")));
+  doMixVar2 = (TString (jetsInFileName).Contains ("MixCatVar2") || (doMixing && TString (tracksInFileName).Contains ("MixCatVar2")));
+  doMixVar3 = (TString (jetsInFileName).Contains ("MixCatVar3") || (doMixing && TString (tracksInFileName).Contains ("MixCatVar3")));
 
 
   //////////////////////////////////////////////////////////////////////////////////////////
@@ -907,44 +914,15 @@ bool RunCorrelator (const char* directory,
     tracksInTree = jetsInTree;
 
 
-  if (!IsCollisions ()) {
-    if (TString (jetsInFileName).Contains ("JZ0")) {
-      truth_jet_min_pt = 0;
-      truth_jet_max_pt = 20;
-    }
-    else if (TString (jetsInFileName).Contains ("JZ1")) {
-      truth_jet_min_pt = 20;
-      truth_jet_max_pt = 60;
-    }
-    else if (TString (jetsInFileName).Contains ("JZ2")) {
-      truth_jet_min_pt = 60;
-      truth_jet_max_pt = 160;
-    }
-    else if (TString (jetsInFileName).Contains ("JZ3")) {
-      truth_jet_min_pt = 160;
-      truth_jet_max_pt = 400;
-    }
-    else if (TString (jetsInFileName).Contains ("JZ4")) {
-      truth_jet_min_pt = 400;
-      truth_jet_max_pt = 800;
-    }
-    else if (TString (jetsInFileName).Contains ("JZ5")) {
-      truth_jet_min_pt = 800;
-      truth_jet_max_pt = 1300;
-    }
-  }
-
-  //TFile* jetsInFile = new TFile (jetsInFileName, "read");
-  //TFile* tracksInFile = (tracksInFileName != nullptr ? new TFile (tracksInFileName, "read") : nullptr);
-
-  //TTree* jetsInTree = (TTree*) jetsInFile->Get (IspPb () ? "pPbTree" : "ppTree");
-  //TTree* tracksInTree = (tracksInFileName != nullptr ? (TTree*) tracksInFile->Get (IspPb () ? "pPbTree" : "ppTree") : jetsInTree);
+  truth_jet_min_pt = GetJZXR04MinPt (TString (jetsInFileName));
+  truth_jet_max_pt = GetJZXR04MaxPt (TString (jetsInFileName));
+  if (truth_jet_min_pt != 0)
+    std::cout << "Checking for leading truth jet with pT > " << truth_jet_min_pt << std::endl;
+  if (truth_jet_max_pt != FLT_MAX)
+    std::cout << "Checking for leading truth jet with pT < " << truth_jet_max_pt << std::endl;
 
   return Correlator (TString (tag), outFilePattern, jetsInTree, tracksInTree);
 
-  //jetsInFile->Close ();
-  //if (tracksInFile)
-  //  tracksInFile->Close ();
 }
 
 
@@ -1035,28 +1013,5 @@ int main (int argc, char** argv) {
   }
 }
 
-//int main (int argc, char** argv) {
-//  assert (argc >= 7);
-//
-//  jet_min_pt = (double) std::atof (argv[1]);
-//  jet_max_pt = (double) std::atof (argv[2]);
-//
-//  if (argc == 8) {
-//    std::cout << "Main will execute RunCorrelator (const char* collSys, const char* tag, const char* outFilePattern, const char* jetsInFileName, const char* tracksInFileName)" << std::endl;
-//    RunCorrelator (argv[3], argv[4], argv[5], argv[6], argv[7]);
-//  }
-//
-//  else if (argc == 7) {
-//    std::cout << "Main will execute RunCorrelator (const char* collSys, const char* tag, const char* outFilePattern, const char* jetsInFileName)" << std::endl;
-//    RunCorrelator (argv[3], argv[4], argv[5], argv[6]);
-//  }
-//
-//  else {
-//    std::cout << "Undefined behavior for " << argc << " arguments, exiting" << std::endl;
-//    return 1;
-//  }
-//
-//  return 0;
-//}
 
 #endif

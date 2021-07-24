@@ -53,7 +53,7 @@ void PlotOffsets (const char* tag) {
 
       if (TString (centStr.c_str ()) == TString (Form ("%i-%i%%", zdcCentPercs[iCent+1], zdcCentPercs[iCent]))) {
         g_offsets[iCent]->SetPoint (g_offsets[iCent]->GetN (), 0.5 * (pTChStrCuts[pTChSel].first + pTChStrCuts[pTChSel].second), -offset);
-        g_offsets[iCent]->SetPointError (g_offsets[iCent]->GetN () -1, 0.5 * fabs (pTChStrCuts[pTChSel].first - pTChStrCuts[pTChSel].second), offerr);
+        g_offsets[iCent]->SetPointError (g_offsets[iCent]->GetN () -1, 0.5 * std::fabs (pTChStrCuts[pTChSel].first - pTChStrCuts[pTChSel].second), offerr);
         continue;
       }
     }

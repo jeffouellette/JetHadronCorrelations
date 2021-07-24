@@ -31,7 +31,7 @@ TString dataPath = extWorkPath + "data/";
 
 
 
-TString ToTString (const CollisionSystem collSys) {
+TString ToTString (const CollisionSystem& collSys) {
   switch (collSys) {
     case CollisionSystem::pp15:       return TString ("pp15_5TeV");
     case CollisionSystem::PbPb15:     return TString ("PbPb15_5TeV");
@@ -47,7 +47,7 @@ TString ToTString (const CollisionSystem collSys) {
  
  
  
-TString ToTString (const DataType dType) {
+TString ToTString (const DataType& dType) {
   switch (dType) {
     case DataType::Collisions:      return TString ("Collisions");
     case DataType::MCSignal:        return TString ("MCSignal");
@@ -60,7 +60,7 @@ TString ToTString (const DataType dType) {
 
 
 
-TString ToTString (const TriggerType tType) {
+TString ToTString (const TriggerType& tType) {
   switch (tType) {
     case TriggerType::None:       return TString ("None");
     case TriggerType::Jet50GeV:   return TString ("Jet50GeV");
@@ -72,27 +72,51 @@ TString ToTString (const TriggerType tType) {
 
 
 
-TString ToTString (const SystFlag sFlag) {
+TString ToTString (const SystFlag& sFlag) {
   switch (sFlag) {
     case SystFlag::Nominal:                 return TString ("Nominal");
     case SystFlag::HITightVar:              return TString ("HITightVar");
-    case SystFlag::PionsOnlyVar:            return TString ("PionsOnlyVar");
-    case SystFlag::WithPileupVar:           return TString ("WithPileupVar");
     case SystFlag::FcalCentVar:             return TString ("FcalCentVar");
     case SystFlag::FineFcalCentVar:         return TString ("FineFcalCentVar");
-    case SystFlag::JetES5PercUpVar:         return TString ("JetES5PercUpVar");
-    case SystFlag::JetES5PercDownVar:       return TString ("JetES5PercDownVar");
-    case SystFlag::JetES5PercSmearVar:      return TString ("JetES5PercSmearVar");
-    case SystFlag::JetES2PercUpVar:         return TString ("JetES2PercUpVar");
-    case SystFlag::JetES2PercDownVar:       return TString ("JetES2PercDownVar");
-    case SystFlag::JetES2PercSmearVar:      return TString ("JetES2PercSmearVar");
+    case SystFlag::JESVar0:                 return TString ("JESVar0");
+    case SystFlag::JESVar1:                 return TString ("JESVar1");
+    case SystFlag::JESVar2:                 return TString ("JESVar2");
+    case SystFlag::JESVar3:                 return TString ("JESVar3");
+    case SystFlag::JESVar4:                 return TString ("JESVar4");
+    case SystFlag::JESVar5:                 return TString ("JESVar5");
+    case SystFlag::JESVar6:                 return TString ("JESVar6");
+    case SystFlag::JESVar7:                 return TString ("JESVar7");
+    case SystFlag::JESVar8:                 return TString ("JESVar8");
+    case SystFlag::JESVar9:                 return TString ("JESVar9");
+    case SystFlag::JESVar10:                return TString ("JESVar10");
+    case SystFlag::JESVar11:                return TString ("JESVar11");
+    case SystFlag::JESVar12:                return TString ("JESVar12");
+    case SystFlag::JESVar13:                return TString ("JESVar13");
+    case SystFlag::JESVar14:                return TString ("JESVar14");
+    case SystFlag::JESVar15:                return TString ("JESVar15");
+    case SystFlag::JESVar16:                return TString ("JESVar16");
+    case SystFlag::JESVar17:                return TString ("JESVar17");
+    case SystFlag::JESVar18:                return TString ("JESVar18");
+    case SystFlag::JESVar19:                return TString ("JESVar19");
+    case SystFlag::JESVar20:                return TString ("JESVar20");
+    case SystFlag::JERVar0:                 return TString ("JERVar0");
+    case SystFlag::JERVar1:                 return TString ("JERVar1");
+    case SystFlag::JERVar2:                 return TString ("JERVar2");
+    case SystFlag::JERVar3:                 return TString ("JERVar3");
+    case SystFlag::JERVar4:                 return TString ("JERVar4");
+    case SystFlag::JERVar5:                 return TString ("JERVar5");
+    case SystFlag::JERVar6:                 return TString ("JERVar6");
+    case SystFlag::JERVar7:                 return TString ("JERVar7");
+    case SystFlag::JERVar8:                 return TString ("JERVar8");
+    case SystFlag::JERVar9:                 return TString ("JERVar9");
+    case SystFlag::JERVar10:                return TString ("JERVar10");
     default:                                return TString ("???");
   }
 }
 
 
 
-float GetRadius (const JetRadius r) {
+float GetRadius (const JetRadius& r) {
   switch (r) {
     case JetRadius::R0p2:     return 0.2;
     case JetRadius::R0p3:     return 0.3;
@@ -143,67 +167,67 @@ bool SetSystFlag (TString ts) {
 
 
 
-bool IsIons (const CollisionSystem collSys) {
+bool IsIons (const CollisionSystem& collSys) {
   return (collSys == CollisionSystem::PbPb15 || collSys == CollisionSystem::pPb16s5TeV || collSys == CollisionSystem::pPb16 || collSys == CollisionSystem::Pbp16 || collSys == CollisionSystem::PbPb18);
 }
 
 
 
-bool IsPbPb (const CollisionSystem collSys) {
+bool IsPbPb (const CollisionSystem& collSys) {
   return (collSys == CollisionSystem::PbPb15 || collSys == CollisionSystem::PbPb18);
 }
 
 
 
-bool IsPbPb18 (const CollisionSystem collSys) {
+bool IsPbPb18 (const CollisionSystem& collSys) {
   return (collSys == CollisionSystem::PbPb18);
 }
 
 
 
-bool IsPbPb15 (const CollisionSystem collSys) {
+bool IsPbPb15 (const CollisionSystem& collSys) {
   return (collSys == CollisionSystem::PbPb15);
 }
 
 
 
-bool IsXeXe (const CollisionSystem collSys) {
+bool IsXeXe (const CollisionSystem& collSys) {
   return (collSys == CollisionSystem::XeXe17);
 }
 
 
 
-bool IspPb (const CollisionSystem collSys) {
+bool IspPb (const CollisionSystem& collSys) {
   return (collSys == CollisionSystem::pPb16s5TeV || collSys == CollisionSystem::pPb16 || collSys == CollisionSystem::Pbp16);
 }
 
 
 
-bool IspPb16 (const CollisionSystem collSys) {
+bool IspPb16 (const CollisionSystem& collSys) {
   return (collSys == CollisionSystem::pPb16s5TeV || collSys == CollisionSystem::pPb16 || collSys == CollisionSystem::Pbp16);
 }
 
 
 
-bool Ispp (const CollisionSystem collSys) {
+bool Ispp (const CollisionSystem& collSys) {
   return (collSys == CollisionSystem::pp15 || collSys == CollisionSystem::pp17);
 }
 
 
 
-bool Ispp15 (const CollisionSystem collSys) {
+bool Ispp15 (const CollisionSystem& collSys) {
   return (collSys == CollisionSystem::pp15);
 }
 
 
 
-bool Ispp17 (const CollisionSystem collSys) {
+bool Ispp17 (const CollisionSystem& collSys) {
   return (collSys == CollisionSystem::pp17);
 }
 
 
 
-bool IsPeriodA (const CollisionSystem collSys) {
+bool IsPeriodA (const CollisionSystem& collSys) {
   if (collSys == CollisionSystem::pPb16s5TeV || collSys == CollisionSystem::pPb16) {
     return true;
   }
@@ -216,152 +240,158 @@ bool IsPeriodA (const CollisionSystem collSys) {
 
 
 
-bool Is5TeV (const CollisionSystem collSys) {
+bool Is5TeV (const CollisionSystem& collSys) {
   return (collSys == CollisionSystem::pp15 || collSys == CollisionSystem::PbPb15 || collSys == CollisionSystem::pPb16s5TeV || collSys == CollisionSystem::XeXe17 || collSys == CollisionSystem::pp17 || collSys == CollisionSystem::PbPb18);
 }
 
 
 
-bool Is8TeV (const CollisionSystem collSys) {
+bool Is8TeV (const CollisionSystem& collSys) {
   return (collSys == CollisionSystem::pPb16 || collSys == CollisionSystem::Pbp16);
 }
 
 
 
-bool Is2018 (const CollisionSystem collSys) {
+bool Is2018 (const CollisionSystem& collSys) {
   return (collSys == CollisionSystem::PbPb18);
 }
 
 
 
-bool Is2017 (const CollisionSystem collSys) {
+bool Is2017 (const CollisionSystem& collSys) {
   return (collSys == CollisionSystem::XeXe17 || collSys == CollisionSystem::pp17);
 }
 
 
 
-bool Is2016 (const CollisionSystem collSys) {
+bool Is2016 (const CollisionSystem& collSys) {
   return (collSys == CollisionSystem::pPb16s5TeV || collSys == CollisionSystem::pPb16 || collSys == CollisionSystem::Pbp16);
 }
 
 
 
-bool Is2015 (const CollisionSystem collSys) {
+bool Is2015 (const CollisionSystem& collSys) {
   return (collSys == CollisionSystem::pp15 || collSys == CollisionSystem::PbPb15);
 }
 
 
 
-bool IsCollisions (const DataType dType) {
+bool IsCollisions (const DataType& dType) {
   return (dType == DataType::Collisions);
 }
 
 
 
-bool IsDataOverlay (const DataType dType) {
+bool IsDataOverlay (const DataType& dType) {
   return (dType == DataType::MCDataOverlay);
 }
 
 
 
-bool IsOverlay (const DataType dType) {
+bool IsOverlay (const DataType& dType) {
   return (dType == DataType::MCDataOverlay || dType == DataType::MCHijingOverlay);
 }
 
 
 
-bool IsHijing (const DataType dType) {
+bool IsHijing (const DataType& dType) {
   return (dType == DataType::MCHijing || dType == DataType::MCHijingOverlay);
 }
 
 
 
-bool UseJetTriggers (const TriggerType tType) {
+bool UseJetTriggers (const TriggerType& tType) {
   return UseJet50GeVTriggers (tType) || UseJet100GeVTriggers (tType);
 }
 
 
 
-bool UseJet50GeVTriggers (const TriggerType tType) {
+bool UseJet50GeVTriggers (const TriggerType& tType) {
   return tType == TriggerType::Jet50GeV;
 }
 
 
 
-bool UseJet100GeVTriggers (const TriggerType tType) {
+bool UseJet100GeVTriggers (const TriggerType& tType) {
   return tType == TriggerType::Jet100GeV;
 }
 
 
 
-bool UseMinBiasTriggers (const TriggerType tType) {
+bool UseMinBiasTriggers (const TriggerType& tType) {
   return tType == TriggerType::MinBias;
 }
 
 
 
-bool DoHITightVar (const SystFlag sFlag) {
+bool DoHITightVar (const SystFlag& sFlag) {
   return sFlag == SystFlag::HITightVar;
 }
 
 
 
-bool DoPionsOnlyVar (const SystFlag sFlag) {
-  return sFlag == SystFlag::PionsOnlyVar;
+bool DoHILooseVar (const SystFlag& sFlag) {
+  return sFlag == SystFlag::HILooseVar;
 }
 
 
 
-bool DoWithPileupVar (const SystFlag sFlag) {
-  return sFlag == SystFlag::WithPileupVar;
-}
-
-
-
-bool DoFcalCentVar (const SystFlag sFlag) {
+bool DoFcalCentVar (const SystFlag& sFlag) {
   return sFlag == SystFlag::FcalCentVar;
 }
 
 
 
-bool DoFineFcalCentVar (const SystFlag sFlag) {
+bool DoFineFcalCentVar (const SystFlag& sFlag) {
   return sFlag == SystFlag::FineFcalCentVar;
 }
 
 
 
-bool DoJetES5PercUpVar (const SystFlag sFlag) {
-  return sFlag == SystFlag::JetES5PercUpVar;
+int GetNJESVar (const SystFlag& sFlag) {
+  switch (sFlag) {
+    case SystFlag::JESVar0:   return 0;
+    case SystFlag::JESVar1:   return 1;
+    case SystFlag::JESVar2:   return 2;
+    case SystFlag::JESVar3:   return 3;
+    case SystFlag::JESVar4:   return 4;
+    case SystFlag::JESVar5:   return 5;
+    case SystFlag::JESVar6:   return 6;
+    case SystFlag::JESVar7:   return 7;
+    case SystFlag::JESVar8:   return 8;
+    case SystFlag::JESVar9:   return 9;
+    case SystFlag::JESVar10:  return 10;
+    case SystFlag::JESVar11:  return 11;
+    case SystFlag::JESVar12:  return 12;
+    case SystFlag::JESVar13:  return 13;
+    case SystFlag::JESVar14:  return 14;
+    case SystFlag::JESVar15:  return 15;
+    case SystFlag::JESVar16:  return 16;
+    case SystFlag::JESVar17:  return 17;
+    case SystFlag::JESVar18:  return 18;
+    case SystFlag::JESVar19:  return 19;
+    case SystFlag::JESVar20:  return 20;
+    default:                  return -1;
+  }
 }
 
 
 
-bool DoJetES5PercDownVar (const SystFlag sFlag) {
-  return sFlag == SystFlag::JetES5PercDownVar;
-}
-
-
-
-bool DoJetES5PercSmearVar (const SystFlag sFlag) {
-  return sFlag == SystFlag::JetES5PercSmearVar;
-}
-
-
-
-bool DoJetES2PercUpVar (const SystFlag sFlag) {
-  return sFlag == SystFlag::JetES2PercUpVar;
-}
-
-
-
-bool DoJetES2PercDownVar (const SystFlag sFlag) {
-  return sFlag == SystFlag::JetES2PercDownVar;
-}
-
-
-
-bool DoJetES2PercSmearVar (const SystFlag sFlag) {
-  return sFlag == SystFlag::JetES2PercSmearVar;
+int GetNJERVar (const SystFlag& sFlag) {
+  switch (sFlag) {
+    case SystFlag::JERVar0:   return 0;
+    case SystFlag::JERVar1:   return 1;
+    case SystFlag::JERVar2:   return 2;
+    case SystFlag::JERVar3:   return 3;
+    case SystFlag::JERVar4:   return 4;
+    case SystFlag::JERVar5:   return 5;
+    case SystFlag::JERVar6:   return 6;
+    case SystFlag::JERVar7:   return 7;
+    case SystFlag::JERVar8:   return 8;
+    case SystFlag::JERVar9:   return 9;
+    case SystFlag::JERVar10:  return 10;
+    default:                  return -1;
+  }
 }
 
 
@@ -522,14 +552,8 @@ bool DoHITightVar () {
 
 
 
-bool DoPionsOnlyVar () {
-  return DoPionsOnlyVar (systFlag);
-}
-
-
-
-bool DoWithPileupVar () {
-  return DoWithPileupVar (systFlag);
+bool DoHILooseVar () {
+  return DoHILooseVar (systFlag);
 }
 
 
@@ -546,38 +570,16 @@ bool DoFineFcalCentVar () {
 
 
 
-bool DoJetES5PercUpVar () {
-  return DoJetES5PercUpVar (systFlag);
+int GetNJESVar () {
+  return GetNJESVar (systFlag);
 }
 
 
 
-bool DoJetES5PercDownVar () {
-  return DoJetES5PercDownVar (systFlag);
+int GetNJERVar () {
+  return GetNJERVar (systFlag);
 }
 
-
-
-bool DoJetES5PercSmearVar () {
-  return DoJetES5PercSmearVar (systFlag);
-}
-
-
-
-bool DoJetES2PercUpVar () {
-  return DoJetES2PercUpVar (systFlag);
-}
-
-
-bool DoJetES2PercDownVar () {
-  return DoJetES2PercDownVar (systFlag);
-}
-
-
-
-bool DoJetES2PercSmearVar () {
-  return DoJetES2PercSmearVar (systFlag);
-}
 
 
 
@@ -600,36 +602,11 @@ double GetBoost (int rn) {
 /**
  * Establishes path variables appropriately.
  */
-void SetupDirectories (const TString dataSubDir, const bool addSubDir) {
+void SetupDirectories (const TString& dataSubDir, const bool addSubDir) {
   rootPath = extWorkPath + "rootFiles/" + dataSubDir + "/";
 
-  if (addSubDir) {
+  if (addSubDir)
     rootPath = rootPath + ToTString (systFlag) + "/";
-    //if (DoHITightVar ())
-    //  rootPath = rootPath + "HITightVar/";
-    //else if (DoPionsOnlyVar ())
-    //  rootPath = rootPath + "PionsOnlyVar/";
-    //else if (DoWithPileupVar ())
-    //  rootPath = rootPath + "WithPileupVar/";
-    //else if (DoFcalCentVar ())
-    //  rootPath = rootPath + "FcalCentVar/";
-    //else if (DoFineFcalCentVar ())
-    //  rootPath = rootPath + "FineFcalCentVar/";
-    //else if (DoJetES5PercUpVar ())
-    //  rootPath = rootPath + "JetES5PercUpVar/";
-    //else if (DoJetES5PercDownVar ())
-    //  rootPath = rootPath + "JetES5PercDownVar/";
-    //else if (DoJetES5PercSmearVar ())
-    //  rootPath = rootPath + "JetES5PercSmearVar/";
-    //else if (DoJetES2PercUpVar ())
-    //  rootPath = rootPath + "JetES2PercUpVar/";
-    //else if (DoJetES2PercDownVar ())
-    //  rootPath = rootPath + "JetES2PercDownVar/";
-    //else if (DoJetES2PercSmearVar ())
-    //  rootPath = rootPath + "JetES2PercSmearVar/";
-    //else
-    //  rootPath = rootPath + "Nominal/";
-  }
 }
 
 
@@ -637,7 +614,7 @@ void SetupDirectories (const TString dataSubDir, const bool addSubDir) {
 /**
  * Looks up MC sample cross section, filter efficiency, and number of events.
  */
-bool GetMCWeights (TString fname) {
+bool GetMCWeights (const TString& fname) {
   ifstream f_wgts;
   f_wgts.open (Form ("%s/aux/MC_Weights.dat", workPath.Data ()));
 
@@ -662,6 +639,40 @@ bool GetMCWeights (TString fname) {
     }
   }
   return false;
+}
+
+
+
+/**
+ * Returns the minimum anti-kT R=0.4 truth jet pT for this JZXR04 MC sample.
+ */
+float GetJZXR04MinPt (const TString& fname) {
+  if (!IsCollisions ()) {
+    if (TString (fname).Contains ("JZ0"))      return 0;
+    else if (TString (fname).Contains ("JZ1")) return 20;
+    else if (TString (fname).Contains ("JZ2")) return 60;
+    else if (TString (fname).Contains ("JZ3")) return 160;
+    else if (TString (fname).Contains ("JZ4")) return 400;
+    else if (TString (fname).Contains ("JZ5")) return 800;
+  }
+  return 0;
+}
+
+
+
+/**
+ * Returns the maximum anti-kT R=0.4 truth jet pT for this JZXR04 MC sample.
+ */
+float GetJZXR04MaxPt (const TString& fname) {
+  if (!IsCollisions ()) {
+    if (TString (fname).Contains ("JZ0"))      return 20;
+    else if (TString (fname).Contains ("JZ1")) return 60;
+    else if (TString (fname).Contains ("JZ2")) return 160;
+    else if (TString (fname).Contains ("JZ3")) return 400;
+    else if (TString (fname).Contains ("JZ4")) return 800;
+    else if (TString (fname).Contains ("JZ5")) return 1300;
+  }
+  return FLT_MAX;
 }
 
 
@@ -734,6 +745,9 @@ TString GetIdentifier (const int dataSet, const char* directory, const char* inF
   else if (Ispp ())
     id = (Is2015 () ? "pp15" : "pp17");
 
+  if ((IsPbPb () || IspPb ()) && !IsCollisions () && !IsOverlay () && !IsHijing ())
+    id = id + "_so";
+
   if (TString (inFileName).Contains ("420010"))
     id = id + "_JZ0";
   else if (TString (inFileName).Contains ("420011"))
@@ -752,6 +766,7 @@ TString GetIdentifier (const int dataSet, const char* directory, const char* inF
   else if (TString (inFileName).Contains ("e6608"))
     id = id + "_SampleB";
 
+  // FROM Z+h analysis (now deprecated)
   if (TString (inFileName).Contains ("Sherpa"))
     id = id + "_Sherpa";
 
@@ -814,6 +829,7 @@ TString GetIdentifier (const int dataSet, const char* directory, const char* inF
       id += "_vtxz_p64";
   }
 
+  // FROM Z+h analysis Hijing samples (now deprecated)
   if (TString (inFileName).Contains ("ptmin25"))
     id = id + "_ptmin25";
   else if (TString (inFileName).Contains ("ygt175"))
@@ -840,10 +856,12 @@ double GetJetLuminosity () {
 /**
  * Returns true if this jet passes selection criteria.
  */
-bool MeetsJetAcceptanceCuts (int iJ, const JetRadius radius) {
-  if (fabs (GetAktHIJetEta (iJ, radius)) > 2.8)
+bool MeetsJetAcceptanceCuts (int iJ, const JetRadius& radius, const int nJESVar) {
+  assert (GetAktHIJetN (radius) > iJ);
+  assert (nJESVar >= -1 && nJESVar < nJESSys);
+  if (std::fabs (GetAktHIJetEta (iJ, radius, nJESVar)) > 2.8)
     return false; // cut out forward jets
-  if (IspPb () && InDisabledHEC (GetAktHIJetEta (iJ, radius), GetAktHIJetPhi (iJ, radius), GetRadius (radius)))
+  if (IspPb () && InDisabledHEC (GetAktHIJetEta (iJ, radius, nJESVar), GetAktHIJetPhi (iJ, radius, nJESVar), GetRadius (radius)))
     return false; // cut out jets in the disabled HEC
   if (IsCollisions () && Ispp () && UseMinBiasTriggers () && GetAktHIJetTiming (iJ, radius) > 10)
     return false; // cut out jets with bad timing in pp if using MinBias trigger
@@ -875,16 +893,16 @@ bool MeetsJetPtCut (double jpt) {
 bool MeetsTrackCuts (int iTrk) {
   if (trk_pt[iTrk] < min_trk_pt)
     return false; // track minimum pT
-  if (fabs (trk_eta[iTrk]) > 2.5)
+  if (std::fabs (trk_eta[iTrk]) > 2.5)
     return false; // track maximum eta
 
   if (!trk_wp[iTrk])
     return false;
 
   if (IsPbPb ()) {
-    if (fabs (trk_d0sig[iTrk]) > 3.0)
+    if (std::fabs (trk_d0sig[iTrk]) > 3.0)
       return false; // d0 significance cut in Pb+Pb
-    if (fabs (trk_z0sig[iTrk]) > 3.0)
+    if (std::fabs (trk_z0sig[iTrk]) > 3.0)
       return false; // z0 significance cut in Pb+Pb
   }
   return true;
@@ -896,35 +914,217 @@ bool MeetsTrackCuts (int iTrk) {
  * Returns the matched truth jet within DR < pi to this HI jet.
  * Returns -1 if no truth jet is matched within this DR range, or the radius is invalid.
  */
-int GetAktTruthJetMatch (const int iJ, const JetRadius radius) {
+int GetAktTruthJetMatch (const int iJ, const JetRadius& radius, const int nJESVar) {
+  assert (GetAktHIJetN (radius) > iJ);
   float mindr = M_PI;
   int match = -1;
-  const float jeta = GetAktHIJetEta (iJ, radius);
-  const float jphi = GetAktHIJetPhi (iJ, radius);
-
-  if (radius == JetRadius::R0p4) {
-    assert (akt4_hi_jet_n > iJ);
-    for (int iTJ = 0; iTJ < akt4_truth_jet_n; iTJ++) {
-      const float dr = DeltaR (jeta, akt4_truth_jet_eta[iTJ], jphi, akt4_truth_jet_phi[iTJ]);
-      if (dr < mindr) {
-        match = iTJ;
-        mindr = dr;
-      }
+  const float jeta = GetAktHIJetEta (iJ, radius, nJESVar);
+  const float jphi = GetAktHIJetPhi (iJ, radius, nJESVar);
+  const int nTJ = GetAktTruthJetN (radius);
+  for (int iTJ = 0; iTJ < nTJ; iTJ++) {
+    const float dr = DeltaR (jeta, GetAktTruthJetEta (iTJ, radius), jphi, GetAktTruthJetPhi (iTJ, radius));
+    if (dr < mindr) {
+      match = iTJ;
+      mindr = dr;
     }
   }
-
-  else if (radius == JetRadius::R0p2) {
-    assert (akt2_hi_jet_n > iJ);
-    for (int iTJ = 0; iTJ < akt2_truth_jet_n; iTJ++) {
-      const float dr = DeltaR (jeta, akt2_truth_jet_eta[iTJ], jphi, akt2_truth_jet_phi[iTJ]);
-      if (dr < mindr) {
-        match = iTJ;
-        mindr = dr;
-      }
-    }
-  }
-
+  if (mindr > GetAktTruthMatchMaxDR (radius))
+    return -1;
   return match;
+}
+
+
+
+/**
+ * Determines the correct truth jet count for this radius.
+ * Returns -1 if radius was not recognized.
+ */
+int GetAktTruthJetN (const JetRadius& radius) {
+  switch (radius) {
+  case JetRadius::R0p4: {
+    assert (akt4_truth_jet_n >= 0);
+    return akt4_truth_jet_n;
+  }
+  case JetRadius::R0p2: {
+    assert (akt2_truth_jet_n >= 0);
+    return akt2_truth_jet_n;
+  }
+  default: return -1;
+  } // end switch
+}
+
+
+
+/**
+ * Returns the appropriate truth jet pT for the given jet radius.
+ * Returns NaN if radius was not recognized.
+ */
+float GetAktTruthJetPt (const int iJ, const JetRadius& radius) {
+  assert (GetAktTruthJetN (radius) > iJ);
+  switch (radius) {
+  case JetRadius::R0p4: return akt4_truth_jet_pt[iJ];
+  case JetRadius::R0p2: return akt2_truth_jet_pt[iJ];
+  default: return std::nan ("");
+  } // end switch
+}
+
+
+
+/**
+ * Returns the appropriate truth jet eta for the given jet radius.
+ * Returns NaN if radius was not recognized.
+ */
+float GetAktTruthJetEta (const int iJ, const JetRadius& radius) {
+  assert (GetAktTruthJetN (radius) > iJ);
+  switch (radius) {
+  case JetRadius::R0p4: return akt4_truth_jet_eta[iJ];
+  case JetRadius::R0p2: return akt2_truth_jet_eta[iJ];
+  default: return std::nan ("");
+  } // end switch
+}
+
+
+
+/**
+ * Returns the appropriate truth jet phi for the given jet radius.
+ * Returns NaN if radius was not recognized.
+ */
+float GetAktTruthJetPhi (const int iJ, const JetRadius& radius) {
+  assert (GetAktTruthJetN (radius) > iJ);
+  switch (radius) {
+  case JetRadius::R0p4: return akt4_truth_jet_phi[iJ];
+  case JetRadius::R0p2: return akt2_truth_jet_phi[iJ];
+  default: return std::nan ("");
+  } // end switch
+}
+
+
+
+/**
+ * Returns the appropriate truth jet energy for the given jet radius.
+ * Returns NaN if radius was not recognized.
+ */
+float GetAktTruthJetEn (const int iJ, const JetRadius& radius) {
+  assert (GetAktTruthJetN (radius) > iJ);
+  switch (radius) {
+  case JetRadius::R0p4: return akt4_truth_jet_e[iJ];
+  case JetRadius::R0p2: return akt2_truth_jet_e[iJ];
+  default: return std::nan ("");
+  } // end switch
+}
+
+
+
+/**
+ * Returns the minimum delta R to any other truth jet with a pT above some threshold.
+ * Will cause an error due to NaN returns if the radius is not supported.
+ */
+float GetAktTruthJetIso (const int iJ, const JetRadius& radius) {
+  assert (GetAktTruthJetN (radius) > iJ);
+
+  int jn = GetAktTruthJetN (radius);
+  float maxdr = FLT_MAX;
+  float jeta = GetAktTruthJetEta (iJ, radius);
+  float jphi = GetAktTruthJetPhi (iJ, radius);
+
+  for (int iJp = 0; iJp < jn; iJp++) {
+    if (iJp == iJ)
+      continue; // skip the jet of interest
+    if (GetAktTruthJetPt (iJp, radius) < GetAktTruthIsoMinPtCut (radius))
+      continue; // minimum jet pT cut
+    float dr = DeltaR (jeta, GetAktTruthJetEta (iJp, radius), jphi, GetAktTruthJetPhi (iJp, radius));
+    maxdr = std::fmin (dr, maxdr); // set isolation
+  }
+  return maxdr;
+}
+
+
+
+/**
+ * Returns the minimum truth jet pT for consideration in isolation calculation.
+ * Returns NaN if radius was not recognized.
+ */
+float GetAktTruthIsoMinPtCut (const JetRadius& radius) {
+  switch (radius) {
+  case JetRadius::R0p4: return akt4_truth_IsoMinPt;
+  case JetRadius::R0p2: return akt2_truth_IsoMinPt;
+  default: return std::nan ("");
+  } // end switch
+}
+
+
+/**
+ * Returns the minimum DR for considering a truth jet isolated.
+ * Returns NaN if radius was not recognized.
+ */
+float GetAktTruthIsoMinDR (const JetRadius& radius) {
+  switch (radius) {
+  case JetRadius::R0p4: return akt4_truth_IsoMinDR;
+  case JetRadius::R0p2: return akt2_truth_IsoMinDR;
+  default: return std::nan ("");
+  } // end switch
+}
+
+
+/**
+ * Returns the minimum pT for reco. jets in the truth-matching procedure.
+ * Returns NaN if radius was not recognized.
+ */
+float GetAktTruthMatchMinRecoPt (const JetRadius& radius) {
+  switch (radius) {
+  case JetRadius::R0p4: return akt4_hi_TruthMatchMinRecoPt;
+  case JetRadius::R0p2: return akt2_hi_TruthMatchMinRecoPt;
+  default: return std::nan ("");
+  } // end switch
+}
+
+
+
+/**
+ * Returns the matched HI jet within DR < 1 to this truth jet.
+ * Returns -1 if no HI jet is matched within this DR range, or the radius is invalid.
+ */
+int GetAktHIJetMatch (const int iTJ, const JetRadius& radius, const int nJESVar) {
+  assert (GetAktTruthJetN (radius) > iTJ);
+  assert (nJESVar >= -1 && nJESVar < nJESSys);
+  float mindr = M_PI;
+  int match = -1;
+  const float tjeta = GetAktTruthJetEta (iTJ, radius);
+  const float tjphi = GetAktTruthJetPhi (iTJ, radius);
+  //const float minpt = GetAktTruthMatchMinRecoPt (radius);
+  const int nJ = GetAktHIJetN (radius);
+  for (int iJ = 0; iJ < nJ; iJ++) {
+    //if (GetAktHIJetPt (iJ, radius, nJESVar) < minpt)
+    //  continue; 
+    const float dr = DeltaR (tjeta, GetAktHIJetEta (iJ, radius, nJESVar), tjphi, GetAktHIJetPhi (iJ, radius, nJESVar));
+    if (dr < mindr) {
+      match = iJ;
+      mindr = dr;
+    }
+  }
+  if (mindr > GetAktTruthMatchMaxDR (radius))
+    return -1;
+  return match;
+}
+
+
+
+/**
+ * Determines the correct HI jet count for this radius.
+ * Returns -1 if radius was not recognized.
+ */
+int GetAktHIJetN (const JetRadius& radius) {
+  switch (radius) {
+  case JetRadius::R0p4: {
+    assert (akt4_hi_jet_n >= 0);
+    return akt4_hi_jet_n;
+  }
+  case JetRadius::R0p2: {
+    assert (akt2_hi_jet_n >= 0);
+    return akt2_hi_jet_n;
+  }
+  default: return -1;
+  } // end switch
 }
 
 
@@ -934,30 +1134,30 @@ int GetAktTruthJetMatch (const int iJ, const JetRadius radius) {
  * Jets in data must be cross-calibrated and jets in MC must not be, but jets in MC + data overlay should be cross-calibrated if they are not truth-matched.
  * Returns NaN if radius was not recognized.
  */
-float GetAktHIJetPt (const int iJ, const JetRadius radius) {
-  if (radius == JetRadius::R0p4) {
-    assert (akt4_hi_jet_n > iJ);
-    if (IsCollisions ())    return akt4_hi_jet_pt_xcalib[iJ];
-    if (!IsDataOverlay ())  return akt4_hi_jet_pt_etajes[iJ];
-    int TJ = GetAktTruthJetMatch (iJ, radius);
-    if (TJ >= 0 && DeltaR (GetAktHIJetEta (iJ, radius), akt4_truth_jet_eta[TJ], GetAktHIJetPhi (iJ, radius), akt4_truth_jet_phi[TJ]) < akt4_TruthMatchMaxDR)
-      return akt4_hi_jet_pt_etajes[iJ];
-    else
-      return akt4_hi_jet_pt_xcalib[iJ];
+float GetAktHIJetPt (const int iJ, const JetRadius& radius, const int nJESVar, const short scale) {
+  assert (GetAktHIJetN (radius) > iJ);
+  assert (nJESVar >= -1 && nJESVar < nJESSys);
+  assert (scale >= -1 && scale <= 2);
+  switch (radius) {
+  case JetRadius::R0p4: {
+    const float jesVar = 1. + (nJESVar == -1 ? 0 : akt4_hi_jet_pt_sys_JES_ALL[nJESVar][iJ]);
+    if (IsCollisions () || scale == 0)                  return akt4_hi_jet_pt_xcalib[iJ] * jesVar;
+    if (!IsDataOverlay () || scale == 1)                return akt4_hi_jet_pt_etajes[iJ] * jesVar;
+    if (scale == 2)                                     return akt4_hi_jet_pt_precalib[iJ] * jesVar;
+    if (GetAktTruthJetMatch (iJ, radius, nJESVar) >= 0) return akt4_hi_jet_pt_etajes[iJ] * jesVar;
+    else                                                return akt4_hi_jet_pt_xcalib[iJ] * jesVar;
   }
-
-  if (radius == JetRadius::R0p2) {
-    assert (akt2_hi_jet_n > iJ);
-    if (IsCollisions ())    return akt2_hi_jet_pt_xcalib[iJ];
-    if (!IsDataOverlay ())  return akt2_hi_jet_pt_etajes[iJ];
-    int TJ = GetAktTruthJetMatch (iJ, radius);
-    if (TJ >= 0 && DeltaR (GetAktHIJetEta (iJ, radius), akt2_truth_jet_eta[TJ], GetAktHIJetPhi (iJ, radius), akt2_truth_jet_phi[TJ]) < akt2_TruthMatchMaxDR)
-      return akt2_hi_jet_pt_etajes[iJ];
-    else
-      return akt2_hi_jet_pt_xcalib[iJ];
+  case JetRadius::R0p2: {
+    const float jesVar = 1. + (nJESVar == -1 ? 0 : akt2_hi_jet_pt_sys_JES_ALL[nJESVar][iJ]);
+    if (IsCollisions () || scale == 0)                  return akt2_hi_jet_pt_xcalib[iJ] * jesVar;
+    if (!IsDataOverlay () || scale == 1)                return akt2_hi_jet_pt_etajes[iJ] * jesVar;
+    if (scale == 2)                                     return akt2_hi_jet_pt_precalib[iJ] * jesVar;
+    if (GetAktTruthJetMatch (iJ, radius, nJESVar) >= 0) return akt2_hi_jet_pt_etajes[iJ] * jesVar;
+    else                                                return akt2_hi_jet_pt_xcalib[iJ] * jesVar;
   }
-
-  return std::nan ("");
+  default: 
+    return std::nan ("");
+  } // end switch
 }
 
 
@@ -967,18 +1167,14 @@ float GetAktHIJetPt (const int iJ, const JetRadius radius) {
  * The cross-calibration does nothing to jet eta so this function is trivial.
  * Returns NaN if radius was not recognized.
  */
-float GetAktHIJetEta (const int iJ, const JetRadius radius) {
-  if (radius == JetRadius::R0p4) {
-    assert (akt4_hi_jet_n > iJ);
-    return akt4_hi_jet_eta_etajes[iJ];
-  }
-
-  if (radius == JetRadius::R0p2) {
-    assert (akt2_hi_jet_n > iJ);
-    return akt2_hi_jet_eta_etajes[iJ];
-  }
-
-  return std::nan ("");
+float GetAktHIJetEta (const int iJ, const JetRadius& radius, const int nJESVar) {
+  assert (GetAktHIJetN (radius) > iJ);
+  assert (nJESVar >= -1 && nJESVar < nJESSys);
+  switch (radius) {
+  case JetRadius::R0p4: return akt4_hi_jet_eta_etajes[iJ];
+  case JetRadius::R0p2: return akt2_hi_jet_eta_etajes[iJ];
+  default:              return std::nan ("");
+  } // end switch
 }
 
 
@@ -988,18 +1184,14 @@ float GetAktHIJetEta (const int iJ, const JetRadius radius) {
  * The EtaJES and cross-calibration do nothing to jet phi so this function is trivial.
  * Returns NaN if radius was not recognized.
  */
-float GetAktHIJetPhi (const int iJ, const JetRadius radius) {
-  if (radius == JetRadius::R0p4) {
-    assert (akt4_hi_jet_n > iJ);
-    return akt4_hi_jet_phi[iJ];
-  }
-
-  if (radius == JetRadius::R0p2) {
-    assert (akt2_hi_jet_n > iJ);
-    return akt2_hi_jet_phi[iJ];
-  }
-
-  return std::nan ("");
+float GetAktHIJetPhi (const int iJ, const JetRadius& radius, const int nJESVar) {
+  assert (GetAktHIJetN (radius) > iJ);
+  assert (nJESVar >= -1 && nJESVar < nJESSys);
+  switch (radius) {
+  case JetRadius::R0p4: return akt4_hi_jet_phi[iJ];
+  case JetRadius::R0p2: return akt2_hi_jet_phi[iJ];
+  default:              return std::nan ("");
+  } // end switch
 }
 
 
@@ -1009,30 +1201,99 @@ float GetAktHIJetPhi (const int iJ, const JetRadius radius) {
  * Jets in data must be cross-calibrated and jets in MC must not be, but jets in MC + data overlay should be cross-calibrated if they are not truth-matched.
  * Returns NaN if radius was not recognized.
  */
-float GetAktHIJetEn (const int iJ, const JetRadius radius) {
-  if (radius == JetRadius::R0p4) {
-    assert (akt4_hi_jet_n > iJ);
-    if (IsCollisions ())    return akt4_hi_jet_e_xcalib[iJ];
-    if (!IsDataOverlay ())  return akt4_hi_jet_e_etajes[iJ];
-    int TJ = GetAktTruthJetMatch (iJ, radius);
-    if (TJ >= 0 && DeltaR (GetAktHIJetEta (iJ, radius), akt4_truth_jet_eta[TJ], GetAktHIJetPhi (iJ, radius), akt4_truth_jet_phi[TJ]) < akt4_TruthMatchMaxDR)
-      return akt4_hi_jet_e_etajes[iJ];
-    else
-      return akt4_hi_jet_e_xcalib[iJ];
+float GetAktHIJetEn (const int iJ, const JetRadius& radius, const int nJESVar, const short scale) {
+  assert (GetAktHIJetN (radius) > iJ);
+  assert (nJESVar >= -1 && nJESVar < nJESSys);
+  assert (scale >= -1 && scale <= 2);
+  switch (radius) {
+  case JetRadius::R0p4: {
+    const float jesVar = 1. + (nJESVar == -1 ? 0 : akt4_hi_jet_pt_sys_JES_ALL[nJESVar][iJ]);
+    if (IsCollisions () || scale == 0)                  return akt4_hi_jet_e_xcalib[iJ] * jesVar;
+    if (!IsDataOverlay () || scale == 1)                return akt4_hi_jet_e_etajes[iJ] * jesVar;
+    if (scale == 2)                                     return akt4_hi_jet_e_precalib[iJ] * jesVar;
+    if (GetAktTruthJetMatch (iJ, radius, nJESVar) >= 0) return akt4_hi_jet_e_etajes[iJ] * jesVar;
+    else                                                return akt4_hi_jet_e_xcalib[iJ] * jesVar;
+  }
+  case JetRadius::R0p2: {
+    const float jesVar = 1. + (nJESVar == -1 ? 0 : akt2_hi_jet_pt_sys_JES_ALL[nJESVar][iJ]);
+    if (IsCollisions () || scale == 0)                  return akt2_hi_jet_e_xcalib[iJ] * jesVar;
+    if (!IsDataOverlay () || scale == 1)                return akt2_hi_jet_e_etajes[iJ] * jesVar;
+    if (scale == 2)                                     return akt2_hi_jet_e_precalib[iJ] * jesVar;
+    if (GetAktTruthJetMatch (iJ, radius, nJESVar) >= 0) return akt2_hi_jet_e_etajes[iJ] * jesVar;
+    else                                                return akt2_hi_jet_e_xcalib[iJ] * jesVar;
   }
 
-  if (radius == JetRadius::R0p2) {
-    assert (akt2_hi_jet_n > iJ);
-    if (IsCollisions ())    return akt2_hi_jet_e_xcalib[iJ];
-    if (!IsDataOverlay ())  return akt2_hi_jet_e_etajes[iJ];
-    int TJ = GetAktTruthJetMatch (iJ, radius);
-    if (TJ >= 0 && DeltaR (GetAktHIJetEta (iJ, radius), akt2_truth_jet_eta[TJ], GetAktHIJetPhi (iJ, radius), akt2_truth_jet_phi[TJ]) < akt2_TruthMatchMaxDR)
-      return akt2_hi_jet_e_etajes[iJ];
-    else
-      return akt2_hi_jet_e_xcalib[iJ];
-  }
+  default:
+    return std::nan ("");
+  } // end switch
+}
 
-  return std::nan ("");
+
+
+/**
+ * Returns the maximum delta R for a truth-reco. jet match.
+ * Returns NaN if radius was not recognized.
+ */
+float GetAktTruthMatchMaxDR (const JetRadius& radius) {
+  switch (radius) {
+  case JetRadius::R0p4: return akt4_TruthMatchMaxDR;
+  case JetRadius::R0p2: return akt2_TruthMatchMaxDR;
+  default: return std::nan ("");
+  } // end switch
+}
+
+
+
+/**
+ * Returns the minimum reconstructed jet pT for consideration in isolation calculation.
+ * Returns NaN if radius was not recognized.
+ */
+float GetAktHIIsoMinPtCut (const JetRadius& radius) {
+  switch (radius) {
+  case JetRadius::R0p4: return akt4_hi_IsoMinPt;
+  case JetRadius::R0p2: return akt2_hi_IsoMinPt;
+  default: return std::nan ("");
+  } // end switch
+}
+
+
+
+/**
+ * Returns the minimum DR for considering a reco. jet isolated.
+ * Returns NaN if radius was not recognized.
+ */
+float GetAktHIIsoMinDR (const JetRadius& radius) {
+  switch (radius) {
+  case JetRadius::R0p4: return akt4_hi_IsoMinDR;
+  case JetRadius::R0p2: return akt2_hi_IsoMinDR;
+  default: return std::nan ("");
+  } // end switch
+}
+
+
+
+/**
+ * Returns the minimum delta R to any other reconstructed jet with a pT above some threshold.
+ * Will cause an error due to NaN returns if the radius is not supported.
+ */
+float GetAktHIJetIso (const int iJ, const JetRadius& radius, const int nJESVar) {
+  assert (GetAktHIJetN (radius) > iJ);
+  assert (nJESVar >= -1 && nJESVar < nJESSys);
+
+  int jn = GetAktHIJetN (radius);
+  float maxdr = FLT_MAX;
+  float jeta = GetAktHIJetEta (iJ, radius, nJESVar);
+  float jphi = GetAktHIJetPhi (iJ, radius, nJESVar);
+
+  for (int iJp = 0; iJp < jn; iJp++) {
+    if (iJp == iJ)
+      continue; // skip the jet of interest
+    if (GetAktHIJetPt (iJp, radius, nJESVar) < GetAktHIIsoMinPtCut (radius))
+      continue; // minimum jet pT cut
+    float dr = DeltaR (jeta, GetAktHIJetEta (iJp, radius, nJESVar), jphi, GetAktHIJetPhi (iJp, radius, nJESVar));
+    maxdr = std::fmin (dr, maxdr); // set isolation
+  }
+  return maxdr;
 }
 
 
@@ -1041,18 +1302,13 @@ float GetAktHIJetEn (const int iJ, const JetRadius radius) {
  * Determines the optimal jet timing to return (depends on jet radius).
  * Returns NaN if radius was not recognized.
  */
-float GetAktHIJetTiming (const int iJ, const JetRadius radius) {
-  if (radius == JetRadius::R0p4) {
-    assert (akt4_hi_jet_n > iJ);
-    return akt4_hi_jet_timing[iJ];
-  }
-
-  if (radius == JetRadius::R0p2) {
-    assert (akt2_hi_jet_n > iJ);
-    return akt2_hi_jet_timing[iJ];
-  }
-
-  return std::nan ("");
+float GetAktHIJetTiming (const int iJ, const JetRadius& radius) {
+  assert (GetAktHIJetN (radius) > iJ);
+  switch (radius) {
+  case JetRadius::R0p4: return akt4_hi_jet_timing[iJ];
+  case JetRadius::R0p2: return akt2_hi_jet_timing[iJ];
+  default:              return std::nan ("");
+  } // end switch
 }
 
 
@@ -1061,8 +1317,8 @@ float GetAktHIJetTiming (const int iJ, const JetRadius radius) {
  * Returns the appropriate per-jet reweighting factor. Takes in coordinates for an anti-kT HI jet (pT, eta, & phi).
  * Returns 0 if the jet is outside the acceptance.
  */
-double GetAktJetWeight (const float jpt, const float jeta, const float jphi, const JetRadius jetr) {
-  const double accept = ((IspPb () & InDisabledHEC (jeta, jphi, GetRadius (jetr))) || fabs (jeta) > 2.8 ? 0. : 1.);
+double GetAktJetWeight (const float jpt, const float jeta, const float jphi, const JetRadius& jetr) {
+  const double accept = ((IspPb () & InDisabledHEC (jeta, jphi, GetRadius (jetr))) || std::fabs (jeta) > 2.8 ? 0. : 1.);
   const double hecwgt = (IspPb () && jeta > 1.1 && jeta < 3.6 ? (2.*M_PI / (3.*M_PI/2. - 2*GetRadius (jetr))) : 1.);
   return accept * hecwgt;
 }

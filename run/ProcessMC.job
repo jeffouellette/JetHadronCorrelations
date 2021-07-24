@@ -11,12 +11,12 @@ accounting_group = group_atlas.boulder
 swVersion=21.2.169
 
 # grid pass version
-gridPass=040
+gridPass=061
 
 # JetHadronSkimmer, JetEnergyResolution, TrackMomentumResolution, or TrackingPerformance
-alg = TrackMomentumResolution
+#alg = TrackMomentumResolution
 #alg = TrackingPerformance
-#alg = JetEnergyResolution
+alg = JetEnergyResolution
 
 # Systematic config; Nominal, JetES5PercUpVar, JetES5PercDownVar, JetES5PercSmearVar, JetES2PercUpVar, JetES2PercDownVar, JetES2PercSmearVar, FcalCentVar (at the moment)
 syst=Nominal
@@ -109,4 +109,24 @@ Arguments = $(alg) mc_$(gridPass) 0 pPb16_5TeV MCHijing None $(syst) user.jeouel
 Error = errors/$(alg)_Hijing_pPb.err
 Log = /tmp/jeff/logs/$(algs)_Hijing_pPb.log
 Output = outputs/$(alg)_Hijing_pPb.out
+Queue 1
+
+
+
+Arguments = $(alg) mc_$(gridPass) 0 pPb16_5TeV MCSignal None $(syst) user.jeouelle.$(swVersion).hadrons.$(gridPass).mc16_5TeV.pPb.420011.JZ1R04.recon.AOD.e8362_s3701_r12721_Tree.root
+Error = errors/$(alg)_Pythia8_pPb_so_JZ1R04.err
+Log = /tmp/jeff/logs/$(alg)_Pythia8_pPb_so_JZ1R04.log
+Output = outputs/$(alg)_Pythia8_pPb_so_JZ1R04.out
+Queue 1
+
+Arguments = $(alg) mc_$(gridPass) 0 pPb16_5TeV MCSignal None $(syst) user.jeouelle.$(swVersion).hadrons.$(gridPass).mc16_5TeV.pPb.420012.JZ2R04.recon.AOD.e8362_s3701_r12721_Tree.root
+Error = errors/$(alg)_Pythia8_pPb_so_JZ2R04.err
+Log = /tmp/jeff/logs/$(alg)_Pythia8_pPb_so_JZ2R04.log
+Output = outputs/$(alg)_Pythia8_pPb_so_JZ2R04.out
+Queue 1
+
+Arguments = $(alg) mc_$(gridPass) 0 pPb16_5TeV MCSignal None $(syst) user.jeouelle.$(swVersion).hadrons.$(gridPass).mc16_5TeV.pPb.420013.JZ3R04.recon.AOD.e8362_s3701_r12721_Tree.root
+Error = errors/$(alg)_Pythia8_pPb_so_JZ3R04.err
+Log = /tmp/jeff/logs/$(alg)_Pythia8_pPb_so_JZ3R04.log
+Output = outputs/$(alg)_Pythia8_pPb_so_JZ3R04.out
 Queue 1

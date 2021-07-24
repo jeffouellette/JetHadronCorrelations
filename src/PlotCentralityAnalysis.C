@@ -89,8 +89,10 @@ void PlotCentralityAnalysis () {
     if (h_jet_p_fcal_et[iRun]) h_jet_p_fcal_et_sum->Add (h_jet_p_fcal_et[iRun]);
     if (h_mb_p_fcal_et[iRun]) h_mb_p_fcal_et_sum->Add (h_mb_p_fcal_et[iRun]);
   }
-  h_jet_p_fcal_et_sum->Scale (1./ h_jet_p_fcal_et_sum->Integral (), "width");
-  h_mb_p_fcal_et_sum->Scale (1./ h_mb_p_fcal_et_sum->Integral (), "width");
+  //h_jet_p_fcal_et_sum->Scale (1., "width");
+  //h_mb_p_fcal_et_sum->Scale (1., "width");
+  //h_jet_p_fcal_et_sum->Scale (1./ h_jet_p_fcal_et_sum->Integral (), "width");
+  //h_mb_p_fcal_et_sum->Scale (1./ h_mb_p_fcal_et_sum->Integral (), "width");
 
   h_ratio_p_fcal_et_sum = (TH1D*) h_jet_p_fcal_et_sum->Clone ("h_ratio_p_fcal_et_sum");
   h_ratio_p_fcal_et_sum->Divide (h_mb_p_fcal_et_sum); 
@@ -127,10 +129,14 @@ void PlotCentralityAnalysis () {
   h2_jet_Pb_fcal_et_zdc_calibE = (TH2D*) inFile->Get ("h2_jet_Pb_fcal_et_zdc_calibE");//h3_jet_Pb_fcal_et_Pb_q2_Pb_zdc_calibE->Project3D ("zx");
   h2_mb_Pb_fcal_et_zdc_calibE = (TH2D*) inFile->Get ("h2_mb_Pb_fcal_et_zdc_calibE");//h3_mb_Pb_fcal_et_Pb_q2_Pb_zdc_calibE->Project3D ("zx");
 
-  h_jet_Pb_fcal_et_sum->Scale (1. / h_jet_Pb_fcal_et_sum->Integral (h_jet_Pb_fcal_et_sum->FindBin (fcalCentBins[iFcal20Percent]), h_jet_Pb_fcal_et_sum->GetNbinsX ()), "width");
-  h_mb_Pb_fcal_et_sum->Scale (1. / h_mb_Pb_fcal_et_sum->Integral (h_mb_Pb_fcal_et_sum->FindBin (fcalCentBins[iFcal20Percent]), h_mb_Pb_fcal_et_sum->GetNbinsX ()), "width");
-  h_jet_Pb_zdc_calibE_sum->Scale (1. / h_jet_Pb_zdc_calibE_sum->Integral (h_jet_Pb_zdc_calibE_sum->FindBin (zdcCentBins[iZdc20Percent]), h_jet_Pb_zdc_calibE_sum->GetNbinsX ()), "width");
-  h_mb_Pb_zdc_calibE_sum->Scale (1. / h_mb_Pb_zdc_calibE_sum->Integral (h_mb_Pb_zdc_calibE_sum->FindBin (zdcCentBins[iZdc20Percent]), h_mb_Pb_zdc_calibE_sum->GetNbinsX ()), "width");
+  //h_jet_Pb_fcal_et_sum->Scale (1., "width");
+  //h_mb_Pb_fcal_et_sum->Scale (1., "width");
+  //h_jet_Pb_zdc_calibE_sum->Scale (1., "width");
+  //h_mb_Pb_zdc_calibE_sum->Scale (1., "width");
+  //h_jet_Pb_fcal_et_sum->Scale (1. / h_jet_Pb_fcal_et_sum->Integral (h_jet_Pb_fcal_et_sum->FindBin (fcalCentBins[iFcal20Percent]), h_jet_Pb_fcal_et_sum->GetNbinsX ()), "width");
+  //h_mb_Pb_fcal_et_sum->Scale (1. / h_mb_Pb_fcal_et_sum->Integral (h_mb_Pb_fcal_et_sum->FindBin (fcalCentBins[iFcal20Percent]), h_mb_Pb_fcal_et_sum->GetNbinsX ()), "width");
+  //h_jet_Pb_zdc_calibE_sum->Scale (1. / h_jet_Pb_zdc_calibE_sum->Integral (h_jet_Pb_zdc_calibE_sum->FindBin (zdcCentBins[iZdc20Percent]), h_jet_Pb_zdc_calibE_sum->GetNbinsX ()), "width");
+  //h_mb_Pb_zdc_calibE_sum->Scale (1. / h_mb_Pb_zdc_calibE_sum->Integral (h_mb_Pb_zdc_calibE_sum->FindBin (zdcCentBins[iZdc20Percent]), h_mb_Pb_zdc_calibE_sum->GetNbinsX ()), "width");
 
   h_ratio_Pb_fcal_et_sum = (TH1D*) h_jet_Pb_fcal_et_sum->Clone ("h_ratio_Pb_fcal_et_sum");
   h_ratio_Pb_fcal_et_sum->Divide (h_mb_Pb_fcal_et_sum); 
@@ -244,7 +250,7 @@ void PlotCentralityAnalysis () {
   //  xq[16] = 1.00; percs[16] = "0%";
   //  h->GetQuantiles (17, yq, xq);
   //  for (int i = 0; i < 17; i++)
-  //    cout << xq[i] << ", " << yq[i] << endl;
+  //    std::cout << xq[i] << ", " << yq[i] << std::endl;
 
   //  TLine* divs = new TLine ();
   //  TLatex* tl = new TLatex ();
@@ -255,7 +261,7 @@ void PlotCentralityAnalysis () {
   //  divs->SetLineStyle (2);
   //  for (int i = 1; i < 16; i++) {
   //    divs->DrawLine (yq[i], ymin, yq[i], h->GetBinContent (h->FindBin (yq[i])));
-  //    tl->DrawLatex (yq[i]+0.15, exp (0.1*log(ymax/ymin)) * ymin, percs[i].Data ());
+  //    tl->DrawLatex (yq[i]+0.15, std::exp (0.1*std::log (ymax/ymin)) * ymin, percs[i].Data ());
   //  }
 
   //  h->DrawCopy ("hist same");
@@ -344,32 +350,11 @@ void PlotCentralityAnalysis () {
     uPad->cd ();
     uPad->SetLogy ();
 
-    TH1D* h = (TH1D*) h_jet_Pb_zdc_calibE_sum->Clone ("htemp");
-    h->GetYaxis ()->SetTitle ("A.U. (normalized in 0-20%)");
-
-    h->GetYaxis ()->SetTitleOffset (1.2 * h->GetYaxis ()->GetTitleOffset ());
-
     double ymin = 4e-6;
-    double ymax = 6.4e-1;
-
-    h->SetLineColor (kBlue+3);
-
-    h->GetYaxis ()->SetRangeUser (ymin, ymax);
+    double ymax = 4e0;
 
 
-    h->GetXaxis ()->SetTitleFont (43);
-    h->GetXaxis ()->SetTitleSize (0);
-    h->GetYaxis ()->SetTitleFont (43);
-    h->GetYaxis ()->SetTitleSize (26);
-    h->GetXaxis ()->SetLabelFont (43);
-    h->GetXaxis ()->SetLabelSize (0);
-    h->GetYaxis ()->SetLabelFont (43);
-    h->GetYaxis ()->SetLabelSize (24);
-
-    h->DrawCopy ("hist");
-    SaferDelete (&h);
-
-    h = (TH1D*) h_mb_Pb_zdc_calibE_sum->Clone ("htemp");
+    TH1D* h = (TH1D*) h_mb_Pb_zdc_calibE_sum->Clone ("htemp");
 
     h->SetLineColor (kRed+1);
 
@@ -396,6 +381,12 @@ void PlotCentralityAnalysis () {
     h->GetQuantiles (17, plot_yq, plot_xq);
     h->GetQuantiles (101, yq, xq);
 
+    int ibin = 0;
+    while (ibin < 17 && plot_percs[ibin++] != "20%");
+
+    const double mbNorm = h->Integral (h->FindBin (plot_yq[ibin]), h->GetNbinsX ());
+    h->Scale (1. / mbNorm, "width");
+
     ofstream cutsfile;
     cutsfile.open (Form ("%s/aux/ZdcCentCuts.dat", workPath.Data ()));
     for (int i = 0; i < 101; i++) {
@@ -403,6 +394,38 @@ void PlotCentralityAnalysis () {
       cutsfile << std::setw (6) << percs[i] << "\t" << yq[i] << "\n";
     }
     cutsfile.close ();
+
+
+    TH1D* hjet = (TH1D*) h_jet_Pb_zdc_calibE_sum->Clone ("htemp");
+
+    const double j50Norm = hjet->Integral (hjet->FindBin (plot_yq[ibin]), hjet->GetNbinsX ());
+    hjet->Scale (1. / j50Norm, "width");
+
+    TAxis* xax = hjet->GetXaxis ();
+    TAxis* yax = hjet->GetYaxis ();
+
+    yax->SetTitle ("A.U. (normalized in 0-20%)");
+
+    yax->SetTitleOffset (1.2 * yax->GetTitleOffset ());
+
+    yax->SetRangeUser (ymin, ymax);
+
+    xax->SetTitleFont (43);
+    xax->SetTitleSize (0);
+    yax->SetTitleFont (43);
+    yax->SetTitleSize (26);
+    xax->SetLabelFont (43);
+    xax->SetLabelSize (0);
+    yax->SetLabelFont (43);
+    yax->SetLabelSize (24);
+
+    hjet->SetLineColor (kBlue+3);
+
+    hjet->DrawCopy ("hist");
+    SaferDelete (&hjet);
+  
+
+    h->DrawCopy ("hist same");
 
     TLine* divs = new TLine ();
     TLatex* tl = new TLatex ();
@@ -413,11 +436,11 @@ void PlotCentralityAnalysis () {
     divs->SetLineStyle (2);
     for (int i = 1; i < 16; i++) {
       divs->DrawLine (plot_yq[i], ymin, plot_yq[i], h->GetBinContent (h->FindBin (plot_yq[i])));
-      tl->DrawLatex (plot_yq[i]+0.20, exp (0.1*log(ymax/ymin)) * ymin, plot_percs[i].Data ());
+      tl->DrawLatex (plot_yq[i]+0.20, std::exp (0.1*std::log (ymax/ymin)) * ymin, plot_percs[i].Data ());
     }
 
-    h->DrawCopy ("hist same");
     SaferDelete (&h);
+
 
     myText (0.20, 0.900, kBlack, "#bf{#it{ATLAS}} Internal", 0.036);
     myText (0.20, 0.860, kBlack, "#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV", 0.032);
@@ -433,25 +456,31 @@ void PlotCentralityAnalysis () {
     ymax = 2e1;
 
     h = (TH1D*) h_ratio_Pb_zdc_calibE_sum->Clone ("htemp");
-    h->GetXaxis ()->SetTitle ("Calibrated #Sigma#it{E}_{ZDC}^{Pb} [TeV]");
-    h->GetYaxis ()->SetTitle ("j50 / MB");
 
-    h->GetXaxis ()->SetTitleOffset (2.4 * h->GetXaxis ()->GetTitleOffset ());
-    h->GetYaxis ()->SetTitleOffset (1.2 * h->GetYaxis ()->GetTitleOffset ());
-    h->GetYaxis ()->CenterTitle ();
+    h->Scale (mbNorm / j50Norm);
+
+    xax = h->GetXaxis ();
+    yax = h->GetYaxis ();
+
+    xax->SetTitle ("Calibrated #Sigma#it{E}_{ZDC}^{Pb} [TeV]");
+    yax->SetTitle (Form ("#color[%i]{j50} / #color[%i]{mb_sptrk}", kBlue+3, kRed+1));
+
+    xax->SetTitleOffset (2.4 * xax->GetTitleOffset ());
+    yax->SetTitleOffset (1.2 * yax->GetTitleOffset ());
+    yax->CenterTitle ();
 
     h->SetLineColor (kBlue+3);
 
-    h->GetYaxis ()->SetRangeUser (ymin, ymax);
+    yax->SetRangeUser (ymin, ymax);
 
-    h->GetXaxis ()->SetTitleFont (43);
-    h->GetXaxis ()->SetTitleSize (26);
-    h->GetYaxis ()->SetTitleFont (43);
-    h->GetYaxis ()->SetTitleSize (26);
-    h->GetXaxis ()->SetLabelFont (43);
-    h->GetXaxis ()->SetLabelSize (24);
-    h->GetYaxis ()->SetLabelFont (43);
-    h->GetYaxis ()->SetLabelSize (24);
+    xax->SetTitleFont (43);
+    xax->SetTitleSize (26);
+    yax->SetTitleFont (43);
+    yax->SetTitleSize (26);
+    xax->SetLabelFont (43);
+    xax->SetLabelSize (24);
+    yax->SetLabelFont (43);
+    yax->SetLabelSize (24);
 
     h->DrawCopy ("hist");
     SaferDelete (&h);
@@ -465,34 +494,44 @@ void PlotCentralityAnalysis () {
     ymin = 3.2e-4;
     ymax = 1.6e0;
 
-    h = (TH1D*) h_jet_Pb_zdc_calibE_sum->Clone ("htemp");
 
-    h->GetXaxis ()->SetTitleOffset (999);
-    h->GetYaxis ()->SetTitleOffset (999);
+    h = (TH1D*) h_mb_Pb_zdc_calibE_sum->Clone ("htemp");
 
-    h->GetXaxis ()->SetRangeUser (0, 12);
-    h->GetYaxis ()->SetRangeUser (ymin, ymax);
+    h->Scale (1. / h->Integral (h->FindBin (plot_yq[ibin]), h->GetNbinsX ()), "width");
 
-    h->GetXaxis ()->SetTitleFont (43);
-    h->GetXaxis ()->SetTitleSize (18);
-    h->GetYaxis ()->SetTitleFont (43);
-    h->GetYaxis ()->SetTitleSize (18);
-    h->GetXaxis ()->SetLabelFont (43);
-    h->GetXaxis ()->SetLabelSize (14);
-    h->GetYaxis ()->SetLabelFont (43);
-    h->GetYaxis ()->SetLabelSize (14);
+    h->SetLineColor (kRed+1);
 
-    h->SetLineColor (kBlue+3);
+    xax = h->GetXaxis ();
+    yax = h->GetYaxis ();
+
+    xax->SetTitleOffset (999);
+    yax->SetTitleOffset (999);
+
+    xax->SetRangeUser (0, 12);
+    yax->SetRangeUser (ymin, ymax);
+
+    xax->SetTitleFont (43);
+    xax->SetTitleSize (18);
+    yax->SetTitleFont (43);
+    yax->SetTitleSize (18);
+    xax->SetLabelFont (43);
+    xax->SetLabelSize (14);
+    yax->SetLabelFont (43);
+    yax->SetLabelSize (14);
 
     h->DrawCopy ("hist");
     SaferDelete (&h);
 
-    h = (TH1D*) h_mb_Pb_zdc_calibE_sum->Clone ("htemp");
 
-    h->SetLineColor (kRed+1);
+    h = (TH1D*) h_jet_Pb_zdc_calibE_sum->Clone ("htemp");
+
+    h->Scale (1. / h->Integral (h->FindBin (plot_yq[ibin]), h->GetNbinsX ()), "width");
+
+    h->SetLineColor (kBlue+3);
 
     h->DrawCopy ("hist same");
     SaferDelete (&h);
+
 
     c->cd ();
     TLine* subPadBorder = new TLine ();
@@ -543,20 +582,176 @@ void PlotCentralityAnalysis () {
 
     h->SetLineColor (kRed+1);
 
-    h->GetYaxis ()->SetTitle ("A.U. (normalized in 0-20%)");
+    double plot_xq[17];
+    double plot_yq[17];
+    TString plot_percs[17];
+    plot_xq[0]  = 0.000; plot_percs[0]  = "100%";
+    plot_xq[1]  = 0.100; plot_percs[1]  = "90%";
+    plot_xq[2]  = 0.200; plot_percs[2]  = "80%";
+    plot_xq[3]  = 0.300; plot_percs[3]  = "70%";
+    plot_xq[4]  = 0.400; plot_percs[4]  = "60%";
+    plot_xq[5]  = 0.500; plot_percs[5]  = "50%";
+    plot_xq[6]  = 0.600; plot_percs[6]  = "40%";
+    plot_xq[7]  = 0.700; plot_percs[7]  = "30%";
+    plot_xq[8]  = 0.800; plot_percs[8]  = "20%";
+    plot_xq[9]  = 0.900; plot_percs[9]  = "10%";
+    plot_xq[10] = 0.950; plot_percs[10] = "5%";
+    plot_xq[11] = 0.980; plot_percs[11] = "2%";
+    plot_xq[12] = 0.990; plot_percs[12] = "1%";
+    plot_xq[13] = 0.995; plot_percs[13] = "0.5%";
+    plot_xq[14] = 0.998; plot_percs[14] = "0.2%";
+    plot_xq[15] = 0.999; plot_percs[15] = "0.1%";
+    plot_xq[16] = 1.000; plot_percs[16] = "0%";
+    h->GetQuantiles (17, plot_yq, plot_xq);
+    h->GetQuantiles (101, yq, xq);
 
-    h->GetYaxis ()->SetTitleOffset (1.2 * h->GetYaxis ()->GetTitleOffset ());
+    int ibin = 0;
+    while (ibin < 17 && plot_percs[ibin++] != "20%");
 
-    h->GetYaxis ()->SetRangeUser (ymin, ymax);
+    ofstream cutsfile;
+    cutsfile.open (Form ("%s/aux/FCalCentCuts.dat", workPath.Data ()));
+    for (int i = 0; i < 101; i++) {
+      std::cout << xq[i] << ", " << yq[i] << std::endl;
+      cutsfile << std::setw (6) << percs[i] << "\t" << yq[i] << "\n";
+    }
+    cutsfile.close ();
 
-    h->GetXaxis ()->SetTitleFont (43);
-    h->GetXaxis ()->SetTitleSize (0);
-    h->GetYaxis ()->SetTitleFont (43);
-    h->GetYaxis ()->SetTitleSize (26);
-    h->GetXaxis ()->SetLabelFont (43);
-    h->GetXaxis ()->SetLabelSize (0);
-    h->GetYaxis ()->SetLabelFont (43);
-    h->GetYaxis ()->SetLabelSize (24);
+    const double mbNorm = h->Integral (h->FindBin (plot_yq[ibin]), h->GetNbinsX ());
+    h->Scale (1. / mbNorm, "width");
+
+
+    TH1D* hjet = (TH1D*) h_jet_Pb_fcal_et_sum->Clone ("htemp");
+
+    const double j50Norm = hjet->Integral (hjet->FindBin (plot_yq[ibin]), hjet->GetNbinsX ());
+    hjet->Scale (1. / j50Norm, "width");
+
+    TAxis* xax = hjet->GetXaxis ();
+    TAxis* yax = hjet->GetYaxis ();
+
+    yax->SetTitle ("A.U. (normalized in 0-20%)");
+
+    yax->SetTitleOffset (1.2 * yax->GetTitleOffset ());
+
+    yax->SetRangeUser (ymin, ymax);
+
+    xax->SetTitleFont (43);
+    xax->SetTitleSize (0);
+    yax->SetTitleFont (43);
+    yax->SetTitleSize (26);
+    xax->SetLabelFont (43);
+    xax->SetLabelSize (0);
+    yax->SetLabelFont (43);
+    yax->SetLabelSize (24);
+
+    hjet->SetLineColor (kBlue+3);
+
+    hjet->DrawCopy ("hist");
+    SaferDelete (&hjet);
+
+
+    h->DrawCopy ("hist same");
+
+    TLine* divs = new TLine ();
+    TLatex* tl = new TLatex ();
+    tl->SetTextAngle (-90);
+    tl->SetTextAlign (11);
+    tl->SetTextFont (43);
+    tl->SetTextSize (14);
+    divs->SetLineStyle (2);
+    for (int i = 1; i < 16; i++) {
+      divs->DrawLine (plot_yq[i], ymin, plot_yq[i], h->GetBinContent (h->FindBin (plot_yq[i])));
+      tl->DrawLatex (plot_yq[i]+0.20, std::exp (0.1*std::log (ymax/ymin)) * ymin, plot_percs[i].Data ());
+    }
+
+    SaferDelete (&h);
+
+
+    myText (0.65, 0.890, kBlack, "#bf{#it{ATLAS}} Internal", 0.036);
+    myText (0.65, 0.850, kBlack, "#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV", 0.032);
+    myText (0.65, 0.810, kBlack, "All runs", 0.032);
+    myText (0.65, 0.770, kBlue+3, "HLT_j50_L1J15", 0.032);
+    myText (0.65, 0.730, kRed+1, "HLT_mb_sptrk_L1MBTS_1", 0.032);
+
+
+    dPad->cd ();
+    dPad->SetLogy ();
+
+    ymin = 7e-2;
+    ymax = 2e1;
+
+
+    h = (TH1D*) h_ratio_Pb_fcal_et_sum->Clone ("htemp");  
+
+    h->Scale (mbNorm / j50Norm);
+
+    xax = h->GetXaxis ();
+    yax = h->GetYaxis ();
+
+    xax->SetTitle ("#Sigma#it{E}_{T}^{FCal, Pb} [GeV]");
+    yax->SetTitle (Form ("#color[%i]{j50} / #color[%i]{mb_sptrk}", kBlue+3, kRed+1));
+
+    xax->SetTitleOffset (2.4 * xax->GetTitleOffset ());
+    yax->SetTitleOffset (1.2 * yax->GetTitleOffset ());
+    yax->CenterTitle ();
+
+    h->SetLineColor (kBlue+3);
+
+    yax->SetRangeUser (ymin, ymax);
+
+    xax->SetTitleFont (43);
+    xax->SetTitleSize (26);
+    yax->SetTitleFont (43);
+    yax->SetTitleSize (26);
+    xax->SetLabelFont (43);
+    xax->SetLabelSize (24);
+    yax->SetLabelFont (43);
+    yax->SetLabelSize (24);
+
+    h->DrawCopy ("hist");
+    SaferDelete (&h);
+
+    divs->DrawLine (-30, 1, 220, 1);
+
+    c->SaveAs (Form ("%s/Plots/CentralityAnalysis/allpPbRuns_fcal_et.pdf", workPath.Data ()));
+  }
+
+
+
+  {
+    TCanvas* c = new TCanvas ("c_allppRuns_fcal_et", "", 800, 1000);
+
+    const double bMargin = 0.20;
+    const double lMargin = 0.11;
+    const double rMargin = 0.04;
+    const double tMargin = 0.04;
+
+    TPad* uPad = new TPad ("c_allppRuns_fcal_et_uPad", "", 0.0, 0.3, 1.0, 1.0);
+    TPad* dPad = new TPad ("c_allppRuns_fcal_et_dPad", "", 0.0, 0.0, 1.0, 0.3);
+
+    uPad->SetBottomMargin (0);
+    uPad->SetLeftMargin (lMargin);
+    uPad->SetRightMargin (rMargin);
+    uPad->SetTopMargin (tMargin);
+
+    dPad->SetBottomMargin (bMargin);
+    dPad->SetLeftMargin (lMargin);
+    dPad->SetRightMargin (rMargin);
+    dPad->SetTopMargin (0);
+
+    uPad->Draw ();
+    dPad->Draw ();
+
+
+    uPad->cd ();
+    uPad->SetLogy ();
+
+    double ymin = 5e-8;
+    double ymax = 1e0;
+
+
+    TH1D* h = (TH1D*) h_mb_p_fcal_et_sum->Clone ("htemp");
+
+    h->SetLineColor (kRed+1);
 
     double plot_xq[17];
     double plot_yq[17];
@@ -584,159 +779,6 @@ void PlotCentralityAnalysis () {
     int ibin = 0;
     while (ibin < 17 && plot_percs[ibin++] != "20%");
 
-    h->Scale (1. / h->Integral (h->FindBin (plot_yq[ibin]), h->GetNbinsX ()), "width");
-
-    h->DrawCopy ("hist");
-
-    ofstream cutsfile;
-    cutsfile.open (Form ("%s/aux/FCalCentCuts.dat", workPath.Data ()));
-    for (int i = 0; i < 101; i++) {
-      std::cout << xq[i] << ", " << yq[i] << std::endl;
-      cutsfile << std::setw (6) << percs[i] << "\t" << yq[i] << "\n";
-    }
-    cutsfile.close ();
-
-    TLine* divs = new TLine ();
-    TLatex* tl = new TLatex ();
-    tl->SetTextAngle (-90);
-    tl->SetTextAlign (11);
-    tl->SetTextFont (43);
-    tl->SetTextSize (14);
-    divs->SetLineStyle (2);
-    for (int i = 1; i < 16; i++) {
-      divs->DrawLine (plot_yq[i], ymin, plot_yq[i], h->GetBinContent (h->FindBin (plot_yq[i])));
-      tl->DrawLatex (plot_yq[i]+0.20, exp (0.1*log(ymax/ymin)) * ymin, plot_percs[i].Data ());
-    }
-
-    SaferDelete (&h);
-
-
-
-    h = (TH1D*) h_jet_Pb_fcal_et_sum->Clone ("htemp");
-
-    h->Scale (1. / h->Integral (h->FindBin (plot_yq[ibin]), h->GetNbinsX ()), "width");
-
-    h->SetLineColor (kBlue+3);
-
-    h->DrawCopy ("hist same");
-    SaferDelete (&h);
-
-
-    myText (0.65, 0.900, kBlack, "#bf{#it{ATLAS}} Internal", 0.036);
-    myText (0.65, 0.860, kBlack, "#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV", 0.032);
-    myText (0.65, 0.820, kBlack, "All runs", 0.032);
-    myText (0.65, 0.740, kBlue+3, "HLT_j50_L1J15", 0.032);
-    myText (0.65, 0.700, kRed+1, "HLT_mb_sptrk_L1MBTS_1", 0.032);
-
-
-    dPad->cd ();
-    dPad->SetLogy ();
-
-    ymin = 7e-2;
-    ymax = 2e1;
-
-    h = (TH1D*) h_ratio_Pb_fcal_et_sum->Clone ("htemp");  
-    h = (TH1D*) h_jet_Pb_fcal_et_sum->Clone ("htemp");
-    h->Scale (1. / h->Integral (h->FindBin (plot_yq[ibin]), h->GetNbinsX ()));
-    TH1D* hd = (TH1D*) h_mb_Pb_fcal_et_sum->Clone ("hd");
-    hd->Rebin (hd->GetNbinsX () / h->GetNbinsX ());
-    hd->Scale (1. / hd->Integral (hd->FindBin (plot_yq[ibin]), hd->GetNbinsX ()));
-    h->Divide (hd);
-    SaferDelete (&hd);
-
-    h->GetXaxis ()->SetTitle ("#Sigma#it{E}_{T}^{FCal, Pb} [GeV]");
-    h->GetYaxis ()->SetTitle ("j50 / sptrk");
-
-    h->GetXaxis ()->SetTitleOffset (2.4 * h->GetXaxis ()->GetTitleOffset ());
-    h->GetYaxis ()->SetTitleOffset (1.2 * h->GetYaxis ()->GetTitleOffset ());
-    h->GetYaxis ()->CenterTitle ();
-
-    h->SetLineColor (kBlue+3);
-
-    h->GetYaxis ()->SetRangeUser (ymin, ymax);
-
-    h->GetXaxis ()->SetTitleFont (43);
-    h->GetXaxis ()->SetTitleSize (26);
-    h->GetYaxis ()->SetTitleFont (43);
-    h->GetYaxis ()->SetTitleSize (26);
-    h->GetXaxis ()->SetLabelFont (43);
-    h->GetXaxis ()->SetLabelSize (24);
-    h->GetYaxis ()->SetLabelFont (43);
-    h->GetYaxis ()->SetLabelSize (24);
-
-    h->DrawCopy ("hist");
-    SaferDelete (&h);
-
-    divs->DrawLine (-30, 1, 220, 1);
-
-    c->SaveAs (Form ("%s/Plots/CentralityAnalysis/allpPbRuns_fcal_et.pdf", workPath.Data ()));
-  }
-
-
-
-  {
-    TCanvas* c = new TCanvas ("c_allppRuns_fcal_et", "", 800, 800);
-
-    const double bMargin = 0.20;
-    const double lMargin = 0.11;
-    const double rMargin = 0.04;
-    const double tMargin = 0.04;
-
-    gPad->SetBottomMargin (bMargin);
-    gPad->SetLeftMargin (lMargin);
-    gPad->SetRightMargin (rMargin);
-    gPad->SetTopMargin (tMargin);
-
-    gPad->SetLogy ();
-
-    TH1D* h = (TH1D*) h_mb_p_fcal_et_sum->Clone ("htemp");
-    h->GetXaxis ()->SetTitle ("#Sigma#it{E}_{T}^{FCal} [GeV]");
-    h->GetYaxis ()->SetTitle ("A.U.");
-
-    h->GetYaxis ()->SetTitleOffset (1.2 * h->GetYaxis ()->GetTitleOffset ());
-
-    double ymin = 5e-8;
-    double ymax = 1e0;
-
-    h->SetLineColor (kRed+1);
-
-    h->GetYaxis ()->SetRangeUser (ymin, ymax);
-
-
-    h->GetXaxis ()->SetTitleFont (43);
-    h->GetXaxis ()->SetTitleSize (26);
-    h->GetYaxis ()->SetTitleFont (43);
-    h->GetYaxis ()->SetTitleSize (26);
-    h->GetXaxis ()->SetLabelFont (43);
-    h->GetXaxis ()->SetLabelSize (24);
-    h->GetYaxis ()->SetLabelFont (43);
-    h->GetYaxis ()->SetLabelSize (24);
-
-    h->DrawCopy ("hist");
-
-    double plot_xq[17];
-    double plot_yq[17];
-    TString plot_percs[17];
-    plot_xq[0]  = 0.000; plot_percs[0]  = "100%";
-    plot_xq[1]  = 0.100; plot_percs[1]  = "90%";
-    plot_xq[2]  = 0.200; plot_percs[2]  = "80%";
-    plot_xq[3]  = 0.300; plot_percs[3]  = "70%";
-    plot_xq[4]  = 0.400; plot_percs[4]  = "60%";
-    plot_xq[5]  = 0.500; plot_percs[5]  = "50%";
-    plot_xq[6]  = 0.600; plot_percs[6]  = "40%";
-    plot_xq[7]  = 0.700; plot_percs[7]  = "30%";
-    plot_xq[8]  = 0.800; plot_percs[8]  = "20%";
-    plot_xq[9]  = 0.900; plot_percs[9]  = "10%";
-    plot_xq[10] = 0.950; plot_percs[10] = "5%";
-    plot_xq[11] = 0.980; plot_percs[11] = "2%";
-    plot_xq[12] = 0.990; plot_percs[12] = "1%";
-    plot_xq[13] = 0.995; plot_percs[13] = "0.5%";
-    plot_xq[14] = 0.998; plot_percs[14] = "0.2%";
-    plot_xq[15] = 0.999; plot_percs[15] = "0.1%";
-    plot_xq[16] = 1.000; plot_percs[16] = "0%";
-    h->GetQuantiles (17, plot_yq, plot_xq);
-    h->GetQuantiles (101, yq, xq);
-
     ofstream cutsfile;
     cutsfile.open (Form ("%s/aux/ppMixCuts.dat", workPath.Data ()));
     for (int i = 0; i < 101; i++) {
@@ -745,6 +787,43 @@ void PlotCentralityAnalysis () {
     }
     cutsfile.close ();
 
+    const double mbNorm = h->Integral (h->FindBin (plot_yq[ibin]), h->GetNbinsX ());
+    h->Scale (1. / mbNorm, "width");
+
+
+    TH1D* hjet = (TH1D*) h_jet_p_fcal_et_sum->Clone ("htemp");
+
+    const double j50Norm = hjet->Integral (hjet->FindBin (plot_yq[ibin]), hjet->GetNbinsX ());
+    hjet->Scale (1. / j50Norm, "width");
+
+    TAxis* xax = hjet->GetXaxis ();
+    TAxis* yax = hjet->GetYaxis ();
+
+    xax->SetTitle ("#Sigma#it{E}_{T}^{FCal} [GeV]");
+    yax->SetTitle ("A.U. (normalized in 0-20%)");
+
+    yax->SetTitleOffset (1.2 * yax->GetTitleOffset ());
+
+    xax->SetRangeUser (-30, 140);
+    yax->SetRangeUser (ymin, ymax);
+
+    xax->SetTitleFont (43);
+    xax->SetTitleSize (26);
+    yax->SetTitleFont (43);
+    yax->SetTitleSize (26);
+    xax->SetLabelFont (43);
+    xax->SetLabelSize (24);
+    yax->SetLabelFont (43);
+    yax->SetLabelSize (24);
+
+    hjet->SetLineColor (kBlue+3);
+
+    hjet->DrawCopy ("hist");
+    SaferDelete (&hjet);
+
+
+    h->DrawCopy ("hist same");
+
     TLine* divs = new TLine ();
     TLatex* tl = new TLatex ();
     tl->SetTextAngle (-90);
@@ -754,14 +833,57 @@ void PlotCentralityAnalysis () {
     divs->SetLineStyle (2);
     for (int i = 1; i < 16; i++) {
       divs->DrawLine (plot_yq[i], ymin, plot_yq[i], h->GetBinContent (h->FindBin (plot_yq[i])));
-      tl->DrawLatex (plot_yq[i]+0.20, exp (0.1*log(ymax/ymin)) * ymin, plot_percs[i].Data ());
+      tl->DrawLatex (plot_yq[i]+0.20, std::exp (0.1*std::log (ymax/ymin)) * ymin, plot_percs[i].Data ());
     }
+
     SaferDelete (&h);
 
-    myText (0.65, 0.900, kBlack, "#bf{#it{ATLAS}} Internal", 0.036);
-    myText (0.65, 0.860, kBlack, "#it{pp}, #sqrt{s_{NN}} = 5.02 TeV", 0.032);
-    myText (0.65, 0.820, kBlack, "All runs", 0.032);
-    myText (0.65, 0.700, kRed+1, "HLT_mb_sptrk", 0.032);
+ 
+    myText (0.65, 0.890, kBlack, "#bf{#it{ATLAS}} Internal", 0.032);
+    myText (0.65, 0.850, kBlack, "#it{pp}, #sqrt{s_{NN}} = 5.02 TeV", 0.032);
+    myText (0.65, 0.810, kBlack, "All runs", 0.032);
+    myText (0.65, 0.770, kBlue+3, "HLT_j50_L1J15", 0.032);
+    myText (0.65, 0.730, kRed+1, "HLT_mb_sptrk", 0.032);
+
+
+    dPad->cd ();
+    dPad->SetLogy ();
+
+    ymin = 7e-2;
+    ymax = 2e1;
+
+    h = (TH1D*) h_ratio_p_fcal_et_sum->Clone ("htemp");  
+
+    h->Scale (mbNorm / j50Norm);
+
+    xax = h->GetXaxis ();
+    yax = h->GetYaxis ();
+
+    xax->SetTitle ("#Sigma#it{E}_{T}^{FCal, A+C} [GeV]");
+    yax->SetTitle (Form ("#color[%i]{j50} / #color[%i]{mb_sptrk}", kBlue+3, kRed+1));
+
+    xax->SetTitleOffset (2.4 * xax->GetTitleOffset ());
+    yax->SetTitleOffset (1.2 * yax->GetTitleOffset ());
+    yax->CenterTitle ();
+
+    h->SetLineColor (kBlue+3);
+
+    xax->SetRangeUser (-30, 140);
+    yax->SetRangeUser (ymin, ymax);
+
+    xax->SetTitleFont (43);
+    xax->SetTitleSize (26);
+    yax->SetTitleFont (43);
+    yax->SetTitleSize (26);
+    xax->SetLabelFont (43);
+    xax->SetLabelSize (24);
+    yax->SetLabelFont (43);
+    yax->SetLabelSize (24);
+
+    h->DrawCopy ("hist");
+    SaferDelete (&h);
+
+    divs->DrawLine (-30, 1, 140, 1);
 
     c->SaveAs (Form ("%s/Plots/CentralityAnalysis/allppRuns_fcal_et.pdf", workPath.Data ()));
   }

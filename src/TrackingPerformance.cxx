@@ -78,6 +78,7 @@ bool TrackingPerformance (const char* directory,
   }
 
 
+
   if (!IsHijing ()) {
     assert (crossSectionPicoBarns > 0);
     assert (mcFilterEfficiency > 0);
@@ -86,34 +87,11 @@ bool TrackingPerformance (const char* directory,
 
 
   // variables for filtering MC truth
-  double truth_jet_min_pt = 0, truth_jet_max_pt = DBL_MAX;
-  if (TString (inFileName).Contains ("JZ0")) {
-    truth_jet_min_pt = 0;
-    truth_jet_max_pt = 20;
-  }
-  else if (TString (inFileName).Contains ("JZ1")) {
-    truth_jet_min_pt = 20;
-    truth_jet_max_pt = 60;
-  }
-  else if (TString (inFileName).Contains ("JZ2")) {
-    truth_jet_min_pt = 60;
-    truth_jet_max_pt = 160;
-  }
-  else if (TString (inFileName).Contains ("JZ3")) {
-    truth_jet_min_pt = 160;
-    truth_jet_max_pt = 400;
-  }
-  else if (TString (inFileName).Contains ("JZ4")) {
-    truth_jet_min_pt = 400;
-    truth_jet_max_pt = 800;
-  }
-  else if (TString (inFileName).Contains ("JZ5")) {
-    truth_jet_min_pt = 800;
-    truth_jet_max_pt = 1300;
-  }
+  const float truth_jet_min_pt = GetJZXR04MinPt (TString (inFileName));
+  const float truth_jet_max_pt = GetJZXR04MaxPt (TString (inFileName));
   if (truth_jet_min_pt != 0)
     std::cout << "Checking for leading truth jet with pT > " << truth_jet_min_pt << std::endl;
-  if (truth_jet_max_pt != DBL_MAX)
+  if (truth_jet_max_pt != FLT_MAX)
     std::cout << "Checking for leading truth jet with pT < " << truth_jet_max_pt << std::endl;
 
 
@@ -201,7 +179,7 @@ bool TrackingPerformance (const char* directory,
   tree->SetBranchAddress ("akt4_truth_jet_e",     &akt4_truth_jet_e);
 
 
-  cout << "Info : In TrackingPerformance.cxx: Saving histograms to " << Form ("%s/%s.root", rootPath.Data (), identifier.Data ()) << endl;
+  std::cout << "Info : In TrackingPerformance.cxx: Saving histograms to " << Form ("%s/%s.root", rootPath.Data (), identifier.Data ()) << std::endl;
   TFile* outFile = new TFile (Form ("%s/%s.root", rootPath.Data (), identifier.Data ()), "recreate");
 
   TString sys;
@@ -337,6 +315,7 @@ bool TrackingPerformance (const char* directory,
   } // end loop over iWP
 
 
+  const JetRadius r0p4 = JetRadius::R0p4;
   const int nEvts = tree->GetEntries ();
 
   // Loop over events
@@ -345,20 +324,20 @@ bool TrackingPerformance (const char* directory,
       std::cout << "Info: In TrackingPerformance.cxx: Event loop " << iEvt / (nEvts / 100) << "\% done...\r" << std::flush;
     tree->GetEntry (iEvt);
 
-    // reject events with pileup vertices or too high z-vertex
+    // vertexing cuts, require no pileup vertices and primary vertex with |vz| < 150mm
     {
       bool hasPrimary = false;
       bool hasPileup = false;
       float vz = -999;
       for (int iVert = 0; iVert < nvert; iVert++) {
-        const bool isPrimary = (vert_type[iVert] == 1);
-        hasPrimary = hasPrimary || isPrimary;
-        hasPileup = hasPileup || (vert_type[iVert] == 3);
-        if (isPrimary)
+        if (vert_type[iVert] == 1) {
+          hasPrimary = true;
           vz = vert_z[iVert];
+        }
+        else if (vert_type[iVert] == 3)
+          hasPileup = true;
       }
-      if (!hasPrimary || hasPileup || fabs (vz) > 150)
-      //if (!hasPrimary || fabs (vz) > 150)
+      if (hasPileup || std::fabs (vz) > 150 || !hasPrimary)
         continue;
     }
 
@@ -366,12 +345,13 @@ bool TrackingPerformance (const char* directory,
     // Filter sample based on min/max of pThat range
     if (!IsHijing ()) {
       int iLTJ = -1;
-      for (int iTJ = 0; iTJ < akt4_truth_jet_n; iTJ++) {
-        if (iLTJ == -1 || akt4_truth_jet_pt[iTJ] > akt4_truth_jet_pt[iLTJ])
+      const int nTJ = GetAktTruthJetN (r0p4);
+      for (int iTJ = 0; iTJ < nTJ; iTJ++) {
+        if (iLTJ == -1 || GetAktTruthJetPt (iTJ, r0p4) > GetAktTruthJetPt (iLTJ, r0p4))
           iLTJ = iTJ;
       }
 
-      if (iLTJ == -1 || akt4_truth_jet_pt[iLTJ] < truth_jet_min_pt || akt4_truth_jet_pt[iLTJ] > truth_jet_max_pt)
+      if (iLTJ == -1 || GetAktTruthJetPt (iLTJ, r0p4) < truth_jet_min_pt || GetAktTruthJetPt (iLTJ, r0p4) > truth_jet_max_pt)
         continue;
     }
 
@@ -406,13 +386,13 @@ bool TrackingPerformance (const char* directory,
 
         const bool isSecondary = isTruthMatched && (trk_truth_barcode[iTrk] <= 0 || 200000 <= trk_truth_barcode[iTrk]);
 
-        const bool isStrangeBaryon = !isFake && !isSecondary && (abs (trk_truth_pdgid[iTrk]) == 3112 || abs (trk_truth_pdgid[iTrk]) == 3222 || abs (trk_truth_pdgid[iTrk]) == 3312 || abs (trk_truth_pdgid[iTrk]) == 3334);
+        const bool isStrangeBaryon = !isFake && !isSecondary && (std::abs (trk_truth_pdgid[iTrk]) == 3112 || std::abs (trk_truth_pdgid[iTrk]) == 3222 || std::abs (trk_truth_pdgid[iTrk]) == 3312 || std::abs (trk_truth_pdgid[iTrk]) == 3334);
 
         // primary tracks are non-fake, non-secondary tracks.
         const bool isPrimary = !isFake && !isSecondary;// && !isStrangeBaryon;
 
         short iEtaReco = 0;
-        while (etaTrkBins[iEtaReco+1] < fabs (trk_eta[iTrk]))
+        while (etaTrkBins[iEtaReco+1] < std::fabs (trk_eta[iTrk]))
           iEtaReco++;
 
 
@@ -458,11 +438,11 @@ bool TrackingPerformance (const char* directory,
 
         if (!IsHijing () && (isPrimary || isStrangeBaryon)) {
 
-          if (trk_truth_charge[iTrk] == 0 || fabs (trk_truth_eta[iTrk]) > 2.5)
+          if (trk_truth_charge[iTrk] == 0 || std::fabs (trk_truth_eta[iTrk]) > 2.5)
             continue; // truth-level acceptance cut
 
           short iEtaTruth = 0;
-          while (etaTrkBins[iEtaTruth+1] < fabs (trk_truth_eta[iTrk]))
+          while (etaTrkBins[iEtaTruth+1] < std::fabs (trk_truth_eta[iTrk]))
             iEtaTruth++;
 
           short iPID = 0;
@@ -494,19 +474,19 @@ bool TrackingPerformance (const char* directory,
 
       for (int iTTrk = 0; iTTrk < truth_trk_n; iTTrk++) {
 
-        if (truth_trk_charge[iTTrk] == 0 || fabs (truth_trk_eta[iTTrk]) > 2.5)
+        if (truth_trk_charge[iTTrk] == 0 || std::fabs (truth_trk_eta[iTTrk]) > 2.5)
           continue; // truth-level acceptance cut
 
         const bool isSecondary = (truth_trk_barcode[iTTrk] <= 0 || 200000 <= truth_trk_barcode[iTTrk]);
         if (isSecondary)
           continue; // don't work with secondaries
 
-        const bool isStrangeBaryon = !isSecondary && (abs (truth_trk_pdgid[iTTrk]) == 3112 || abs (truth_trk_pdgid[iTTrk]) == 3222 || abs (truth_trk_pdgid[iTTrk]) == 3312 || abs (truth_trk_pdgid[iTTrk]) == 3334);
+        const bool isStrangeBaryon = !isSecondary && (std::abs (truth_trk_pdgid[iTTrk]) == 3112 || std::abs (truth_trk_pdgid[iTTrk]) == 3222 || std::abs (truth_trk_pdgid[iTTrk]) == 3312 || std::abs (truth_trk_pdgid[iTTrk]) == 3334);
 
         const bool isPrimary = !isSecondary;// && !isStrangeBaryon;
 
         short iEta = 0;
-        while (etaTrkBins[iEta+1] < fabs (truth_trk_eta[iTTrk]))
+        while (etaTrkBins[iEta+1] < std::fabs (truth_trk_eta[iTTrk]))
           iEta++;
 
         short iPID = 0;

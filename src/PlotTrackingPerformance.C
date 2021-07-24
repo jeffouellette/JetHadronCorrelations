@@ -408,27 +408,27 @@ void PlotTrackingPerformance () {
 
 
 
-  for (int iSys : systems) {
+  //for (int iSys : systems) {
 
-    const TString sys = (iSys == 0 ? "pp" : "pPb");
+  //  const TString sys = (iSys == 0 ? "pp" : "pPb");
 
-    for (int iWP = 0; iWP < trackWPs.size (); iWP++) {
+  //  for (int iWP = 0; iWP < trackWPs.size (); iWP++) {
 
-      for (int iMult = 0; iMult < nMultBins; iMult++) {
+  //    for (int iMult = 0; iMult < nMultBins; iMult++) {
 
-        for (int iEta = 0; iEta < nEtaTrkBins; iEta++) {
+  //      for (int iEta = 0; iEta < nEtaTrkBins; iEta++) {
 
-          //TF1* f = DoPurityFit (h_primary_rate[iSys][iWP][iMult][iEta], 60, 6, 1);
-          TF1* f = DoPurityFit (h_primary_rate[iSys][iWP][iMult][iEta], 8, 2, f_primary_rate[0][iWP][iMult][iEta]);
-          f_primary_rate[iSys][iWP][iMult][iEta] = f;
+  //        //TF1* f = DoPurityFit (h_primary_rate[iSys][iWP][iMult][iEta], 60, 6, 1);
+  //        TF1* f = DoPurityFit (h_primary_rate[iSys][iWP][iMult][iEta], 8, 2);//, f_primary_rate[0][iWP][iMult][iEta]);
+  //        f_primary_rate[iSys][iWP][iMult][iEta] = f;
 
-        } // end loop over iEta
+  //      } // end loop over iEta
 
-      } // end loop over iMult
+  //    } // end loop over iMult
 
-    } // end loop over iWP
+  //  } // end loop over iWP
 
-  } // end loop over iSys
+  //} // end loop over iSys
 
 
 
@@ -470,7 +470,7 @@ void PlotTrackingPerformance () {
         gPad->SetLogx ();
 
         TH1D* htemp = new TH1D ("htemp", "", 1, pTchBins[0], pTchBins[nPtchBins]);
-        //htemp->SetBinContent (1, 1);
+        htemp->SetBinContent (1, 1);
   
         TAxis* xax = htemp->GetXaxis ();
         TAxis* yax = htemp->GetYaxis ();
@@ -487,9 +487,10 @@ void PlotTrackingPerformance () {
         const double ymax = 1.06;
         yax->SetRangeUser (ymin, ymax);
 
-        htemp->SetLineWidth (0);
-
-        htemp->DrawCopy ("");
+        htemp->SetLineWidth (1);
+        htemp->SetLineStyle (2);
+  
+        htemp->DrawCopy ("hist");
         SaferDelete (&htemp);
 
         tl->SetTextFont (43);
@@ -540,19 +541,130 @@ void PlotTrackingPerformance () {
 
 
 
+  //for (int iSys : systems) {
+
+  //  const char* cname = Form ("c_pur_sum_%s", iSys == 0 ? "pp" : "pPb");
+
+  //  TCanvas* c = new TCanvas (cname, "", 800*(nMultBins-1), 800);
+  //  c->Divide (3, 1);
+
+  //  const double lMargin = 0.15;
+  //  const double rMargin = 0.04;
+  //  const double bMargin = 0.15;
+  //  const double tMargin = 0.04;
+
+  //  for (int iMult = 0; iMult < (nMultBins-1); iMult++) {
+
+  //    c->cd (iMult+1);
+
+  //    gPad->SetLeftMargin (lMargin);
+  //    gPad->SetRightMargin (rMargin);
+  //    gPad->SetBottomMargin (bMargin);
+  //    gPad->SetTopMargin (tMargin);
+
+  //    gPad->SetLogx ();
+
+  //    {
+  //      TH1D* htemp = new TH1D ("htemp", "", 1, pTchBins[0], pTchBins[nPtchBins]);
+  //      htemp->SetBinContent (1, 1);
+  //
+  //      TAxis* xax = htemp->GetXaxis ();
+  //      TAxis* yax = htemp->GetYaxis ();
+
+  //      xax->SetTitle ("#it{p}_{T}^{ch} [GeV]");
+  //      xax->SetTitleOffset (0.9 * xax->GetTitleOffset ());
+  //      xax->SetLabelSize (0);
+
+  //      yax->SetTitle ("Primary Fraction");
+  //      yax->SetLabelFont (43);
+  //      yax->SetLabelSize (32);
+  //      yax->SetLabelOffset (1.8 * yax->GetLabelOffset ());
+  //      const double ymin = 0.82;
+  //      const double ymax = 1.06;
+  //      yax->SetRangeUser (ymin, ymax);
+
+  //      htemp->SetLineWidth (1);
+  //      htemp->SetLineStyle (2);
+
+  //      htemp->DrawCopy ("hist");
+  //      SaferDelete (&htemp);
+
+  //      tl->SetTextFont (43);
+  //      tl->SetTextSize (32);
+  //      tl->SetTextAlign (21);
+  //      
+  //      const double yoff = ymin - 0.04 * (ymax-ymin) / (1.-tMargin-bMargin);
+  //      //tl->DrawLatex (0.5,  yoff, "0.5");
+  //      tl->DrawLatex (0.7,  yoff, "0.7");
+  //      tl->DrawLatex (1,  yoff, "1");
+  //      tl->DrawLatex (2,  yoff, "2");
+  //      tl->DrawLatex (3,  yoff, "3");
+  //      tl->DrawLatex (4,  yoff, "4");
+  //      tl->DrawLatex (5,  yoff, "5");
+  //      tl->DrawLatex (6,  yoff, "6");
+  //      tl->DrawLatex (7,  yoff, "7");
+  //      tl->DrawLatex (10, yoff, "10");
+  //      tl->DrawLatex (20, yoff, "20");
+  //      tl->DrawLatex (30, yoff, "30");
+  //      tl->DrawLatex (40, yoff, "40");
+  //      tl->DrawLatex (60, yoff, "60");
+  //      //tl->DrawLatex (80, yoff, "80");
+  //      tl->DrawLatex (100, yoff, "100");
+  //    }
+
+  //    for (int iEta = 0; iEta < nEtaTrkBins; iEta++) {
+  //      myDraw (h_primary_rate[iSys][iWP][iMult][iEta], colors[iEta], kOpenCircle, 0.6);
+  //      TF1* f = f_primary_rate[iSys][iWP][iMult][iEta];
+  //      if (f) {
+  //        f->SetLineColor (colors[iEta]);
+  //        f->SetLineWidth (1);
+  //        f->Draw ("same");
+  //      }
+  //    }
+
+  //    tl->SetTextColor (kBlack);
+  //    tl->SetTextAlign (11);
+
+  //    tl->SetTextSize (28);
+  //    tl->DrawLatexNDC (0.22, 0.89, "#bf{#it{ATLAS}} Simulation Internal");
+  //    tl->SetTextSize (24);
+  //    tl->DrawLatexNDC (0.22, 0.85, iSys == 0 ? "Pythia8 #it{pp}, #sqrt{s} = 5.02 TeV" : "Hijing #it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV");
+  //    tl->DrawLatexNDC (0.22, 0.81, Form ("%s tracks", trackWPStrs[iWP].c_str ()));
+
+  //    tl->SetTextSize (28);
+  //    tl->DrawLatexNDC (0.22, 0.22, Form ("N_{ch}^{rec} = %i-%i", (int) std::ceil (multBins[iMult]), (int) std::floor (multBins[iMult+1])));
+
+  //    tl->SetTextSize (18);
+  //    tl->SetTextAlign (21);
+  //    tl->DrawLatexNDC (0.705, 0.37, "Primaries");
+  //    for (int iEta = 0; iEta < nEtaTrkBins; iEta++) {
+  //      myLineText2 (0.74, 0.34-iEta*0.036, colors[iEta], kOpenCircle, Form ("%g < |#eta| < %g", etaTrkBins[iEta], etaTrkBins[iEta+1]), 1.2, 0.026, true);
+  //    }
+
+  //  } // end loop over iMult
+
+  //  c->SaveAs (Form ("%s/Plots/TrackingPerformance/PuritySummary_%s.pdf", workPath.Data (), iSys == 0 ? "pp" : "pPb"));
+  //}
+
+
   for (int iSys : systems) {
 
-    const char* cname = Form ("c_pur_sum_%s", iSys == 0 ? "pp" : "pPb");
+    const int iEta = 0;
 
-    TCanvas* c = new TCanvas (cname, "", 800*(nMultBins-1), 800);
-    c->Divide (3, 1);
+    const char* cname = Form ("c_eff_com_%s", iSys == 0 ? "pp" : "pPb");
+
+    TCanvas* c = new TCanvas (cname, "", 800, 800);
+    //TCanvas* c = new TCanvas (cname, "", 800*(nMultBins-1), 800);
+    //c->Divide (3, 1);
 
     const double lMargin = 0.15;
     const double rMargin = 0.04;
     const double bMargin = 0.15;
     const double tMargin = 0.04;
 
-    for (int iMult = 0; iMult < (nMultBins-1); iMult++) {
+    const int iMult = nMultBins-1;
+    //for (int iMult = 0; iMult < (nMultBins-1); iMult++) {
+    {
 
       c->cd (iMult+1);
 
@@ -566,112 +678,6 @@ void PlotTrackingPerformance () {
       {
         TH1D* htemp = new TH1D ("htemp", "", 1, pTchBins[0], pTchBins[nPtchBins]);
         htemp->SetBinContent (1, 1);
-  
-        TAxis* xax = htemp->GetXaxis ();
-        TAxis* yax = htemp->GetYaxis ();
-
-        xax->SetTitle ("#it{p}_{T}^{ch} [GeV]");
-        xax->SetTitleOffset (0.9 * xax->GetTitleOffset ());
-        xax->SetLabelSize (0);
-
-        yax->SetTitle ("Primary Fraction");
-        yax->SetLabelFont (43);
-        yax->SetLabelSize (32);
-        yax->SetLabelOffset (1.8 * yax->GetLabelOffset ());
-        const double ymin = 0.82;
-        const double ymax = 1.06;
-        yax->SetRangeUser (ymin, ymax);
-
-        htemp->SetLineWidth (1);
-        htemp->SetLineStyle (2);
-
-        htemp->DrawCopy ("hist");
-        SaferDelete (&htemp);
-
-        tl->SetTextFont (43);
-        tl->SetTextSize (32);
-        tl->SetTextAlign (21);
-        
-        const double yoff = ymin - 0.04 * (ymax-ymin) / (1.-tMargin-bMargin);
-        //tl->DrawLatex (0.5,  yoff, "0.5");
-        tl->DrawLatex (0.7,  yoff, "0.7");
-        tl->DrawLatex (1,  yoff, "1");
-        tl->DrawLatex (2,  yoff, "2");
-        tl->DrawLatex (3,  yoff, "3");
-        tl->DrawLatex (4,  yoff, "4");
-        tl->DrawLatex (5,  yoff, "5");
-        tl->DrawLatex (6,  yoff, "6");
-        tl->DrawLatex (7,  yoff, "7");
-        tl->DrawLatex (10, yoff, "10");
-        tl->DrawLatex (20, yoff, "20");
-        tl->DrawLatex (30, yoff, "30");
-        tl->DrawLatex (40, yoff, "40");
-        tl->DrawLatex (60, yoff, "60");
-        //tl->DrawLatex (80, yoff, "80");
-        tl->DrawLatex (100, yoff, "100");
-      }
-
-      for (int iEta = 0; iEta < nEtaTrkBins; iEta++) {
-        myDraw (h_primary_rate[iSys][iWP][iMult][iEta], colors[iEta], kOpenCircle, 0.6);
-        TF1* f = f_primary_rate[iSys][iWP][iMult][iEta];
-        f->SetLineColor (colors[iEta]);
-        f->SetLineWidth (1);
-        f->Draw ("same");
-      }
-
-      tl->SetTextColor (kBlack);
-      tl->SetTextAlign (11);
-
-      tl->SetTextSize (28);
-      tl->DrawLatexNDC (0.22, 0.89, "#bf{#it{ATLAS}} Simulation Internal");
-      tl->SetTextSize (24);
-      tl->DrawLatexNDC (0.22, 0.85, iSys == 0 ? "Pythia8 #it{pp}, #sqrt{s} = 5.02 TeV" : "Hijing #it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV");
-      tl->DrawLatexNDC (0.22, 0.81, Form ("%s tracks", trackWPStrs[iWP].c_str ()));
-
-      tl->SetTextSize (28);
-      tl->DrawLatexNDC (0.22, 0.22, Form ("N_{ch}^{rec} = %i-%i", (int) std::ceil (multBins[iMult]), (int) std::floor (multBins[iMult+1])));
-
-      tl->SetTextSize (18);
-      tl->SetTextAlign (21);
-      tl->DrawLatexNDC (0.705, 0.37, "Primaries");
-      for (int iEta = 0; iEta < nEtaTrkBins; iEta++) {
-        myLineText2 (0.74, 0.34-iEta*0.036, colors[iEta], kOpenCircle, Form ("%g < |#eta| < %g", etaTrkBins[iEta], etaTrkBins[iEta+1]), 1.2, 0.026, true);
-      }
-
-    } // end loop over iMult
-
-    c->SaveAs (Form ("%s/Plots/TrackingPerformance/PuritySummary_%s.pdf", workPath.Data (), iSys == 0 ? "pp" : "pPb"));
-  }
-
-
-  for (int iSys : systems) {
-
-    const int iEta = 0;
-
-    const char* cname = Form ("c_eff_com_%s", iSys == 0 ? "pp" : "pPb");
-
-    TCanvas* c = new TCanvas (cname, "", 800*(nMultBins-1), 800);
-    c->Divide (3, 1);
-
-    const double lMargin = 0.15;
-    const double rMargin = 0.04;
-    const double bMargin = 0.15;
-    const double tMargin = 0.04;
-
-    for (int iMult = 0; iMult < (nMultBins-1); iMult++) {
-
-      c->cd (iMult+1);
-
-      gPad->SetLeftMargin (lMargin);
-      gPad->SetRightMargin (rMargin);
-      gPad->SetBottomMargin (bMargin);
-      gPad->SetTopMargin (tMargin);
-
-      gPad->SetLogx ();
-
-      {
-        TH1D* htemp = new TH1D ("htemp", "", 1, pTchBins[0], pTchBins[nPtchBins]);
-        //htemp->SetBinContent (1, 1);
     
         TAxis* xax = htemp->GetXaxis ();
         TAxis* yax = htemp->GetYaxis ();
@@ -685,12 +691,13 @@ void PlotTrackingPerformance () {
         yax->SetLabelSize (32);
         yax->SetLabelOffset (1.8 * yax->GetLabelOffset ());
         const double ymin = 0.0;
-        const double ymax = 1.2;
+        const double ymax = 1.25;
         yax->SetRangeUser (ymin, ymax);
   
-        htemp->SetLineWidth (0);
+        htemp->SetLineWidth (1);
+        htemp->SetLineStyle (2);
   
-        htemp->DrawCopy ("");
+        htemp->DrawCopy ("hist");
         SaferDelete (&htemp);
   
         tl->SetTextFont (43);
@@ -716,10 +723,8 @@ void PlotTrackingPerformance () {
         tl->DrawLatex (100, yoff, "100");
       }
 
-      for (int iPID = 0; iPID < nPIDs; iPID++) {
-        //if (PIDs[iPID] == 211 || PIDs[iPID] == 321 || PIDs[iPID] == 2212 || PIDs[iPID] == 3222 || PIDs[iPID] == 3112 || PIDs[iPID] == 3312 || PIDs[iPID] == 0)
+      for (int iPID = 0; iPID < nPIDs; iPID++)
         myDraw (h_efficiency[iSys][iPID][iWP][iMult][iEta], systColors[iPID], kOpenCircle, 0.8);
-      }
       myDraw (h_efficiency[iSys][nPIDs-1][iWP][iMult][iEta], kBlack, kFullCircle, 0.8);
 
       tl->SetTextColor (kBlack);
@@ -731,8 +736,8 @@ void PlotTrackingPerformance () {
       tl->DrawLatexNDC (0.22, 0.85, iSys == 0 ? "Pythia8 #it{pp}, #sqrt{s} = 5.02 TeV" : "Pythia8 + #it{p}+Pb overlay, #sqrt{s_{NN}} = 5.02 TeV");
       tl->DrawLatexNDC (0.22, 0.81, Form ("%s tracks", trackWPStrs[iWP].c_str ()));
 
-      tl->SetTextSize (28);
-      tl->DrawLatexNDC (0.22, 0.22, Form ("N_{ch}^{rec} = %i-%i", (int) std::ceil (multBins[iMult]), (int) std::floor (multBins[iMult+1])));
+      //tl->SetTextSize (28);
+      //tl->DrawLatexNDC (0.22, 0.22, Form ("N_{ch}^{rec} = %i-%i", (int) std::ceil (multBins[iMult]), (int) std::floor (multBins[iMult+1])));
 
       for (int iPID = 0; iPID < nPIDs-1; iPID++)
         //if (PIDs[iPID] == 211 || PIDs[iPID] == 321 || PIDs[iPID] == 2212 || PIDs[iPID] == 3222 || PIDs[iPID] == 3112 || PIDs[iPID] == 3312 || PIDs[iPID] == 0)

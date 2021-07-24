@@ -5,8 +5,8 @@
 
 namespace JetHadronCorrelations {
 
-double jet_min_pt = -2;
-double jet_max_pt = -2;
+float jet_min_pt = -2;
+float jet_max_pt = -2;
 
 }
 

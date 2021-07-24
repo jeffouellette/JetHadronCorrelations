@@ -597,7 +597,7 @@ void PlotPtCh (const char* tag, const char* inFileTag) {
   }
 
 
-
+/*
   for (int iCent = 0; iCent < nZdcCentBins; iCent++) {
     const char* canvasName = Form ("c_jet_trk_pt_FcalVsZdc_iCent%i", iCent);
     TCanvas* c = new TCanvas (canvasName, "", 1200, 1120);
@@ -1336,7 +1336,7 @@ void PlotPtCh (const char* tag, const char* inFileTag) {
     myLineText2 (0.10, 0.38, myBlue, kFullSquare, "#bf{w/out} FCal matching", 0.8, 0.020/fdPad, true);
 
     c->SaveAs (Form ("%s/Plots/PtCh/JetTagged_HadronYields_%i-%i%%_FCalMixCatVar_PtCh_%s.pdf", workPath.Data (), zdcCentPercs[iCent+1], zdcCentPercs[iCent], tag)); 
-  }
+  }*/
 
 
  

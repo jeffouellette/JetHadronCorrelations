@@ -184,8 +184,8 @@ void PlotJets (const char* tag, const char* inFileTag) {
     dPad->cd ();
     dPad->SetLogx();
 
-    ymin=0.6;
-    ymax=1.4;
+    ymin=0.3;
+    ymax=1.7;
 
     h = (TH1D*) h_jet_pt_ratio[iCent]->Clone ("h");
     h->Reset ();

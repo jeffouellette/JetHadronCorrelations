@@ -4,7 +4,7 @@ LDFLAGS=`root-config --glibs --ldflags` -Llib -L${ROOT_UTILS_PATH}/lib -L${ATLAS
 
 libraries = LocalUtilities
 algorithms = JetHadronSkimmer CentralityAnalysis JetSubtractedEnergy TrackingPerformance TrackMomentumResolution JetEnergyResolution
-binaries = Process AnalyzeTrackMomentumResolution RunCorrelator
+binaries = Process AnalyzeTrackMomentumResolution AnalyzeJetEnergyResolution RunCorrelator
 
 .PHONY : libs algs bins directories clean
 
@@ -29,6 +29,9 @@ RunCorrelator : $(libraries) src/RunCorrelator.cxx
 
 AnalyzeTrackMomentumResolution : $(libraries) src/AnalyzeTrackMomentumResolution.C
 	$(CXX) $(CXXFLAGS) src/AnalyzeTrackMomentumResolution.C $(LDFLAGS) $(libraries:%=-l%) $(algorithms:%=-l%) -o bin/AnalyzeTrackMomentumResolution.exe
+
+AnalyzeJetEnergyResolution : $(libraries) src/AnalyzeJetEnergyResolution.C
+	$(CXX) $(CXXFLAGS) src/AnalyzeJetEnergyResolution.C $(LDFLAGS) $(libraries:%=-l%) $(algorithms:%=-l%) -o bin/AnalyzeJetEnergyResolution.exe
 
 obj/%.o : src/%.cxx
 	$(CXX) $(CXXFLAGS) -c -o $@ $<

@@ -27,7 +27,7 @@ bool JetSubtractedEnergy (const char* directory,
                           const int dataSet,
                           const char* inFileName) {
 
-  cout << "Info: In JetSubtractedEnergy.cxx: Entered JetSubtractedEnergy routine." << endl;
+  std::cout << "Info: In JetSubtractedEnergy.cxx: Entered JetSubtractedEnergy routine." << std::endl;
 
   SetupDirectories ("JetSubtractedEnergy");
 
@@ -69,6 +69,22 @@ bool JetSubtractedEnergy (const char* directory,
     }
     std::cout << "Chain has " << tree->GetListOfFiles ()->GetEntries () << " files, " << tree->GetEntries () << " entries" << std::endl;
   }
+
+
+  if (!IsHijing ()) {
+    assert (crossSectionPicoBarns > 0);
+    assert (mcFilterEfficiency > 0);
+    assert (mcNumberEvents > 0);
+  }
+
+
+  // variables for filtering MC truth
+  const float truth_jet_min_pt = GetJZXR04MinPt (TString (inFileName));
+  const float truth_jet_max_pt = GetJZXR04MaxPt (TString (inFileName));
+  if (truth_jet_min_pt != 0)
+    std::cout << "Checking for leading truth jet with pT > " << truth_jet_min_pt << std::endl;
+  if (truth_jet_max_pt != FLT_MAX)
+    std::cout << "Checking for leading truth jet with pT < " << truth_jet_max_pt << std::endl;
 
 
   tree->SetBranchAddress ("run_number",     &run_number);
@@ -166,15 +182,14 @@ bool JetSubtractedEnergy (const char* directory,
   }
 
 
-  Trigger* jetTriggers[jet_trig_n];
+  Trigger* jetTrigger = nullptr;
   Trigger* zdcL1Triggers[zdc_L1_trig_n];
 
   if (IsCollisions ()) {
-    for (int iTrig = 0; iTrig < jet_trig_n; iTrig++) {
-      jetTriggers[iTrig] = new Trigger (jet_trig_name[iTrig]);
-      tree->SetBranchAddress ((jet_trig_name[iTrig]+"_decision").c_str (), &(jetTriggers[iTrig]->trigDecision));
-      tree->SetBranchAddress ((jet_trig_name[iTrig]+"_prescale").c_str (), &(jetTriggers[iTrig]->trigPrescale));
-    }
+    jetTrigger = new Trigger (jet_trig_name[0]);
+    tree->SetBranchAddress ((jet_trig_name[0]+"_decision").c_str (), &(jetTrigger->trigDecision));
+    tree->SetBranchAddress ((jet_trig_name[0]+"_prescale").c_str (), &(jetTrigger->trigPrescale));
+
     if (!Ispp ()) {
       for (int iTrig = 0; iTrig < zdc_L1_trig_n; iTrig++) {
         zdcL1Triggers[iTrig] = new Trigger (zdc_L1_trig_name[iTrig]);
@@ -203,33 +218,46 @@ bool JetSubtractedEnergy (const char* directory,
   }
 
 
+  const JetRadius r0p4 = JetRadius::R0p4;
   const int nEvts = tree->GetEntries ();
 
-  // First loop over events
+  // Loop over events
   for (int iEvt = 0; iEvt < nEvts; iEvt++) {
     if (nEvts > 0 && iEvt % (nEvts / 100) == 0)
-      cout << "Info: In JetSubtractedEnergy.cxx: Events " << iEvt / (nEvts / 100) << "\% done...\r" << flush;
-
+      std::cout << "Info: In JetSubtractedEnergy.cxx: Events " << iEvt / (nEvts / 100) << "\% done...\r" << std::flush;
     tree->GetEntry (iEvt);
 
-    if (IsPbPb18 () && (IsCollisions () || IsDataOverlay ()) && BlayerDesyn)
-      continue; // check for B layer desynchronization
-    if (IsPbPb () && (IsCollisions () || IsDataOverlay ()) && isOOTPU)
-      continue; // check for out-of-time pile-up
-
-    bool hasPrimaryVert = false;
-    bool hasPileup = false;
-    float vz = -999;
-    for (int iVert = 0; iVert < nvert; iVert++) {
-      if (vert_type[iVert] == 1) {
-        hasPrimaryVert = true;
-        vz = vert_z[iVert];
+    // vertexing cuts, require no pileup vertices and primary vertex with |vz| < 150mm
+    {
+      bool hasPrimary = false;
+      bool hasPileup = false;
+      float vz = -999;
+      for (int iVert = 0; iVert < nvert; iVert++) {
+        if (vert_type[iVert] == 1) {
+          hasPrimary = true;
+          vz = vert_z[iVert];
+        }
+        else if (vert_type[iVert] == 3)
+          hasPileup = true;
       }
-      if (vert_type[iVert] == 3 && vert_ntrk[iVert] > 6)
-        hasPileup = true;
+      if (hasPileup || std::fabs (vz) > 150 || !hasPrimary)
+        continue;
     }
-    if (!hasPrimaryVert || hasPileup || fabs (vz) > 150)
-      continue;
+
+
+    // Filter sample based on min/max of pThat range
+    if (!IsHijing ()) {
+      int iLTJ = -1;
+      const int nTJ = GetAktTruthJetN (r0p4);
+      for (int iTJ = 0; iTJ < nTJ; iTJ++) {
+        if (iLTJ == -1 || GetAktTruthJetPt (iTJ, r0p4) > GetAktTruthJetPt (iLTJ, r0p4))
+          iLTJ = iTJ;
+      }
+
+      if (iLTJ == -1 || GetAktTruthJetPt (iLTJ, r0p4) < truth_jet_min_pt || GetAktTruthJetPt (iLTJ, r0p4) > truth_jet_max_pt)
+        continue;
+    }
+
 
     float fcal_et_Pb = 0, fcal_et_p = 0;
     float zdc_calibE_Pb = 0, zdc_calibE_p = 0;
@@ -275,13 +303,15 @@ bool JetSubtractedEnergy (const char* directory,
       continue;
 
 
-    if (jetTriggers[0]->trigDecision) {
+    if (!IsCollisions () || (jetTrigger && jetTrigger->trigDecision)) {
 
       for (int iJ = 0; iJ < akt4_hi_jet_n; iJ++) {
-        if (!MeetsJetAcceptanceCuts (iJ))
+        if (!MeetsJetAcceptanceCuts (iJ, r0p4))
           continue;
 
-        if (akt4_hi_jet_pt_xcalib[iJ] < 60)
+        const float jpt = GetAktHIJetPt (iJ, r0p4);
+        const float jen = GetAktHIJetEn (iJ, r0p4);
+        if (jpt < 60)
           continue;
 
         if (!Ispp ()) {
@@ -296,12 +326,11 @@ bool JetSubtractedEnergy (const char* directory,
       }
     }
   } // end event loop
-  cout << endl << "Info: In JetSubtractedEnergy.cxx: Finished processing events." << endl;
+  std::cout << std::endl << "Info: In JetSubtractedEnergy.cxx: Finished processing events." << std::endl;
 
 
   if (IsCollisions ()) {
-    for (int iTrig = 0; iTrig < jet_trig_n; iTrig++)
-      SaferDelete (&jetTriggers[iTrig]);
+    SaferDelete (&jetTrigger);
     if (!Ispp ()) {
       for (int iTrig = 0; iTrig < zdc_L1_trig_n; iTrig++)
         SaferDelete (&zdcL1Triggers[iTrig]);

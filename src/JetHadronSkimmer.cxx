@@ -91,36 +91,6 @@ bool JetHadronSkimmer (const char* directory,
     fileIdentifier = inFileName;
 
 
-  // variables for filtering MC truth
-  double truth_jet_min_pt = 0, truth_jet_max_pt = DBL_MAX;
-  if (!IsCollisions ()) {
-    if (TString (inFileName).Contains ("JZ0")) {
-      truth_jet_min_pt = 0;
-      truth_jet_max_pt = 20;
-    }
-    else if (TString (inFileName).Contains ("JZ1")) {
-      truth_jet_min_pt = 20;
-      truth_jet_max_pt = 60;
-    }
-    else if (TString (inFileName).Contains ("JZ2")) {
-      truth_jet_min_pt = 60;
-      truth_jet_max_pt = 160;
-    }
-    else if (TString (inFileName).Contains ("JZ3")) {
-      truth_jet_min_pt = 160;
-      truth_jet_max_pt = 400;
-    }
-    else if (TString (inFileName).Contains ("JZ4")) {
-      truth_jet_min_pt = 400;
-      truth_jet_max_pt = 800;
-    }
-    else if (TString (inFileName).Contains ("JZ5")) {
-      truth_jet_min_pt = 800;
-      truth_jet_max_pt = 1300;
-    }
-  }
-
-
   // opens a TTree as a TChain from all files in a directory matching the file identifier
   TChain* tree = new TChain ("bush", "bush");
   {
@@ -159,6 +129,22 @@ bool JetHadronSkimmer (const char* directory,
     }
     std::cout << "Info: In JetHadronSkimmer.cxx: Chain has " << tree->GetListOfFiles ()->GetEntries () << " files, " << tree->GetEntries () << " entries" << std::endl;
   }
+
+
+  if (!IsHijing ()) {
+    assert (crossSectionPicoBarns > 0);
+    assert (mcFilterEfficiency > 0);
+    assert (mcNumberEvents > 0);
+  }
+
+
+  // variables for filtering MC truth
+  const float truth_jet_min_pt = GetJZXR04MinPt (TString (inFileName));
+  const float truth_jet_max_pt = GetJZXR04MaxPt (TString (inFileName));
+  if (truth_jet_min_pt != 0)
+    std::cout << "Checking for leading truth jet with pT > " << truth_jet_min_pt << std::endl;
+  if (truth_jet_max_pt != FLT_MAX)
+    std::cout << "Checking for leading truth jet with pT < " << truth_jet_max_pt << std::endl;
 
 
   tree->SetBranchAddress ("run_number",     &run_number);
@@ -376,12 +362,13 @@ bool JetHadronSkimmer (const char* directory,
   //  h_fineFcalWgts = GetFCalZdcWeights ();
 
 
+  const JetRadius r0p4 = JetRadius::R0p4;
   const int nEvts = tree->GetEntries ();
 
-  std::random_device rndm;
-  std::mt19937 mt19937_gen (rndm ());
-  std::normal_distribution <double> jetES2PercSmearDist (1.0, 0.02);
-  std::normal_distribution <double> jetES5PercSmearDist (1.0, 0.05);
+  //std::random_device rndm;
+  //std::mt19937 mt19937_gen (rndm ());
+  //std::normal_distribution <double> jetES2PercSmearDist (1.0, 0.02);
+  //std::normal_distribution <double> jetES5PercSmearDist (1.0, 0.05);
 
   for (int iEvt = 0; iEvt < nEvts; iEvt++) {
     if (nEvts > 100 && iEvt % (nEvts / 100) == 0)
@@ -422,7 +409,7 @@ bool JetHadronSkimmer (const char* directory,
         else if (vert_type[iVert] == 3)
           hasPileup = true;
       }
-      if (!hasPrimary || (!DoWithPileupVar () && hasPileup) || fabs (vz) > 150)
+      if (hasPileup || std::fabs (vz) > 150 || !hasPrimary)
         continue;
     }
     else {
@@ -431,15 +418,16 @@ bool JetHadronSkimmer (const char* directory,
     }
 
 
-    // MC only -- filter sample based on min/max of pThat range
-    if (!IsCollisions ()) {
+    // Filter sample based on min/max of pThat range
+    if (!IsHijing ()) {
       int iLTJ = -1;
-      for (int iTJ = 0; iTJ < akt4_truth_jet_n; iTJ++) {
-        if (iLTJ == -1 || akt4_truth_jet_pt[iTJ] > akt4_truth_jet_pt[iLTJ])
+      const int nTJ = GetAktTruthJetN (r0p4);
+      for (int iTJ = 0; iTJ < nTJ; iTJ++) {
+        if (iLTJ == -1 || GetAktTruthJetPt (iTJ, r0p4) > GetAktTruthJetPt (iLTJ, r0p4))
           iLTJ = iTJ;
       }
 
-      if (iLTJ == -1 || akt4_truth_jet_pt[iLTJ] < truth_jet_min_pt || akt4_truth_jet_pt[iLTJ] > truth_jet_max_pt)
+      if (iLTJ == -1 || GetAktTruthJetPt (iLTJ, r0p4) < truth_jet_min_pt || GetAktTruthJetPt (iLTJ, r0p4) > truth_jet_max_pt)
         continue;
     }
 
@@ -491,32 +479,33 @@ bool JetHadronSkimmer (const char* directory,
     if (event_weight > 0) { // trigger requirement
 
       out_akt4_hi_jet_n = 0;
-      for (int iJ = 0; iJ < akt4_hi_jet_n; iJ++) {
-        if (!MeetsJetAcceptanceCuts (iJ))
+      const int jn = GetAktHIJetN (r0p4);
+      for (int iJ = 0; iJ < jn; iJ++) {
+        if (!MeetsJetAcceptanceCuts (iJ, r0p4))
           continue;
 
         // Crude systematic -- smear jet energy scale by 2% or 5% (ad-hoc)
-        double jpt = akt4_hi_jet_pt_xcalib[iJ];
-        double jen = akt4_hi_jet_e_xcalib[iJ]; 
+        float jpt = GetAktHIJetPt (iJ, r0p4);
+        float jen = GetAktHIJetEn (iJ, r0p4);
 
-        if (DoJetES5PercUpVar ())    { jpt *= 1.05;  jen *= 1.05; }
-        if (DoJetES5PercDownVar ())  { jpt *= 0.95;  jen *= 0.95; }
-        if (DoJetES5PercSmearVar ()) { 
-          double sf = jetES5PercSmearDist (mt19937_gen);
-          jpt *= sf;
-          jen *= sf;
-        }
-        if (DoJetES2PercUpVar ())    { jpt *= 1.02;  jen *= 1.02; }
-        if (DoJetES2PercDownVar ())  { jpt *= 0.98;  jen *= 0.98; }
-        if (DoJetES2PercSmearVar ()) { 
-          double sf = jetES2PercSmearDist (mt19937_gen);
-          jpt *= sf;
-          jen *= sf;
-        }
+        //if (DoJetES5PercUpVar ())    { jpt *= 1.05;  jen *= 1.05; }
+        //if (DoJetES5PercDownVar ())  { jpt *= 0.95;  jen *= 0.95; }
+        //if (DoJetES5PercSmearVar ()) { 
+        //  float sf = jetES5PercSmearDist (mt19937_gen);
+        //  jpt *= sf;
+        //  jen *= sf;
+        //}
+        //if (DoJetES2PercUpVar ())    { jpt *= 1.02;  jen *= 1.02; }
+        //if (DoJetES2PercDownVar ())  { jpt *= 0.98;  jen *= 0.98; }
+        //if (DoJetES2PercSmearVar ()) { 
+        //  float sf = jetES2PercSmearDist (mt19937_gen);
+        //  jpt *= sf;
+        //  jen *= sf;
+        //}
 
         out_akt4_hi_jet_pt[out_akt4_hi_jet_n] = jpt;
-        out_akt4_hi_jet_eta[out_akt4_hi_jet_n] = akt4_hi_jet_eta_xcalib[iJ];
-        out_akt4_hi_jet_phi[out_akt4_hi_jet_n] = akt4_hi_jet_phi[iJ];
+        out_akt4_hi_jet_eta[out_akt4_hi_jet_n] = GetAktHIJetEta (iJ, r0p4);
+        out_akt4_hi_jet_phi[out_akt4_hi_jet_n] = GetAktHIJetEta (iJ, r0p4);
         out_akt4_hi_jet_e[out_akt4_hi_jet_n] = jen;
         out_akt4_hi_jet_n++;
       }
@@ -568,7 +557,7 @@ bool JetHadronSkimmer (const char* directory,
       float sumptcw = 0, sumptccw = 0;
       for (int iTrk = 0; iTrk < out_trk_n; iTrk++) {
         float dphi = DeltaPhi (out_trk_phi[iTrk], out_akt4_hi_jet_phi[leading_jet], true);
-        if (M_PI/3. < fabs (dphi) && fabs (dphi) < 2.*M_PI/3.) {
+        if (M_PI/3. < std::fabs (dphi) && std::fabs (dphi) < 2.*M_PI/3.) {
           if (dphi < 0) // then trackphi is ccw of zphi
             sumptccw += out_trk_pt[iTrk];
           else

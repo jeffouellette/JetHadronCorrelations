@@ -41,12 +41,12 @@ maxjpt=0
 #[10] input jets file pattern
 #[11] input tracks file pattern
 
-# p+Pb non-mixed
-Arguments = data_$(gridPass) $(minjpt)GeVJets_data16 $(minjpt) $(maxjpt) pPb16_5TeV Collisions $(trig) $(syst) ./rootFiles/Histograms/$(minjpt)GeVJets/JetsHists/$(syst)/$(run)_iCent_hists.root user.jeouelle.$(swVersion).hadrons.$(gridPass).data16_hip5TeV.00$(run).physics_$(jetstream).merge.AOD.r11416_p3868_Tree.root
-Error = run/errors/$(minjpt)GeVJets_JetsHists_$(run)_$(syst).err
-Log = /tmp/jeff/logs/$(minjpt)GeVJets_JetsHists_$(run)_$(syst).log
-Output = run/outputs/$(minjpt)GeVJets_JetsHists_$(run)_$(syst).out
-Queue run in (312796 312837 312937 312945 312968 314199)
+## p+Pb non-mixed
+#Arguments = data_$(gridPass) $(minjpt)GeVJets_data16 $(minjpt) $(maxjpt) pPb16_5TeV Collisions $(trig) $(syst) ./rootFiles/Histograms/$(minjpt)GeVJets/JetsHists/$(syst)/$(run)_iCent_hists.root user.jeouelle.$(swVersion).hadrons.$(gridPass).data16_hip5TeV.00$(run).physics_$(jetstream).merge.AOD.r11416_p3868_Tree.root
+#Error = run/errors/$(minjpt)GeVJets_JetsHists_$(run)_$(syst).err
+#Log = /tmp/jeff/logs/$(minjpt)GeVJets_JetsHists_$(run)_$(syst).log
+#Output = run/outputs/$(minjpt)GeVJets_JetsHists_$(run)_$(syst).out
+#Queue run in (312796 312837 312937 312945 312968 314199)
 
 
 # p+Pb mixed

@@ -587,9 +587,9 @@ float akt2_hi_jet_e_xcalib[max_akt2_hi_jet_n];
 float akt2_hi_jet_sub_et[max_akt2_hi_jet_n];
 float akt2_hi_jet_sub_e[max_akt2_hi_jet_n];
 bool akt2_hi_jet_LooseBad[max_akt2_hi_jet_n];
-float* akt2_hi_jet_pt_sys_JES_ALL[nJESSys]; //!
-float* akt2_hi_jet_pt_sys_JER_ALL[nJERSys]; //!
-float akt2_hi_jet_timing[max_akt2_hi_jet_n]; //!
+float akt2_hi_jet_pt_sys_JES_ALL[nJESSys][max_akt2_hi_jet_n];
+float akt2_hi_jet_pt_sys_JER_ALL[nJERSys][max_akt2_hi_jet_n];
+float akt2_hi_jet_timing[max_akt2_hi_jet_n];
 
 // Anti-kT R=0.4 HI Jets info
 const static int max_akt4_hi_jet_n = 40;
@@ -610,9 +610,9 @@ float akt4_hi_jet_e_xcalib[max_akt4_hi_jet_n];
 float akt4_hi_jet_sub_et[max_akt4_hi_jet_n];
 float akt4_hi_jet_sub_e[max_akt4_hi_jet_n];
 bool akt4_hi_jet_LooseBad[max_akt4_hi_jet_n];
-float* akt4_hi_jet_pt_sys_JES_ALL[nJESSys]; //!
-float* akt4_hi_jet_pt_sys_JER_ALL[nJERSys]; //!
-float akt4_hi_jet_timing[max_akt4_hi_jet_n]; //!
+float akt4_hi_jet_pt_sys_JES_ALL[nJESSys][max_akt4_hi_jet_n];
+float akt4_hi_jet_pt_sys_JER_ALL[nJERSys][max_akt4_hi_jet_n];
+float akt4_hi_jet_timing[max_akt4_hi_jet_n];
 
 
 #endif

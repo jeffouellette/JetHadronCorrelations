@@ -31,17 +31,17 @@ for resdir in ${resdirs[@]}; do
             ${histpath}/341123_hists.root \
             ${histpath}/341184_hists.root
 
-    #for cent in $(seq 0 4); do   
+    for cent in $(seq 0 4); do   
  
-    #  hadd -f ${histpath}/data16_5TeV_iCent${cent}_hists.root \
-    #          ${histpath}/312796_iCent${cent}_hists.root \
-    #          ${histpath}/312837_iCent${cent}_hists.root \
-    #          ${histpath}/312937_iCent${cent}_hists.root \
-    #          ${histpath}/312945_iCent${cent}_hists.root \
-    #          ${histpath}/312968_iCent${cent}_hists.root
-    #          #${histpath}/314199_iCent${cent}_hists.root
+      hadd -f ${histpath}/data16_5TeV_iCent${cent}_hists.root \
+              ${histpath}/312796_iCent${cent}_hists.root \
+              ${histpath}/312837_iCent${cent}_hists.root \
+              ${histpath}/312937_iCent${cent}_hists.root \
+              ${histpath}/312945_iCent${cent}_hists.root \
+              ${histpath}/312968_iCent${cent}_hists.root \
+              ${histpath}/314199_iCent${cent}_hists.root
 
-    #done
+    done
 
     histpath=rootFiles/Histograms/${resdir}/MixedHists/${vardir}
 
@@ -60,17 +60,17 @@ for resdir in ${resdirs[@]}; do
             ${histpath}/341123_hists.root \
             ${histpath}/341184_hists.root
 
-    #for cent in $(seq 0 4); do   
+    for cent in $(seq 0 4); do   
 
-    #  hadd -f ${histpath}/data16_5TeV_iCent${cent}_hists.root \
-    #          ${histpath}/312796_iCent${cent}_hists.root \
-    #          ${histpath}/312837_iCent${cent}_hists.root \
-    #          ${histpath}/312937_iCent${cent}_hists.root \
-    #          ${histpath}/312945_iCent${cent}_hists.root \
-    #          ${histpath}/312968_iCent${cent}_hists.root
-    #          #${histpath}/314199_iCent${cent}_hists.root
+      hadd -f ${histpath}/data16_5TeV_iCent${cent}_hists.root \
+              ${histpath}/312796_iCent${cent}_hists.root \
+              ${histpath}/312837_iCent${cent}_hists.root \
+              ${histpath}/312937_iCent${cent}_hists.root \
+              ${histpath}/312945_iCent${cent}_hists.root \
+              ${histpath}/312968_iCent${cent}_hists.root \
+              ${histpath}/314199_iCent${cent}_hists.root
 
-    #done
+    done
 
   done
 

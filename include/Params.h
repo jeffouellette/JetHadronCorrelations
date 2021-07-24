@@ -29,6 +29,16 @@ const float min_akt4_hi_jet_pt = 30;
 
 const float akt2_TruthMatchMaxDR = 0.1; // Truth-matching maximum dR for R=0.2 jets
 const float akt4_TruthMatchMaxDR = 0.2; // Truth-matching maximum dR for R=0.4 jets
+const float akt2_hi_TruthMatchMinRecoPt = 15; // Minimum HI jet pT for reco. matching of R=0.2 truth jets
+const float akt4_hi_TruthMatchMinRecoPt = 15; // Minimum HI jet pT for reco. matching of R=0.4 truth jets
+const float akt2_hi_IsoMinPt = 7; // Minimum pT for isolation calculation of R=0.2 HI jets
+const float akt4_hi_IsoMinPt = 7; // Minimum pT for isolation calculation of R=0.4 HI jets
+const float akt2_truth_IsoMinPt = 7; // Minimum pT for isolation calculation of R=0.2 truth jets
+const float akt4_truth_IsoMinPt = 7; // Minimum pT for isolation calculation of R=0.4 truth jets
+const float akt2_hi_IsoMinDR = 0.3; // Minimum isolation DR for R=0.2 HI jets
+const float akt4_hi_IsoMinDR = 0.6; // Minimum isolation DR for R=0.4 HI jets
+const float akt2_truth_IsoMinDR = 0.5; // Minimum isolation DR for R=0.2 truth jets
+const float akt4_truth_IsoMinDR = 1.0; // Minimum isolation DR for R=0.4 truth jets
 
 extern TString workPath;
 extern TString extWorkPath;
@@ -57,8 +67,8 @@ extern TriggerType triggerType;
 
 
 // histogram level jet pT cuts
-extern double jet_min_pt;
-extern double jet_max_pt;
+extern float jet_min_pt;
+extern float jet_max_pt;
 
 // list of track working point names
 const std::vector <std::string> trackWPNames = {"trk_TightPrimary", "trk_HItight", "trk_HIloose"};
@@ -130,6 +140,8 @@ const int nPtJBins = 60;
 double* pTJBins = logspace (30, 450, nPtJBins);
 
 short GetPtJBin (const float jpt) {
+  if (jpt < pTJBins[0])
+    return -1;
   short iPtJ = 0;
   while (iPtJ < nPtJBins) {
     if (jpt < pTJBins[iPtJ+1])
@@ -158,6 +170,8 @@ short GetDPhiBin (const float dphi) {
 const double pTChBins[] = {0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2, 2.25, 2.5, 2.75, 3, 3.25, 3.5, 3.75, 4, 4.5, 5, 5.5, 6, 7, 8, 9, 10, 11, 12, 14, 16, 18, 20, 25, 30, 35, 40, 45, 50, 55, 60};
 const int nPtChBins = sizeof (pTChBins) / sizeof (pTChBins[0]) - 1;
 short GetPtChBin (const float ptch) {
+  if (ptch < pTChBins[0])
+    return -1;
   short iPtCh = 0;
   while (iPtCh < nPtChBins) {
     if (ptch < pTChBins[iPtCh+1])

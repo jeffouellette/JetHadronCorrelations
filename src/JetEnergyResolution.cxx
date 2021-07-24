@@ -27,25 +27,26 @@ bool JetEnergyResolution (const char* directory,
                           const char* inFileName,
                           const char* eventWeightsFileName) {
  
-  cout << "Info: In JetEnergyResolution.cxx: Entered JetEnergyResolution routine." << endl;
-  cout << "Info: In JetEnergyResolution.cxx: Printing systematic onfiguration:";
+  std::cout << "Info: In JetEnergyResolution.cxx: Entered JetEnergyResolution routine." << std::endl;
 
   SetupDirectories ("JetEnergyResolution");
 
   if (IsCollisions ()) {
-    cout << "Error: In JetEnergyResolution.cxx: Trying to calculate jet performance in data! Quitting." << endl;
+    std::cout << "Error: In JetEnergyResolution.cxx: Trying to calculate jet performance in data! Quitting." << std::endl;
     return false;
   }
 
   if (IsDataOverlay ())
-    cout << "Info: In JetEnergyResolution.cxx: Running over data overlay, will check data conditions" << endl;
-  if (IsHijing ())
-    cout << "Info: In JetEnergyResolution.cxx: Running over Hijing sample" << endl;
+    std::cout << "Info: In JetEnergyResolution.cxx: Running over data overlay, will check data conditions" << std::endl;
+  if (IsHijing ()) {
+    std::cout << "Info: In JetEnergyResolution.cxx: Not configured to process Hijing samples, exiting gracefully!" << std::endl;
+    return true;
+  }
 
   // this identifier here corresponds to the name of the output file
   const TString identifier = GetIdentifier (dataSet, directory, inFileName);
-  cout << "Info: In JetEnergyResolution.cxx: File Identifier: " << identifier << endl;
-  cout << "Info: In JetEnergyResolution.cxx: Saving output to " << rootPath << endl;
+  std::cout << "Info: In JetEnergyResolution.cxx: File Identifier: " << identifier << std::endl;
+  std::cout << "Info: In JetEnergyResolution.cxx: Saving output to " << rootPath << std::endl;
 
 
   // creates a file identifier pattern that we will use to identify the directory containing the input files
@@ -89,39 +90,27 @@ bool JetEnergyResolution (const char* directory,
 
 
   // variables for filtering MC truth
-  double truth_jet_min_pt = 0, truth_jet_max_pt = DBL_MAX;
-  if (TString (inFileName).Contains ("JZ0")) {
-    truth_jet_min_pt = 0;
-    truth_jet_max_pt = 20;
-  }
-  else if (TString (inFileName).Contains ("JZ1")) {
-    truth_jet_min_pt = 20;
-    truth_jet_max_pt = 60;
-  }
-  else if (TString (inFileName).Contains ("JZ2")) {
-    truth_jet_min_pt = 60;
-    truth_jet_max_pt = 160;
-  }
-  else if (TString (inFileName).Contains ("JZ3")) {
-    truth_jet_min_pt = 160;
-    truth_jet_max_pt = 400;
-  }
-  else if (TString (inFileName).Contains ("JZ4")) {
-    truth_jet_min_pt = 400;
-    truth_jet_max_pt = 800;
-  }
-  else if (TString (inFileName).Contains ("JZ5")) {
-    truth_jet_min_pt = 800;
-    truth_jet_max_pt = 1300;
-  }
+  const float truth_jet_min_pt = GetJZXR04MinPt (TString (inFileName));
+  const float truth_jet_max_pt = GetJZXR04MaxPt (TString (inFileName));
   if (truth_jet_min_pt != 0)
     std::cout << "Checking for leading truth jet with pT > " << truth_jet_min_pt << std::endl;
-  if (truth_jet_max_pt != DBL_MAX)
+  if (truth_jet_max_pt != FLT_MAX)
     std::cout << "Checking for leading truth jet with pT < " << truth_jet_max_pt << std::endl;
 
 
-  std::cout << "Anti-kT R=0.2 jets truth matched to within dR < " << akt2_TruthMatchMaxDR << std::endl;
-  std::cout << "Anti-kT R=0.4 jets truth matched to within dR < " << akt4_TruthMatchMaxDR << std::endl;
+  std::cout << std::endl << "Jet acceptance config.:" << std::endl;
+  std::cout << "Anti-kT R=0.2:" << std::endl;
+  std::cout << "  --> jets truth matched to within dR < " << akt2_TruthMatchMaxDR << std::endl;
+  std::cout << "  --> HI jets must be isolated to dR > " << akt2_hi_IsoMinDR << std::endl;
+  std::cout << "  --> truth jets must be isolated to dR > " << akt2_truth_IsoMinDR << std::endl;
+  std::cout << "  --> HI jets must have minimum pT in isolation calc. " << akt2_hi_IsoMinPt << std::endl;
+  std::cout << "  --> truth jets must have minimum pT in isolation calc. " << akt2_truth_IsoMinPt << std::endl;
+  std::cout << "Anti-kT R=0.4:" << std::endl;
+  std::cout << "  -->jets truth matched to within dR < " << akt4_TruthMatchMaxDR << std::endl;
+  std::cout << "  -->HI jets must be isolated to dR > " << akt4_hi_IsoMinDR << std::endl;
+  std::cout << "  -->truth jets must be isolated to dR > " << akt4_truth_IsoMinDR << std::endl;
+  std::cout << "  -->HI jets must have minimum pT in isolation calc. " << akt4_hi_IsoMinPt << std::endl;
+  std::cout << "  -->truth jets must have minimum pT in isolation calc. " << akt4_truth_IsoMinPt << std::endl << std::endl;
 
 
   tree->SetBranchAddress ("run_number",     &run_number);
@@ -208,7 +197,7 @@ bool JetEnergyResolution (const char* directory,
   tree->SetBranchAddress ("akt4_hi_jet_sub_e",        &akt4_hi_jet_sub_e);
 
 
-  cout << "Info : In JetEnergyResolution.cxx: Saving histograms to " << Form ("%s/%s.root", rootPath.Data (), identifier.Data ()) << endl;
+  std::cout << "Info : In JetEnergyResolution.cxx: Saving histograms to " << Form ("%s/%s.root", rootPath.Data (), identifier.Data ()) << std::endl;
   TFile* outFile = new TFile (Form ("%s/%s.root", rootPath.Data (), identifier.Data ()), "recreate");
 
   TString sys;
@@ -225,64 +214,64 @@ bool JetEnergyResolution (const char* directory,
   const int nEtaRespBins = 80;
   const double* etaRespBins = linspace (-0.2, 0.2, nEtaRespBins);
 
-  const double pTJBins[] = {10, 12, 15, 18, 22, 26, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 100, 120, 140, 160, 180, 200, 220, 240, 260, 280, 300, 320, 360, 400, 450, 500, 550, 600, 650, 700, 750, 800, 900, 1000, 1100, 1200, 1300};
+  const double pTJBins[] = {12, 16, 20, 25, 30, 35, 40, 45, 50, 55, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 190, 220, 250, 280, 310, 340, 370, 400, 450, 500, 550, 600, 650, 700, 750, 800, 900, 1000, 1100, 1200, 1300};
   const int nPtJBins = sizeof (pTJBins) / sizeof (pTJBins[0]) - 1;
+
+  const std::vector <JetRadius> radii = {JetRadius::R0p2, JetRadius::R0p4};
+  const int nRadii = radii.size ();
 
 
   // Initialize a bunch of histograms --
-  TH1D*** h_r2_jpts     = Get2DArray <TH1D*> (nPtJBins, nFinerEtaBins);
-  TH1D*** h_r2_jes      = Get2DArray <TH1D*> (nPtJBins, nFinerEtaBins);
-  TH1D*** h_r2_jetacorr = Get2DArray <TH1D*> (nPtJBins, nFinerEtaBins);
-  TH1D*** h_r4_jpts     = Get2DArray <TH1D*> (nPtJBins, nFinerEtaBins);
-  TH1D*** h_r4_jes      = Get2DArray <TH1D*> (nPtJBins, nFinerEtaBins);
-  TH1D*** h_r4_jetacorr = Get2DArray <TH1D*> (nPtJBins, nFinerEtaBins);
+  TH1D**** h_jpts     = Get3DArray <TH1D*> (nRadii, nPtJBins, nFinerEtaBins);
+  TH1D**** h_jes      = Get3DArray <TH1D*> (nRadii, nPtJBins, nFinerEtaBins);
+  TH1D**** h_jetacorr = Get3DArray <TH1D*> (nRadii, nPtJBins, nFinerEtaBins);
 
-  for (int iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
+  for (int iR = 0; iR < nRadii; iR++) {
 
-    for (int iEta = 0; iEta < nFinerEtaBins; iEta++) {
+    const int r = (radii[iR] == JetRadius::R0p4 ? 4 : 2);
 
-      h_r2_jpts[iPtJ][iEta] = new TH1D (Form ("h_r2_jpts_%s_iPtJ%i_iEta%i", sys.Data (), iPtJ, iEta), ";#it{p}_{T}^{reco} / #it{p}_{T}^{truth};Counts", nRespBins, respBins);
-      h_r2_jpts[iPtJ][iEta]->Sumw2 ();
-      h_r2_jes[iPtJ][iEta] = new TH1D (Form ("h_r2_jes_%s_iPtJ%i_iEta%i", sys.Data (), iPtJ, iEta), ";#it{E}_{reco} / #it{E}_{truth};Counts", nRespBins, respBins);
-      h_r2_jes[iPtJ][iEta]->Sumw2 ();
-      h_r2_jetacorr[iPtJ][iEta] = new TH1D (Form ("h_r2_jetacorr_%s_iPtJ%i_iEta%i", sys.Data (), iPtJ, iEta), ";#eta_{reco} - #eta_{truth};Counts", nEtaRespBins, etaRespBins);
-      h_r2_jetacorr[iPtJ][iEta]->Sumw2 ();
+    for (int iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
 
-      h_r4_jpts[iPtJ][iEta] = new TH1D (Form ("h_r4_jpts_%s_iPtJ%i_iEta%i", sys.Data (), iPtJ, iEta), ";#it{p}_{T}^{reco} / #it{p}_{T}^{truth};Counts", nRespBins, respBins);
-      h_r4_jpts[iPtJ][iEta]->Sumw2 ();
-      h_r4_jes[iPtJ][iEta] = new TH1D (Form ("h_r4_jes_%s_iPtJ%i_iEta%i", sys.Data (), iPtJ, iEta), ";#it{E}_{reco} / #it{E}_{truth};Counts", nRespBins, respBins);
-      h_r4_jes[iPtJ][iEta]->Sumw2 ();
-      h_r4_jetacorr[iPtJ][iEta] = new TH1D (Form ("h_r4_jetacorr_%s_iPtJ%i_iEta%i", sys.Data (), iPtJ, iEta), ";#eta_{reco} - #eta_{truth};Counts", nEtaRespBins, etaRespBins);
-      h_r4_jetacorr[iPtJ][iEta]->Sumw2 ();
+      for (int iEta = 0; iEta < nFinerEtaBins; iEta++) {
 
-    } // end loop over iEta
+        h_jpts[iR][iPtJ][iEta] = new TH1D (Form ("h_r%i_jpts_%s_iPtJ%i_iEta%i", r, sys.Data (), iPtJ, iEta), ";#it{p}_{T}^{reco} / #it{p}_{T}^{truth};Counts", nRespBins, respBins);
+        h_jpts[iR][iPtJ][iEta]->Sumw2 ();
+        h_jes[iR][iPtJ][iEta] = new TH1D (Form ("h_r%i_jes_%s_iPtJ%i_iEta%i", r, sys.Data (), iPtJ, iEta), ";#it{E}_{reco} / #it{E}_{truth};Counts", nRespBins, respBins);
+        h_jes[iR][iPtJ][iEta]->Sumw2 ();
+        h_jetacorr[iR][iPtJ][iEta] = new TH1D (Form ("h_r%i_jetacorr_%s_iPtJ%i_iEta%i", r, sys.Data (), iPtJ, iEta), ";#eta_{reco} - #eta_{truth};Counts", nEtaRespBins, etaRespBins);
+        h_jetacorr[iR][iPtJ][iEta]->Sumw2 ();
 
-  } // end loop over iPtJ
+      } // end loop over iEta
+
+    } // end loop over iPtJ
+
+  } // end loop over iR
 
   
 
+  const JetRadius r0p4 = JetRadius::R0p4;
   const int nEvts = tree->GetEntries ();
 
   // Loop over events
   for (int iEvt = 0; iEvt < nEvts; iEvt++) {
     if (nEvts > 100 && iEvt % (nEvts / 100) == 0)
-      cout << "Info: In JetEnergyResolution.cxx: Event loop " << iEvt / (nEvts / 100) << "\% done...\r" << flush;
+      std::cout << "Info: In JetEnergyResolution.cxx: Event loop " << iEvt / (nEvts / 100) << "\% done...\r" << std::flush;
     tree->GetEntry (iEvt);
 
-    // reject events with pileup vertices or too high z-vertex
+    // vertexing cuts, require no pileup vertices and primary vertex with |vz| < 150mm
     {
       bool hasPrimary = false;
       bool hasPileup = false;
       float vz = -999;
       for (int iVert = 0; iVert < nvert; iVert++) {
-        const bool isPrimary = (vert_type[iVert] == 1);
-        hasPrimary = hasPrimary || isPrimary;
-        hasPileup = hasPileup || (vert_type[iVert] == 3);
-        if (isPrimary)
+        if (vert_type[iVert] == 1) {
+          hasPrimary = true;
           vz = vert_z[iVert];
+        }
+        else if (vert_type[iVert] == 3)
+          hasPileup = true;
       }
-      if (!hasPrimary || hasPileup || fabs (vz) > 150)
-      //if (!hasPrimary || fabs (vz) > 150)
+      if (hasPileup || std::fabs (vz) > 150 || !hasPrimary)
         continue;
     }
 
@@ -290,92 +279,142 @@ bool JetEnergyResolution (const char* directory,
     // Filter sample based on min/max of pThat range
     if (!IsHijing ()) {
       int iLTJ = -1;
-      for (int iTJ = 0; iTJ < akt4_truth_jet_n; iTJ++) {
-        if (iLTJ == -1 || akt4_truth_jet_pt[iTJ] > akt4_truth_jet_pt[iLTJ])
+      const int nTJ = GetAktTruthJetN (r0p4);
+      for (int iTJ = 0; iTJ < nTJ; iTJ++) {
+        if (iLTJ == -1 || GetAktTruthJetPt (iTJ, r0p4) > GetAktTruthJetPt (iLTJ, r0p4))
           iLTJ = iTJ;
       }
 
-      if (iLTJ == -1 || akt4_truth_jet_pt[iLTJ] < truth_jet_min_pt || akt4_truth_jet_pt[iLTJ] > truth_jet_max_pt)
+      if (iLTJ == -1 || GetAktTruthJetPt (iLTJ, r0p4) < truth_jet_min_pt || GetAktTruthJetPt (iLTJ, r0p4) > truth_jet_max_pt)
         continue;
     }
 
 
-    for (int iJet = 0; iJet < akt2_hi_jet_n; iJet++) {
-      if (!MeetsJetAcceptanceCuts (iJet, JetRadius::R0p2))
-        continue;
-
-      const float jpt = GetAktHIJetPt (iJet, JetRadius::R0p2);
-      const float jeta = GetAktHIJetEta (iJet, JetRadius::R0p2);
-      const float jphi = GetAktHIJetPhi (iJet, JetRadius::R0p2);
-      const float jen = GetAktHIJetEn (iJet, JetRadius::R0p2);
-
-      const int iTJet = GetAktTruthJetMatch (iJet, JetRadius::R0p2);
-      if (iTJet == -1 || DeltaR (jeta, akt2_truth_jet_eta[iTJet], jphi, akt2_truth_jet_phi[iTJet]) > akt2_TruthMatchMaxDR)
-        continue;
-
-      const float tjpt = akt2_truth_jet_pt[iTJet];
-      const float tjeta = akt2_truth_jet_eta[iTJet];
-      const float tjphi = akt2_truth_jet_phi[iTJet];
-      const float tjen = akt2_truth_jet_e[iTJet];
-
-      short iPtJ = -1;
-      if (pTJBins[0] <= tjpt) {
-        iPtJ = 0;
-        while (iPtJ < nPtJBins && pTJBins[iPtJ+1] < tjpt) iPtJ++;
-      }
-
-      short iEta = -1;
-      if (finerEtaBins[0] <= tjeta) {
-        iEta = 0;
-        while (iEta < nFinerEtaBins && finerEtaBins[iEta+1] < tjeta) iEta++;
-      }
-
-      if (iPtJ >= 0 && iPtJ < nPtJBins && iEta >= 0 && iEta < nFinerEtaBins) {
-        h_r2_jpts[iPtJ][iEta]->Fill (jpt / tjpt);
-        h_r2_jes[iPtJ][iEta]->Fill (jen / tjen);
-        h_r2_jetacorr[iPtJ][iEta]->Fill (jeta - tjeta);
-      }
-    } // end loop over R=0.2 jets
+    const double eventWeight = 1;
+    // JZ weighting scheme: sigma * eff * L_int / N_evt
+    //const double eventWeight = (IsHijing () ? 1 : mcEventWeights->at (0) * crossSectionPicoBarns * mcFilterEfficiency * GetJetLuminosity () / mcNumberEvents);
 
 
-    for (int iJet = 0; iJet < akt4_hi_jet_n; iJet++) {
-      if (!MeetsJetAcceptanceCuts (iJet, JetRadius::R0p4))
-        continue;
+    // Fill histograms for all jet radii
+    for (int iR = 0; iR < nRadii; iR++) {
 
-      const float jpt = GetAktHIJetPt (iJet, JetRadius::R0p4);
-      const float jeta = GetAktHIJetEta (iJet, JetRadius::R0p4);
-      const float jphi = GetAktHIJetPhi (iJet, JetRadius::R0p4);
-      const float jen = GetAktHIJetEn (iJet, JetRadius::R0p4);
+      const JetRadius radius = radii[iR];
 
-      const int iTJet = GetAktTruthJetMatch (iJet, JetRadius::R0p4);
-      if (iTJet == -1 || DeltaR (jeta, akt4_truth_jet_eta[iTJet], jphi, akt4_truth_jet_phi[iTJet]) > akt4_TruthMatchMaxDR)
-        continue;
+      const float jet_TruthMatchMaxDR = GetAktTruthMatchMaxDR (radius); // maximum truth match delta R cut
 
-      const float tjpt = akt4_truth_jet_pt[iTJet];
-      const float tjeta = akt4_truth_jet_eta[iTJet];
-      const float tjphi = akt4_truth_jet_phi[iTJet];
-      const float tjen = akt4_truth_jet_e[iTJet];
 
-      short iPtJ = -1;
-      if (pTJBins[0] <= tjpt) {
-        iPtJ = 0;
-        while (iPtJ < nPtJBins && pTJBins[iPtJ+1] < tjpt) iPtJ++;
-      }
+      // NEW VERSION -- loop over truth jets
+      const int nTJets = GetAktTruthJetN (radius);
+      for (int iTJet = 0; iTJet < nTJets; iTJet++) {
 
-      short iEta = -1;
-      if (finerEtaBins[0] <= tjeta) {
-        iEta = 0;
-        while (iEta < nFinerEtaBins && finerEtaBins[iEta+1] < tjeta) iEta++;
-      }
+        const float tjpt = GetAktTruthJetPt (iTJet, radius);
+        const float tjeta = GetAktTruthJetEta (iTJet, radius);
+        const float tjphi = GetAktTruthJetPhi (iTJet, radius);
+        const float tjen = GetAktTruthJetEn (iTJet, radius);
 
-      if (iPtJ >= 0 && iPtJ < nPtJBins && iEta >= 0 && iEta < nFinerEtaBins) {
-        h_r4_jpts[iPtJ][iEta]->Fill (jpt / tjpt);
-        h_r4_jes[iPtJ][iEta]->Fill (jen / tjen);
-        h_r4_jetacorr[iPtJ][iEta]->Fill (jeta - tjeta);
-      }
-    } // end loop over R=0.4 jets
+        if (GetAktTruthJetIso (iTJet, radius) < GetAktTruthIsoMinDR (radius))
+          continue; // truth jet isolation cut
+
+        const int iJet = GetAktHIJetMatch (iTJet, radius);
+        if (iJet == -1)
+          continue; // in case of no reco. jet match
+
+        const float jpt = GetAktHIJetPt (iJet, radius);
+        const float jeta = GetAktHIJetEta (iJet, radius);
+        const float jphi = GetAktHIJetPhi (iJet, radius);
+        const float jen = GetAktHIJetEn (iJet, radius);
+
+        if (DeltaR (jeta, tjeta, jphi, tjphi) > jet_TruthMatchMaxDR)
+          continue; // reco.-truth jet matching cut
+
+        if (!MeetsJetAcceptanceCuts (iJet, radius))
+          continue; // reco. jet acceptance cut
+
+        if (GetAktHIJetIso (iJet, radius) < GetAktHIIsoMinDR (radius))
+          continue; // reco. jet isolation cut
+
+        if (jpt / tjpt < 0.4 && GetAktHIJetPt (iJet, radius, -1, 2) < 15) // cuts on pre-calibrated jet pT
+          continue; // cut out very low pT jets (before calibration), except in cases with a correspondingly low pT truth match.
+
+        short iPtJ = -1;
+        if (pTJBins[0] <= tjpt) {
+          iPtJ = 0;
+          while (iPtJ < nPtJBins && pTJBins[iPtJ+1] < tjpt) iPtJ++;
+        }
+
+        short iEta = -1;
+        if (finerEtaBins[0] <= tjeta) {
+          iEta = 0;
+          while (iEta < nFinerEtaBins && finerEtaBins[iEta+1] < tjeta) iEta++;
+        }
+
+        if (iPtJ >= 0 && iPtJ < nPtJBins && iEta >= 0 && iEta < nFinerEtaBins) {
+          h_jpts[iR][iPtJ][iEta]->Fill (jpt / tjpt, eventWeight);
+          h_jes[iR][iPtJ][iEta]->Fill (jen / tjen, eventWeight);
+          h_jetacorr[iR][iPtJ][iEta]->Fill (jeta - tjeta, eventWeight);
+        }
+
+      } // end loop over jets
+
+      // OLD VERSION -- loop over reco. jets
+      /*
+      const int jn = GetAktHIJetN (radius);
+      for (int iJet = 0; iJet < jn; iJet++) {
+        if (!MeetsJetAcceptanceCuts (iJet, radius))
+          continue;
+
+        const float jpt = GetAktHIJetPt (iJet, radius);
+        const float jeta = GetAktHIJetEta (iJet, radius);
+        const float jphi = GetAktHIJetPhi (iJet, radius);
+        const float jen = GetAktHIJetEn (iJet, radius);
+
+        if (GetAktHIJetIso (iJet, radius) < GetAktHIIsoMinDR (radius))
+          continue; // reco. jet isolation cut
+
+        const int iTJet = GetAktTruthJetMatch (iJet, radius);
+        if (iTJet == -1)
+          continue; // in case of no truth jet match
+
+        const float tjpt = GetAktTruthJetPt (iTJet, radius);
+        const float tjeta = GetAktTruthJetEta (iTJet, radius);
+        const float tjphi = GetAktTruthJetPhi (iTJet, radius);
+        const float tjen = GetAktTruthJetEn (iTJet, radius);
+
+        if (DeltaR (jeta, tjeta, jphi, tjphi) > jet_TruthMatchMaxDR)
+          continue; // reco.-truth jet matching cut
+
+        if (GetAktTruthJetIso (iTJet, radius) < GetAktTruthIsoMinDR (radius))
+          continue; // truth jet isolation cut
+
+        if (jpt / tjpt < 0.4 && GetAktHIJetPt (iJet, radius, -1, 2) < 15) // cuts on pre-calibrated jet pT
+          continue; // cut out very low pT jets (before calibration), except in cases with a correspondingly low pT truth match.
+
+        short iPtJ = -1;
+        if (pTJBins[0] <= tjpt) {
+          iPtJ = 0;
+          while (iPtJ < nPtJBins && pTJBins[iPtJ+1] < tjpt) iPtJ++;
+        }
+
+        short iEta = -1;
+        if (finerEtaBins[0] <= tjeta) {
+          iEta = 0;
+          while (iEta < nFinerEtaBins && finerEtaBins[iEta+1] < tjeta) iEta++;
+        }
+
+        if (iPtJ >= 0 && iPtJ < nPtJBins && iEta >= 0 && iEta < nFinerEtaBins) {
+          h_jpts[iR][iPtJ][iEta]->Fill (jpt / tjpt, eventWeight);
+          h_jes[iR][iPtJ][iEta]->Fill (jen / tjen, eventWeight);
+          h_jetacorr[iR][iPtJ][iEta]->Fill (jeta - tjeta, eventWeight);
+        }
+
+      } // end loop over jets
+      */
+
+    } // end loop over jet radii
+
   } // end event loop
-  cout << endl << "Info: In JetEnergyResolution.cxx: Finished event loop." << endl;
+
+  std::cout << std::endl << "Info: In JetEnergyResolution.cxx: Finished event loop." << std::endl;
 
 
   SaferDelete (&tree);
@@ -383,23 +422,24 @@ bool JetEnergyResolution (const char* directory,
 
   outFile->cd ();
 
-  for (int iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
-    for (int iEta = 0; iEta < nFinerEtaBins; iEta++) {
-      h_r2_jpts[iPtJ][iEta]->Write ();
-      SaferDelete (&(h_r2_jpts[iPtJ][iEta]));
-      h_r2_jes[iPtJ][iEta]->Write ();
-      SaferDelete (&(h_r2_jes[iPtJ][iEta]));
-      h_r2_jetacorr[iPtJ][iEta]->Write ();
-      SaferDelete (&(h_r2_jetacorr[iPtJ][iEta]));
+  for (int iR = 0; iR < nRadii; iR++) {
 
-      h_r4_jpts[iPtJ][iEta]->Write ();
-      SaferDelete (&(h_r4_jpts[iPtJ][iEta]));
-      h_r4_jes[iPtJ][iEta]->Write ();
-      SaferDelete (&(h_r4_jes[iPtJ][iEta]));
-      h_r4_jetacorr[iPtJ][iEta]->Write ();
-      SaferDelete (&(h_r4_jetacorr[iPtJ][iEta]));
-    } // end loop over iEta
-  } // end loop over iPtJ
+    for (int iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
+
+      for (int iEta = 0; iEta < nFinerEtaBins; iEta++) {
+
+        h_jpts[iR][iPtJ][iEta]->Write ();
+        SaferDelete (&(h_jpts[iR][iPtJ][iEta]));
+        h_jes[iR][iPtJ][iEta]->Write ();
+        SaferDelete (&(h_jes[iR][iPtJ][iEta]));
+        h_jetacorr[iR][iPtJ][iEta]->Write ();
+        SaferDelete (&(h_jetacorr[iR][iPtJ][iEta]));
+
+      } // end loop over iEta
+
+    } // end loop over iPtJ
+
+  } // end loop over iR
 
   outFile->Write (0, TObject::kOverwrite);
   outFile->Close ();
