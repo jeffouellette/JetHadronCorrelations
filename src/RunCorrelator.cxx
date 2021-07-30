@@ -17,7 +17,7 @@
 #include <TH1D.h>
 #include <TH2D.h>
 #include <TF1.h>
-#include <TLorentzVector.h>
+#include <TPRegexp.h>
 
 #include <iostream>
 #include <math.h>
@@ -27,9 +27,6 @@ using namespace JetHadronCorrelations;
 
 
 bool doMixing = false;
-bool doMixVar1 = false;
-bool doMixVar2 = false;
-bool doMixVar3 = false;
 
 float truth_jet_min_pt = 0;
 float truth_jet_max_pt = FLT_MAX;
@@ -141,31 +138,31 @@ bool Correlator (const char* tag, const char* outFilePattern, TTree* jetsTree, T
     }
   }
 
-  if (!IsCollisions ()) {
-    tracksTree->SetBranchAddress ("truth_trk_n",        &truth_trk_n);
-    tracksTree->SetBranchAddress ("truth_trk_pt",       &truth_trk_pt);
-    tracksTree->SetBranchAddress ("truth_trk_eta",      &truth_trk_eta);
-    tracksTree->SetBranchAddress ("truth_trk_phi",      &truth_trk_phi);
-    tracksTree->SetBranchAddress ("truth_trk_charge",   &truth_trk_charge);
-    tracksTree->SetBranchAddress ("truth_trk_pdgid",    &truth_trk_pdgid);
-    tracksTree->SetBranchAddress ("truth_trk_barcode",  &truth_trk_barcode);
-    tracksTree->SetBranchAddress ("truth_trk_isHadron", &truth_trk_isHadron);
-  }
+  //if (!IsCollisions ()) {
+  //  tracksTree->SetBranchAddress ("truth_trk_n",        &truth_trk_n);
+  //  tracksTree->SetBranchAddress ("truth_trk_pt",       &truth_trk_pt);
+  //  tracksTree->SetBranchAddress ("truth_trk_eta",      &truth_trk_eta);
+  //  tracksTree->SetBranchAddress ("truth_trk_phi",      &truth_trk_phi);
+  //  tracksTree->SetBranchAddress ("truth_trk_charge",   &truth_trk_charge);
+  //  tracksTree->SetBranchAddress ("truth_trk_pdgid",    &truth_trk_pdgid);
+  //  tracksTree->SetBranchAddress ("truth_trk_barcode",  &truth_trk_barcode);
+  //  tracksTree->SetBranchAddress ("truth_trk_isHadron", &truth_trk_isHadron);
+  //}
 
   tracksTree->SetBranchAddress ("ntrk",                   &trk_n);
   tracksTree->SetBranchAddress ("trk_pt",                 &trk_pt);
   tracksTree->SetBranchAddress ("trk_eta",                &trk_eta);
   tracksTree->SetBranchAddress ("trk_phi",                &trk_phi);
   tracksTree->SetBranchAddress ("trk_charge",             &trk_charge);
+  tracksTree->SetBranchAddress ("trk_TightPrimary",       &trk_TightPrimary);
   tracksTree->SetBranchAddress ("trk_HITight",            &trk_HITight);
   tracksTree->SetBranchAddress ("trk_HILoose",            &trk_HILoose);
-  tracksTree->SetBranchAddress ("trk_TightPrimary",       &trk_TightPrimary);
-  tracksTree->SetBranchAddress ("trk_d0",                 &trk_d0);
-  tracksTree->SetBranchAddress ("trk_d0sig",              &trk_d0sig);
-  tracksTree->SetBranchAddress ("trk_z0",                 &trk_z0);
-  tracksTree->SetBranchAddress ("trk_z0sig",              &trk_z0sig);
-  tracksTree->SetBranchAddress ("trk_theta",              &trk_theta);
-  tracksTree->SetBranchAddress ("trk_vz",                 &trk_vz);
+  //tracksTree->SetBranchAddress ("trk_d0",                 &trk_d0);
+  //tracksTree->SetBranchAddress ("trk_d0sig",              &trk_d0sig);
+  //tracksTree->SetBranchAddress ("trk_z0",                 &trk_z0);
+  //tracksTree->SetBranchAddress ("trk_z0sig",              &trk_z0sig);
+  //tracksTree->SetBranchAddress ("trk_theta",              &trk_theta);
+  //tracksTree->SetBranchAddress ("trk_vz",                 &trk_vz);
   //tracksTree->SetBranchAddress ("trk_nBLayerHits",        &trk_nBLayerHits);
   //tracksTree->SetBranchAddress ("trk_nBLayerSharedHits",  &trk_nBLayerSharedHits);
   //tracksTree->SetBranchAddress ("trk_nPixelHits",         &trk_nPixelHits);
@@ -176,20 +173,20 @@ bool Correlator (const char* tag, const char* outFilePattern, TTree* jetsTree, T
   //tracksTree->SetBranchAddress ("trk_nSCTSharedHits",     &trk_nSCTSharedHits);
   //tracksTree->SetBranchAddress ("trk_nTRTHits",           &trk_nTRTHits);
   //tracksTree->SetBranchAddress ("trk_nTRTSharedHits",     &trk_nTRTSharedHits);
-  if (!IsCollisions ()) {
-    tracksTree->SetBranchAddress ("trk_prob_truth",     &trk_prob_truth);
-    tracksTree->SetBranchAddress ("trk_truth_pt",       &trk_truth_pt);
-    tracksTree->SetBranchAddress ("trk_truth_eta",      &trk_truth_eta);
-    tracksTree->SetBranchAddress ("trk_truth_phi",      &trk_truth_phi);
-    tracksTree->SetBranchAddress ("trk_truth_charge",   &trk_truth_charge);
-    tracksTree->SetBranchAddress ("trk_truth_type",     &trk_truth_type);
-    tracksTree->SetBranchAddress ("trk_truth_orig",     &trk_truth_orig);
-    tracksTree->SetBranchAddress ("trk_truth_barcode",  &trk_truth_barcode);
-    tracksTree->SetBranchAddress ("trk_truth_pdgid",    &trk_truth_pdgid);
-    tracksTree->SetBranchAddress ("trk_truth_vz",       &trk_truth_vz);
-    tracksTree->SetBranchAddress ("trk_truth_nIn",      &trk_truth_nIn);
-    tracksTree->SetBranchAddress ("trk_truth_isHadron", &trk_truth_isHadron);
-  }
+  //if (!IsCollisions ()) {
+  //  tracksTree->SetBranchAddress ("trk_prob_truth",     &trk_prob_truth);
+  //  tracksTree->SetBranchAddress ("trk_truth_pt",       &trk_truth_pt);
+  //  tracksTree->SetBranchAddress ("trk_truth_eta",      &trk_truth_eta);
+  //  tracksTree->SetBranchAddress ("trk_truth_phi",      &trk_truth_phi);
+  //  tracksTree->SetBranchAddress ("trk_truth_charge",   &trk_truth_charge);
+  //  tracksTree->SetBranchAddress ("trk_truth_type",     &trk_truth_type);
+  //  tracksTree->SetBranchAddress ("trk_truth_orig",     &trk_truth_orig);
+  //  tracksTree->SetBranchAddress ("trk_truth_barcode",  &trk_truth_barcode);
+  //  tracksTree->SetBranchAddress ("trk_truth_pdgid",    &trk_truth_pdgid);
+  //  tracksTree->SetBranchAddress ("trk_truth_vz",       &trk_truth_vz);
+  //  tracksTree->SetBranchAddress ("trk_truth_nIn",      &trk_truth_nIn);
+  //  tracksTree->SetBranchAddress ("trk_truth_isHadron", &trk_truth_isHadron);
+  //}
 
 
   if (!IsCollisions ()) {
@@ -215,6 +212,7 @@ bool Correlator (const char* tag, const char* outFilePattern, TTree* jetsTree, T
   //jetsTree->SetBranchAddress ("akt4_hi_jet_sub_e",        &akt4_hi_jet_sub_e);
   jetsTree->SetBranchAddress ("akt4_hi_jet_timing",       &akt4_hi_jet_timing);
 
+
   const int nJESVar = GetNJESVar ();
   if (!IsCollisions () && nJESVar != -1) {
     std::cout << "Info: In RunCorrelator.cxx: Branching JES variation " << nJESVar << std::endl;
@@ -222,13 +220,16 @@ bool Correlator (const char* tag, const char* outFilePattern, TTree* jetsTree, T
   }
 
 
+  const int nTrkWPVar = (DoHITightVar () ? 1 : (DoHILooseVar () ? 2 : 0));
+
+
   // setup centrality bins (only relevant for p+Pb)
-  double* centBins = (DoFcalCentVar () ? fcalCentBins : (DoFineFcalCentVar () ? fineFcalCentBins : zdcCentBins));
-  const int nCentBins = (DoFcalCentVar () ? nFcalCentBins : (DoFineFcalCentVar () ? nFineFcalCentBins : nZdcCentBins));
+  double* centBins = (DoFcalCentVar () ? fcalCentBins : (DoFineFcalCentVar () ? fineFcalCentBins : (!IsCollisions () ? zdcCentBins : fcalCentBins)));
+  const int nCentBins = (DoFcalCentVar () ? nFcalCentBins : (DoFineFcalCentVar () ? nFineFcalCentBins : (!IsCollisions () ? nZdcCentBins : nFcalCentBins)));
 
 
   TH2D* h2_trk_eff = LoadTrackingEfficiency ();
-  TH2D* h2_trk_pur = LoadTrackingPurity ();
+  TH1D** h_trk_pur = LoadTrackingPurity ();
 
   TF1** f_trk_pur = LoadTrackingPurityFuncs ();
 
@@ -347,13 +348,13 @@ bool Correlator (const char* tag, const char* outFilePattern, TTree* jetsTree, T
   int nMixCentBins = 0;
 
   if (Ispp ()) {
-    if (doMixVar1)      { mixCentBins = ppMixVar1Bins;  nMixCentBins = nppMixVar1Bins;  }
-    else if (doMixVar3) { mixCentBins = ppMixVar3Bins;  nMixCentBins = nppMixVar3Bins;  }
-    else                { mixCentBins = ppMixBins;      nMixCentBins = nppMixBins;      }
+    if (DoMixCatVar1 ())      { mixCentBins = ppMixVar1Bins;    nMixCentBins = nppMixVar1Bins;  }
+    else if (DoMixCatVar3 ()) { mixCentBins = ppMixVar3Bins;    nMixCentBins = nppMixVar3Bins;  }
+    else                      { mixCentBins = ppMixBins;        nMixCentBins = nppMixBins;      }
   }
   else {
-    if (doMixVar2)      { mixCentBins = fcalMixVar2Bins;  nMixCentBins = nFcalMixVar2Bins;  }
-    else                { mixCentBins = fcalMixBins;      nMixCentBins = nFcalMixBins;      }
+    if (DoMixCatVar2 ())      { mixCentBins = fcalMixVar2Bins;  nMixCentBins = nFcalMixVar2Bins;  }
+    else                      { mixCentBins = fcalMixBins;      nMixCentBins = nFcalMixBins;      }
   }
 
 
@@ -414,7 +415,7 @@ bool Correlator (const char* tag, const char* outFilePattern, TTree* jetsTree, T
     int iCent = 0;
     // p+Pb only -- split events by centrality
     if (IspPb ()) {
-      const double centVar = (DoFcalCentVar ()  || DoFineFcalCentVar () ? fcalA_et : ZdcCalibEnergy_A * 1e3);
+      const double centVar = (!IsCollisions () || DoFcalCentVar ()  || DoFineFcalCentVar () ? fcalA_et : ZdcCalibEnergy_A * 1e3);
       iCent = GetBin (centBins, nCentBins, centVar);
       if (iCent < 0 || iCent > nCentBins-1)
         continue;
@@ -594,7 +595,7 @@ bool Correlator (const char* tag, const char* outFilePattern, TTree* jetsTree, T
       // correlate charged particles with this jet  
       for (int iTrk = 0; iTrk < trk_n; iTrk++) {
 
-        if (!MeetsTrackCuts (iTrk))
+        if (!MeetsTrackCuts (iTrk, nTrkWPVar))
           continue; // cut on bad quality tracks
 
         if (trk_pt[iTrk] < pTChBins[0])
@@ -628,7 +629,7 @@ bool Correlator (const char* tag, const char* outFilePattern, TTree* jetsTree, T
 
         const float teff = h2_trk_eff->GetBinContent (h2_trk_eff->FindBin (trk_eta[iTrk], trk_pt[iTrk]));
         //const float tpur = h2_trk_pur->GetBinContent (h2_trk_pur->FindBin (trk_eta[iTrk], trk_pt[iTrk])); // deprecated
-        const float tpur = f_trk_pur[iEta]->Eval (trk_pt[iTrk]);
+        const float tpur = (DoPrimFitVar () ? h_trk_pur[iEta]->GetBinContent (h_trk_pur[iEta]->FindBin (trk_pt[iTrk])) : f_trk_pur[iEta]->Eval (trk_pt[iTrk]));
         const float twgt = thisjwgt * (teff > 0. ? tpur / teff : 0.);
 
         if (0.5 < trk_pt[iTrk] && trk_pt[iTrk] < 1)
@@ -757,11 +758,13 @@ bool Correlator (const char* tag, const char* outFilePattern, TTree* jetsTree, T
 
 
   SaferDelete (&h2_trk_eff);
-  SaferDelete (&h2_trk_pur);
 
-  for (int iEta = 0; iEta < nEtaTrkBins; iEta++)
+  for (int iEta = 0; iEta < nEtaTrkBins; iEta++) {
     SaferDelete (&f_trk_pur[iEta]);
+    SaferDelete (&h_trk_pur[iEta]);
+  }
   Delete1DArray (f_trk_pur, nEtaTrkBins);
+  Delete1DArray (h_trk_pur, nEtaTrkBins);
 
 
   for (int iFile = 0; iFile < nFiles; iFile++) {
@@ -820,6 +823,7 @@ bool RunCorrelator (const char* directory,
                     const char* tag,
                     const char* jetsInFileName,
                     const char* outFilePattern,
+                    const char* mixdirectory = nullptr,
                     const char* tracksInFileName = nullptr) {
 
   if (!Is5TeV () || (!Ispp17 () && !IspPb16 ())) {
@@ -833,10 +837,21 @@ bool RunCorrelator (const char* directory,
     jet_max_pt = (float) std::atof (std::getenv ("JET_MAX_PT"));
   doMixing = (tracksInFileName != nullptr && strcmp (tracksInFileName, "") != 0);
 
+  // check mixing configuration makes sense
+  if (!doMixing && (DoMixCatVar1 () || DoMixCatVar2 () || DoMixCatVar3 ())) {
+    std::cout << "In RunCorrelator.cxx: Configured to run mixing variations but no mixing configuration specified? Please investigate. Exiting." << std::endl;
+    return false;
+  }
 
-  doMixVar1 = (TString (jetsInFileName).Contains ("MixCatVar1") || (doMixing && TString (tracksInFileName).Contains ("MixCatVar1")));
-  doMixVar2 = (TString (jetsInFileName).Contains ("MixCatVar2") || (doMixing && TString (tracksInFileName).Contains ("MixCatVar2")));
-  doMixVar3 = (TString (jetsInFileName).Contains ("MixCatVar3") || (doMixing && TString (tracksInFileName).Contains ("MixCatVar3")));
+  // histograms for some mixing variations are symlinks to central values to avoid file copy issues, make sure not to overwrite them by exiting gracefully
+  if (DoMixCatVar2 () && Ispp ()) {
+    std::cout << "In RunCorrelator.cxx: MixCatVar2 does nothing in pp, exiting gracefully." << std::endl;
+    return true;
+  }
+  else if ((DoMixCatVar1 () || DoMixCatVar3 ()) && IspPb ()) {
+    std::cout << "In RunCorrelator.cxx: MixCatVar1 and MixCatVar3 do nothing in p+Pb, exiting gracefully." << std::endl;
+    return true;
+  }
 
 
   //////////////////////////////////////////////////////////////////////////////////////////
@@ -846,7 +861,6 @@ bool RunCorrelator (const char* directory,
 
   {
     // opens a bunch of TTrees as a TChain from all files in a directory matching the file identifier
-    TString pattern = "*.root";
     std::cout << "DataPath = " << dataPath << std::endl;
     auto dir = gSystem->OpenDirectory (dataPath + directory);
     while (const char* f = gSystem->GetDirEntry (dir)) {
@@ -883,9 +897,16 @@ bool RunCorrelator (const char* directory,
 
   if (tracksInTree) {
     // opens a bunch of TTrees as a TChain from all files in a directory matching the file identifier
-    TString pattern = "*.root";
     std::cout << "DataPath = " << dataPath << std::endl;
-    auto dir = gSystem->OpenDirectory (dataPath + directory);
+    auto dir = gSystem->OpenDirectory (dataPath + mixdirectory);
+
+    TString patternString = tracksInFileName;
+    patternString.ReplaceAll (".", "\\."); // save '.' as normal character
+    patternString.ReplaceAll ("*",".*"); // wildcard '.' of any length '*'
+    std::cout << patternString << std::endl;
+
+    TPRegexp pattern = TPRegexp (patternString);
+
     while (const char* f = gSystem->GetDirEntry (dir)) {
       TString file = TString (f);
 
@@ -893,12 +914,13 @@ bool RunCorrelator (const char* directory,
         if (!file.Contains ("MinBias"))
           continue;
       }
-      if (!file.Contains (tracksInFileName))
+      if (!pattern.MatchB (file))
         continue;
+      //if (!file.Contains (tracksInFileName))
+      //  continue;
 
-      std::cout << "Adding " << dataPath + directory + "/" + file + "/*.root" << " to input tracks trees TChain" << std::endl;
-      tracksInTree->Add (dataPath + directory + "/" + file + "/*.root");
-      break;
+      std::cout << "Adding " << dataPath + mixdirectory + "/" + file + "/*.root" << " to input tracks trees TChain" << std::endl;
+      tracksInTree->Add (dataPath + mixdirectory + "/" + file + "/*.root");
     }
     if (tracksInTree->GetEntries () == 0) {
       std::cout << "Info: In RunCorrelator.cxx: Tracks input chain has " << tracksInTree->GetEntries () << " entries, exiting gracefully." << std::endl;
@@ -966,6 +988,7 @@ int main (int argc, char** argv) {
     GetMCWeights (inFileName);
   }
 
+  const char* mixdir                = (argc > argn && argv[argn] ? argv[argn++] : "");
   const char* assocInFileName       = (argc > argn && argv[argn] ? argv[argn++] : "");
 
   std::cout << "Configuration set to";
@@ -985,12 +1008,13 @@ int main (int argc, char** argv) {
     std::cout << "\n\t  --> deduced mcFilterEfficiency = " << mcFilterEfficiency;
   if (mcNumberEvents != 0.)
     std::cout << "\n\t  --> deduced mcNumberEvents = " << mcNumberEvents;
+  std::cout << "\n\tmixingDir = " << mixdir;
   std::cout << "\n\tassocInFileName = " << assocInFileName;
   std::cout << std::endl;
 
 
   std::cout << "Running Correlator algorithm..." << std::endl;
-  bool success = RunCorrelator (subdir, tag, inFileName, outFilePattern, assocInFileName);
+  bool success = RunCorrelator (subdir, tag, inFileName, outFilePattern, mixdir, assocInFileName);
 
   delete [] zdcCentBins;
   zdcCentBins = nullptr;

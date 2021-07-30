@@ -1,8 +1,9 @@
 #! /bin/bash
 
-declare -a systs=("Nominal")
-#declare -a systs=("Nominal" "JetES5PercUpVar" "JetES5PercDownVar" "JetES2PercUpVar" "JetES2PercDownVar" "MixCatVar1" "MixCatVar2" "MixCatVar3")
+declare -a systs=("TrkEffVar" "PrimFitVar")
+#declare -a systs=("Nominal" "HITightVar" "HILooseVar" "TrkEffVar" "FakeRateVar" "PrimFitVar" "PartSpcUnc" "MixCatVar1" "MixCatVar2" "MixCatVar3")
 #declare -a systs=("MixCatVar1" "MixCatVar2" "MixCatVar3")
+declare -a jessysts=("Nominal" "JESVar0" "JESVar1" "JESVar2" "JESVar3" "JESVar4" "JESVar5" "JESVar6" "JESVar7" "JESVar8" "JESVar9" "JESVar10" "JESVar11" "JESVar12" "JESVar13" "JESVar14" "JESVar15" "JESVar17" "JESVar18" "JESVar19")
 #declare -a minjpts=("15" "30" "60")
 declare -a minjpts=("30" "60")
 #declare -a minjpts=("30")
@@ -31,9 +32,14 @@ for minjpt in ${minjpts[@]}; do
 
 
   for syst in ${systs[@]}; do
-    condor_submit syst=${syst} minjpt=${minjpt} trig=${trig} jetstream=${pPbjetstream} tracksstream=${pPbtracksstream} RunCorrelator_pPb.job
+    #condor_submit syst=${syst} minjpt=${minjpt} trig=${trig} jetstream=${pPbjetstream} tracksstream=${pPbtracksstream} RunCorrelator_pPb.job
     condor_submit syst=${syst} minjpt=${minjpt} trig=${trig} jetstream=${ppjetstream} tracksstream=${pptracksstream} RunCorrelator_pp.job
   done
+
+  #for jessyst in ${jessysts[@]}; do
+  #  condor_submit syst=${jessyst} minjpt=${minjpt} RunCorrelator_MC.job
+  #done
+  #condor_submit syst=Nominal minjpt=${minjpt} RunCorrelator_MC_Mixing.job
 
 
   #condor_submit syst=FcalCentVar minjpt=${minjpt} trig=${trig} jetstream=${pPbjetstream} tracksstream=${pPbtracksstream} RunCorrelator_pPb.job

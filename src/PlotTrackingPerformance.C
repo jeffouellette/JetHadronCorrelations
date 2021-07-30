@@ -38,6 +38,9 @@ const vector <int> systems = {0, 1}; // 0 = pp, 1 = pPb
 const int nSystems = systems.size ();
 
 
+PrimaryFractionFit pff;
+
+
 void InvertRate (TH1* h) {
   for (int iX = 1; iX <= h->GetNbinsX (); iX++)
     for (int iY = 1; iY <= h->GetNbinsY (); iY++)
@@ -48,11 +51,9 @@ void InvertRate (TH1* h) {
 
 
 
-TF1* DoPurityFit (TH1D* h, const int degree, const int nderiv, const TF1* seed = nullptr) {
+TF1* DoPurityFit (TH1D* h, const int degree, const int nderiv) {
   std::string fname = std::string (h->GetName ());
   fname.replace (fname.begin (), fname.begin () + 1, "f");
-
-  PrimaryFractionFit pff;
 
   pff.SetNDeriv (nderiv);
   pff.SetDegree (degree);
@@ -71,30 +72,14 @@ TF1* DoPurityFit (TH1D* h, const int degree, const int nderiv, const TF1* seed =
   }
   mean = mean / den;
 
-  //TGAE* g = make_graph (h);
-  //RecenterGraph (g);
-
-  //double x,y;
-  //g->GetPoint (g->GetN ()-1, x, y);
-  //delete g;
-
   fit->SetParameter (0, h->GetBinCenter (h->GetNbinsX ()));
-  //fit->SetParameter (0, h->GetBinLowEdge (h->GetNbinsX () + 1));
-  //fit->SetParameter (0, x);
   fit->SetParameter (1, mean);
 
-  //if (!seed) {
-    for (int i = 2; i < ndf; i++)
-      fit->SetParameter (i, std::pow (0.1, i-nderiv));
-  //}
-  //else {
-  //  for (int i = 2; i < ndf; i++)
-  //    fit->SetParameter (i, seed->GetParameter (i));
-  //}
+  for (int i = 2; i < ndf; i++)
+    fit->SetParameter (i, std::pow (0.1, i-nderiv));
 
   h->Fit (fit, "RN0Q");
 
-  //delete g;
   return fit;
 }
 
@@ -160,17 +145,19 @@ void PlotTrackingPerformance () {
 
   TH2D***** h2_efficiency                   = Get4DArray <TH2D*> (nSystems, nPIDs, trackWPs.size (), nMultBins);
 
-  TH2D**** h2_fake_tracks         = Get3DArray <TH2D*> (nSystems, trackWPs.size (), nMultBins);
-  TH2D**** h2_secondary_tracks    = Get3DArray <TH2D*> (nSystems, trackWPs.size (), nMultBins);
-  TH2D**** h2_strange_tracks      = Get3DArray <TH2D*> (nSystems, trackWPs.size (), nMultBins);
-  TH2D**** h2_primary_tracks      = Get3DArray <TH2D*> (nSystems, trackWPs.size (), nMultBins);
-  TH2D**** h2_reco_tracks         = Get3DArray <TH2D*> (nSystems, trackWPs.size (), nMultBins);
-  TH2D**** h2_reco_tracks_wgt2    = Get3DArray <TH2D*> (nSystems, trackWPs.size (), nMultBins);
+  TH2D**** h2_fake_tracks               = Get3DArray <TH2D*> (nSystems, trackWPs.size (), nMultBins);
+  TH2D**** h2_secondary_tracks          = Get3DArray <TH2D*> (nSystems, trackWPs.size (), nMultBins);
+  TH2D**** h2_strange_tracks            = Get3DArray <TH2D*> (nSystems, trackWPs.size (), nMultBins);
+  TH2D**** h2_primary_tracks            = Get3DArray <TH2D*> (nSystems, trackWPs.size (), nMultBins);
+  TH2D**** h2_primary_tracks_fakes_p100 = Get3DArray <TH2D*> (nSystems, trackWPs.size (), nMultBins);
+  TH2D**** h2_reco_tracks               = Get3DArray <TH2D*> (nSystems, trackWPs.size (), nMultBins);
+  TH2D**** h2_reco_tracks_wgt2          = Get3DArray <TH2D*> (nSystems, trackWPs.size (), nMultBins);
 
-  TH2D**** h2_fake_rate           = Get3DArray <TH2D*> (nSystems, trackWPs.size (), nMultBins);
-  TH2D**** h2_secondary_rate      = Get3DArray <TH2D*> (nSystems, trackWPs.size (), nMultBins);
-  TH2D**** h2_strange_rate        = Get3DArray <TH2D*> (nSystems, trackWPs.size (), nMultBins);
-  TH2D**** h2_primary_rate        = Get3DArray <TH2D*> (nSystems, trackWPs.size (), nMultBins);
+  TH2D**** h2_fake_rate                 = Get3DArray <TH2D*> (nSystems, trackWPs.size (), nMultBins);
+  TH2D**** h2_secondary_rate            = Get3DArray <TH2D*> (nSystems, trackWPs.size (), nMultBins);
+  TH2D**** h2_strange_rate              = Get3DArray <TH2D*> (nSystems, trackWPs.size (), nMultBins);
+  TH2D**** h2_primary_rate              = Get3DArray <TH2D*> (nSystems, trackWPs.size (), nMultBins);
+  TH2D**** h2_primary_rate_fakes_p100   = Get3DArray <TH2D*> (nSystems, trackWPs.size (), nMultBins);
 
 
   TH1D****** h_truth_matched_primary_tracks  = Get5DArray <TH1D*> (nSystems, nPIDs, trackWPs.size (), nMultBins, nEtaTrkBins);
@@ -179,19 +166,22 @@ void PlotTrackingPerformance () {
 
   TH1D****** h_efficiency                    = Get5DArray <TH1D*> (nSystems, nPIDs, trackWPs.size (), nMultBins, nEtaTrkBins);
 
-  TH1D***** h_fake_tracks       = Get4DArray <TH1D*> (nSystems, trackWPs.size (), nMultBins, nEtaTrkBins);
-  TH1D***** h_secondary_tracks  = Get4DArray <TH1D*> (nSystems, trackWPs.size (), nMultBins, nEtaTrkBins);
-  TH1D***** h_strange_tracks    = Get4DArray <TH1D*> (nSystems, trackWPs.size (), nMultBins, nEtaTrkBins);
-  TH1D***** h_primary_tracks    = Get4DArray <TH1D*> (nSystems, trackWPs.size (), nMultBins, nEtaTrkBins);
-  TH1D***** h_reco_tracks       = Get4DArray <TH1D*> (nSystems, trackWPs.size (), nMultBins, nEtaTrkBins);
-  TH1D***** h_reco_tracks_wgt2  = Get4DArray <TH1D*> (nSystems, trackWPs.size (), nMultBins, nEtaTrkBins);
+  TH1D***** h_fake_tracks               = Get4DArray <TH1D*> (nSystems, trackWPs.size (), nMultBins, nEtaTrkBins);
+  TH1D***** h_secondary_tracks          = Get4DArray <TH1D*> (nSystems, trackWPs.size (), nMultBins, nEtaTrkBins);
+  TH1D***** h_strange_tracks            = Get4DArray <TH1D*> (nSystems, trackWPs.size (), nMultBins, nEtaTrkBins);
+  TH1D***** h_primary_tracks            = Get4DArray <TH1D*> (nSystems, trackWPs.size (), nMultBins, nEtaTrkBins);
+  TH1D***** h_primary_tracks_fakes_p100 = Get4DArray <TH1D*> (nSystems, trackWPs.size (), nMultBins, nEtaTrkBins);
+  TH1D***** h_reco_tracks               = Get4DArray <TH1D*> (nSystems, trackWPs.size (), nMultBins, nEtaTrkBins);
+  TH1D***** h_reco_tracks_wgt2          = Get4DArray <TH1D*> (nSystems, trackWPs.size (), nMultBins, nEtaTrkBins);
 
-  TH1D***** h_fake_rate         = Get4DArray <TH1D*> (nSystems, trackWPs.size (), nMultBins, nEtaTrkBins);
-  TH1D***** h_secondary_rate    = Get4DArray <TH1D*> (nSystems, trackWPs.size (), nMultBins, nEtaTrkBins);
-  TH1D***** h_strange_rate      = Get4DArray <TH1D*> (nSystems, trackWPs.size (), nMultBins, nEtaTrkBins);
-  TH1D***** h_primary_rate      = Get4DArray <TH1D*> (nSystems, trackWPs.size (), nMultBins, nEtaTrkBins);
+  TH1D***** h_fake_rate                 = Get4DArray <TH1D*> (nSystems, trackWPs.size (), nMultBins, nEtaTrkBins);
+  TH1D***** h_secondary_rate            = Get4DArray <TH1D*> (nSystems, trackWPs.size (), nMultBins, nEtaTrkBins);
+  TH1D***** h_strange_rate              = Get4DArray <TH1D*> (nSystems, trackWPs.size (), nMultBins, nEtaTrkBins);
+  TH1D***** h_primary_rate              = Get4DArray <TH1D*> (nSystems, trackWPs.size (), nMultBins, nEtaTrkBins);
+  TH1D***** h_primary_rate_fakes_p100   = Get4DArray <TH1D*> (nSystems, trackWPs.size (), nMultBins, nEtaTrkBins);
 
-  TF1***** f_primary_rate       = Get4DArray <TF1*> (nSystems, trackWPs.size (), nMultBins, nEtaTrkBins);
+  TF1***** f_primary_rate               = Get4DArray <TF1*> (nSystems, trackWPs.size (), nMultBins, nEtaTrkBins);
+  TF1***** f_primary_rate_fakes_p100    = Get4DArray <TF1*> (nSystems, trackWPs.size (), nMultBins, nEtaTrkBins);
 
 
   TFile* inFile = new TFile (Form ("%s/TrackingPerformance/Nominal/outFile.root", rootPath.Data ()), "read");
@@ -274,33 +264,42 @@ void PlotTrackingPerformance () {
         h2_fake_tracks[iSys][iWP][iMult] = (TH2D*) inFile->Get (Form ("h2_fake_tracks_%s_%s_iMult%i", sys.Data (), trackWPNames[iWP].c_str (), iMult));
         h2_secondary_tracks[iSys][iWP][iMult] = (TH2D*) inFile->Get (Form ("h2_secondary_tracks_%s_%s_iMult%i", sys.Data (), trackWPNames[iWP].c_str (), iMult));
         h2_strange_tracks[iSys][iWP][iMult] = (TH2D*) inFile->Get (Form ("h2_strange_tracks_%s_%s_iMult%i", sys.Data (), trackWPNames[iWP].c_str (), iMult));
-        h2_primary_tracks[iSys][iWP][iMult] = (TH2D*) inFile->Get (Form ("h2_primary_tracks_%s_%s_iMult%i", sys.Data (), trackWPNames[iWP].c_str (), iMult));
+        //h2_primary_tracks[iSys][iWP][iMult] = (TH2D*) inFile->Get (Form ("h2_primary_tracks_%s_%s_iMult%i", sys.Data (), trackWPNames[iWP].c_str (), iMult));
 
         h2_reco_tracks[iSys][iWP][iMult] = (TH2D*) inFile->Get (Form ("h2_reco_tracks_%s_%s_iMult%i", sys.Data (), trackWPNames[iWP].c_str (), iMult));
         h2_reco_tracks_wgt2[iSys][iWP][iMult] = (TH2D*) inFile->Get (Form ("h2_reco_tracks_wgt2_%s_%s_iMult%i", sys.Data (), trackWPNames[iWP].c_str (), iMult));
 
-        //h2_primary_tracks[iSys][iWP][iMult] = (TH2D*) h2_reco_tracks[iSys][iWP][iMult]->Clone (Form ("h2_primary_tracks_%s_%s_iMult%i", sys.Data (), trackWPNames[iWP].c_str (), iMult));
-        //h2_primary_tracks[iSys][iWP][iMult]->Add (h2_fake_tracks[iSys][iWP][iMult], -1);
-        //h2_primary_tracks[iSys][iWP][iMult]->Add (h2_secondary_tracks[iSys][iWP][iMult], -1);
+        h2_primary_tracks[iSys][iWP][iMult] = (TH2D*) h2_reco_tracks[iSys][iWP][iMult]->Clone (Form ("h2_primary_tracks_%s_%s_iMult%i", sys.Data (), trackWPNames[iWP].c_str (), iMult));
+        h2_primary_tracks[iSys][iWP][iMult]->Add (h2_fake_tracks[iSys][iWP][iMult], -1);
+        h2_primary_tracks[iSys][iWP][iMult]->Add (h2_secondary_tracks[iSys][iWP][iMult], -1);
+
+        h2_primary_tracks_fakes_p100[iSys][iWP][iMult] = (TH2D*) h2_reco_tracks[iSys][iWP][iMult]->Clone (Form ("h2_primary_tracks_fakes_p100_%s_%s_iMult%i", sys.Data (), trackWPNames[iWP].c_str (), iMult));
+        h2_primary_tracks_fakes_p100[iSys][iWP][iMult]->Add (h2_fake_tracks[iSys][iWP][iMult], -2); // 100% increase of fake rate for systematics
+        h2_primary_tracks_fakes_p100[iSys][iWP][iMult]->Add (h2_secondary_tracks[iSys][iWP][iMult], -1);
 
         for (int iEta = 0; iEta < nEtaTrkBins; iEta++) {
 
           h_fake_tracks[iSys][iWP][iMult][iEta] = (TH1D*) inFile->Get (Form ("h_fake_tracks_%s_%s_iMult%i_iEta%i", sys.Data (), trackWPNames[iWP].c_str (), iMult, iEta));
           h_secondary_tracks[iSys][iWP][iMult][iEta] = (TH1D*) inFile->Get (Form ("h_secondary_tracks_%s_%s_iMult%i_iEta%i", sys.Data (), trackWPNames[iWP].c_str (), iMult, iEta));
           h_strange_tracks[iSys][iWP][iMult][iEta] = (TH1D*) inFile->Get (Form ("h_strange_tracks_%s_%s_iMult%i_iEta%i", sys.Data (), trackWPNames[iWP].c_str (), iMult, iEta));
-          h_primary_tracks[iSys][iWP][iMult][iEta] = (TH1D*) inFile->Get (Form ("h_primary_tracks_%s_%s_iMult%i_iEta%i", sys.Data (), trackWPNames[iWP].c_str (), iMult, iEta));
+          //h_primary_tracks[iSys][iWP][iMult][iEta] = (TH1D*) inFile->Get (Form ("h_primary_tracks_%s_%s_iMult%i_iEta%i", sys.Data (), trackWPNames[iWP].c_str (), iMult, iEta));
           h_reco_tracks[iSys][iWP][iMult][iEta] = (TH1D*) inFile->Get (Form ("h_reco_tracks_%s_%s_iMult%i_iEta%i", sys.Data (), trackWPNames[iWP].c_str (), iMult, iEta));
           h_reco_tracks_wgt2[iSys][iWP][iMult][iEta] = (TH1D*) inFile->Get (Form ("h_reco_tracks_wgt2_%s_%s_iMult%i_iEta%i", sys.Data (), trackWPNames[iWP].c_str (), iMult, iEta));
 
-          //h_primary_tracks[iSys][iWP][iMult][iEta] = (TH1D*) h_reco_tracks[iSys][iWP][iMult][iEta]->Clone (Form ("h_primary_tracks_%s_%s_iMult%i_iEta%i", sys.Data (), trackWPNames[iWP].c_str (), iMult, iEta));
-          //h_primary_tracks[iSys][iWP][iMult][iEta]->Add (h_fake_tracks[iSys][iWP][iMult][iEta], -1);
-          //h_primary_tracks[iSys][iWP][iMult][iEta]->Add (h_secondary_tracks[iSys][iWP][iMult][iEta], -1);
+          h_primary_tracks[iSys][iWP][iMult][iEta] = (TH1D*) h_reco_tracks[iSys][iWP][iMult][iEta]->Clone (Form ("h_primary_tracks_%s_%s_iMult%i_iEta%i", sys.Data (), trackWPNames[iWP].c_str (), iMult, iEta));
+          h_primary_tracks[iSys][iWP][iMult][iEta]->Add (h_fake_tracks[iSys][iWP][iMult][iEta], -1);
+          h_primary_tracks[iSys][iWP][iMult][iEta]->Add (h_secondary_tracks[iSys][iWP][iMult][iEta], -1);
+
+          h_primary_tracks_fakes_p100[iSys][iWP][iMult][iEta] = (TH1D*) h_reco_tracks[iSys][iWP][iMult][iEta]->Clone (Form ("h_primary_tracks_fakes_p100_%s_%s_iMult%i_iEta%i", sys.Data (), trackWPNames[iWP].c_str (), iMult, iEta));
+          h_primary_tracks_fakes_p100[iSys][iWP][iMult][iEta]->Add (h_fake_tracks[iSys][iWP][iMult][iEta], -2); // 100% increase of fake rate for systematics
+          h_primary_tracks_fakes_p100[iSys][iWP][iMult][iEta]->Add (h_secondary_tracks[iSys][iWP][iMult][iEta], -1);
 
           if (iSys == 0) {
             h_fake_tracks[iSys][iWP][iMult][iEta]->Rebin (2);
             h_secondary_tracks[iSys][iWP][iMult][iEta]->Rebin (2);
             h_strange_tracks[iSys][iWP][iMult][iEta]->Rebin (2);
             h_primary_tracks[iSys][iWP][iMult][iEta]->Rebin (2);
+            h_primary_tracks_fakes_p100[iSys][iWP][iMult][iEta]->Rebin (2);
             h_reco_tracks[iSys][iWP][iMult][iEta]->Rebin (2);
             h_reco_tracks_wgt2[iSys][iWP][iMult][iEta]->Rebin (2);
           }
@@ -330,6 +329,7 @@ void PlotTrackingPerformance () {
           RebinSomeBins (&(h_secondary_tracks[1][iWP][iMult][iEta]), nCoarserPtchBins, (double*) coarserPtchBins);
           RebinSomeBins (&(h_strange_tracks[1][iWP][iMult][iEta]), nCoarserPtchBins, (double*) coarserPtchBins);
           RebinSomeBins (&(h_primary_tracks[1][iWP][iMult][iEta]), nCoarserPtchBins, (double*) coarserPtchBins);
+          RebinSomeBins (&(h_primary_tracks_fakes_p100[1][iWP][iMult][iEta]), nCoarserPtchBins, (double*) coarserPtchBins);
           RebinSomeBins (&(h_reco_tracks[1][iWP][iMult][iEta]), nCoarserPtchBins, (double*) coarserPtchBins);
           RebinSomeBins (&(h_reco_tracks_wgt2[1][iWP][iMult][iEta]), nCoarserPtchBins, (double*) coarserPtchBins);
 
@@ -383,6 +383,8 @@ void PlotTrackingPerformance () {
         InvertRate (h2_strange_rate[iSys][iWP][iMult]);
         h2_primary_rate[iSys][iWP][iMult] = (TH2D*) h2_primary_tracks[iSys][iWP][iMult]->Clone (Form ("h2_primary_rate_%s_%s_iMult%i", sys.Data (), trackWPNames[iWP].c_str (), iMult));
         BinomialDivide (h2_primary_rate[iSys][iWP][iMult], h2_primary_tracks[iSys][iWP][iMult], h2_reco_tracks[iSys][iWP][iMult], h2_reco_tracks_wgt2[iSys][iWP][iMult]);
+        h2_primary_rate_fakes_p100[iSys][iWP][iMult] = (TH2D*) h2_primary_tracks_fakes_p100[iSys][iWP][iMult]->Clone (Form ("h2_primary_rate_fakes_p100_%s_%s_iMult%i", sys.Data (), trackWPNames[iWP].c_str (), iMult));
+        BinomialDivide (h2_primary_rate_fakes_p100[iSys][iWP][iMult], h2_primary_tracks_fakes_p100[iSys][iWP][iMult], h2_reco_tracks[iSys][iWP][iMult], h2_reco_tracks_wgt2[iSys][iWP][iMult]);
 
         for (int iEta = 0; iEta < nEtaTrkBins; iEta++) {
 
@@ -397,6 +399,8 @@ void PlotTrackingPerformance () {
           InvertRate (h_strange_rate[iSys][iWP][iMult][iEta]);
           h_primary_rate[iSys][iWP][iMult][iEta] = (TH1D*) h_primary_tracks[iSys][iWP][iMult][iEta]->Clone (Form ("h_primary_rate_%s_%s_iMult%i_iEta%i", sys.Data (), trackWPNames[iWP].c_str (), iMult, iEta));
           BinomialDivide (h_primary_rate[iSys][iWP][iMult][iEta], h_primary_tracks[iSys][iWP][iMult][iEta], h_reco_tracks[iSys][iWP][iMult][iEta], h_reco_tracks_wgt2[iSys][iWP][iMult][iEta]);
+          h_primary_rate_fakes_p100[iSys][iWP][iMult][iEta] = (TH1D*) h_primary_tracks_fakes_p100[iSys][iWP][iMult][iEta]->Clone (Form ("h_primary_rate_fakes_p100_%s_%s_iMult%i_iEta%i", sys.Data (), trackWPNames[iWP].c_str (), iMult, iEta));
+          BinomialDivide (h_primary_rate_fakes_p100[iSys][iWP][iMult][iEta], h_primary_tracks_fakes_p100[iSys][iWP][iMult][iEta], h_reco_tracks[iSys][iWP][iMult][iEta], h_reco_tracks_wgt2[iSys][iWP][iMult][iEta]);
 
         } // end loop over iEta
 
@@ -408,27 +412,27 @@ void PlotTrackingPerformance () {
 
 
 
-  //for (int iSys : systems) {
+  for (int iSys : systems) {
 
-  //  const TString sys = (iSys == 0 ? "pp" : "pPb");
+    const TString sys = (iSys == 0 ? "pp" : "pPb");
 
-  //  for (int iWP = 0; iWP < trackWPs.size (); iWP++) {
+    for (int iWP = 0; iWP < trackWPs.size (); iWP++) {
 
-  //    for (int iMult = 0; iMult < nMultBins; iMult++) {
+      //for (int iMult = 0; iMult < nMultBins; iMult++) {
+      for (int iMult = nMultBins-1; iMult < nMultBins; iMult++) {
 
-  //      for (int iEta = 0; iEta < nEtaTrkBins; iEta++) {
+        for (int iEta = 0; iEta < nEtaTrkBins; iEta++) {
 
-  //        //TF1* f = DoPurityFit (h_primary_rate[iSys][iWP][iMult][iEta], 60, 6, 1);
-  //        TF1* f = DoPurityFit (h_primary_rate[iSys][iWP][iMult][iEta], 8, 2);//, f_primary_rate[0][iWP][iMult][iEta]);
-  //        f_primary_rate[iSys][iWP][iMult][iEta] = f;
+          f_primary_rate[iSys][iWP][iMult][iEta] = DoPurityFit (h_primary_rate[iSys][iWP][iMult][iEta], 8, 2);
+          f_primary_rate_fakes_p100[iSys][iWP][iMult][iEta] = DoPurityFit (h_primary_rate_fakes_p100[iSys][iWP][iMult][iEta], 8, 2);
 
-  //      } // end loop over iEta
+        } // end loop over iEta
 
-  //    } // end loop over iMult
+      } // end loop over iMult
 
-  //  } // end loop over iWP
+    } // end loop over iWP
 
-  //} // end loop over iSys
+  } // end loop over iSys
 
 
 
@@ -437,15 +441,110 @@ void PlotTrackingPerformance () {
   TLine* l = new TLine ();
 
   const short iWP = 0;
-  //const short iMult = 0;
+
 
 
   for (int iSys : systems) {
 
-    const char* cname = Form ("c_eff_sum_%s", iSys == 0 ? "pp" : "pPb");
+    const char* cname = Form ("c_eff_sum_vs_mult_%s", iSys == 0 ? "pp" : "pPb");
 
     TCanvas* c = new TCanvas (cname, "", 800*(nMultBins-1), 800);
     c->Divide (3, 1);
+
+    const double lMargin = 0.15;
+    const double rMargin = 0.04;
+    const double bMargin = 0.15;
+    const double tMargin = 0.04;
+
+    for (int iMult = 0; iMult < (nMultBins-1); iMult++) {
+
+      c->cd (iMult+1);
+
+      gPad->SetLeftMargin (lMargin);
+      gPad->SetRightMargin (rMargin);
+      gPad->SetBottomMargin (bMargin);
+      gPad->SetTopMargin (tMargin);
+
+      gPad->SetLogx ();
+
+      TH1D* htemp = new TH1D ("htemp", "", 1, pTchBins[0], pTchBins[nPtchBins]);
+      htemp->SetBinContent (1, 1);
+  
+      TAxis* xax = htemp->GetXaxis ();
+      TAxis* yax = htemp->GetYaxis ();
+
+      xax->SetTitle ("#it{p}_{T}^{truth} [GeV]");
+      xax->SetTitleOffset (0.9 * xax->GetTitleOffset ());
+      xax->SetLabelSize (0);
+
+      yax->SetTitle ("Track Reco. Efficiency");
+      yax->SetLabelFont (43);
+      yax->SetLabelSize (32);
+      yax->SetLabelOffset (1.8 * yax->GetLabelOffset ());
+      const double ymin = 0.5;
+      const double ymax = 1.06;
+      yax->SetRangeUser (ymin, ymax);
+
+      htemp->SetLineWidth (1);
+      htemp->SetLineStyle (2);
+  
+      htemp->DrawCopy ("hist");
+      SaferDelete (&htemp);
+
+      tl->SetTextFont (43);
+      tl->SetTextSize (32);
+      tl->SetTextAlign (21);
+      
+      const double yoff = ymin - 0.04 * (ymax-ymin) / (1.-tMargin-bMargin);
+      //tl->DrawLatex (0.5,  yoff, "0.5");
+      tl->DrawLatex (0.7,  yoff, "0.7");
+      tl->DrawLatex (1,  yoff, "1");
+      tl->DrawLatex (2,  yoff, "2");
+      tl->DrawLatex (3,  yoff, "3");
+      tl->DrawLatex (4,  yoff, "4");
+      tl->DrawLatex (5,  yoff, "5");
+      tl->DrawLatex (6,  yoff, "6");
+      tl->DrawLatex (7,  yoff, "7");
+      tl->DrawLatex (10, yoff, "10");
+      tl->DrawLatex (20, yoff, "20");
+      tl->DrawLatex (30, yoff, "30");
+      tl->DrawLatex (40, yoff, "40");
+      tl->DrawLatex (60, yoff, "60");
+      //tl->DrawLatex (80, yoff, "80");
+      tl->DrawLatex (100, yoff, "100");
+
+      for (int iEta = 0; iEta < nEtaTrkBins; iEta++)
+        myDraw (h_efficiency[iSys][nPIDs-1][iWP][iMult][iEta], colors[iEta], kOpenCircle, 0.6);
+
+      tl->SetTextColor (kBlack);
+      tl->SetTextAlign (11);
+
+      tl->SetTextSize (28);
+      tl->DrawLatexNDC (0.22, 0.88, "#bf{#it{ATLAS}} Simulation Internal");
+      tl->SetTextSize (24);
+      tl->DrawLatexNDC (0.22, 0.84, iSys == 0 ? "Pythia8 #it{pp}, #sqrt{s} = 5.02 TeV" : "Pythia8 + #it{p}+Pb overlay, #sqrt{s_{NN}} = 5.02 TeV");
+      tl->DrawLatexNDC (0.22, 0.80, Form ("%s tracks", trackWPStrs[iWP].c_str ()));
+ 
+      tl->SetTextSize (28);
+      tl->DrawLatexNDC (0.22, 0.22, Form ("N_{ch}^{rec} = %i-%i", (int) std::ceil (multBins[iMult]), (int) std::floor (multBins[iMult+1])));
+
+      for (int iEta = 0; iEta < nEtaTrkBins; iEta++)
+        myLineText2 (0.74, 0.34-iEta*0.036, colors[iEta], kOpenCircle, Form ("%g < |#eta| < %g", etaTrkBins[iEta], etaTrkBins[iEta+1]), 1.0, 0.026, true);
+
+    } // end loop over iMult
+
+    c->SaveAs (Form ("%s/Plots/TrackingPerformance/EfficiencySummary_vsMultiplicity_%s.pdf", workPath.Data (), iSys == 0 ? "pp" : "pPb"));
+  } // end loop over iSys
+
+
+
+  for (int iSys : systems) {
+
+    const int iMult = nMultBins-1;
+
+    const char* cname = Form ("c_eff_sum_%s", iSys == 0 ? "pp" : "pPb");
+
+    TCanvas* c = new TCanvas (cname, "", 800, 800);
 
     const double lMargin = 0.15;
     const double rMargin = 0.04;
@@ -457,302 +556,77 @@ void PlotTrackingPerformance () {
     c->SetBottomMargin (bMargin);
     c->SetTopMargin (tMargin);
 
-    for (int iMult = 0; iMult < (nMultBins-1); iMult++) {
+    c->SetLogx ();
 
-      c->cd (iMult+1);
-
-      gPad->SetLeftMargin (lMargin);
-      gPad->SetRightMargin (rMargin);
-      gPad->SetBottomMargin (bMargin);
-      gPad->SetTopMargin (tMargin);
-
-      {
-        gPad->SetLogx ();
-
-        TH1D* htemp = new TH1D ("htemp", "", 1, pTchBins[0], pTchBins[nPtchBins]);
-        htemp->SetBinContent (1, 1);
+    TH1D* htemp = new TH1D ("htemp", "", 1, pTchBins[0], pTchBins[nPtchBins]);
+    htemp->SetBinContent (1, 1);
   
-        TAxis* xax = htemp->GetXaxis ();
-        TAxis* yax = htemp->GetYaxis ();
+    TAxis* xax = htemp->GetXaxis ();
+    TAxis* yax = htemp->GetYaxis ();
 
-        xax->SetTitle ("#it{p}_{T}^{truth} [GeV]");
-        xax->SetTitleOffset (0.9 * xax->GetTitleOffset ());
-        xax->SetLabelSize (0);
+    xax->SetTitle ("#it{p}_{T}^{truth} [GeV]");
+    xax->SetTitleOffset (0.9 * xax->GetTitleOffset ());
+    xax->SetLabelSize (0);
 
-        yax->SetTitle ("Track Reco. Efficiency");
-        yax->SetLabelFont (43);
-        yax->SetLabelSize (32);
-        yax->SetLabelOffset (1.8 * yax->GetLabelOffset ());
-        const double ymin = 0.5;
-        const double ymax = 1.06;
-        yax->SetRangeUser (ymin, ymax);
+    yax->SetTitle ("Track Reco. Efficiency");
+    yax->SetLabelFont (43);
+    yax->SetLabelSize (32);
+    yax->SetLabelOffset (1.8 * yax->GetLabelOffset ());
+    const double ymin = 0.5;
+    const double ymax = 1.06;
+    yax->SetRangeUser (ymin, ymax);
 
-        htemp->SetLineWidth (1);
-        htemp->SetLineStyle (2);
+    htemp->SetLineWidth (1);
+    htemp->SetLineStyle (2);
   
-        htemp->DrawCopy ("hist");
-        SaferDelete (&htemp);
+    htemp->DrawCopy ("hist");
+    SaferDelete (&htemp);
 
-        tl->SetTextFont (43);
-        tl->SetTextSize (32);
-        tl->SetTextAlign (21);
-        
-        const double yoff = ymin - 0.04 * (ymax-ymin) / (1.-tMargin-bMargin);
-        //tl->DrawLatex (0.5,  yoff, "0.5");
-        tl->DrawLatex (0.7,  yoff, "0.7");
-        tl->DrawLatex (1,  yoff, "1");
-        tl->DrawLatex (2,  yoff, "2");
-        tl->DrawLatex (3,  yoff, "3");
-        tl->DrawLatex (4,  yoff, "4");
-        tl->DrawLatex (5,  yoff, "5");
-        tl->DrawLatex (6,  yoff, "6");
-        tl->DrawLatex (7,  yoff, "7");
-        tl->DrawLatex (10, yoff, "10");
-        tl->DrawLatex (20, yoff, "20");
-        tl->DrawLatex (30, yoff, "30");
-        tl->DrawLatex (40, yoff, "40");
-        tl->DrawLatex (60, yoff, "60");
-        //tl->DrawLatex (80, yoff, "80");
-        tl->DrawLatex (100, yoff, "100");
-      }
+    tl->SetTextFont (43);
+    tl->SetTextSize (32);
+    tl->SetTextAlign (21);
+    
+    const double yoff = ymin - 0.04 * (ymax-ymin) / (1.-tMargin-bMargin);
+    //tl->DrawLatex (0.5,  yoff, "0.5");
+    tl->DrawLatex (0.7,  yoff, "0.7");
+    tl->DrawLatex (1,  yoff, "1");
+    tl->DrawLatex (2,  yoff, "2");
+    tl->DrawLatex (3,  yoff, "3");
+    tl->DrawLatex (4,  yoff, "4");
+    tl->DrawLatex (5,  yoff, "5");
+    tl->DrawLatex (6,  yoff, "6");
+    tl->DrawLatex (7,  yoff, "7");
+    tl->DrawLatex (10, yoff, "10");
+    tl->DrawLatex (20, yoff, "20");
+    tl->DrawLatex (30, yoff, "30");
+    tl->DrawLatex (40, yoff, "40");
+    tl->DrawLatex (60, yoff, "60");
+    //tl->DrawLatex (80, yoff, "80");
+    tl->DrawLatex (100, yoff, "100");
 
-      for (int iEta = 0; iEta < nEtaTrkBins; iEta++)
-        myDraw (h_efficiency[iSys][nPIDs-1][iWP][iMult][iEta], colors[iEta], kOpenCircle, 0.6);
+    for (int iEta = 0; iEta < nEtaTrkBins; iEta++)
+      myDraw (h_efficiency[iSys][nPIDs-1][iWP][iMult][iEta], colors[iEta], kOpenCircle, 0.8);
 
-      tl->SetTextColor (kBlack);
-      tl->SetTextAlign (11);
+    tl->SetTextColor (kBlack);
+    tl->SetTextAlign (11);
 
-      tl->SetTextSize (28);
-      tl->DrawLatexNDC (0.22, 0.89, "#bf{#it{ATLAS}} Simulation Internal");
-      tl->SetTextSize (24);
-      tl->DrawLatexNDC (0.22, 0.85, iSys == 0 ? "Pythia8 #it{pp}, #sqrt{s} = 5.02 TeV" : "Pythia8 + #it{p}+Pb overlay, #sqrt{s_{NN}} = 5.02 TeV");
-      tl->DrawLatexNDC (0.22, 0.81, Form ("%s tracks", trackWPStrs[iWP].c_str ()));
+    tl->SetTextSize (28);
+    tl->DrawLatexNDC (0.22, 0.88, "#bf{#it{ATLAS}} Simulation Internal");
+    tl->SetTextSize (24);
+    tl->DrawLatexNDC (0.22, 0.84, iSys == 0 ? "Pythia8 #it{pp}, #sqrt{s} = 5.02 TeV" : "Pythia8 + #it{p}+Pb overlay, #sqrt{s_{NN}} = 5.02 TeV");
+    tl->DrawLatexNDC (0.22, 0.80, Form ("%s tracks", trackWPStrs[iWP].c_str ()));
  
-      tl->SetTextSize (28);
-      tl->DrawLatexNDC (0.22, 0.22, Form ("N_{ch}^{rec} = %i-%i", (int) std::ceil (multBins[iMult]), (int) std::floor (multBins[iMult+1])));
-
-      for (int iEta = 0; iEta < nEtaTrkBins; iEta++)
-        myLineText2 (0.74, 0.34-iEta*0.036, colors[iEta], kOpenCircle, Form ("%g < |#eta| < %g", etaTrkBins[iEta], etaTrkBins[iEta+1]), 1.0, 0.026, true);
-
-    } // end loop over iMult
+    for (int iEta = 0; iEta < nEtaTrkBins; iEta++)
+      myLineText2 (0.74, 0.34-iEta*0.036, colors[iEta], kOpenCircle, Form ("%g < |#eta| < %g", etaTrkBins[iEta], etaTrkBins[iEta+1]), 1.0, 0.026, true);
 
     c->SaveAs (Form ("%s/Plots/TrackingPerformance/EfficiencySummary_%s.pdf", workPath.Data (), iSys == 0 ? "pp" : "pPb"));
-  }
+  } // end loop over iSys
 
-
-
-  //for (int iSys : systems) {
-
-  //  const char* cname = Form ("c_pur_sum_%s", iSys == 0 ? "pp" : "pPb");
-
-  //  TCanvas* c = new TCanvas (cname, "", 800*(nMultBins-1), 800);
-  //  c->Divide (3, 1);
-
-  //  const double lMargin = 0.15;
-  //  const double rMargin = 0.04;
-  //  const double bMargin = 0.15;
-  //  const double tMargin = 0.04;
-
-  //  for (int iMult = 0; iMult < (nMultBins-1); iMult++) {
-
-  //    c->cd (iMult+1);
-
-  //    gPad->SetLeftMargin (lMargin);
-  //    gPad->SetRightMargin (rMargin);
-  //    gPad->SetBottomMargin (bMargin);
-  //    gPad->SetTopMargin (tMargin);
-
-  //    gPad->SetLogx ();
-
-  //    {
-  //      TH1D* htemp = new TH1D ("htemp", "", 1, pTchBins[0], pTchBins[nPtchBins]);
-  //      htemp->SetBinContent (1, 1);
-  //
-  //      TAxis* xax = htemp->GetXaxis ();
-  //      TAxis* yax = htemp->GetYaxis ();
-
-  //      xax->SetTitle ("#it{p}_{T}^{ch} [GeV]");
-  //      xax->SetTitleOffset (0.9 * xax->GetTitleOffset ());
-  //      xax->SetLabelSize (0);
-
-  //      yax->SetTitle ("Primary Fraction");
-  //      yax->SetLabelFont (43);
-  //      yax->SetLabelSize (32);
-  //      yax->SetLabelOffset (1.8 * yax->GetLabelOffset ());
-  //      const double ymin = 0.82;
-  //      const double ymax = 1.06;
-  //      yax->SetRangeUser (ymin, ymax);
-
-  //      htemp->SetLineWidth (1);
-  //      htemp->SetLineStyle (2);
-
-  //      htemp->DrawCopy ("hist");
-  //      SaferDelete (&htemp);
-
-  //      tl->SetTextFont (43);
-  //      tl->SetTextSize (32);
-  //      tl->SetTextAlign (21);
-  //      
-  //      const double yoff = ymin - 0.04 * (ymax-ymin) / (1.-tMargin-bMargin);
-  //      //tl->DrawLatex (0.5,  yoff, "0.5");
-  //      tl->DrawLatex (0.7,  yoff, "0.7");
-  //      tl->DrawLatex (1,  yoff, "1");
-  //      tl->DrawLatex (2,  yoff, "2");
-  //      tl->DrawLatex (3,  yoff, "3");
-  //      tl->DrawLatex (4,  yoff, "4");
-  //      tl->DrawLatex (5,  yoff, "5");
-  //      tl->DrawLatex (6,  yoff, "6");
-  //      tl->DrawLatex (7,  yoff, "7");
-  //      tl->DrawLatex (10, yoff, "10");
-  //      tl->DrawLatex (20, yoff, "20");
-  //      tl->DrawLatex (30, yoff, "30");
-  //      tl->DrawLatex (40, yoff, "40");
-  //      tl->DrawLatex (60, yoff, "60");
-  //      //tl->DrawLatex (80, yoff, "80");
-  //      tl->DrawLatex (100, yoff, "100");
-  //    }
-
-  //    for (int iEta = 0; iEta < nEtaTrkBins; iEta++) {
-  //      myDraw (h_primary_rate[iSys][iWP][iMult][iEta], colors[iEta], kOpenCircle, 0.6);
-  //      TF1* f = f_primary_rate[iSys][iWP][iMult][iEta];
-  //      if (f) {
-  //        f->SetLineColor (colors[iEta]);
-  //        f->SetLineWidth (1);
-  //        f->Draw ("same");
-  //      }
-  //    }
-
-  //    tl->SetTextColor (kBlack);
-  //    tl->SetTextAlign (11);
-
-  //    tl->SetTextSize (28);
-  //    tl->DrawLatexNDC (0.22, 0.89, "#bf{#it{ATLAS}} Simulation Internal");
-  //    tl->SetTextSize (24);
-  //    tl->DrawLatexNDC (0.22, 0.85, iSys == 0 ? "Pythia8 #it{pp}, #sqrt{s} = 5.02 TeV" : "Hijing #it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV");
-  //    tl->DrawLatexNDC (0.22, 0.81, Form ("%s tracks", trackWPStrs[iWP].c_str ()));
-
-  //    tl->SetTextSize (28);
-  //    tl->DrawLatexNDC (0.22, 0.22, Form ("N_{ch}^{rec} = %i-%i", (int) std::ceil (multBins[iMult]), (int) std::floor (multBins[iMult+1])));
-
-  //    tl->SetTextSize (18);
-  //    tl->SetTextAlign (21);
-  //    tl->DrawLatexNDC (0.705, 0.37, "Primaries");
-  //    for (int iEta = 0; iEta < nEtaTrkBins; iEta++) {
-  //      myLineText2 (0.74, 0.34-iEta*0.036, colors[iEta], kOpenCircle, Form ("%g < |#eta| < %g", etaTrkBins[iEta], etaTrkBins[iEta+1]), 1.2, 0.026, true);
-  //    }
-
-  //  } // end loop over iMult
-
-  //  c->SaveAs (Form ("%s/Plots/TrackingPerformance/PuritySummary_%s.pdf", workPath.Data (), iSys == 0 ? "pp" : "pPb"));
-  //}
 
 
   for (int iSys : systems) {
 
-    const int iEta = 0;
-
-    const char* cname = Form ("c_eff_com_%s", iSys == 0 ? "pp" : "pPb");
-
-    TCanvas* c = new TCanvas (cname, "", 800, 800);
-    //TCanvas* c = new TCanvas (cname, "", 800*(nMultBins-1), 800);
-    //c->Divide (3, 1);
-
-    const double lMargin = 0.15;
-    const double rMargin = 0.04;
-    const double bMargin = 0.15;
-    const double tMargin = 0.04;
-
-    const int iMult = nMultBins-1;
-    //for (int iMult = 0; iMult < (nMultBins-1); iMult++) {
-    {
-
-      c->cd (iMult+1);
-
-      gPad->SetLeftMargin (lMargin);
-      gPad->SetRightMargin (rMargin);
-      gPad->SetBottomMargin (bMargin);
-      gPad->SetTopMargin (tMargin);
-
-      gPad->SetLogx ();
-
-      {
-        TH1D* htemp = new TH1D ("htemp", "", 1, pTchBins[0], pTchBins[nPtchBins]);
-        htemp->SetBinContent (1, 1);
-    
-        TAxis* xax = htemp->GetXaxis ();
-        TAxis* yax = htemp->GetYaxis ();
-  
-        xax->SetTitle ("#it{p}_{T}^{truth} [GeV]");
-        xax->SetTitleOffset (0.9 * xax->GetTitleOffset ());
-        xax->SetLabelSize (0);
-  
-        yax->SetTitle ("Track Reco. Efficiency");
-        yax->SetLabelFont (43);
-        yax->SetLabelSize (32);
-        yax->SetLabelOffset (1.8 * yax->GetLabelOffset ());
-        const double ymin = 0.0;
-        const double ymax = 1.25;
-        yax->SetRangeUser (ymin, ymax);
-  
-        htemp->SetLineWidth (1);
-        htemp->SetLineStyle (2);
-  
-        htemp->DrawCopy ("hist");
-        SaferDelete (&htemp);
-  
-        tl->SetTextFont (43);
-        tl->SetTextSize (32);
-        tl->SetTextAlign (21);
-        
-        const double yoff = ymin - 0.04 * (ymax-ymin) / (1.-tMargin-bMargin);
-        //tl->DrawLatex (0.5,  yoff, "0.5");
-        tl->DrawLatex (0.7,  yoff, "0.7");
-        tl->DrawLatex (1,  yoff, "1");
-        tl->DrawLatex (2,  yoff, "2");
-        tl->DrawLatex (3,  yoff, "3");
-        tl->DrawLatex (4,  yoff, "4");
-        tl->DrawLatex (5,  yoff, "5");
-        tl->DrawLatex (6,  yoff, "6");
-        tl->DrawLatex (7,  yoff, "7");
-        tl->DrawLatex (10, yoff, "10");
-        tl->DrawLatex (20, yoff, "20");
-        tl->DrawLatex (30, yoff, "30");
-        tl->DrawLatex (40, yoff, "40");
-        tl->DrawLatex (60, yoff, "60");
-        //tl->DrawLatex (80, yoff, "80");
-        tl->DrawLatex (100, yoff, "100");
-      }
-
-      for (int iPID = 0; iPID < nPIDs; iPID++)
-        myDraw (h_efficiency[iSys][iPID][iWP][iMult][iEta], systColors[iPID], kOpenCircle, 0.8);
-      myDraw (h_efficiency[iSys][nPIDs-1][iWP][iMult][iEta], kBlack, kFullCircle, 0.8);
-
-      tl->SetTextColor (kBlack);
-      tl->SetTextAlign (11);
-
-      tl->SetTextSize (28);
-      tl->DrawLatexNDC (0.22, 0.89, "#bf{#it{ATLAS}} Simulation Internal");
-      tl->SetTextSize (24);
-      tl->DrawLatexNDC (0.22, 0.85, iSys == 0 ? "Pythia8 #it{pp}, #sqrt{s} = 5.02 TeV" : "Pythia8 + #it{p}+Pb overlay, #sqrt{s_{NN}} = 5.02 TeV");
-      tl->DrawLatexNDC (0.22, 0.81, Form ("%s tracks", trackWPStrs[iWP].c_str ()));
-
-      //tl->SetTextSize (28);
-      //tl->DrawLatexNDC (0.22, 0.22, Form ("N_{ch}^{rec} = %i-%i", (int) std::ceil (multBins[iMult]), (int) std::floor (multBins[iMult+1])));
-
-      for (int iPID = 0; iPID < nPIDs-1; iPID++)
-        //if (PIDs[iPID] == 211 || PIDs[iPID] == 321 || PIDs[iPID] == 2212 || PIDs[iPID] == 3222 || PIDs[iPID] == 3112 || PIDs[iPID] == 3312 || PIDs[iPID] == 0)
-        myLineText2 (0.25+(iPID>=nPIDs/2 ? 0.13 : 0), 0.42-(iPID%(nPIDs/2))*0.036, systColors[iPID], kOpenCircle, partNames[iPID].c_str (), 1.2, 0.026, true);
-      myLineText2 (0.38, 0.42-((nPIDs-1)%(nPIDs/2))*0.036, kBlack, kFullCircle, partNames[nPIDs-1].c_str (), 1.2, 0.026, true);
-
-    } // end loop over iMult
-
-    c->SaveAs (Form ("%s/Plots/TrackingPerformance/EfficiencyComposition_%s.pdf", workPath.Data (), iSys == 0 ? "pp" : "pPb"));
-  }
-
-
-  for (int iSys : systems) {
-
-    const char* cname = Form ("c_pur_comp_%s", iSys == 0 ? "pp" : "pPb");
+    const char* cname = Form ("c_pur_sum_vs_mult_%s", iSys == 0 ? "pp" : "pPb");
 
     TCanvas* c = new TCanvas (cname, "", 800*(nMultBins-1), 800);
     c->Divide (3, 1);
@@ -784,7 +658,7 @@ void PlotTrackingPerformance () {
         xax->SetTitleOffset (0.9 * xax->GetTitleOffset ());
         xax->SetLabelSize (0);
 
-        yax->SetTitle ("Fraction of tracks");
+        yax->SetTitle ("Primary Fraction");
         yax->SetLabelFont (43);
         yax->SetLabelSize (32);
         yax->SetLabelOffset (1.8 * yax->GetLabelOffset ());
@@ -821,56 +695,340 @@ void PlotTrackingPerformance () {
         tl->DrawLatex (100, yoff, "100");
       }
 
-      for (int iEta : {0, 3})
-        myDraw (h_fake_rate[iSys][iWP][iMult][iEta], colors[iEta], kOpenCrossX, 1.0);
-
-      for (int iEta : {0, 3})
-        myDraw (h_secondary_rate[iSys][iWP][iMult][iEta], colors[iEta], kOpenCross, 1.0);
-
-      for (int iEta : {0, 3})
-        myDraw (h_strange_rate[iSys][iWP][iMult][iEta], colors[iEta], kOpenSquare, 1.0);
-
-      for (int iEta : {0, 3})
-        myDraw (h_primary_rate[iSys][iWP][iMult][iEta], colors[iEta], kOpenCircle, 1.0);
+      for (int iEta = 0; iEta < nEtaTrkBins; iEta++) {
+        myDraw (h_primary_rate[iSys][iWP][iMult][iEta], colors[iEta], kOpenCircle, 0.6);
+        TF1* f = f_primary_rate[iSys][iWP][iMult][iEta];
+        if (f) {
+          f->SetLineColor (colors[iEta]);
+          f->SetLineWidth (1);
+          f->Draw ("same");
+        }
+      }
 
       tl->SetTextColor (kBlack);
       tl->SetTextAlign (11);
 
       tl->SetTextSize (28);
-      tl->DrawLatexNDC (0.22, 0.89, "#bf{#it{ATLAS}} Simulation Internal");
+      tl->DrawLatexNDC (0.22, 0.88, "#bf{#it{ATLAS}} Simulation Internal");
       tl->SetTextSize (24);
-      tl->DrawLatexNDC (0.22, 0.85, iSys == 0 ? "Pythia8 #it{pp}, #sqrt{s} = 5.02 TeV" : "Hijing #it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV");
-      tl->DrawLatexNDC (0.22, 0.81, Form ("%s tracks", trackWPStrs[iWP].c_str ()));
+      tl->DrawLatexNDC (0.22, 0.84, iSys == 0 ? "Pythia8 #it{pp}, #sqrt{s} = 5.02 TeV" : "Hijing #it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV");
+      tl->DrawLatexNDC (0.22, 0.80, Form ("%s tracks", trackWPStrs[iWP].c_str ()));
 
       tl->SetTextSize (28);
-      tl->DrawLatexNDC (0.22, 0.40, Form ("N_{ch}^{rec} = %i-%i", (int) std::ceil (multBins[iMult]), (int) std::floor (multBins[iMult+1])));
+      tl->DrawLatexNDC (0.22, 0.22, Form ("N_{ch}^{rec} = %i-%i", (int) std::ceil (multBins[iMult]), (int) std::floor (multBins[iMult+1])));
 
       tl->SetTextSize (18);
       tl->SetTextAlign (21);
-      tl->DrawLatexNDC (0.345, 0.262, "Fakes");
-      tl->DrawLatexNDC (0.465, 0.262, "Secondaries");
-      tl->DrawLatexNDC (0.585, 0.262, "#Sigma^{#pm}, #Xi^{-}, #Omega^{-}");
-      tl->DrawLatexNDC (0.705, 0.262, "Primaries");
-
-      for (int iEta : {0, 3}) {
-        myLineText2 (0.38, 0.232-(iEta/3)*0.036, colors[iEta], kOpenCrossX, "", 0.8, 0.026, true);
-        myLineText2 (0.50, 0.232-(iEta/3)*0.036, colors[iEta], kOpenCross, "", 0.8, 0.026, true);
-        myLineText2 (0.62, 0.232-(iEta/3)*0.036, colors[iEta], kOpenSquare, "", 0.8, 0.026, true);
-        myLineText2 (0.74, 0.232-(iEta/3)*0.036, colors[iEta], kOpenCircle, Form ("%g < |#eta| < %g", etaTrkBins[iEta], etaTrkBins[iEta+1]), 1.2, 0.026, true);
+      tl->DrawLatexNDC (0.705, 0.37, "Primaries");
+      for (int iEta = 0; iEta < nEtaTrkBins; iEta++) {
+        myLineText2 (0.74, 0.34-iEta*0.036, colors[iEta], kOpenCircle, Form ("%g < |#eta| < %g", etaTrkBins[iEta], etaTrkBins[iEta+1]), 1.2, 0.026, true);
       }
 
     } // end loop over iMult
 
-    c->SaveAs (Form ("%s/Plots/TrackingPerformance/PurityComponents_%s.pdf", workPath.Data (), iSys == 0 ? "pp" : "pPb"));
-  }
+    c->SaveAs (Form ("%s/Plots/TrackingPerformance/PuritySummary_vsMultiplicity_%s.pdf", workPath.Data (), iSys == 0 ? "pp" : "pPb"));
+  } // end loop over iSys
 
 
 
   for (int iSys : systems) {
 
+    const int iMult = nMultBins-1;
+    const char* cname = Form ("c_pur_sum_%s", iSys == 0 ? "pp" : "pPb");
+
+    TCanvas* c = new TCanvas (cname, "", 800, 800);
+
+    const double lMargin = 0.15;
+    const double rMargin = 0.04;
+    const double bMargin = 0.15;
+    const double tMargin = 0.04;
+
+    c->SetLeftMargin (lMargin);
+    c->SetRightMargin (rMargin);
+    c->SetBottomMargin (bMargin);
+    c->SetTopMargin (tMargin);
+
+    c->SetLogx ();
+
+    TH1D* htemp = new TH1D ("htemp", "", 1, pTchBins[0], pTchBins[nPtchBins]);
+    htemp->SetBinContent (1, 1);
+  
+    TAxis* xax = htemp->GetXaxis ();
+    TAxis* yax = htemp->GetYaxis ();
+
+    xax->SetTitle ("#it{p}_{T}^{ch} [GeV]");
+    xax->SetTitleOffset (0.9 * xax->GetTitleOffset ());
+    xax->SetLabelSize (0);
+
+    yax->SetTitle ("Primary Fraction");
+    yax->SetLabelFont (43);
+    yax->SetLabelSize (32);
+    yax->SetLabelOffset (1.8 * yax->GetLabelOffset ());
+    const double ymin = 0.82;
+    const double ymax = 1.06;
+    yax->SetRangeUser (ymin, ymax);
+
+    htemp->SetLineWidth (1);
+    htemp->SetLineStyle (2);
+
+    htemp->DrawCopy ("hist");
+    SaferDelete (&htemp);
+
+    tl->SetTextFont (43);
+    tl->SetTextSize (32);
+    tl->SetTextAlign (21);
+    
+    const double yoff = ymin - 0.04 * (ymax-ymin) / (1.-tMargin-bMargin);
+    //tl->DrawLatex (0.5,  yoff, "0.5");
+    tl->DrawLatex (0.7,  yoff, "0.7");
+    tl->DrawLatex (1,  yoff, "1");
+    tl->DrawLatex (2,  yoff, "2");
+    tl->DrawLatex (3,  yoff, "3");
+    tl->DrawLatex (4,  yoff, "4");
+    tl->DrawLatex (5,  yoff, "5");
+    tl->DrawLatex (6,  yoff, "6");
+    tl->DrawLatex (7,  yoff, "7");
+    tl->DrawLatex (10, yoff, "10");
+    tl->DrawLatex (20, yoff, "20");
+    tl->DrawLatex (30, yoff, "30");
+    tl->DrawLatex (40, yoff, "40");
+    tl->DrawLatex (60, yoff, "60");
+    //tl->DrawLatex (80, yoff, "80");
+    tl->DrawLatex (100, yoff, "100");
+
+    for (int iEta = 0; iEta < nEtaTrkBins; iEta++) {
+      myDraw (h_primary_rate[iSys][iWP][iMult][iEta], colors[iEta], kOpenCircle, 0.8);
+      TF1* f = f_primary_rate[iSys][iWP][iMult][iEta];
+      if (f != nullptr) {
+        f->SetLineColor (colors[iEta]);
+        f->SetLineWidth (1);
+        f->Draw ("same");
+      }
+    }
+
+    tl->SetTextColor (kBlack);
+    tl->SetTextAlign (11);
+
+    tl->SetTextSize (28);
+    tl->DrawLatexNDC (0.22, 0.89, "#bf{#it{ATLAS}} Simulation Internal");
+    tl->SetTextSize (24);
+    tl->DrawLatexNDC (0.22, 0.85, iSys == 0 ? "Pythia8 #it{pp}, #sqrt{s} = 5.02 TeV" : "Hijing #it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV");
+    tl->DrawLatexNDC (0.22, 0.81, Form ("%s tracks", trackWPStrs[iWP].c_str ()));
+
+    tl->SetTextSize (18);
+    tl->SetTextAlign (21);
+    tl->DrawLatexNDC (0.705, 0.37, "Primaries");
+    for (int iEta = 0; iEta < nEtaTrkBins; iEta++)
+      myLineText2 (0.74, 0.34-iEta*0.036, colors[iEta], kOpenCircle, Form ("%g < |#eta| < %g", etaTrkBins[iEta], etaTrkBins[iEta+1]), 1.2, 0.026, true);
+
+    c->SaveAs (Form ("%s/Plots/TrackingPerformance/PuritySummary_%s.pdf", workPath.Data (), iSys == 0 ? "pp" : "pPb"));
+  } // end loop over iSys
+
+
+
+  for (int iSys : systems) {
+
+    const int iEta = 0;
+    const int iMult = nMultBins-1;
+
+    const char* cname = Form ("c_eff_com_%s", iSys == 0 ? "pp" : "pPb");
+
+    TCanvas* c = new TCanvas (cname, "", 800, 800);
+
+    const double lMargin = 0.15;
+    const double rMargin = 0.04;
+    const double bMargin = 0.15;
+    const double tMargin = 0.04;
+
+    c->SetLeftMargin (lMargin);
+    c->SetRightMargin (rMargin);
+    c->SetBottomMargin (bMargin);
+    c->SetTopMargin (tMargin);
+
+    c->SetLogx ();
+
+    TH1D* htemp = new TH1D ("htemp", "", 1, pTchBins[0], pTchBins[nPtchBins]);
+    htemp->SetBinContent (1, 1);
+    
+    TAxis* xax = htemp->GetXaxis ();
+    TAxis* yax = htemp->GetYaxis ();
+  
+    xax->SetTitle ("#it{p}_{T}^{truth} [GeV]");
+    xax->SetTitleOffset (0.9 * xax->GetTitleOffset ());
+    xax->SetLabelSize (0);
+  
+    yax->SetTitle ("Track Reco. Efficiency");
+    yax->SetLabelFont (43);
+    yax->SetLabelSize (32);
+    yax->SetLabelOffset (1.8 * yax->GetLabelOffset ());
+    const double ymin = 0.0;
+    const double ymax = 1.25;
+    yax->SetRangeUser (ymin, ymax);
+  
+    htemp->SetLineWidth (1);
+    htemp->SetLineStyle (2);
+  
+    htemp->DrawCopy ("hist");
+    SaferDelete (&htemp);
+  
+    tl->SetTextFont (43);
+    tl->SetTextSize (32);
+    tl->SetTextAlign (21);
+    
+    const double yoff = ymin - 0.04 * (ymax-ymin) / (1.-tMargin-bMargin);
+    //tl->DrawLatex (0.5,  yoff, "0.5");
+    tl->DrawLatex (0.7,  yoff, "0.7");
+    tl->DrawLatex (1,  yoff, "1");
+    tl->DrawLatex (2,  yoff, "2");
+    tl->DrawLatex (3,  yoff, "3");
+    tl->DrawLatex (4,  yoff, "4");
+    tl->DrawLatex (5,  yoff, "5");
+    tl->DrawLatex (6,  yoff, "6");
+    tl->DrawLatex (7,  yoff, "7");
+    tl->DrawLatex (10, yoff, "10");
+    tl->DrawLatex (20, yoff, "20");
+    tl->DrawLatex (30, yoff, "30");
+    tl->DrawLatex (40, yoff, "40");
+    tl->DrawLatex (60, yoff, "60");
+    //tl->DrawLatex (80, yoff, "80");
+    tl->DrawLatex (100, yoff, "100");
+
+    for (int iPID = 0; iPID < nPIDs; iPID++)
+      myDraw (h_efficiency[iSys][iPID][iWP][iMult][iEta], systColors[iPID], kOpenCircle, 0.8);
+    myDraw (h_efficiency[iSys][nPIDs-1][iWP][iMult][iEta], kBlack, kFullCircle, 0.8);
+
+    tl->SetTextColor (kBlack);
+    tl->SetTextAlign (11);
+
+    tl->SetTextSize (28);
+    tl->DrawLatexNDC (0.22, 0.89, "#bf{#it{ATLAS}} Simulation Internal");
+    tl->SetTextSize (24);
+    tl->DrawLatexNDC (0.22, 0.85, iSys == 0 ? "Pythia8 #it{pp}, #sqrt{s} = 5.02 TeV" : "Pythia8 + #it{p}+Pb overlay, #sqrt{s_{NN}} = 5.02 TeV");
+    tl->DrawLatexNDC (0.22, 0.81, Form ("%s tracks", trackWPStrs[iWP].c_str ()));
+
+    for (int iPID = 0; iPID < nPIDs-1; iPID++)
+      myLineText2 (0.25+(iPID>=nPIDs/2 ? 0.13 : 0), 0.42-(iPID%(nPIDs/2))*0.036, systColors[iPID], kOpenCircle, partNames[iPID].c_str (), 1.2, 0.026, true);
+    myLineText2 (0.38, 0.42-((nPIDs-1)%(nPIDs/2))*0.036, kBlack, kFullCircle, partNames[nPIDs-1].c_str (), 1.2, 0.026, true);
+
+    c->SaveAs (Form ("%s/Plots/TrackingPerformance/EfficiencyComposition_%s.pdf", workPath.Data (), iSys == 0 ? "pp" : "pPb"));
+  } // end loop over iSys
+
+
+  for (int iSys : systems) {
+
+    const int iMult = nMultBins-1;
+
+    const char* cname = Form ("c_pur_comp_%s", iSys == 0 ? "pp" : "pPb");
+
+    TCanvas* c = new TCanvas (cname, "", 800, 800);
+
+    const double lMargin = 0.15;
+    const double rMargin = 0.04;
+    const double bMargin = 0.15;
+    const double tMargin = 0.04;
+
+    c->SetLeftMargin (lMargin);
+    c->SetRightMargin (rMargin);
+    c->SetBottomMargin (bMargin);
+    c->SetTopMargin (tMargin);
+
+    c->SetLogx ();
+
+    TH1D* htemp = new TH1D ("htemp", "", 1, pTchBins[0], pTchBins[nPtchBins]);
+    htemp->SetBinContent (1, 1);
+
+    TAxis* xax = htemp->GetXaxis ();
+    TAxis* yax = htemp->GetYaxis ();
+
+    xax->SetTitle ("#it{p}_{T}^{ch} [GeV]");
+    xax->SetTitleOffset (0.9 * xax->GetTitleOffset ());
+    xax->SetLabelSize (0);
+
+    yax->SetTitle ("Fraction of tracks");
+    yax->SetLabelFont (43);
+    yax->SetLabelSize (32);
+    yax->SetLabelOffset (1.8 * yax->GetLabelOffset ());
+    const double ymin = 0.82;
+    const double ymax = 1.06;
+    yax->SetRangeUser (ymin, ymax);
+
+    htemp->SetLineWidth (1);
+    htemp->SetLineStyle (2);
+
+    htemp->DrawCopy ("hist");
+    SaferDelete (&htemp);
+
+    tl->SetTextFont (43);
+    tl->SetTextSize (32);
+    tl->SetTextAlign (21);
+    
+    const double yoff = ymin - 0.04 * (ymax-ymin) / (1.-tMargin-bMargin);
+    //tl->DrawLatex (0.5,  yoff, "0.5");
+    tl->DrawLatex (0.7,  yoff, "0.7");
+    tl->DrawLatex (1,  yoff, "1");
+    tl->DrawLatex (2,  yoff, "2");
+    tl->DrawLatex (3,  yoff, "3");
+    tl->DrawLatex (4,  yoff, "4");
+    tl->DrawLatex (5,  yoff, "5");
+    tl->DrawLatex (6,  yoff, "6");
+    tl->DrawLatex (7,  yoff, "7");
+    tl->DrawLatex (10, yoff, "10");
+    tl->DrawLatex (20, yoff, "20");
+    tl->DrawLatex (30, yoff, "30");
+    tl->DrawLatex (40, yoff, "40");
+    tl->DrawLatex (60, yoff, "60");
+    //tl->DrawLatex (80, yoff, "80");
+    tl->DrawLatex (100, yoff, "100");
+
+    for (int iEta : {0, 3})
+      myDraw (h_fake_rate[iSys][iWP][iMult][iEta], colors[iEta], kOpenCrossX, 1.0);
+
+    for (int iEta : {0, 3})
+      myDraw (h_secondary_rate[iSys][iWP][iMult][iEta], colors[iEta], kOpenCross, 1.0);
+
+    for (int iEta : {0, 3})
+      myDraw (h_strange_rate[iSys][iWP][iMult][iEta], colors[iEta], kOpenSquare, 1.0);
+
+    for (int iEta : {0, 3})
+      myDraw (h_primary_rate[iSys][iWP][iMult][iEta], colors[iEta], kOpenCircle, 1.0);
+
+    tl->SetTextColor (kBlack);
+    tl->SetTextAlign (11);
+
+    tl->SetTextSize (28);
+    tl->DrawLatexNDC (0.22, 0.89, "#bf{#it{ATLAS}} Simulation Internal");
+    tl->SetTextSize (24);
+    tl->DrawLatexNDC (0.22, 0.85, iSys == 0 ? "Pythia8 #it{pp}, #sqrt{s} = 5.02 TeV" : "Hijing #it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV");
+    tl->DrawLatexNDC (0.22, 0.81, Form ("%s tracks", trackWPStrs[iWP].c_str ()));
+
+    tl->SetTextSize (18);
+    tl->SetTextAlign (21);
+    tl->DrawLatexNDC (0.345, 0.262, "Fakes");
+    tl->DrawLatexNDC (0.465, 0.262, "Secondaries");
+    tl->DrawLatexNDC (0.585, 0.262, "#Sigma^{#pm}, #Xi^{-}, #Omega^{-}");
+    tl->DrawLatexNDC (0.705, 0.262, "Primaries");
+
+    for (int iEta : {0, 3}) {
+      myLineText2 (0.38, 0.232-(iEta/3)*0.036, colors[iEta], kOpenCrossX, "", 0.8, 0.026, true);
+      myLineText2 (0.50, 0.232-(iEta/3)*0.036, colors[iEta], kOpenCross, "", 0.8, 0.026, true);
+      myLineText2 (0.62, 0.232-(iEta/3)*0.036, colors[iEta], kOpenSquare, "", 0.8, 0.026, true);
+      myLineText2 (0.74, 0.232-(iEta/3)*0.036, colors[iEta], kOpenCircle, Form ("%g < |#eta| < %g", etaTrkBins[iEta], etaTrkBins[iEta+1]), 1.2, 0.026, true);
+    }
+
+    c->SaveAs (Form ("%s/Plots/TrackingPerformance/PurityComponents_%s.pdf", workPath.Data (), iSys == 0 ? "pp" : "pPb"));
+  } // end loop over iSys
+
+
+
+  for (int iSys : systems) {
+
+    const int iMult = nMultBins-1;
+    const int iPID = nPIDs-1;
+
     const char* cname = Form ("c_eff_all_%s", iSys == 0 ? "pp" : "pPb");
 
     TCanvas* c = new TCanvas (cname, "", 880, 800);
+
     const double lMargin = 0.15;
     const double rMargin = 0.15;
     const double bMargin = 0.15;
@@ -883,9 +1041,7 @@ void PlotTrackingPerformance () {
 
     c->SetLogy ();
 
-    const int iMult = nMultBins-1;
-
-    TH2D* h2 = (TH2D*) h2_efficiency[0][nPIDs-1][iWP][0]->Clone ("temp");
+    TH2D* h2 = (TH2D*) h2_efficiency[iSys][iPID][iWP][iMult]->Clone ("temp");
 
     TAxis* xax = h2->GetXaxis ();
     TAxis* yax = h2->GetYaxis ();
@@ -930,14 +1086,18 @@ void PlotTrackingPerformance () {
     tl->DrawLatexNDC (0.22, 0.810, Form ("%s tracks", trackWPStrs[iWP].c_str ()));
 
     c->SaveAs (Form ("%s/Plots/TrackingPerformance/EfficiencyMap_%s.pdf", workPath.Data (), iSys == 0 ? "pp" : "pPb"));
-  }
+  } // end loop over iSys
 
 
 
   for (int iSys : systems) {
+
+    const int iMult = nMultBins-1;
+
     const char* cname = Form ("c_pur_all_%s", iSys == 0 ? "pp" : "pPb");
 
     TCanvas* c = new TCanvas (cname, "", 880, 800);
+
     const double lMargin = 0.15;
     const double rMargin = 0.15;
     const double bMargin = 0.15;
@@ -949,8 +1109,6 @@ void PlotTrackingPerformance () {
     c->SetTopMargin (tMargin);
 
     c->SetLogy ();
-
-    const int iMult = nMultBins-1;
 
     TH2D* h2 = (TH2D*) h2_primary_rate[iSys][iWP][iMult]->Clone ("temp");
 
@@ -997,7 +1155,7 @@ void PlotTrackingPerformance () {
     tl->DrawLatexNDC (0.22, 0.810, Form ("%s tracks", trackWPStrs[iWP].c_str ()));
 
     c->SaveAs (Form ("%s/Plots/TrackingPerformance/PurityMap_%s.pdf", workPath.Data (), iSys == 0 ? "pp" : "pPb"));
-  }
+  } // end loop over iSys
 
 
 
@@ -1016,7 +1174,21 @@ void PlotTrackingPerformance () {
   //        if (f_primary_rate[iSys][iWP][iMult][iEta])
   //          f_primary_rate[iSys][iWP][iMult][iEta]->Write ();
 
+  //        if (f_primary_rate_fakes_p100[iSys][iWP][iMult][iEta])
+  //          f_primary_rate_fakes_p100[iSys][iWP][iMult][iEta]->Write ();
+
+  //        if (h_primary_rate[iSys][iWP][iMult][iEta])
+  //          h_primary_rate[iSys][iWP][iMult][iEta]->Write ();
+
   //      } // end loop over iEta
+
+  //
+  //      for (int iPID = 0; iPID < nPIDs; iPID++) {
+
+  //        if (h2_efficiency[iSys][iPID][iWP][iMult])
+  //          h2_efficiency[iSys][iPID][iWP][iMult]->Write ();
+
+  //      } // end loop over iPID
 
   //    } // end loop over iMult
 

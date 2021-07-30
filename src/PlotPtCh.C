@@ -31,6 +31,9 @@ using namespace JetHadronCorrelations;
 TLine* l = new TLine ();
 TLatex* tl = new TLatex ();
 
+const std::vector <TString> directions = {"ns", "perp", "as"};
+const int nDir = (int) directions.size ();
+
 
 void DoOffset (TH1D* h, const char* tag, const int iCent) {
 
@@ -87,66 +90,45 @@ void PlotPtCh (const char* tag, const char* inFileTag) {
 
   TFile* inFile = nullptr;
 
-  TH1D*  h_evt_counts_ref = nullptr;
-  TH1D*  h_jet_counts_ref = nullptr;
-  TH1D*  h_evt_counts_ref_bkg = nullptr;
-  TH1D*  h_jet_counts_ref_bkg = nullptr;
-  TH1D** h_evt_counts = new TH1D*[nZdcCentBins];
-  TH1D** h_jet_counts = new TH1D*[nZdcCentBins];
-  TH1D** h_evt_counts_bkg = new TH1D*[nZdcCentBins];
-  TH1D** h_jet_counts_bkg = new TH1D*[nZdcCentBins];
+  TH1D**  h_evt_counts_ref      = Get1DArray <TH1D*> (2);
+  TH1D**  h_jet_counts_ref      = Get1DArray <TH1D*> (2);
+  TH1D**  h_evt_counts_ref_bkg  = Get1DArray <TH1D*> (2);
+  TH1D**  h_jet_counts_ref_bkg  = Get1DArray <TH1D*> (2);
+  TH1D*** h_evt_counts          = Get2DArray <TH1D*> (2, nZdcCentBins);
+  TH1D*** h_jet_counts          = Get2DArray <TH1D*> (2, nZdcCentBins);
+  TH1D*** h_evt_counts_bkg      = Get2DArray <TH1D*> (2, nZdcCentBins);
+  TH1D*** h_jet_counts_bkg      = Get2DArray <TH1D*> (2, nZdcCentBins);
 
-  TH1D*  h_jet_trk_pt_ns_ref = nullptr;
-  TH1D*  h_jet_trk_pt_as_ref = nullptr;
-  TH1D*  h_jet_trk_pt_ns_ref_bkg = nullptr;
-  TH1D*  h_jet_trk_pt_as_ref_bkg = nullptr;
-  TH1D** h_jet_trk_pt_ns = new TH1D*[nZdcCentBins];
-  TH1D** h_jet_trk_pt_as = new TH1D*[nZdcCentBins];
-  TH1D** h_jet_trk_pt_ns_bkg = new TH1D*[nZdcCentBins];
-  TH1D** h_jet_trk_pt_as_bkg = new TH1D*[nZdcCentBins];
+  TH1D***  h_jet_trk_pt_ref     = Get2DArray <TH1D*> (2, nDir);
+  TH1D***  h_jet_trk_pt_ref_bkg = Get2DArray <TH1D*> (2, nDir);
+  TH1D**** h_jet_trk_pt         = Get3DArray <TH1D*> (2, nDir, nZdcCentBins);
+  TH1D**** h_jet_trk_pt_bkg     = Get3DArray <TH1D*> (2, nDir, nZdcCentBins);
 
-  TH1D*  h_jet_trk_pt_ns_ref_sig = nullptr;
-  TH1D*  h_jet_trk_pt_as_ref_sig = nullptr;
-  TH1D** h_jet_trk_pt_ns_sig = new TH1D*[nZdcCentBins];
-  TH1D** h_jet_trk_pt_as_sig = new TH1D*[nZdcCentBins];
+  TH1D***  h_jet_trk_pt_ref_sig = Get2DArray <TH1D*> (2, nDir);
+  TH1D**** h_jet_trk_pt_sig     = Get3DArray <TH1D*> (2, nDir, nZdcCentBins);
 
-  TH1D** h_jet_trk_pt_ns_iaa = new TH1D*[nZdcCentBins];
-  TH1D** h_jet_trk_pt_as_iaa = new TH1D*[nZdcCentBins];
+  TH1D**** h_jet_trk_pt_iaa     = Get3DArray <TH1D*> (2, nDir, nZdcCentBins);
 
-  TGAE*  g_jet_trk_pt_ns_ref_syst = nullptr;
-  TGAE*  g_jet_trk_pt_as_ref_syst = nullptr;
-  TGAE*  g_jet_trk_pt_ns_ref_bkg_syst = nullptr;
-  TGAE*  g_jet_trk_pt_as_ref_bkg_syst = nullptr;
-  TGAE** g_jet_trk_pt_ns_syst = new TGAE*[nZdcCentBins];
-  TGAE** g_jet_trk_pt_as_syst = new TGAE*[nZdcCentBins];
-  TGAE** g_jet_trk_pt_ns_bkg_syst = new TGAE*[nZdcCentBins];
-  TGAE** g_jet_trk_pt_as_bkg_syst = new TGAE*[nZdcCentBins];
+  TGAE**  g_jet_trk_pt_ref_syst     = Get1DArray <TGAE*> (nDir);
+  TGAE**  g_jet_trk_pt_ref_bkg_syst = Get1DArray <TGAE*> (nDir);
+  TGAE*** g_jet_trk_pt_syst         = Get2DArray <TGAE*> (nDir, nZdcCentBins);
+  TGAE*** g_jet_trk_pt_bkg_syst     = Get2DArray <TGAE*> (nDir, nZdcCentBins);
 
-  TGAE*  g_jet_trk_pt_ns_ref_sig_syst = nullptr;
-  TGAE*  g_jet_trk_pt_as_ref_sig_syst = nullptr;
-  TGAE** g_jet_trk_pt_ns_sig_syst = new TGAE*[nZdcCentBins];
-  TGAE** g_jet_trk_pt_as_sig_syst = new TGAE*[nZdcCentBins];
+  TGAE**  g_jet_trk_pt_ref_sig_syst = Get1DArray <TGAE*> (nDir);
+  TGAE*** g_jet_trk_pt_sig_syst     = Get2DArray <TGAE*> (nDir, nZdcCentBins);
 
-  TGAE** g_jet_trk_pt_ns_iaa_syst = new TGAE*[nZdcCentBins];
-  TGAE** g_jet_trk_pt_as_iaa_syst = new TGAE*[nZdcCentBins];
+  TGAE*** g_jet_trk_pt_iaa_syst     = Get2DArray <TGAE*> (nDir, nZdcCentBins);
 
 
-  TH1D**  h_jet_trk_pt_ns_ref_syst = Get1DArray <TH1D*> (nVar);
-  TH1D**  h_jet_trk_pt_as_ref_syst = Get1DArray <TH1D*> (nVar);
-  TH1D**  h_jet_trk_pt_ns_ref_bkg_syst = Get1DArray <TH1D*> (nVar);
-  TH1D**  h_jet_trk_pt_as_ref_bkg_syst = Get1DArray <TH1D*> (nVar);
-  TH1D*** h_jet_trk_pt_ns_syst = Get2DArray <TH1D*> (nZdcCentBins, nVar);
-  TH1D*** h_jet_trk_pt_as_syst = Get2DArray <TH1D*> (nZdcCentBins, nVar);
-  TH1D*** h_jet_trk_pt_ns_bkg_syst = Get2DArray <TH1D*> (nZdcCentBins, nVar);
-  TH1D*** h_jet_trk_pt_as_bkg_syst = Get2DArray <TH1D*> (nZdcCentBins, nVar);
+  TH1D***  h_jet_trk_pt_ref_syst      = Get2DArray <TH1D*> (nDir, nVar);
+  TH1D***  h_jet_trk_pt_ref_bkg_syst  = Get2DArray <TH1D*> (nDir, nVar);
+  TH1D**** h_jet_trk_pt_syst          = Get3DArray <TH1D*> (nDir, nZdcCentBins, nVar);
+  TH1D**** h_jet_trk_pt_bkg_syst      = Get3DArray <TH1D*> (nDir, nZdcCentBins, nVar);
 
-  TH1D**  h_jet_trk_pt_ns_ref_sig_syst = Get1DArray <TH1D*> (nVar);
-  TH1D**  h_jet_trk_pt_as_ref_sig_syst = Get1DArray <TH1D*> (nVar);
-  TH1D*** h_jet_trk_pt_ns_sig_syst = Get2DArray <TH1D*> (nZdcCentBins, nVar);
-  TH1D*** h_jet_trk_pt_as_sig_syst = Get2DArray <TH1D*> (nZdcCentBins, nVar);
+  TH1D***  h_jet_trk_pt_ref_sig_syst  = Get2DArray <TH1D*> (nDir, nVar);
+  TH1D**** h_jet_trk_pt_sig_syst      = Get3DArray <TH1D*> (nDir, nZdcCentBins, nVar);
 
-  TH1D*** h_jet_trk_pt_ns_iaa_syst = Get2DArray <TH1D*> (nZdcCentBins, nVar);
-  TH1D*** h_jet_trk_pt_as_iaa_syst = Get2DArray <TH1D*> (nZdcCentBins, nVar);
+  TH1D**** h_jet_trk_pt_iaa_syst      = Get3DArray <TH1D*> (nDir, nZdcCentBins, nVar);
 
 
   {
@@ -156,91 +138,105 @@ void PlotPtCh (const char* tag, const char* inFileTag) {
     std::cout << "Reading " << inFileName.Data () << std::endl;
     inFile = new TFile (inFileName, "read");
 
-    h_evt_counts_ref = (TH1D*) inFile->Get ("h_evt_counts_ref_Nominal");
-    h_jet_counts_ref = (TH1D*) inFile->Get ("h_jet_counts_ref_Nominal");
+    for (int iDType = 0; iDType < 2; iDType++) {
 
-    h_evt_counts_ref_bkg = (TH1D*) inFile->Get ("h_evt_counts_ref_bkg_Nominal");
-    h_jet_counts_ref_bkg = (TH1D*) inFile->Get ("h_jet_counts_ref_bkg_Nominal");
+      const TString dType = (iDType == 0 ? "data" : "mc");
 
-    h_jet_trk_pt_ns_ref = (TH1D*) inFile->Get ("h_jet_trk_pt_ns_ref_Nominal");
-    h_jet_trk_pt_as_ref = (TH1D*) inFile->Get ("h_jet_trk_pt_as_ref_Nominal");
+      h_evt_counts_ref[iDType] = (TH1D*) inFile->Get (Form ("h_evt_counts_ref_%s_Nominal", dType.Data ()));
+      h_jet_counts_ref[iDType] = (TH1D*) inFile->Get (Form ("h_jet_counts_ref_%s_Nominal", dType.Data ()));
 
-    h_jet_trk_pt_ns_ref_bkg = (TH1D*) inFile->Get ("h_jet_trk_pt_ns_ref_bkg_Nominal");
-    h_jet_trk_pt_as_ref_bkg = (TH1D*) inFile->Get ("h_jet_trk_pt_as_ref_bkg_Nominal");
+      h_evt_counts_ref_bkg[iDType] = (TH1D*) inFile->Get (Form ("h_evt_counts_ref_bkg_%s_Nominal", dType.Data ()));
+      h_jet_counts_ref_bkg[iDType] = (TH1D*) inFile->Get (Form ("h_jet_counts_ref_bkg_%s_Nominal", dType.Data ()));
 
-    h_jet_trk_pt_ns_ref_sig = (TH1D*) inFile->Get ("h_jet_trk_pt_ns_ref_sig_Nominal");
-    h_jet_trk_pt_as_ref_sig = (TH1D*) inFile->Get ("h_jet_trk_pt_as_ref_sig_Nominal");
+      for (int iDir = 0; iDir < nDir; iDir++) {
 
-    g_jet_trk_pt_ns_ref_syst = (TGAE*) inFile->Get ("g_jet_trk_pt_ns_ref_syst");
-    g_jet_trk_pt_as_ref_syst = (TGAE*) inFile->Get ("g_jet_trk_pt_as_ref_syst");
+        const TString dir = directions[iDir];
 
-    g_jet_trk_pt_ns_ref_bkg_syst = (TGAE*) inFile->Get ("g_jet_trk_pt_ns_ref_bkg_syst");
-    g_jet_trk_pt_as_ref_bkg_syst = (TGAE*) inFile->Get ("g_jet_trk_pt_as_ref_bkg_syst");
+        h_jet_trk_pt_ref[iDType][iDir] = (TH1D*) inFile->Get (Form ("h_jet_trk_pt_%s_ref_%s_Nominal", dir.Data (), dType.Data ()));
 
-    g_jet_trk_pt_ns_ref_sig_syst = (TGAE*) inFile->Get ("g_jet_trk_pt_ns_ref_sig_syst");
-    g_jet_trk_pt_as_ref_sig_syst = (TGAE*) inFile->Get ("g_jet_trk_pt_as_ref_sig_syst");
+        h_jet_trk_pt_ref_bkg[iDType][iDir] = (TH1D*) inFile->Get (Form ("h_jet_trk_pt_%s_ref_bkg_%s_Nominal", dir.Data (), dType.Data ()));
 
-    for (int iCent = 0; iCent < nZdcCentBins; iCent++) {
+        h_jet_trk_pt_ref_sig[iDType][iDir] = (TH1D*) inFile->Get (Form ("h_jet_trk_pt_%s_ref_sig_%s_Nominal", dir.Data (), dType.Data ()));
 
-      h_evt_counts[iCent] = (TH1D*) inFile->Get (Form ("h_evt_counts_pPb_iCent%i_Nominal", iCent));
-      h_jet_counts[iCent] = (TH1D*) inFile->Get (Form ("h_jet_counts_pPb_iCent%i_Nominal", iCent));
-
-      h_evt_counts_bkg[iCent] = (TH1D*) inFile->Get (Form ("h_evt_counts_pPb_bkg_iCent%i_Nominal", iCent));
-      h_jet_counts_bkg[iCent] = (TH1D*) inFile->Get (Form ("h_jet_counts_pPb_bkg_iCent%i_Nominal", iCent));
-
-      h_jet_trk_pt_ns[iCent] = (TH1D*) inFile->Get (Form ("h_jet_trk_pt_ns_pPb_iCent%i_Nominal", iCent));
-      h_jet_trk_pt_as[iCent] = (TH1D*) inFile->Get (Form ("h_jet_trk_pt_as_pPb_iCent%i_Nominal", iCent));
-
-      h_jet_trk_pt_ns_bkg[iCent] = (TH1D*) inFile->Get (Form ("h_jet_trk_pt_ns_pPb_bkg_iCent%i_Nominal", iCent));
-      h_jet_trk_pt_as_bkg[iCent] = (TH1D*) inFile->Get (Form ("h_jet_trk_pt_as_pPb_bkg_iCent%i_Nominal", iCent));
-
-      h_jet_trk_pt_ns_sig[iCent] = (TH1D*) inFile->Get (Form ("h_jet_trk_pt_ns_pPb_sig_iCent%i_Nominal", iCent));
-      h_jet_trk_pt_as_sig[iCent] = (TH1D*) inFile->Get (Form ("h_jet_trk_pt_as_pPb_sig_iCent%i_Nominal", iCent));
-
-      h_jet_trk_pt_ns_iaa[iCent] = (TH1D*) inFile->Get (Form ("h_jet_trk_pt_ns_iaa_iCent%i_Nominal", iCent));
-      h_jet_trk_pt_as_iaa[iCent] = (TH1D*) inFile->Get (Form ("h_jet_trk_pt_as_iaa_iCent%i_Nominal", iCent));
-
-      g_jet_trk_pt_ns_syst[iCent] = (TGAE*) inFile->Get (Form ("g_jet_trk_pt_ns_syst_iCent%i", iCent));
-      g_jet_trk_pt_as_syst[iCent] = (TGAE*) inFile->Get (Form ("g_jet_trk_pt_as_syst_iCent%i", iCent));
-
-      g_jet_trk_pt_ns_bkg_syst[iCent] = (TGAE*) inFile->Get (Form ("g_jet_trk_pt_ns_bkg_syst_iCent%i", iCent));
-      g_jet_trk_pt_as_bkg_syst[iCent] = (TGAE*) inFile->Get (Form ("g_jet_trk_pt_as_bkg_syst_iCent%i", iCent));
-
-      g_jet_trk_pt_ns_sig_syst[iCent] = (TGAE*) inFile->Get (Form ("g_jet_trk_pt_ns_sig_syst_iCent%i", iCent));
-      g_jet_trk_pt_as_sig_syst[iCent] = (TGAE*) inFile->Get (Form ("g_jet_trk_pt_as_sig_syst_iCent%i", iCent));
-
-      g_jet_trk_pt_ns_iaa_syst[iCent] = (TGAE*) inFile->Get (Form ("g_jet_trk_pt_ns_iaa_syst_iCent%i", iCent));
-      g_jet_trk_pt_as_iaa_syst[iCent] = (TGAE*) inFile->Get (Form ("g_jet_trk_pt_as_iaa_syst_iCent%i", iCent));
-    }
-
-
-    for (int iVar = 1; iVar < nVar; iVar++) {
-
-      h_jet_trk_pt_ns_ref_syst[iVar] = (TH1D*) inFile->Get (Form ("h_jet_trk_pt_ns_ref_%s", variations[iVar].Data ()));
-      h_jet_trk_pt_as_ref_syst[iVar] = (TH1D*) inFile->Get (Form ("h_jet_trk_pt_as_ref_%s", variations[iVar].Data ()));
-
-      h_jet_trk_pt_ns_ref_bkg_syst[iVar] = (TH1D*) inFile->Get (Form ("h_jet_trk_pt_ns_ref_bkg_%s", variations[iVar].Data ()));
-      h_jet_trk_pt_as_ref_bkg_syst[iVar] = (TH1D*) inFile->Get (Form ("h_jet_trk_pt_as_ref_bkg_%s", variations[iVar].Data ()));
-
-      h_jet_trk_pt_ns_ref_sig_syst[iVar] = (TH1D*) inFile->Get (Form ("h_jet_trk_pt_ns_ref_sig_%s", variations[iVar].Data ()));
-      h_jet_trk_pt_as_ref_sig_syst[iVar] = (TH1D*) inFile->Get (Form ("h_jet_trk_pt_as_ref_sig_%s", variations[iVar].Data ()));
+      } // end loop over iDir
 
       for (int iCent = 0; iCent < nZdcCentBins; iCent++) {
 
-        h_jet_trk_pt_ns_syst[iCent][iVar] = (TH1D*) inFile->Get (Form ("h_jet_trk_pt_ns_pPb_iCent%i_%s", iCent, variations[iVar].Data ()));
-        h_jet_trk_pt_as_syst[iCent][iVar] = (TH1D*) inFile->Get (Form ("h_jet_trk_pt_as_pPb_iCent%i_%s", iCent, variations[iVar].Data ()));
+        h_evt_counts[iDType][iCent] = (TH1D*) inFile->Get (Form ("h_evt_counts_pPb_iCent%i_%s_Nominal", iCent, dType.Data ()));
+        h_jet_counts[iDType][iCent] = (TH1D*) inFile->Get (Form ("h_jet_counts_pPb_iCent%i_%s_Nominal", iCent, dType.Data ()));
 
-        h_jet_trk_pt_ns_bkg_syst[iCent][iVar] = (TH1D*) inFile->Get (Form ("h_jet_trk_pt_ns_pPb_bkg_iCent%i_%s", iCent, variations[iVar].Data ()));
-        h_jet_trk_pt_as_bkg_syst[iCent][iVar] = (TH1D*) inFile->Get (Form ("h_jet_trk_pt_as_pPb_bkg_iCent%i_%s", iCent, variations[iVar].Data ()));
+        h_evt_counts_bkg[iDType][iCent] = (TH1D*) inFile->Get (Form ("h_evt_counts_pPb_bkg_iCent%i_%s_Nominal", iCent, dType.Data ()));
+        h_jet_counts_bkg[iDType][iCent] = (TH1D*) inFile->Get (Form ("h_jet_counts_pPb_bkg_iCent%i_%s_Nominal", iCent, dType.Data ()));
 
-        h_jet_trk_pt_ns_sig_syst[iCent][iVar] = (TH1D*) inFile->Get (Form ("h_jet_trk_pt_ns_pPb_sig_iCent%i_%s", iCent, variations[iVar].Data ()));
-        h_jet_trk_pt_as_sig_syst[iCent][iVar] = (TH1D*) inFile->Get (Form ("h_jet_trk_pt_as_pPb_sig_iCent%i_%s", iCent, variations[iVar].Data ()));
+        for (int iDir = 0; iDir < nDir; iDir++) {
 
-        h_jet_trk_pt_ns_iaa_syst[iCent][iVar] = (TH1D*) inFile->Get (Form ("h_jet_trk_pt_ns_iaa_iCent%i_%s", iCent, variations[iVar].Data ()));
-        h_jet_trk_pt_as_iaa_syst[iCent][iVar] = (TH1D*) inFile->Get (Form ("h_jet_trk_pt_as_iaa_iCent%i_%s", iCent, variations[iVar].Data ()));
+          const TString dir = directions[iDir];
 
-      }
-    }
+          h_jet_trk_pt[iDType][iDir][iCent] = (TH1D*) inFile->Get (Form ("h_jet_trk_pt_%s_pPb_iCent%i_%s_Nominal", dir.Data (), iCent, dType.Data ()));
+
+          h_jet_trk_pt_bkg[iDType][iDir][iCent] = (TH1D*) inFile->Get (Form ("h_jet_trk_pt_%s_pPb_bkg_iCent%i_%s_Nominal", dir.Data (), iCent, dType.Data ()));
+
+          h_jet_trk_pt_sig[iDType][iDir][iCent] = (TH1D*) inFile->Get (Form ("h_jet_trk_pt_%s_pPb_sig_iCent%i_%s_Nominal", dir.Data (), iCent, dType.Data ()));
+
+          h_jet_trk_pt_iaa[iDType][iDir][iCent] = (TH1D*) inFile->Get (Form ("h_jet_trk_pt_%s_iaa_iCent%i_%s_Nominal", dir.Data (), iCent, dType.Data ()));
+
+        } // end loop over iDir
+
+      } // end loop over iCent
+
+    } // end loop over iDType
+
+
+
+    for (int iDir = 0; iDir < nDir; iDir++) {
+
+      const TString dir = directions[iDir];
+
+      g_jet_trk_pt_ref_syst[iDir] = (TGAE*) inFile->Get (Form ("g_jet_trk_pt_%s_ref_syst", dir.Data ()));
+
+      g_jet_trk_pt_ref_bkg_syst[iDir] = (TGAE*) inFile->Get (Form ("g_jet_trk_pt_%s_ref_bkg_syst", dir.Data ()));
+
+      g_jet_trk_pt_ref_sig_syst[iDir] = (TGAE*) inFile->Get (Form ("g_jet_trk_pt_%s_ref_sig_syst", dir.Data ()));
+
+      for (int iCent = 0; iCent < nZdcCentBins; iCent++) {
+
+        g_jet_trk_pt_syst[iDir][iCent] = (TGAE*) inFile->Get (Form ("g_jet_trk_pt_%s_syst_iCent%i", dir.Data (), iCent));
+
+        g_jet_trk_pt_bkg_syst[iDir][iCent] = (TGAE*) inFile->Get (Form ("g_jet_trk_pt_%s_bkg_syst_iCent%i", dir.Data (), iCent));
+
+        g_jet_trk_pt_sig_syst[iDir][iCent] = (TGAE*) inFile->Get (Form ("g_jet_trk_pt_%s_sig_syst_iCent%i", dir.Data (), iCent));
+
+        g_jet_trk_pt_iaa_syst[iDir][iCent] = (TGAE*) inFile->Get (Form ("g_jet_trk_pt_%s_iaa_syst_iCent%i", dir.Data (), iCent));
+
+      } // end loop over iCent
+
+
+      for (int iVar = 1; iVar < nVar; iVar++) {
+
+        const TString dType = (dataVariations.count (variations[iVar]) > 0 ? "data" : "mc");
+
+        h_jet_trk_pt_ref_syst[iDir][iVar] = (TH1D*) inFile->Get (Form ("h_jet_trk_pt_%s_ref_%s_%s", dir.Data (), dType.Data (), variations[iVar].Data ()));
+
+        h_jet_trk_pt_ref_bkg_syst[iDir][iVar] = (TH1D*) inFile->Get (Form ("h_jet_trk_pt_%s_ref_bkg_%s_%s", dir.Data (), dType.Data (), variations[iVar].Data ()));
+
+        h_jet_trk_pt_ref_sig_syst[iDir][iVar] = (TH1D*) inFile->Get (Form ("h_jet_trk_pt_%s_ref_sig_%s_%s", dir.Data (), dType.Data (), variations[iVar].Data ()));
+
+        for (int iCent = 0; iCent < nZdcCentBins; iCent++) {
+
+          h_jet_trk_pt_syst[iDir][iCent][iVar] = (TH1D*) inFile->Get (Form ("h_jet_trk_pt_%s_pPb_iCent%i_%s_%s", dir.Data (), iCent, dType.Data (), variations[iVar].Data ()));
+
+          h_jet_trk_pt_bkg_syst[iDir][iCent][iVar] = (TH1D*) inFile->Get (Form ("h_jet_trk_pt_%s_pPb_bkg_iCent%i_%s_%s", dir.Data (), iCent, dType.Data (), variations[iVar].Data ()));
+
+          h_jet_trk_pt_sig_syst[iDir][iCent][iVar] = (TH1D*) inFile->Get (Form ("h_jet_trk_pt_%s_pPb_sig_iCent%i_%s_%s", dir.Data (), iCent, dType.Data (), variations[iVar].Data ()));
+
+          h_jet_trk_pt_iaa_syst[iDir][iCent][iVar] = (TH1D*) inFile->Get (Form ("h_jet_trk_pt_%s_iaa_iCent%i_%s_%s", dir.Data (), iCent, dType.Data (), variations[iVar].Data ()));
+
+        } // end loop over iCent
+
+      } // end loop over iVar
+
+    } // end loop over iDir
+
   }
 
 
@@ -251,350 +247,331 @@ void PlotPtCh (const char* tag, const char* inFileTag) {
 
 
 
-  for (int iCent = 0; iCent < nZdcCentBins; iCent++) {
-    const char* canvasName = Form ("c_jet_trk_pt_iCent%i", iCent);
+  for (int iDType = 0; iDType < 2; iDType++) {
 
-    TCanvas* c = new TCanvas (canvasName, "", 1200, 1120);
-    c->cd ();
+    for (int iCent = 0; iCent < nZdcCentBins; iCent++) {
 
-    const double fuPad = 480./1120.;
-    const double fdPad = 320./1120.;
-    const double fcPad = 1.0 - fuPad - fdPad;
-    const double fxPad = 0.42;
+      const char* canvasName = Form ("c_jet_trk_pt_iCent%i", iCent);
 
-    TPad* ulPad = new TPad (Form ("%s_ulPad", canvasName), "", 0.0, 1.0-fuPad, fxPad+0.1, 1.0);
-    TPad* clPad = new TPad (Form ("%s_clPad", canvasName), "", 0.0, fdPad, fxPad+0.1, 1.0-fuPad);
-    TPad* dlPad = new TPad (Form ("%s_dlPad", canvasName), "", 0.0, 0.0, fxPad+0.1, fdPad);
-    TPad* urPad = new TPad (Form ("%s_urPad", canvasName), "", fxPad+0.1, 1.0-fuPad, 1.0, 1.0);
-    TPad* crPad = new TPad (Form ("%s_crPad", canvasName), "", fxPad+0.1, fdPad, 1.0, 1.0-fuPad);
-    TPad* drPad = new TPad (Form ("%s_drPad", canvasName), "", fxPad+0.1, 0.0, 1.0, fdPad);
+      TCanvas* c = new TCanvas (canvasName, "", 1200, 1120);
+      c->cd ();
 
-    ulPad->SetTopMargin (0.14);
-    urPad->SetTopMargin (0.14);
-    ulPad->SetBottomMargin (0);
-    urPad->SetBottomMargin (0);
-    clPad->SetTopMargin (0);
-    crPad->SetTopMargin (0);
-    clPad->SetBottomMargin (0);
-    crPad->SetBottomMargin (0);
-    dlPad->SetTopMargin (0);
-    drPad->SetTopMargin (0);
-    dlPad->SetBottomMargin (0.25);
-    drPad->SetBottomMargin (0.25);
+      const double fuPad = 480./1120.;
+      const double fdPad = 320./1120.;
+      const double fcPad = 1.0 - fuPad - fdPad;
+      const double fxPad = 0.42;
 
-    ulPad->SetLeftMargin (0.1 / 0.52);
-    clPad->SetLeftMargin (0.1 / 0.52);
-    dlPad->SetLeftMargin (0.1 / 0.52);
-    ulPad->SetRightMargin (0);
-    clPad->SetRightMargin (0);
-    dlPad->SetRightMargin (0);
-    urPad->SetLeftMargin (0);
-    crPad->SetLeftMargin (0);
-    drPad->SetLeftMargin (0);
-    urPad->SetRightMargin (0.03 / 0.48);
-    crPad->SetRightMargin (0.03 / 0.48);
-    drPad->SetRightMargin (0.03 / 0.48);
-    ulPad->Draw ();
-    clPad->Draw ();
-    dlPad->Draw ();
-    urPad->Draw ();
-    crPad->Draw ();
-    drPad->Draw ();
+      TPad* ulPad = new TPad (Form ("%s_ulPad", canvasName), "", 0.0, 1.0-fuPad, fxPad+0.1, 1.0);
+      TPad* clPad = new TPad (Form ("%s_clPad", canvasName), "", 0.0, fdPad, fxPad+0.1, 1.0-fuPad);
+      TPad* dlPad = new TPad (Form ("%s_dlPad", canvasName), "", 0.0, 0.0, fxPad+0.1, fdPad);
+      TPad* urPad = new TPad (Form ("%s_urPad", canvasName), "", fxPad+0.1, 1.0-fuPad, 1.0, 1.0);
+      TPad* crPad = new TPad (Form ("%s_crPad", canvasName), "", fxPad+0.1, fdPad, 1.0, 1.0-fuPad);
+      TPad* drPad = new TPad (Form ("%s_drPad", canvasName), "", fxPad+0.1, 0.0, 1.0, fdPad);
 
-    TH1D* h = nullptr; 
-    TGAE* g = nullptr;
+      ulPad->SetTopMargin (0.14);
+      urPad->SetTopMargin (0.14);
+      ulPad->SetBottomMargin (0);
+      urPad->SetBottomMargin (0);
+      clPad->SetTopMargin (0);
+      crPad->SetTopMargin (0);
+      clPad->SetBottomMargin (0);
+      crPad->SetBottomMargin (0);
+      dlPad->SetTopMargin (0);
+      drPad->SetTopMargin (0);
+      dlPad->SetBottomMargin (0.25);
+      drPad->SetBottomMargin (0.25);
 
-    ulPad->cd (); 
-    ulPad->SetLogx ();
-    ulPad->SetLogy ();
+      ulPad->SetLeftMargin (0.1 / 0.52);
+      clPad->SetLeftMargin (0.1 / 0.52);
+      dlPad->SetLeftMargin (0.1 / 0.52);
+      ulPad->SetRightMargin (0);
+      clPad->SetRightMargin (0);
+      dlPad->SetRightMargin (0);
+      urPad->SetLeftMargin (0);
+      crPad->SetLeftMargin (0);
+      drPad->SetLeftMargin (0);
+      urPad->SetRightMargin (0.03 / 0.48);
+      crPad->SetRightMargin (0.03 / 0.48);
+      drPad->SetRightMargin (0.03 / 0.48);
+      ulPad->Draw ();
+      clPad->Draw ();
+      dlPad->Draw ();
+      urPad->Draw ();
+      crPad->Draw ();
+      drPad->Draw ();
 
-    float ymin = 8e-6;
-    float ymax = 3e1;
-    h = (TH1D*) h_jet_trk_pt_ns_ref->Clone ("h");
-    h->Reset ();
-    h->GetYaxis ()->SetRangeUser (ymin, ymax);
-    h->GetYaxis ()->SetTitle ("(1/N_{jet}) (dN_{ch} / d#it{p}_{T}^{ch}) [GeV^{-1}]");
-    h->GetYaxis ()->SetTitleSize (0.028/fuPad);
-    h->GetYaxis ()->SetLabelSize (0.028/fuPad);
-    h->GetYaxis ()->SetTitleOffset (3.0*fuPad);
+      TH1D* h = nullptr; 
+      TGAE* g = nullptr;
 
-    h->SetLineWidth (1);
-    h->SetLineStyle (2);
-    h->DrawCopy ("hist ][");
-    SaferDelete (&h);
+      ulPad->cd (); 
+      ulPad->SetLogx ();
+      ulPad->SetLogy ();
 
-    //myDrawSyst (g_jet_trk_pt_ns_ref_syst, myBlue);
-    h = h_jet_trk_pt_ns_ref;
-    g = make_graph (h);
-    ResetXErrors (g);
-    myDraw (g, myBlue, kFullCircle, 0.8);
-    SaferDelete (&g);
+      float ymin = 8e-6;
+      float ymax = 3e1;
+      h = (TH1D*) h_jet_trk_pt_ref[iDType][0]->Clone ("h");
+      h->Reset ();
+      h->GetYaxis ()->SetRangeUser (ymin, ymax);
+      h->GetYaxis ()->SetTitle ("(1/N_{jet}) (dN_{ch} / d#it{p}_{T}^{ch}) [GeV^{-1}]");
+      h->GetYaxis ()->SetTitleSize (0.028/fuPad);
+      h->GetYaxis ()->SetLabelSize (0.028/fuPad);
+      h->GetYaxis ()->SetTitleOffset (3.0*fuPad);
 
-    //myDrawSyst (g_jet_trk_pt_ns_ref_bkg_syst, myPurple);
-    h = h_jet_trk_pt_ns_ref_bkg;
-    g = make_graph (h);
-    ResetXErrors (g);
-    myDraw (g, myPurple, kOpenCircle, 0.8);
-    SaferDelete (&g);
+      h->SetLineWidth (1);
+      h->SetLineStyle (2);
+      h->DrawCopy ("hist ][");
+      SaferDelete (&h);
 
-    //myDrawSyst (g_jet_trk_pt_ns_syst[iCent], myRed);
-    h = h_jet_trk_pt_ns[iCent];
-    g = make_graph (h);
-    ResetXErrors (g);
-    myDraw (g, myRed, kFullCircle, 0.8);
-    SaferDelete (&g);
+      myDrawSyst (g_jet_trk_pt_ref_syst[0], myBlue);
+      h = h_jet_trk_pt_ref[iDType][0];
+      g = make_graph (h);
+      ResetXErrors (g);
+      myDraw (g, myBlue, kFullCircle, 0.8);
+      SaferDelete (&g);
 
-    g = g_jet_trk_pt_ns_bkg_syst[iCent];
-    //myDrawSyst (g_jet_trk_pt_ns_bkg_syst[iCent], myGreen);
-    h = h_jet_trk_pt_ns_bkg[iCent];
-    g = make_graph (h);
-    ResetXErrors (g);
-    myDraw (g, myGreen, kOpenCircle, 0.8);
-    SaferDelete (&g);
+      myDrawSyst (g_jet_trk_pt_ref_bkg_syst[0], myPurple);
+      h = h_jet_trk_pt_ref_bkg[iDType][0];
+      g = make_graph (h);
+      ResetXErrors (g);
+      myDraw (g, myPurple, kOpenCircle, 0.8);
+      SaferDelete (&g);
 
-    myText (0.24, 0.12, kBlack, Form ("#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV, #bf{ZDC %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.020/fuPad);
-    myText (0.24, 0.06, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.020/fuPad);
+      myDrawSyst (g_jet_trk_pt_syst[0][iCent], myRed);
+      h = h_jet_trk_pt[iDType][0][iCent];
+      g = make_graph (h);
+      ResetXErrors (g);
+      myDraw (g, myRed, kFullCircle, 0.8);
+      SaferDelete (&g);
 
-    tl->SetTextAlign (22);
-    tl->SetTextFont (42);
-    tl->SetTextSize (0.022/fuPad);
-    tl->DrawLatexNDC (0.1/0.52 + 0.5*(1.-0.1/0.52), 0.94, "#Delta#phi < #pi/8 (near-side)");
+      myDrawSyst (g_jet_trk_pt_bkg_syst[0][iCent], myGreen);
+      h = h_jet_trk_pt_bkg[iDType][0][iCent];
+      g = make_graph (h);
+      ResetXErrors (g);
+      myDraw (g, myGreen, kOpenCircle, 0.8);
+      SaferDelete (&g);
 
+      myText (0.24, 0.12, kBlack, Form ("#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV, #bf{ZDC %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.020/fuPad);
+      myText (0.24, 0.06, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.020/fuPad);
 
-    urPad->cd (); 
-    urPad->SetLogx ();
-    urPad->SetLogy ();
-
-    ymin = 8e-6;
-    ymax = 3e1;
-
-    h = (TH1D*) h_jet_trk_pt_as_ref->Clone ("h");
-    h->Reset ();
-    h->GetYaxis ()->SetRangeUser (ymin, ymax);
-    h->GetYaxis ()->SetTitle ("(1/N_{jet}) (dN_{ch} / d#it{p}_{T}^{ch}) [GeV^{-1}]");
-    h->GetYaxis ()->SetTitleSize (0.028/fuPad);
-    h->GetYaxis ()->SetLabelSize (0.028/fuPad);
-    h->GetYaxis ()->SetTitleOffset (3.0*fuPad);
-
-    h->SetLineWidth (1);
-    h->SetLineStyle (2);
-    h->DrawCopy ("hist ][");
-    SaferDelete (&h);
-
-    //myDrawSyst (g_jet_trk_pt_as_ref_syst, myBlue);
-    h = h_jet_trk_pt_as_ref;
-    g = make_graph (h);
-    ResetXErrors (g);
-    myDraw (g, myBlue, kFullCircle, 0.8);
-    SaferDelete (&g);
-
-    //myDrawSyst (g_jet_trk_pt_as_ref_bkg_syst, myPurple);
-    h = h_jet_trk_pt_as_ref_bkg;
-    g = make_graph (h);
-    ResetXErrors (g);
-    myDraw (g, myPurple, kOpenCircle, 0.8);
-    SaferDelete (&g);
-
-    //myDrawSyst (g_jet_trk_pt_as_syst[iCent], myRed);
-    h = h_jet_trk_pt_as[iCent];
-    g = make_graph (h);
-    ResetXErrors (g);
-    myDraw (g, myRed, kFullCircle, 0.8);
-    SaferDelete (&g);
-
-    //myDrawSyst (g_jet_trk_pt_as_bkg_syst[iCent], myGreen);
-    h = h_jet_trk_pt_as_bkg[iCent];
-    g = make_graph (h);
-    ResetXErrors (g);
-    myDraw (g, myGreen, kOpenCircle, 0.8);
-    SaferDelete (&g);
-
-    myText (0.58, 0.78, kBlack, "#bf{#it{ATLAS}} Internal", 0.022/fuPad);
-    myBoxText2 (0.10, 0.24, myRed, kFullCircle, "#it{p}+Pb total", 0.8, 0.020/fuPad, true);
-    myBoxText2 (0.10, 0.18, myBlue, kFullCircle, "#it{pp} total", 0.8, 0.020/fuPad, true);
-    myBoxText2 (0.10, 0.12, myGreen, kOpenCircle, "#it{p}+Pb bkgd.", 0.8, 0.020/fuPad);
-    myBoxText2 (0.10, 0.06, myPurple, kOpenCircle, "#it{pp} bkgd.", 0.8, 0.020/fuPad);
-
-    tl->DrawLatexNDC (0.5*(1-0.03/0.48), 0.94, "#Delta#phi > 7#pi/8 (away-side)");
+      tl->SetTextAlign (22);
+      tl->SetTextFont (42);
+      tl->SetTextSize (0.022/fuPad);
+      tl->DrawLatexNDC (0.1/0.52 + 0.5*(1.-0.1/0.52), 0.94, "#Delta#phi < #pi/8 (near-side)");
 
 
-    clPad->cd (); 
-    clPad->SetLogx ();
-    clPad->SetLogy ();
+      urPad->cd (); 
+      urPad->SetLogx ();
+      urPad->SetLogy ();
 
-    ymin = 8e-6;
-    ymax = 3e1;
+      ymin = 8e-6;
+      ymax = 3e1;
 
-    h = (TH1D*) h_jet_trk_pt_ns_ref_sig->Clone ("h");
-    h->Reset ();
-    h->GetXaxis ()->SetMoreLogLabels ();
-    h->GetYaxis ()->SetRangeUser (ymin, ymax);
-    h->GetYaxis ()->SetTitle ("(Sig.+Bkg.) - Bkg.");
-    h->GetYaxis ()->SetTitleSize (0.028/fdPad);
-    h->GetYaxis ()->SetLabelSize (0.028/fdPad);
-    h->GetYaxis ()->SetTitleOffset (3.0*fdPad);
-    h->GetYaxis ()->CenterTitle ();
+      h = (TH1D*) h_jet_trk_pt_ref[iDType][2]->Clone ("h");
+      h->Reset ();
+      h->GetYaxis ()->SetRangeUser (ymin, ymax);
+      h->GetYaxis ()->SetTitle ("(1/N_{jet}) (dN_{ch} / d#it{p}_{T}^{ch}) [GeV^{-1}]");
+      h->GetYaxis ()->SetTitleSize (0.028/fuPad);
+      h->GetYaxis ()->SetLabelSize (0.028/fuPad);
+      h->GetYaxis ()->SetTitleOffset (3.0*fuPad);
 
-    h->SetLineWidth (1);
-    h->SetLineStyle (2);
-    h->DrawCopy ("hist ][");
-    SaferDelete (&h);
+      h->SetLineWidth (1);
+      h->SetLineStyle (2);
+      h->DrawCopy ("hist ][");
+      SaferDelete (&h);
 
-    //myDrawSyst (g_jet_trk_pt_ns_ref_sig_syst, myBlue);
-    h = h_jet_trk_pt_ns_ref_sig;
-    g = make_graph (h);
-    ResetXErrors (g);
-    myDraw (g, myBlue, kFullCircle, 0.8);
-    SaferDelete (&g);
+      myDrawSyst (g_jet_trk_pt_ref_syst[2], myBlue);
+      h = h_jet_trk_pt_ref[iDType][2];
+      g = make_graph (h);
+      ResetXErrors (g);
+      myDraw (g, myBlue, kFullCircle, 0.8);
+      SaferDelete (&g);
 
-    //myDrawSyst (g_jet_trk_pt_ns_sig_syst[iCent], myRed);
-    h = h_jet_trk_pt_ns_sig[iCent];
-    g = make_graph (h);
-    ResetXErrors (g);
-    myDraw (g, myRed, kFullCircle, 0.8);
-    SaferDelete (&g);
+      myDrawSyst (g_jet_trk_pt_ref_bkg_syst[2], myPurple);
+      h = h_jet_trk_pt_ref_bkg[iDType][2];
+      g = make_graph (h);
+      ResetXErrors (g);
+      myDraw (g, myPurple, kOpenCircle, 0.8);
+      SaferDelete (&g);
 
-    myText (0.24, 0.26, kBlack, "Jet-hadron correlations", 0.020/fcPad);
-    myText (0.24, 0.18, kBlack, Form ("#it{p}_{T}^{jet} > %s", GetJetPtStr (tag).Data ()), 0.020/fcPad);
-    myText (0.24, 0.10, kBlack, "|#eta_{ch} - #it{y}_{CoM}| < 2.035", 0.020/fcPad);
+      myDrawSyst (g_jet_trk_pt_syst[2][iCent], myRed);
+      h = h_jet_trk_pt[iDType][2][iCent];
+      g = make_graph (h);
+      ResetXErrors (g);
+      myDraw (g, myRed, kFullCircle, 0.8);
+      SaferDelete (&g);
 
+      myDrawSyst (g_jet_trk_pt_bkg_syst[2][iCent], myGreen);
+      h = h_jet_trk_pt_bkg[iDType][2][iCent];
+      g = make_graph (h);
+      ResetXErrors (g);
+      myDraw (g, myGreen, kOpenCircle, 0.8);
+      SaferDelete (&g);
 
-    crPad->cd (); 
-    crPad->SetLogx ();
-    crPad->SetLogy ();
+      if (iDType == 0) myText (0.58, 0.78, kBlack, "#bf{#it{ATLAS}} Internal", 0.022/fuPad);
+      else {
+        myText (0.42, 0.78, kBlack, "#bf{#it{ATLAS}} Simulation Internal", 0.022/fuPad);
+        myText (0.42, 0.72, kBlack, Form ("Pythia8 JZ%i (+ #it{p}+Pb Overlay)", TString (tag) == TString ("30GeVJets") ? 1 : 2), 0.022/fuPad);
+      }
+      myBoxText2 (0.10, 0.24, myRed, kFullCircle, "#it{p}+Pb total", 0.8, 0.020/fuPad, true);
+      myBoxText2 (0.10, 0.18, myBlue, kFullCircle, "#it{pp} total", 0.8, 0.020/fuPad, true);
+      myBoxText2 (0.10, 0.12, myGreen, kOpenCircle, "#it{p}+Pb bkgd.", 0.8, 0.020/fuPad);
+      myBoxText2 (0.10, 0.06, myPurple, kOpenCircle, "#it{pp} bkgd.", 0.8, 0.020/fuPad);
 
-    ymin = 8e-6;
-    ymax = 3e1;
-
-    h = (TH1D*) h_jet_trk_pt_as_ref_sig->Clone ("h");
-    h->Reset ();
-    h->GetXaxis ()->SetMoreLogLabels ();
-    h->GetYaxis ()->SetRangeUser (ymin, ymax);
-    h->GetYaxis ()->SetTitle ("(Sig.+Bkg.) - Bkg.");
-    h->GetYaxis ()->SetTitleSize (0.028/fdPad);
-    h->GetYaxis ()->SetLabelSize (0.028/fdPad);
-    h->GetYaxis ()->SetTitleOffset (3.0*fdPad);
-    h->GetYaxis ()->CenterTitle ();
-
-    h->SetLineWidth (1);
-    h->SetLineStyle (2);
-    h->DrawCopy ("hist ][");
-    SaferDelete (&h);
-
-    //myDrawSyst (g_jet_trk_pt_as_ref_sig_syst, myBlue);
-    h = h_jet_trk_pt_as_ref_sig;
-    g = make_graph (h);
-    ResetXErrors (g);
-    myDraw (g, myBlue, kFullCircle, 0.8);
-    SaferDelete (&g);
-
-    //myDrawSyst (g_jet_trk_pt_as_sig_syst[iCent], myRed);
-    h = h_jet_trk_pt_as_sig[iCent];
-    g = make_graph (h);
-    ResetXErrors (g);
-    myDraw (g, myRed, kFullCircle, 0.8);
-    SaferDelete (&g);
+      tl->DrawLatexNDC (0.5*(1-0.03/0.48), 0.94, "#Delta#phi > 7#pi/8 (away-side)");
 
 
-    dlPad->cd (); 
-    dlPad->SetLogx ();
+      clPad->cd (); 
+      clPad->SetLogx ();
+      clPad->SetLogy ();
 
-    ymin = 0.53;
-    ymax = (strcmp (tag, "30GeVJets") == 0 || strcmp (tag, "15GeVJets") == 0 ? 1.45 : 1.17);
+      ymin = 8e-6;
+      ymax = 3e1;
 
-    h = (TH1D*) h_jet_trk_pt_ns_iaa[iCent]->Clone ("h");
-    h->Reset ();
-    for (int i = 1; i <= h->GetNbinsX (); i++) h->SetBinContent (i, 1);
-    h->GetXaxis ()->SetMoreLogLabels ();
-    h->GetYaxis ()->SetRangeUser (ymin, ymax);
-    h->GetXaxis ()->SetTitle ("#it{p}_{T}^{ch} [GeV]");
-    h->GetXaxis ()->SetTitleSize (0.028/fdPad);
-    h->GetXaxis ()->SetLabelSize (0.028/fdPad);
-    h->GetXaxis ()->SetTitleOffset (3.7*fdPad);
-    h->GetXaxis ()->SetLabelOffset (-0.05*fdPad);
-    h->GetYaxis ()->SetTitle ("#it{I}_{#it{p}A} = #it{p}+Pb / #it{pp}");
-    h->GetYaxis ()->SetTitleSize (0.028/fdPad);
-    h->GetYaxis ()->SetLabelSize (0.028/fdPad);
-    h->GetYaxis ()->SetTitleOffset (3.0*fdPad);
-    h->GetYaxis ()->CenterTitle ();
+      h = (TH1D*) h_jet_trk_pt_ref_sig[iDType][0]->Clone ("h");
+      h->Reset ();
+      h->GetXaxis ()->SetMoreLogLabels ();
+      h->GetYaxis ()->SetRangeUser (ymin, ymax);
+      h->GetYaxis ()->SetTitle ("(Sig.+Bkg.) - Bkg.");
+      h->GetYaxis ()->SetTitleSize (0.028/fdPad);
+      h->GetYaxis ()->SetLabelSize (0.028/fdPad);
+      h->GetYaxis ()->SetTitleOffset (3.0*fdPad);
+      h->GetYaxis ()->CenterTitle ();
 
-    h->SetLineWidth (1);
-    h->SetLineStyle (2);
-    h->DrawCopy ("hist ][");
-    SaferDelete (&h);
+      h->SetLineWidth (1);
+      h->SetLineStyle (2);
+      h->DrawCopy ("hist ][");
+      SaferDelete (&h);
 
-    //myDrawSyst (g_jet_trk_pt_ns_iaa_syst[iCent], myRed);
-    h = h_jet_trk_pt_ns_iaa[iCent];
-    g = make_graph (h);
-    ResetXErrors (g);
-    myDraw (g, myRed, kFullCircle, 0.8);
-    SaferDelete (&g);
+      myDrawSyst (g_jet_trk_pt_ref_sig_syst[0], myBlue);
+      h = h_jet_trk_pt_ref_sig[iDType][0];
+      g = make_graph (h);
+      ResetXErrors (g);
+      myDraw (g, myBlue, kFullCircle, 0.8);
+      SaferDelete (&g);
 
-    //g = (TGAE*) g_jet_trk_pt_ns_iaa_syst[iCent]->Clone ();
-    //DoOffset (g, tag, iCent);
-    //myDrawSyst (g, myGreen);
-    //SaferDelete (&g);
-    //h = (TH1D*) h_jet_trk_pt_ns_iaa[iCent]->Clone ("htemp");
-    //DoOffset (h, tag, iCent);
-    //g = make_graph (h);
-    //SaferDelete (&h);
-    //ResetXErrors (g);
-    //myDraw (g, myGreen, kFullCircle, 0.8);
-    //SaferDelete (&g);
+      myDrawSyst (g_jet_trk_pt_sig_syst[0][iCent], myRed);
+      h = h_jet_trk_pt_sig[iDType][0][iCent];
+      g = make_graph (h);
+      ResetXErrors (g);
+      myDraw (g, myRed, kFullCircle, 0.8);
+      SaferDelete (&g);
+
+      myText (0.24, 0.26, kBlack, "Jet-hadron correlations", 0.020/fcPad);
+      myText (0.24, 0.18, kBlack, Form ("#it{p}_{T}^{jet} > %s", GetJetPtStr (tag).Data ()), 0.020/fcPad);
+      myText (0.24, 0.10, kBlack, "|#eta_{ch} - #it{y}_{CoM}| < 2.035", 0.020/fcPad);
 
 
-    drPad->cd (); 
-    drPad->SetLogx ();
+      crPad->cd (); 
+      crPad->SetLogx ();
+      crPad->SetLogy ();
 
-    ymin = 0.53;
-    ymax = (strcmp (tag, "30GeVJets") == 0 || strcmp (tag, "15GeVJets") == 0 ? 1.45 : 1.17);
+      ymin = 8e-6;
+      ymax = 3e1;
 
-    h = (TH1D*) h_jet_trk_pt_as_iaa[iCent]->Clone ("h");
-    h->Reset ();
-    for (int i = 1; i <= h->GetNbinsX (); i++) h->SetBinContent (i, 1);
-    h->GetXaxis ()->SetMoreLogLabels ();
-    h->GetYaxis ()->SetRangeUser (ymin, ymax);
-    h->GetXaxis ()->SetTitle ("#it{p}_{T}^{ch} [GeV]");
-    h->GetXaxis ()->SetTitleSize (0.028/fdPad);
-    h->GetXaxis ()->SetLabelSize (0.028/fdPad);
-    h->GetXaxis ()->SetTitleOffset (3.7*fdPad);
-    h->GetXaxis ()->SetLabelOffset (-0.05*fdPad);
-    h->GetYaxis ()->SetTitle ("#it{I}_{#it{p}A} = #it{p}+Pb / #it{pp}");
-    h->GetYaxis ()->SetTitleSize (0.028/fdPad);
-    h->GetYaxis ()->SetLabelSize (0.028/fdPad);
-    h->GetYaxis ()->SetTitleOffset (3.0*fdPad);
-    h->GetYaxis ()->CenterTitle ();
+      h = (TH1D*) h_jet_trk_pt_ref_sig[iDType][2]->Clone ("h");
+      h->Reset ();
+      h->GetXaxis ()->SetMoreLogLabels ();
+      h->GetYaxis ()->SetRangeUser (ymin, ymax);
+      h->GetYaxis ()->SetTitle ("(Sig.+Bkg.) - Bkg.");
+      h->GetYaxis ()->SetTitleSize (0.028/fdPad);
+      h->GetYaxis ()->SetLabelSize (0.028/fdPad);
+      h->GetYaxis ()->SetTitleOffset (3.0*fdPad);
+      h->GetYaxis ()->CenterTitle ();
 
-    h->SetLineWidth (1);
-    h->SetLineStyle (2);
-    h->DrawCopy ("hist ][");
-    SaferDelete (&h);
+      h->SetLineWidth (1);
+      h->SetLineStyle (2);
+      h->DrawCopy ("hist ][");
+      SaferDelete (&h);
 
-    //myDrawSyst (g_jet_trk_pt_as_iaa_syst[iCent], myRed);
-    h = h_jet_trk_pt_as_iaa[iCent];
-    g = make_graph (h);
-    ResetXErrors (g);
-    myDraw (g, myRed, kFullCircle, 0.8);
-    SaferDelete (&g);
+      myDrawSyst (g_jet_trk_pt_ref_sig_syst[2], myBlue);
+      h = h_jet_trk_pt_ref_sig[iDType][2];
+      g = make_graph (h);
+      ResetXErrors (g);
+      myDraw (g, myBlue, kFullCircle, 0.8);
+      SaferDelete (&g);
 
-    //g = (TGAE*) g_jet_trk_pt_as_iaa_syst[iCent]->Clone ();
-    //DoOffset (g, tag, iCent);
-    //myDrawSyst (g, myGreen);
-    //SaferDelete (&g);
-    //h = (TH1D*) h_jet_trk_pt_as_iaa[iCent]->Clone ("htemp");
-    //DoOffset (h, tag, iCent);
-    //g = make_graph (h);
-    //SaferDelete (&h);
-    //ResetXErrors (g);
-    //myDraw (g, myGreen, kFullCircle, 0.8);
-    //SaferDelete (&g);
+      myDrawSyst (g_jet_trk_pt_sig_syst[2][iCent], myRed);
+      h = h_jet_trk_pt_sig[iDType][2][iCent];
+      g = make_graph (h);
+      ResetXErrors (g);
+      myDraw (g, myRed, kFullCircle, 0.8);
+      SaferDelete (&g);
 
 
-    //myBoxText2 (0.10, 0.48, myRed, kFullCircle, "Nominal", 0.8, 0.020/fdPad, true);
-    //myBoxText2 (0.10, 0.38, myGreen, kFullCircle, "Offset by #LT1 - #it{I}_{pPb}(#Delta#phi=#pi/2)#GT", 0.8, 0.020/fdPad, true);
+      dlPad->cd (); 
+      dlPad->SetLogx ();
 
-    c->SaveAs (Form ("%s/Plots/PtCh/JetTagged_HadronYields_%i-%i%%_comparison_PtCh_%s.pdf", workPath.Data (), zdcCentPercs[iCent+1], zdcCentPercs[iCent], tag)); 
-  }
+      ymin = 0.53;
+      ymax = (strcmp (tag, "30GeVJets") == 0 || strcmp (tag, "15GeVJets") == 0 ? 1.45 : 1.17);
+
+      h = (TH1D*) h_jet_trk_pt_iaa[iDType][0][iCent]->Clone ("h");
+      h->Reset ();
+      for (int i = 1; i <= h->GetNbinsX (); i++) h->SetBinContent (i, 1);
+      h->GetXaxis ()->SetMoreLogLabels ();
+      h->GetYaxis ()->SetRangeUser (ymin, ymax);
+      h->GetXaxis ()->SetTitle ("#it{p}_{T}^{ch} [GeV]");
+      h->GetXaxis ()->SetTitleSize (0.028/fdPad);
+      h->GetXaxis ()->SetLabelSize (0.028/fdPad);
+      h->GetXaxis ()->SetTitleOffset (3.7*fdPad);
+      h->GetXaxis ()->SetLabelOffset (-0.05*fdPad);
+      h->GetYaxis ()->SetTitle ("#it{I}_{#it{p}Pb} = #it{p}+Pb / #it{pp}");
+      h->GetYaxis ()->SetTitleSize (0.028/fdPad);
+      h->GetYaxis ()->SetLabelSize (0.028/fdPad);
+      h->GetYaxis ()->SetTitleOffset (3.0*fdPad);
+      h->GetYaxis ()->CenterTitle ();
+
+      h->SetLineWidth (1);
+      h->SetLineStyle (2);
+      h->DrawCopy ("hist ][");
+      SaferDelete (&h);
+
+      myDrawSyst (g_jet_trk_pt_iaa_syst[0][iCent], myRed);
+      h = h_jet_trk_pt_iaa[iDType][0][iCent];
+      g = make_graph (h);
+      ResetXErrors (g);
+      myDraw (g, myRed, kFullCircle, 0.8);
+      SaferDelete (&g);
+
+
+      drPad->cd (); 
+      drPad->SetLogx ();
+
+      ymin = 0.53;
+      ymax = (strcmp (tag, "30GeVJets") == 0 || strcmp (tag, "15GeVJets") == 0 ? 1.45 : 1.17);
+
+      h = (TH1D*) h_jet_trk_pt_iaa[iDType][2][iCent]->Clone ("h");
+      h->Reset ();
+      for (int i = 1; i <= h->GetNbinsX (); i++) h->SetBinContent (i, 1);
+      h->GetXaxis ()->SetMoreLogLabels ();
+      h->GetYaxis ()->SetRangeUser (ymin, ymax);
+      h->GetXaxis ()->SetTitle ("#it{p}_{T}^{ch} [GeV]");
+      h->GetXaxis ()->SetTitleSize (0.028/fdPad);
+      h->GetXaxis ()->SetLabelSize (0.028/fdPad);
+      h->GetXaxis ()->SetTitleOffset (3.7*fdPad);
+      h->GetXaxis ()->SetLabelOffset (-0.05*fdPad);
+      h->GetYaxis ()->SetTitle ("#it{I}_{#it{p}Pb} = #it{p}+Pb / #it{pp}");
+      h->GetYaxis ()->SetTitleSize (0.028/fdPad);
+      h->GetYaxis ()->SetLabelSize (0.028/fdPad);
+      h->GetYaxis ()->SetTitleOffset (3.0*fdPad);
+      h->GetYaxis ()->CenterTitle ();
+
+      h->SetLineWidth (1);
+      h->SetLineStyle (2);
+      h->DrawCopy ("hist ][");
+      SaferDelete (&h);
+
+      myDrawSyst (g_jet_trk_pt_iaa_syst[2][iCent], myRed);
+      h = h_jet_trk_pt_iaa[iDType][2][iCent];
+      g = make_graph (h);
+      ResetXErrors (g);
+      myDraw (g, myRed, kFullCircle, 0.8);
+      SaferDelete (&g);
+
+      c->SaveAs (Form ("%s/Plots/PtCh/JetTagged_HadronYields_%i-%i%%_comparison_PtCh_%s%s.pdf", workPath.Data (), zdcCentPercs[iCent+1], zdcCentPercs[iCent], tag, iDType == 1 ? "_mc" : "")); 
+
+    } // end loop over iCent
+
+  } // end loop over iDType
 
 
 /*
@@ -662,7 +639,7 @@ void PlotPtCh (const char* tag, const char* inFileTag) {
     float ymin = 8e-6;
     float ymax = 3e1;
 
-    h = (TH1D*) h_jet_trk_pt_ns_ref->Clone ("h");
+    h = (TH1D*) h_jet_trk_pt_ref[0]->Clone ("h");
     h->Reset ();
     h->GetYaxis ()->SetRangeUser (ymin, ymax);
     h->GetYaxis ()->SetTitle ("(1/N_{jet}) (dN_{ch} / d#it{p}_{T}^{ch}) [GeV^{-1}]");
@@ -675,37 +652,37 @@ void PlotPtCh (const char* tag, const char* inFileTag) {
     h->DrawCopy ("hist ][");
     SaferDelete (&h);
 
-    h = h_jet_trk_pt_ns_ref;
+    h = h_jet_trk_pt_ref[0][0];
     g = make_graph (h);
     ResetXErrors (g);
     myDraw (g, kBlack, kFullCircle, 0.8);
     SaferDelete (&g);
 
-    h = h_jet_trk_pt_ns_ref_bkg;
+    h = h_jet_trk_pt_ref_bkg[0][0];
     g = make_graph (h);
     ResetXErrors (g);
     myDraw (g, kBlack, kOpenCircle, 0.8);
     SaferDelete (&g);
 
-    h = h_jet_trk_pt_ns[iCent];
+    h = h_jet_trk_pt[0][0][iCent];
     g = make_graph (h);
     ResetXErrors (g);
     myDraw (g, myRed, kFullCircle, 0.8);
     SaferDelete (&g);
 
-    h = h_jet_trk_pt_ns_bkg[iCent];
+    h = h_jet_trk_pt_bkg[0][0][iCent];
     g = make_graph (h);
     ResetXErrors (g);
     myDraw (g, myGreen, kFullCircle, 0.8);
     SaferDelete (&g);
 
-    h = h_jet_trk_pt_ns_syst[iCent][iVar];
+    h = h_jet_trk_pt_syst[0][iCent][iVar];
     g = make_graph (h);
     ResetXErrors (g);
     myDraw (g, myBlue, kFullSquare, 0.8);
     SaferDelete (&g);
 
-    h = h_jet_trk_pt_ns_bkg_syst[iCent][iVar];
+    h = h_jet_trk_pt_bkg_syst[0][iCent][iVar];
     g = make_graph (h);
     ResetXErrors (g);
     myDraw (g, myOrange, kFullSquare, 0.8);
@@ -730,7 +707,7 @@ void PlotPtCh (const char* tag, const char* inFileTag) {
     ymin = 8e-6;
     ymax = 3e1;
 
-    h = (TH1D*) h_jet_trk_pt_as_ref->Clone ("h");
+    h = (TH1D*) h_jet_trk_pt_ref[0][2]->Clone ("h");
     h->Reset ();
     h->GetYaxis ()->SetRangeUser (ymin, ymax);
     h->GetYaxis ()->SetTitle ("(1/N_{jet}) (dN_{ch} / d#it{p}_{T}^{ch}) [GeV^{-1}]");
@@ -743,37 +720,37 @@ void PlotPtCh (const char* tag, const char* inFileTag) {
     h->DrawCopy ("hist ][");
     SaferDelete (&h);
 
-    h = h_jet_trk_pt_as_ref;
+    h = h_jet_trk_pt_ref[0][2];
     g = make_graph (h);
     ResetXErrors (g);
     myDraw (g, kBlack, kFullCircle, 0.8);
     SaferDelete (&g);
 
-    h = h_jet_trk_pt_as_ref_bkg;
+    h = h_jet_trk_pt_ref_bkg[0][2];
     g = make_graph (h);
     ResetXErrors (g);
     myDraw (g, kBlack, kOpenCircle, 0.8);
     SaferDelete (&g);
 
-    h = h_jet_trk_pt_as[iCent];
+    h = h_jet_trk_pt[0][2][iCent];
     g = make_graph (h);
     ResetXErrors (g);
     myDraw (g, myRed, kFullCircle, 0.8);
     SaferDelete (&g);
 
-    h = h_jet_trk_pt_as_bkg[iCent];
+    h = h_jet_trk_pt_bkg[0][2][iCent];
     g = make_graph (h);
     ResetXErrors (g);
     myDraw (g, myGreen, kFullCircle, 0.8);
     SaferDelete (&g);
 
-    h = h_jet_trk_pt_as_syst[iCent][iVar];
+    h = h_jet_trk_pt_syst[2][iCent][iVar];
     g = make_graph (h);
     ResetXErrors (g);
     myDraw (g, myBlue, kFullSquare, 0.8);
     SaferDelete (&g);
 
-    h = h_jet_trk_pt_as_bkg_syst[iCent][iVar];
+    h = h_jet_trk_pt_bkg_syst[2][iCent][iVar];
     g = make_graph (h);
     ResetXErrors (g);
     myDraw (g, myOrange, kFullSquare, 0.8);
@@ -797,7 +774,7 @@ void PlotPtCh (const char* tag, const char* inFileTag) {
     ymin = 8e-6;
     ymax = 3e1;
 
-    h = (TH1D*) h_jet_trk_pt_ns_ref_sig->Clone ("h");
+    h = (TH1D*) h_jet_trk_pt_ref_sig[0][0]->Clone ("h");
     h->Reset ();
     h->GetXaxis ()->SetMoreLogLabels ();
     h->GetYaxis ()->SetRangeUser (ymin, ymax);
@@ -812,19 +789,19 @@ void PlotPtCh (const char* tag, const char* inFileTag) {
     h->DrawCopy ("hist ][");
     SaferDelete (&h);
 
-    h = h_jet_trk_pt_ns_ref_sig;
+    h = h_jet_trk_pt_ref_sig[0][0];
     g = make_graph (h);
     ResetXErrors (g);
     myDraw (g, kBlack, kFullCircle, 0.8);
     SaferDelete (&g);
 
-    h = h_jet_trk_pt_ns_sig[iCent];
+    h = h_jet_trk_pt_sig[0][0][iCent];
     g = make_graph (h);
     ResetXErrors (g);
     myDraw (g, myRed, kFullCircle, 0.8);
     SaferDelete (&g);
 
-    h = h_jet_trk_pt_ns_sig_syst[iCent][iVar];
+    h = h_jet_trk_pt_sig_syst[0][iCent][iVar];
     g = make_graph (h);
     ResetXErrors (g);
     myDraw (g, myBlue, kFullSquare, 0.8);
@@ -842,7 +819,7 @@ void PlotPtCh (const char* tag, const char* inFileTag) {
     ymin = 8e-6;
     ymax = 3e1;
 
-    h = (TH1D*) h_jet_trk_pt_as_ref_sig->Clone ("h");
+    h = (TH1D*) h_jet_trk_pt_ref_sig[0][2]->Clone ("h");
     h->Reset ();
     h->GetXaxis ()->SetMoreLogLabels ();
     h->GetYaxis ()->SetRangeUser (ymin, ymax);
@@ -857,19 +834,19 @@ void PlotPtCh (const char* tag, const char* inFileTag) {
     h->DrawCopy ("hist ][");
     SaferDelete (&h);
 
-    h = h_jet_trk_pt_as_ref_sig;
+    h = h_jet_trk_pt_ref_sig[0][2];
     g = make_graph (h);
     ResetXErrors (g);
     myDraw (g, kBlack, kFullCircle, 0.8);
     SaferDelete (&g);
 
-    h = h_jet_trk_pt_as_sig[iCent];
+    h = h_jet_trk_pt_sig[0][2][iCent];
     g = make_graph (h);
     ResetXErrors (g);
     myDraw (g, myRed, kFullCircle, 0.8);
     SaferDelete (&g);
 
-    h = h_jet_trk_pt_as_sig_syst[iCent][iVar];
+    h = h_jet_trk_pt_sig_syst[2][iCent][iVar];
     g = make_graph (h);
     ResetXErrors (g);
     myDraw (g, myBlue, kFullSquare, 0.8);
@@ -882,7 +859,7 @@ void PlotPtCh (const char* tag, const char* inFileTag) {
     ymin = 0.53;
     ymax = (strcmp (tag, "30GeVJets") == 0 || strcmp (tag, "15GeVJets") == 0 ? 1.45 : 1.17);
 
-    h = (TH1D*) h_jet_trk_pt_ns_iaa[iCent]->Clone ("h");
+    h = (TH1D*) h_jet_trk_pt_iaa[0][0][iCent]->Clone ("h");
     h->Reset ();
     for (int i = 1; i <= h->GetNbinsX (); i++) h->SetBinContent (i, 1);
     h->GetXaxis ()->SetMoreLogLabels ();
@@ -892,7 +869,7 @@ void PlotPtCh (const char* tag, const char* inFileTag) {
     h->GetXaxis ()->SetLabelSize (0.028/fdPad);
     h->GetXaxis ()->SetTitleOffset (3.7*fdPad);
     h->GetXaxis ()->SetLabelOffset (-0.05*fdPad);
-    h->GetYaxis ()->SetTitle ("#it{I}_{#it{p}A} = #it{p}+Pb / #it{pp}");
+    h->GetYaxis ()->SetTitle ("#it{I}_{#it{p}Pb} = #it{p}+Pb / #it{pp}");
     h->GetYaxis ()->SetTitleSize (0.028/fdPad);
     h->GetYaxis ()->SetLabelSize (0.028/fdPad);
     h->GetYaxis ()->SetTitleOffset (3.0*fdPad);
@@ -903,13 +880,13 @@ void PlotPtCh (const char* tag, const char* inFileTag) {
     h->DrawCopy ("hist ][");
     SaferDelete (&h);
 
-    h = h_jet_trk_pt_ns_iaa[iCent];
+    h = h_jet_trk_pt_iaa[0][0][iCent];
     g = make_graph (h);
     ResetXErrors (g);
     myDraw (g, myRed, kFullCircle, 0.8);
     SaferDelete (&g);
 
-    h = h_jet_trk_pt_ns_iaa_syst[iCent][iVar];
+    h = h_jet_trk_pt_iaa_syst[0][iCent][iVar];
     g = make_graph (h);
     ResetXErrors (g);
     myDraw (g, myBlue, kFullSquare, 0.8);
@@ -922,7 +899,7 @@ void PlotPtCh (const char* tag, const char* inFileTag) {
     ymin = 0.53;
     ymax = (strcmp (tag, "30GeVJets") == 0 || strcmp (tag, "15GeVJets") == 0 ? 1.45 : 1.17);
 
-    h = (TH1D*) h_jet_trk_pt_as_iaa[iCent]->Clone ("h");
+    h = (TH1D*) h_jet_trk_pt_iaa[0][2][iCent]->Clone ("h");
     h->Reset ();
     for (int i = 1; i <= h->GetNbinsX (); i++) h->SetBinContent (i, 1);
     h->GetXaxis ()->SetMoreLogLabels ();
@@ -932,7 +909,7 @@ void PlotPtCh (const char* tag, const char* inFileTag) {
     h->GetXaxis ()->SetLabelSize (0.028/fdPad);
     h->GetXaxis ()->SetTitleOffset (3.7*fdPad);
     h->GetXaxis ()->SetLabelOffset (-0.05*fdPad);
-    h->GetYaxis ()->SetTitle ("#it{I}_{#it{p}A} = #it{p}+Pb / #it{pp}");
+    h->GetYaxis ()->SetTitle ("#it{I}_{#it{p}Pb} = #it{p}+Pb / #it{pp}");
     h->GetYaxis ()->SetTitleSize (0.028/fdPad);
     h->GetYaxis ()->SetLabelSize (0.028/fdPad);
     h->GetYaxis ()->SetTitleOffset (3.0*fdPad);
@@ -943,13 +920,13 @@ void PlotPtCh (const char* tag, const char* inFileTag) {
     h->DrawCopy ("hist ][");
     SaferDelete (&h);
 
-    h = h_jet_trk_pt_as_iaa[iCent];
+    h = h_jet_trk_pt_iaa[0][2][iCent];
     g = make_graph (h);
     ResetXErrors (g);
     myDraw (g, myRed, kFullCircle, 0.8);
     SaferDelete (&g);
 
-    h = h_jet_trk_pt_as_iaa_syst[iCent][iVar];
+    h = h_jet_trk_pt_iaa_syst[2][iCent][iVar];
     g = make_graph (h);
     ResetXErrors (g);
     myDraw (g, myBlue, kFullSquare, 0.8);
@@ -1024,7 +1001,7 @@ void PlotPtCh (const char* tag, const char* inFileTag) {
     float ymin = 8e-6;
     float ymax = 3e1;
 
-    h = (TH1D*) h_jet_trk_pt_ns_ref->Clone ("h");
+    h = (TH1D*) h_jet_trk_pt_ref[0][0]->Clone ("h");
     h->Reset ();
     h->GetYaxis ()->SetRangeUser (ymin, ymax);
     h->GetYaxis ()->SetTitle ("(1/N_{jet}) (dN_{ch} / d#it{p}_{T}^{ch}) [GeV^{-1}]");
@@ -1037,37 +1014,37 @@ void PlotPtCh (const char* tag, const char* inFileTag) {
     h->DrawCopy ("hist ][");
     SaferDelete (&h);
 
-    h = h_jet_trk_pt_ns_ref;
+    h = h_jet_trk_pt_ref[0][0];
     g = make_graph (h);
     ResetXErrors (g);
     myDraw (g, kBlack, kOpenCircle, 0.8);
     SaferDelete (&g);
 
-    h = h_jet_trk_pt_ns_ref_bkg;
+    h = h_jet_trk_pt_ref_bkg[0][0];
     g = make_graph (h);
     ResetXErrors (g);
     myDraw (g, myGreen, kOpenCircle, 0.8);
     SaferDelete (&g);
 
-    h = h_jet_trk_pt_ns_ref_bkg_syst[iVar];
+    h = h_jet_trk_pt_ref_bkg_syst[0][iVar];
     g = make_graph (h);
     ResetXErrors (g);
     myDraw (g, myOrange, kOpenSquare, 0.8);
     SaferDelete (&g);
 
-    h = h_jet_trk_pt_ns[iCent];
+    h = h_jet_trk_pt[0][iCent];
     g = make_graph (h);
     ResetXErrors (g);
     myDraw (g, kBlack, kFullCircle, 0.8);
     SaferDelete (&g);
 
-    h = h_jet_trk_pt_ns_bkg[iCent];
+    h = h_jet_trk_pt_bkg[0][iCent];
     g = make_graph (h);
     ResetXErrors (g);
     myDraw (g, myRed, kFullCircle, 0.8);
     SaferDelete (&g);
 
-    h = h_jet_trk_pt_ns_bkg_syst[iCent][iVar];
+    h = h_jet_trk_pt_bkg_syst[0][iCent][iVar];
     g = make_graph (h);
     ResetXErrors (g);
     myDraw (g, myBlue, kFullSquare, 0.8);
@@ -1091,7 +1068,7 @@ void PlotPtCh (const char* tag, const char* inFileTag) {
     ymin = 8e-6;
     ymax = 3e1;
 
-    h = (TH1D*) h_jet_trk_pt_as_ref->Clone ("h");
+    h = (TH1D*) h_jet_trk_pt_ref[0][2]->Clone ("h");
     h->Reset ();
     h->GetYaxis ()->SetRangeUser (ymin, ymax);
     h->GetYaxis ()->SetTitle ("(1/N_{jet}) (dN_{ch} / d#it{p}_{T}^{ch}) [GeV^{-1}]");
@@ -1104,37 +1081,37 @@ void PlotPtCh (const char* tag, const char* inFileTag) {
     h->DrawCopy ("hist ][");
     SaferDelete (&h);
 
-    h = h_jet_trk_pt_as_ref;
+    h = h_jet_trk_pt_ref[0][2];
     g = make_graph (h);
     ResetXErrors (g);
     myDraw (g, kBlack, kOpenCircle, 0.8);
     SaferDelete (&g);
 
-    h = h_jet_trk_pt_as_ref_bkg;
+    h = h_jet_trk_pt_ref_bkg[0][2];
     g = make_graph (h);
     ResetXErrors (g);
     myDraw (g, myGreen, kOpenCircle, 0.8);
     SaferDelete (&g);
 
-    h = h_jet_trk_pt_as_ref_bkg_syst[iVar];
+    h = h_jet_trk_pt_ref_bkg_syst[2][iVar];
     g = make_graph (h);
     ResetXErrors (g);
     myDraw (g, myOrange, kOpenSquare, 0.8);
     SaferDelete (&g);
 
-    h = h_jet_trk_pt_as[iCent];
+    h = h_jet_trk_pt[0][2][iCent];
     g = make_graph (h);
     ResetXErrors (g);
     myDraw (g, kBlack, kFullCircle, 0.8);
     SaferDelete (&g);
 
-    h = h_jet_trk_pt_as_bkg[iCent];
+    h = h_jet_trk_pt_bkg[0][2][iCent];
     g = make_graph (h);
     ResetXErrors (g);
     myDraw (g, myRed, kFullCircle, 0.8);
     SaferDelete (&g);
 
-    h = h_jet_trk_pt_as_bkg_syst[iCent][iVar];
+    h = h_jet_trk_pt_bkg_syst[2][iCent][iVar];
     g = make_graph (h);
     ResetXErrors (g);
     myDraw (g, myBlue, kFullSquare, 0.8);
@@ -1158,7 +1135,7 @@ void PlotPtCh (const char* tag, const char* inFileTag) {
     ymin = 8e-6;
     ymax = 3e1;
 
-    h = (TH1D*) h_jet_trk_pt_ns_ref_sig->Clone ("h");
+    h = (TH1D*) h_jet_trk_pt_ref_sig[0][0]->Clone ("h");
     h->Reset ();
     h->GetXaxis ()->SetMoreLogLabels ();
     h->GetYaxis ()->SetRangeUser (ymin, ymax);
@@ -1173,24 +1150,24 @@ void PlotPtCh (const char* tag, const char* inFileTag) {
     h->DrawCopy ("hist ][");
     SaferDelete (&h);
 
-    h = h_jet_trk_pt_ns_ref_sig;
+    h = h_jet_trk_pt_ref_sig[0][0];
     g = make_graph (h);
     ResetXErrors (g); myDraw (g, myGreen, kOpenCircle, 0.8);
     SaferDelete (&g);
 
-    h = h_jet_trk_pt_ns_ref_sig_syst[iVar];
+    h = h_jet_trk_pt_ref_sig_syst[0][iVar];
     g = make_graph (h);
     ResetXErrors (g);
     myDraw (g, myOrange, kOpenSquare, 0.8);
     SaferDelete (&g);
 
-    h = h_jet_trk_pt_ns_sig[iCent];
+    h = h_jet_trk_pt_sig[0][iCent];
     g = make_graph (h);
     ResetXErrors (g);
     myDraw (g, myRed, kFullCircle, 0.8);
     SaferDelete (&g);
 
-    h = h_jet_trk_pt_ns_sig_syst[iCent][iVar];
+    h = h_jet_trk_pt_sig_syst[0][iCent][iVar];
     g = make_graph (h);
     ResetXErrors (g);
     myDraw (g, myBlue, kFullSquare, 0.8);
@@ -1208,7 +1185,7 @@ void PlotPtCh (const char* tag, const char* inFileTag) {
     ymin = 8e-6;
     ymax = 3e1;
 
-    h = (TH1D*) h_jet_trk_pt_as_ref_sig->Clone ("h");
+    h = (TH1D*) h_jet_trk_pt_ref_sig[0][2]->Clone ("h");
     h->Reset ();
     h->GetXaxis ()->SetMoreLogLabels ();
     h->GetYaxis ()->SetRangeUser (ymin, ymax);
@@ -1223,25 +1200,25 @@ void PlotPtCh (const char* tag, const char* inFileTag) {
     h->DrawCopy ("hist ][");
     SaferDelete (&h);
 
-    h = h_jet_trk_pt_as_ref_sig;
+    h = h_jet_trk_pt_ref_sig[0][2];
     g = make_graph (h);
     ResetXErrors (g);
     myDraw (g, myGreen, kOpenCircle, 0.8);
     SaferDelete (&g);
 
-    h = h_jet_trk_pt_as_ref_sig_syst[iVar];
+    h = h_jet_trk_pt_ref_sig_syst[2][iVar];
     g = make_graph (h);
     ResetXErrors (g);
     myDraw (g, myOrange, kOpenSquare, 0.8);
     SaferDelete (&g);
 
-    h = h_jet_trk_pt_as_sig[iCent];
+    h = h_jet_trk_pt_sig[0][2][iCent];
     g = make_graph (h);
     ResetXErrors (g);
     myDraw (g, myRed, kFullCircle, 0.8);
     SaferDelete (&g);
 
-    h = h_jet_trk_pt_as_sig_syst[iCent][iVar];
+    h = h_jet_trk_pt_sig_syst[2][iCent][iVar];
     g = make_graph (h);
     ResetXErrors (g);
     myDraw (g, myBlue, kFullSquare, 0.8);
@@ -1259,7 +1236,7 @@ void PlotPtCh (const char* tag, const char* inFileTag) {
     ymin = 0.53;
     ymax = (strcmp (tag, "30GeVJets") == 0 || strcmp (tag, "15GeVJets") == 0 ? 1.45 : 1.17);
 
-    h = (TH1D*) h_jet_trk_pt_ns_iaa[iCent]->Clone ("h");
+    h = (TH1D*) h_jet_trk_pt_iaa[0][0][iCent]->Clone ("h");
     h->Reset ();
     for (int i = 1; i <= h->GetNbinsX (); i++) h->SetBinContent (i, 1);
     h->GetXaxis ()->SetMoreLogLabels ();
@@ -1269,7 +1246,7 @@ void PlotPtCh (const char* tag, const char* inFileTag) {
     h->GetXaxis ()->SetLabelSize (0.028/fdPad);
     h->GetXaxis ()->SetTitleOffset (3.7*fdPad);
     h->GetXaxis ()->SetLabelOffset (-0.05*fdPad);
-    h->GetYaxis ()->SetTitle ("#it{I}_{#it{p}A} = #it{p}+Pb / #it{pp}");
+    h->GetYaxis ()->SetTitle ("#it{I}_{#it{p}Pb} = #it{p}+Pb / #it{pp}");
     h->GetYaxis ()->SetTitleSize (0.028/fdPad);
     h->GetYaxis ()->SetLabelSize (0.028/fdPad);
     h->GetYaxis ()->SetTitleOffset (3.0*fdPad);
@@ -1280,13 +1257,13 @@ void PlotPtCh (const char* tag, const char* inFileTag) {
     h->DrawCopy ("hist ][");
     SaferDelete (&h);
 
-    h = h_jet_trk_pt_ns_iaa[iCent];
+    h = h_jet_trk_pt_iaa[0][0][iCent];
     g = make_graph (h);
     ResetXErrors (g);
     myDraw (g, myRed, kFullCircle, 0.8);
     SaferDelete (&g);
 
-    h = h_jet_trk_pt_ns_iaa_syst[iCent][iVar];
+    h = h_jet_trk_pt_iaa_syst[0][iCent][iVar];
     g = make_graph (h);
     ResetXErrors (g);
     myDraw (g, myBlue, kFullSquare, 0.8);
@@ -1299,7 +1276,7 @@ void PlotPtCh (const char* tag, const char* inFileTag) {
     ymin = 0.53;
     ymax = (strcmp (tag, "30GeVJets") == 0 || strcmp (tag, "15GeVJets") == 0 ? 1.45 : 1.17);
 
-    h = (TH1D*) h_jet_trk_pt_as_iaa[iCent]->Clone ("h");
+    h = (TH1D*) h_jet_trk_pt_iaa[0][2][iCent]->Clone ("h");
     h->Reset ();
     for (int i = 1; i <= h->GetNbinsX (); i++) h->SetBinContent (i, 1);
     h->GetXaxis ()->SetMoreLogLabels ();
@@ -1309,7 +1286,7 @@ void PlotPtCh (const char* tag, const char* inFileTag) {
     h->GetXaxis ()->SetLabelSize (0.028/fdPad);
     h->GetXaxis ()->SetTitleOffset (3.7*fdPad);
     h->GetXaxis ()->SetLabelOffset (-0.05*fdPad);
-    h->GetYaxis ()->SetTitle ("#it{I}_{#it{p}A} = #it{p}+Pb / #it{pp}");
+    h->GetYaxis ()->SetTitle ("#it{I}_{#it{p}Pb} = #it{p}+Pb / #it{pp}");
     h->GetYaxis ()->SetTitleSize (0.028/fdPad);
     h->GetYaxis ()->SetLabelSize (0.028/fdPad);
     h->GetYaxis ()->SetTitleOffset (3.0*fdPad);
@@ -1320,13 +1297,13 @@ void PlotPtCh (const char* tag, const char* inFileTag) {
     h->DrawCopy ("hist ][");
     SaferDelete (&h);
 
-    h = h_jet_trk_pt_as_iaa[iCent];
+    h = h_jet_trk_pt_iaa[0][2][iCent];
     g = make_graph (h);
     ResetXErrors (g);
     myDraw (g, myRed, kFullCircle, 0.8);
     SaferDelete (&g);
 
-    h = h_jet_trk_pt_as_iaa_syst[iCent][iVar];
+    h = h_jet_trk_pt_iaa_syst[2][iCent][iVar];
     g = make_graph (h);
     ResetXErrors (g);
     myDraw (g, myBlue, kFullSquare, 0.8);
@@ -1340,8 +1317,9 @@ void PlotPtCh (const char* tag, const char* inFileTag) {
 
 
  
-  {
-    const char* canvasName = "c_jet_trk_pt_ns_sig2bkg";
+  for (int iDir : {0, 2}) {
+
+    const char* canvasName = Form ("c_jet_trk_pt_%s_sig2bkg", directions[iDir].Data ());
     TCanvas* c = new TCanvas (canvasName, "", 800, 800);
 
     TH1D* h = nullptr; 
@@ -1356,8 +1334,8 @@ void PlotPtCh (const char* tag, const char* inFileTag) {
 
     c->Clear ();
 
-    h = (TH1D*) h_jet_trk_pt_ns_ref_sig->Clone ("h");
-    h->Divide (h_jet_trk_pt_ns_ref_bkg);
+    h = (TH1D*) h_jet_trk_pt_ref_sig[0][iDir]->Clone ("h");
+    h->Divide (h_jet_trk_pt_ref_bkg[0][iDir]);
     g = make_graph (h);
     ResetXErrors (g);
 
@@ -1381,8 +1359,8 @@ void PlotPtCh (const char* tag, const char* inFileTag) {
     SaferDelete (&h);
 
     for (int iCent = 0; iCent < nZdcCentBins; iCent++) {
-      h = (TH1D*) h_jet_trk_pt_ns_sig[iCent]->Clone ("htemp");
-      h->Divide (h_jet_trk_pt_ns_bkg[iCent]);
+      h = (TH1D*) h_jet_trk_pt_sig[0][iDir][iCent]->Clone ("htemp");
+      h->Divide (h_jet_trk_pt_bkg[0][iDir][iCent]);
       g = make_graph (h);
       SaferDelete (&h);
       ResetXErrors (g);
@@ -1393,655 +1371,454 @@ void PlotPtCh (const char* tag, const char* inFileTag) {
     myText (0.22, 0.89, kBlack, "#bf{#it{ATLAS}} Internal", 0.032);
     myText (0.22, 0.85, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.032);
     myText (0.22, 0.81, kBlack, "#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV", 0.032);
-    myText (0.22, 0.77, kBlack, Form ("#it{p}_{T}^{jet} > %s, #Delta#phi_{ch,jet} < #pi/8 (near-side)", GetJetPtStr (tag).Data ()), 0.032);
+    if (directions[iDir] == "ns")
+      myText (0.22, 0.77, kBlack, Form ("#it{p}_{T}^{jet} > %s, #Delta#phi_{ch,jet} < #pi/8 (near-side)", GetJetPtStr (tag).Data ()), 0.032);
+    else if (directions[iDir] == "as")
+      myText (0.22, 0.77, kBlack, Form ("#it{p}_{T}^{jet} > %s, #Delta#phi_{ch,jet} > 7#pi/8 (away-side)", GetJetPtStr (tag).Data ()), 0.032);
     myLineText2 (0.25, 0.72, kBlack, kFullCircle, "#bf{#it{pp}}", 0.8, 0.032, true);
     for (int iCent = 0; iCent < nZdcCentBins; iCent++)
       myLineText2 (0.25, 0.68-iCent*0.04, colors[iCent], kFullCircle, Form ("#bf{#it{p}+Pb, %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.8, 0.032, true);
 
-    c->SaveAs (Form ("%s/Plots/PtCh/SigToBkgd_%s_nearside_ptch_syst.pdf", workPath.Data (), tag));
+    c->SaveAs (Form ("%s/Plots/PtCh/SigToBkgd_%s_%s_ptch.pdf", workPath.Data (), tag, directions[iDir] == "ns" ? "nearside" : "awayside"));
   }
 
 
 
-  {
-    const char* canvasName = "c_jet_trk_pt_as_sig2bkg";
-    TCanvas* c = new TCanvas (canvasName, "", 800, 800);
-
-    TH1D* h = nullptr; 
-    TGAE* g = nullptr;
-
-    c->cd (); 
-    c->SetLogx ();
-    c->SetLogy ();
-
-    float ymin = 1e-1;
-    float ymax = 1e6;
-
-    c->Clear ();
-
-    h = (TH1D*) h_jet_trk_pt_as_ref_sig->Clone ("h");
-    h->Divide (h_jet_trk_pt_as_ref_bkg);
-    g = make_graph (h);
-    ResetXErrors (g);
-
-    g->GetXaxis ()->SetMoreLogLabels ();
-    g->GetYaxis ()->SetRangeUser (ymin, ymax);
-    g->GetXaxis ()->SetTitle ("#it{p}_{T}^{ch} [GeV]");
-    //g->GetXaxis ()->SetTitleSize (0.028);
-    //g->GetXaxis ()->SetLabelSize (0.028);
-    g->GetYaxis ()->SetTitle ("Sig. / Bkgd.");
-    //g->GetYaxis ()->SetTitleSize (0.028);
-    //g->GetYaxis ()->SetLabelSize (0.028);
-
-    g->SetLineColor (kBlack);
-    g->SetLineWidth (2);
-    g->SetMarkerColor (kBlack);
-    g->SetMarkerStyle (kFullCircle);
-    g->SetMarkerSize (0.8);
-
-    ((TGAE*) g->Clone ())->Draw ("AP");
-    SaferDelete (&g);
-    SaferDelete (&h);
-
-    for (int iCent = 0; iCent < nZdcCentBins; iCent++) {
-      h = (TH1D*) h_jet_trk_pt_as_sig[iCent]->Clone ("htemp");
-      h->Divide (h_jet_trk_pt_as_bkg[iCent]);
-      g = make_graph (h);
-      ResetXErrors (g);
-      SaferDelete (&h);
-      myDraw (g, colors[iCent], kFullCircle, 0.8);
-      SaferDelete (&g);
-    }
-
-    myText (0.22, 0.89, kBlack, "#bf{#it{ATLAS}} Internal", 0.032);
-    myText (0.22, 0.85, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.032);
-    myText (0.22, 0.81, kBlack, "#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV", 0.032);
-    myText (0.22, 0.77, kBlack, Form ("#it{p}_{T}^{jet} > %s, #Delta#phi_{ch,jet} > 7#pi/8 (away-side)", GetJetPtStr (tag).Data ()), 0.032);
-    myMarkerText (0.25, 0.72, kBlack, kFullCircle, "#bf{#it{pp}}", 0.8, 0.032, true);
-    for (int iCent = 0; iCent < nZdcCentBins; iCent++)
-      myMarkerText (0.25, 0.68-iCent*0.04, colors[iCent], kFullCircle, Form ("#bf{#it{p}+Pb, %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.8, 0.032, true);
-
-    c->SaveAs (Form ("%s/Plots/PtCh/SigToBkgd_%s_awayside_ptch_syst.pdf", workPath.Data (), tag));
-  }
-
-
-
-  {
-    const char* canvasName = "c_jet_trk_pt_ns_pp_syst";
-    TCanvas* c = new TCanvas (canvasName, "", 800, 800);
-
-    TH1D* h = nullptr; 
-    TGAE* g = nullptr;
-
-    c->cd (); 
-    c->SetLogx ();
-    //c->SetLogy ();
-
-    float ymin = -20;
-    float ymax = 20;
-
-    c->Clear ();
-
-    h = (TH1D*) h_jet_trk_pt_ns_ref->Clone ("h");
-    h->Reset ();
-    h->GetXaxis ()->SetMoreLogLabels ();
-    h->GetYaxis ()->SetRangeUser (ymin, ymax);
-    h->GetXaxis ()->SetTitle ("#it{p}_{T}^{ch} [GeV]");
-    //h->GetXaxis ()->SetTitleSize (0.028);
-    //h->GetXaxis ()->SetLabelSize (0.028);
-    h->GetYaxis ()->SetTitle ("#delta N_{ch} / N_{ch} [%]");
-    //h->GetYaxis ()->SetTitleSize (0.028);
-    //h->GetYaxis ()->SetLabelSize (0.028);
-
-    h->SetLineWidth (1);
-    h->SetLineStyle (2);
-    h->DrawCopy ("hist ][");
-    SaferDelete (&h);
-
-
-    for (int iVar = 1; iVar < nVar; iVar++) {
-      h = (TH1D*) h_jet_trk_pt_ns_ref_syst[iVar]->Clone ("htemp");
-      SaveRelativeErrors (h, h_jet_trk_pt_ns_ref, true);
-      for (int iX = 1; iX <= h->GetNbinsX (); iX++) h->SetBinContent (iX, 100*h->GetBinContent (iX) - 100);
-      g = make_graph (h);
-      SaferDelete (&h);
-      ResetXErrors (g);
-      ResetTGAEErrors (g);
-
-      g->SetLineColor (varStyles[variations[iVar]].first);
-      g->SetLineStyle (varStyles[variations[iVar]].second);
-      g->SetLineWidth (3);
-      ((TGAE*) g->Clone ())->Draw ("L");
-      SaferDelete (&g);
-    }
-
-    myText (0.22, 0.89, kBlack, "#bf{#it{ATLAS}} Internal", 0.032);
-    myText (0.22, 0.85, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.032);
-    myText (0.22, 0.81, kBlack, Form ("#it{p}_{T}^{jet} > %s, #Delta#phi_{ch,jet} < #pi/8 (near-side)", GetJetPtStr (tag).Data ()), 0.032);
-    for (int iVar = 1; iVar < nVar; iVar++)
-      myLineColorText (0.25, 0.77-iVar*0.040, varStyles[variations[iVar]].first, varStyles[variations[iVar]].second, varFullNames[variations[iVar]], 1.0, 0.028);
-
-    c->SaveAs (Form ("%s/Plots/Systematics/TotalJetTaggedYield_pp_nearside_ptch_%s_syst.pdf", workPath.Data (), tag));
-  }
-  for (int iCent = 0; iCent < nZdcCentBins; iCent++) {
-    const char* canvasName = Form ("c_jet_trk_pt_ns_iCent%i_syst", iCent);
-    TCanvas* c = new TCanvas (canvasName, "", 800, 800);
-
-    TH1D* h = nullptr; 
-    TGAE* g = nullptr;
-
-    c->cd (); 
-    c->SetLogx ();
-    //c->SetLogy ();
-
-    float ymin = -20;
-    float ymax = 20;
-
-    c->Clear ();
-
-    h = (TH1D*) h_jet_trk_pt_ns[iCent]->Clone ("h");
-    h->Reset ();
-    h->GetXaxis ()->SetMoreLogLabels ();
-    h->GetYaxis ()->SetRangeUser (ymin, ymax);
-    h->GetXaxis ()->SetTitle ("#it{p}_{T}^{ch} [GeV]");
-    //h->GetXaxis ()->SetTitleSize (0.028);
-    //h->GetXaxis ()->SetLabelSize (0.028);
-    h->GetYaxis ()->SetTitle ("#delta N_{ch} / N_{ch} [%]");
-    //h->GetYaxis ()->SetTitleSize (0.028);
-    //h->GetYaxis ()->SetLabelSize (0.028);
-
-    h->SetLineWidth (1);
-    h->SetLineStyle (2);
-    h->DrawCopy ("hist ][");
-    SaferDelete (&h);
-
-    for (int iVar = 1; iVar < nVar; iVar++) {
-      h = (TH1D*) h_jet_trk_pt_ns_syst[iCent][iVar]->Clone ("htemp");
-      SaveRelativeErrors (h, h_jet_trk_pt_ns[iCent], true);
-      for (int iX = 1; iX <= h->GetNbinsX (); iX++) h->SetBinContent (iX, 100*h->GetBinContent (iX) - 100);
-      g = make_graph (h);
-      SaferDelete (&h);
-      ResetXErrors (g);
-      ResetTGAEErrors (g);
-
-      g->SetLineColor (varStyles[variations[iVar]].first);
-      g->SetLineStyle (varStyles[variations[iVar]].second);
-      g->SetLineWidth (3);
-      ((TGAE*) g->Clone ())->Draw ("L");
-      SaferDelete (&g);
-    }
-
-    myText (0.22, 0.89, kBlack, "#bf{#it{ATLAS}} Internal", 0.032);
-    myText (0.22, 0.85, kBlack, Form ("#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV, #bf{ZDC %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.032);
-    myText (0.22, 0.81, kBlack, Form ("#it{p}_{T}^{jet} > %s, #Delta#phi_{ch,jet} < #pi/8 (near-side)", GetJetPtStr (tag).Data ()), 0.032);
-    for (int iVar = 1; iVar < nVar; iVar++)
-      myLineColorText (0.25, 0.77-iVar*0.040, varStyles[variations[iVar]].first, varStyles[variations[iVar]].second, varFullNames[variations[iVar]], 1.0, 0.028);
-    
-    c->SaveAs (Form ("%s/Plots/Systematics/TotalJetTaggedYield_%s_nearside_ptch_%s_syst.pdf", workPath.Data (), Form ("pPb_%i-%i%%", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), tag));
-  }
-
-
-
-  {
-    const char* canvasName = "c_jet_trk_pt_as_pp_syst";
-    TCanvas* c = new TCanvas (canvasName, "", 800, 800);
-
-    TH1D* h = nullptr; 
-    TGAE* g = nullptr;
-
-    c->cd (); 
-    c->SetLogx ();
-    //c->SetLogy ();
-
-    float ymin = -20;
-    float ymax = 20;
-
-    c->Clear ();
-
-    h = (TH1D*) h_jet_trk_pt_as_ref->Clone ("h");
-    h->Reset ();
-    h->GetXaxis ()->SetMoreLogLabels ();
-    h->GetYaxis ()->SetRangeUser (ymin, ymax);
-    h->GetXaxis ()->SetTitle ("#it{p}_{T}^{ch} [GeV]");
-    //h->GetXaxis ()->SetTitleSize (0.028);
-    //h->GetXaxis ()->SetLabelSize (0.028);
-    h->GetYaxis ()->SetTitle ("#delta N_{ch} / N_{ch} [%]");
-    //h->GetYaxis ()->SetTitleSize (0.028);
-    //h->GetYaxis ()->SetLabelSize (0.028);
-
-    h->SetLineWidth (1);
-    h->SetLineStyle (2);
-    h->DrawCopy ("hist ][");
-    SaferDelete (&h);
-
-    for (int iVar = 1; iVar < nVar; iVar++) {
-      h = (TH1D*) h_jet_trk_pt_as_ref_syst[iVar]->Clone ("htemp");
-      SaveRelativeErrors (h, h_jet_trk_pt_as_ref, true);
-      for (int iX = 1; iX <= h->GetNbinsX (); iX++) h->SetBinContent (iX, 100*h->GetBinContent (iX) - 100);
-      g = make_graph (h);
-      SaferDelete (&h);
-      ResetXErrors (g);
-      ResetTGAEErrors (g);
-
-      g->SetLineColor (varStyles[variations[iVar]].first);
-      g->SetLineStyle (varStyles[variations[iVar]].second);
-      g->SetLineWidth (3);
-      ((TGAE*) g->Clone ())->Draw ("L");
-      SaferDelete (&g);
-    }
-
-    myText (0.22, 0.89, kBlack, "#bf{#it{ATLAS}} Internal", 0.032);
-    myText (0.22, 0.85, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.032);
-    myText (0.22, 0.81, kBlack, Form ("#it{p}_{T}^{jet} > %s, #Delta#phi_{ch,jet} > 7#pi/8 (away-side)", GetJetPtStr (tag).Data ()), 0.032);
-    for (int iVar = 1; iVar < nVar; iVar++)
-      myLineColorText (0.25, 0.77-iVar*0.040, varStyles[variations[iVar]].first, varStyles[variations[iVar]].second, varFullNames[variations[iVar]], 1.0, 0.028);
-
-    c->SaveAs (Form ("%s/Plots/Systematics/TotalJetTaggedYield_pp_awayside_ptch_%s_syst.pdf", workPath.Data (), tag));
-  }
-  for (int iCent = 0; iCent < nZdcCentBins; iCent++) {
-    const char* canvasName = Form ("c_jet_trk_pt_as_iCent%i_syst", iCent);
-    TCanvas* c = new TCanvas (canvasName, "", 800, 800);
-
-    TH1D* h = nullptr; 
-    TGAE* g = nullptr;
-
-    c->cd (); 
-    c->SetLogx ();
-    //c->SetLogy ();
-
-    float ymin = -20;
-    float ymax = 20;
-
-    c->Clear ();
-
-    h = (TH1D*) h_jet_trk_pt_as[iCent]->Clone ("h");
-    h->Reset ();
-    h->GetXaxis ()->SetMoreLogLabels ();
-    h->GetYaxis ()->SetRangeUser (ymin, ymax);
-    h->GetXaxis ()->SetTitle ("#it{p}_{T}^{ch} [GeV]");
-    //h->GetXaxis ()->SetTitleSize (0.028);
-    //h->GetXaxis ()->SetLabelSize (0.028);
-    h->GetYaxis ()->SetTitle ("#delta N_{ch} / N_{ch} [%]");
-    //h->GetYaxis ()->SetTitleSize (0.028);
-    //h->GetYaxis ()->SetLabelSize (0.028);
-
-    h->SetLineWidth (1);
-    h->SetLineStyle (2);
-    h->DrawCopy ("hist ][");
-    SaferDelete (&h);
-
-    for (int iVar = 1; iVar < nVar; iVar++) {
-      h = (TH1D*) h_jet_trk_pt_as_syst[iCent][iVar]->Clone ("htemp");
-      SaveRelativeErrors (h, h_jet_trk_pt_as[iCent], true);
-      for (int iX = 1; iX <= h->GetNbinsX (); iX++) h->SetBinContent (iX, 100*h->GetBinContent (iX) - 100);
-      g = make_graph (h);
-      SaferDelete (&h);
-      ResetXErrors (g);
-      ResetTGAEErrors (g);
-
-      g->SetLineColor (varStyles[variations[iVar]].first);
-      g->SetLineStyle (varStyles[variations[iVar]].second);
-      g->SetLineWidth (3);
-      ((TGAE*) g->Clone ())->Draw ("L");
-      SaferDelete (&g);
-    }
-
-    myText (0.22, 0.89, kBlack, "#bf{#it{ATLAS}} Internal", 0.032);
-    myText (0.22, 0.85, kBlack, Form ("#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV, #bf{ZDC %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.032);
-    myText (0.22, 0.81, kBlack, Form ("#it{p}_{T}^{jet} > %s, #Delta#phi_{ch,jet} > 7#pi/8 (away-side)", GetJetPtStr (tag).Data ()), 0.032);
-    for (int iVar = 1; iVar < nVar; iVar++)
-      myLineColorText (0.25, 0.77-iVar*0.040, varStyles[variations[iVar]].first, varStyles[variations[iVar]].second, varFullNames[variations[iVar]], 1.0, 0.028);
-
-    c->SaveAs (Form ("%s/Plots/Systematics/TotalJetTaggedYield_%s_awayside_ptch_%s_syst.pdf", workPath.Data (), Form ("pPb_%i-%i%%", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), tag));
-  }
-
-
-
-  {
-    const char* canvasName = "c_jet_trk_pt_ns_sig_pp_syst";
-    TCanvas* c = new TCanvas (canvasName, "", 800, 800);
-
-    TH1D* h = nullptr; 
-    TGAE* g = nullptr;
-
-    c->cd (); 
-    c->SetLogx ();
-    //c->SetLogy ();
-
-    float ymin = -20;
-    float ymax = 20;
-
-    c->Clear ();
-
-    h = (TH1D*) h_jet_trk_pt_ns_ref_sig->Clone ("h");
-    h->Reset ();
-    h->GetXaxis ()->SetMoreLogLabels ();
-    h->GetYaxis ()->SetRangeUser (ymin, ymax);
-    h->GetXaxis ()->SetTitle ("#it{p}_{T}^{ch} [GeV]");
-    //h->GetXaxis ()->SetTitleSize (0.028);
-    //h->GetXaxis ()->SetLabelSize (0.028);
-    h->GetYaxis ()->SetTitle ("#delta N_{ch} / N_{ch} [%]");
-    //h->GetYaxis ()->SetTitleSize (0.028);
-    //h->GetYaxis ()->SetLabelSize (0.028);
-
-    h->SetLineWidth (1);
-    h->SetLineStyle (2);
-    h->DrawCopy ("hist ][");
-    SaferDelete (&h);
-
-    for (int iVar = 1; iVar < nVar; iVar++) {
-      h = (TH1D*) h_jet_trk_pt_ns_ref_sig_syst[iVar]->Clone ("htemp");
-      SaveRelativeErrors (h, h_jet_trk_pt_ns_ref_sig, true);
-      for (int iX = 1; iX <= h->GetNbinsX (); iX++) h->SetBinContent (iX, 100*h->GetBinContent (iX) - 100);
-      g = make_graph (h);
-      SaferDelete (&h);
-      ResetXErrors (g);
-      ResetTGAEErrors (g);
-
-      g->SetLineColor (varStyles[variations[iVar]].first);
-      g->SetLineStyle (varStyles[variations[iVar]].second);
-      g->SetLineWidth (3);
-      ((TGAE*) g->Clone ())->Draw ("L");
-      SaferDelete (&g);
-    }
-
-    myText (0.22, 0.89, kBlack, "#bf{#it{ATLAS}} Internal", 0.032);
-    myText (0.22, 0.85, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.032);
-    myText (0.22, 0.81, kBlack, Form ("#it{p}_{T}^{jet} > %s, #Delta#phi_{ch,jet} < #pi/8 (near-side)", GetJetPtStr (tag).Data ()), 0.032);
-    for (int iVar = 1; iVar < nVar; iVar++)
-      myLineColorText (0.25, 0.77-iVar*0.040, varStyles[variations[iVar]].first, varStyles[variations[iVar]].second, varFullNames[variations[iVar]], 1.0, 0.028);
-
-    c->SaveAs (Form ("%s/Plots/Systematics/SignalJetTaggedYield_pp_nearside_ptch_%s_syst.pdf", workPath.Data (), tag));
-  }
-  for (int iCent = 0; iCent < nZdcCentBins; iCent++) {
-    const char* canvasName = Form ("c_jet_trk_pt_ns_sig_iCent%i_syst", iCent);
-    TCanvas* c = new TCanvas (canvasName, "", 800, 800);
-
-    TH1D* h = nullptr; 
-    TGAE* g = nullptr;
-
-    c->cd (); 
-    c->SetLogx ();
-    //c->SetLogy ();
-
-    float ymin = -20;
-    float ymax = 20;
-
-    c->Clear ();
-
-    h = (TH1D*) h_jet_trk_pt_ns_sig[iCent]->Clone ("h");
-    h->Reset ();
-    h->GetXaxis ()->SetMoreLogLabels ();
-    h->GetYaxis ()->SetRangeUser (ymin, ymax);
-    h->GetXaxis ()->SetTitle ("#it{p}_{T}^{ch} [GeV]");
-    //h->GetXaxis ()->SetTitleSize (0.028);
-    //h->GetXaxis ()->SetLabelSize (0.028);
-    h->GetYaxis ()->SetTitle ("#delta N_{ch} / N_{ch} [%]");
-    //h->GetYaxis ()->SetTitleSize (0.028);
-    //h->GetYaxis ()->SetLabelSize (0.028);
-
-    h->SetLineWidth (1);
-    h->SetLineStyle (2);
-    h->DrawCopy ("hist ][");
-    SaferDelete (&h);
-
-    for (int iVar = 1; iVar < nVar; iVar++) {
-      h = (TH1D*) h_jet_trk_pt_ns_sig_syst[iCent][iVar]->Clone ("htemp");
-      SaveRelativeErrors (h, h_jet_trk_pt_ns_sig[iCent], true);
-      for (int iX = 1; iX <= h->GetNbinsX (); iX++) h->SetBinContent (iX, 100*h->GetBinContent (iX) - 100);
-      g = make_graph (h);
-      SaferDelete (&h);
-      ResetXErrors (g);
-      ResetTGAEErrors (g);
-
-      g->SetLineColor (varStyles[variations[iVar]].first);
-      g->SetLineStyle (varStyles[variations[iVar]].second);
-      g->SetLineWidth (3);
-      ((TGAE*) g->Clone ())->Draw ("L");
-      SaferDelete (&g);
-    }
-
-    myText (0.22, 0.89, kBlack, "#bf{#it{ATLAS}} Internal", 0.032);
-    myText (0.22, 0.85, kBlack, Form ("#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV, #bf{ZDC %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.032);
-    myText (0.22, 0.81, kBlack, Form ("#it{p}_{T}^{jet} > %s, #Delta#phi_{ch,jet} < #pi/8 (near-side)", GetJetPtStr (tag).Data ()), 0.032);
-    for (int iVar = 1; iVar < nVar; iVar++)
-      myLineColorText (0.25, 0.77-iVar*0.040, varStyles[variations[iVar]].first, varStyles[variations[iVar]].second, varFullNames[variations[iVar]], 1.0, 0.028);
-
-    c->SaveAs (Form ("%s/Plots/Systematics/SignalJetTaggedYield_%s_nearside_ptch_%s_syst.pdf", workPath.Data (), Form ("pPb_%i-%i%%", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), tag));
-  }
-
-
-
-  {
-    const char* canvasName = "c_jet_trk_pt_as_sig_pp_syst";
-    TCanvas* c = new TCanvas (canvasName, "", 800, 800);
-
-    TH1D* h = nullptr; 
-    TGAE* g = nullptr;
-
-    c->cd (); 
-    c->SetLogx ();
-    //c->SetLogy ();
-
-    float ymin = -20;
-    float ymax = 20;
-
-    c->Clear ();
-
-    h = (TH1D*) h_jet_trk_pt_as_ref_sig->Clone ("h");
-    h->Reset ();
-    h->GetXaxis ()->SetMoreLogLabels ();
-    h->GetYaxis ()->SetRangeUser (ymin, ymax);
-    h->GetXaxis ()->SetTitle ("#it{p}_{T}^{ch} [GeV]");
-    //h->GetXaxis ()->SetTitleSize (0.028);
-    //h->GetXaxis ()->SetLabelSize (0.028);
-    h->GetYaxis ()->SetTitle ("#delta N_{ch} / N_{ch} [%]");
-    //h->GetYaxis ()->SetTitleSize (0.028);
-    //h->GetYaxis ()->SetLabelSize (0.028);
-
-    h->SetLineWidth (1);
-    h->SetLineStyle (2);
-    h->DrawCopy ("hist ][");
-    SaferDelete (&h);
-
-    for (int iVar = 1; iVar < nVar; iVar++) {
-      h = (TH1D*) h_jet_trk_pt_as_ref_sig_syst[iVar]->Clone ("htemp");
-      SaveRelativeErrors (h, h_jet_trk_pt_as_ref_sig, true);
-      for (int iX = 1; iX <= h->GetNbinsX (); iX++) h->SetBinContent (iX, 100*h->GetBinContent (iX) - 100);
-      g = make_graph (h);
-      SaferDelete (&h);
-      ResetXErrors (g);
-      ResetTGAEErrors (g);
-
-      g->SetLineColor (varStyles[variations[iVar]].first);
-      g->SetLineStyle (varStyles[variations[iVar]].second);
-      g->SetLineWidth (3);
-      ((TGAE*) g->Clone ())->Draw ("L");
-      SaferDelete (&g);
-    }
-
-    myText (0.22, 0.89, kBlack, "#bf{#it{ATLAS}} Internal", 0.032);
-    myText (0.22, 0.85, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.032);
-    myText (0.22, 0.81, kBlack, Form ("#it{p}_{T}^{jet} > %s, #Delta#phi_{ch,jet} > 7#pi/8 (away-side)", GetJetPtStr (tag).Data ()), 0.032);
-    for (int iVar = 1; iVar < nVar; iVar++)
-      myLineColorText (0.56, 0.42-iVar*0.030, varStyles[variations[iVar]].first, varStyles[variations[iVar]].second, varFullNames[variations[iVar]], 1.0, 0.024);
-    
-    c->SaveAs (Form ("%s/Plots/Systematics/SignalJetTaggedYield_pp_awayside_ptch_%s_syst.pdf", workPath.Data (), tag));
-  }
-  for (int iCent = 0; iCent < nZdcCentBins; iCent++) {
-    const char* canvasName = Form ("c_jet_trk_pt_as_sig_iCent%i_syst", iCent);
-    TCanvas* c = new TCanvas (canvasName, "", 800, 800);
-
-    TH1D* h = nullptr; 
-    TGAE* g = nullptr;
-
-    c->cd (); 
-    c->SetLogx ();
-    //c->SetLogy ();
-
-    float ymin = -20;
-    float ymax = 20;
-
-    c->Clear ();
-
-    h = (TH1D*) h_jet_trk_pt_as_sig[iCent]->Clone ("h");
-    h->Reset ();
-    h->GetXaxis ()->SetMoreLogLabels ();
-    h->GetYaxis ()->SetRangeUser (ymin, ymax);
-    h->GetXaxis ()->SetTitle ("#it{p}_{T}^{ch} [GeV]");
-    //h->GetXaxis ()->SetTitleSize (0.028);
-    //h->GetXaxis ()->SetLabelSize (0.028);
-    h->GetYaxis ()->SetTitle ("#delta N_{ch} / N_{ch} [%]");
-    //h->GetYaxis ()->SetTitleSize (0.028);
-    //h->GetYaxis ()->SetLabelSize (0.028);
-
-    h->SetLineWidth (1);
-    h->SetLineStyle (2);
-    h->DrawCopy ("hist ][");
-    SaferDelete (&h);
-
-    for (int iVar = 1; iVar < nVar; iVar++) {
-      h = (TH1D*) h_jet_trk_pt_as_sig_syst[iCent][iVar]->Clone ("htemp");
-      SaveRelativeErrors (h, h_jet_trk_pt_as_sig[iCent], true);
-      for (int iX = 1; iX <= h->GetNbinsX (); iX++) h->SetBinContent (iX, 100*h->GetBinContent (iX) - 100);
-      g = make_graph (h);
-      SaferDelete (&h);
-      ResetXErrors (g);
-      ResetTGAEErrors (g);
-
-      g->SetLineColor (varStyles[variations[iVar]].first);
-      g->SetLineStyle (varStyles[variations[iVar]].second);
-      g->SetLineWidth (3);
-      ((TGAE*) g->Clone ())->Draw ("L");
-      SaferDelete (&g);
-    }
-
-    myText (0.22, 0.89, kBlack, "#bf{#it{ATLAS}} Internal", 0.032);
-    myText (0.22, 0.85, kBlack, Form ("#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV, #bf{ZDC %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.032);
-    myText (0.22, 0.81, kBlack, Form ("#it{p}_{T}^{jet} > %s, #Delta#phi_{ch,jet} > 7#pi/8 (away-side)", GetJetPtStr (tag).Data ()), 0.032);
-    for (int iVar = 1; iVar < nVar; iVar++)
-      myLineColorText (0.56, 0.42-iVar*0.030, varStyles[variations[iVar]].first, varStyles[variations[iVar]].second, varFullNames[variations[iVar]], 1.0, 0.024);
-    
-    c->SaveAs (Form ("%s/Plots/Systematics/SignalJetTaggedYield_%s_awayside_ptch_%s_syst.pdf", workPath.Data (), Form ("pPb_%i-%i%%", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), tag));
-  }
-
-
-
-  for (int iCent = 0; iCent < nZdcCentBins; iCent++) {
-    const char* canvasName = Form ("c_jet_trk_pt_ns_iaa_iCent%i_syst", iCent);
-    TCanvas* c = new TCanvas (canvasName, "", 800, 800);
-
-    TH1D* h = nullptr; 
-    TGAE* g = nullptr;
-
-    c->cd (); 
-    c->SetLogx ();
-    //c->SetLogy ();
-
-    float ymin = -20;
-    float ymax = 20;
-
-
-    h = (TH1D*) h_jet_trk_pt_ns_iaa[iCent]->Clone ("h");
-    h->Reset ();
-    h->GetXaxis ()->SetMoreLogLabels ();
-    h->GetYaxis ()->SetRangeUser (ymin, ymax);
-    h->GetXaxis ()->SetTitle ("#it{p}_{T}^{ch} [GeV]");
-    //h->GetXaxis ()->SetTitleSize (0.028);
-    //h->GetXaxis ()->SetLabelSize (0.028);
-    h->GetYaxis ()->SetTitle ("#delta I_{pA} / I_{pA} [%]");
-    //h->GetYaxis ()->SetTitleSize (0.028);
-    //h->GetYaxis ()->SetLabelSize (0.028);
-
-    h->SetLineWidth (1);
-    h->SetLineStyle (2);
-    h->DrawCopy ("hist ][");
-    SaferDelete (&h);
-
-    for (int iVar = 1; iVar < nVar; iVar++) {
-      h = (TH1D*) h_jet_trk_pt_ns_iaa_syst[iCent][iVar]->Clone ("htemp");
-      SaveRelativeErrors (h, h_jet_trk_pt_ns_iaa[iCent], true);
-      for (int iX = 1; iX <= h->GetNbinsX (); iX++) h->SetBinContent (iX, 100*h->GetBinContent (iX) - 100);
-      g = make_graph (h);
-      SaferDelete (&h);
-      ResetXErrors (g);
-      ResetTGAEErrors (g);
-
-      g->SetLineColor (varStyles[variations[iVar]].first);
-      g->SetLineStyle (varStyles[variations[iVar]].second);
-      g->SetLineWidth (3);
-      ((TGAE*) g->Clone ())->Draw ("L");
-      SaferDelete (&g);
-    }
-
-    myText (0.22, 0.89, kBlack, "#bf{#it{ATLAS}} Internal", 0.032);
-    myText (0.22, 0.85, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.032);
-    myText (0.22, 0.81, kBlack, Form ("#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV, #bf{ZDC %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.032);
-    myText (0.22, 0.77, kBlack, Form ("#it{p}_{T}^{jet} > %s, #Delta#phi_{ch,jet} < #pi/8 (near-side)", GetJetPtStr (tag).Data ()), 0.032);
-    for (int iVar = 1; iVar < nVar; iVar++)
-      myLineColorText (0.56, 0.42-iVar*0.030, varStyles[variations[iVar]].first, varStyles[variations[iVar]].second, varFullNames[variations[iVar]], 1.0, 0.024);
-
-    c->SaveAs (Form ("%s/Plots/Systematics/JetTagged_IpA_%i-%i%%_nearside_ptch_%s_syst.pdf", workPath.Data (), zdcCentPercs[iCent+1], zdcCentPercs[iCent], tag));
-  }
-
-
-
-  for (int iCent = 0; iCent < nZdcCentBins; iCent++) {
-    const char* canvasName = Form ("c_jet_trk_pt_as_iaa_iCent%i_syst", iCent);
-    TCanvas* c = new TCanvas (canvasName, "", 800, 800);
-
-    TH1D* h = nullptr; 
-    TGAE* g = nullptr;
-
-    c->cd (); 
-    c->SetLogx ();
-    //c->SetLogy ();
-
-    float ymin = -20;
-    float ymax = 20;
-
-
-    h = (TH1D*) h_jet_trk_pt_as_iaa[iCent]->Clone ("h");
-    h->Reset ();
-    h->GetXaxis ()->SetMoreLogLabels ();
-    h->GetYaxis ()->SetRangeUser (ymin, ymax);
-    h->GetXaxis ()->SetTitle ("#it{p}_{T}^{ch} [GeV]");
-    //h->GetXaxis ()->SetTitleSize (0.028);
-    //h->GetXaxis ()->SetLabelSize (0.028);
-    h->GetYaxis ()->SetTitle ("#delta I_{pA} / I_{pA} [%]");
-    //h->GetYaxis ()->SetTitleSize (0.028);
-    //h->GetYaxis ()->SetLabelSize (0.028);
-
-    h->SetLineWidth (1);
-    h->SetLineStyle (2);
-    h->DrawCopy ("hist ][");
-    SaferDelete (&h);
-
-    for (int iVar = 1; iVar < nVar; iVar++) {
-      h = (TH1D*) h_jet_trk_pt_as_iaa_syst[iCent][iVar]->Clone ("htemp");
-      SaveRelativeErrors (h, h_jet_trk_pt_as_iaa[iCent], true);
-      for (int iX = 1; iX <= h->GetNbinsX (); iX++) h->SetBinContent (iX, 100*h->GetBinContent (iX) - 100);
-      g = make_graph (h);
-      SaferDelete (&h);
-      ResetXErrors (g);
-      ResetTGAEErrors (g);
-
-      g->SetLineColor (varStyles[variations[iVar]].first);
-      g->SetLineStyle (varStyles[variations[iVar]].second);
-      g->SetLineWidth (3);
-      ((TGAE*) g->Clone ())->Draw ("L");
-      SaferDelete (&g);
-    }
-
-    myText (0.22, 0.89, kBlack, "#bf{#it{ATLAS}} Internal", 0.032);
-    myText (0.22, 0.85, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.032);
-    myText (0.22, 0.81, kBlack, Form ("#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV, #bf{ZDC %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.032);
-    myText (0.22, 0.77, kBlack, Form ("#it{p}_{T}^{jet} > %s, #Delta#phi_{ch,jet} > 7#pi/8 (away-side)", GetJetPtStr (tag).Data ()), 0.032);
-    for (int iVar = 1; iVar < nVar; iVar++)
-      myLineColorText (0.56, 0.42-iVar*0.030, varStyles[variations[iVar]].first, varStyles[variations[iVar]].second, varFullNames[variations[iVar]], 1.0, 0.024);
-
-    c->SaveAs (Form ("%s/Plots/Systematics/JetTagged_IpA_%i-%i%%_awayside_ptch_%s_syst.pdf", workPath.Data (), zdcCentPercs[iCent+1], zdcCentPercs[iCent], tag));
-  }
+
+  for (int iDType : {0, 1}) {
+
+    for (int iDir : {0, 2}) {
+
+      {
+        const char* canvasName = Form ("c_jet_trk_pt_%s_pp_%s_syst", directions[iDir].Data (), iDType == 0 ? "data" : "mc");
+        TCanvas* c = new TCanvas (canvasName, "", 800, 800);
+
+        TH1D* h = nullptr, *h_tot = nullptr;
+        TGAE* g = nullptr;
+
+        c->cd (); 
+        c->SetLogx ();
+
+        float ymin = (iDType == 0 ? -20 : -10);
+        float ymax = (iDType == 0 ?  20 :  10);
+
+        h = (TH1D*) h_jet_trk_pt_ref[iDType][iDir]->Clone ("h");
+        h->Reset ();
+        h->GetXaxis ()->SetMoreLogLabels ();
+        h->GetYaxis ()->SetRangeUser (ymin, ymax);
+        h->GetXaxis ()->SetTitle ("#it{p}_{T}^{ch} [GeV]");
+        //h->GetXaxis ()->SetTitleSize (0.028);
+        //h->GetXaxis ()->SetLabelSize (0.028);
+        h->GetYaxis ()->SetTitle ("#delta N_{ch} / N_{ch} [%]");
+        //h->GetYaxis ()->SetTitleSize (0.028);
+        //h->GetYaxis ()->SetLabelSize (0.028);
+
+        h->SetLineWidth (1);
+        h->SetLineStyle (2);
+        h->DrawCopy ("hist ][");
+        SaferDelete (&h);
+
+        h_tot = (TH1D*) h_jet_trk_pt_ref[iDType][iDir]->Clone ("h_total_unc");
+        h_tot->Reset ();
+
+        for (int iVar = 1; iVar < nVar; iVar++) {
+          if ((iDType == 0  && dataVariations.count (variations[iVar]) == 0) || (iDType == 1 && mcVariations.count (variations[iVar]) == 0))
+            continue;
+
+          h = (TH1D*) h_jet_trk_pt_ref_syst[iDir][iVar]->Clone ("htemp");
+          SaveRelativeErrors (h, h_jet_trk_pt_ref[iDType][iDir], true);
+          for (int iX = 1; iX <= h->GetNbinsX (); iX++) {
+            h->SetBinContent (iX, 100*h->GetBinContent (iX) - 100);
+            h_tot->SetBinContent (iX, std::sqrt (std::pow (h_tot->GetBinContent (iX), 2) + std::pow (h->GetBinContent (iX), 2)));
+          }
+          g = make_graph (h);
+          SaferDelete (&h);
+          ResetXErrors (g);
+          ResetTGAEErrors (g);
+
+          g->SetLineColor (varStyles[variations[iVar]].first);
+          g->SetLineStyle (varStyles[variations[iVar]].second);
+          g->SetLineWidth (3);
+          ((TGAE*) g->Clone ())->Draw ("L");
+          SaferDelete (&g);
+        }
+
+        g = make_graph (h_tot);
+        SaferDelete (&h_tot);
+        ResetXErrors (g);
+        ResetTGAEErrors (g);
+
+        g->SetLineColor (kBlack);
+        g->SetLineStyle (1);
+        g->SetLineWidth (3);
+        ((TGAE*) g->Clone ())->Draw ("L");
+        SaferDelete (&g);
+
+        myText (0.22, 0.89, kBlack, Form ("#bf{#it{ATLAS}} %sInternal", iDType == 0 ? "" : "Simulation "), 0.032);
+        myText (0.22, 0.85, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.032);
+        if (directions[iDir] == "ns")
+          myText (0.22, 0.81, kBlack, Form ("#it{p}_{T}^{jet} > %s, #Delta#phi_{ch,jet} < #pi/8 (near-side)", GetJetPtStr (tag).Data ()), 0.032);
+        else if (directions[iDir] == "as")
+          myText (0.22, 0.81, kBlack, Form ("#it{p}_{T}^{jet} > %s, #Delta#phi_{ch,jet} > 7#pi/8 (away-side)", GetJetPtStr (tag).Data ()), 0.032);
+
+        int count = 0;
+        for (int iVar = 1; iVar < nVar; iVar++) {
+          if ((iDType == 0  && dataVariations.count (variations[iVar]) > 0) || (iDType == 1 && mcVariations.count (variations[iVar]) > 0)) {
+            myLineColorText (0.25+0.40*(count>=12), 0.45-(count%12)*0.020, varStyles[variations[iVar]].first, varStyles[variations[iVar]].second, varFullNames[variations[iVar]], 0.5, 0.014);
+            count++;
+          }
+        }
+
+        c->SaveAs (Form ("%s/Plots/Systematics/TotalJetTaggedYield_pp_%s_ptch_%s_%ssyst.pdf", workPath.Data (), directions[iDir] == "ns" ? "nearside" : "awayside", tag, iDType == 0 ? "":"mcBased_"));
+      }
+
+
+      for (int iCent = 0; iCent < nZdcCentBins; iCent++) {
+
+        const char* canvasName = Form ("c_jet_trk_pt_%s_%s_pPb_iCent%i_syst", directions[iDir].Data (), iDType == 0 ? "data" : "mc", iCent);
+        TCanvas* c = new TCanvas (canvasName, "", 800, 800);
+
+        TH1D* h = nullptr, *h_tot = nullptr;
+        TGAE* g = nullptr;
+
+        c->cd (); 
+        c->SetLogx ();
+
+        float ymin = (iDType == 0 ? -20 : -10);
+        float ymax = (iDType == 0 ?  20 :  10);
+
+        h = (TH1D*) h_jet_trk_pt[iDType][iDir][iCent]->Clone ("h");
+        h->Reset ();
+        h->GetXaxis ()->SetMoreLogLabels ();
+        h->GetYaxis ()->SetRangeUser (ymin, ymax);
+        h->GetXaxis ()->SetTitle ("#it{p}_{T}^{ch} [GeV]");
+        //h->GetXaxis ()->SetTitleSize (0.028);
+        //h->GetXaxis ()->SetLabelSize (0.028);
+        h->GetYaxis ()->SetTitle ("#delta N_{ch} / N_{ch} [%]");
+        //h->GetYaxis ()->SetTitleSize (0.028);
+        //h->GetYaxis ()->SetLabelSize (0.028);
+
+        h->SetLineWidth (1);
+        h->SetLineStyle (2);
+        h->DrawCopy ("hist ][");
+        SaferDelete (&h);
+
+        h_tot = (TH1D*) h_jet_trk_pt[iDType][iDir][iCent]->Clone ("h_total_unc");
+        h_tot->Reset ();
+
+        for (int iVar = 1; iVar < nVar; iVar++) {
+          if ((iDType == 0  && dataVariations.count (variations[iVar]) == 0) || (iDType == 1 && mcVariations.count (variations[iVar]) == 0))
+            continue;
+
+          h = (TH1D*) h_jet_trk_pt_syst[iDir][iCent][iVar]->Clone ("htemp");
+          SaveRelativeErrors (h, h_jet_trk_pt[iDType][iDir][iCent], true);
+          for (int iX = 1; iX <= h->GetNbinsX (); iX++) {
+            h->SetBinContent (iX, 100*h->GetBinContent (iX) - 100);
+            h_tot->SetBinContent (iX, std::sqrt (std::pow (h_tot->GetBinContent (iX), 2) + std::pow (h->GetBinContent (iX), 2)));
+          }
+          g = make_graph (h);
+          SaferDelete (&h);
+          ResetXErrors (g);
+          ResetTGAEErrors (g);
+
+          g->SetLineColor (varStyles[variations[iVar]].first);
+          g->SetLineStyle (varStyles[variations[iVar]].second);
+          g->SetLineWidth (3);
+          ((TGAE*) g->Clone ())->Draw ("L");
+          SaferDelete (&g);
+        }
+
+        g = make_graph (h_tot);
+        SaferDelete (&h_tot);
+        ResetXErrors (g);
+        ResetTGAEErrors (g);
+
+        g->SetLineColor (kBlack);
+        g->SetLineStyle (1);
+        g->SetLineWidth (3);
+        ((TGAE*) g->Clone ())->Draw ("L");
+        SaferDelete (&g);
+
+        myText (0.22, 0.89, kBlack, Form ("#bf{#it{ATLAS}} %sInternal", iDType == 0 ? "" : "Simulation "), 0.032);
+        myText (0.22, 0.85, kBlack, Form ("#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV, #bf{ZDC %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.032);
+        if (directions[iDir] == "ns")
+          myText (0.22, 0.81, kBlack, Form ("#it{p}_{T}^{jet} > %s, #Delta#phi_{ch,jet} < #pi/8 (near-side)", GetJetPtStr (tag).Data ()), 0.032);
+        else if (directions[iDir] == "as")
+          myText (0.22, 0.81, kBlack, Form ("#it{p}_{T}^{jet} > %s, #Delta#phi_{ch,jet} > 7#pi/8 (away-side)", GetJetPtStr (tag).Data ()), 0.032);
+
+        int count = 0;
+        for (int iVar = 1; iVar < nVar; iVar++) {
+          if ((iDType == 0  && dataVariations.count (variations[iVar]) > 0) || (iDType == 1 && mcVariations.count (variations[iVar]) > 0)) {
+            myLineColorText (0.25+0.40*(count>=12), 0.45-(count%12)*0.020, varStyles[variations[iVar]].first, varStyles[variations[iVar]].second, varFullNames[variations[iVar]], 0.5, 0.014);
+            count++;
+          }
+        }
+        
+        c->SaveAs (Form ("%s/Plots/Systematics/TotalJetTaggedYield_pPb_%i-%i%%_%s_ptch_%s_%ssyst.pdf", workPath.Data (), zdcCentPercs[iCent+1], zdcCentPercs[iCent], directions[iDir] == "ns" ? "nearside" : "awayside", tag, iDType == 0 ? "":"mcBased_"));
+      } // end loop over iCent
+
+
+
+      {
+        const char* canvasName = Form ("c_jet_trk_pt_%s_sig_%s_pp_syst", directions[iDir].Data (), iDType == 0 ? "data" : "mc");
+        TCanvas* c = new TCanvas (canvasName, "", 800, 800);
+
+        TH1D* h = nullptr, *h_tot = nullptr;
+        TGAE* g = nullptr;
+
+        c->cd (); 
+        c->SetLogx ();
+
+        float ymin = (iDType == 0 ? -20 : -10);
+        float ymax = (iDType == 0 ?  20 :  10);
+
+        h = (TH1D*) h_jet_trk_pt_ref_sig[iDType][iDir]->Clone ("h");
+        h->Reset ();
+        h->GetXaxis ()->SetMoreLogLabels ();
+        h->GetYaxis ()->SetRangeUser (ymin, ymax);
+        h->GetXaxis ()->SetTitle ("#it{p}_{T}^{ch} [GeV]");
+        //h->GetXaxis ()->SetTitleSize (0.028);
+        //h->GetXaxis ()->SetLabelSize (0.028);
+        h->GetYaxis ()->SetTitle ("#delta N_{ch} / N_{ch} [%]");
+        //h->GetYaxis ()->SetTitleSize (0.028);
+        //h->GetYaxis ()->SetLabelSize (0.028);
+
+        h->SetLineWidth (1);
+        h->SetLineStyle (2);
+        h->DrawCopy ("hist ][");
+        SaferDelete (&h);
+
+        h_tot = (TH1D*) h_jet_trk_pt_ref_sig[iDType][iDir]->Clone ("h_total_unc");
+        h_tot->Reset ();
+
+        for (int iVar = 1; iVar < nVar; iVar++) {
+          if ((iDType == 0  && dataVariations.count (variations[iVar]) == 0) || (iDType == 1 && mcVariations.count (variations[iVar]) == 0))
+            continue;
+
+          h = (TH1D*) h_jet_trk_pt_ref_sig_syst[iDir][iVar]->Clone ("htemp");
+          SaveRelativeErrors (h, h_jet_trk_pt_ref_sig[iDType][iDir], true);
+          for (int iX = 1; iX <= h->GetNbinsX (); iX++) {
+            h->SetBinContent (iX, 100*h->GetBinContent (iX) - 100);
+            h_tot->SetBinContent (iX, std::sqrt (std::pow (h_tot->GetBinContent (iX), 2) + std::pow (h->GetBinContent (iX), 2)));
+          }
+          g = make_graph (h);
+          SaferDelete (&h);
+          ResetXErrors (g);
+          ResetTGAEErrors (g);
+
+          g->SetLineColor (varStyles[variations[iVar]].first);
+          g->SetLineStyle (varStyles[variations[iVar]].second);
+          g->SetLineWidth (3);
+          ((TGAE*) g->Clone ())->Draw ("L");
+          SaferDelete (&g);
+        }
+
+        g = make_graph (h_tot);
+        SaferDelete (&h_tot);
+        ResetXErrors (g);
+        ResetTGAEErrors (g);
+
+        g->SetLineColor (kBlack);
+        g->SetLineStyle (1);
+        g->SetLineWidth (3);
+        ((TGAE*) g->Clone ())->Draw ("L");
+        SaferDelete (&g);
+
+        myText (0.22, 0.89, kBlack, Form ("#bf{#it{ATLAS}} %sInternal", iDType == 0 ? "" : "Simulation "), 0.032);
+        myText (0.22, 0.85, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.032);
+        if (directions[iDir] == "ns")
+          myText (0.22, 0.81, kBlack, Form ("#it{p}_{T}^{jet} > %s, #Delta#phi_{ch,jet} < #pi/8 (near-side)", GetJetPtStr (tag).Data ()), 0.032);
+        else if (directions[iDir] == "as")
+          myText (0.22, 0.81, kBlack, Form ("#it{p}_{T}^{jet} > %s, #Delta#phi_{ch,jet} > 7#pi/8 (away-side)", GetJetPtStr (tag).Data ()), 0.032);
+
+        int count = 0;
+        for (int iVar = 1; iVar < nVar; iVar++) {
+          if ((iDType == 0  && dataVariations.count (variations[iVar]) > 0) || (iDType == 1 && mcVariations.count (variations[iVar]) > 0)) {
+            myLineColorText (0.25+0.40*(count>=12), 0.45-(count%12)*0.020, varStyles[variations[iVar]].first, varStyles[variations[iVar]].second, varFullNames[variations[iVar]], 0.5, 0.014);
+            count++;
+          }
+        }
+
+        c->SaveAs (Form ("%s/Plots/Systematics/SignalJetTaggedYield_pp_%s_ptch_%s_%ssyst.pdf", workPath.Data (), directions[iDir] == "ns" ? "nearside" : "awayside", tag, iDType == 0 ? "":"mcBased_"));
+      }
+
+
+      for (int iCent = 0; iCent < nZdcCentBins; iCent++) {
+
+        const char* canvasName = Form ("c_jet_trk_pt_%s_sig_%s_pPb_iCent%i_syst", directions[iDir].Data (), iDType == 0 ? "data" : "mc", iCent);
+        TCanvas* c = new TCanvas (canvasName, "", 800, 800);
+
+        TH1D* h = nullptr, *h_tot = nullptr;
+        TGAE* g = nullptr;
+
+        c->cd (); 
+        c->SetLogx ();
+        //c->SetLogy ();
+
+        float ymin = (iDType == 0 ? -20 : -10);
+        float ymax = (iDType == 0 ?  20 :  10);
+
+        h = (TH1D*) h_jet_trk_pt_sig[iDType][iDir][iCent]->Clone ("h");
+        h->Reset ();
+        h->GetXaxis ()->SetMoreLogLabels ();
+        h->GetYaxis ()->SetRangeUser (ymin, ymax);
+        h->GetXaxis ()->SetTitle ("#it{p}_{T}^{ch} [GeV]");
+        //h->GetXaxis ()->SetTitleSize (0.028);
+        //h->GetXaxis ()->SetLabelSize (0.028);
+        h->GetYaxis ()->SetTitle ("#delta N_{ch} / N_{ch} [%]");
+        //h->GetYaxis ()->SetTitleSize (0.028);
+        //h->GetYaxis ()->SetLabelSize (0.028);
+
+        h->SetLineWidth (1);
+        h->SetLineStyle (2);
+        h->DrawCopy ("hist ][");
+        SaferDelete (&h);
+
+        h_tot = (TH1D*) h_jet_trk_pt_sig[iDType][iDir][iCent]->Clone ("h_total_unc");
+        h_tot->Reset ();
+
+        for (int iVar = 1; iVar < nVar; iVar++) {
+          if ((iDType == 0  && dataVariations.count (variations[iVar]) == 0) || (iDType == 1 && mcVariations.count (variations[iVar]) == 0))
+            continue;
+
+          h = (TH1D*) h_jet_trk_pt_sig_syst[iDir][iCent][iVar]->Clone ("htemp");
+          SaveRelativeErrors (h, h_jet_trk_pt_sig[iDType][iDir][iCent], true);
+          for (int iX = 1; iX <= h->GetNbinsX (); iX++) {
+            h->SetBinContent (iX, 100*h->GetBinContent (iX) - 100);
+            h_tot->SetBinContent (iX, std::sqrt (std::pow (h_tot->GetBinContent (iX), 2) + std::pow (h->GetBinContent (iX), 2)));
+          }
+          g = make_graph (h);
+          SaferDelete (&h);
+          ResetXErrors (g);
+          ResetTGAEErrors (g);
+
+          g->SetLineColor (varStyles[variations[iVar]].first);
+          g->SetLineStyle (varStyles[variations[iVar]].second);
+          g->SetLineWidth (3);
+          ((TGAE*) g->Clone ())->Draw ("L");
+          SaferDelete (&g);
+        }
+
+        g = make_graph (h_tot);
+        SaferDelete (&h_tot);
+        ResetXErrors (g);
+        ResetTGAEErrors (g);
+
+        g->SetLineColor (kBlack);
+        g->SetLineStyle (1);
+        g->SetLineWidth (3);
+        ((TGAE*) g->Clone ())->Draw ("L");
+        SaferDelete (&g);
+
+        myText (0.22, 0.89, kBlack, Form ("#bf{#it{ATLAS}} %sInternal", iDType == 0 ? "" : "Simulation "), 0.032);
+        myText (0.22, 0.85, kBlack, Form ("#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV, #bf{ZDC %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.032);
+        if (directions[iDir] == "ns")
+          myText (0.22, 0.81, kBlack, Form ("#it{p}_{T}^{jet} > %s, #Delta#phi_{ch,jet} < #pi/8 (near-side)", GetJetPtStr (tag).Data ()), 0.032);
+        else if (directions[iDir] == "as")
+          myText (0.22, 0.81, kBlack, Form ("#it{p}_{T}^{jet} > %s, #Delta#phi_{ch,jet} > 7#pi/8 (away-side)", GetJetPtStr (tag).Data ()), 0.032);
+
+        int count = 0;
+        for (int iVar = 1; iVar < nVar; iVar++) {
+          if ((iDType == 0  && dataVariations.count (variations[iVar]) > 0) || (iDType == 1 && mcVariations.count (variations[iVar]) > 0)) {
+            myLineColorText (0.25+0.40*(count>=12), 0.45-(count%12)*0.020, varStyles[variations[iVar]].first, varStyles[variations[iVar]].second, varFullNames[variations[iVar]], 0.5, 0.014);
+            count++;
+          }
+        }
+
+        c->SaveAs (Form ("%s/Plots/Systematics/SignalJetTaggedYield_pPb_%i-%i%%_%s_ptch_%s_%ssyst.pdf", workPath.Data (), zdcCentPercs[iCent+1], zdcCentPercs[iCent], directions[iDir] == "ns" ? "nearside" : "awayside", tag, iDType == 0 ? "":"mcBased_"));
+      } // end loop over iCent
+
+
+
+      for (int iCent = 0; iCent < nZdcCentBins; iCent++) {
+
+        const char* canvasName = Form ("c_jet_trk_pt_%s_iaa_%s_pPb_iCent%i_syst", directions[iDir].Data (), iDType == 0 ? "data" : "mc", iCent);
+        TCanvas* c = new TCanvas (canvasName, "", 800, 800);
+
+        TH1D* h = nullptr, *h_tot = nullptr;
+        TGAE* g = nullptr;
+
+        c->cd (); 
+        c->SetLogx ();
+        //c->SetLogy ();
+
+        float ymin = (iDType == 0 ? -20 : -10);
+        float ymax = (iDType == 0 ?  20 :  10);
+
+        h = (TH1D*) h_jet_trk_pt_iaa[iDType][iDir][iCent]->Clone ("h");
+        h->Reset ();
+        h->GetXaxis ()->SetMoreLogLabels ();
+        h->GetYaxis ()->SetRangeUser (ymin, ymax);
+        h->GetXaxis ()->SetTitle ("#it{p}_{T}^{ch} [GeV]");
+        //h->GetXaxis ()->SetTitleSize (0.028);
+        //h->GetXaxis ()->SetLabelSize (0.028);
+        h->GetYaxis ()->SetTitle ("#delta I_{pA} / I_{pA} [%]");
+        //h->GetYaxis ()->SetTitleSize (0.028);
+        //h->GetYaxis ()->SetLabelSize (0.028);
+
+        h->SetLineWidth (1);
+        h->SetLineStyle (2);
+        h->DrawCopy ("hist ][");
+        SaferDelete (&h);
+
+        h_tot = (TH1D*) h_jet_trk_pt_iaa[iDType][iDir][iCent]->Clone ("h_total_unc");
+        h_tot->Reset ();
+
+        for (int iVar = 1; iVar < nVar; iVar++) {
+          if ((iDType == 0  && dataVariations.count (variations[iVar]) == 0) || (iDType == 1 && mcVariations.count (variations[iVar]) == 0))
+            continue;
+
+          h = (TH1D*) h_jet_trk_pt_iaa_syst[iDir][iCent][iVar]->Clone ("htemp");
+          SaveRelativeErrors (h, h_jet_trk_pt_iaa[iDType][iDir][iCent], true);
+          for (int iX = 1; iX <= h->GetNbinsX (); iX++) {
+            h->SetBinContent (iX, 100*h->GetBinContent (iX) - 100);
+            h_tot->SetBinContent (iX, std::sqrt (std::pow (h_tot->GetBinContent (iX), 2) + std::pow (h->GetBinContent (iX), 2)));
+          }
+          g = make_graph (h);
+          SaferDelete (&h);
+          ResetXErrors (g);
+          ResetTGAEErrors (g);
+
+          g->SetLineColor (varStyles[variations[iVar]].first);
+          g->SetLineStyle (varStyles[variations[iVar]].second);
+          g->SetLineWidth (3);
+          ((TGAE*) g->Clone ())->Draw ("L");
+          SaferDelete (&g);
+        }
+
+        g = make_graph (h_tot);
+        SaferDelete (&h_tot);
+        ResetXErrors (g);
+        ResetTGAEErrors (g);
+
+        g->SetLineColor (kBlack);
+        g->SetLineStyle (1);
+        g->SetLineWidth (3);
+        ((TGAE*) g->Clone ())->Draw ("L");
+        SaferDelete (&g);
+
+        myText (0.22, 0.89, kBlack, Form ("#bf{#it{ATLAS}} %sInternal", iDType == 0 ? "" : "Simulation "), 0.032);
+        myText (0.22, 0.85, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.032);
+        myText (0.22, 0.81, kBlack, Form ("#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV, #bf{ZDC %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.032);
+        if (directions[iDir] == "ns")
+          myText (0.22, 0.77, kBlack, Form ("#it{p}_{T}^{jet} > %s, #Delta#phi_{ch,jet} < #pi/8 (near-side)", GetJetPtStr (tag).Data ()), 0.032);
+        else if (directions[iDir] == "as")
+          myText (0.22, 0.77, kBlack, Form ("#it{p}_{T}^{jet} > %s, #Delta#phi_{ch,jet} > 7#pi/8 (away-side)", GetJetPtStr (tag).Data ()), 0.032);
+
+        int count = 0;
+        for (int iVar = 1; iVar < nVar; iVar++) {
+          if ((iDType == 0  && dataVariations.count (variations[iVar]) > 0) || (iDType == 1 && mcVariations.count (variations[iVar]) > 0)) {
+            myLineColorText (0.25+0.40*(count>=12), 0.45-(count%12)*0.020, varStyles[variations[iVar]].first, varStyles[variations[iVar]].second, varFullNames[variations[iVar]], 0.5, 0.014);
+            count++;
+          }
+        }
+
+        c->SaveAs (Form ("%s/Plots/Systematics/JetTagged_IpPb_%i-%i%%_%s_ptch_%s_%ssyst.pdf", workPath.Data (), zdcCentPercs[iCent+1], zdcCentPercs[iCent], directions[iDir] == "ns" ? "nearside" : "awayside", tag, iDType == 0 ? "":"mcBased_"));
+      } // end loop over iCent
+
+    } // end loop over iDir
+
+  } // end loop over iDType
 
 }
 

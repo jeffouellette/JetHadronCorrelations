@@ -76,8 +76,16 @@ TString ToTString (const SystFlag& sFlag) {
   switch (sFlag) {
     case SystFlag::Nominal:                 return TString ("Nominal");
     case SystFlag::HITightVar:              return TString ("HITightVar");
+    case SystFlag::HILooseVar:              return TString ("HILooseVar");
+    case SystFlag::TrkEffVar:               return TString ("TrkEffVar");
+    case SystFlag::FakeRateVar:             return TString ("FakeRateVar");
+    case SystFlag::PrimFitVar:              return TString ("PrimFitVar");
+    case SystFlag::PartSpcVar:              return TString ("PartSpcVar");
     case SystFlag::FcalCentVar:             return TString ("FcalCentVar");
     case SystFlag::FineFcalCentVar:         return TString ("FineFcalCentVar");
+    case SystFlag::MixCatVar1:              return TString ("MixCatVar1");
+    case SystFlag::MixCatVar2:              return TString ("MixCatVar2");
+    case SystFlag::MixCatVar3:              return TString ("MixCatVar3");
     case SystFlag::JESVar0:                 return TString ("JESVar0");
     case SystFlag::JESVar1:                 return TString ("JESVar1");
     case SystFlag::JESVar2:                 return TString ("JESVar2");
@@ -336,6 +344,30 @@ bool DoHILooseVar (const SystFlag& sFlag) {
 
 
 
+bool DoTrkEffVar (const SystFlag& sFlag) {
+  return sFlag == SystFlag::TrkEffVar;
+}
+
+
+
+bool DoFakeRateVar (const SystFlag& sFlag) {
+  return sFlag == SystFlag::FakeRateVar;
+}
+
+
+
+bool DoPrimFitVar (const SystFlag& sFlag) {
+  return sFlag == SystFlag::PrimFitVar;
+}
+
+
+
+bool DoPartSpcVar (const SystFlag& sFlag) {
+  return sFlag == SystFlag::PartSpcVar;
+}
+
+
+
 bool DoFcalCentVar (const SystFlag& sFlag) {
   return sFlag == SystFlag::FcalCentVar;
 }
@@ -344,6 +376,24 @@ bool DoFcalCentVar (const SystFlag& sFlag) {
 
 bool DoFineFcalCentVar (const SystFlag& sFlag) {
   return sFlag == SystFlag::FineFcalCentVar;
+}
+
+
+
+bool DoMixCatVar1 (const SystFlag& sFlag) {
+  return sFlag == SystFlag::MixCatVar1;
+}
+
+
+
+bool DoMixCatVar2 (const SystFlag& sFlag) {
+  return sFlag == SystFlag::MixCatVar2;
+}
+
+
+
+bool DoMixCatVar3 (const SystFlag& sFlag) {
+  return sFlag == SystFlag::MixCatVar3;
 }
 
 
@@ -558,6 +608,30 @@ bool DoHILooseVar () {
 
 
 
+bool DoTrkEffVar () {
+  return DoTrkEffVar (systFlag);
+}
+
+
+
+bool DoFakeRateVar () {
+  return DoFakeRateVar (systFlag);
+}
+
+
+
+bool DoPrimFitVar () {
+  return DoPrimFitVar (systFlag);
+}
+
+
+
+bool DoPartSpcVar () {
+  return DoPartSpcVar (systFlag);
+}
+
+
+
 bool DoFcalCentVar () {
   return DoFcalCentVar (systFlag);
 }
@@ -566,6 +640,24 @@ bool DoFcalCentVar () {
 
 bool DoFineFcalCentVar () {
   return DoFineFcalCentVar (systFlag);
+}
+
+
+
+bool DoMixCatVar1 () {
+  return DoMixCatVar1 (systFlag);
+}
+
+
+
+bool DoMixCatVar2 () {
+  return DoMixCatVar2 (systFlag);
+}
+
+
+
+bool DoMixCatVar3 () {
+  return DoMixCatVar3 (systFlag);
 }
 
 
@@ -890,21 +982,23 @@ bool MeetsJetPtCut (double jpt) {
 /**
  * Returns true if this track passes selection criteria.
  */
-bool MeetsTrackCuts (int iTrk) {
+bool MeetsTrackCuts (int iTrk, const int nWPVar) {
   if (trk_pt[iTrk] < min_trk_pt)
     return false; // track minimum pT
   if (std::fabs (trk_eta[iTrk]) > 2.5)
     return false; // track maximum eta
 
-  if (!trk_wp[iTrk])
+  assert (nWPVar >= 0 && nWPVar < (int)trackWPs.size ());
+
+  if (!trackWPs[nWPVar][iTrk])
     return false;
 
-  if (IsPbPb ()) {
-    if (std::fabs (trk_d0sig[iTrk]) > 3.0)
-      return false; // d0 significance cut in Pb+Pb
-    if (std::fabs (trk_z0sig[iTrk]) > 3.0)
-      return false; // z0 significance cut in Pb+Pb
-  }
+  //if (IsPbPb ()) {
+  //  if (std::fabs (trk_d0sig[iTrk]) > 3.0)
+  //    return false; // d0 significance cut in Pb+Pb
+  //  if (std::fabs (trk_z0sig[iTrk]) > 3.0)
+  //    return false; // z0 significance cut in Pb+Pb
+  //}
   return true;
 }
 
@@ -1331,20 +1425,32 @@ double GetAktJetWeight (const float jpt, const float jeta, const float jphi, con
 TH2D* LoadTrackingEfficiency () {
   TDirectory* gdir = gDirectory;
 
-  TString fname = Form ("%s/TrackingPerformance/Nominal/outFile.root", rootPath.Data ());
+  //TString fname = Form ("%s/TrackingPerformance/Nominal/outFile.root", rootPath.Data ());
+  //std::cout << "Trying to resolve tracking performance file in " << fname.Data () << std::endl;
+  //TFile* infile = new TFile (fname, "read");
+  TString fname = Form ("%s/aux/TrackingPerformance.root", workPath.Data ());
   std::cout << "Trying to resolve tracking performance file in " << fname.Data () << std::endl;
   TFile* infile = new TFile (fname, "read");
 
-  const std::string wp = "trk_TightPrimary";
+  const std::string wp = (DoHITightVar () ? "trk_HItight" : (DoHILooseVar () ? "trk_HIloose" : "trk_TightPrimary"));
   const int iMult = nMultBins-1; // TODO change me for mult. unc.
   const std::string sys = Ispp () ? "pp" : "pPb";
-  const int PID = 0; // TODO change me for part. comp. unc.
+  const int PID = (DoPartSpcVar () ? 211 : 0);
 
-  TH2D* h2 = (TH2D*) infile->Get (Form ("h2_truth_matched_primary_tracks_%s_PID%i_%s_iMult%i", sys.c_str (), PID, wp.c_str (), iMult))->Clone ("h2_tracking_efficiency");
-  h2->Divide ((TH2D*) infile->Get (Form ("h2_truth_tracks_%s_PID%i_iMult%i", sys.c_str (), PID, iMult)));
+  TH2D* h2 = (TH2D*) infile->Get (Form ("h2_efficiency_%s_PID%i_%s_iMult%i", sys.c_str (), PID, wp.c_str (), iMult))->Clone ("h2_tracking_efficiency");
+  //TH2D* h2 = (TH2D*) infile->Get (Form ("h2_truth_matched_primary_tracks_%s_PID%i_%s_iMult%i", sys.c_str (), PID, wp.c_str (), iMult))->Clone ("h2_tracking_efficiency");
+  //h2->Divide ((TH2D*) infile->Get (Form ("h2_truth_tracks_%s_PID%i_iMult%i", sys.c_str (), PID, iMult)));
   std::cout << "Loaded tracking efficiencies, closing file" << std::endl;
 
   h2->SetDirectory (gdir);
+
+  if (DoTrkEffVar ()) {
+    for (int iX = 1; iX <= h2->GetNbinsX (); iX++) {
+      for (int iY = 1; iY <= h2->GetNbinsY (); iY++) {
+        h2->SetBinContent (iX, iY, h2->GetBinContent (iX, iY) * (1.005 + (0.013/2.35)*(std::fabs (h2->GetXaxis ()->GetBinCenter (iX)) - 0.05))); // uncertainty on tracking efficiency, linear in |eta|
+      }
+    }
+  }
 
   infile->Close ();
   SaferDelete (&infile);
@@ -1357,27 +1463,38 @@ TH2D* LoadTrackingEfficiency () {
 /**
  * Returns the tracking purity histograms.
  */
-TH2D* LoadTrackingPurity () {
+TH1D** LoadTrackingPurity () {
   TDirectory* gdir = gDirectory;
 
-  TString fname = Form ("%s/TrackingPerformance/Nominal/outFile.root", rootPath.Data ());
+  //TString fname = Form ("%s/TrackingPerformance/Nominal/outFile.root", rootPath.Data ());
+  //std::cout << "Trying to resolve tracking performance file in " << fname.Data () << std::endl;
+  //TFile* infile = new TFile (fname, "read");
+  TString fname = Form ("%s/aux/TrackingPerformance.root", workPath.Data ());
   std::cout << "Trying to resolve tracking performance file in " << fname.Data () << std::endl;
   TFile* infile = new TFile (fname, "read");
 
-  const std::string wp = "trk_TightPrimary";
+  const std::string wp = (DoHITightVar () ? "trk_HItight" : (DoHILooseVar () ? "trk_HIloose" : "trk_TightPrimary"));
   const int iMult = nMultBins-1;
   const std::string sys = Ispp () ? "pp" : "pPb";
 
-  TH2D* h2 = (TH2D*) infile->Get (Form ("h2_primary_tracks_%s_%s_iMult%i", sys.c_str (), wp.c_str (), iMult))->Clone ("h2_tracking_purity");
-  h2->Divide ((TH2D*) infile->Get (Form ("h2_reco_tracks_%s_%s_iMult%i", sys.c_str (), wp.c_str (), iMult)));
-  std::cout << "Loaded tracking purities, closing file" << std::endl;
+  TH1D** h_trk_pur = Get1DArray <TH1D*> (nEtaTrkBins);
 
-  h2->SetDirectory (gdir);
+  for (int iEta = 0; iEta < nEtaTrkBins; iEta++) {
+    h_trk_pur[iEta] = (TH1D*) infile->Get (Form ("h_primary_rate_%s_%s_iMult%i_iEta%i", sys.c_str (), wp.c_str (), iMult, iEta))->Clone (Form ("h_primary_rate_iMult%i_iEta%i", iMult, iEta));
+    //h_trk_pur[iEta] = (TH1D*) infile->Get (Form ("h_reco_tracks_%s_%s_iMult%i_iEta%i", sys.c_str (), wp.c_str (), iMult, iEta))->Clone (Form ("h_primary_rate_iMult%i_iEta%i", iMult, iEta));
+    //h_trk_pur[iEta]->Add ((TH1D*) infile->Get (Form ("h_fake_tracks_%s_%s_iMult%i_iEta%i", sys.c_str (), wp.c_str (), iMult, iEta)), -1);
+    //h_trk_pur[iEta]->Add ((TH1D*) infile->Get (Form ("h_secondary_tracks_%s_%s_iMult%i_iEta%i", sys.c_str (), wp.c_str (), iMult, iEta)), -1);
+    //h_trk_pur[iEta]->Divide ((TH1D*) infile->Get (Form ("h_reco_tracks_%s_%s_iMult%i_iEta%i", sys.c_str (), wp.c_str (), iMult, iEta)));
+
+    h_trk_pur[iEta]->SetDirectory (gdir);
+  }
+
+  std::cout << "Loaded tracking purities, closing file" << std::endl;
 
   infile->Close ();
   SaferDelete (&infile);
 
-  return h2;
+  return h_trk_pur;
 }
 
 
@@ -1390,14 +1507,13 @@ TF1** LoadTrackingPurityFuncs () {
   std::cout << "Trying to resolve tracking performance file in " << fname.Data () << std::endl;
   TFile* infile = new TFile (fname, "read");
 
-  const std::string wp = "trk_TightPrimary";
+  const std::string wp = (DoHITightVar () ? "trk_HItight" : (DoHILooseVar () ? "trk_HIloose" : "trk_TightPrimary"));
   const int iMult = nMultBins-1;
   const std::string sys = Ispp () ? "pp" : "pPb";
-
   TF1** f_trk_pur = Get1DArray <TF1*> (nEtaTrkBins);
 
   for (int iEta = 0; iEta < nEtaTrkBins; iEta++)
-    f_trk_pur[iEta] = (TF1*) ((TF1*) infile->Get (Form ("f_primary_rate_%s_%s_iMult%i_iEta%i", sys.c_str (), wp.c_str (), iMult, iEta)))->Clone (Form ("f_primary_rate_iMult%i_iEta%i", iMult, iEta));
+    f_trk_pur[iEta] = (TF1*) ((TF1*) infile->Get (Form ("f_primary_rate%s_%s_%s_iMult%i_iEta%i", DoFakeRateVar () ? "_fakes_p100" : "", sys.c_str (), wp.c_str (), iMult, iEta)))->Clone (Form ("f_primary_rate_iMult%i_iEta%i", iMult, iEta));
 
   std::cout << "Loaded tracking purity functions" << std::endl;
 
@@ -1421,6 +1537,8 @@ TGraphErrors* TProfY2TGE (TProfile* py) {
   return g;
 }
 
+
+
 /**
  * Converts a TProfile to a TGraph assuming the x-axis of the TProfile is the x-axis of the TGraph.
  */
@@ -1431,6 +1549,35 @@ TGraphErrors* TProfX2TGE (TProfile* px) {
     g->SetPointError (g->GetN ()-1, px->GetBinWidth (iX) / 2., px->GetBinError (iX));
   }
   return g;
+}
+
+
+
+/**
+ * Sets central values in g according to values in centralValues, but keeps relative uncertainties the same.
+ * Values must be positive-definite! I.e. not negative or zero. Otherwise no uncertainty resetting is done for those bins.
+ */
+void SetCentralValuesKeepRelativeErrors (TGAE* g, TH1D* centralValues) {
+  assert (g->GetN () == centralValues->GetNbinsX ());
+
+  double xelo, xehi, yelo, yehi, x, y, ynew;
+  for (int i = 0; i < g->GetN (); i++) {
+    xelo = g->GetErrorXlow (i);
+    xehi = g->GetErrorXhigh (i);
+    yelo = g->GetErrorYlow (i);
+    yehi = g->GetErrorYhigh (i);
+    g->GetPoint (i, x, y);
+
+    ynew = centralValues->GetBinContent (i+1);
+
+    if (y > 0) {
+      g->SetPoint (i, x, ynew);
+      g->SetPointEXlow (i, xelo);
+      g->SetPointEXhigh (i, xehi);
+      g->SetPointEYlow (i, yelo*ynew/y);
+      g->SetPointEYhigh (i, yehi*ynew/y);
+    }
+  }
 }
 
 

@@ -315,7 +315,7 @@ void PlotDPhi (const char* tag, const char* inFileTag) {
       h->GetXaxis ()->SetLabelSize (0.028/fdPad);
       h->GetXaxis ()->SetTitleOffset (3.8*fdPad);
       //h->GetXaxis ()->SetLabelOffset (-0.05*fdPad);
-      h->GetYaxis ()->SetTitle ("#it{I}_{#it{p}A} = #it{p}+Pb / #it{pp}");
+      h->GetYaxis ()->SetTitle ("#it{I}_{#it{p}Pb} = #it{p}+Pb / #it{pp}");
       h->GetYaxis ()->SetTitleSize (0.028/fdPad);
       h->GetYaxis ()->SetLabelSize (0.028/fdPad);
       h->GetYaxis ()->SetTitleOffset (2.1*fdPad);
@@ -531,7 +531,7 @@ void PlotDPhi (const char* tag, const char* inFileTag) {
     h->GetXaxis ()->SetLabelSize (0.028/fdPad);
     h->GetXaxis ()->SetTitleOffset (3.8*fdPad);
     //h->GetXaxis ()->SetLabelOffset (-0.05*fdPad);
-    h->GetYaxis ()->SetTitle ("#it{I}_{#it{p}A} = #it{p}+Pb / #it{pp}");
+    h->GetYaxis ()->SetTitle ("#it{I}_{#it{p}Pb} = #it{p}+Pb / #it{pp}");
     h->GetYaxis ()->SetTitleSize (0.028/fdPad);
     h->GetYaxis ()->SetLabelSize (0.028/fdPad);
     h->GetYaxis ()->SetTitleOffset (2.1*fdPad);
@@ -754,7 +754,7 @@ void PlotDPhi (const char* tag, const char* inFileTag) {
     h->GetXaxis ()->SetLabelSize (0.028/fdPad);
     h->GetXaxis ()->SetTitleOffset (3.8*fdPad);
     //h->GetXaxis ()->SetLabelOffset (-0.05*fdPad);
-    h->GetYaxis ()->SetTitle ("#it{I}_{#it{p}A} = #it{p}+Pb / #it{pp}");
+    h->GetYaxis ()->SetTitle ("#it{I}_{#it{p}Pb} = #it{p}+Pb / #it{pp}");
     h->GetYaxis ()->SetTitleSize (0.028/fdPad);
     h->GetYaxis ()->SetLabelSize (0.028/fdPad);
     h->GetYaxis ()->SetTitleOffset (2.1*fdPad);
@@ -981,7 +981,7 @@ void PlotDPhi (const char* tag, const char* inFileTag) {
     h->GetXaxis ()->SetLabelSize (0.028/fdPad);
     h->GetXaxis ()->SetTitleOffset (3.8*fdPad);
     //h->GetXaxis ()->SetLabelOffset (-0.05*fdPad);
-    h->GetYaxis ()->SetTitle ("#it{I}_{#it{p}A} = #it{p}+Pb / #it{pp}");
+    h->GetYaxis ()->SetTitle ("#it{I}_{#it{p}Pb} = #it{p}+Pb / #it{pp}");
     h->GetYaxis ()->SetTitleSize (0.028/fdPad);
     h->GetYaxis ()->SetLabelSize (0.028/fdPad);
     h->GetYaxis ()->SetTitleOffset (2.1*fdPad);
@@ -1208,7 +1208,7 @@ void PlotDPhi (const char* tag, const char* inFileTag) {
     h->GetXaxis ()->SetLabelSize (0.028/fdPad);
     h->GetXaxis ()->SetTitleOffset (3.8*fdPad);
     //h->GetXaxis ()->SetLabelOffset (-0.05*fdPad);
-    h->GetYaxis ()->SetTitle ("#it{I}_{#it{p}A} = #it{p}+Pb / #it{pp}");
+    h->GetYaxis ()->SetTitle ("#it{I}_{#it{p}Pb} = #it{p}+Pb / #it{pp}");
     h->GetYaxis ()->SetTitleSize (0.028/fdPad);
     h->GetYaxis ()->SetLabelSize (0.028/fdPad);
     h->GetYaxis ()->SetTitleOffset (2.1*fdPad);

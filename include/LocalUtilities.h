@@ -7,9 +7,12 @@
 #include <TF1.h>
 #include <TFile.h>
 #include <TGraphErrors.h>
+#include <TGraphAsymmErrors.h>
 #include <TProfile.h>
 
 #include <vector>
+
+typedef TGraphAsymmErrors TGAE;
 
 namespace JetHadronCorrelations {
 
@@ -24,11 +27,18 @@ static const std::vector <TriggerType> AllTriggerType = { TriggerType::None, Tri
 
 enum class SystFlag {
   Nominal,
-  HITightVar,
+  HITightVar,       // tracking quality variations
   HILooseVar,
-  FcalCentVar,
+  TrkEffVar,        // tracking efficiency uncertainty
+  FakeRateVar,      // fake rate uncertainty
+  PrimFitVar,       // primary fraction uncertainty from fit  //TODO
+  PartSpcVar,       // particle species uncertainty           //TODO
+  FcalCentVar,      // centrality variations
   FineFcalCentVar,
-  JESVar0,
+  MixCatVar1,       // mixing variations
+  MixCatVar2,
+  MixCatVar3,
+  JESVar0,          // jet energy scale variations
   JESVar1,
   JESVar2,
   JESVar3,
@@ -44,12 +54,12 @@ enum class SystFlag {
   JESVar13,
   JESVar14,
   JESVar15,
-  JESVar16,
-  JESVar17,
-  JESVar18,
-  JESVar19,
-  JESVar20,
-  JERVar0,
+  JESVar16,         // 2018 Eta-intercalibration non-closure uncertainty  (not applicable)
+  JESVar17,         // cross-calibration JES uncertainty
+  JESVar18,         // flavor response JES uncertainty
+  JESVar19,         // flavor fraction JES uncertainty
+  JESVar20,         // R-scan uncertainty                                 (not applicable)
+  JERVar0,          // jet energy resolution variations
   JERVar1,
   JERVar2,
   JERVar3,
@@ -65,8 +75,15 @@ static const std::vector <SystFlag> AllSystFlag = {
   SystFlag::Nominal,
   SystFlag::HITightVar, 
   SystFlag::HILooseVar,
+  SystFlag::TrkEffVar,
+  SystFlag::FakeRateVar,
+  SystFlag::PrimFitVar,
+  SystFlag::PartSpcVar,
   SystFlag::FcalCentVar,
   SystFlag::FineFcalCentVar,
+  SystFlag::MixCatVar1,
+  SystFlag::MixCatVar2,
+  SystFlag::MixCatVar3,
   SystFlag::JESVar0,
   SystFlag::JESVar1,
   SystFlag::JESVar2,
@@ -147,8 +164,15 @@ bool UseMinBiasTriggers (const TriggerType& tType);
 
 bool DoHITightVar (const SystFlag& sFlag);
 bool DoHILooseVar (const SystFlag& sFlag);
+bool DoTrkEffVar (const SystFlag& sFlag);
+bool DoFakeRateVar (const SystFlag& sFlag);
+bool DoPrimFitVar (const SystFlag& sFlag);
+bool DoPartSpcVar (const SystFlag& sFlag);
 bool DoFcalCentVar (const SystFlag& sFlag);
 bool DoFineFcalCentVar (const SystFlag& sFlag);
+bool DoMixCatVar1 (const SystFlag& sFlag);
+bool DoMixCatVar2 (const SystFlag& sFlag);
+bool DoMixCatVar3 (const SystFlag& sFlag);
 
 int GetNJESVar (const SystFlag& sFlag);
 int GetNJERVar (const SystFlag& sFlag);
@@ -185,8 +209,15 @@ bool UseMinBiasTriggers ();
 
 bool DoHITightVar ();
 bool DoHILooseVar ();
+bool DoTrkEffVar ();
+bool DoFakeRateVar ();
+bool DoPrimFitVar ();
+bool DoPartSpcVar ();
 bool DoFcalCentVar ();
 bool DoFineFcalCentVar ();
+bool DoMixCatVar1 ();
+bool DoMixCatVar2 ();
+bool DoMixCatVar3 ();
 
 int GetNJESVar ();
 int GetNJERVar ();
@@ -261,7 +292,7 @@ bool MeetsJetPtCut (double jpt);
 /**
  * Returns true if this track passes selection criteria.
  */
-bool MeetsTrackCuts (int iTrk);
+bool MeetsTrackCuts (int iTrk, const int nWPVar = 0);
 
 
 /**
@@ -431,7 +462,7 @@ TH2D* LoadTrackingEfficiency ();
 /**
  * Returns the tracking purity histograms.
  */
-TH2D* LoadTrackingPurity ();
+TH1D** LoadTrackingPurity ();
 
 
 /**
@@ -450,6 +481,13 @@ TGraphErrors* TProfY2TGE (TProfile* py);
  * Converts a TProfile to a TGraph assuming the x-axis of the TProfile is the x-axis of the TGraph.
  */
 TGraphErrors* TProfX2TGE (TProfile* px);
+
+
+/**
+ * Sets central values in g according to values in centralValues, but keeps relative uncertainties the same.
+ * Values must be positive-definite! I.e. not negative or zero. Otherwise no uncertainty resetting is done for those bins.
+ */
+void SetCentralValuesKeepRelativeErrors (TGAE* g, TH1D* centralValues);
 
 
 } // end namespace

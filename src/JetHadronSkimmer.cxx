@@ -533,9 +533,8 @@ bool JetHadronSkimmer (const char* directory,
       for (int iTrk = 0; iTrk < trk_n; iTrk++) {
 
         bool isOKTrack = false;
-        for (int iWP = 0; iWP < trackWPs.size (); iWP++) {
-          trk_wp = trackWPs[iWP];
-          isOKTrack = isOKTrack || MeetsTrackCuts (iTrk);
+        for (int iWP = 0; iWP < (int)trackWPs.size (); iWP++) {
+          isOKTrack = isOKTrack || MeetsTrackCuts (iTrk, iWP);
         }
         if (!isOKTrack)
           continue;

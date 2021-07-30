@@ -189,7 +189,7 @@ void PlotJetEnergyResolution () {
         if (iSys == 0)
           tl->DrawLatexNDC (0.22, 0.850, "Pythia8 #it{pp}, #sqrt{s} = 5.02 TeV");
         else if (iSys == 1)
-          tl->DrawLatexNDC (0.22, 0.845, "Pythia8 + #it{p}+Pb Overlay, #sqrt{s_{NN}} = 5.02 TeV");
+          tl->DrawLatexNDC (0.22, 0.845, "Pythia8 + #it{p}+Pb boost, #sqrt{s_{NN}} = 5.02 TeV");
         tl->DrawLatexNDC (0.22, 0.810, Form ("Anti-#it{k}_{T} HI Jets, R=0.%i", r));
         for (int iEta = 0; iEta < nEtaBins; iEta++)
           myLineText2 (0.3+(2*iEta>=nEtaBins ? 0.24 : 0), 0.328-0.032*(iEta%(nEtaBins/2)), systColors[iEta], kOpenCircle, Form ("%g < #it{#eta} < %g", etaBins[iEta], etaBins[iEta+1]), 1.2, 0.026, true);
@@ -271,7 +271,7 @@ void PlotJetEnergyResolution () {
         if (iSys == 0)
           tl->DrawLatexNDC (0.22, 0.850, "Pythia8 #it{pp}, #sqrt{s} = 5.02 TeV");
         else if (iSys == 1)
-          tl->DrawLatexNDC (0.22, 0.845, "Pythia8 + #it{p}+Pb Overlay, #sqrt{s_{NN}} = 5.02 TeV");
+          tl->DrawLatexNDC (0.22, 0.845, "Pythia8 + #it{p}+Pb boost, #sqrt{s_{NN}} = 5.02 TeV");
         tl->DrawLatexNDC (0.22, 0.810, Form ("Anti-#it{k}_{T} HI Jets, R=0.%i", r));
         for (int iEta = 0; iEta < nEtaBins; iEta++)
           myLineText2 (0.3+(2*iEta>=nEtaBins ? 0.24 : 0), 0.328-0.032*(iEta%(nEtaBins/2)), systColors[iEta], kOpenCircle, Form ("%g < #it{#eta} < %g", etaBins[iEta], etaBins[iEta+1]), 1.2, 0.026, true);
@@ -353,7 +353,7 @@ void PlotJetEnergyResolution () {
         if (iSys == 0)
           tl->DrawLatexNDC (0.22, 0.850, "Pythia8 #it{pp}, #sqrt{s} = 5.02 TeV");
         else if (iSys == 1)
-          tl->DrawLatexNDC (0.22, 0.845, "Pythia8 + #it{p}+Pb Overlay, #sqrt{s_{NN}} = 5.02 TeV");
+          tl->DrawLatexNDC (0.22, 0.845, "Pythia8 + #it{p}+Pb boost, #sqrt{s_{NN}} = 5.02 TeV");
         tl->DrawLatexNDC (0.22, 0.810, Form ("Anti-#it{k}_{T} HI Jets, R=0.%i", r));
         for (int iEta = 0; iEta < nEtaBins; iEta++)
           myLineText2 (0.3+(2*iEta>=nEtaBins ? 0.24 : 0), 0.328-0.032*(iEta%(nEtaBins/2)), systColors[iEta], kOpenCircle, Form ("%g < #it{#eta} < %g", etaBins[iEta], etaBins[iEta+1]), 1.2, 0.026, true);
@@ -432,7 +432,7 @@ void PlotJetEnergyResolution () {
         if (iSys == 0)
           tl->DrawLatexNDC (0.22, 0.850, "Pythia8 #it{pp}, #sqrt{s} = 5.02 TeV");
         else if (iSys == 1)
-          tl->DrawLatexNDC (0.22, 0.845, "Pythia8 + #it{p}+Pb Overlay, #sqrt{s_{NN}} = 5.02 TeV");
+          tl->DrawLatexNDC (0.22, 0.845, "Pythia8 + #it{p}+Pb boost, #sqrt{s_{NN}} = 5.02 TeV");
         tl->DrawLatexNDC (0.22, 0.810, Form ("Anti-#it{k}_{T} HI Jets, R=0.%i", r));
         for (int iEta = 0; iEta < nEtaBins; iEta++)
           myLineText2 (0.5+(2*iEta>=nEtaBins ? 0.24 : 0), 0.718-0.032*(iEta%(nEtaBins/2)), systColors[iEta], kOpenCircle, Form ("%g < #it{#eta} < %g", etaBins[iEta], etaBins[iEta+1]), 1.2, 0.026, true);
@@ -512,7 +512,7 @@ void PlotJetEnergyResolution () {
         if (iSys == 0)
           tl->DrawLatexNDC (0.22, 0.850, "Pythia8 #it{pp}, #sqrt{s} = 5.02 TeV");
         else if (iSys == 1)
-          tl->DrawLatexNDC (0.22, 0.845, "Pythia8 + #it{p}+Pb Overlay, #sqrt{s_{NN}} = 5.02 TeV");
+          tl->DrawLatexNDC (0.22, 0.845, "Pythia8 + #it{p}+Pb boost, #sqrt{s_{NN}} = 5.02 TeV");
         tl->DrawLatexNDC (0.22, 0.810, Form ("Anti-#it{k}_{T} HI Jets, R=0.%i", r));
         for (int iEta = 0; iEta < nEtaBins; iEta++)
           myLineText2 (0.5+(2*iEta>=nEtaBins ? 0.24 : 0), 0.718-0.032*(iEta%(nEtaBins/2)), systColors[iEta], kOpenCircle, Form ("%g < #it{#eta} < %g", etaBins[iEta], etaBins[iEta+1]), 1.2, 0.026, true);
@@ -591,7 +591,7 @@ void PlotJetEnergyResolution () {
         if (iSys == 0)
           tl->DrawLatexNDC (0.22, 0.850, "Pythia8 #it{pp}, #sqrt{s} = 5.02 TeV");
         else if (iSys == 1)
-          tl->DrawLatexNDC (0.22, 0.845, "Pythia8 + #it{p}+Pb Overlay, #sqrt{s_{NN}} = 5.02 TeV");
+          tl->DrawLatexNDC (0.22, 0.845, "Pythia8 + #it{p}+Pb boost, #sqrt{s_{NN}} = 5.02 TeV");
         tl->DrawLatexNDC (0.22, 0.810, Form ("Anti-#it{k}_{T} HI Jets, R=0.%i", r));
         for (int iEta = 0; iEta < nEtaBins; iEta++)
           myLineText2 (0.5+(2*iEta>=nEtaBins ? 0.24 : 0), 0.718-0.032*(iEta%(nEtaBins/2)), systColors[iEta], kOpenCircle, Form ("%g < #it{#eta} < %g", etaBins[iEta], etaBins[iEta+1]), 1.2, 0.026, true);
@@ -693,7 +693,7 @@ void PlotJetEnergyResolution () {
         if (iSys == 0)
           tl->DrawLatexNDC (0.36, 0.850, "Pythia8 #it{pp}, #sqrt{s} = 5.02 TeV");
         else if (iSys == 1)
-          tl->DrawLatexNDC (0.36, 0.845, "Pythia8 + #it{p}+Pb Overlay, #sqrt{s_{NN}} = 5.02 TeV");
+          tl->DrawLatexNDC (0.36, 0.845, "Pythia8 + #it{p}+Pb boost, #sqrt{s_{NN}} = 5.02 TeV");
         tl->DrawLatexNDC (0.36, 0.810, Form ("Anti-#it{k}_{T} HI Jets, R=0.%i", r));
         tl->DrawLatexNDC (0.36, 0.775, iEta == nEtaBins ? "|#it{#eta}| < 2.8" : Form ("%g < #it{#eta} < %g", etaBins[iEta], etaBins[iEta+1]));
 

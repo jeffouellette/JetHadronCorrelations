@@ -248,7 +248,7 @@ bool TrackingPerformance (const char* directory,
     } // end loop over iMult
 
 
-    for (int iWP = 0; iWP < trackWPs.size (); iWP++) {
+    for (int iWP = 0; iWP < (int)trackWPs.size (); iWP++) {
 
       for (int iMult = 0; iMult < nMultBins; iMult++) {
 
@@ -269,7 +269,7 @@ bool TrackingPerformance (const char* directory,
   } // end loop over iPID
 
 
-  for (int iWP = 0; iWP < trackWPs.size (); iWP++) {
+  for (int iWP = 0; iWP < (int)trackWPs.size (); iWP++) {
 
     h_truth_matching_prob[iWP] = new TH1D (Form ("h_truth_matching_prob_%s_%s", sys.Data (), trackWPNames[iWP].c_str ()), ";Truth matching prob.;N_{ch}^{rec}", 200, 0, 1);
     h_truth_matching_prob[iWP]->Sumw2 ();
@@ -370,11 +370,9 @@ bool TrackingPerformance (const char* directory,
 
     for (int iTrk = 0; iTrk < trk_n; iTrk++) {
 
-      for (int iWP = 0; iWP < trackWPs.size (); iWP++) {
+      for (int iWP = 0; iWP < (int)trackWPs.size (); iWP++) {
 
-        trk_wp = trackWPs[iWP];
-
-        if (!MeetsTrackCuts (iTrk))
+        if (!MeetsTrackCuts (iTrk, iWP))
           continue;
 
         if (trk_pt[iTrk] > 1)
@@ -551,7 +549,7 @@ bool TrackingPerformance (const char* directory,
 
     } // end loop over iMult
 
-    for (int iWP = 0; iWP < trackWPs.size (); iWP++) {
+    for (int iWP = 0; iWP < (int)trackWPs.size (); iWP++) {
 
       for (int iMult = 0; iMult < nMultBins; iMult++) {
 
@@ -572,7 +570,7 @@ bool TrackingPerformance (const char* directory,
   } // end loop over iPID
 
 
-  for (int iWP = 0; iWP < trackWPs.size (); iWP++) {
+  for (int iWP = 0; iWP < (int)trackWPs.size (); iWP++) {
 
     h_truth_matching_prob[iWP]->Write ();
     SaferDelete (&h_truth_matching_prob[iWP]);

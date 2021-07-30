@@ -538,7 +538,6 @@ bool trk_truth_isHadron[max_trk_n];
 // list of track working points
 const std::vector <bool*> trackWPs = {trk_TightPrimary, trk_HITight, trk_HILoose};
 const std::vector <std::string> trackWPStrs = {"TightPrimary", "HITight", "HILoose"};
-bool* trk_wp = trk_TightPrimary; // user-specified, defaults to TightPrimary
 
 // Anti-kT R=0.2 Truth Jets info
 const static int max_akt2_truth_jet_n = 40;

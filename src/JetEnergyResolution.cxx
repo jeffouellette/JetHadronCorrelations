@@ -333,7 +333,7 @@ bool JetEnergyResolution (const char* directory,
         if (GetAktHIJetIso (iJet, radius) < GetAktHIIsoMinDR (radius))
           continue; // reco. jet isolation cut
 
-        if (jpt / tjpt < 0.4 && GetAktHIJetPt (iJet, radius, -1, 2) < 15) // cuts on pre-calibrated jet pT
+        if (jpt / tjpt < 0.4 && GetAktHIJetPt (iJet, radius, -1, 2) < 15)
           continue; // cut out very low pT jets (before calibration), except in cases with a correspondingly low pT truth match.
 
         short iPtJ = -1;
