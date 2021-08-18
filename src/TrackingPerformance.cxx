@@ -172,6 +172,17 @@ bool TrackingPerformance (const char* directory,
   tree->SetBranchAddress ("trk_truth_isHadron", &trk_truth_isHadron);
 
 
+  tree->SetBranchAddress ("akt4_hi_jet_n",            &akt4_hi_jet_n);
+  tree->SetBranchAddress ("akt4_hi_jet_pt_etajes",    &akt4_hi_jet_pt_etajes);
+  tree->SetBranchAddress ("akt4_hi_jet_pt_xcalib",    &akt4_hi_jet_pt_xcalib);
+  tree->SetBranchAddress ("akt4_hi_jet_eta_etajes",   &akt4_hi_jet_eta_etajes);
+  tree->SetBranchAddress ("akt4_hi_jet_eta_xcalib",   &akt4_hi_jet_eta_xcalib);
+  tree->SetBranchAddress ("akt4_hi_jet_phi",          &akt4_hi_jet_phi);
+  tree->SetBranchAddress ("akt4_hi_jet_e_etajes",     &akt4_hi_jet_e_etajes);
+  tree->SetBranchAddress ("akt4_hi_jet_e_xcalib",     &akt4_hi_jet_e_xcalib);
+  tree->SetBranchAddress ("akt4_hi_jet_timing",       &akt4_hi_jet_timing);
+
+
   tree->SetBranchAddress ("akt4_truth_jet_n",     &akt4_truth_jet_n);
   tree->SetBranchAddress ("akt4_truth_jet_pt",    &akt4_truth_jet_pt);
   tree->SetBranchAddress ("akt4_truth_jet_eta",   &akt4_truth_jet_eta);
@@ -205,24 +216,24 @@ bool TrackingPerformance (const char* directory,
   TH2D***  h2_truth_tracks                 = Get2DArray <TH2D*> (nPIDs, nMultBins);
   TH2D***  h2_truth_tracks_wgt2            = Get2DArray <TH2D*> (nPIDs, nMultBins);
 
-  TH2D*** h2_fake_tracks        = Get2DArray <TH2D*> (trackWPs.size (), nMultBins);
-  TH2D*** h2_secondary_tracks   = Get2DArray <TH2D*> (trackWPs.size (), nMultBins);
-  TH2D*** h2_strange_tracks     = Get2DArray <TH2D*> (trackWPs.size (), nMultBins);
-  TH2D*** h2_primary_tracks     = Get2DArray <TH2D*> (trackWPs.size (), nMultBins);
-  TH2D*** h2_reco_tracks        = Get2DArray <TH2D*> (trackWPs.size (), nMultBins);
-  TH2D*** h2_reco_tracks_wgt2   = Get2DArray <TH2D*> (trackWPs.size (), nMultBins);
+  TH2D*** h2_fake_tracks        = Get2DArray <TH2D*> (trackWPs.size (), nDRBins);
+  TH2D*** h2_secondary_tracks   = Get2DArray <TH2D*> (trackWPs.size (), nDRBins);
+  TH2D*** h2_strange_tracks     = Get2DArray <TH2D*> (trackWPs.size (), nDRBins);
+  TH2D*** h2_primary_tracks     = Get2DArray <TH2D*> (trackWPs.size (), nDRBins);
+  TH2D*** h2_reco_tracks        = Get2DArray <TH2D*> (trackWPs.size (), nDRBins);
+  TH2D*** h2_reco_tracks_wgt2   = Get2DArray <TH2D*> (trackWPs.size (), nDRBins);
 
 
   TH1D***** h_truth_matched_primary_tracks = Get4DArray <TH1D*> (nPIDs, trackWPs.size (), nMultBins, nEtaTrkBins);
   TH1D****  h_truth_tracks                 = Get3DArray <TH1D*> (nPIDs, nMultBins, nEtaTrkBins);
   TH1D****  h_truth_tracks_wgt2            = Get3DArray <TH1D*> (nPIDs, nMultBins, nEtaTrkBins);
 
-  TH1D**** h_fake_tracks        = Get3DArray <TH1D*> (trackWPs.size (), nMultBins, nEtaTrkBins);
-  TH1D**** h_secondary_tracks   = Get3DArray <TH1D*> (trackWPs.size (), nMultBins, nEtaTrkBins);
-  TH1D**** h_strange_tracks     = Get3DArray <TH1D*> (trackWPs.size (), nMultBins, nEtaTrkBins);
-  TH1D**** h_primary_tracks     = Get3DArray <TH1D*> (trackWPs.size (), nMultBins, nEtaTrkBins);
-  TH1D**** h_reco_tracks        = Get3DArray <TH1D*> (trackWPs.size (), nMultBins, nEtaTrkBins);
-  TH1D**** h_reco_tracks_wgt2   = Get3DArray <TH1D*> (trackWPs.size (), nMultBins, nEtaTrkBins);
+  TH1D**** h_fake_tracks        = Get3DArray <TH1D*> (trackWPs.size (), nDRBins, nEtaTrkBins);
+  TH1D**** h_secondary_tracks   = Get3DArray <TH1D*> (trackWPs.size (), nDRBins, nEtaTrkBins);
+  TH1D**** h_strange_tracks     = Get3DArray <TH1D*> (trackWPs.size (), nDRBins, nEtaTrkBins);
+  TH1D**** h_primary_tracks     = Get3DArray <TH1D*> (trackWPs.size (), nDRBins, nEtaTrkBins);
+  TH1D**** h_reco_tracks        = Get3DArray <TH1D*> (trackWPs.size (), nDRBins, nEtaTrkBins);
+  TH1D**** h_reco_tracks_wgt2   = Get3DArray <TH1D*> (trackWPs.size (), nDRBins, nEtaTrkBins);
 
 
   for (int iPID = 0; iPID < nPIDs; iPID++) {
@@ -274,43 +285,43 @@ bool TrackingPerformance (const char* directory,
     h_truth_matching_prob[iWP] = new TH1D (Form ("h_truth_matching_prob_%s_%s", sys.Data (), trackWPNames[iWP].c_str ()), ";Truth matching prob.;N_{ch}^{rec}", 200, 0, 1);
     h_truth_matching_prob[iWP]->Sumw2 ();
 
-    for (int iMult = 0; iMult < nMultBins; iMult++) {
+    for (int iDR = 0; iDR < nDRBins; iDR++) {
 
-      h2_fake_tracks[iWP][iMult] = new TH2D (Form ("h2_fake_tracks_%s_%s_iMult%i", sys.Data (), trackWPNames[iWP].c_str (), iMult), ";#eta;#it{p}_{T} [GeV]", nFinerEtaTrkBins, finerEtaTrkBins, nPtchBins, pTchBins);
-      h2_fake_tracks[iWP][iMult]->Sumw2 ();
-      h2_secondary_tracks[iWP][iMult] = new TH2D (Form ("h2_secondary_tracks_%s_%s_iMult%i", sys.Data (), trackWPNames[iWP].c_str (), iMult), ";#eta;#it{p}_{T} [GeV]", nFinerEtaTrkBins, finerEtaTrkBins, nPtchBins, pTchBins);
-      h2_secondary_tracks[iWP][iMult]->Sumw2 ();
-      h2_strange_tracks[iWP][iMult] = new TH2D (Form ("h2_strange_tracks_%s_%s_iMult%i", sys.Data (), trackWPNames[iWP].c_str (), iMult), ";#eta;#it{p}_{T} [GeV]", nFinerEtaTrkBins, finerEtaTrkBins, nPtchBins, pTchBins);
-      h2_strange_tracks[iWP][iMult]->Sumw2 ();
-      h2_primary_tracks[iWP][iMult] = new TH2D (Form ("h2_primary_tracks_%s_%s_iMult%i", sys.Data (), trackWPNames[iWP].c_str (), iMult), ";#eta;#it{p}_{T} [GeV]", nFinerEtaTrkBins, finerEtaTrkBins, nPtchBins, pTchBins);
-      h2_primary_tracks[iWP][iMult]->Sumw2 ();
+      h2_fake_tracks[iWP][iDR] = new TH2D (Form ("h2_fake_tracks_%s_%s_iDR%i", sys.Data (), trackWPNames[iWP].c_str (), iDR), ";#eta;#it{p}_{T} [GeV]", nFinerEtaTrkBins, finerEtaTrkBins, nPtchBins, pTchBins);
+      h2_fake_tracks[iWP][iDR]->Sumw2 ();
+      h2_secondary_tracks[iWP][iDR] = new TH2D (Form ("h2_secondary_tracks_%s_%s_iDR%i", sys.Data (), trackWPNames[iWP].c_str (), iDR), ";#eta;#it{p}_{T} [GeV]", nFinerEtaTrkBins, finerEtaTrkBins, nPtchBins, pTchBins);
+      h2_secondary_tracks[iWP][iDR]->Sumw2 ();
+      h2_strange_tracks[iWP][iDR] = new TH2D (Form ("h2_strange_tracks_%s_%s_iDR%i", sys.Data (), trackWPNames[iWP].c_str (), iDR), ";#eta;#it{p}_{T} [GeV]", nFinerEtaTrkBins, finerEtaTrkBins, nPtchBins, pTchBins);
+      h2_strange_tracks[iWP][iDR]->Sumw2 ();
+      h2_primary_tracks[iWP][iDR] = new TH2D (Form ("h2_primary_tracks_%s_%s_iDR%i", sys.Data (), trackWPNames[iWP].c_str (), iDR), ";#eta;#it{p}_{T} [GeV]", nFinerEtaTrkBins, finerEtaTrkBins, nPtchBins, pTchBins);
+      h2_primary_tracks[iWP][iDR]->Sumw2 ();
 
-      h2_reco_tracks[iWP][iMult] = new TH2D (Form ("h2_reco_tracks_%s_%s_iMult%i", sys.Data (), trackWPNames[iWP].c_str (), iMult), ";#eta;#it{p}_{T} [GeV]", nFinerEtaTrkBins, finerEtaTrkBins, nPtchBins, pTchBins);
-      h2_reco_tracks[iWP][iMult]->Sumw2 ();
+      h2_reco_tracks[iWP][iDR] = new TH2D (Form ("h2_reco_tracks_%s_%s_iDR%i", sys.Data (), trackWPNames[iWP].c_str (), iDR), ";#eta;#it{p}_{T} [GeV]", nFinerEtaTrkBins, finerEtaTrkBins, nPtchBins, pTchBins);
+      h2_reco_tracks[iWP][iDR]->Sumw2 ();
 
-      h2_reco_tracks_wgt2[iWP][iMult] = new TH2D (Form ("h2_reco_tracks_wgt2_%s_%s_iMult%i", sys.Data (), trackWPNames[iWP].c_str (), iMult), ";#eta;#it{p}_{T} [GeV]", nFinerEtaTrkBins, finerEtaTrkBins, nPtchBins, pTchBins);
-      h2_reco_tracks_wgt2[iWP][iMult]->Sumw2 ();
+      h2_reco_tracks_wgt2[iWP][iDR] = new TH2D (Form ("h2_reco_tracks_wgt2_%s_%s_iDR%i", sys.Data (), trackWPNames[iWP].c_str (), iDR), ";#eta;#it{p}_{T} [GeV]", nFinerEtaTrkBins, finerEtaTrkBins, nPtchBins, pTchBins);
+      h2_reco_tracks_wgt2[iWP][iDR]->Sumw2 ();
 
       for (int iEta = 0; iEta < nEtaTrkBins; iEta++) {
 
-        h_fake_tracks[iWP][iMult][iEta] = new TH1D (Form ("h_fake_tracks_%s_%s_iMult%i_iEta%i", sys.Data (), trackWPNames[iWP].c_str (), iMult, iEta), ";#it{p}_{T} [GeV]", nPtchBins, pTchBins);
-        h_fake_tracks[iWP][iMult][iEta]->Sumw2 ();
-        h_secondary_tracks[iWP][iMult][iEta] = new TH1D (Form ("h_secondary_tracks_%s_%s_iMult%i_iEta%i", sys.Data (), trackWPNames[iWP].c_str (), iMult, iEta), ";#it{p}_{T} [GeV]", nPtchBins, pTchBins);
-        h_secondary_tracks[iWP][iMult][iEta]->Sumw2 ();
-        h_strange_tracks[iWP][iMult][iEta] = new TH1D (Form ("h_strange_tracks_%s_%s_iMult%i_iEta%i", sys.Data (), trackWPNames[iWP].c_str (), iMult, iEta), ";#it{p}_{T} [GeV]", nPtchBins, pTchBins);
-        h_strange_tracks[iWP][iMult][iEta]->Sumw2 ();
-        h_primary_tracks[iWP][iMult][iEta] = new TH1D (Form ("h_primary_tracks_%s_%s_iMult%i_iEta%i", sys.Data (), trackWPNames[iWP].c_str (), iMult, iEta), ";#it{p}_{T} [GeV]", nPtchBins, pTchBins);
-        h_primary_tracks[iWP][iMult][iEta]->Sumw2 ();
+        h_fake_tracks[iWP][iDR][iEta] = new TH1D (Form ("h_fake_tracks_%s_%s_iDR%i_iEta%i", sys.Data (), trackWPNames[iWP].c_str (), iDR, iEta), ";#it{p}_{T} [GeV]", nPtchBins, pTchBins);
+        h_fake_tracks[iWP][iDR][iEta]->Sumw2 ();
+        h_secondary_tracks[iWP][iDR][iEta] = new TH1D (Form ("h_secondary_tracks_%s_%s_iDR%i_iEta%i", sys.Data (), trackWPNames[iWP].c_str (), iDR, iEta), ";#it{p}_{T} [GeV]", nPtchBins, pTchBins);
+        h_secondary_tracks[iWP][iDR][iEta]->Sumw2 ();
+        h_strange_tracks[iWP][iDR][iEta] = new TH1D (Form ("h_strange_tracks_%s_%s_iDR%i_iEta%i", sys.Data (), trackWPNames[iWP].c_str (), iDR, iEta), ";#it{p}_{T} [GeV]", nPtchBins, pTchBins);
+        h_strange_tracks[iWP][iDR][iEta]->Sumw2 ();
+        h_primary_tracks[iWP][iDR][iEta] = new TH1D (Form ("h_primary_tracks_%s_%s_iDR%i_iEta%i", sys.Data (), trackWPNames[iWP].c_str (), iDR, iEta), ";#it{p}_{T} [GeV]", nPtchBins, pTchBins);
+        h_primary_tracks[iWP][iDR][iEta]->Sumw2 ();
 
-        h_reco_tracks[iWP][iMult][iEta] = new TH1D (Form ("h_reco_tracks_%s_%s_iMult%i_iEta%i", sys.Data (), trackWPNames[iWP].c_str (), iMult, iEta), ";#it{p}_{T} [GeV]", nPtchBins, pTchBins);
-        h_reco_tracks[iWP][iMult][iEta]->Sumw2 ();
+        h_reco_tracks[iWP][iDR][iEta] = new TH1D (Form ("h_reco_tracks_%s_%s_iDR%i_iEta%i", sys.Data (), trackWPNames[iWP].c_str (), iDR, iEta), ";#it{p}_{T} [GeV]", nPtchBins, pTchBins);
+        h_reco_tracks[iWP][iDR][iEta]->Sumw2 ();
 
-        h_reco_tracks_wgt2[iWP][iMult][iEta] = new TH1D (Form ("h_reco_tracks_wgt2_%s_%s_iMult%i_iEta%i", sys.Data (), trackWPNames[iWP].c_str (), iMult, iEta), ";#it{p}_{T} [GeV]", nPtchBins, pTchBins);
-        h_reco_tracks_wgt2[iWP][iMult][iEta]->Sumw2 ();
+        h_reco_tracks_wgt2[iWP][iDR][iEta] = new TH1D (Form ("h_reco_tracks_wgt2_%s_%s_iDR%i_iEta%i", sys.Data (), trackWPNames[iWP].c_str (), iDR, iEta), ";#it{p}_{T} [GeV]", nPtchBins, pTchBins);
+        h_reco_tracks_wgt2[iWP][iDR][iEta]->Sumw2 ();
 
       } // end loop over iEta
 
-    } // end loop over iMult
+    } // end loop over iDR
 
   } // end loop over iWP
 
@@ -367,8 +378,21 @@ bool TrackingPerformance (const char* directory,
     const double eventWeight = 1;
     //const double eventWeight = (IsHijing () ? 1 : mcEventWeights->at (0) * crossSectionPicoBarns * mcFilterEfficiency * GetJetLuminosity () / mcNumberEvents); // sigma * f * L_int
 
+    const int njet = GetAktHIJetN (r0p4);
 
     for (int iTrk = 0; iTrk < trk_n; iTrk++) {
+
+      float mindr = M_PI;
+      for (int iJet = 0; iJet < njet; iJet++) {
+        if (GetAktHIJetPt (iJet, r0p4) > 15)
+          mindr = std::fmin (mindr, DeltaR (trk_eta[iTrk], GetAktHIJetEta (iJet, r0p4), trk_phi[iTrk], GetAktHIJetPhi (iJet, r0p4)));
+      }
+      int iDR = (mindr > 0.4 ? 0 : (mindr > 0.2 ? 1 : 2));
+
+      short iEtaReco = 0;
+      while (etaTrkBins[iEtaReco+1] < std::fabs (trk_eta[iTrk]))
+        iEtaReco++;
+
 
       for (int iWP = 0; iWP < (int)trackWPs.size (); iWP++) {
 
@@ -389,47 +413,42 @@ bool TrackingPerformance (const char* directory,
         // primary tracks are non-fake, non-secondary tracks.
         const bool isPrimary = !isFake && !isSecondary;// && !isStrangeBaryon;
 
-        short iEtaReco = 0;
-        while (etaTrkBins[iEtaReco+1] < std::fabs (trk_eta[iTrk]))
-          iEtaReco++;
-
-
         if (!IsDataOverlay ()) {
 
           if (isFake) {
-            h2_fake_tracks[iWP][iMult]->Fill (trk_eta[iTrk], trk_pt[iTrk], eventWeight);
-            h_fake_tracks[iWP][iMult][iEtaReco]->Fill (trk_pt[iTrk], eventWeight);
-            h2_fake_tracks[iWP][nMultBins-1]->Fill (trk_eta[iTrk], trk_pt[iTrk], eventWeight);
-            h_fake_tracks[iWP][nMultBins-1][iEtaReco]->Fill (trk_pt[iTrk], eventWeight);
+            h2_fake_tracks[iWP][iDR]->Fill (trk_eta[iTrk], trk_pt[iTrk], eventWeight);
+            h_fake_tracks[iWP][iDR][iEtaReco]->Fill (trk_pt[iTrk], eventWeight);
+            h2_fake_tracks[iWP][nDRBins-1]->Fill (trk_eta[iTrk], trk_pt[iTrk], eventWeight);
+            h_fake_tracks[iWP][nDRBins-1][iEtaReco]->Fill (trk_pt[iTrk], eventWeight);
           }
           else if (isSecondary) {
-            h2_secondary_tracks[iWP][iMult]->Fill (trk_eta[iTrk], trk_pt[iTrk], eventWeight);
-            h_secondary_tracks[iWP][iMult][iEtaReco]->Fill (trk_pt[iTrk], eventWeight);
-            h2_secondary_tracks[iWP][nMultBins-1]->Fill (trk_eta[iTrk], trk_pt[iTrk], eventWeight);
-            h_secondary_tracks[iWP][nMultBins-1][iEtaReco]->Fill (trk_pt[iTrk], eventWeight);
+            h2_secondary_tracks[iWP][iDR]->Fill (trk_eta[iTrk], trk_pt[iTrk], eventWeight);
+            h_secondary_tracks[iWP][iDR][iEtaReco]->Fill (trk_pt[iTrk], eventWeight);
+            h2_secondary_tracks[iWP][nDRBins-1]->Fill (trk_eta[iTrk], trk_pt[iTrk], eventWeight);
+            h_secondary_tracks[iWP][nDRBins-1][iEtaReco]->Fill (trk_pt[iTrk], eventWeight);
           }
           else if (isStrangeBaryon) {
-            h2_strange_tracks[iWP][iMult]->Fill (trk_eta[iTrk], trk_pt[iTrk], eventWeight);
-            h_strange_tracks[iWP][iMult][iEtaReco]->Fill (trk_pt[iTrk], eventWeight);
-            h2_strange_tracks[iWP][nMultBins-1]->Fill (trk_eta[iTrk], trk_pt[iTrk], eventWeight);
-            h_strange_tracks[iWP][nMultBins-1][iEtaReco]->Fill (trk_pt[iTrk], eventWeight);
+            h2_strange_tracks[iWP][iDR]->Fill (trk_eta[iTrk], trk_pt[iTrk], eventWeight);
+            h_strange_tracks[iWP][iDR][iEtaReco]->Fill (trk_pt[iTrk], eventWeight);
+            h2_strange_tracks[iWP][nDRBins-1]->Fill (trk_eta[iTrk], trk_pt[iTrk], eventWeight);
+            h_strange_tracks[iWP][nDRBins-1][iEtaReco]->Fill (trk_pt[iTrk], eventWeight);
           }
           else if (isPrimary) {
-            h2_primary_tracks[iWP][iMult]->Fill (trk_eta[iTrk], trk_pt[iTrk], eventWeight);
-            h_primary_tracks[iWP][iMult][iEtaReco]->Fill (trk_pt[iTrk], eventWeight);
-            h2_primary_tracks[iWP][nMultBins-1]->Fill (trk_eta[iTrk], trk_pt[iTrk], eventWeight);
-            h_primary_tracks[iWP][nMultBins-1][iEtaReco]->Fill (trk_pt[iTrk], eventWeight);
+            h2_primary_tracks[iWP][iDR]->Fill (trk_eta[iTrk], trk_pt[iTrk], eventWeight);
+            h_primary_tracks[iWP][iDR][iEtaReco]->Fill (trk_pt[iTrk], eventWeight);
+            h2_primary_tracks[iWP][nDRBins-1]->Fill (trk_eta[iTrk], trk_pt[iTrk], eventWeight);
+            h_primary_tracks[iWP][nDRBins-1][iEtaReco]->Fill (trk_pt[iTrk], eventWeight);
           }
 
-          h2_reco_tracks[iWP][iMult]->Fill (trk_eta[iTrk], trk_pt[iTrk], eventWeight);
-          h_reco_tracks[iWP][iMult][iEtaReco]->Fill (trk_pt[iTrk], eventWeight);
-          h2_reco_tracks[iWP][nMultBins-1]->Fill (trk_eta[iTrk], trk_pt[iTrk], eventWeight);
-          h_reco_tracks[iWP][nMultBins-1][iEtaReco]->Fill (trk_pt[iTrk], eventWeight);
+          h2_reco_tracks[iWP][iDR]->Fill (trk_eta[iTrk], trk_pt[iTrk], eventWeight);
+          h_reco_tracks[iWP][iDR][iEtaReco]->Fill (trk_pt[iTrk], eventWeight);
+          h2_reco_tracks[iWP][nDRBins-1]->Fill (trk_eta[iTrk], trk_pt[iTrk], eventWeight);
+          h_reco_tracks[iWP][nDRBins-1][iEtaReco]->Fill (trk_pt[iTrk], eventWeight);
 
-          h2_reco_tracks_wgt2[iWP][iMult]->Fill (trk_eta[iTrk], trk_pt[iTrk], eventWeight*eventWeight);
-          h_reco_tracks_wgt2[iWP][iMult][iEtaReco]->Fill (trk_pt[iTrk], eventWeight*eventWeight);
-          h2_reco_tracks_wgt2[iWP][nMultBins-1]->Fill (trk_eta[iTrk], trk_pt[iTrk], eventWeight*eventWeight);
-          h_reco_tracks_wgt2[iWP][nMultBins-1][iEtaReco]->Fill (trk_pt[iTrk], eventWeight*eventWeight);
+          h2_reco_tracks_wgt2[iWP][iDR]->Fill (trk_eta[iTrk], trk_pt[iTrk], eventWeight*eventWeight);
+          h_reco_tracks_wgt2[iWP][iDR][iEtaReco]->Fill (trk_pt[iTrk], eventWeight*eventWeight);
+          h2_reco_tracks_wgt2[iWP][nDRBins-1]->Fill (trk_eta[iTrk], trk_pt[iTrk], eventWeight*eventWeight);
+          h_reco_tracks_wgt2[iWP][nDRBins-1][iEtaReco]->Fill (trk_pt[iTrk], eventWeight*eventWeight);
 
         }
 
@@ -575,43 +594,44 @@ bool TrackingPerformance (const char* directory,
     h_truth_matching_prob[iWP]->Write ();
     SaferDelete (&h_truth_matching_prob[iWP]);
 
-    for (int iMult = 0; iMult < nMultBins; iMult++) {
+    //for (int iMult = 0; iMult < nMultBins; iMult++) {
+    for (int iDR = 0; iDR < nDRBins; iDR++) {
 
-      h2_fake_tracks[iWP][iMult]->Write ();
-      SaferDelete (&h2_fake_tracks[iWP][iMult]);
-      h2_secondary_tracks[iWP][iMult]->Write ();
-      SaferDelete (&h2_secondary_tracks[iWP][iMult]);
-      h2_strange_tracks[iWP][iMult]->Write ();
-      SaferDelete (&h2_strange_tracks[iWP][iMult]);
-      h2_primary_tracks[iWP][iMult]->Write ();
-      SaferDelete (&h2_primary_tracks[iWP][iMult]);
+      h2_fake_tracks[iWP][iDR]->Write ();
+      SaferDelete (&h2_fake_tracks[iWP][iDR]);
+      h2_secondary_tracks[iWP][iDR]->Write ();
+      SaferDelete (&h2_secondary_tracks[iWP][iDR]);
+      h2_strange_tracks[iWP][iDR]->Write ();
+      SaferDelete (&h2_strange_tracks[iWP][iDR]);
+      h2_primary_tracks[iWP][iDR]->Write ();
+      SaferDelete (&h2_primary_tracks[iWP][iDR]);
 
-      h2_reco_tracks[iWP][iMult]->Write ();
-      SaferDelete (&h2_reco_tracks[iWP][iMult]);
+      h2_reco_tracks[iWP][iDR]->Write ();
+      SaferDelete (&h2_reco_tracks[iWP][iDR]);
 
-      h2_reco_tracks_wgt2[iWP][iMult]->Write ();
-      SaferDelete (&h2_reco_tracks_wgt2[iWP][iMult]);
+      h2_reco_tracks_wgt2[iWP][iDR]->Write ();
+      SaferDelete (&h2_reco_tracks_wgt2[iWP][iDR]);
 
       for (int iEta = 0; iEta < nEtaTrkBins; iEta++) {
 
-        h_fake_tracks[iWP][iMult][iEta]->Write ();
-        SaferDelete (&h_fake_tracks[iWP][iMult][iEta]);
-        h_secondary_tracks[iWP][iMult][iEta]->Write ();
-        SaferDelete (&h_secondary_tracks[iWP][iMult][iEta]);
-        h_strange_tracks[iWP][iMult][iEta]->Write ();
-        SaferDelete (&h_strange_tracks[iWP][iMult][iEta]);
-        h_primary_tracks[iWP][iMult][iEta]->Write ();
-        SaferDelete (&h_primary_tracks[iWP][iMult][iEta]);
+        h_fake_tracks[iWP][iDR][iEta]->Write ();
+        SaferDelete (&h_fake_tracks[iWP][iDR][iEta]);
+        h_secondary_tracks[iWP][iDR][iEta]->Write ();
+        SaferDelete (&h_secondary_tracks[iWP][iDR][iEta]);
+        h_strange_tracks[iWP][iDR][iEta]->Write ();
+        SaferDelete (&h_strange_tracks[iWP][iDR][iEta]);
+        h_primary_tracks[iWP][iDR][iEta]->Write ();
+        SaferDelete (&h_primary_tracks[iWP][iDR][iEta]);
 
-        h_reco_tracks[iWP][iMult][iEta]->Write ();
-        SaferDelete (&h_reco_tracks[iWP][iMult][iEta]);
+        h_reco_tracks[iWP][iDR][iEta]->Write ();
+        SaferDelete (&h_reco_tracks[iWP][iDR][iEta]);
 
-        h_reco_tracks_wgt2[iWP][iMult][iEta]->Write ();
-        SaferDelete (&h_reco_tracks_wgt2[iWP][iMult][iEta]);
+        h_reco_tracks_wgt2[iWP][iDR][iEta]->Write ();
+        SaferDelete (&h_reco_tracks_wgt2[iWP][iDR][iEta]);
 
       } // end loop over iEta
 
-    } // end loop over iMult
+    } // end loop over iDR
 
   } // end loop over iWP
 

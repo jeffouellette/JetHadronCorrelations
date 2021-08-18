@@ -226,6 +226,10 @@ bool JetEnergyResolution (const char* directory,
   TH1D**** h_jes      = Get3DArray <TH1D*> (nRadii, nPtJBins, nFinerEtaBins);
   TH1D**** h_jetacorr = Get3DArray <TH1D*> (nRadii, nPtJBins, nFinerEtaBins);
 
+  TH2D** h2_jet_ptreco_pttruth  = Get1DArray <TH2D*> (nRadii);
+  TH2D** h2_jet_ereco_etruth    = Get1DArray <TH2D*> (nRadii);
+
+
   for (int iR = 0; iR < nRadii; iR++) {
 
     const int r = (radii[iR] == JetRadius::R0p4 ? 4 : 2);
@@ -244,6 +248,11 @@ bool JetEnergyResolution (const char* directory,
       } // end loop over iEta
 
     } // end loop over iPtJ
+
+    h2_jet_ptreco_pttruth[iR] = new TH2D (Form ("h2_r%i_jet_ptreco_pttruth_%s", r, sys.Data ()), ";#it{p}_{T}^{truth} [GeV];#it{p}_{T}^{reco} [GeV];Counts", nPtJBins, pTJBins, nPtJBins, pTJBins);
+    h2_jet_ptreco_pttruth[iR]->Sumw2 ();
+    h2_jet_ereco_etruth[iR] = new TH2D (Form ("h2_r%i_jet_ereco_etruth_%s", r, sys.Data ()), ";#it{E}_{truth} [GeV];#it{E}_{reco} [GeV];Counts", nPtJBins, pTJBins, nPtJBins, pTJBins);
+    h2_jet_ereco_etruth[iR]->Sumw2 ();
 
   } // end loop over iR
 
@@ -290,9 +299,9 @@ bool JetEnergyResolution (const char* directory,
     }
 
 
-    const double eventWeight = 1;
+    //const double eventWeight = 1;
     // JZ weighting scheme: sigma * eff * L_int / N_evt
-    //const double eventWeight = (IsHijing () ? 1 : mcEventWeights->at (0) * crossSectionPicoBarns * mcFilterEfficiency * GetJetLuminosity () / mcNumberEvents);
+    const double eventWeight = (IsHijing () ? 1 : mcEventWeights->at (0) * crossSectionPicoBarns * mcFilterEfficiency * GetJetLuminosity () / mcNumberEvents);
 
 
     // Fill histograms for all jet radii
@@ -336,6 +345,9 @@ bool JetEnergyResolution (const char* directory,
         if (jpt / tjpt < 0.4 && GetAktHIJetPt (iJet, radius, -1, 2) < 15)
           continue; // cut out very low pT jets (before calibration), except in cases with a correspondingly low pT truth match.
 
+        h2_jet_ptreco_pttruth[iR]->Fill (tjpt, jpt, eventWeight);
+        h2_jet_ereco_etruth[iR]->Fill (tjen, jen, eventWeight);
+
         short iPtJ = -1;
         if (pTJBins[0] <= tjpt) {
           iPtJ = 0;
@@ -349,9 +361,9 @@ bool JetEnergyResolution (const char* directory,
         }
 
         if (iPtJ >= 0 && iPtJ < nPtJBins && iEta >= 0 && iEta < nFinerEtaBins) {
-          h_jpts[iR][iPtJ][iEta]->Fill (jpt / tjpt, eventWeight);
-          h_jes[iR][iPtJ][iEta]->Fill (jen / tjen, eventWeight);
-          h_jetacorr[iR][iPtJ][iEta]->Fill (jeta - tjeta, eventWeight);
+          h_jpts[iR][iPtJ][iEta]->Fill (jpt / tjpt);
+          h_jes[iR][iPtJ][iEta]->Fill (jen / tjen);
+          h_jetacorr[iR][iPtJ][iEta]->Fill (jeta - tjeta);
         }
 
       } // end loop over jets
@@ -402,9 +414,9 @@ bool JetEnergyResolution (const char* directory,
         }
 
         if (iPtJ >= 0 && iPtJ < nPtJBins && iEta >= 0 && iEta < nFinerEtaBins) {
-          h_jpts[iR][iPtJ][iEta]->Fill (jpt / tjpt, eventWeight);
-          h_jes[iR][iPtJ][iEta]->Fill (jen / tjen, eventWeight);
-          h_jetacorr[iR][iPtJ][iEta]->Fill (jeta - tjeta, eventWeight);
+          h_jpts[iR][iPtJ][iEta]->Fill (jpt / tjpt);
+          h_jes[iR][iPtJ][iEta]->Fill (jen / tjen);
+          h_jetacorr[iR][iPtJ][iEta]->Fill (jeta - tjeta);
         }
 
       } // end loop over jets
@@ -438,6 +450,11 @@ bool JetEnergyResolution (const char* directory,
       } // end loop over iEta
 
     } // end loop over iPtJ
+
+    h2_jet_ptreco_pttruth[iR]->Write ();
+    SaferDelete (&(h2_jet_ptreco_pttruth[iR]));
+    h2_jet_ereco_etruth[iR]->Write ();
+    SaferDelete (&(h2_jet_ereco_etruth[iR]));
 
   } // end loop over iR
 

@@ -570,10 +570,7 @@ const static int nJERSys = 10;
 // Anti-kT R=0.2 HI Jets info
 const static int max_akt2_hi_jet_n = 40;
 int akt2_hi_jet_n;
-float akt2_hi_jet_pt[max_akt2_hi_jet_n];
-float akt2_hi_jet_eta[max_akt2_hi_jet_n];
 float akt2_hi_jet_phi[max_akt2_hi_jet_n];
-float akt2_hi_jet_e[max_akt2_hi_jet_n];
 float akt2_hi_jet_pt_precalib[max_akt2_hi_jet_n];
 float akt2_hi_jet_eta_precalib[max_akt2_hi_jet_n];
 float akt2_hi_jet_e_precalib[max_akt2_hi_jet_n];
@@ -593,10 +590,7 @@ float akt2_hi_jet_timing[max_akt2_hi_jet_n];
 // Anti-kT R=0.4 HI Jets info
 const static int max_akt4_hi_jet_n = 40;
 int akt4_hi_jet_n;
-float akt4_hi_jet_pt[max_akt4_hi_jet_n];
-float akt4_hi_jet_eta[max_akt4_hi_jet_n];
 float akt4_hi_jet_phi[max_akt4_hi_jet_n];
-float akt4_hi_jet_e[max_akt4_hi_jet_n];
 float akt4_hi_jet_pt_precalib[max_akt4_hi_jet_n];
 float akt4_hi_jet_eta_precalib[max_akt4_hi_jet_n];
 float akt4_hi_jet_e_precalib[max_akt4_hi_jet_n];

@@ -18,52 +18,52 @@ mixGridPass=040
 #minjpt=30
 maxjpt=0
 
-# Systematic config; Nominal, JESVar0, JESVar1,..., JESVar15, (don't run 16!), JESVar17, JESVar18, JESVar19, MixVar1, MixVar2, MixVar3, FcalCentVar (at the moment)
+# Systematic config; Nominal, JESVar0, JESVar1,..., JESVar15, (don't run 16!), JESVar17, JESVar18, JESVar19, MixVar1, MixVar2, MixVar3, MixVar4, MixVar5, FcalCentVar (at the moment)
 #syst=None
 
 
-## pp dijet MC (low pThat)
-#Arguments = mc_$(gridPass) $(minjpt)GeVJets_mixed_mc17 $(minjpt) $(maxjpt) pp17_5TeV MCSignal None $(syst) ./rootFiles/Histograms/$(minjpt)GeVJets/MixedHists/$(syst)/pp17_JZ0_hists.root user.jeouelle.$(swVersion).hadrons.$(gridPass).mc16_5TeV.pp.420010.JZ0R04.recon.AOD.e4108_s3238_r11199_Tree.root data_$(mixGridPass) user.jeouelle.$(swVersion).hadrons.$(mixGridPass).data17_5TeV.00*.physics_MinBias.merge.AOD.r11215_p3764_Tree.root
-#Error = run/errors/$(minjpt)GeVJets_MixedHists_pp17_JZ0_$(syst).err
-#Log = /tmp/jeff/logs/$(minjpt)GeVJets_MixedHists_pp17_JZ0_$(syst).log
-#Output = run/outputs/$(minjpt)GeVJets_MixedHists_pp17_JZ0_$(syst).out
-#Queue 1
-#
-#Arguments = mc_$(gridPass) $(minjpt)GeVJets_mixed_mc17 $(minjpt) $(maxjpt) pp17_5TeV MCSignal None $(syst) ./rootFiles/Histograms/$(minjpt)GeVJets/MixedHists/$(syst)/pp17_JZ1_a_hists.root user.jeouelle.$(swVersion).hadrons.$(gridPass).mc16_5TeV.pp.420011.JZ1R04.recon.AOD.e4108_s3238_r11199_Tree.root data_$(mixGridPass) user.jeouelle.$(swVersion).hadrons.$(mixGridPass).data17_5TeV.00*.physics_MinBias.merge.AOD.r11215_p3764_Tree.root
-#Error = run/errors/$(minjpt)GeVJets_MixedHists_pp17_JZ1_a_$(syst).err
-#Log = /tmp/jeff/logs/$(minjpt)GeVJets_MixedHists_pp17_JZ1_a_$(syst).log
-#Output = run/outputs/$(minjpt)GeVJets_MixedHists_pp17_JZ1_a_$(syst).out
-#Queue 1
-#
-#Arguments = mc_$(gridPass) $(minjpt)GeVJets_mixed_mc17 $(minjpt) $(maxjpt) pp17_5TeV MCSignal None $(syst) ./rootFiles/Histograms/$(minjpt)GeVJets/MixedHists/$(syst)/pp17_JZ1_b_hists.root user.jeouelle.$(swVersion).hadrons.$(gridPass).mc16_5TeV.pp.420011.JZ1R04.recon.AOD.e6608_s3238_r11199_Tree.root data_$(mixGridPass) user.jeouelle.$(swVersion).hadrons.$(mixGridPass).data17_5TeV.00*.physics_MinBias.merge.AOD.r11215_p3764_Tree.root
-#Error = run/errors/$(minjpt)GeVJets_MixedHists_pp17_JZ1_b_$(syst).err
-#Log = /tmp/jeff/logs/$(minjpt)GeVJets_MixedHists_pp17_JZ1_b_$(syst).log
-#Output = run/outputs/$(minjpt)GeVJets_MixedHists_pp17_JZ1_b_$(syst).out
-#Queue 1
-#
-#Arguments = mc_$(gridPass) $(minjpt)GeVJets_mixed_mc17 $(minjpt) $(maxjpt) pp17_5TeV MCSignal None $(syst) ./rootFiles/Histograms/$(minjpt)GeVJets/MixedHists/$(syst)/pp17_JZ2_a_hists.root user.jeouelle.$(swVersion).hadrons.$(gridPass).mc16_5TeV.pp.420012.JZ2R04.recon.AOD.e4108_s3238_r11199_Tree.root data_$(mixGridPass) user.jeouelle.$(swVersion).hadrons.$(mixGridPass).data17_5TeV.00*.physics_MinBias.merge.AOD.r11215_p3764_Tree.root
-#Error = run/errors/$(minjpt)GeVJets_MixedHists_pp17_JZ2_a_$(syst).err
-#Log = /tmp/jeff/logs/$(minjpt)GeVJets_MixedHists_pp17_JZ2_a_$(syst).log
-#Output = run/outputs/$(minjpt)GeVJets_MixedHists_pp17_JZ2_a_$(syst).out
-#Queue 1
-#
-#Arguments = mc_$(gridPass) $(minjpt)GeVJets_mixed_mc17 $(minjpt) $(maxjpt) pp17_5TeV MCSignal None $(syst) ./rootFiles/Histograms/$(minjpt)GeVJets/MixedHists/$(syst)/pp17_JZ2_b_hists.root user.jeouelle.$(swVersion).hadrons.$(gridPass).mc16_5TeV.pp.420012.JZ2R04.recon.AOD.e6608_s3238_r11199_Tree.root data_$(mixGridPass) user.jeouelle.$(swVersion).hadrons.$(mixGridPass).data17_5TeV.00*.physics_MinBias.merge.AOD.r11215_p3764_Tree.root
-#Error = run/errors/$(minjpt)GeVJets_MixedHists_pp17_JZ2_b_$(syst).err
-#Log = /tmp/jeff/logs/$(minjpt)GeVJets_MixedHists_pp17_JZ2_b_$(syst).log
-#Output = run/outputs/$(minjpt)GeVJets_MixedHists_pp17_JZ2_b_$(syst).out
-#Queue 1
-#
-#Arguments = mc_$(gridPass) $(minjpt)GeVJets_mixed_mc17 $(minjpt) $(maxjpt) pp17_5TeV MCSignal None $(syst) ./rootFiles/Histograms/$(minjpt)GeVJets/MixedHists/$(syst)/pp17_JZ3_a_hists.root user.jeouelle.$(swVersion).hadrons.$(gridPass).mc16_5TeV.pp.420013.JZ3R04.recon.AOD.e4108_s3238_r11199_Tree.root data_$(mixGridPass) user.jeouelle.$(swVersion).hadrons.$(mixGridPass).data17_5TeV.00*.physics_MinBias.merge.AOD.r11215_p3764_Tree.root
-#Error = run/errors/$(minjpt)GeVJets_MixedHists_pp17_JZ3_a_$(syst).err
-#Log = /tmp/jeff/logs/$(minjpt)GeVJets_MixedHists_pp17_JZ3_a_$(syst).log
-#Output = run/outputs/$(minjpt)GeVJets_MixedHists_pp17_JZ3_a_$(syst).out
-#Queue 1
-#
-#Arguments = mc_$(gridPass) $(minjpt)GeVJets_mixed_mc17 $(minjpt) $(maxjpt) pp17_5TeV MCSignal None $(syst) ./rootFiles/Histograms/$(minjpt)GeVJets/MixedHists/$(syst)/pp17_JZ3_b_hists.root user.jeouelle.$(swVersion).hadrons.$(gridPass).mc16_5TeV.pp.420013.JZ3R04.recon.AOD.e6608_s3238_r11199_Tree.root data_$(mixGridPass) user.jeouelle.$(swVersion).hadrons.$(mixGridPass).data17_5TeV.00*.physics_MinBias.merge.AOD.r11215_p3764_Tree.root
-#Error = run/errors/$(minjpt)GeVJets_MixedHists_pp17_JZ3_b_$(syst).err
-#Log = /tmp/jeff/logs/$(minjpt)GeVJets_MixedHists_pp17_JZ3_b_$(syst).log
-#Output = run/outputs/$(minjpt)GeVJets_MixedHists_pp17_JZ3_b_$(syst).out
-#Queue 1
+# pp dijet MC (low pThat)
+Arguments = mc_$(gridPass) $(minjpt)GeVJets_mixed_mc17 $(minjpt) $(maxjpt) pp17_5TeV MCSignal None $(syst) ./rootFiles/Histograms/$(minjpt)GeVJets/MixedHists/$(syst)/pp17_JZ0_hists.root user.jeouelle.$(swVersion).hadrons.$(gridPass).mc16_5TeV.pp.420010.JZ0R04.recon.AOD.e4108_s3238_r11199_Tree.root data_$(mixGridPass) user.jeouelle.$(swVersion).hadrons.$(mixGridPass).data17_5TeV.00*.physics_MinBias.merge.AOD.r11215_p3764_Tree.root
+Error = run/errors/$(minjpt)GeVJets_MixedHists_pp17_JZ0_$(syst).err
+Log = /tmp/jeff/logs/$(minjpt)GeVJets_MixedHists_pp17_JZ0_$(syst).log
+Output = run/outputs/$(minjpt)GeVJets_MixedHists_pp17_JZ0_$(syst).out
+Queue 1
+
+Arguments = mc_$(gridPass) $(minjpt)GeVJets_mixed_mc17 $(minjpt) $(maxjpt) pp17_5TeV MCSignal None $(syst) ./rootFiles/Histograms/$(minjpt)GeVJets/MixedHists/$(syst)/pp17_JZ1_a_hists.root user.jeouelle.$(swVersion).hadrons.$(gridPass).mc16_5TeV.pp.420011.JZ1R04.recon.AOD.e4108_s3238_r11199_Tree.root data_$(mixGridPass) user.jeouelle.$(swVersion).hadrons.$(mixGridPass).data17_5TeV.00*.physics_MinBias.merge.AOD.r11215_p3764_Tree.root
+Error = run/errors/$(minjpt)GeVJets_MixedHists_pp17_JZ1_a_$(syst).err
+Log = /tmp/jeff/logs/$(minjpt)GeVJets_MixedHists_pp17_JZ1_a_$(syst).log
+Output = run/outputs/$(minjpt)GeVJets_MixedHists_pp17_JZ1_a_$(syst).out
+Queue 1
+
+Arguments = mc_$(gridPass) $(minjpt)GeVJets_mixed_mc17 $(minjpt) $(maxjpt) pp17_5TeV MCSignal None $(syst) ./rootFiles/Histograms/$(minjpt)GeVJets/MixedHists/$(syst)/pp17_JZ1_b_hists.root user.jeouelle.$(swVersion).hadrons.$(gridPass).mc16_5TeV.pp.420011.JZ1R04.recon.AOD.e6608_s3238_r11199_Tree.root data_$(mixGridPass) user.jeouelle.$(swVersion).hadrons.$(mixGridPass).data17_5TeV.00*.physics_MinBias.merge.AOD.r11215_p3764_Tree.root
+Error = run/errors/$(minjpt)GeVJets_MixedHists_pp17_JZ1_b_$(syst).err
+Log = /tmp/jeff/logs/$(minjpt)GeVJets_MixedHists_pp17_JZ1_b_$(syst).log
+Output = run/outputs/$(minjpt)GeVJets_MixedHists_pp17_JZ1_b_$(syst).out
+Queue 1
+
+Arguments = mc_$(gridPass) $(minjpt)GeVJets_mixed_mc17 $(minjpt) $(maxjpt) pp17_5TeV MCSignal None $(syst) ./rootFiles/Histograms/$(minjpt)GeVJets/MixedHists/$(syst)/pp17_JZ2_a_hists.root user.jeouelle.$(swVersion).hadrons.$(gridPass).mc16_5TeV.pp.420012.JZ2R04.recon.AOD.e4108_s3238_r11199_Tree.root data_$(mixGridPass) user.jeouelle.$(swVersion).hadrons.$(mixGridPass).data17_5TeV.00*.physics_MinBias.merge.AOD.r11215_p3764_Tree.root
+Error = run/errors/$(minjpt)GeVJets_MixedHists_pp17_JZ2_a_$(syst).err
+Log = /tmp/jeff/logs/$(minjpt)GeVJets_MixedHists_pp17_JZ2_a_$(syst).log
+Output = run/outputs/$(minjpt)GeVJets_MixedHists_pp17_JZ2_a_$(syst).out
+Queue 1
+
+Arguments = mc_$(gridPass) $(minjpt)GeVJets_mixed_mc17 $(minjpt) $(maxjpt) pp17_5TeV MCSignal None $(syst) ./rootFiles/Histograms/$(minjpt)GeVJets/MixedHists/$(syst)/pp17_JZ2_b_hists.root user.jeouelle.$(swVersion).hadrons.$(gridPass).mc16_5TeV.pp.420012.JZ2R04.recon.AOD.e6608_s3238_r11199_Tree.root data_$(mixGridPass) user.jeouelle.$(swVersion).hadrons.$(mixGridPass).data17_5TeV.00*.physics_MinBias.merge.AOD.r11215_p3764_Tree.root
+Error = run/errors/$(minjpt)GeVJets_MixedHists_pp17_JZ2_b_$(syst).err
+Log = /tmp/jeff/logs/$(minjpt)GeVJets_MixedHists_pp17_JZ2_b_$(syst).log
+Output = run/outputs/$(minjpt)GeVJets_MixedHists_pp17_JZ2_b_$(syst).out
+Queue 1
+
+Arguments = mc_$(gridPass) $(minjpt)GeVJets_mixed_mc17 $(minjpt) $(maxjpt) pp17_5TeV MCSignal None $(syst) ./rootFiles/Histograms/$(minjpt)GeVJets/MixedHists/$(syst)/pp17_JZ3_a_hists.root user.jeouelle.$(swVersion).hadrons.$(gridPass).mc16_5TeV.pp.420013.JZ3R04.recon.AOD.e4108_s3238_r11199_Tree.root data_$(mixGridPass) user.jeouelle.$(swVersion).hadrons.$(mixGridPass).data17_5TeV.00*.physics_MinBias.merge.AOD.r11215_p3764_Tree.root
+Error = run/errors/$(minjpt)GeVJets_MixedHists_pp17_JZ3_a_$(syst).err
+Log = /tmp/jeff/logs/$(minjpt)GeVJets_MixedHists_pp17_JZ3_a_$(syst).log
+Output = run/outputs/$(minjpt)GeVJets_MixedHists_pp17_JZ3_a_$(syst).out
+Queue 1
+
+Arguments = mc_$(gridPass) $(minjpt)GeVJets_mixed_mc17 $(minjpt) $(maxjpt) pp17_5TeV MCSignal None $(syst) ./rootFiles/Histograms/$(minjpt)GeVJets/MixedHists/$(syst)/pp17_JZ3_b_hists.root user.jeouelle.$(swVersion).hadrons.$(gridPass).mc16_5TeV.pp.420013.JZ3R04.recon.AOD.e6608_s3238_r11199_Tree.root data_$(mixGridPass) user.jeouelle.$(swVersion).hadrons.$(mixGridPass).data17_5TeV.00*.physics_MinBias.merge.AOD.r11215_p3764_Tree.root
+Error = run/errors/$(minjpt)GeVJets_MixedHists_pp17_JZ3_b_$(syst).err
+Log = /tmp/jeff/logs/$(minjpt)GeVJets_MixedHists_pp17_JZ3_b_$(syst).log
+Output = run/outputs/$(minjpt)GeVJets_MixedHists_pp17_JZ3_b_$(syst).out
+Queue 1
 
 
 ## pp dijet MC (high pThat)

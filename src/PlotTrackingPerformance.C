@@ -145,19 +145,19 @@ void PlotTrackingPerformance () {
 
   TH2D***** h2_efficiency                   = Get4DArray <TH2D*> (nSystems, nPIDs, trackWPs.size (), nMultBins);
 
-  TH2D**** h2_fake_tracks               = Get3DArray <TH2D*> (nSystems, trackWPs.size (), nMultBins);
-  TH2D**** h2_secondary_tracks          = Get3DArray <TH2D*> (nSystems, trackWPs.size (), nMultBins);
-  TH2D**** h2_strange_tracks            = Get3DArray <TH2D*> (nSystems, trackWPs.size (), nMultBins);
-  TH2D**** h2_primary_tracks            = Get3DArray <TH2D*> (nSystems, trackWPs.size (), nMultBins);
-  TH2D**** h2_primary_tracks_fakes_p100 = Get3DArray <TH2D*> (nSystems, trackWPs.size (), nMultBins);
-  TH2D**** h2_reco_tracks               = Get3DArray <TH2D*> (nSystems, trackWPs.size (), nMultBins);
-  TH2D**** h2_reco_tracks_wgt2          = Get3DArray <TH2D*> (nSystems, trackWPs.size (), nMultBins);
+  TH2D**** h2_fake_tracks               = Get3DArray <TH2D*> (nSystems, trackWPs.size (), nDRBins);
+  TH2D**** h2_secondary_tracks          = Get3DArray <TH2D*> (nSystems, trackWPs.size (), nDRBins);
+  TH2D**** h2_strange_tracks            = Get3DArray <TH2D*> (nSystems, trackWPs.size (), nDRBins);
+  TH2D**** h2_primary_tracks            = Get3DArray <TH2D*> (nSystems, trackWPs.size (), nDRBins);
+  TH2D**** h2_primary_tracks_fakes_p100 = Get3DArray <TH2D*> (nSystems, trackWPs.size (), nDRBins);
+  TH2D**** h2_reco_tracks               = Get3DArray <TH2D*> (nSystems, trackWPs.size (), nDRBins);
+  TH2D**** h2_reco_tracks_wgt2          = Get3DArray <TH2D*> (nSystems, trackWPs.size (), nDRBins);
 
-  TH2D**** h2_fake_rate                 = Get3DArray <TH2D*> (nSystems, trackWPs.size (), nMultBins);
-  TH2D**** h2_secondary_rate            = Get3DArray <TH2D*> (nSystems, trackWPs.size (), nMultBins);
-  TH2D**** h2_strange_rate              = Get3DArray <TH2D*> (nSystems, trackWPs.size (), nMultBins);
-  TH2D**** h2_primary_rate              = Get3DArray <TH2D*> (nSystems, trackWPs.size (), nMultBins);
-  TH2D**** h2_primary_rate_fakes_p100   = Get3DArray <TH2D*> (nSystems, trackWPs.size (), nMultBins);
+  TH2D**** h2_fake_rate                 = Get3DArray <TH2D*> (nSystems, trackWPs.size (), nDRBins);
+  TH2D**** h2_secondary_rate            = Get3DArray <TH2D*> (nSystems, trackWPs.size (), nDRBins);
+  TH2D**** h2_strange_rate              = Get3DArray <TH2D*> (nSystems, trackWPs.size (), nDRBins);
+  TH2D**** h2_primary_rate              = Get3DArray <TH2D*> (nSystems, trackWPs.size (), nDRBins);
+  TH2D**** h2_primary_rate_fakes_p100   = Get3DArray <TH2D*> (nSystems, trackWPs.size (), nDRBins);
 
 
   TH1D****** h_truth_matched_primary_tracks  = Get5DArray <TH1D*> (nSystems, nPIDs, trackWPs.size (), nMultBins, nEtaTrkBins);
@@ -166,22 +166,22 @@ void PlotTrackingPerformance () {
 
   TH1D****** h_efficiency                    = Get5DArray <TH1D*> (nSystems, nPIDs, trackWPs.size (), nMultBins, nEtaTrkBins);
 
-  TH1D***** h_fake_tracks               = Get4DArray <TH1D*> (nSystems, trackWPs.size (), nMultBins, nEtaTrkBins);
-  TH1D***** h_secondary_tracks          = Get4DArray <TH1D*> (nSystems, trackWPs.size (), nMultBins, nEtaTrkBins);
-  TH1D***** h_strange_tracks            = Get4DArray <TH1D*> (nSystems, trackWPs.size (), nMultBins, nEtaTrkBins);
-  TH1D***** h_primary_tracks            = Get4DArray <TH1D*> (nSystems, trackWPs.size (), nMultBins, nEtaTrkBins);
-  TH1D***** h_primary_tracks_fakes_p100 = Get4DArray <TH1D*> (nSystems, trackWPs.size (), nMultBins, nEtaTrkBins);
-  TH1D***** h_reco_tracks               = Get4DArray <TH1D*> (nSystems, trackWPs.size (), nMultBins, nEtaTrkBins);
-  TH1D***** h_reco_tracks_wgt2          = Get4DArray <TH1D*> (nSystems, trackWPs.size (), nMultBins, nEtaTrkBins);
+  TH1D***** h_fake_tracks               = Get4DArray <TH1D*> (nSystems, trackWPs.size (), nDRBins, nEtaTrkBins);
+  TH1D***** h_secondary_tracks          = Get4DArray <TH1D*> (nSystems, trackWPs.size (), nDRBins, nEtaTrkBins);
+  TH1D***** h_strange_tracks            = Get4DArray <TH1D*> (nSystems, trackWPs.size (), nDRBins, nEtaTrkBins);
+  TH1D***** h_primary_tracks            = Get4DArray <TH1D*> (nSystems, trackWPs.size (), nDRBins, nEtaTrkBins);
+  TH1D***** h_primary_tracks_fakes_p100 = Get4DArray <TH1D*> (nSystems, trackWPs.size (), nDRBins, nEtaTrkBins);
+  TH1D***** h_reco_tracks               = Get4DArray <TH1D*> (nSystems, trackWPs.size (), nDRBins, nEtaTrkBins);
+  TH1D***** h_reco_tracks_wgt2          = Get4DArray <TH1D*> (nSystems, trackWPs.size (), nDRBins, nEtaTrkBins);
 
-  TH1D***** h_fake_rate                 = Get4DArray <TH1D*> (nSystems, trackWPs.size (), nMultBins, nEtaTrkBins);
-  TH1D***** h_secondary_rate            = Get4DArray <TH1D*> (nSystems, trackWPs.size (), nMultBins, nEtaTrkBins);
-  TH1D***** h_strange_rate              = Get4DArray <TH1D*> (nSystems, trackWPs.size (), nMultBins, nEtaTrkBins);
-  TH1D***** h_primary_rate              = Get4DArray <TH1D*> (nSystems, trackWPs.size (), nMultBins, nEtaTrkBins);
-  TH1D***** h_primary_rate_fakes_p100   = Get4DArray <TH1D*> (nSystems, trackWPs.size (), nMultBins, nEtaTrkBins);
+  TH1D***** h_fake_rate                 = Get4DArray <TH1D*> (nSystems, trackWPs.size (), nDRBins, nEtaTrkBins);
+  TH1D***** h_secondary_rate            = Get4DArray <TH1D*> (nSystems, trackWPs.size (), nDRBins, nEtaTrkBins);
+  TH1D***** h_strange_rate              = Get4DArray <TH1D*> (nSystems, trackWPs.size (), nDRBins, nEtaTrkBins);
+  TH1D***** h_primary_rate              = Get4DArray <TH1D*> (nSystems, trackWPs.size (), nDRBins, nEtaTrkBins);
+  TH1D***** h_primary_rate_fakes_p100   = Get4DArray <TH1D*> (nSystems, trackWPs.size (), nDRBins, nEtaTrkBins);
 
-  TF1***** f_primary_rate               = Get4DArray <TF1*> (nSystems, trackWPs.size (), nMultBins, nEtaTrkBins);
-  TF1***** f_primary_rate_fakes_p100    = Get4DArray <TF1*> (nSystems, trackWPs.size (), nMultBins, nEtaTrkBins);
+  TF1***** f_primary_rate               = Get4DArray <TF1*> (nSystems, trackWPs.size (), nDRBins, nEtaTrkBins);
+  TF1***** f_primary_rate_fakes_p100    = Get4DArray <TF1*> (nSystems, trackWPs.size (), nDRBins, nEtaTrkBins);
 
 
   TFile* inFile = new TFile (Form ("%s/TrackingPerformance/Nominal/outFile.root", rootPath.Data ()), "read");
@@ -259,54 +259,55 @@ void PlotTrackingPerformance () {
 
       h_truth_matching_prob[iSys][iWP] = (TH1D*) inFile->Get (Form ("h_truth_matching_prob_%s_%s", sys.Data (), trackWPNames[iWP].c_str ()));
 
-      for (int iMult = 0; iMult < nMultBins; iMult++) {
+      //for (int iMult = 0; iMult < nMultBins; iMult++) {
+      for (int iDR = 0; iDR < nDRBins; iDR++) {
 
-        h2_fake_tracks[iSys][iWP][iMult] = (TH2D*) inFile->Get (Form ("h2_fake_tracks_%s_%s_iMult%i", sys.Data (), trackWPNames[iWP].c_str (), iMult));
-        h2_secondary_tracks[iSys][iWP][iMult] = (TH2D*) inFile->Get (Form ("h2_secondary_tracks_%s_%s_iMult%i", sys.Data (), trackWPNames[iWP].c_str (), iMult));
-        h2_strange_tracks[iSys][iWP][iMult] = (TH2D*) inFile->Get (Form ("h2_strange_tracks_%s_%s_iMult%i", sys.Data (), trackWPNames[iWP].c_str (), iMult));
-        //h2_primary_tracks[iSys][iWP][iMult] = (TH2D*) inFile->Get (Form ("h2_primary_tracks_%s_%s_iMult%i", sys.Data (), trackWPNames[iWP].c_str (), iMult));
+        h2_fake_tracks[iSys][iWP][iDR] = (TH2D*) inFile->Get (Form ("h2_fake_tracks_%s_%s_iDR%i", sys.Data (), trackWPNames[iWP].c_str (), iDR));
+        h2_secondary_tracks[iSys][iWP][iDR] = (TH2D*) inFile->Get (Form ("h2_secondary_tracks_%s_%s_iDR%i", sys.Data (), trackWPNames[iWP].c_str (), iDR));
+        h2_strange_tracks[iSys][iWP][iDR] = (TH2D*) inFile->Get (Form ("h2_strange_tracks_%s_%s_iDR%i", sys.Data (), trackWPNames[iWP].c_str (), iDR));
+        //h2_primary_tracks[iSys][iWP][iDR] = (TH2D*) inFile->Get (Form ("h2_primary_tracks_%s_%s_iDR%i", sys.Data (), trackWPNames[iWP].c_str (), iDR));
 
-        h2_reco_tracks[iSys][iWP][iMult] = (TH2D*) inFile->Get (Form ("h2_reco_tracks_%s_%s_iMult%i", sys.Data (), trackWPNames[iWP].c_str (), iMult));
-        h2_reco_tracks_wgt2[iSys][iWP][iMult] = (TH2D*) inFile->Get (Form ("h2_reco_tracks_wgt2_%s_%s_iMult%i", sys.Data (), trackWPNames[iWP].c_str (), iMult));
+        h2_reco_tracks[iSys][iWP][iDR] = (TH2D*) inFile->Get (Form ("h2_reco_tracks_%s_%s_iDR%i", sys.Data (), trackWPNames[iWP].c_str (), iDR));
+        h2_reco_tracks_wgt2[iSys][iWP][iDR] = (TH2D*) inFile->Get (Form ("h2_reco_tracks_wgt2_%s_%s_iDR%i", sys.Data (), trackWPNames[iWP].c_str (), iDR));
 
-        h2_primary_tracks[iSys][iWP][iMult] = (TH2D*) h2_reco_tracks[iSys][iWP][iMult]->Clone (Form ("h2_primary_tracks_%s_%s_iMult%i", sys.Data (), trackWPNames[iWP].c_str (), iMult));
-        h2_primary_tracks[iSys][iWP][iMult]->Add (h2_fake_tracks[iSys][iWP][iMult], -1);
-        h2_primary_tracks[iSys][iWP][iMult]->Add (h2_secondary_tracks[iSys][iWP][iMult], -1);
+        h2_primary_tracks[iSys][iWP][iDR] = (TH2D*) h2_reco_tracks[iSys][iWP][iDR]->Clone (Form ("h2_primary_tracks_%s_%s_iDR%i", sys.Data (), trackWPNames[iWP].c_str (), iDR));
+        h2_primary_tracks[iSys][iWP][iDR]->Add (h2_fake_tracks[iSys][iWP][iDR], -1);
+        h2_primary_tracks[iSys][iWP][iDR]->Add (h2_secondary_tracks[iSys][iWP][iDR], -1);
 
-        h2_primary_tracks_fakes_p100[iSys][iWP][iMult] = (TH2D*) h2_reco_tracks[iSys][iWP][iMult]->Clone (Form ("h2_primary_tracks_fakes_p100_%s_%s_iMult%i", sys.Data (), trackWPNames[iWP].c_str (), iMult));
-        h2_primary_tracks_fakes_p100[iSys][iWP][iMult]->Add (h2_fake_tracks[iSys][iWP][iMult], -2); // 100% increase of fake rate for systematics
-        h2_primary_tracks_fakes_p100[iSys][iWP][iMult]->Add (h2_secondary_tracks[iSys][iWP][iMult], -1);
+        h2_primary_tracks_fakes_p100[iSys][iWP][iDR] = (TH2D*) h2_reco_tracks[iSys][iWP][iDR]->Clone (Form ("h2_primary_tracks_fakes_p100_%s_%s_iDR%i", sys.Data (), trackWPNames[iWP].c_str (), iDR));
+        h2_primary_tracks_fakes_p100[iSys][iWP][iDR]->Add (h2_fake_tracks[iSys][iWP][iDR], -2); // 100% increase of fake rate for systematics
+        h2_primary_tracks_fakes_p100[iSys][iWP][iDR]->Add (h2_secondary_tracks[iSys][iWP][iDR], -1);
 
         for (int iEta = 0; iEta < nEtaTrkBins; iEta++) {
 
-          h_fake_tracks[iSys][iWP][iMult][iEta] = (TH1D*) inFile->Get (Form ("h_fake_tracks_%s_%s_iMult%i_iEta%i", sys.Data (), trackWPNames[iWP].c_str (), iMult, iEta));
-          h_secondary_tracks[iSys][iWP][iMult][iEta] = (TH1D*) inFile->Get (Form ("h_secondary_tracks_%s_%s_iMult%i_iEta%i", sys.Data (), trackWPNames[iWP].c_str (), iMult, iEta));
-          h_strange_tracks[iSys][iWP][iMult][iEta] = (TH1D*) inFile->Get (Form ("h_strange_tracks_%s_%s_iMult%i_iEta%i", sys.Data (), trackWPNames[iWP].c_str (), iMult, iEta));
-          //h_primary_tracks[iSys][iWP][iMult][iEta] = (TH1D*) inFile->Get (Form ("h_primary_tracks_%s_%s_iMult%i_iEta%i", sys.Data (), trackWPNames[iWP].c_str (), iMult, iEta));
-          h_reco_tracks[iSys][iWP][iMult][iEta] = (TH1D*) inFile->Get (Form ("h_reco_tracks_%s_%s_iMult%i_iEta%i", sys.Data (), trackWPNames[iWP].c_str (), iMult, iEta));
-          h_reco_tracks_wgt2[iSys][iWP][iMult][iEta] = (TH1D*) inFile->Get (Form ("h_reco_tracks_wgt2_%s_%s_iMult%i_iEta%i", sys.Data (), trackWPNames[iWP].c_str (), iMult, iEta));
+          h_fake_tracks[iSys][iWP][iDR][iEta] = (TH1D*) inFile->Get (Form ("h_fake_tracks_%s_%s_iDR%i_iEta%i", sys.Data (), trackWPNames[iWP].c_str (), iDR, iEta));
+          h_secondary_tracks[iSys][iWP][iDR][iEta] = (TH1D*) inFile->Get (Form ("h_secondary_tracks_%s_%s_iDR%i_iEta%i", sys.Data (), trackWPNames[iWP].c_str (), iDR, iEta));
+          h_strange_tracks[iSys][iWP][iDR][iEta] = (TH1D*) inFile->Get (Form ("h_strange_tracks_%s_%s_iDR%i_iEta%i", sys.Data (), trackWPNames[iWP].c_str (), iDR, iEta));
+          //h_primary_tracks[iSys][iWP][iDR][iEta] = (TH1D*) inFile->Get (Form ("h_primary_tracks_%s_%s_iDR%i_iEta%i", sys.Data (), trackWPNames[iWP].c_str (), iDR, iEta));
+          h_reco_tracks[iSys][iWP][iDR][iEta] = (TH1D*) inFile->Get (Form ("h_reco_tracks_%s_%s_iDR%i_iEta%i", sys.Data (), trackWPNames[iWP].c_str (), iDR, iEta));
+          h_reco_tracks_wgt2[iSys][iWP][iDR][iEta] = (TH1D*) inFile->Get (Form ("h_reco_tracks_wgt2_%s_%s_iDR%i_iEta%i", sys.Data (), trackWPNames[iWP].c_str (), iDR, iEta));
 
-          h_primary_tracks[iSys][iWP][iMult][iEta] = (TH1D*) h_reco_tracks[iSys][iWP][iMult][iEta]->Clone (Form ("h_primary_tracks_%s_%s_iMult%i_iEta%i", sys.Data (), trackWPNames[iWP].c_str (), iMult, iEta));
-          h_primary_tracks[iSys][iWP][iMult][iEta]->Add (h_fake_tracks[iSys][iWP][iMult][iEta], -1);
-          h_primary_tracks[iSys][iWP][iMult][iEta]->Add (h_secondary_tracks[iSys][iWP][iMult][iEta], -1);
+          h_primary_tracks[iSys][iWP][iDR][iEta] = (TH1D*) h_reco_tracks[iSys][iWP][iDR][iEta]->Clone (Form ("h_primary_tracks_%s_%s_iDR%i_iEta%i", sys.Data (), trackWPNames[iWP].c_str (), iDR, iEta));
+          h_primary_tracks[iSys][iWP][iDR][iEta]->Add (h_fake_tracks[iSys][iWP][iDR][iEta], -1);
+          h_primary_tracks[iSys][iWP][iDR][iEta]->Add (h_secondary_tracks[iSys][iWP][iDR][iEta], -1);
 
-          h_primary_tracks_fakes_p100[iSys][iWP][iMult][iEta] = (TH1D*) h_reco_tracks[iSys][iWP][iMult][iEta]->Clone (Form ("h_primary_tracks_fakes_p100_%s_%s_iMult%i_iEta%i", sys.Data (), trackWPNames[iWP].c_str (), iMult, iEta));
-          h_primary_tracks_fakes_p100[iSys][iWP][iMult][iEta]->Add (h_fake_tracks[iSys][iWP][iMult][iEta], -2); // 100% increase of fake rate for systematics
-          h_primary_tracks_fakes_p100[iSys][iWP][iMult][iEta]->Add (h_secondary_tracks[iSys][iWP][iMult][iEta], -1);
+          h_primary_tracks_fakes_p100[iSys][iWP][iDR][iEta] = (TH1D*) h_reco_tracks[iSys][iWP][iDR][iEta]->Clone (Form ("h_primary_tracks_fakes_p100_%s_%s_iDR%i_iEta%i", sys.Data (), trackWPNames[iWP].c_str (), iDR, iEta));
+          h_primary_tracks_fakes_p100[iSys][iWP][iDR][iEta]->Add (h_fake_tracks[iSys][iWP][iDR][iEta], -2); // 100% increase of fake rate for systematics
+          h_primary_tracks_fakes_p100[iSys][iWP][iDR][iEta]->Add (h_secondary_tracks[iSys][iWP][iDR][iEta], -1);
 
           if (iSys == 0) {
-            h_fake_tracks[iSys][iWP][iMult][iEta]->Rebin (2);
-            h_secondary_tracks[iSys][iWP][iMult][iEta]->Rebin (2);
-            h_strange_tracks[iSys][iWP][iMult][iEta]->Rebin (2);
-            h_primary_tracks[iSys][iWP][iMult][iEta]->Rebin (2);
-            h_primary_tracks_fakes_p100[iSys][iWP][iMult][iEta]->Rebin (2);
-            h_reco_tracks[iSys][iWP][iMult][iEta]->Rebin (2);
-            h_reco_tracks_wgt2[iSys][iWP][iMult][iEta]->Rebin (2);
+            h_fake_tracks[iSys][iWP][iDR][iEta]->Rebin (2);
+            h_secondary_tracks[iSys][iWP][iDR][iEta]->Rebin (2);
+            h_strange_tracks[iSys][iWP][iDR][iEta]->Rebin (2);
+            h_primary_tracks[iSys][iWP][iDR][iEta]->Rebin (2);
+            h_primary_tracks_fakes_p100[iSys][iWP][iDR][iEta]->Rebin (2);
+            h_reco_tracks[iSys][iWP][iDR][iEta]->Rebin (2);
+            h_reco_tracks_wgt2[iSys][iWP][iDR][iEta]->Rebin (2);
           }
 
         } // end loop over iEta
 
-      } // end loop over iMult
+      } // end loop over iDR
 
     } // end loop over iWP
 
@@ -321,21 +322,22 @@ void PlotTrackingPerformance () {
 
     for (int iWP = 0; iWP < trackWPs.size (); iWP++) {
 
-      for (int iMult = 0; iMult < nMultBins; iMult++) {
+      //for (int iMult = 0; iMult < nMultBins; iMult++) {
+      for (int iDR = 0; iDR < nDRBins; iDR++) {
 
         for (int iEta = 0; iEta < nEtaTrkBins; iEta++) {
 
-          RebinSomeBins (&(h_fake_tracks[1][iWP][iMult][iEta]), nCoarserPtchBins, (double*) coarserPtchBins);
-          RebinSomeBins (&(h_secondary_tracks[1][iWP][iMult][iEta]), nCoarserPtchBins, (double*) coarserPtchBins);
-          RebinSomeBins (&(h_strange_tracks[1][iWP][iMult][iEta]), nCoarserPtchBins, (double*) coarserPtchBins);
-          RebinSomeBins (&(h_primary_tracks[1][iWP][iMult][iEta]), nCoarserPtchBins, (double*) coarserPtchBins);
-          RebinSomeBins (&(h_primary_tracks_fakes_p100[1][iWP][iMult][iEta]), nCoarserPtchBins, (double*) coarserPtchBins);
-          RebinSomeBins (&(h_reco_tracks[1][iWP][iMult][iEta]), nCoarserPtchBins, (double*) coarserPtchBins);
-          RebinSomeBins (&(h_reco_tracks_wgt2[1][iWP][iMult][iEta]), nCoarserPtchBins, (double*) coarserPtchBins);
+          RebinSomeBins (&(h_fake_tracks[1][iWP][iDR][iEta]), nCoarserPtchBins, (double*) coarserPtchBins);
+          RebinSomeBins (&(h_secondary_tracks[1][iWP][iDR][iEta]), nCoarserPtchBins, (double*) coarserPtchBins);
+          RebinSomeBins (&(h_strange_tracks[1][iWP][iDR][iEta]), nCoarserPtchBins, (double*) coarserPtchBins);
+          RebinSomeBins (&(h_primary_tracks[1][iWP][iDR][iEta]), nCoarserPtchBins, (double*) coarserPtchBins);
+          RebinSomeBins (&(h_primary_tracks_fakes_p100[1][iWP][iDR][iEta]), nCoarserPtchBins, (double*) coarserPtchBins);
+          RebinSomeBins (&(h_reco_tracks[1][iWP][iDR][iEta]), nCoarserPtchBins, (double*) coarserPtchBins);
+          RebinSomeBins (&(h_reco_tracks_wgt2[1][iWP][iDR][iEta]), nCoarserPtchBins, (double*) coarserPtchBins);
 
         } // end loop over iEta
 
-      } // end loop over iMult
+      } // end loop over iDR
 
     } // end loop over iWP
   }
@@ -370,41 +372,42 @@ void PlotTrackingPerformance () {
 
     for (int iWP = 0; iWP < trackWPs.size (); iWP++) {
 
-      for (int iMult = 0; iMult < nMultBins; iMult++) {
+      //for (int iMult = 0; iMult < nMultBins; iMult++) {
+      for (int iDR = 0; iDR < nDRBins; iDR++) {
 
-        h2_fake_rate[iSys][iWP][iMult] = (TH2D*) h2_fake_tracks[iSys][iWP][iMult]->Clone (Form ("h2_fake_rate_%s_%s_iMult%i", sys.Data (), trackWPNames[iWP].c_str (), iMult));
-        BinomialDivide (h2_fake_rate[iSys][iWP][iMult], h2_fake_tracks[iSys][iWP][iMult], h2_reco_tracks[iSys][iWP][iMult], h2_reco_tracks_wgt2[iSys][iWP][iMult]);
-        InvertRate (h2_fake_rate[iSys][iWP][iMult]);
-        h2_secondary_rate[iSys][iWP][iMult] = (TH2D*) h2_secondary_tracks[iSys][iWP][iMult]->Clone (Form ("h2_secondary_rate_%s_%s_iMult%i", sys.Data (), trackWPNames[iWP].c_str (), iMult));
-        BinomialDivide (h2_secondary_rate[iSys][iWP][iMult], h2_secondary_tracks[iSys][iWP][iMult], h2_reco_tracks[iSys][iWP][iMult], h2_reco_tracks_wgt2[iSys][iWP][iMult]);
-        InvertRate (h2_secondary_rate[iSys][iWP][iMult]);
-        h2_strange_rate[iSys][iWP][iMult] = (TH2D*) h2_strange_tracks[iSys][iWP][iMult]->Clone (Form ("h2_strange_rate_%s_%s_iMult%i", sys.Data (), trackWPNames[iWP].c_str (), iMult));
-        BinomialDivide (h2_strange_rate[iSys][iWP][iMult], h2_strange_tracks[iSys][iWP][iMult], h2_reco_tracks[iSys][iWP][iMult], h2_reco_tracks_wgt2[iSys][iWP][iMult]);
-        InvertRate (h2_strange_rate[iSys][iWP][iMult]);
-        h2_primary_rate[iSys][iWP][iMult] = (TH2D*) h2_primary_tracks[iSys][iWP][iMult]->Clone (Form ("h2_primary_rate_%s_%s_iMult%i", sys.Data (), trackWPNames[iWP].c_str (), iMult));
-        BinomialDivide (h2_primary_rate[iSys][iWP][iMult], h2_primary_tracks[iSys][iWP][iMult], h2_reco_tracks[iSys][iWP][iMult], h2_reco_tracks_wgt2[iSys][iWP][iMult]);
-        h2_primary_rate_fakes_p100[iSys][iWP][iMult] = (TH2D*) h2_primary_tracks_fakes_p100[iSys][iWP][iMult]->Clone (Form ("h2_primary_rate_fakes_p100_%s_%s_iMult%i", sys.Data (), trackWPNames[iWP].c_str (), iMult));
-        BinomialDivide (h2_primary_rate_fakes_p100[iSys][iWP][iMult], h2_primary_tracks_fakes_p100[iSys][iWP][iMult], h2_reco_tracks[iSys][iWP][iMult], h2_reco_tracks_wgt2[iSys][iWP][iMult]);
+        h2_fake_rate[iSys][iWP][iDR] = (TH2D*) h2_fake_tracks[iSys][iWP][iDR]->Clone (Form ("h2_fake_rate_%s_%s_iDR%i", sys.Data (), trackWPNames[iWP].c_str (), iDR));
+        BinomialDivide (h2_fake_rate[iSys][iWP][iDR], h2_fake_tracks[iSys][iWP][iDR], h2_reco_tracks[iSys][iWP][iDR], h2_reco_tracks_wgt2[iSys][iWP][iDR]);
+        InvertRate (h2_fake_rate[iSys][iWP][iDR]);
+        h2_secondary_rate[iSys][iWP][iDR] = (TH2D*) h2_secondary_tracks[iSys][iWP][iDR]->Clone (Form ("h2_secondary_rate_%s_%s_iDR%i", sys.Data (), trackWPNames[iWP].c_str (), iDR));
+        BinomialDivide (h2_secondary_rate[iSys][iWP][iDR], h2_secondary_tracks[iSys][iWP][iDR], h2_reco_tracks[iSys][iWP][iDR], h2_reco_tracks_wgt2[iSys][iWP][iDR]);
+        InvertRate (h2_secondary_rate[iSys][iWP][iDR]);
+        h2_strange_rate[iSys][iWP][iDR] = (TH2D*) h2_strange_tracks[iSys][iWP][iDR]->Clone (Form ("h2_strange_rate_%s_%s_iDR%i", sys.Data (), trackWPNames[iWP].c_str (), iDR));
+        BinomialDivide (h2_strange_rate[iSys][iWP][iDR], h2_strange_tracks[iSys][iWP][iDR], h2_reco_tracks[iSys][iWP][iDR], h2_reco_tracks_wgt2[iSys][iWP][iDR]);
+        InvertRate (h2_strange_rate[iSys][iWP][iDR]);
+        h2_primary_rate[iSys][iWP][iDR] = (TH2D*) h2_primary_tracks[iSys][iWP][iDR]->Clone (Form ("h2_primary_rate_%s_%s_iDR%i", sys.Data (), trackWPNames[iWP].c_str (), iDR));
+        BinomialDivide (h2_primary_rate[iSys][iWP][iDR], h2_primary_tracks[iSys][iWP][iDR], h2_reco_tracks[iSys][iWP][iDR], h2_reco_tracks_wgt2[iSys][iWP][iDR]);
+        h2_primary_rate_fakes_p100[iSys][iWP][iDR] = (TH2D*) h2_primary_tracks_fakes_p100[iSys][iWP][iDR]->Clone (Form ("h2_primary_rate_fakes_p100_%s_%s_iDR%i", sys.Data (), trackWPNames[iWP].c_str (), iDR));
+        BinomialDivide (h2_primary_rate_fakes_p100[iSys][iWP][iDR], h2_primary_tracks_fakes_p100[iSys][iWP][iDR], h2_reco_tracks[iSys][iWP][iDR], h2_reco_tracks_wgt2[iSys][iWP][iDR]);
 
         for (int iEta = 0; iEta < nEtaTrkBins; iEta++) {
 
-          h_fake_rate[iSys][iWP][iMult][iEta] = (TH1D*) h_fake_tracks[iSys][iWP][iMult][iEta]->Clone (Form ("h_fake_rate_%s_%s_iMult%i_iEta%i", sys.Data (), trackWPNames[iWP].c_str (), iMult, iEta));
-          BinomialDivide (h_fake_rate[iSys][iWP][iMult][iEta], h_fake_tracks[iSys][iWP][iMult][iEta], h_reco_tracks[iSys][iWP][iMult][iEta], h_reco_tracks_wgt2[iSys][iWP][iMult][iEta]);
-          InvertRate (h_fake_rate[iSys][iWP][iMult][iEta]);
-          h_secondary_rate[iSys][iWP][iMult][iEta] = (TH1D*) h_secondary_tracks[iSys][iWP][iMult][iEta]->Clone (Form ("h_secondary_rate_%s_%s_iMult%i_iEta%i", sys.Data (), trackWPNames[iWP].c_str (), iMult, iEta));
-          BinomialDivide (h_secondary_rate[iSys][iWP][iMult][iEta], h_secondary_tracks[iSys][iWP][iMult][iEta], h_reco_tracks[iSys][iWP][iMult][iEta], h_reco_tracks_wgt2[iSys][iWP][iMult][iEta]);
-          InvertRate (h_secondary_rate[iSys][iWP][iMult][iEta]);
-          h_strange_rate[iSys][iWP][iMult][iEta] = (TH1D*) h_strange_tracks[iSys][iWP][iMult][iEta]->Clone (Form ("h_strange_rate_%s_%s_iMult%i_iEta%i", sys.Data (), trackWPNames[iWP].c_str (), iMult, iEta));
-          BinomialDivide (h_strange_rate[iSys][iWP][iMult][iEta], h_strange_tracks[iSys][iWP][iMult][iEta], h_reco_tracks[iSys][iWP][iMult][iEta], h_reco_tracks_wgt2[iSys][iWP][iMult][iEta]);
-          InvertRate (h_strange_rate[iSys][iWP][iMult][iEta]);
-          h_primary_rate[iSys][iWP][iMult][iEta] = (TH1D*) h_primary_tracks[iSys][iWP][iMult][iEta]->Clone (Form ("h_primary_rate_%s_%s_iMult%i_iEta%i", sys.Data (), trackWPNames[iWP].c_str (), iMult, iEta));
-          BinomialDivide (h_primary_rate[iSys][iWP][iMult][iEta], h_primary_tracks[iSys][iWP][iMult][iEta], h_reco_tracks[iSys][iWP][iMult][iEta], h_reco_tracks_wgt2[iSys][iWP][iMult][iEta]);
-          h_primary_rate_fakes_p100[iSys][iWP][iMult][iEta] = (TH1D*) h_primary_tracks_fakes_p100[iSys][iWP][iMult][iEta]->Clone (Form ("h_primary_rate_fakes_p100_%s_%s_iMult%i_iEta%i", sys.Data (), trackWPNames[iWP].c_str (), iMult, iEta));
-          BinomialDivide (h_primary_rate_fakes_p100[iSys][iWP][iMult][iEta], h_primary_tracks_fakes_p100[iSys][iWP][iMult][iEta], h_reco_tracks[iSys][iWP][iMult][iEta], h_reco_tracks_wgt2[iSys][iWP][iMult][iEta]);
+          h_fake_rate[iSys][iWP][iDR][iEta] = (TH1D*) h_fake_tracks[iSys][iWP][iDR][iEta]->Clone (Form ("h_fake_rate_%s_%s_iDR%i_iEta%i", sys.Data (), trackWPNames[iWP].c_str (), iDR, iEta));
+          BinomialDivide (h_fake_rate[iSys][iWP][iDR][iEta], h_fake_tracks[iSys][iWP][iDR][iEta], h_reco_tracks[iSys][iWP][iDR][iEta], h_reco_tracks_wgt2[iSys][iWP][iDR][iEta]);
+          InvertRate (h_fake_rate[iSys][iWP][iDR][iEta]);
+          h_secondary_rate[iSys][iWP][iDR][iEta] = (TH1D*) h_secondary_tracks[iSys][iWP][iDR][iEta]->Clone (Form ("h_secondary_rate_%s_%s_iDR%i_iEta%i", sys.Data (), trackWPNames[iWP].c_str (), iDR, iEta));
+          BinomialDivide (h_secondary_rate[iSys][iWP][iDR][iEta], h_secondary_tracks[iSys][iWP][iDR][iEta], h_reco_tracks[iSys][iWP][iDR][iEta], h_reco_tracks_wgt2[iSys][iWP][iDR][iEta]);
+          InvertRate (h_secondary_rate[iSys][iWP][iDR][iEta]);
+          h_strange_rate[iSys][iWP][iDR][iEta] = (TH1D*) h_strange_tracks[iSys][iWP][iDR][iEta]->Clone (Form ("h_strange_rate_%s_%s_iDR%i_iEta%i", sys.Data (), trackWPNames[iWP].c_str (), iDR, iEta));
+          BinomialDivide (h_strange_rate[iSys][iWP][iDR][iEta], h_strange_tracks[iSys][iWP][iDR][iEta], h_reco_tracks[iSys][iWP][iDR][iEta], h_reco_tracks_wgt2[iSys][iWP][iDR][iEta]);
+          InvertRate (h_strange_rate[iSys][iWP][iDR][iEta]);
+          h_primary_rate[iSys][iWP][iDR][iEta] = (TH1D*) h_primary_tracks[iSys][iWP][iDR][iEta]->Clone (Form ("h_primary_rate_%s_%s_iDR%i_iEta%i", sys.Data (), trackWPNames[iWP].c_str (), iDR, iEta));
+          BinomialDivide (h_primary_rate[iSys][iWP][iDR][iEta], h_primary_tracks[iSys][iWP][iDR][iEta], h_reco_tracks[iSys][iWP][iDR][iEta], h_reco_tracks_wgt2[iSys][iWP][iDR][iEta]);
+          h_primary_rate_fakes_p100[iSys][iWP][iDR][iEta] = (TH1D*) h_primary_tracks_fakes_p100[iSys][iWP][iDR][iEta]->Clone (Form ("h_primary_rate_fakes_p100_%s_%s_iDR%i_iEta%i", sys.Data (), trackWPNames[iWP].c_str (), iDR, iEta));
+          BinomialDivide (h_primary_rate_fakes_p100[iSys][iWP][iDR][iEta], h_primary_tracks_fakes_p100[iSys][iWP][iDR][iEta], h_reco_tracks[iSys][iWP][iDR][iEta], h_reco_tracks_wgt2[iSys][iWP][iDR][iEta]);
 
         } // end loop over iEta
 
-      } // end loop over iMult
+      } // end loop over iDR
 
     } // end loop over iWP
 
@@ -419,16 +422,17 @@ void PlotTrackingPerformance () {
     for (int iWP = 0; iWP < trackWPs.size (); iWP++) {
 
       //for (int iMult = 0; iMult < nMultBins; iMult++) {
-      for (int iMult = nMultBins-1; iMult < nMultBins; iMult++) {
+      //for (int iMult = nMultBins-1; iMult < nMultBins; iMult++) {
+      for (int iDR = 0; iDR < nDRBins; iDR++) {
 
         for (int iEta = 0; iEta < nEtaTrkBins; iEta++) {
 
-          f_primary_rate[iSys][iWP][iMult][iEta] = DoPurityFit (h_primary_rate[iSys][iWP][iMult][iEta], 8, 2);
-          f_primary_rate_fakes_p100[iSys][iWP][iMult][iEta] = DoPurityFit (h_primary_rate_fakes_p100[iSys][iWP][iMult][iEta], 8, 2);
+          f_primary_rate[iSys][iWP][iDR][iEta] = DoPurityFit (h_primary_rate[iSys][iWP][iDR][iEta], 8, 2);
+          f_primary_rate_fakes_p100[iSys][iWP][iDR][iEta] = DoPurityFit (h_primary_rate_fakes_p100[iSys][iWP][iDR][iEta], 8, 2);
 
         } // end loop over iEta
 
-      } // end loop over iMult
+      } // end loop over iDR
 
     } // end loop over iWP
 
@@ -626,9 +630,9 @@ void PlotTrackingPerformance () {
 
   for (int iSys : systems) {
 
-    const char* cname = Form ("c_pur_sum_vs_mult_%s", iSys == 0 ? "pp" : "pPb");
+    const char* cname = Form ("c_pur_sum_vs_dr_%s", iSys == 0 ? "pp" : "pPb");
 
-    TCanvas* c = new TCanvas (cname, "", 800*(nMultBins-1), 800);
+    TCanvas* c = new TCanvas (cname, "", 800*(nDRBins-1), 800);
     c->Divide (3, 1);
 
     const double lMargin = 0.15;
@@ -636,9 +640,9 @@ void PlotTrackingPerformance () {
     const double bMargin = 0.15;
     const double tMargin = 0.04;
 
-    for (int iMult = 0; iMult < (nMultBins-1); iMult++) {
+    for (int iDR = 0; iDR < (nDRBins-1); iDR++) {
 
-      c->cd (iMult+1);
+      c->cd (iDR+1);
 
       gPad->SetLeftMargin (lMargin);
       gPad->SetRightMargin (rMargin);
@@ -696,8 +700,8 @@ void PlotTrackingPerformance () {
       }
 
       for (int iEta = 0; iEta < nEtaTrkBins; iEta++) {
-        myDraw (h_primary_rate[iSys][iWP][iMult][iEta], colors[iEta], kOpenCircle, 0.6);
-        TF1* f = f_primary_rate[iSys][iWP][iMult][iEta];
+        myDraw (h_primary_rate[iSys][iWP][iDR][iEta], colors[iEta], kOpenCircle, 0.6);
+        TF1* f = f_primary_rate[iSys][iWP][iDR][iEta];
         if (f) {
           f->SetLineColor (colors[iEta]);
           f->SetLineWidth (1);
@@ -715,7 +719,7 @@ void PlotTrackingPerformance () {
       tl->DrawLatexNDC (0.22, 0.80, Form ("%s tracks", trackWPStrs[iWP].c_str ()));
 
       tl->SetTextSize (28);
-      tl->DrawLatexNDC (0.22, 0.22, Form ("N_{ch}^{rec} = %i-%i", (int) std::ceil (multBins[iMult]), (int) std::floor (multBins[iMult+1])));
+      tl->DrawLatexNDC (0.22, 0.22, Form ("%g < #Delta R_{ch, jet} < %g", drBins[iDR], drBins[iDR+1]));
 
       tl->SetTextSize (18);
       tl->SetTextAlign (21);
@@ -724,16 +728,16 @@ void PlotTrackingPerformance () {
         myLineText2 (0.74, 0.34-iEta*0.036, colors[iEta], kOpenCircle, Form ("%g < |#eta| < %g", etaTrkBins[iEta], etaTrkBins[iEta+1]), 1.2, 0.026, true);
       }
 
-    } // end loop over iMult
+    } // end loop over iDR
 
-    c->SaveAs (Form ("%s/Plots/TrackingPerformance/PuritySummary_vsMultiplicity_%s.pdf", workPath.Data (), iSys == 0 ? "pp" : "pPb"));
+    c->SaveAs (Form ("%s/Plots/TrackingPerformance/PuritySummary_vs_JetDR_%s.pdf", workPath.Data (), iSys == 0 ? "pp" : "pPb"));
   } // end loop over iSys
 
 
 
   for (int iSys : systems) {
 
-    const int iMult = nMultBins-1;
+    const int iDR = nDRBins-1;
     const char* cname = Form ("c_pur_sum_%s", iSys == 0 ? "pp" : "pPb");
 
     TCanvas* c = new TCanvas (cname, "", 800, 800);
@@ -797,8 +801,8 @@ void PlotTrackingPerformance () {
     tl->DrawLatex (100, yoff, "100");
 
     for (int iEta = 0; iEta < nEtaTrkBins; iEta++) {
-      myDraw (h_primary_rate[iSys][iWP][iMult][iEta], colors[iEta], kOpenCircle, 0.8);
-      TF1* f = f_primary_rate[iSys][iWP][iMult][iEta];
+      myDraw (h_primary_rate[iSys][iWP][iDR][iEta], colors[iEta], kOpenCircle, 0.8);
+      TF1* f = f_primary_rate[iSys][iWP][iDR][iEta];
       if (f != nullptr) {
         f->SetLineColor (colors[iEta]);
         f->SetLineWidth (1);
@@ -916,7 +920,7 @@ void PlotTrackingPerformance () {
 
   for (int iSys : systems) {
 
-    const int iMult = nMultBins-1;
+    const int iDR = nDRBins-1;
 
     const char* cname = Form ("c_pur_comp_%s", iSys == 0 ? "pp" : "pPb");
 
@@ -981,16 +985,16 @@ void PlotTrackingPerformance () {
     tl->DrawLatex (100, yoff, "100");
 
     for (int iEta : {0, 3})
-      myDraw (h_fake_rate[iSys][iWP][iMult][iEta], colors[iEta], kOpenCrossX, 1.0);
+      myDraw (h_fake_rate[iSys][iWP][iDR][iEta], colors[iEta], kOpenCrossX, 1.0);
 
     for (int iEta : {0, 3})
-      myDraw (h_secondary_rate[iSys][iWP][iMult][iEta], colors[iEta], kOpenCross, 1.0);
+      myDraw (h_secondary_rate[iSys][iWP][iDR][iEta], colors[iEta], kOpenCross, 1.0);
 
     for (int iEta : {0, 3})
-      myDraw (h_strange_rate[iSys][iWP][iMult][iEta], colors[iEta], kOpenSquare, 1.0);
+      myDraw (h_strange_rate[iSys][iWP][iDR][iEta], colors[iEta], kOpenSquare, 1.0);
 
     for (int iEta : {0, 3})
-      myDraw (h_primary_rate[iSys][iWP][iMult][iEta], colors[iEta], kOpenCircle, 1.0);
+      myDraw (h_primary_rate[iSys][iWP][iDR][iEta], colors[iEta], kOpenCircle, 1.0);
 
     tl->SetTextColor (kBlack);
     tl->SetTextAlign (11);
@@ -1092,7 +1096,7 @@ void PlotTrackingPerformance () {
 
   for (int iSys : systems) {
 
-    const int iMult = nMultBins-1;
+    const int iDR = nDRBins-1;
 
     const char* cname = Form ("c_pur_all_%s", iSys == 0 ? "pp" : "pPb");
 
@@ -1110,7 +1114,7 @@ void PlotTrackingPerformance () {
 
     c->SetLogy ();
 
-    TH2D* h2 = (TH2D*) h2_primary_rate[iSys][iWP][iMult]->Clone ("temp");
+    TH2D* h2 = (TH2D*) h2_primary_rate[iSys][iWP][iDR]->Clone ("temp");
 
     TAxis* xax = h2->GetXaxis ();
     TAxis* yax = h2->GetYaxis ();

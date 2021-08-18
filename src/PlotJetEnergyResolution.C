@@ -44,15 +44,22 @@ void PlotJetEnergyResolution () {
 
   TFile* inFile = new TFile (Form ("%s/JetEnergyResolution/Nominal/summary.root", rootPath.Data ()), "read");
 
+  TH2D*** h2_jet_ptreco_pttruth = Get2DArray <TH2D*> (nSystems, nRadii);
+  TH2D*** h2_jet_ereco_etruth   = Get2DArray <TH2D*> (nSystems, nRadii);
+
   TH2D*** h2_avg_jpts = Get2DArray <TH2D*> (nSystems, nRadii);
   TH2D*** h2_avg_jptr = Get2DArray <TH2D*> (nSystems, nRadii);
   TH1D**** h_avg_jpts = Get3DArray <TH1D*> (nSystems, nRadii, nEtaBins+1);
   TH1D**** h_avg_jptr = Get3DArray <TH1D*> (nSystems, nRadii, nEtaBins+1);
 
+  TF1**** f_avg_jptr = Get3DArray <TF1*> (nSystems, nRadii, nEtaBins+1);
+
   TH2D*** h2_avg_jes  = Get2DArray <TH2D*> (nSystems, nRadii);
   TH2D*** h2_avg_jer  = Get2DArray <TH2D*> (nSystems, nRadii);
   TH1D**** h_avg_jes  = Get3DArray <TH1D*> (nSystems, nRadii, nEtaBins+1);
   TH1D**** h_avg_jer  = Get3DArray <TH1D*> (nSystems, nRadii, nEtaBins+1);
+
+  TF1**** f_avg_jer = Get3DArray <TF1*> (nSystems, nRadii, nEtaBins+1);
 
   TH2D*** h2_avg_jetacorr = Get2DArray <TH2D*> (nSystems, nRadii);
   TH2D*** h2_avg_jetares  = Get2DArray <TH2D*> (nSystems, nRadii);
@@ -85,8 +92,12 @@ void PlotJetEnergyResolution () {
         h_avg_jpts[iSys][iR][iEta] = (TH1D*) inFile->Get (Form ("h_r%i_avg_jpts_%s_iEta%i", r, sys.Data (), iEta));
         h_avg_jptr[iSys][iR][iEta] = (TH1D*) inFile->Get (Form ("h_r%i_avg_jptr_%s_iEta%i", r, sys.Data (), iEta));
 
+        f_avg_jptr[iSys][iR][iEta] = (TF1*) inFile->Get (Form ("f_r%i_avg_jptr_%s_iEta%i", r, sys.Data (), iEta));
+
         h_avg_jes[iSys][iR][iEta] = (TH1D*) inFile->Get (Form ("h_r%i_avg_jes_%s_iEta%i", r, sys.Data (), iEta));
         h_avg_jer[iSys][iR][iEta] = (TH1D*) inFile->Get (Form ("h_r%i_avg_jer_%s_iEta%i", r, sys.Data (), iEta));
+
+        f_avg_jer[iSys][iR][iEta] = (TF1*) inFile->Get (Form ("f_r%i_avg_jer_%s_iEta%i", r, sys.Data (), iEta));
 
         h_avg_jetacorr[iSys][iR][iEta] = (TH1D*) inFile->Get (Form ("h_r%i_avg_jetacorr_%s_iEta%i", r, sys.Data (), iEta));
         h_avg_jetares[iSys][iR][iEta] = (TH1D*) inFile->Get (Form ("h_r%i_avg_jetares_%s_iEta%i", r, sys.Data (), iEta));
@@ -99,6 +110,9 @@ void PlotJetEnergyResolution () {
         h2_jetacorr_integratedEta[iSys][iR][iEta] = (TH2D*) inFile->Get (Form ("h2_r%i_jetacorr_integratedEta_%s_iEta%i", r, sys.Data (), iEta));
 
       } // end loop over iEta
+
+      h2_jet_ptreco_pttruth[iSys][iR] = (TH2D*) inFile->Get (Form ("h2_r%i_jet_ptreco_pttruth_%s", r, sys.Data ()));
+      h2_jet_ereco_etruth[iSys][iR]   = (TH2D*) inFile->Get (Form ("h2_r%i_jet_ereco_etruth_%s", r, sys.Data ()));
 
     } // end loop over iR
 
@@ -163,8 +177,6 @@ void PlotJetEnergyResolution () {
           tl->SetTextAlign (21);
           
           const double yoff = ymin - 0.04 * (ymax-ymin) / (1.-tMargin-bMargin);
-          //tl->DrawLatex (0.8,  yoff, "0.8");
-          //tl->DrawLatex (10, yoff, "10");
           tl->DrawLatex (20, yoff, "20");
           tl->DrawLatex (30, yoff, "30");
           tl->DrawLatex (40, yoff, "40");
@@ -189,7 +201,7 @@ void PlotJetEnergyResolution () {
         if (iSys == 0)
           tl->DrawLatexNDC (0.22, 0.850, "Pythia8 #it{pp}, #sqrt{s} = 5.02 TeV");
         else if (iSys == 1)
-          tl->DrawLatexNDC (0.22, 0.845, "Pythia8 + #it{p}+Pb boost, #sqrt{s_{NN}} = 5.02 TeV");
+          tl->DrawLatexNDC (0.22, 0.845, "Pythia8 + #it{p}+Pb Overlay, #sqrt{s_{NN}} = 5.02 TeV");
         tl->DrawLatexNDC (0.22, 0.810, Form ("Anti-#it{k}_{T} HI Jets, R=0.%i", r));
         for (int iEta = 0; iEta < nEtaBins; iEta++)
           myLineText2 (0.3+(2*iEta>=nEtaBins ? 0.24 : 0), 0.328-0.032*(iEta%(nEtaBins/2)), systColors[iEta], kOpenCircle, Form ("%g < #it{#eta} < %g", etaBins[iEta], etaBins[iEta+1]), 1.2, 0.026, true);
@@ -245,8 +257,6 @@ void PlotJetEnergyResolution () {
           tl->SetTextAlign (21);
           
           const double yoff = ymin - 0.04 * (ymax-ymin) / (1.-tMargin-bMargin);
-          //tl->DrawLatex (0.8,  yoff, "0.8");
-          //tl->DrawLatex (10, yoff, "10");
           tl->DrawLatex (20, yoff, "20");
           tl->DrawLatex (30, yoff, "30");
           tl->DrawLatex (40, yoff, "40");
@@ -271,7 +281,7 @@ void PlotJetEnergyResolution () {
         if (iSys == 0)
           tl->DrawLatexNDC (0.22, 0.850, "Pythia8 #it{pp}, #sqrt{s} = 5.02 TeV");
         else if (iSys == 1)
-          tl->DrawLatexNDC (0.22, 0.845, "Pythia8 + #it{p}+Pb boost, #sqrt{s_{NN}} = 5.02 TeV");
+          tl->DrawLatexNDC (0.22, 0.845, "Pythia8 + #it{p}+Pb Overlay, #sqrt{s_{NN}} = 5.02 TeV");
         tl->DrawLatexNDC (0.22, 0.810, Form ("Anti-#it{k}_{T} HI Jets, R=0.%i", r));
         for (int iEta = 0; iEta < nEtaBins; iEta++)
           myLineText2 (0.3+(2*iEta>=nEtaBins ? 0.24 : 0), 0.328-0.032*(iEta%(nEtaBins/2)), systColors[iEta], kOpenCircle, Form ("%g < #it{#eta} < %g", etaBins[iEta], etaBins[iEta+1]), 1.2, 0.026, true);
@@ -312,8 +322,8 @@ void PlotJetEnergyResolution () {
           yax->SetLabelFont (43);
           yax->SetLabelSize (32);
           yax->SetLabelOffset (1.8 * yax->GetLabelOffset ());
-          const double ymin = -0.05;
-          const double ymax = 0.05;
+          const double ymin = -0.01;
+          const double ymax = 0.01;
           yax->SetRangeUser (ymin, ymax);
 
           htemp->SetLineWidth (2);
@@ -327,8 +337,6 @@ void PlotJetEnergyResolution () {
           tl->SetTextAlign (21);
           
           const double yoff = ymin - 0.04 * (ymax-ymin) / (1.-tMargin-bMargin);
-          //tl->DrawLatex (0.8,  yoff, "0.8");
-          //tl->DrawLatex (10, yoff, "10");
           tl->DrawLatex (20, yoff, "20");
           tl->DrawLatex (30, yoff, "30");
           tl->DrawLatex (40, yoff, "40");
@@ -353,7 +361,7 @@ void PlotJetEnergyResolution () {
         if (iSys == 0)
           tl->DrawLatexNDC (0.22, 0.850, "Pythia8 #it{pp}, #sqrt{s} = 5.02 TeV");
         else if (iSys == 1)
-          tl->DrawLatexNDC (0.22, 0.845, "Pythia8 + #it{p}+Pb boost, #sqrt{s_{NN}} = 5.02 TeV");
+          tl->DrawLatexNDC (0.22, 0.845, "Pythia8 + #it{p}+Pb Overlay, #sqrt{s_{NN}} = 5.02 TeV");
         tl->DrawLatexNDC (0.22, 0.810, Form ("Anti-#it{k}_{T} HI Jets, R=0.%i", r));
         for (int iEta = 0; iEta < nEtaBins; iEta++)
           myLineText2 (0.3+(2*iEta>=nEtaBins ? 0.24 : 0), 0.328-0.032*(iEta%(nEtaBins/2)), systColors[iEta], kOpenCircle, Form ("%g < #it{#eta} < %g", etaBins[iEta], etaBins[iEta+1]), 1.2, 0.026, true);
@@ -406,8 +414,6 @@ void PlotJetEnergyResolution () {
           tl->SetTextAlign (21);
           
           const double yoff = ymin - 0.04 * (ymax-ymin) / (1.-tMargin-bMargin);
-          //tl->DrawLatex (0.8,  yoff, "0.8");
-          //tl->DrawLatex (10, yoff, "10");
           tl->DrawLatex (20, yoff, "20");
           tl->DrawLatex (30, yoff, "30");
           tl->DrawLatex (40, yoff, "40");
@@ -423,6 +429,7 @@ void PlotJetEnergyResolution () {
         for (int iEta = 0; iEta < nEtaBins; iEta++)
           myDraw (h_avg_jptr[iSys][iR][iEta], systColors[iEta], kOpenCircle, 1.0);
         myDraw (h_avg_jptr[iSys][iR][nEtaBins], kBlack, kFullCircle, 1.0);
+        myDraw (f_avg_jptr[iSys][iR][nEtaBins], kBlack, 1, 2);
 
         tl->SetTextColor (kBlack);
         tl->SetTextAlign (12);
@@ -432,7 +439,7 @@ void PlotJetEnergyResolution () {
         if (iSys == 0)
           tl->DrawLatexNDC (0.22, 0.850, "Pythia8 #it{pp}, #sqrt{s} = 5.02 TeV");
         else if (iSys == 1)
-          tl->DrawLatexNDC (0.22, 0.845, "Pythia8 + #it{p}+Pb boost, #sqrt{s_{NN}} = 5.02 TeV");
+          tl->DrawLatexNDC (0.22, 0.845, "Pythia8 + #it{p}+Pb Overlay, #sqrt{s_{NN}} = 5.02 TeV");
         tl->DrawLatexNDC (0.22, 0.810, Form ("Anti-#it{k}_{T} HI Jets, R=0.%i", r));
         for (int iEta = 0; iEta < nEtaBins; iEta++)
           myLineText2 (0.5+(2*iEta>=nEtaBins ? 0.24 : 0), 0.718-0.032*(iEta%(nEtaBins/2)), systColors[iEta], kOpenCircle, Form ("%g < #it{#eta} < %g", etaBins[iEta], etaBins[iEta+1]), 1.2, 0.026, true);
@@ -486,8 +493,6 @@ void PlotJetEnergyResolution () {
           tl->SetTextAlign (21);
           
           const double yoff = ymin - 0.04 * (ymax-ymin) / (1.-tMargin-bMargin);
-          //tl->DrawLatex (0.8,  yoff, "0.8");
-          //tl->DrawLatex (10, yoff, "10");
           tl->DrawLatex (20, yoff, "20");
           tl->DrawLatex (30, yoff, "30");
           tl->DrawLatex (40, yoff, "40");
@@ -503,6 +508,7 @@ void PlotJetEnergyResolution () {
         for (int iEta = 0; iEta < nEtaBins; iEta++)
           myDraw (h_avg_jer[iSys][iR][iEta], systColors[iEta], kOpenCircle, 1.0);
         myDraw (h_avg_jer[iSys][iR][nEtaBins], kBlack, kFullCircle, 1.0);
+        myDraw (f_avg_jer[iSys][iR][nEtaBins], kBlack, 1, 2);
 
         tl->SetTextColor (kBlack);
         tl->SetTextAlign (12);
@@ -512,7 +518,7 @@ void PlotJetEnergyResolution () {
         if (iSys == 0)
           tl->DrawLatexNDC (0.22, 0.850, "Pythia8 #it{pp}, #sqrt{s} = 5.02 TeV");
         else if (iSys == 1)
-          tl->DrawLatexNDC (0.22, 0.845, "Pythia8 + #it{p}+Pb boost, #sqrt{s_{NN}} = 5.02 TeV");
+          tl->DrawLatexNDC (0.22, 0.845, "Pythia8 + #it{p}+Pb Overlay, #sqrt{s_{NN}} = 5.02 TeV");
         tl->DrawLatexNDC (0.22, 0.810, Form ("Anti-#it{k}_{T} HI Jets, R=0.%i", r));
         for (int iEta = 0; iEta < nEtaBins; iEta++)
           myLineText2 (0.5+(2*iEta>=nEtaBins ? 0.24 : 0), 0.718-0.032*(iEta%(nEtaBins/2)), systColors[iEta], kOpenCircle, Form ("%g < #it{#eta} < %g", etaBins[iEta], etaBins[iEta+1]), 1.2, 0.026, true);
@@ -565,8 +571,6 @@ void PlotJetEnergyResolution () {
           tl->SetTextAlign (21);
           
           const double yoff = ymin - 0.04 * (ymax-ymin) / (1.-tMargin-bMargin);
-          //tl->DrawLatex (0.8,  yoff, "0.8");
-          //tl->DrawLatex (10, yoff, "10");
           tl->DrawLatex (20, yoff, "20");
           tl->DrawLatex (30, yoff, "30");
           tl->DrawLatex (40, yoff, "40");
@@ -591,7 +595,7 @@ void PlotJetEnergyResolution () {
         if (iSys == 0)
           tl->DrawLatexNDC (0.22, 0.850, "Pythia8 #it{pp}, #sqrt{s} = 5.02 TeV");
         else if (iSys == 1)
-          tl->DrawLatexNDC (0.22, 0.845, "Pythia8 + #it{p}+Pb boost, #sqrt{s_{NN}} = 5.02 TeV");
+          tl->DrawLatexNDC (0.22, 0.845, "Pythia8 + #it{p}+Pb Overlay, #sqrt{s_{NN}} = 5.02 TeV");
         tl->DrawLatexNDC (0.22, 0.810, Form ("Anti-#it{k}_{T} HI Jets, R=0.%i", r));
         for (int iEta = 0; iEta < nEtaBins; iEta++)
           myLineText2 (0.5+(2*iEta>=nEtaBins ? 0.24 : 0), 0.718-0.032*(iEta%(nEtaBins/2)), systColors[iEta], kOpenCircle, Form ("%g < #it{#eta} < %g", etaBins[iEta], etaBins[iEta+1]), 1.2, 0.026, true);
@@ -642,16 +646,7 @@ void PlotJetEnergyResolution () {
 
         xax->SetTitle ("#it{p}_{T}^{truth} [GeV]");
         yax->SetTitle ("#it{p}_{T}^{reco} / #it{p}_{T}^{truth}");
-        //zax->SetTitle ("(1 / N(#it{p}_{T}^{truth})) (dN / dr_{jet})");
         zax->SetTitle ("");
-
-        //const double zmin = 0.8;
-        //const double zmax = 1;
-
-        h2->SetLineWidth (0);
-
-        //zax->SetRangeUser (zmin, zmax);
-        //xax->SetMoreLogLabels ();
 
         xax->SetTitleFont (43);
         xax->SetTitleSize (32);
@@ -659,9 +654,7 @@ void PlotJetEnergyResolution () {
         yax->SetTitleSize (32);
         zax->SetTitleFont (43);
         zax->SetTitleSize (32);
-        zax->SetTitleOffset (1.1*zax->GetTitleOffset ());
         xax->SetLabelFont (43);
-        //xax->SetLabelSize (32);
         xax->SetLabelSize (0);
         yax->SetLabelFont (43);
         yax->SetLabelSize (32);
@@ -693,11 +686,157 @@ void PlotJetEnergyResolution () {
         if (iSys == 0)
           tl->DrawLatexNDC (0.36, 0.850, "Pythia8 #it{pp}, #sqrt{s} = 5.02 TeV");
         else if (iSys == 1)
-          tl->DrawLatexNDC (0.36, 0.845, "Pythia8 + #it{p}+Pb boost, #sqrt{s_{NN}} = 5.02 TeV");
+          tl->DrawLatexNDC (0.36, 0.845, "Pythia8 + #it{p}+Pb Overlay, #sqrt{s_{NN}} = 5.02 TeV");
         tl->DrawLatexNDC (0.36, 0.810, Form ("Anti-#it{k}_{T} HI Jets, R=0.%i", r));
         tl->DrawLatexNDC (0.36, 0.775, iEta == nEtaBins ? "|#it{#eta}| < 2.8" : Form ("%g < #it{#eta} < %g", etaBins[iEta], etaBins[iEta+1]));
 
         c->SaveAs (Form ("%s/Plots/JetEnergyResolution/JetResponse_R%i_%s_iEta%i.pdf", workPath.Data (), r, iSys == 0 ? "pp" : "pPb", iEta));
+      } // end loop over iEta
+
+
+      {
+        const char* cname = Form ("c_jetPtResp_r%i_%s", r, sys.Data ());
+
+        TCanvas* c = new TCanvas (cname, "", 880, 800);
+        const double lMargin = 0.15;
+        const double rMargin = 0.11;
+        const double bMargin = 0.15;
+        const double tMargin = 0.04;
+
+        c->SetLeftMargin (lMargin);
+        c->SetRightMargin (rMargin);
+        c->SetBottomMargin (bMargin);
+        c->SetTopMargin (tMargin);
+
+        c->SetLogx ();
+        c->SetLogy ();
+        c->SetLogz ();
+
+        TH2D* h2 = (TH2D*) h2_jet_ptreco_pttruth[iSys][iR]->Clone ("temp");
+
+        TAxis* xax = h2->GetXaxis ();
+        TAxis* yax = h2->GetYaxis ();
+        TAxis* zax = h2->GetZaxis ();
+
+        float pur_num[2]  = {};
+        float pur_den[2]  = {};
+        float pur[2]      = {};
+
+        for (int iY = 1; iY <= h2->GetNbinsY (); iY++) {
+          const float ptreco = yax->GetBinCenter (iY);
+          if (ptreco > 30) {
+            for (int iX = 1; iX <= h2->GetNbinsX (); iX++) {
+              const float pttruth = xax->GetBinCenter (iX);
+              if (pttruth > 30) pur_num[0] += h2->GetBinContent (iX, iY);
+              pur_den[0] += h2->GetBinContent (iX, iY);
+            }  
+          }
+          if (ptreco > 60) {
+            for (int iX = 1; iX <= h2->GetNbinsX (); iX++) {
+              const float pttruth = xax->GetBinCenter (iX);
+              if (pttruth > 60) pur_num[1] += h2->GetBinContent (iX, iY);
+              pur_den[1] += h2->GetBinContent (iX, iY);
+            }  
+          }
+        }
+
+        pur[0] = pur_num[0] / pur_den[0];
+        pur[1] = pur_num[1] / pur_den[1];
+
+        std::cout << "Purity of > 30 GeV selection: " << pur[0] << std::endl;
+        std::cout << "Purity of > 60 GeV selection: " << pur[1] << std::endl;
+
+        //// normalize distributions in response (along y-axis)
+        //for (int iX = 1; iX <= h2->GetNbinsX (); iX++) {
+        //  double integral = 0;
+        //  for (int iY = 1; iY <= h2->GetNbinsY (); iY++)
+        //    integral += h2->GetBinContent (iX, iY) * yax->GetBinWidth (iY);
+        //  if (integral > 0) {
+        //    for (int iY = 1; iY <= h2->GetNbinsY (); iY++) {
+        //      h2->SetBinContent (iX, iY, h2->GetBinContent (iX, iY) / integral);
+        //      h2->SetBinError (iX, iY, h2->GetBinError (iX, iY) / integral);
+        //    } // end loop over iY
+        //  }
+        //} // end loop over iX
+
+        const double ymin = pTJBins[1];
+        const double ymax = pTJBins[nPtJBins];
+
+        xax->SetTitle ("#it{p}_{T}^{truth} [GeV]");
+        yax->SetTitle ("#it{p}_{T}^{reco} [GeV]");
+        zax->SetTitle ("");
+
+        xax->SetTitleFont (43);
+        xax->SetTitleSize (32);
+        yax->SetTitleFont (43);
+        yax->SetTitleSize (32);
+        zax->SetTitleFont (43);
+        zax->SetTitleSize (32);
+        xax->SetLabelFont (43);
+        xax->SetLabelSize (0);
+        yax->SetLabelSize (0);
+        zax->SetLabelFont (43);
+        zax->SetLabelSize (24);
+
+        h2->DrawCopy ("colz");
+        SaferDelete (&h2);
+
+        tl->SetTextFont (43);
+        tl->SetTextSize (32);
+
+        tl->SetTextAlign (32);
+        const double xoff = std::exp (std::log (ymin) - 0.01 * std::log (ymax/ymin) / (1.-lMargin-rMargin));
+        tl->DrawLatex (xoff, 20, "20");
+        tl->DrawLatex (xoff, 30, "30");
+        tl->DrawLatex (xoff, 40, "40");
+        tl->DrawLatex (xoff, 60, "60");
+        tl->DrawLatex (xoff, 100, "100");
+        tl->DrawLatex (xoff, 200, "200");
+        tl->DrawLatex (xoff, 400, "400");
+        tl->DrawLatex (xoff, 800, "800");
+        
+        tl->SetTextAlign (21);
+        const double yoff = std::exp (std::log (ymin) - 0.04 * std::log (ymax/ymin) / (1.-tMargin-bMargin));
+        tl->DrawLatex (20, yoff, "20");
+        tl->DrawLatex (30, yoff, "30");
+        tl->DrawLatex (40, yoff, "40");
+        tl->DrawLatex (60, yoff, "60");
+        tl->DrawLatex (100, yoff, "100");
+        tl->DrawLatex (200, yoff, "200");
+        tl->DrawLatex (400, yoff, "400");
+        tl->DrawLatex (800, yoff, "800");
+
+        l->SetLineWidth (2);
+        l->SetLineStyle (2);
+
+        l->SetLineColor (kGreen+2);
+        l->DrawLine (pTJBins[1], 30, pTJBins[nPtJBins], 30);
+        l->DrawLine (30, pTJBins[1], 30, pTJBins[nPtJBins]);
+
+        l->SetLineColor (kMagenta+2);
+        l->DrawLine (pTJBins[1], 60, pTJBins[nPtJBins], 60);
+        l->DrawLine (60, pTJBins[1], 60, pTJBins[nPtJBins]);
+
+        tl->SetTextColor (kBlack);
+        tl->SetTextAlign (12);
+
+        tl->SetTextSize (26);
+        tl->DrawLatexNDC (0.22, 0.890, "#bf{#it{ATLAS}} Simulation Internal");
+        if (iSys == 0)
+          tl->DrawLatexNDC (0.22, 0.850, "Pythia8 #it{pp}, #sqrt{s} = 5.02 TeV");
+        else if (iSys == 1)
+          tl->DrawLatexNDC (0.22, 0.845, "Pythia8 + #it{p}+Pb Overlay, #sqrt{s_{NN}} = 5.02 TeV");
+        tl->DrawLatexNDC (0.22, 0.810, Form ("Anti-#it{k}_{T} HI Jets, R=0.%i", r));
+        tl->DrawLatexNDC (0.22, 0.775, "|#it{#eta}| < 2.8");
+
+        tl->SetTextSize (22);
+        tl->DrawLatexNDC (0.60, 0.260, "Selection purity");
+        tl->SetTextColor (kGreen+2);
+        tl->DrawLatexNDC (0.60, 0.225, Form ("#it{p}_{T}^{reco} > 30 GeV: %.3f", pur[0]));
+        tl->SetTextColor (kMagenta+2);
+        tl->DrawLatexNDC (0.60, 0.190, Form ("#it{p}_{T}^{reco} > 60 GeV: %.3f", pur[1]));
+
+        c->SaveAs (Form ("%s/Plots/JetEnergyResolution/JetPtResponse_R%i_%s.pdf", workPath.Data (), r, iSys == 0 ? "pp" : "pPb"));
       }
 
     } // end loop over sys

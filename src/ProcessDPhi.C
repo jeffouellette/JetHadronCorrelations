@@ -27,16 +27,16 @@ void ProcessDPhi (const char* outFileTag, const char* tag1, const char* tag2 = n
 
   TFile* inFile = nullptr;
 
-  TH1D**  h_evt_counts_ref = Get1DArray <TH1D*> (nVar);
-  TH1D**  h_jet_counts_ref = Get1DArray <TH1D*> (nVar);
-  TH1D**  h_evt_counts_ref_bkg = Get1DArray <TH1D*> (nVar);
-  TH1D**  h_jet_counts_ref_bkg = Get1DArray <TH1D*> (nVar);
-  TH1D*** h_evt_counts = Get2DArray <TH1D*> (nZdcCentBins, nVar);
-  TH1D*** h_jet_counts = Get2DArray <TH1D*> (nZdcCentBins, nVar);
-  TH1D*** h_evt_counts_bkg = Get2DArray <TH1D*> (nZdcCentBins, nVar);
-  TH1D*** h_jet_counts_bkg = Get2DArray <TH1D*> (nZdcCentBins, nVar);
+  TH1D***  h_evt_counts_ref      = Get1DArray <TH1D*> (2, nVar);
+  TH1D***  h_jet_counts_ref      = Get1DArray <TH1D*> (2, nVar);
+  TH1D***  h_evt_counts_ref_bkg  = Get1DArray <TH1D*> (2, nVar);
+  TH1D***  h_jet_counts_ref_bkg  = Get1DArray <TH1D*> (2, nVar);
+  TH1D**** h_evt_counts          = Get2DArray <TH1D*> (2, nZdcCentBins, nVar);
+  TH1D**** h_jet_counts          = Get2DArray <TH1D*> (2, nZdcCentBins, nVar);
+  TH1D**** h_evt_counts_bkg      = Get2DArray <TH1D*> (2, nZdcCentBins, nVar);
+  TH1D**** h_jet_counts_bkg      = Get2DArray <TH1D*> (2, nZdcCentBins, nVar);
 
-  TH1D***  h_jet_trk_dphi_ref = Get2DArray <TH1D*> (nPtChSelections, nVar);
+  TH1D***  h_jet_trk_dphi_ref = Get2DArray <TH1D*> (2, nPtChSelections, nVar);
   TH2D***  h2_jet_trk_dphi_cov_ref = Get2DArray <TH2D*> (nPtChSelections, nVar);
   TH1D***  h_jet_trk_dphi_ref_bkg = Get2DArray <TH1D*> (nPtChSelections, nVar);
   TH2D***  h2_jet_trk_dphi_cov_ref_bkg = Get2DArray <TH2D*> (nPtChSelections, nVar);

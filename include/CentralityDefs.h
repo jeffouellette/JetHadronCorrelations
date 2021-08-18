@@ -106,6 +106,8 @@ double* fineFcalCentBins = InitCentBins (Form ("%s/aux/FCalCentCuts.dat", workPa
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Zdc-derived centrality classes for categorizing events
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+const double zdcNcollValues[] = {1.24, 3.04, 6.53, 9.99, 13.6};
+const double zdcNcollErrors[] = {0.10, 0.18, 0.50, 0.90, 1.48};
 int zdcCentPercs[] = {100, 80, 60, 40, 20, 0};
 int nZdcCentBins = sizeof (zdcCentPercs) / sizeof (zdcCentPercs[0]) - 1;
 

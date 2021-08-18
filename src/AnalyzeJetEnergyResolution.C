@@ -141,6 +141,9 @@ void AnalyzeJetEnergyResolution () {
   TH1D***** h_jes      = Get4DArray <TH1D*> (nSystems, nRadii, nPtJBins, nFinerEtaBins);
   TH1D***** h_jetacorr = Get4DArray <TH1D*> (nSystems, nRadii, nPtJBins, nFinerEtaBins);
 
+  TH2D*** h2_jet_ptreco_pttruth = Get2DArray <TH2D*> (nSystems, nRadii);
+  TH2D*** h2_jet_ereco_etruth   = Get2DArray <TH2D*> (nSystems, nRadii);
+
   for (int iSys : systems) {
 
     const std::string sys = (iSys == 0 ? "pp" : "pPb");
@@ -149,13 +152,16 @@ void AnalyzeJetEnergyResolution () {
 
       const int r = (radii[iR] == JetRadius::R0p4 ? 4 : 2);
 
+      h2_jet_ptreco_pttruth[iSys][iR]  = (TH2D*) inFile->Get (Form ("h2_r%i_jet_ptreco_pttruth_%s", r, sys.c_str ()));
+      h2_jet_ereco_etruth[iSys][iR]    = (TH2D*) inFile->Get (Form ("h2_r%i_jet_ereco_etruth_%s", r, sys.c_str ()));
+
       for (int iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
 
         for (int iEta = 0; iEta < nFinerEtaBins; iEta++) {
 
-          h_jpts[iSys][iR][iPtJ][iEta] = (TH1D*) inFile->Get (Form ("h_r%i_jpts_%s_iPtJ%i_iEta%i", r, sys.c_str (), iPtJ, iEta));
-          h_jes[iSys][iR][iPtJ][iEta] = (TH1D*) inFile->Get (Form ("h_r%i_jes_%s_iPtJ%i_iEta%i", r, sys.c_str (), iPtJ, iEta));
-          h_jetacorr[iSys][iR][iPtJ][iEta] = (TH1D*) inFile->Get (Form ("h_r%i_jetacorr_%s_iPtJ%i_iEta%i", r, sys.c_str (), iPtJ, iEta));
+          h_jpts[iSys][iR][iPtJ][iEta]      = (TH1D*) inFile->Get (Form ("h_r%i_jpts_%s_iPtJ%i_iEta%i", r, sys.c_str (), iPtJ, iEta));
+          h_jes[iSys][iR][iPtJ][iEta]       = (TH1D*) inFile->Get (Form ("h_r%i_jes_%s_iPtJ%i_iEta%i", r, sys.c_str (), iPtJ, iEta));
+          h_jetacorr[iSys][iR][iPtJ][iEta]  = (TH1D*) inFile->Get (Form ("h_r%i_jetacorr_%s_iPtJ%i_iEta%i", r, sys.c_str (), iPtJ, iEta));
 
         } // end loop over iEta
 
@@ -181,10 +187,14 @@ void AnalyzeJetEnergyResolution () {
   TH1D**** h_avg_jpts = Get3DArray <TH1D*> (nSystems, nRadii, nEtaBins+1);
   TH1D**** h_avg_jptr = Get3DArray <TH1D*> (nSystems, nRadii, nEtaBins+1);
 
+  TF1**** f_avg_jptr = Get3DArray <TF1*> (nSystems, nRadii, nEtaBins+1);
+
   TH2D*** h2_avg_jes  = Get2DArray <TH2D*> (nSystems, nRadii);
   TH2D*** h2_avg_jer  = Get2DArray <TH2D*> (nSystems, nRadii);
   TH1D**** h_avg_jes  = Get3DArray <TH1D*> (nSystems, nRadii, nEtaBins+1);
   TH1D**** h_avg_jer  = Get3DArray <TH1D*> (nSystems, nRadii, nEtaBins+1);
+
+  TF1**** f_avg_jer = Get3DArray <TF1*> (nSystems, nRadii, nEtaBins+1);
 
   TH2D*** h2_avg_jetacorr = Get2DArray <TH2D*> (nSystems, nRadii);
   TH2D*** h2_avg_jetares  = Get2DArray <TH2D*> (nSystems, nRadii);
@@ -199,26 +209,26 @@ void AnalyzeJetEnergyResolution () {
 
       const int r = (radii[iR] == JetRadius::R0p4 ? 4 : 2);
 
-      h2_avg_jpts[iSys][iR] = new TH2D (Form ("h2_r%i_avg_jpts_%s", r, sys.c_str ()), ";#it{E}_{truth} [GeV];#eta_{truth};#LT#it{p}_{T}^{reco} / #it{p}_{T}^{truth}#GT [%]", nPtJBins, pTJBins, nFinerEtaBins, finerEtaBins);
-      h2_avg_jptr[iSys][iR] = new TH2D (Form ("h2_r%i_avg_jptr_%s", r, sys.c_str ()), ";#it{E}_{truth} [GeV];#eta_{truth};#sigma / #mu #left[#it{p}_{T}^{reco} / #it{p}_{T}^{truth}#right] [%]", nPtJBins, pTJBins, nFinerEtaBins, finerEtaBins);
+      h2_avg_jpts[iSys][iR]     = new TH2D (Form ("h2_r%i_avg_jpts_%s", r, sys.c_str ()), ";#it{p}_{T}^{truth} [GeV];#eta_{truth};#LT#it{p}_{T}^{reco} / #it{p}_{T}^{truth}#GT [%]", nPtJBins, pTJBins, nFinerEtaBins, finerEtaBins);
+      h2_avg_jptr[iSys][iR]     = new TH2D (Form ("h2_r%i_avg_jptr_%s", r, sys.c_str ()), ";#it{p}_{T}^{truth} [GeV];#eta_{truth};#sigma / #mu #left[#it{p}_{T}^{reco} / #it{p}_{T}^{truth}#right] [%]", nPtJBins, pTJBins, nFinerEtaBins, finerEtaBins);
 
-      h2_avg_jes[iSys][iR] = new TH2D (Form ("h2_r%i_avg_jes_%s", r, sys.c_str ()), ";#it{E}_{truth} [GeV];#eta_{truth};#LT#it{E}_{reco} / #it{E}_{truth}#GT [%]", nPtJBins, pTJBins, nFinerEtaBins, finerEtaBins);
-      h2_avg_jer[iSys][iR] = new TH2D (Form ("h2_r%i_avg_jer_%s", r, sys.c_str ()), ";#it{E}_{truth} [GeV];#eta_{truth};#sigma / #mu #left[#it{E}_{reco} / #it{E}_{truth}#right] [%]", nPtJBins, pTJBins, nFinerEtaBins, finerEtaBins);
+      h2_avg_jes[iSys][iR]      = new TH2D (Form ("h2_r%i_avg_jes_%s", r, sys.c_str ()), ";#it{p}_{T}^{truth} [GeV];#eta_{truth};#LT#it{E}_{reco} / #it{E}_{truth}#GT [%]", nPtJBins, pTJBins, nFinerEtaBins, finerEtaBins);
+      h2_avg_jer[iSys][iR]      = new TH2D (Form ("h2_r%i_avg_jer_%s", r, sys.c_str ()), ";#it{p}_{T}^{truth} [GeV];#eta_{truth};#sigma / #mu #left[#it{E}_{reco} / #it{E}_{truth}#right] [%]", nPtJBins, pTJBins, nFinerEtaBins, finerEtaBins);
 
-      h2_avg_jetacorr[iSys][iR] = new TH2D (Form ("h2_r%i_avg_jetacorr_%s", r, sys.c_str ()), ";#it{E}_{truth} [GeV];#eta_{truth};#LT#eta_{reco} - #eta_{truth}#GT", nPtJBins, pTJBins, nFinerEtaBins, finerEtaBins);
-      h2_avg_jetares[iSys][iR] = new TH2D (Form ("h2_r%i_avg_jetares_%s", r, sys.c_str ()), ";#it{E}_{truth} [GeV];#eta_{truth};#sigma#left[#eta_{reco} - #eta_{truth}#GT#right]", nPtJBins, pTJBins, nFinerEtaBins, finerEtaBins);
+      h2_avg_jetacorr[iSys][iR] = new TH2D (Form ("h2_r%i_avg_jetacorr_%s", r, sys.c_str ()), ";#it{p}_{T}^{truth} [GeV];#eta_{truth};#LT#eta_{reco} - #eta_{truth}#GT", nPtJBins, pTJBins, nFinerEtaBins, finerEtaBins);
+      h2_avg_jetares[iSys][iR]  = new TH2D (Form ("h2_r%i_avg_jetares_%s", r, sys.c_str ()), ";#it{p}_{T}^{truth} [GeV];#eta_{truth};#sigma#left[#eta_{reco} - #eta_{truth}#GT#right]", nPtJBins, pTJBins, nFinerEtaBins, finerEtaBins);
 
 
       for (int iEta = 0; iEta <= nEtaBins; iEta++) {
 
-        h_avg_jpts[iSys][iR][iEta] = new TH1D (Form ("h_r%i_avg_jpts_%s_iEta%i", r, sys.c_str (), iEta), ";#it{E}_{truth} [GeV];#LT#it{p}_{T}^{reco} / #it{p}_{T}^{truth}#GT [%]", nPtJBins, pTJBins);
-        h_avg_jptr[iSys][iR][iEta] = new TH1D (Form ("h_r%i_avg_jptr_%s_iEta%i", r, sys.c_str (), iEta), ";#it{E}_{truth} [GeV];#sigma / #mu #left[#it{p}_{T}^{reco} / #it{p}_{T}^{truth}#right] [%]", nPtJBins, pTJBins);
+        h_avg_jpts[iSys][iR][iEta]      = new TH1D (Form ("h_r%i_avg_jpts_%s_iEta%i", r, sys.c_str (), iEta), ";#it{p}_{T}^{truth} [GeV];#LT#it{p}_{T}^{reco} / #it{p}_{T}^{truth}#GT [%]", nPtJBins, pTJBins);
+        h_avg_jptr[iSys][iR][iEta]      = new TH1D (Form ("h_r%i_avg_jptr_%s_iEta%i", r, sys.c_str (), iEta), ";#it{p}_{T}^{truth} [GeV];#sigma / #mu #left[#it{p}_{T}^{reco} / #it{p}_{T}^{truth}#right] [%]", nPtJBins, pTJBins);
 
-        h_avg_jes[iSys][iR][iEta] = new TH1D (Form ("h_r%i_avg_jes_%s_iEta%i", r, sys.c_str (), iEta), ";#it{E}_{truth} [GeV];#LT#it{E}_{reco} / #it{E}_{truth}#GT [%]", nPtJBins, pTJBins);
-        h_avg_jer[iSys][iR][iEta] = new TH1D (Form ("h_r%i_avg_jer_%s_iEta%i", r, sys.c_str (), iEta), ";#it{E}_{truth} [GeV];#sigma / #mu #left[#it{E}_{reco} / #it{E}_{truth}#right] [%]", nPtJBins, pTJBins);
+        h_avg_jes[iSys][iR][iEta]       = new TH1D (Form ("h_r%i_avg_jes_%s_iEta%i", r, sys.c_str (), iEta), ";#it{p}_{T}^{truth} [GeV];#LT#it{E}_{reco} / #it{E}_{truth}#GT [%]", nPtJBins, pTJBins);
+        h_avg_jer[iSys][iR][iEta]       = new TH1D (Form ("h_r%i_avg_jer_%s_iEta%i", r, sys.c_str (), iEta), ";#it{p}_{T}^{truth} [GeV];#sigma / #mu #left[#it{E}_{reco} / #it{E}_{truth}#right] [%]", nPtJBins, pTJBins);
 
-        h_avg_jetacorr[iSys][iR][iEta] = new TH1D (Form ("h_r%i_avg_jetacorr_%s_iEta%i", r, sys.c_str (), iEta), ";#it{E}_{truth} [GeV];#LT#eta_{reco} - #eta_{truth}#GT", nPtJBins, pTJBins);
-        h_avg_jetares[iSys][iR][iEta] = new TH1D (Form ("h_r%i_avg_jetares_%s_iEta%i", r, sys.c_str (), iEta), ";#it{E}_{truth} [GeV];#sigma#left[#eta_{reco} - #eta_{truth}#GT#right]", nPtJBins, pTJBins);
+        h_avg_jetacorr[iSys][iR][iEta]  = new TH1D (Form ("h_r%i_avg_jetacorr_%s_iEta%i", r, sys.c_str (), iEta), ";#it{p}_{T}^{truth} [GeV];#LT#eta_{reco} - #eta_{truth}#GT", nPtJBins, pTJBins);
+        h_avg_jetares[iSys][iR][iEta]   = new TH1D (Form ("h_r%i_avg_jetares_%s_iEta%i", r, sys.c_str (), iEta), ";#it{p}_{T}^{truth} [GeV];#sigma#left[#eta_{reco} - #eta_{truth}#GT#right]", nPtJBins, pTJBins);
 
 
         h2_jpts_integratedEta[iSys][iR][iEta] = new TH2D (Form ("h2_r%i_jpts_integratedEta_%s_iEta%i", r, sys.c_str (), iEta), ";#it{p}_{T}^{truth} [GeV];#it{p}_{T}^{reco} / #it{p}_{T}^{truth};Counts", nPtJBins, pTJBins, nRespBins, respBins);
@@ -864,6 +874,28 @@ void AnalyzeJetEnergyResolution () {
 
       c->Print ((plotFileName + "]").c_str (), "pdf");
 
+
+      // fit jet energy resolution to functional form
+      for (int iEta = 0; iEta <= nEtaBins; iEta++) {
+
+        {
+          TF1* f = new TF1 (Form ("f_r%i_avg_jer_%s_iEta%i", r, sys.c_str (), iEta), "sqrt([0]*[0] + [1]*[1]/x + pow([2]/x, 2))", pTJBins[0], pTJBins[nPtJBins]);
+          f_avg_jer[iSys][iR][iEta] = f;
+
+          TH1D* h = h_avg_jer[iSys][iR][iEta];
+          h->Fit (f, "RN0Q");
+        }
+
+        {
+          TF1* f = new TF1 (Form ("f_r%i_avg_jptr_%s_iEta%i", r, sys.c_str (), iEta), "sqrt([0]*[0] + [1]*[1]/x + pow([2]/x, 2))", pTJBins[0], pTJBins[nPtJBins]);
+          f_avg_jptr[iSys][iR][iEta] = f;
+
+          TH1D* h = h_avg_jptr[iSys][iR][iEta];
+          h->Fit (f, "RN0Q");
+        }
+
+      } // end loop over iEta
+
     } // end loop over iR
 
   } // end loop over iSys
@@ -888,8 +920,12 @@ void AnalyzeJetEnergyResolution () {
         h_avg_jpts[iSys][iR][iEta]->Write ();
         h_avg_jptr[iSys][iR][iEta]->Write ();
 
+        f_avg_jptr[iSys][iR][iEta]->Write ();
+
         h_avg_jes[iSys][iR][iEta]->Write ();
         h_avg_jer[iSys][iR][iEta]->Write ();
+
+        f_avg_jer[iSys][iR][iEta]->Write ();
 
         h_avg_jetacorr[iSys][iR][iEta]->Write ();
         h_avg_jetares[iSys][iR][iEta]->Write ();
@@ -901,6 +937,10 @@ void AnalyzeJetEnergyResolution () {
         h2_jetacorr_integratedEta[iSys][iR][iEta]->Write ();
 
       } // end loop over iEta
+
+      h2_jet_ptreco_pttruth[iSys][iR]->Write ();
+
+      h2_jet_ereco_etruth[iSys][iR]->Write ();
 
     } // end loop oveer iR
 

@@ -86,6 +86,8 @@ TString ToTString (const SystFlag& sFlag) {
     case SystFlag::MixCatVar1:              return TString ("MixCatVar1");
     case SystFlag::MixCatVar2:              return TString ("MixCatVar2");
     case SystFlag::MixCatVar3:              return TString ("MixCatVar3");
+    case SystFlag::MixCatVar4:              return TString ("MixCatVar4");
+    case SystFlag::MixCatVar5:              return TString ("MixCatVar5");
     case SystFlag::JESVar0:                 return TString ("JESVar0");
     case SystFlag::JESVar1:                 return TString ("JESVar1");
     case SystFlag::JESVar2:                 return TString ("JESVar2");
@@ -118,6 +120,9 @@ TString ToTString (const SystFlag& sFlag) {
     case SystFlag::JERVar8:                 return TString ("JERVar8");
     case SystFlag::JERVar9:                 return TString ("JERVar9");
     case SystFlag::JERVar10:                return TString ("JERVar10");
+    case SystFlag::MCTruthLevel:            return TString ("MCTruthLevel");
+    case SystFlag::MCTruthJESSmear:         return TString ("MCTruthJESSmear");
+    case SystFlag::MCBbyBReco:              return TString ("MCBbyBReco");
     default:                                return TString ("???");
   }
 }
@@ -398,6 +403,18 @@ bool DoMixCatVar3 (const SystFlag& sFlag) {
 
 
 
+bool DoMixCatVar4 (const SystFlag& sFlag) {
+  return sFlag == SystFlag::MixCatVar4;
+}
+
+
+
+bool DoMixCatVar5 (const SystFlag& sFlag) {
+  return sFlag == SystFlag::MixCatVar5;
+}
+
+
+
 int GetNJESVar (const SystFlag& sFlag) {
   switch (sFlag) {
     case SystFlag::JESVar0:   return 0;
@@ -442,6 +459,24 @@ int GetNJERVar (const SystFlag& sFlag) {
     case SystFlag::JERVar10:  return 10;
     default:                  return -1;
   }
+}
+
+
+
+bool DoMCTruthLevel (const SystFlag& sFlag) {
+  return sFlag == SystFlag::MCTruthLevel;
+}
+
+
+
+bool DoMCTruthJESSmear (const SystFlag& sFlag) {
+  return sFlag == SystFlag::MCTruthJESSmear;
+}
+
+
+
+bool DoMCBbyBReco (const SystFlag& sFlag) {
+  return sFlag == SystFlag::MCBbyBReco;
 }
 
 
@@ -662,6 +697,18 @@ bool DoMixCatVar3 () {
 
 
 
+bool DoMixCatVar4 () {
+  return DoMixCatVar4 (systFlag);
+}
+
+
+
+bool DoMixCatVar5 () {
+  return DoMixCatVar5 (systFlag);
+}
+
+
+
 int GetNJESVar () {
   return GetNJESVar (systFlag);
 }
@@ -671,6 +718,37 @@ int GetNJESVar () {
 int GetNJERVar () {
   return GetNJERVar (systFlag);
 }
+
+
+
+bool DoMCTruthLevel () {
+  return DoMCTruthLevel (systFlag);
+}
+
+
+
+bool DoMCTruthJESSmear () {
+  return DoMCTruthJESSmear (systFlag);
+}
+
+
+
+bool DoMCBbyBReco () {
+  return DoMCBbyBReco (systFlag);
+}
+
+
+
+bool UseTruthJets () {
+  return DoMCTruthLevel () || DoMCTruthJESSmear ();
+}
+
+
+
+bool UseTruthParticles () {
+  return DoMCTruthLevel () || DoMCTruthJESSmear () || DoMCBbyBReco ();
+}
+
 
 
 
@@ -946,9 +1024,23 @@ double GetJetLuminosity () {
 
 
 /**
+ * Returns true if this truth jet passes selection criteria.
+ */
+bool MeetsTruthJetAcceptanceCuts (int iTJ, const JetRadius& radius) {
+  assert (GetAktTruthJetN (radius) > iTJ);
+  if (std::fabs (GetAktTruthJetEta (iTJ, radius)) > 2.8)
+    return false;
+  return true;
+}
+
+
+
+/**
  * Returns true if this jet passes selection criteria.
  */
 bool MeetsJetAcceptanceCuts (int iJ, const JetRadius& radius, const int nJESVar) {
+  if (UseTruthJets ())
+    return MeetsTruthJetAcceptanceCuts (iJ, radius); // if working at truth level then we should actually be checking the truth jet
   assert (GetAktHIJetN (radius) > iJ);
   assert (nJESVar >= -1 && nJESVar < nJESSys);
   if (std::fabs (GetAktHIJetEta (iJ, radius, nJESVar)) > 2.8)
@@ -990,7 +1082,11 @@ bool MeetsTrackCuts (int iTrk, const int nWPVar) {
 
   assert (nWPVar >= 0 && nWPVar < (int)trackWPs.size ());
 
-  if (!trackWPs[nWPVar][iTrk])
+  if (!UseTruthParticles ()) {
+    if (!trackWPs[nWPVar][iTrk])
+      return false;
+  }
+  else if (trk_truth_barcode[iTrk] <= 0 || 200000 <= trk_truth_barcode[iTrk] || !trk_truth_isHadron[iTrk])
     return false;
 
   //if (IsPbPb ()) {
@@ -1382,7 +1478,7 @@ float GetAktHIJetIso (const int iJ, const JetRadius& radius, const int nJESVar) 
   for (int iJp = 0; iJp < jn; iJp++) {
     if (iJp == iJ)
       continue; // skip the jet of interest
-    if (GetAktHIJetPt (iJp, radius, nJESVar) < GetAktHIIsoMinPtCut (radius))
+    if (GetAktHIJetPt (iJp, radius, nJESVar, 2) < GetAktHIIsoMinPtCut (radius))
       continue; // minimum jet pT cut
     float dr = DeltaR (jeta, GetAktHIJetEta (iJp, radius, nJESVar), jphi, GetAktHIJetPhi (iJp, radius, nJESVar));
     maxdr = std::fmin (dr, maxdr); // set isolation
@@ -1412,9 +1508,59 @@ float GetAktHIJetTiming (const int iJ, const JetRadius& radius) {
  * Returns 0 if the jet is outside the acceptance.
  */
 double GetAktJetWeight (const float jpt, const float jeta, const float jphi, const JetRadius& jetr) {
+  if (DoMCTruthLevel ())
+    return 1;
   const double accept = ((IspPb () & InDisabledHEC (jeta, jphi, GetRadius (jetr))) || std::fabs (jeta) > 2.8 ? 0. : 1.);
   const double hecwgt = (IspPb () && jeta > 1.1 && jeta < 3.6 ? (2.*M_PI / (3.*M_PI/2. - 2*GetRadius (jetr))) : 1.);
   return accept * hecwgt;
+}
+
+
+
+/**
+ * Returns the Pb-going Q2 vector, or 0 vector if there is no Pb beam.
+ * If both beams are Pb, the A and C side values are summed.
+ * Optionally will return values from the matched event instead of the trigger event.
+ */
+QnVector GetPbQ2Vec (const bool getMatching) {
+  float q2x = 0, q2y = 0, tot = 0;
+  if (IsPbPb () || (IspPb () && IsPeriodA ())) {
+    q2x += getMatching ? fcalA_et_Cos2_matching : fcalA_et_Cos2;
+    q2y += getMatching ? fcalA_et_Sin2_matching : fcalA_et_Sin2;
+    tot += getMatching ? fcalA_et_matching      : fcalA_et;
+  }
+  if (IsPbPb () || (IspPb () && !IsPeriodA ())) {
+    q2x += getMatching ? fcalC_et_Cos2_matching : fcalC_et_Cos2;
+    q2y += getMatching ? fcalC_et_Sin2_matching : fcalC_et_Sin2;
+    tot += getMatching ? fcalC_et_matching      : fcalC_et;
+  }
+  if (tot > 0)
+    return QnVector (q2x / tot, q2y / tot);
+  return QnVector (0, 0);
+}
+
+
+
+/**
+ * Returns the proton-going Q2 vector, or 0 vector if there is no proton beam.
+ * If both beams are protons, the A and C side values are summed.
+ * Optionally will return values from the matched event instead of the trigger event.
+ */
+QnVector GetProtonQ2Vec (const bool getMatching) {
+  float q2x = 0, q2y = 0, tot = 0;
+  if (Ispp () || (IspPb () && !IsPeriodA ())) {
+    q2x += getMatching ? fcalA_et_Cos2_matching : fcalA_et_Cos2;
+    q2y += getMatching ? fcalA_et_Sin2_matching : fcalA_et_Sin2;
+    tot += getMatching ? fcalA_et_matching      : fcalA_et;
+  }
+  if (Ispp () || (IspPb () && IsPeriodA ())) {
+    q2x += getMatching ? fcalC_et_Cos2_matching : fcalC_et_Cos2;
+    q2y += getMatching ? fcalC_et_Sin2_matching : fcalC_et_Sin2;
+    tot += getMatching ? fcalC_et_matching      : fcalC_et;
+  }
+  if (tot > 0)
+    return QnVector (q2x / tot, q2y / tot);
+  return QnVector (0, 0);
 }
 
 
@@ -1526,6 +1672,29 @@ TF1** LoadTrackingPurityFuncs () {
 
 
 /**
+ * Returns the jet energy resolution function for smearing truth jet pT values
+ */
+TF1* LoadJetEnergyResFunction () {
+  TString fname = Form ("%s/aux/JetEnergyResolution.root", workPath.Data ());
+  std::cout << "Trying to resolve jet energy resolutions file in " << fname.Data () << std::endl;
+  TFile* infile = new TFile (fname, "read");
+
+  const std::string sys = Ispp () ? "pp" : "pPb";
+  const short iAllEta = 10;
+
+  TF1* f_jer = (TF1*) ((TF1*) infile->Get (Form ("f_r4_avg_jer_%s_iEta%i", sys.c_str (), iAllEta)))->Clone ("f_r4_avg_jer");
+
+  std::cout << "Loaded JER function" << std::endl;
+
+  infile->Close ();
+  SaferDelete (&infile);
+
+  return f_jer;
+}
+
+
+
+/**
  * Converts a TProfile to a TGraph assuming the x-axis of the TProfile is the y-axis of the TGraph.
  */
 TGraphErrors* TProfY2TGE (TProfile* py) {
@@ -1562,8 +1731,8 @@ void SetCentralValuesKeepRelativeErrors (TGAE* g, TH1D* centralValues) {
 
   double xelo, xehi, yelo, yehi, x, y, ynew;
   for (int i = 0; i < g->GetN (); i++) {
-    xelo = g->GetErrorXlow (i);
-    xehi = g->GetErrorXhigh (i);
+    //xelo = g->GetErrorXlow (i);
+    //xehi = g->GetErrorXhigh (i);
     yelo = g->GetErrorYlow (i);
     yehi = g->GetErrorYhigh (i);
     g->GetPoint (i, x, y);
@@ -1572,12 +1741,40 @@ void SetCentralValuesKeepRelativeErrors (TGAE* g, TH1D* centralValues) {
 
     if (y > 0) {
       g->SetPoint (i, x, ynew);
-      g->SetPointEXlow (i, xelo);
-      g->SetPointEXhigh (i, xehi);
+      //g->SetPointEXlow (i, xelo);
+      //g->SetPointEXhigh (i, xehi);
       g->SetPointEYlow (i, yelo*ynew/y);
       g->SetPointEYhigh (i, yehi*ynew/y);
     }
   }
+}
+
+
+
+/**
+ * Takes the TGAE and sets y --> -y.
+ */
+void FlipTGAE (TGAE* g) {
+  double x, y;
+  for (int i = 0; i < g->GetN (); i++) {
+    g->GetPoint (i, x, y);
+    g->SetPoint (i, x, -y);
+  }
+  return;
+}
+
+
+
+/**
+ * Performs a bin-by-bin unfold on a TH1D y^meas(x) using a given TF1 with unfolding factors f(x) such that y^unfold(x) = y^meas(x) * f(x).
+ */
+void BinByBinUnfold (TH1D* h, TF1* f) {
+  for (int iX = 1; iX <= h->GetNbinsX (); iX++) {
+    const float uf = f->Eval (h->GetBinCenter (iX));
+    h->SetBinContent (iX, h->GetBinContent (iX) * uf);
+    h->SetBinError (iX, h->GetBinError (iX) * uf);
+  }
+  return;
 }
 
 

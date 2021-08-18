@@ -74,6 +74,9 @@ void PlotCentralityAnalysis () {
   TH3D* h3_mb_Pb_fcal_et_Pb_q2_Pb_zdc_calibE = nullptr;
   TH3D* h3_jet_Pb_fcal_et_Pb_q2_Pb_zdc_calibE = nullptr;
 
+  TGAE* g_ALICE_zna_calibE = new TGAE ();
+  TGAE* g_ALICE_zna_calibE_subpanel = new TGAE (); 
+
 
   inFile = new TFile (Form ("%s/CentralityAnalysis/Nominal/allppRuns.root", rootPath.Data ()), "read");
 
@@ -351,7 +354,7 @@ void PlotCentralityAnalysis () {
     uPad->SetLogy ();
 
     double ymin = 4e-6;
-    double ymax = 4e0;
+    double ymax = 8e0;
 
 
     TH1D* h = (TH1D*) h_mb_Pb_zdc_calibE_sum->Clone ("htemp");
@@ -427,6 +430,38 @@ void PlotCentralityAnalysis () {
 
     h->DrawCopy ("hist same");
 
+
+    const double alice_sf = 2.56/1.57;
+    {
+      std::ifstream f_alice (Form ("%s/aux/ALICE_data.txt", workPath.Data ()));
+      std::string dummyLine;
+      std::getline (f_alice, dummyLine);
+      double x, y, integral = 0;
+      while (f_alice) {
+        f_alice >> x >> y;
+        if (x/(alice_sf*1e3) > zdcCentBins[4]) integral += y;
+        g_ALICE_zna_calibE->SetPoint (g_ALICE_zna_calibE->GetN (), x/(alice_sf*1e3), y);
+      }
+      assert (integral > 0);
+      ScaleGraph (g_ALICE_zna_calibE, nullptr, 1./integral);
+
+      std::ifstream f_alice_subpanel (Form ("%s/aux/ALICE_data_subpanel.txt", workPath.Data ()));
+      std::getline (f_alice_subpanel, dummyLine);
+      while (f_alice_subpanel) {
+        f_alice_subpanel >> x >> y;
+        g_ALICE_zna_calibE_subpanel->SetPoint (g_ALICE_zna_calibE_subpanel->GetN (), x/(alice_sf*1e3), y);
+      }
+      assert (integral > 0);
+      ScaleGraph (g_ALICE_zna_calibE_subpanel, nullptr, 1./integral);
+
+    }
+
+    TGAE* g = g_ALICE_zna_calibE;
+    g->SetMarkerColor (kGreen+1);
+    g->SetLineColor (kGreen+1);
+    g->SetMarkerStyle (kOpenCircle);
+    g->Draw ("P");
+
     TLine* divs = new TLine ();
     TLatex* tl = new TLatex ();
     tl->SetTextAngle (-90);
@@ -442,11 +477,11 @@ void PlotCentralityAnalysis () {
     SaferDelete (&h);
 
 
-    myText (0.20, 0.900, kBlack, "#bf{#it{ATLAS}} Internal", 0.036);
-    myText (0.20, 0.860, kBlack, "#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV", 0.032);
-    myText (0.20, 0.820, kBlack, "All runs", 0.032);
-    myText (0.65, 0.550, kBlue+3, "HLT_j50_L1J15", 0.032);
-    myText (0.65, 0.510, kRed+1, "HLT_mb_sptrk_L1MBTS_1", 0.032);
+    myText (0.18, 0.900, kBlack, "#bf{#it{ATLAS}} Internal", 0.036);
+    myText (0.18, 0.860, kBlack, "#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV", 0.032);
+    myText (0.18, 0.820, kBlue+3, "HLT_j50_ion_L1J10", 0.032);
+    myText (0.18, 0.780, kRed+1, "HLT_mb_sptrk_L1MBTS_1", 0.032);
+    myText (0.18, 0.740, kGreen+1, "ALICE 8.16 TeV, #Sigma#it{E}^{Pb}_{ZNA} #times 1.57/2.56", 0.032);
 
 
     dPad->cd ();
@@ -532,6 +567,11 @@ void PlotCentralityAnalysis () {
     h->DrawCopy ("hist same");
     SaferDelete (&h);
 
+    g = g_ALICE_zna_calibE_subpanel;
+    g->SetMarkerColor (kGreen+1);
+    g->SetLineColor (kGreen+1);
+    g->SetMarkerStyle (kOpenCircle);
+    g->Draw ("P");
 
     c->cd ();
     TLine* subPadBorder = new TLine ();
@@ -669,7 +709,7 @@ void PlotCentralityAnalysis () {
     myText (0.65, 0.890, kBlack, "#bf{#it{ATLAS}} Internal", 0.036);
     myText (0.65, 0.850, kBlack, "#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV", 0.032);
     myText (0.65, 0.810, kBlack, "All runs", 0.032);
-    myText (0.65, 0.770, kBlue+3, "HLT_j50_L1J15", 0.032);
+    myText (0.65, 0.770, kBlue+3, "HLT_j50_ion_L1J10", 0.032);
     myText (0.65, 0.730, kRed+1, "HLT_mb_sptrk_L1MBTS_1", 0.032);
 
 
@@ -910,6 +950,7 @@ void PlotCentralityAnalysis () {
     //c->SetLogy ();
 
     TH1D* h = (TH1D*) h_mb_Pb_fcal_et_sum->Clone ("htemp");
+    h->Scale (1./h->Integral (), "width");
     h->Rebin (2);
     h->Scale (0.5);
 

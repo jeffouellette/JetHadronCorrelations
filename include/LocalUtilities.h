@@ -13,18 +13,23 @@
 #include <vector>
 
 typedef TGraphAsymmErrors TGAE;
+typedef std::pair <float, float> QnVector;
 
 namespace JetHadronCorrelations {
 
-enum class CollisionSystem { pp15, PbPb15, pPb16s5TeV, pPb16, Pbp16, XeXe17, pp17, PbPb18 }; // run 2 HI data sets
+// run 2 HI data sets
+enum class CollisionSystem { pp15, PbPb15, pPb16s5TeV, pPb16, Pbp16, XeXe17, pp17, PbPb18 };
 static const std::vector <CollisionSystem> AllCollisionSystem = { CollisionSystem::pp15, CollisionSystem::PbPb15, CollisionSystem::pPb16s5TeV, CollisionSystem::pPb16, CollisionSystem::Pbp16, CollisionSystem::XeXe17, CollisionSystem::pp17, CollisionSystem::PbPb18 };
 
-enum class DataType { Collisions, MCSignal, MCDataOverlay, MCHijing, MCHijingOverlay }; // data types used in HI
+// data types used in HI
+enum class DataType { Collisions, MCSignal, MCDataOverlay, MCHijing, MCHijingOverlay };
 static const std::vector <DataType> AllDataType = { DataType::Collisions, DataType::MCSignal, DataType:: MCDataOverlay, DataType::MCHijing, DataType::MCHijingOverlay };
 
-enum class TriggerType { None, Jet50GeV, Jet100GeV, MinBias }; // types of triggers in this analysis
+// types of triggers in this analysis
+enum class TriggerType { None, Jet50GeV, Jet100GeV, MinBias };
 static const std::vector <TriggerType> AllTriggerType = { TriggerType::None, TriggerType::Jet50GeV, TriggerType::Jet100GeV, TriggerType::MinBias };
 
+// types of systematic variations
 enum class SystFlag {
   Nominal,
   HITightVar,       // tracking quality variations
@@ -38,6 +43,8 @@ enum class SystFlag {
   MixCatVar1,       // mixing variations
   MixCatVar2,
   MixCatVar3,
+  MixCatVar4,       // 2nd order EP matching in pPb
+  MixCatVar5,       // 2nd order EP matching in pp
   JESVar0,          // jet energy scale variations
   JESVar1,
   JESVar2,
@@ -69,8 +76,11 @@ enum class SystFlag {
   JERVar7,
   JERVar8,
   JERVar9,
-  JERVar10
-}; // types of systematic variations
+  JERVar10,
+  MCTruthLevel,     // does the analysis at the MC-truth level
+  MCTruthJESSmear,  // does the analysis at MC-truth level but smears the JES
+  MCBbyBReco,       // selects truth charged particles with reco jets for BbyB (bin-by-bin) unfolding factors numerator. Denominator is in MCTruthLevel
+};
 static const std::vector <SystFlag> AllSystFlag = {
   SystFlag::Nominal,
   SystFlag::HITightVar, 
@@ -84,6 +94,8 @@ static const std::vector <SystFlag> AllSystFlag = {
   SystFlag::MixCatVar1,
   SystFlag::MixCatVar2,
   SystFlag::MixCatVar3,
+  SystFlag::MixCatVar4,
+  SystFlag::MixCatVar5,
   SystFlag::JESVar0,
   SystFlag::JESVar1,
   SystFlag::JESVar2,
@@ -115,7 +127,10 @@ static const std::vector <SystFlag> AllSystFlag = {
   SystFlag::JERVar7,
   SystFlag::JERVar8,
   SystFlag::JERVar9,
-  SystFlag::JERVar10
+  SystFlag::JERVar10,
+  SystFlag::MCTruthLevel,
+  SystFlag::MCTruthJESSmear,
+  SystFlag::MCBbyBReco,
 };
 
 enum class JetRadius { R0p2, R0p3, R0p4, R0p6, R0p8, R1p0, Invalid };
@@ -173,9 +188,14 @@ bool DoFineFcalCentVar (const SystFlag& sFlag);
 bool DoMixCatVar1 (const SystFlag& sFlag);
 bool DoMixCatVar2 (const SystFlag& sFlag);
 bool DoMixCatVar3 (const SystFlag& sFlag);
+bool DoMixCatVar4 (const SystFlag& sFlag);
+bool DoMixCatVar5 (const SystFlag& sFlag);
 
 int GetNJESVar (const SystFlag& sFlag);
 int GetNJERVar (const SystFlag& sFlag);
+
+bool DoMCTruthLevel (const SystFlag& sFlag);
+bool DoMCTruthJESSmear (const SystFlag& sFlag);
 
 
 
@@ -218,9 +238,17 @@ bool DoFineFcalCentVar ();
 bool DoMixCatVar1 ();
 bool DoMixCatVar2 ();
 bool DoMixCatVar3 ();
+bool DoMixCatVar4 ();
+bool DoMixCatVar5 ();
 
 int GetNJESVar ();
 int GetNJERVar ();
+
+bool DoMCTruthLevel ();
+bool DoMCTruthJESSmear ();
+
+bool UseTruthJets ();
+bool UseTruthParticles ();
 
 
 /**
@@ -275,6 +303,12 @@ TString GetIdentifier (const int dataSet, const char* directory, const char* inF
  * Returns the proper jet trigger luminosity for this data set in nb^-1
  */
 double GetJetLuminosity ();
+
+
+/**
+ * Returns true if this truth jet passes selection criteria.
+ */
+bool MeetsTruthJetAcceptanceCuts (int iTJ, const JetRadius& radius);
 
 
 /**
@@ -454,6 +488,22 @@ double GetAktJetWeight (const float jpt, const float jeta, const float jphi, con
 
 
 /**
+ * Returns the Pb-going Q2 vector, or 0 vector if there is no Pb beam.
+ * If both beams are Pb, the A and C side values are summed.
+ * Optionally will return values from the matched event instead of the trigger event.
+ */
+QnVector GetPbQ2Vec (const bool getMatching = false);
+
+
+/**
+ * Returns the proton-going Q2 vector, or 0 vector if there is no proton beam.
+ * If both beams are protons, the A and C side values are summed.
+ * Optionally will return values from the matched event instead of the trigger event.
+ */
+QnVector GetProtonQ2Vec (const bool getMatching = false);
+
+
+/**
  * Returns the tracking efficiency histograms.
  */
 TH2D* LoadTrackingEfficiency ();
@@ -469,6 +519,12 @@ TH1D** LoadTrackingPurity ();
  * Returns array of functions that fit the tracking purity.
  */
 TF1** LoadTrackingPurityFuncs ();
+
+
+/**
+ * Returns the jet energy resolution function for smearing truth jet pT values
+ */
+TF1* LoadJetEnergyResFunction ();
 
 
 /**
@@ -488,6 +544,18 @@ TGraphErrors* TProfX2TGE (TProfile* px);
  * Values must be positive-definite! I.e. not negative or zero. Otherwise no uncertainty resetting is done for those bins.
  */
 void SetCentralValuesKeepRelativeErrors (TGAE* g, TH1D* centralValues);
+
+
+/**
+ * Takes the TGAE and sets y --> -y.
+ */
+void FlipTGAE (TGAE* g);
+
+
+/**
+ * Performs a bin-by-bin unfold on a TH1D y^meas(x) using a given TF1 with unfolding factors f(x) such that y^unfold(x) = y^meas(x) * f(x).
+ */
+void BinByBinUnfold (TH1D* h, TF1* f);
 
 
 } // end namespace

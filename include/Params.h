@@ -12,7 +12,7 @@
 #include <set>
 #include <math.h>
 
-using namespace std;
+typedef std::pair <float, float> QnVector;
 
 namespace JetHadronCorrelations { 
 
@@ -29,14 +29,14 @@ const float min_akt4_hi_jet_pt = 30;
 
 const float akt2_TruthMatchMaxDR = 0.1; // Truth-matching maximum dR for R=0.2 jets
 const float akt4_TruthMatchMaxDR = 0.2; // Truth-matching maximum dR for R=0.4 jets
-const float akt2_hi_TruthMatchMinRecoPt = 15; // Minimum HI jet pT for reco. matching of R=0.2 truth jets
-const float akt4_hi_TruthMatchMinRecoPt = 15; // Minimum HI jet pT for reco. matching of R=0.4 truth jets
+const float akt2_hi_TruthMatchMinRecoPt = 0; // Minimum HI jet pT for reco. matching of R=0.2 truth jets
+const float akt4_hi_TruthMatchMinRecoPt = 0; // Minimum HI jet pT for reco. matching of R=0.4 truth jets
 const float akt2_hi_IsoMinPt = 7; // Minimum pT for isolation calculation of R=0.2 HI jets
 const float akt4_hi_IsoMinPt = 7; // Minimum pT for isolation calculation of R=0.4 HI jets
 const float akt2_truth_IsoMinPt = 7; // Minimum pT for isolation calculation of R=0.2 truth jets
 const float akt4_truth_IsoMinPt = 7; // Minimum pT for isolation calculation of R=0.4 truth jets
-const float akt2_hi_IsoMinDR = 0.3; // Minimum isolation DR for R=0.2 HI jets
-const float akt4_hi_IsoMinDR = 0.6; // Minimum isolation DR for R=0.4 HI jets
+const float akt2_hi_IsoMinDR = 0.0; // Minimum isolation DR for R=0.2 HI jets
+const float akt4_hi_IsoMinDR = 0.0; // Minimum isolation DR for R=0.4 HI jets
 const float akt2_truth_IsoMinDR = 0.5; // Minimum isolation DR for R=0.2 truth jets
 const float akt4_truth_IsoMinDR = 1.0; // Minimum isolation DR for R=0.4 truth jets
 
@@ -86,6 +86,9 @@ TString GetJetPtStr (const char* tag) {
 }
 
 
+const std::vector <TString> directions = {"ns", "perp", "as"};
+const int nDir = (int) directions.size ();
+
 const std::vector <TString> pTChSelections = {"gt0p5_lt1", "gt1_lt1p5", "gt1p5_lt2", "gt2_lt4", "gt4_lt6", "gt6_lt8", "gt8_lt10", "gt10_lt15", "gt15_lt20", "gt20_lt30"};
 const int nPtChSelections = pTChSelections.size ();
 
@@ -131,6 +134,9 @@ const int nppRuns = sizeof (ppRuns) / sizeof (ppRuns[0]);
 
 const double multBins[] = {-0.5, 60.5, 120.5, 999.5};
 const int nMultBins = sizeof (multBins) / sizeof (multBins[0]); // last bin is inclusive in multiplicity
+
+const double drBins[] = {0, 0.2, 0.4, M_PI};
+const int nDRBins = sizeof (drBins) / sizeof (drBins[0]); // last bin is inclusive in dR
 
 const double etaTrkBins[] = {0, 0.5, 1.0, 1.5, 2.0, 2.5};
 const int nEtaTrkBins = sizeof (etaTrkBins) / sizeof (etaTrkBins[0]) - 1;

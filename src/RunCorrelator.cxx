@@ -18,6 +18,7 @@
 #include <TH2D.h>
 #include <TF1.h>
 #include <TPRegexp.h>
+#include <TRandom3.h>
 
 #include <iostream>
 #include <math.h>
@@ -27,6 +28,7 @@ using namespace JetHadronCorrelations;
 
 
 bool doMixing = false;
+bool sameTreeMixing = false;
 
 float truth_jet_min_pt = 0;
 float truth_jet_max_pt = FLT_MAX;
@@ -50,7 +52,7 @@ bool Correlator (const char* tag, const char* outFilePattern, TTree* jetsTree, T
     jet_trig_name = jet_trig_name_pp17;
   }
   else {
-    std::cout << "Error: In Correlator.C: Invalid or unsupported collision system, exiting." << std::endl;
+    std::cout << "Error: In RunCorrelator.cxx: Invalid or unsupported collision system, exiting." << std::endl;
     return false;
   }
 
@@ -63,24 +65,24 @@ bool Correlator (const char* tag, const char* outFilePattern, TTree* jetsTree, T
   if (IsCollisions ()) {
     if (UseJet50GeVTriggers ()) {
       jetTrigger = new Trigger (jet_trig_name[0]);
-      std::cout << "Info: In Correlator.C: Looking for " << jet_trig_name[0] << " trigger" << std::endl;
+      std::cout << "Info: In RunCorrelator.cxx: Looking for " << jet_trig_name[0] << " trigger" << std::endl;
       jetsTree->SetBranchAddress ((jet_trig_name[0]+"_decision").c_str (), &(jetTrigger->trigDecision));
       jetsTree->SetBranchAddress ((jet_trig_name[0]+"_prescale").c_str (), &(jetTrigger->trigPrescale));
     }
     else if (UseJet100GeVTriggers ()) {
       jetTrigger = new Trigger (jet_trig_name[1]);
-      std::cout << "Info: In Correlator.C: Looking for " << jet_trig_name[1] << " trigger" << std::endl;
+      std::cout << "Info: In RunCorrelator.cxx: Looking for " << jet_trig_name[1] << " trigger" << std::endl;
       jetsTree->SetBranchAddress ((jet_trig_name[1]+"_decision").c_str (), &(jetTrigger->trigDecision));
       jetsTree->SetBranchAddress ((jet_trig_name[1]+"_prescale").c_str (), &(jetTrigger->trigPrescale));
     }
     else if (!UseJetTriggers ()) {
       jetTrigger = new Trigger (minbias_trig_name[0]);
-      std::cout << "Info: In Correlator.C: Looking for " << minbias_trig_name[0] << " trigger" << std::endl;
+      std::cout << "Info: In RunCorrelator.cxx: Looking for " << minbias_trig_name[0] << " trigger" << std::endl;
       jetsTree->SetBranchAddress ((minbias_trig_name[0]+"_decision").c_str (), &(jetTrigger->trigDecision));
       jetsTree->SetBranchAddress ((minbias_trig_name[0]+"_prescale").c_str (), &(jetTrigger->trigPrescale));
     }
     else {
-      std::cout << "Error: In Correlator.C: Invalid trigger scheme? Please debug! Exiting." << std::endl;
+      std::cout << "Error: In RunCorrelator.cxx: Invalid trigger scheme? Please debug! Exiting." << std::endl;
       return false;
     }
 
@@ -114,6 +116,10 @@ bool Correlator (const char* tag, const char* outFilePattern, TTree* jetsTree, T
 
   jetsTree->SetBranchAddress ("fcalA_et",         &fcalA_et);
   jetsTree->SetBranchAddress ("fcalC_et",         &fcalC_et);
+  jetsTree->SetBranchAddress ("fcalA_et_Cos2",    &fcalA_et_Cos2);
+  jetsTree->SetBranchAddress ("fcalC_et_Cos2",    &fcalC_et_Cos2);
+  jetsTree->SetBranchAddress ("fcalA_et_Sin2",    &fcalA_et_Sin2);
+  jetsTree->SetBranchAddress ("fcalC_et_Sin2",    &fcalC_et_Sin2);
 
   if (IsCollisions () && !Ispp ()) {
     jetsTree->SetBranchAddress ("ZdcCalibEnergy_A", &ZdcCalibEnergy_A);
@@ -131,6 +137,10 @@ bool Correlator (const char* tag, const char* outFilePattern, TTree* jetsTree, T
 
     tracksTree->SetBranchAddress ("fcalA_et",         &fcalA_et_matching);
     tracksTree->SetBranchAddress ("fcalC_et",         &fcalC_et_matching);
+    tracksTree->SetBranchAddress ("fcalA_et_Cos2",    &fcalA_et_Cos2_matching);
+    tracksTree->SetBranchAddress ("fcalC_et_Cos2",    &fcalC_et_Cos2_matching);
+    tracksTree->SetBranchAddress ("fcalA_et_Sin2",    &fcalA_et_Sin2_matching);
+    tracksTree->SetBranchAddress ("fcalC_et_Sin2",    &fcalC_et_Sin2_matching);
 
     if (IsCollisions () && !Ispp ()) {
       tracksTree->SetBranchAddress ("ZdcCalibEnergy_A", &ZdcCalibEnergy_A_matching);
@@ -138,25 +148,29 @@ bool Correlator (const char* tag, const char* outFilePattern, TTree* jetsTree, T
     }
   }
 
-  //if (!IsCollisions ()) {
-  //  tracksTree->SetBranchAddress ("truth_trk_n",        &truth_trk_n);
-  //  tracksTree->SetBranchAddress ("truth_trk_pt",       &truth_trk_pt);
-  //  tracksTree->SetBranchAddress ("truth_trk_eta",      &truth_trk_eta);
-  //  tracksTree->SetBranchAddress ("truth_trk_phi",      &truth_trk_phi);
-  //  tracksTree->SetBranchAddress ("truth_trk_charge",   &truth_trk_charge);
-  //  tracksTree->SetBranchAddress ("truth_trk_pdgid",    &truth_trk_pdgid);
-  //  tracksTree->SetBranchAddress ("truth_trk_barcode",  &truth_trk_barcode);
-  //  tracksTree->SetBranchAddress ("truth_trk_isHadron", &truth_trk_isHadron);
-  //}
-
-  tracksTree->SetBranchAddress ("ntrk",                   &trk_n);
-  tracksTree->SetBranchAddress ("trk_pt",                 &trk_pt);
-  tracksTree->SetBranchAddress ("trk_eta",                &trk_eta);
-  tracksTree->SetBranchAddress ("trk_phi",                &trk_phi);
-  tracksTree->SetBranchAddress ("trk_charge",             &trk_charge);
-  tracksTree->SetBranchAddress ("trk_TightPrimary",       &trk_TightPrimary);
-  tracksTree->SetBranchAddress ("trk_HITight",            &trk_HITight);
-  tracksTree->SetBranchAddress ("trk_HILoose",            &trk_HILoose);
+  if (UseTruthParticles ()) {
+    if (IsCollisions ()) {
+      std::cout << "Error: In RunCorrelator.cxx: Configured to use truth particles but running over data? Please investigate. Exiting gracefully." << std::endl;
+      return true;
+    }
+    tracksTree->SetBranchAddress ("truth_trk_n",            &trk_n);
+    tracksTree->SetBranchAddress ("truth_trk_pt",           &trk_pt);
+    tracksTree->SetBranchAddress ("truth_trk_eta",          &trk_eta);
+    tracksTree->SetBranchAddress ("truth_trk_phi",          &trk_phi);
+    tracksTree->SetBranchAddress ("truth_trk_charge",       &trk_charge);
+    tracksTree->SetBranchAddress ("truth_trk_barcode",      &trk_truth_barcode);
+    tracksTree->SetBranchAddress ("truth_trk_isHadron",     &trk_truth_isHadron);
+  }
+  else {
+    tracksTree->SetBranchAddress ("ntrk",                   &trk_n);
+    tracksTree->SetBranchAddress ("trk_pt",                 &trk_pt);
+    tracksTree->SetBranchAddress ("trk_eta",                &trk_eta);
+    tracksTree->SetBranchAddress ("trk_phi",                &trk_phi);
+    tracksTree->SetBranchAddress ("trk_charge",             &trk_charge);
+    tracksTree->SetBranchAddress ("trk_TightPrimary",       &trk_TightPrimary);
+    tracksTree->SetBranchAddress ("trk_HITight",            &trk_HITight);
+    tracksTree->SetBranchAddress ("trk_HILoose",            &trk_HILoose);
+  }
   //tracksTree->SetBranchAddress ("trk_d0",                 &trk_d0);
   //tracksTree->SetBranchAddress ("trk_d0sig",              &trk_d0sig);
   //tracksTree->SetBranchAddress ("trk_z0",                 &trk_z0);
@@ -224,8 +238,8 @@ bool Correlator (const char* tag, const char* outFilePattern, TTree* jetsTree, T
 
 
   // setup centrality bins (only relevant for p+Pb)
-  double* centBins = (DoFcalCentVar () ? fcalCentBins : (DoFineFcalCentVar () ? fineFcalCentBins : (!IsCollisions () ? zdcCentBins : fcalCentBins)));
-  const int nCentBins = (DoFcalCentVar () ? nFcalCentBins : (DoFineFcalCentVar () ? nFineFcalCentBins : (!IsCollisions () ? nZdcCentBins : nFcalCentBins)));
+  double* centBins = (DoFcalCentVar () ? fcalCentBins : (DoFineFcalCentVar () ? fineFcalCentBins : (!IsCollisions () ? fcalCentBins : zdcCentBins)));
+  const int nCentBins = (DoFcalCentVar () ? nFcalCentBins : (DoFineFcalCentVar () ? nFineFcalCentBins : (!IsCollisions () ? nFcalCentBins : nZdcCentBins)));
 
 
   TH2D* h2_trk_eff = LoadTrackingEfficiency ();
@@ -348,9 +362,9 @@ bool Correlator (const char* tag, const char* outFilePattern, TTree* jetsTree, T
   int nMixCentBins = 0;
 
   if (Ispp ()) {
-    if (DoMixCatVar1 ())      { mixCentBins = ppMixVar1Bins;    nMixCentBins = nppMixVar1Bins;  }
-    else if (DoMixCatVar3 ()) { mixCentBins = ppMixVar3Bins;    nMixCentBins = nppMixVar3Bins;  }
-    else                      { mixCentBins = ppMixBins;        nMixCentBins = nppMixBins;      }
+    if      (DoMixCatVar1 ()) { mixCentBins = ppMixVar1Bins;    nMixCentBins = nppMixVar1Bins;    }
+    else if (DoMixCatVar3 ()) { mixCentBins = ppMixVar3Bins;    nMixCentBins = nppMixVar3Bins;    }
+    else                      { mixCentBins = ppMixBins;        nMixCentBins = nppMixBins;        }
   }
   else {
     if (DoMixCatVar2 ())      { mixCentBins = fcalMixVar2Bins;  nMixCentBins = nFcalMixVar2Bins;  }
@@ -358,9 +372,22 @@ bool Correlator (const char* tag, const char* outFilePattern, TTree* jetsTree, T
   }
 
 
-  long iTrkEvt = 0; // counter for mixed events (declared outside of loop scope to keep its value from one loop to the next)
+  // for smearing truth jets if specified
+  TRandom3* rndm = new TRandom3 ();
+  TF1* f_jer = LoadJetEnergyResFunction ();
+
+
+  // counter for mixed events (declared outside of loop scope to keep its value from one loop to the next)
+  long iTrkEvt = 0;
+
+  // Which jet radius to use. We use R=0.4. Could also plausibly use R=0.2.
   const JetRadius r0p4 = JetRadius::R0p4;
 
+
+
+  ////////////////////////////////////////////////////////////////////////////////////////////////////  
+  // Main loop over events
+  ////////////////////////////////////////////////////////////////////////////////////////////////////  
   for (long iEvt = 0; iEvt < nEvts; iEvt++) {
     if (nEvts > 100 && iEvt % (nEvts / 100) == 0)                                
       std::cout << iEvt / (nEvts / 100) << "\% done...\r" << std::flush;
@@ -415,12 +442,17 @@ bool Correlator (const char* tag, const char* outFilePattern, TTree* jetsTree, T
     int iCent = 0;
     // p+Pb only -- split events by centrality
     if (IspPb ()) {
-      const double centVar = (!IsCollisions () || DoFcalCentVar ()  || DoFineFcalCentVar () ? fcalA_et : ZdcCalibEnergy_A * 1e3);
+      const double centVar = ((!IsCollisions () || DoFcalCentVar ()  || DoFineFcalCentVar ()) ? fcalA_et : (ZdcCalibEnergy_A * 1e3));
       iCent = GetBin (centBins, nCentBins, centVar);
       if (iCent < 0 || iCent > nCentBins-1)
         continue;
     }
     const int iFile = iCent;
+
+
+    // calculate event plane angle based on FCal q-vector moments
+    QnVector Q2 = (IspPb () ? GetPbQ2Vec () : GetProtonQ2Vec ());
+    const float psi2 = std::atan2 (Q2.second, Q2.first)/2.;
 
 
     // event weights -- these are not 1 in MC due to JZ weighting (they are 1 in data)
@@ -436,35 +468,46 @@ bool Correlator (const char* tag, const char* outFilePattern, TTree* jetsTree, T
       jet_trk_dphi_gt0p5_lt1_counts[iX] = 0;
       jet_trk_dphi_gt1_lt1p5_counts[iX] = 0;
       jet_trk_dphi_gt1p5_lt2_counts[iX] = 0;
-      jet_trk_dphi_gt2_lt4_counts[iX] = 0;
-      jet_trk_dphi_gt4_lt6_counts[iX] = 0;
-      jet_trk_dphi_gt6_lt8_counts[iX] = 0;
-      jet_trk_dphi_gt8_lt10_counts[iX] = 0;
+      jet_trk_dphi_gt2_lt4_counts[iX]   = 0;
+      jet_trk_dphi_gt4_lt6_counts[iX]   = 0;
+      jet_trk_dphi_gt6_lt8_counts[iX]   = 0;
+      jet_trk_dphi_gt8_lt10_counts[iX]  = 0;
       jet_trk_dphi_gt10_lt15_counts[iX] = 0;
       jet_trk_dphi_gt15_lt20_counts[iX] = 0;
       jet_trk_dphi_gt20_lt30_counts[iX] = 0;
     }
     for (int iX = 0; iX < nPtChBins; iX++) {
-      jet_trk_pt_ns_counts[iX] = 0;
-      jet_trk_pt_perp_counts[iX] = 0;
-      jet_trk_pt_as_counts[iX] = 0;
+      jet_trk_pt_ns_counts[iX]          = 0;
+      jet_trk_pt_perp_counts[iX]        = 0;
+      jet_trk_pt_as_counts[iX]          = 0;
+    }
+
+   
+    // possibly smear truth jet pTs by JER
+    if (DoMCTruthJESSmear ()) {
+      const int jn = GetAktTruthJetN (r0p4);
+      for (int iJet = 0; iJet < jn; iJet++) {
+        const float sf = rndm->Gaus (1, 0.01*f_jer->Eval (akt4_truth_jet_pt[iJet]));
+        akt4_truth_jet_pt[iJet] = sf * akt4_truth_jet_pt[iJet];
+        akt4_truth_jet_e[iJet]  = sf * akt4_truth_jet_e[iJet];
+      }
     }
 
 
-    double nj = 0;
-    double jwgt = 0;
+    float nj = 0;
+    float jwgt = 0;
 
-    const int jn = GetAktHIJetN (r0p4);
+    const int jn = UseTruthJets () ? GetAktTruthJetN (r0p4) :  GetAktHIJetN (r0p4);
     for (int iJet = 0; iJet < jn; iJet++) {
 
-      const double jpt = GetAktHIJetPt (iJet, r0p4, nJESVar);
-      const double jeta = GetAktHIJetEta (iJet, r0p4, nJESVar);
-      const double jphi = GetAktHIJetPhi (iJet, r0p4, nJESVar);
+      const float jpt  = (UseTruthJets () ? GetAktTruthJetPt  (iJet, r0p4) : GetAktHIJetPt  (iJet, r0p4, nJESVar));
+      const float jeta = (UseTruthJets () ? GetAktTruthJetEta (iJet, r0p4) : GetAktHIJetEta (iJet, r0p4, nJESVar));
+      const float jphi = (UseTruthJets () ? GetAktTruthJetPhi (iJet, r0p4) : GetAktHIJetPhi (iJet, r0p4, nJESVar));
 
       if (!MeetsJetAcceptanceCuts (iJet, r0p4, nJESVar))
         continue; // jet eta/phi & timing cuts
 
-      const double thisjwgt = GetAktJetWeight (jpt, jeta, jphi, r0p4);
+      const float thisjwgt = GetAktJetWeight (jpt, jeta, jphi, r0p4);
       if (thisjwgt <= 0.)
         continue; // sanity check
 
@@ -492,7 +535,7 @@ bool Correlator (const char* tag, const char* outFilePattern, TTree* jetsTree, T
     if (nj == 0)
       continue;
 
-    const double yboost = GetBoost (run_number);
+    const float yboost = GetBoost (run_number);
 
     h_evt_counts[iFile]->Fill (0);
     h_evt_counts[iFile]->Fill (1, ewgt);
@@ -515,6 +558,11 @@ bool Correlator (const char* tag, const char* outFilePattern, TTree* jetsTree, T
       bool goodEvent = false;
       do {
         iTrkEvt = (iTrkEvt + 1) % nTrkEvts; // make sure to wrap around
+
+        // make sure we are not mixing an event with itself
+        if (sameTreeMixing && iTrkEvt == iEvt % jetsTree->GetEntries ())
+          continue;
+
         tracksTree->GetEntry (iTrkEvt);
 
         // triggering cut, require appropriate track selection trigger to have fired
@@ -544,6 +592,13 @@ bool Correlator (const char* tag, const char* outFilePattern, TTree* jetsTree, T
         if (GetBin (mixCentBins, nMixCentBins, fcalA_et_matching + (Ispp () ? fcalC_et_matching : 0)) != iMixCent)
           continue; // then match FCal centrality with jet ("trigger") event
 
+        if (DoMixCatVar4 () || DoMixCatVar5 ()) {
+          // calculate Q2 vector for matched event
+          QnVector Q2mix = (IspPb () ? GetPbQ2Vec (true) : GetProtonQ2Vec (true));
+          if (DeltaPhi (psi2, std::atan2 (Q2mix.second, Q2mix.first)/2.) > M_PI / 4)
+            continue; // cut on psi2 matching for mixed event -- exploratory for now!
+        }
+
         // if we've made it this far without proceeding to the next loop then its a good event!
         goodEvent = true;
       }
@@ -561,34 +616,34 @@ bool Correlator (const char* tag, const char* outFilePattern, TTree* jetsTree, T
       jet_trk_dphi_gt0p5_lt1_counts[iX] = 0;
       jet_trk_dphi_gt1_lt1p5_counts[iX] = 0;
       jet_trk_dphi_gt1p5_lt2_counts[iX] = 0;
-      jet_trk_dphi_gt2_lt4_counts[iX] = 0;
-      jet_trk_dphi_gt4_lt6_counts[iX] = 0;
-      jet_trk_dphi_gt6_lt8_counts[iX] = 0;
-      jet_trk_dphi_gt8_lt10_counts[iX] = 0;
+      jet_trk_dphi_gt2_lt4_counts[iX]   = 0;
+      jet_trk_dphi_gt4_lt6_counts[iX]   = 0;
+      jet_trk_dphi_gt6_lt8_counts[iX]   = 0;
+      jet_trk_dphi_gt8_lt10_counts[iX]  = 0;
       jet_trk_dphi_gt10_lt15_counts[iX] = 0;
       jet_trk_dphi_gt15_lt20_counts[iX] = 0;
       jet_trk_dphi_gt20_lt30_counts[iX] = 0;
     }
     for (int iX = 0; iX < nPtChBins; iX++) {
-      jet_trk_pt_ns_counts[iX] = 0;
-      jet_trk_pt_perp_counts[iX] = 0;
-      jet_trk_pt_as_counts[iX] = 0;
+      jet_trk_pt_ns_counts[iX]          = 0;
+      jet_trk_pt_perp_counts[iX]        = 0;
+      jet_trk_pt_as_counts[iX]          = 0;
     }
 
 
-    // loop over all jets in the event and correlate tracks
+    // loop over all jets again in the event but now correlate tracks
     for (int iJet = 0; iJet < jn; iJet++) {
 
-      const double jpt = GetAktHIJetPt (iJet, r0p4, nJESVar);
-      const double jeta = GetAktHIJetEta (iJet, r0p4, nJESVar);
-      const double jphi = GetAktHIJetPhi (iJet, r0p4, nJESVar);
+      const float jpt  = (UseTruthJets () ? GetAktTruthJetPt  (iJet, r0p4) : GetAktHIJetPt  (iJet, r0p4, nJESVar));
+      const float jeta = (UseTruthJets () ? GetAktTruthJetEta (iJet, r0p4) : GetAktHIJetEta (iJet, r0p4, nJESVar));
+      const float jphi = (UseTruthJets () ? GetAktTruthJetPhi (iJet, r0p4) : GetAktHIJetPhi (iJet, r0p4, nJESVar));
 
       if (!MeetsJetAcceptanceCuts (iJet, r0p4, nJESVar))
         continue; // jet eta/phi & timing cuts
       if (!MeetsJetPtCut (jpt))
         continue; // jet pT cuts
 
-      const double thisjwgt = GetAktJetWeight (jpt, jeta, jphi, r0p4);
+      const float thisjwgt = GetAktJetWeight (jpt, jeta, jphi, r0p4);
       if (thisjwgt <= 0.)
         continue; // sanity check
 
@@ -611,7 +666,7 @@ bool Correlator (const char* tag, const char* outFilePattern, TTree* jetsTree, T
         //const double trk_pz = ((double)trk_pt[iTrk]) * std::sinh ((double)trk_eta[iTrk]);
         //const double trk_y = (trk_en > trk_pz ? 0.5 * std::log ((trk_en + trk_pz)/(trk_en - trk_pz)) : 0.);
 
-        const double trk_y = trk_eta[iTrk];
+        const float trk_y = trk_eta[iTrk];
         if (std::fabs (trk_y - yboost) > 2.5 - 0.465)
           continue; // rapidity acceptance cut
 
@@ -628,37 +683,36 @@ bool Correlator (const char* tag, const char* outFilePattern, TTree* jetsTree, T
 
 
         const float teff = h2_trk_eff->GetBinContent (h2_trk_eff->FindBin (trk_eta[iTrk], trk_pt[iTrk]));
-        //const float tpur = h2_trk_pur->GetBinContent (h2_trk_pur->FindBin (trk_eta[iTrk], trk_pt[iTrk])); // deprecated
         const float tpur = (DoPrimFitVar () ? h_trk_pur[iEta]->GetBinContent (h_trk_pur[iEta]->FindBin (trk_pt[iTrk])) : f_trk_pur[iEta]->Eval (trk_pt[iTrk]));
-        const float twgt = thisjwgt * (teff > 0. ? tpur / teff : 0.);
+        const float twgt = thisjwgt * (UseTruthParticles () ? 1 : (teff > 0. ? tpur / teff : 0.));
 
         if (0.5 < trk_pt[iTrk] && trk_pt[iTrk] < 1)
-          jet_trk_dphi_gt0p5_lt1_counts[iDPhi] += twgt;
+          jet_trk_dphi_gt0p5_lt1_counts[iDPhi]  += twgt;
         else if (1 < trk_pt[iTrk] && trk_pt[iTrk] < 1.5)
-          jet_trk_dphi_gt1_lt1p5_counts[iDPhi] += twgt;
+          jet_trk_dphi_gt1_lt1p5_counts[iDPhi]  += twgt;
         else if (1.5 < trk_pt[iTrk] && trk_pt[iTrk] < 2)
-          jet_trk_dphi_gt1p5_lt2_counts[iDPhi] += twgt;
+          jet_trk_dphi_gt1p5_lt2_counts[iDPhi]  += twgt;
         else if (2 < trk_pt[iTrk] && trk_pt[iTrk] < 4)
-          jet_trk_dphi_gt2_lt4_counts[iDPhi] += twgt;
+          jet_trk_dphi_gt2_lt4_counts[iDPhi]    += twgt;
         else if (4 < trk_pt[iTrk] && trk_pt[iTrk] < 6)
-          jet_trk_dphi_gt4_lt6_counts[iDPhi] += twgt;
+          jet_trk_dphi_gt4_lt6_counts[iDPhi]    += twgt;
         else if (6 < trk_pt[iTrk] && trk_pt[iTrk] < 8)
-          jet_trk_dphi_gt6_lt8_counts[iDPhi] += twgt;
+          jet_trk_dphi_gt6_lt8_counts[iDPhi]    += twgt;
         else if (8 < trk_pt[iTrk] && trk_pt[iTrk] < 10)
-          jet_trk_dphi_gt8_lt10_counts[iDPhi] += twgt;
+          jet_trk_dphi_gt8_lt10_counts[iDPhi]   += twgt;
         else if (10 < trk_pt[iTrk] && trk_pt[iTrk] < 15)
-          jet_trk_dphi_gt10_lt15_counts[iDPhi] += twgt;
+          jet_trk_dphi_gt10_lt15_counts[iDPhi]  += twgt;
         else if (15 < trk_pt[iTrk] && trk_pt[iTrk] < 20)
-          jet_trk_dphi_gt15_lt20_counts[iDPhi] += twgt;
+          jet_trk_dphi_gt15_lt20_counts[iDPhi]  += twgt;
         else if (20 < trk_pt[iTrk] && trk_pt[iTrk] < 30)
-          jet_trk_dphi_gt20_lt30_counts[iDPhi] += twgt;
+          jet_trk_dphi_gt20_lt30_counts[iDPhi]  += twgt;
 
         if (dphi < M_PI/8.)
-          jet_trk_pt_ns_counts[iPtCh] += twgt;
+          jet_trk_pt_ns_counts[iPtCh]           += twgt;
         else if (M_PI/3. < dphi && dphi < 2.*M_PI/3.)
-          jet_trk_pt_perp_counts[iPtCh] += twgt;
+          jet_trk_pt_perp_counts[iPtCh]         += twgt;
         else if (dphi > 7.*M_PI/8.)
-          jet_trk_pt_as_counts[iPtCh] += twgt;
+          jet_trk_pt_as_counts[iPtCh]           += twgt;
 
       } // end loop over tracks
     } // end loop over jets
@@ -669,18 +723,18 @@ bool Correlator (const char* tag, const char* outFilePattern, TTree* jetsTree, T
       jet_trk_dphi_gt0p5_lt1_counts[iX] = jet_trk_dphi_gt0p5_lt1_counts[iX] / jwgt;
       jet_trk_dphi_gt1_lt1p5_counts[iX] = jet_trk_dphi_gt1_lt1p5_counts[iX] / jwgt;
       jet_trk_dphi_gt1p5_lt2_counts[iX] = jet_trk_dphi_gt1p5_lt2_counts[iX] / jwgt;
-      jet_trk_dphi_gt2_lt4_counts[iX] = jet_trk_dphi_gt2_lt4_counts[iX] / jwgt;
-      jet_trk_dphi_gt4_lt6_counts[iX] = jet_trk_dphi_gt4_lt6_counts[iX] / jwgt;
-      jet_trk_dphi_gt6_lt8_counts[iX] = jet_trk_dphi_gt6_lt8_counts[iX] / jwgt;
-      jet_trk_dphi_gt8_lt10_counts[iX] = jet_trk_dphi_gt8_lt10_counts[iX] / jwgt;
+      jet_trk_dphi_gt2_lt4_counts[iX]   = jet_trk_dphi_gt2_lt4_counts[iX]   / jwgt;
+      jet_trk_dphi_gt4_lt6_counts[iX]   = jet_trk_dphi_gt4_lt6_counts[iX]   / jwgt;
+      jet_trk_dphi_gt6_lt8_counts[iX]   = jet_trk_dphi_gt6_lt8_counts[iX]   / jwgt;
+      jet_trk_dphi_gt8_lt10_counts[iX]  = jet_trk_dphi_gt8_lt10_counts[iX]  / jwgt;
       jet_trk_dphi_gt10_lt15_counts[iX] = jet_trk_dphi_gt10_lt15_counts[iX] / jwgt;
       jet_trk_dphi_gt15_lt20_counts[iX] = jet_trk_dphi_gt15_lt20_counts[iX] / jwgt;
       jet_trk_dphi_gt20_lt30_counts[iX] = jet_trk_dphi_gt20_lt30_counts[iX] / jwgt;
     }
     for (int iX = 0; iX < nPtChBins; iX++) {
-      jet_trk_pt_ns_counts[iX] = jet_trk_pt_ns_counts[iX] / jwgt;
-      jet_trk_pt_perp_counts[iX] = jet_trk_pt_perp_counts[iX] / jwgt;
-      jet_trk_pt_as_counts[iX] = jet_trk_pt_as_counts[iX] / jwgt;
+      jet_trk_pt_ns_counts[iX]          = jet_trk_pt_ns_counts[iX]          / jwgt;
+      jet_trk_pt_perp_counts[iX]        = jet_trk_pt_perp_counts[iX]        / jwgt;
+      jet_trk_pt_as_counts[iX]          = jet_trk_pt_as_counts[iX]          / jwgt;
     }
 
 
@@ -838,18 +892,31 @@ bool RunCorrelator (const char* directory,
   doMixing = (tracksInFileName != nullptr && strcmp (tracksInFileName, "") != 0);
 
   // check mixing configuration makes sense
-  if (!doMixing && (DoMixCatVar1 () || DoMixCatVar2 () || DoMixCatVar3 ())) {
+  if (!doMixing && (DoMixCatVar1 () || DoMixCatVar2 () || DoMixCatVar3 () || DoMixCatVar4 () || DoMixCatVar5 ())) {
     std::cout << "In RunCorrelator.cxx: Configured to run mixing variations but no mixing configuration specified? Please investigate. Exiting." << std::endl;
     return false;
   }
 
   // histograms for some mixing variations are symlinks to central values to avoid file copy issues, make sure not to overwrite them by exiting gracefully
-  if (DoMixCatVar2 () && Ispp ()) {
-    std::cout << "In RunCorrelator.cxx: MixCatVar2 does nothing in pp, exiting gracefully." << std::endl;
+  if ((DoMixCatVar2 () || DoMixCatVar4 ()) && Ispp ()) {
+    std::cout << "In RunCorrelator.cxx: MixCatVar2 and MixCatVar4 do nothing in pp, exiting gracefully." << std::endl;
     return true;
   }
-  else if ((DoMixCatVar1 () || DoMixCatVar3 ()) && IspPb ()) {
-    std::cout << "In RunCorrelator.cxx: MixCatVar1 and MixCatVar3 do nothing in p+Pb, exiting gracefully." << std::endl;
+  else if ((DoMixCatVar1 () || DoMixCatVar3 () || DoMixCatVar5 ()) && IspPb ()) {
+    std::cout << "In RunCorrelator.cxx: MixCatVar1, MixCatVar3, and MixCatVar5 do nothing in p+Pb, exiting gracefully." << std::endl;
+    return true;
+  }
+
+
+  // keeps track of whether the jets and tracks are taken from the same tree. This is important for making sure we don't mix with the same event.
+  sameTreeMixing = doMixing && strcmp (tracksInFileName, jetsInFileName) == 0;
+  if (sameTreeMixing) {
+    std::cout << "In RunCorrelator.cxx: Will be mixing events from the same tree -- will check that we are not mixing events." << std::endl;
+  }
+
+  // cannot run mixing at truth-level (not yet defined)
+  if (doMixing && (UseTruthJets () || UseTruthParticles ())) {
+    std::cout << "In RunCorrelator.cxx: Configured to run mixing but at MC truth level. This behavior is not defined, please investigate. Exiting gracefully." << std::endl;
     return true;
   }
 

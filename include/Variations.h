@@ -13,8 +13,8 @@
 
 std::vector <TString> variations = {
   "Nominal",
-//  "HITightVar",
-//  "HILooseVar",
+  "HITightVar",
+  "HILooseVar",
   "TrkEffVar",
   "FakeRateVar",
   "PrimFitVar",
@@ -35,7 +35,6 @@ std::vector <TString> variations = {
   "JESVar8",
   "JESVar9",
   "JESVar10",
-  "JESVar10",
   "JESVar11",
   "JESVar12",
   "JESVar13",
@@ -46,11 +45,17 @@ std::vector <TString> variations = {
   "JESVar18",
   "JESVar19",
   //"JESVar20",
+  "MCTruthLevel",     // Truth-level jets and truth-level charged particles
+  "MCTruthJESSmear",  // Truth-level jets and truth-level charged particles, with jet energies smeared by JER
+  "MCBbyBReco",       // Reco-level jets and truth-level charged particles
 };
 const int nVar = (int)variations.size ();
 
-//const int nVar = 1;
-//std::vector <TString> variations = {"Nominal"};
+int GetVariationN (const TString& s) {
+  int i = 0;
+  while (i < nVar && variations[i] != s) i++;
+  return i;
+}
 
 
 // variations to consider in MC -- skip if not listed here
@@ -66,7 +71,6 @@ std::set <TString> mcVariations = {
   "JESVar7",
   "JESVar8",
   "JESVar9",
-  "JESVar10",
   "JESVar10",
   "JESVar11",
   "JESVar12",
@@ -84,8 +88,8 @@ std::set <TString> mcVariations = {
 // variations to consider in data -- skip if not listed here
 std::set <TString> dataVariations = {
   "Nominal",
-//  "HITightVar",
-//  "HILooseVar",
+  "HITightVar",
+  "HILooseVar",
   "TrkEffVar",
   "FakeRateVar",
   "PrimFitVar",
@@ -96,18 +100,90 @@ std::set <TString> dataVariations = {
 };
 
 
+// other variations in MC which are not to be considered as systematics
+std::set <TString> otherMCVariations = {
+  "MCTruthLevel",
+  "MCTruthJESSmear",
+  "MCBbyBReco",
+};
+
+
+// these variations don't need a background subtraction in pp
+std::set <TString> variationsWithNoppBkgd = {
+  "MCTruthLevel",
+  "MCTruthJESSmear",
+  "MCBbyBReco",
+};
+
+// these variations don't need a background subtraction in p+Pb
+std::set <TString> variationsWithNopPbBkgd = {
+  "MCTruthLevel",
+  "MCTruthJESSmear",
+  "MCBbyBReco",
+};
+
+// these variations don't need an unfold performed on them
+std::set <TString> variationsWithNoUnfold = {
+  "MCTruthLevel",
+};
+
+// these variations don't cancel in finding the signal yield
+std::set <TString> variationsThatDontCancelInSig = {
+  "PartSpcVar"
+};
+
+// these variations don't cancel in p+Pb/pp ratio
+std::set <TString> variationsThatDontCancelInRatio = {
+  "JESVar19"
+};
+
+// for each group of variations below take the maximum from that group
+std::vector <std::vector <TString>> variationGroups = {
+  {"HITightVar", "HILooseVar"},
+  {"TrkEffVar"},
+  {"FakeRateVar"},
+  {"PrimFitVar"},
+  {"PartSpcVar"},
+  //{"FcalCentVar"},
+  //{"FineFcalCentVar"},
+  {"MixCatVar1", "MixCatVar3"},
+  {"MixCatVar2"},
+  {"JESVar0"},
+  {"JESVar1"},
+  {"JESVar2"},
+  {"JESVar3"},
+  {"JESVar4"},
+  {"JESVar5"},
+  {"JESVar6"},
+  {"JESVar7"},
+  {"JESVar8"},
+  {"JESVar9"},
+  {"JESVar10"},
+  {"JESVar11"},
+  {"JESVar12"},
+  {"JESVar13"},
+  {"JESVar14"},
+  {"JESVar15"},
+  //{"JESVar16"},
+  {"JESVar17"},
+  {"JESVar18"},
+  {"JESVar19"},
+  //{"JESVar20"},
+};
+
+
 std::map <TString, MyStyle> varStyles = {
-  {"HITightVar",        MyStyle (myLiteRed,   3)},
-  {"HILooseVar",        MyStyle (myCyan,      3)},
-  {"TrkEffVar",         MyStyle (myLitePurple,3)},
-  {"FakeRateVar",       MyStyle (myOrange,    3)},
-  {"PrimFitVar",        MyStyle (myBlue,      3)},
-  {"PartSpcVar",        MyStyle (myLiteGreen, 3)},
-  {"FcalCentVar",       MyStyle (kViolet-5, 5)},
-  {"FineFcalCentVar",   MyStyle (kViolet,   5)},
-  {"MixCatVar1",        MyStyle (myOrange,        7)},
-  {"MixCatVar2",        MyStyle (kAzure+2,        7)},
-  {"MixCatVar3",        MyStyle (kGreen+2,        7)},
+  {"HITightVar",        MyStyle (myLiteRed,       4)},
+  {"HILooseVar",        MyStyle (myCyan,          4)},
+  {"TrkEffVar",         MyStyle (myLitePurple,    4)},
+  {"FakeRateVar",       MyStyle (myLiteYellow,    4)},
+  {"PrimFitVar",        MyStyle (myLiteBlue,      4)},
+  {"PartSpcVar",        MyStyle (myLiteGreen,     4)},
+  {"FcalCentVar",       MyStyle (kViolet-5,       5)},
+  {"FineFcalCentVar",   MyStyle (kViolet,         5)},
+  {"MixCatVar1",        MyStyle (myRed,           7)},
+  {"MixCatVar2",        MyStyle (myGreen,         7)},
+  {"MixCatVar3",        MyStyle (kViolet-3,       7)},
   {"JESVar0",           MyStyle (manyColors[0],   2)},
   {"JESVar1",           MyStyle (manyColors[1],   2)},
   {"JESVar2",           MyStyle (manyColors[2],   2)},
@@ -125,18 +201,23 @@ std::map <TString, MyStyle> varStyles = {
   {"JESVar13",          MyStyle (manyColors[14],  2)},
   {"JESVar14",          MyStyle (manyColors[15],  2)},
   {"JESVar15",          MyStyle (manyColors[16],  2)},
-  {"JESVar16",          MyStyle (kWhite,          2)},
+  //{"JESVar16",          MyStyle (kWhite,          2)},
   {"JESVar17",          MyStyle (manyColors[17],  2)},
   {"JESVar18",          MyStyle (manyColors[18],  2)},
   {"JESVar19",          MyStyle (manyColors[19],  2)},
-  {"JESVar20",          MyStyle (kWhite,          2)},
+  //{"JESVar20",          MyStyle (kWhite,          2)},
 
   //{"NoFcalMixCatVar",   MyStyle (myLiteRed, 6)},
   //{"pPbFcalMixCatVar",  MyStyle (myCyan, 6)},
   //{"ppFcalMixCatVar",   MyStyle (myLitePurple, 6)},
+
+  {"Mixing",            MyStyle (myBlue,      1)},
+  {"Tracking",          MyStyle (myViolet,    1)},
+  {"Jets",              MyStyle (myMaroon,    1)},
 };
 
 
+// for plot labeling -- what is this systematic called?
 std::map <TString, TString> varFullNames = {
   {"HITightVar",        "HITight tracks"},
   {"HILooseVar",        "HILoose tracks"},
@@ -172,11 +253,38 @@ std::map <TString, TString> varFullNames = {
   {"JESVar13",          "JET_EffectiveNP_8restTerm"},
   {"JESVar14",          "JET_SingleParticle_HighPt"},
   {"JESVar15",          "JET_RelativeNonClosure_MC16"},
-  {"JESVar16",          "JET_EtaIntercalibration_NonClosure_2018data"},
+  //{"JESVar16",          "JET_EtaIntercalibration_NonClosure_2018data"},
   {"JESVar17",          "Cross-calibration"},
   {"JESVar18",          "Flavor-dep. response"},
   {"JESVar19",          "Flavor fraction"},
-  {"JESVar20",          "R-scan"},
+  //{"JESVar20",          "R-scan"},
+
+  {"Mixing",            "Total mixing"},
+  {"Tracking",          "Total tracking"},
+  {"Jets",              "Total jets"}
+};
+
+
+
+bool IsMixingVariation (const TString& s) {
+  return s.Contains ("Mix");
+}
+
+
+bool IsTrackingVariation (const TString& s) {
+  return (dataVariations.count (s) > 0 && !IsMixingVariation (s));
+}
+
+
+bool IsJetsVariation (const TString& s) {
+  return (mcVariations.count (s) > 0 && !IsMixingVariation (s));
+}
+
+
+std::vector <TString> totalVariations = {
+  "Mixing",
+  "Tracking",
+  "Jets"
 };
 
 
