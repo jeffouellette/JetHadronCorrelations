@@ -307,21 +307,25 @@ void ProcessCorrelations (const char* outFileTag, const char* tag1, const char* 
 
       const TString dir = directions[iDir];
 
-      h_jet_trk_pt_ref_bbb[iDir] = (TH1D*) h_jet_trk_pt_ref[1][iDir][iVarNum]->Clone (Form ("h_jet_trk_pt_%s_ref_bbb", dir.Data ()));
-      h_jet_trk_pt_ref_bbb[iDir]->Divide (h_jet_trk_pt_ref[1][iDir][iVarDen]);
+      TH1D* h = nullptr;
 
-      f = new TF1 (Form ("f_jet_trk_pt_%s_ref_bbb", dir.Data ()), funcStr, h_jet_trk_pt_ref_bbb[iDir]->GetXaxis ()->GetBinLowEdge (1), h_jet_trk_pt_ref_bbb[iDir]->GetXaxis ()->GetBinLowEdge (h_jet_trk_pt_ref_bbb[iDir]->GetNbinsX () + 1));
-      h_jet_trk_pt_ref_bbb[iDir]->Fit (f, "RN0Q");
+      h = (TH1D*) h_jet_trk_pt_ref[1][iDir][iVarNum]->Clone (Form ("h_jet_trk_pt_%s_ref_bbb", dir.Data ()));
+      h->Divide (h_jet_trk_pt_ref[1][iDir][iVarDen]);
+      h_jet_trk_pt_ref_bbb[iDir] = h;
+
+      f = new TF1 (Form ("f_jet_trk_pt_%s_ref_bbb", dir.Data ()), funcStr, h->GetXaxis ()->GetBinLowEdge (1), h->GetXaxis ()->GetBinLowEdge (h->GetNbinsX () + 1));
       f_jet_trk_pt_ref_bbb[iDir] = f;
+      h->Fit (f, "RN0Q");
 
       for (int iCent = 0; iCent < nZdcCentBins; iCent++) {
 
-        h_jet_trk_pt_bbb[iDir][iCent] = (TH1D*) h_jet_trk_pt[1][iDir][iCent][iVarNum]->Clone (Form ("h_jet_trk_pt_%s_pPb_bbb_iCent%i", dir.Data (), iCent));
-        h_jet_trk_pt_bbb[iDir][iCent]->Divide (h_jet_trk_pt[1][iDir][iCent][iVarDen]);
+        h = (TH1D*) h_jet_trk_pt[1][iDir][iCent][iVarNum]->Clone (Form ("h_jet_trk_pt_%s_pPb_bbb_iCent%i", dir.Data (), iCent));
+        h->Divide (h_jet_trk_pt[1][iDir][iCent][iVarDen]);
+        h_jet_trk_pt_bbb[iDir][iCent] = h;
 
-        f = new TF1 (Form ("f_jet_trk_pt_%s_pPb_bbb_iCent%i", dir.Data (), iCent), funcStr, h_jet_trk_pt_bbb[iDir][iCent]->GetXaxis ()->GetBinLowEdge (1), h_jet_trk_pt_bbb[iDir][iCent]->GetXaxis ()->GetBinLowEdge (h_jet_trk_pt_bbb[iDir][iCent]->GetNbinsX () + 1));
-        h_jet_trk_pt_bbb[iDir][iCent]->Fit (f, "RN0Q");
+        f = new TF1 (Form ("f_jet_trk_pt_%s_pPb_bbb_iCent%i", dir.Data (), iCent), funcStr, h->GetXaxis ()->GetBinLowEdge (1), h->GetXaxis ()->GetBinLowEdge (h->GetNbinsX () + 1));
         f_jet_trk_pt_bbb[iDir][iCent] = f;
+        h->Fit (f, "RN0Q");
 
       } // end loop over iCent
 

@@ -1603,7 +1603,7 @@ void PlotPtCh (const char* tag, const char* inFileTag) {
       h->SetLineStyle (2);
       h->SetLineWidth (2);
       h->SetLineColor (kBlack);
-      h->DrawCopy ("hist");
+      h->DrawCopy ("hist ][");
       SaferDelete (&h);
 
       for (int iDir : {0, 2}) {
@@ -1628,7 +1628,7 @@ void PlotPtCh (const char* tag, const char* inFileTag) {
       h->SetLineStyle (2);
       h->SetLineWidth (2);
       h->SetLineColor (kBlack);
-      h->DrawCopy ("hist");
+      h->DrawCopy ("hist ][");
       SaferDelete (&h);
 
       for (int iDir : {0, 2}) {
@@ -1922,7 +1922,7 @@ void PlotPtCh (const char* tag, const char* inFileTag) {
       h->SetLineStyle (2);
       h->SetLineWidth (2);
       h->SetLineColor (kBlack);
-      h->DrawCopy ("hist");
+      h->DrawCopy ("hist ][");
       SaferDelete (&h);
 
       for (int iDir : {0, 2}) {
@@ -1931,12 +1931,12 @@ void PlotPtCh (const char* tag, const char* inFileTag) {
         h = h_jet_trk_pt_ref[1][iDir];
         g = (TGAE*) g_jet_trk_pt_ref_syst[iDir][0]->Clone ();
         SetCentralValuesKeepRelativeErrors (g, h);
-        ScaleGraph (g, h_jet_trk_pt_ref_syst[iDir][iMCTruthLevel]);
-        myDrawSyst (g, col, 1, 1, 0., "[]");
+        ScaleGraph (g, h_jet_trk_pt_ref_sig_syst[iDir][iMCTruthLevel]);
+        myDrawSyst (g, col, 1, 1, 0.3, "3");
         SaferDelete (&g);
       
         g = make_graph (h);
-        ScaleGraph (g, h_jet_trk_pt_ref_syst[iDir][iMCTruthLevel]);
+        ScaleGraph (g, h_jet_trk_pt_ref_sig_syst[iDir][iMCTruthLevel]);
         ResetXErrors (g);
         myDraw (g, col, kOpenCircle, 0.8, 1, 2, "P", false);
         SaferDelete (&g);
@@ -1959,7 +1959,7 @@ void PlotPtCh (const char* tag, const char* inFileTag) {
       h->SetLineStyle (2);
       h->SetLineWidth (2);
       h->SetLineColor (kBlack);
-      h->DrawCopy ("hist");
+      h->DrawCopy ("hist ][");
       SaferDelete (&h);
 
       for (int iDir : {0, 2}) {
@@ -1968,12 +1968,12 @@ void PlotPtCh (const char* tag, const char* inFileTag) {
         h = h_jet_trk_pt_sig[1][iDir][iCent];
         g = (TGAE*) g_jet_trk_pt_sig_syst[iDir][iCent][0]->Clone ();
         SetCentralValuesKeepRelativeErrors (g, h);
-        ScaleGraph (g, h_jet_trk_pt_syst[iDir][iCent][iMCTruthLevel]);
-        myDrawSyst (g, col, 1, 1, 0., "[]");
+        ScaleGraph (g, h_jet_trk_pt_sig_syst[iDir][iCent][iMCTruthLevel]);
+        myDrawSyst (g, col, 1, 1, 0.3, "3");
         SaferDelete (&g);
       
         g = make_graph (h);
-        ScaleGraph (g, h_jet_trk_pt_syst[iDir][iCent][iMCTruthLevel]);
+        ScaleGraph (g, h_jet_trk_pt_sig_syst[iDir][iCent][iMCTruthLevel]);
         ResetXErrors (g);
         myDraw (g, col, kOpenCircle, 0.8, 1, 2, "P", false);
         SaferDelete (&g);
