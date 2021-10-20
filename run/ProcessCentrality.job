@@ -8,7 +8,7 @@ accounting_group = group_atlas.boulder
 
 # Useful variables to set:
 # grid pass version
-gridPass=040
+gridPass=090
 
 # alg values: CentralityAnalysis
 alg=CentralityAnalysis
@@ -16,7 +16,7 @@ alg=CentralityAnalysis
 # Trigger config; MinBias
 trig=MinBias
 
-# Systematic config; Nominal
+# Systematic config; Nominal, JESVar0, JESVar1,..., JESVar15, (don't run 16 or 20), JESVar17, JESVar18, JESVar19, MixVar1, MixVar2, MixVar3, MCTruthJetsTruthParts, MCRecoJetsTruthParts, FcalCentVar (at the moment)
 syst=Nominal
 
 

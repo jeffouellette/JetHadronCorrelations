@@ -13,17 +13,23 @@
 
 std::vector <TString> variations = {
   "Nominal",
+
+/*
   "HITightVar",
   "HILooseVar",
   "TrkEffVar",
   "FakeRateVar",
   "PrimFitVar",
   "PartSpcVar",
+
   //"FcalCentVar",
   //"FineFcalCentVar",
+
   "MixCatVar1",
   "MixCatVar2",
   "MixCatVar3",
+  "NonClosureVar",
+
   "JESVar0",
   "JESVar1",
   "JESVar2",
@@ -45,9 +51,10 @@ std::vector <TString> variations = {
   "JESVar18",
   "JESVar19",
   //"JESVar20",
-  "MCTruthLevel",     // Truth-level jets and truth-level charged particles
-  "MCTruthJESSmear",  // Truth-level jets and truth-level charged particles, with jet energies smeared by JER
-  "MCBbyBReco",       // Reco-level jets and truth-level charged particles
+
+  "MCTruthJetsTruthParts",     // Truth-level jets and truth-level charged particles
+  "MCRecoJetTruthParts",       // Reco-level jets and truth-level charged particles
+*/
 };
 const int nVar = (int)variations.size ();
 
@@ -88,53 +95,52 @@ std::set <TString> mcVariations = {
 // variations to consider in data -- skip if not listed here
 std::set <TString> dataVariations = {
   "Nominal",
+
   "HITightVar",
   "HILooseVar",
   "TrkEffVar",
   "FakeRateVar",
   "PrimFitVar",
   "PartSpcVar",
+
   "MixCatVar1",
   "MixCatVar2",
-  "MixCatVar3"
+  "MixCatVar3",
+  "NonClosureVar",
 };
 
 
 // other variations in MC which are not to be considered as systematics
 std::set <TString> otherMCVariations = {
-  "MCTruthLevel",
-  "MCTruthJESSmear",
-  "MCBbyBReco",
+  "MCTruthJetsTruthParts",
+  "MCRecoJetTruthParts",
 };
-
 
 // these variations don't need a background subtraction in pp
 std::set <TString> variationsWithNoppBkgd = {
-  "MCTruthLevel",
-  "MCTruthJESSmear",
-  "MCBbyBReco",
+  "MCTruthJetsTruthParts",
+  "MCRecoJetTruthParts",
 };
 
 // these variations don't need a background subtraction in p+Pb
 std::set <TString> variationsWithNopPbBkgd = {
-  "MCTruthLevel",
-  "MCTruthJESSmear",
-  "MCBbyBReco",
+  "MCTruthJetsTruthParts",
+  "MCRecoJetTruthParts",
 };
 
 // these variations don't need an unfold performed on them
 std::set <TString> variationsWithNoUnfold = {
-  "MCTruthLevel",
+  "MCTruthJetsTruthParts",
 };
 
 // these variations don't cancel in finding the signal yield
 std::set <TString> variationsThatDontCancelInSig = {
-  "PartSpcVar"
+  "PartSpcVar",
 };
 
 // these variations don't cancel in p+Pb/pp ratio
 std::set <TString> variationsThatDontCancelInRatio = {
-  "JESVar19"
+  "JESVar19",
 };
 
 // for each group of variations below take the maximum from that group
@@ -144,10 +150,14 @@ std::vector <std::vector <TString>> variationGroups = {
   {"FakeRateVar"},
   {"PrimFitVar"},
   {"PartSpcVar"},
+
   //{"FcalCentVar"},
   //{"FineFcalCentVar"},
+
   {"MixCatVar1", "MixCatVar3"},
   {"MixCatVar2"},
+  {"NonClosureVar"},
+
   {"JESVar0"},
   {"JESVar1"},
   {"JESVar2"},
@@ -179,11 +189,15 @@ std::map <TString, MyStyle> varStyles = {
   {"FakeRateVar",       MyStyle (myLiteYellow,    4)},
   {"PrimFitVar",        MyStyle (myLiteBlue,      4)},
   {"PartSpcVar",        MyStyle (myLiteGreen,     4)},
+
   {"FcalCentVar",       MyStyle (kViolet-5,       5)},
   {"FineFcalCentVar",   MyStyle (kViolet,         5)},
+
   {"MixCatVar1",        MyStyle (myRed,           7)},
   {"MixCatVar2",        MyStyle (myGreen,         7)},
   {"MixCatVar3",        MyStyle (kViolet-3,       7)},
+  {"NonClosureVar",     MyStyle (myOrange,        7)},
+
   {"JESVar0",           MyStyle (manyColors[0],   2)},
   {"JESVar1",           MyStyle (manyColors[1],   2)},
   {"JESVar2",           MyStyle (manyColors[2],   2)},
@@ -225,18 +239,24 @@ std::map <TString, TString> varFullNames = {
   {"FakeRateVar",       "Fake rate"},
   {"PrimFitVar",        "Primary fraction fit"},
   {"PartSpcVar",        "Particle species"},
+
   {"FcalCentVar",       "FCal-based centrality"},
   {"FineFcalCentVar",   "Fine FCal centrality"},
+
   {"MixCatVar1",        "Mixing variation 1"},
   {"MixCatVar2",        "Mixing variation 2"},
   {"MixCatVar3",        "Mixing variation 3"},
+  {"NonClosureVar",     "MC non-closure (50\%)"},
+
   {"FcalCentVar",       "FCal 0-20\%"},
   {"NoFcalMixCatVar",   "No FCal Matching"},
   {"pPbFcalMixCatVar",  "FCal Matching (#it{p}+Pb only)"},
   {"ppFcalMixCatVar",   "FCal Matching (#it{pp} only)"},
+
   {"MixCatVar1",        "Mixing variation 1"},
   {"MixCatVar2",        "Mixing variation 2"},
   {"MixCatVar3",        "Mixing variation 3"},
+
   {"JESVar0",           "JET_EtaIntercalibration_Modelling"},
   {"JESVar1",           "JET_EtaIntercalibration_TotalStat"},
   {"JESVar2",           "JET_EtaIntercalibration_NonClosure_highE"},
@@ -267,7 +287,7 @@ std::map <TString, TString> varFullNames = {
 
 
 bool IsMixingVariation (const TString& s) {
-  return s.Contains ("Mix");
+  return s.Contains ("Mix") || s.Contains ("NonClosureVar");
 }
 
 
@@ -277,7 +297,7 @@ bool IsTrackingVariation (const TString& s) {
 
 
 bool IsJetsVariation (const TString& s) {
-  return (mcVariations.count (s) > 0 && !IsMixingVariation (s));
+  return (s.Contains ("JES"));
 }
 
 
@@ -286,6 +306,17 @@ std::vector <TString> totalVariations = {
   "Tracking",
   "Jets"
 };
+
+
+short GetVarN (const TString& s) {
+  int iVar = 0;
+  while (iVar < nVar && strcmp (variations[iVar], s.Data ()) != 0) iVar++;
+  if (iVar == nVar) {
+    std::cout << "Cannot find " << s << " result? Please check!" << std::endl;
+    return -1;
+  }
+  return iVar;
+}
 
 
 #endif

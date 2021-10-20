@@ -780,6 +780,29 @@ void PlotJetEnergyResolution () {
 
         h2->DrawCopy ("colz");
         SaferDelete (&h2);
+  
+        TF1* f_x = new TF1 ("f_x", "x", ymin, ymax);
+        TF1* f_upper_jer_cut = new TF1 ("f_upper_jer_cut", "x * (1 + 0.04 * sqrt([0]*[0] + [1]*[1]/x + pow([2]/x, 2)))", ymin, ymax);
+        TF1* f_lower_jer_cut = new TF1 ("f_lower_jer_cut", "x * (1 - 0.04 * sqrt([0]*[0] + [1]*[1]/x + pow([2]/x, 2)))", ymin, ymax);
+
+        TF1* f_jer = f_avg_jer[iSys][iR][nEtaBins];
+
+        f_upper_jer_cut->SetParameter (0, f_jer->GetParameter (0));
+        f_upper_jer_cut->SetParameter (1, f_jer->GetParameter (1));
+        f_upper_jer_cut->SetParameter (2, f_jer->GetParameter (2));
+        f_lower_jer_cut->SetParameter (0, f_jer->GetParameter (0));
+        f_lower_jer_cut->SetParameter (1, f_jer->GetParameter (1));
+        f_lower_jer_cut->SetParameter (2, f_jer->GetParameter (2));
+
+        f_x->SetLineStyle (2);
+        f_upper_jer_cut->SetLineStyle (2);
+        f_lower_jer_cut->SetLineStyle (2);
+        f_x->SetLineWidth (2);
+        f_upper_jer_cut->SetLineWidth (2);
+        f_lower_jer_cut->SetLineWidth (2);
+        f_x->Draw ("same");
+        f_upper_jer_cut->Draw ("same");
+        f_lower_jer_cut->Draw ("same");
 
         tl->SetTextFont (43);
         tl->SetTextSize (32);

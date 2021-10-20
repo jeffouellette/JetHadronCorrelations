@@ -11,17 +11,13 @@ accounting_group = group_atlas.boulder
 swVersion=21.2.169
 
 # grid pass version
-gridPass=040
+gridPass=090
 
-# Analysis-level minimum/maximum jet pT; 15, 30, 60, or 120 (minimum); 0 (maximum)
-#minjpt=30
-maxjpt=0
+# Trigger config; MinBias, J50, J100
+#trig=J50
 
-# Trigger config; MinBias, Jet50GeV, Jet100GeV
-#trig=Jet50GeV
-
-# Systematic config; Nominal, JESVar0, JESVar1,..., JESVar15, (don't run 16!), JESVar17, JESVar18, JESVar19, MixVar1, MixVar2, MixVar3, FcalCentVar (at the moment)
-#syst=None
+# Systematic config; Nominal, JESVar0, JESVar1,..., JESVar15, (don't run 16 or 20), JESVar17, JESVar18, JESVar19, MixVar1, MixVar2, MixVar3, MCTruthJetsTruthParts, MCRecoJetsTruthParts, FcalCentVar (at the moment)
+#syst=Nominal
 
 # Data streams; MinBias or Main
 #jetstream=Main
@@ -42,17 +38,19 @@ maxjpt=0
 #[11] input tracks file pattern
 
 
-## p+Pb non-mixed
-#Arguments = data_$(gridPass) $(minjpt)GeVJets_data16 $(minjpt) $(maxjpt) pPb16_5TeV Collisions $(trig) $(syst) ./rootFiles/Histograms/$(minjpt)GeVJets/JetsHists/$(syst)/$(run)_iCent_hists.root user.jeouelle.$(swVersion).hadrons.$(gridPass).data16_hip5TeV.00$(run).physics_$(jetstream).merge.AOD.r11416_p3868_Tree.root
-#Error = run/errors/$(minjpt)GeVJets_JetsHists_$(run)_$(syst).err
-#Log = /tmp/jeff/logs/$(minjpt)GeVJets_JetsHists_$(run)_$(syst).log
-#Output = run/outputs/$(minjpt)GeVJets_JetsHists_$(run)_$(syst).out
+# p+Pb non-mixed
+Arguments = data_$(gridPass) data16 pPb16_5TeV Collisions $(trig) $(syst) ./rootFiles/Histograms/$(trig)/JetsHists/$(syst)/$(run)_iCent_hists.root user.jeouelle.$(swVersion).hadrons.$(gridPass).data16_hip5TeV.00$(run).physics_$(jetstream).merge.AOD.r11416_p3868_Tree.root
+Error = run/errors/RunCorrelator_$(trig)_JetsHists_$(run)_$(syst).err
+Log = /tmp/jeff/logs/RunCorrelator_$(trig)_JetsHists_$(run)_$(syst).log
+Output = run/outputs/RunCorrelator_$(trig)_JetsHists_$(run)_$(syst).out
 #Queue run in (312796 312837 312937 312945 312968 314199)
+Queue run in (312968)
 
 
 # p+Pb mixed
-Arguments = data_$(gridPass) $(minjpt)GeVJets_mixed_data16 $(minjpt) $(maxjpt) pPb16_5TeV Collisions $(trig) $(syst) ./rootFiles/Histograms/$(minjpt)GeVJets/MixedHists/$(syst)/$(run)_iCent_hists.root user.jeouelle.$(swVersion).hadrons.$(gridPass).data16_hip5TeV.00$(run).physics_$(jetstream).merge.AOD.r11416_p3868_Tree.root data_$(gridPass) user.jeouelle.$(swVersion).hadrons.$(gridPass).data16_hip5TeV.00$(run).physics_$(tracksstream).merge.AOD.r11416_p3868_Tree.root
-Error = run/errors/$(minjpt)GeVJets_MixedHists_$(run)_$(syst).err
-Log = /tmp/jeff/logs/$(minjpt)GeVJets_MixedHists_$(run)_$(syst).log
-Output = run/outputs/$(minjpt)GeVJets_MixedHists_$(run)_$(syst).out
-Queue run in (312796 312837 312937 312945 312968 314199)
+Arguments = data_$(gridPass) mixed_data16 pPb16_5TeV Collisions $(trig) $(syst) ./rootFiles/Histograms/$(trig)/MixedHists/$(syst)/$(run)_iCent_hists.root user.jeouelle.$(swVersion).hadrons.$(gridPass).data16_hip5TeV.00$(run).physics_$(jetstream).merge.AOD.r11416_p3868_Tree.root data_$(gridPass) user.jeouelle.$(swVersion).hadrons.$(gridPass).data16_hip5TeV.00$(run).physics_$(tracksstream).merge.AOD.r11416_p3868_Tree.root
+Error = run/errors/RunCorrelator_$(trig)_MixedHists_$(run)_$(syst).err
+Log = /tmp/jeff/logs/RunCorrelator_$(trig)_MixedHists_$(run)_$(syst).log
+Output = run/outputs/RunCorrelator_$(trig)_MixedHists_$(run)_$(syst).out
+#Queue run in (312796 312837 312937 312945 312968 314199)
+Queue run in (312968)

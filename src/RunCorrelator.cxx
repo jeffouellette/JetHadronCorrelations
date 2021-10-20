@@ -22,6 +22,8 @@
 
 #include <iostream>
 #include <math.h>
+#include <map>
+#include <chrono>
 
 
 using namespace JetHadronCorrelations;
@@ -37,6 +39,9 @@ float truth_jet_max_pt = FLT_MAX;
 
 // Main function for performing jet-hadron correlations. (Wrapper function available below.)
 bool Correlator (const char* tag, const char* outFilePattern, TTree* jetsTree, TTree* tracksTree = nullptr) {
+
+  auto start = std::chrono::steady_clock::now (); // time at beginning of correlator function.
+
 
   // Identify appropriate trigger arrays (e.g. use pp triggers instead of p+Pb triggers)
   if (IspPb16 ()) {
@@ -63,13 +68,13 @@ bool Correlator (const char* tag, const char* outFilePattern, TTree* jetsTree, T
 
   // assign branches for triggers
   if (IsCollisions ()) {
-    if (UseJet50GeVTriggers ()) {
+    if (UseJ50Triggers ()) {
       jetTrigger = new Trigger (jet_trig_name[0]);
       std::cout << "Info: In RunCorrelator.cxx: Looking for " << jet_trig_name[0] << " trigger" << std::endl;
       jetsTree->SetBranchAddress ((jet_trig_name[0]+"_decision").c_str (), &(jetTrigger->trigDecision));
       jetsTree->SetBranchAddress ((jet_trig_name[0]+"_prescale").c_str (), &(jetTrigger->trigPrescale));
     }
-    else if (UseJet100GeVTriggers ()) {
+    else if (UseJ100Triggers ()) {
       jetTrigger = new Trigger (jet_trig_name[1]);
       std::cout << "Info: In RunCorrelator.cxx: Looking for " << jet_trig_name[1] << " trigger" << std::endl;
       jetsTree->SetBranchAddress ((jet_trig_name[1]+"_decision").c_str (), &(jetTrigger->trigDecision));
@@ -85,12 +90,12 @@ bool Correlator (const char* tag, const char* outFilePattern, TTree* jetsTree, T
       std::cout << "Error: In RunCorrelator.cxx: Invalid trigger scheme? Please debug! Exiting." << std::endl;
       return false;
     }
+  }
 
-    if (doMixing) {
-      trackTreeTrigger = new Trigger (minbias_trig_name[0]);
-      tracksTree->SetBranchAddress ((minbias_trig_name[0]+"_decision").c_str (), &(trackTreeTrigger->trigDecision));
-      tracksTree->SetBranchAddress ((minbias_trig_name[0]+"_prescale").c_str (), &(trackTreeTrigger->trigPrescale));
-    }
+  if (doMixing) {
+    trackTreeTrigger = new Trigger (minbias_trig_name[0]);
+    tracksTree->SetBranchAddress ((minbias_trig_name[0]+"_decision").c_str (), &(trackTreeTrigger->trigDecision));
+    tracksTree->SetBranchAddress ((minbias_trig_name[0]+"_prescale").c_str (), &(trackTreeTrigger->trigPrescale));
   }
 
 
@@ -170,39 +175,23 @@ bool Correlator (const char* tag, const char* outFilePattern, TTree* jetsTree, T
     tracksTree->SetBranchAddress ("trk_TightPrimary",       &trk_TightPrimary);
     tracksTree->SetBranchAddress ("trk_HITight",            &trk_HITight);
     tracksTree->SetBranchAddress ("trk_HILoose",            &trk_HILoose);
+    if (!IsCollisions () && !doMixing)
+      tracksTree->SetBranchAddress ("trk_prob_truth",       &trk_prob_truth);
+
+    //// get truth particles from MC (i.e. jetsTree, not tracksTree!)
+    //if (!IsCollisions ()) {
+    //  jetsTree->SetBranchAddress ("truth_trk_n",            &truth_trk_n);
+    //  jetsTree->SetBranchAddress ("truth_trk_pt",           &truth_trk_pt);
+    //  jetsTree->SetBranchAddress ("truth_trk_eta",          &truth_trk_eta);
+    //  jetsTree->SetBranchAddress ("truth_trk_phi",          &truth_trk_phi);
+    //  jetsTree->SetBranchAddress ("truth_trk_charge",       &truth_trk_charge);
+    //  jetsTree->SetBranchAddress ("truth_trk_pdgid",        &truth_trk_pdgid);
+    //  jetsTree->SetBranchAddress ("truth_trk_barcode",      &truth_trk_barcode);
+    //  jetsTree->SetBranchAddress ("truth_trk_isHadron",     &truth_trk_isHadron);
+    //}
   }
-  //tracksTree->SetBranchAddress ("trk_d0",                 &trk_d0);
-  //tracksTree->SetBranchAddress ("trk_d0sig",              &trk_d0sig);
-  //tracksTree->SetBranchAddress ("trk_z0",                 &trk_z0);
-  //tracksTree->SetBranchAddress ("trk_z0sig",              &trk_z0sig);
-  //tracksTree->SetBranchAddress ("trk_theta",              &trk_theta);
-  //tracksTree->SetBranchAddress ("trk_vz",                 &trk_vz);
-  //tracksTree->SetBranchAddress ("trk_nBLayerHits",        &trk_nBLayerHits);
-  //tracksTree->SetBranchAddress ("trk_nBLayerSharedHits",  &trk_nBLayerSharedHits);
-  //tracksTree->SetBranchAddress ("trk_nPixelHits",         &trk_nPixelHits);
-  //tracksTree->SetBranchAddress ("trk_nPixelDeadSensors",  &trk_nPixelDeadSensors);
-  //tracksTree->SetBranchAddress ("trk_nPixelSharedHits",   &trk_nPixelSharedHits);
-  //tracksTree->SetBranchAddress ("trk_nSCTHits",           &trk_nSCTHits);
-  //tracksTree->SetBranchAddress ("trk_nSCTDeadSensors",    &trk_nSCTDeadSensors);
-  //tracksTree->SetBranchAddress ("trk_nSCTSharedHits",     &trk_nSCTSharedHits);
-  //tracksTree->SetBranchAddress ("trk_nTRTHits",           &trk_nTRTHits);
-  //tracksTree->SetBranchAddress ("trk_nTRTSharedHits",     &trk_nTRTSharedHits);
-  //if (!IsCollisions ()) {
-  //  tracksTree->SetBranchAddress ("trk_prob_truth",     &trk_prob_truth);
-  //  tracksTree->SetBranchAddress ("trk_truth_pt",       &trk_truth_pt);
-  //  tracksTree->SetBranchAddress ("trk_truth_eta",      &trk_truth_eta);
-  //  tracksTree->SetBranchAddress ("trk_truth_phi",      &trk_truth_phi);
-  //  tracksTree->SetBranchAddress ("trk_truth_charge",   &trk_truth_charge);
-  //  tracksTree->SetBranchAddress ("trk_truth_type",     &trk_truth_type);
-  //  tracksTree->SetBranchAddress ("trk_truth_orig",     &trk_truth_orig);
-  //  tracksTree->SetBranchAddress ("trk_truth_barcode",  &trk_truth_barcode);
-  //  tracksTree->SetBranchAddress ("trk_truth_pdgid",    &trk_truth_pdgid);
-  //  tracksTree->SetBranchAddress ("trk_truth_vz",       &trk_truth_vz);
-  //  tracksTree->SetBranchAddress ("trk_truth_nIn",      &trk_truth_nIn);
-  //  tracksTree->SetBranchAddress ("trk_truth_isHadron", &trk_truth_isHadron);
-  //}
 
-
+  // get truth jets from MC
   if (!IsCollisions ()) {
     jetsTree->SetBranchAddress ("akt4_truth_jet_n",     &akt4_truth_jet_n);
     jetsTree->SetBranchAddress ("akt4_truth_jet_pt",    &akt4_truth_jet_pt);
@@ -212,154 +201,134 @@ bool Correlator (const char* tag, const char* outFilePattern, TTree* jetsTree, T
   }
 
   jetsTree->SetBranchAddress ("akt4_hi_jet_n",            &akt4_hi_jet_n);
-  //jetsTree->SetBranchAddress ("akt4_hi_jet_pt_precalib",  &akt4_hi_jet_pt_precalib);
   jetsTree->SetBranchAddress ("akt4_hi_jet_pt_etajes",    &akt4_hi_jet_pt_etajes);
   jetsTree->SetBranchAddress ("akt4_hi_jet_pt_xcalib",    &akt4_hi_jet_pt_xcalib);
-  //jetsTree->SetBranchAddress ("akt4_hi_jet_eta_precalib", &akt4_hi_jet_eta_precalib);
   jetsTree->SetBranchAddress ("akt4_hi_jet_eta_etajes",   &akt4_hi_jet_eta_etajes);
   jetsTree->SetBranchAddress ("akt4_hi_jet_eta_xcalib",   &akt4_hi_jet_eta_xcalib);
   jetsTree->SetBranchAddress ("akt4_hi_jet_phi",          &akt4_hi_jet_phi);
-  //jetsTree->SetBranchAddress ("akt4_hi_jet_e_precalib",   &akt4_hi_jet_e_precalib);
   jetsTree->SetBranchAddress ("akt4_hi_jet_e_etajes",     &akt4_hi_jet_e_etajes);
   jetsTree->SetBranchAddress ("akt4_hi_jet_e_xcalib",     &akt4_hi_jet_e_xcalib);
-  //jetsTree->SetBranchAddress ("akt4_hi_jet_sub_et",       &akt4_hi_jet_sub_et);
-  //jetsTree->SetBranchAddress ("akt4_hi_jet_sub_e",        &akt4_hi_jet_sub_e);
   jetsTree->SetBranchAddress ("akt4_hi_jet_timing",       &akt4_hi_jet_timing);
 
 
-  const int nJESVar = GetNJESVar ();
+  const short nJESVar = GetNJESVar ();
   if (!IsCollisions () && nJESVar != -1) {
     std::cout << "Info: In RunCorrelator.cxx: Branching JES variation " << nJESVar << std::endl;
     jetsTree->SetBranchAddress (Form ("akt4_hi_jet_pt_sys_JES_%i", nJESVar), akt4_hi_jet_pt_sys_JES_ALL[nJESVar]);
   }
 
 
-  const int nTrkWPVar = (DoHITightVar () ? 1 : (DoHILooseVar () ? 2 : 0));
+  const short nTrkWPVar = (DoHITightVar () ? 1 : (DoHILooseVar () ? 2 : 0));
 
 
   // setup centrality bins (only relevant for p+Pb)
   double* centBins = (DoFcalCentVar () ? fcalCentBins : (DoFineFcalCentVar () ? fineFcalCentBins : (!IsCollisions () ? fcalCentBins : zdcCentBins)));
-  const int nCentBins = (DoFcalCentVar () ? nFcalCentBins : (DoFineFcalCentVar () ? nFineFcalCentBins : (!IsCollisions () ? nFcalCentBins : nZdcCentBins)));
+  const short nCentBins = (DoFcalCentVar () ? nFcalCentBins : (DoFineFcalCentVar () ? nFineFcalCentBins : (!IsCollisions () ? nFcalCentBins : nZdcCentBins)));
+
+  std::cout << "Centrality bin cuts: ";
+  for (short iCent = 0; iCent < nCentBins; iCent++)
+    std::cout << centBins[iCent] << ", ";
+  std::cout << centBins[nCentBins] << std::endl;
 
 
-  TH2D* h2_trk_eff = LoadTrackingEfficiency ();
+  // for jet energy resolution cuts
+  TF1* f_jer = LoadJetEnergyResFunction ();
+
+
+  // for tracking corections
+  TH2D** h2_trk_eff = LoadTrackingEfficiency ();
   TH1D** h_trk_pur = LoadTrackingPurity ();
-
   TF1** f_trk_pur = LoadTrackingPurityFuncs ();
 
 
+  // for corrected FCal Et values in data overlay
+  std::map <const unsigned int, float>* m_overlay_fcalet = (IsDataOverlay () ? GetOverlayFCalMap () : nullptr);
+
+
   // create output histograms in output files
-  const int nFiles = (Ispp () ? 1 : nCentBins);
+  const short nFiles = (Ispp () ? 1 : nCentBins);
   TFile** outFiles = new TFile*[nFiles];
 
-  TH1D** h_evt_counts = new TH1D*[nFiles];
-  TH1D** h_jet_counts = new TH1D*[nFiles];
+  TH1D**  h_evt_counts    = Get1DArray <TH1D*> (nFiles);
+  TH1D*** h_jet_counts    = Get2DArray <TH1D*> (nFiles, nPtJBins);
 
-  TH1D** h_jet_pt = new TH1D*[nFiles];
-  TH2D** h2_jet_pt_cov = new TH2D*[nFiles];
+  TH1D**  h_jet_pt        = Get1DArray <TH1D*> (nFiles);
+  TH2D**  h2_jet_pt_cov   = Get1DArray <TH2D*> (nFiles);
 
-  TH2D** h2_jet_eta_phi = new TH2D*[nFiles];
+  TH2D*** h2_jet_eta_phi  = Get2DArray <TH2D*> (nFiles, nPtJBins);
 
-  TH1D** h_jet_trk_dphi_gt0p5_lt1 = new TH1D*[nFiles];
-  TH2D** h2_jet_trk_dphi_gt0p5_lt1_cov = new TH2D*[nFiles];
-  TH1D** h_jet_trk_dphi_gt1_lt1p5 = new TH1D*[nFiles];
-  TH2D** h2_jet_trk_dphi_gt1_lt1p5_cov = new TH2D*[nFiles];
-  TH1D** h_jet_trk_dphi_gt1p5_lt2 = new TH1D*[nFiles];
-  TH2D** h2_jet_trk_dphi_gt1p5_lt2_cov = new TH2D*[nFiles];
-  TH1D** h_jet_trk_dphi_gt2_lt4 = new TH1D*[nFiles];
-  TH2D** h2_jet_trk_dphi_gt2_lt4_cov = new TH2D*[nFiles];
-  TH1D** h_jet_trk_dphi_gt4_lt6 = new TH1D*[nFiles];
-  TH2D** h2_jet_trk_dphi_gt4_lt6_cov = new TH2D*[nFiles];
-  TH1D** h_jet_trk_dphi_gt6_lt8 = new TH1D*[nFiles];
-  TH2D** h2_jet_trk_dphi_gt6_lt8_cov = new TH2D*[nFiles];
-  TH1D** h_jet_trk_dphi_gt8_lt10 = new TH1D*[nFiles];
-  TH2D** h2_jet_trk_dphi_gt8_lt10_cov = new TH2D*[nFiles];
-  TH1D** h_jet_trk_dphi_gt10_lt15 = new TH1D*[nFiles];
-  TH2D** h2_jet_trk_dphi_gt10_lt15_cov = new TH2D*[nFiles];
-  TH1D** h_jet_trk_dphi_gt15_lt20 = new TH1D*[nFiles];
-  TH2D** h2_jet_trk_dphi_gt15_lt20_cov = new TH2D*[nFiles];
-  TH1D** h_jet_trk_dphi_gt20_lt30 = new TH1D*[nFiles];
-  TH2D** h2_jet_trk_dphi_gt20_lt30_cov = new TH2D*[nFiles];
+  TH1D**** h_jet_trk_dphi       = Get3DArray <TH1D*> (nFiles, nPtJBins, nPtChSelections);
+  TH2D**** h2_jet_trk_dphi_cov  = Get3DArray <TH2D*> (nFiles, nPtJBins, nPtChSelections);
 
-  TH1D** h_jet_trk_pt_ns = new TH1D*[nFiles];
-  TH2D** h2_jet_trk_pt_ns_cov = new TH2D*[nFiles];
-  TH1D** h_jet_trk_pt_perp = new TH1D*[nFiles];
-  TH2D** h2_jet_trk_pt_perp_cov = new TH2D*[nFiles];
-  TH1D** h_jet_trk_pt_as = new TH1D*[nFiles];
-  TH2D** h2_jet_trk_pt_as_cov = new TH2D*[nFiles];
+  TH1D**** h_jet_trk_pt       = Get3DArray <TH1D*> (nFiles, nPtJBins, nDir);
+  TH2D**** h2_jet_trk_pt_cov  = Get3DArray <TH2D*> (nFiles, nPtJBins, nDir);
 
 
-  for (int iFile = 0; iFile < nFiles; iFile++) {
+  for (short iFile = 0; iFile < nFiles; iFile++) {
 
     TString outFileName = outFilePattern;
     outFileName.ReplaceAll ("iCent_", Form ("iCent%i_", iFile));
     TFile* outFile = new TFile (outFileName.Data (), "recreate");
     outFiles[iFile] = outFile;
 
-    h_evt_counts[iFile] = new TH1D (Form ("h_evt_counts_%s", tag), "", 3, -0.5, 2.5);
-    h_jet_counts[iFile] = new TH1D (Form ("h_jet_counts_%s", tag), "", 3, -0.5, 2.5);
+    h_evt_counts[iFile] = new TH1D (Form ("h_evt_counts_%s", tag),  "", 3, -0.5, 2.5);
 
     h_jet_pt[iFile] = new TH1D (Form ("h_jet_pt_%s", tag), ";#it{p}_{T}^{jet} [GeV];(1/N_{jet}) (dN_{jet}/d#it{p}_{T}) [GeV^{-1}]", nPtJBins, pTJBins);
     h2_jet_pt_cov[iFile] = new TH2D (Form ("h2_jet_pt_cov_%s", tag), ";#it{p}_{T}^{jet} [GeV];#it{p}_{T}^{jet} [GeV];Covariance", nPtJBins, pTJBins, nPtJBins, pTJBins);
 
-    h2_jet_eta_phi[iFile] = new TH2D (Form ("h2_jet_eta_phi_%s", tag), ";#eta^{jet};#phi^{jet};Counts", 64, -3.2, 3.2, 64, -M_PI, M_PI);
+    for (short iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
 
-    h_jet_trk_dphi_gt0p5_lt1[iFile] = new TH1D (Form ("h_jet_trk_dphi_gt0p5_lt1_%s", tag), ";#Delta#phi;(1/N_{jet}) (dN_{ch}/d#Delta#phi)", nDPhiBins, dPhiBins);
-    h2_jet_trk_dphi_gt0p5_lt1_cov[iFile] = new TH2D (Form ("h2_jet_trk_dphi_gt0p5_lt1_cov_%s", tag), ";#Delta#phi;#Delta#phi;Covariance", nDPhiBins, dPhiBins, nDPhiBins, dPhiBins);
-    h_jet_trk_dphi_gt1_lt1p5[iFile] = new TH1D (Form ("h_jet_trk_dphi_gt1_lt1p5_%s", tag), ";#Delta#phi;(1/N_{jet}) (dN_{ch}/d#Delta#phi)", nDPhiBins, dPhiBins);
-    h2_jet_trk_dphi_gt1_lt1p5_cov[iFile] = new TH2D (Form ("h2_jet_trk_dphi_gt1_lt1p5_cov_%s", tag), ";#Delta#phi;#Delta#phi;Covariance", nDPhiBins, dPhiBins, nDPhiBins, dPhiBins);
-    h_jet_trk_dphi_gt1p5_lt2[iFile] = new TH1D (Form ("h_jet_trk_dphi_gt1p5_lt2_%s", tag), ";#Delta#phi;(1/N_{jet}) (dN_{ch}/d#Delta#phi)", nDPhiBins, dPhiBins);
-    h2_jet_trk_dphi_gt1p5_lt2_cov[iFile] = new TH2D (Form ("h2_jet_trk_dphi_gt1p5_lt2_cov_%s", tag), ";#Delta#phi;#Delta#phi;Covariance", nDPhiBins, dPhiBins, nDPhiBins, dPhiBins);
-    h_jet_trk_dphi_gt2_lt4[iFile] = new TH1D (Form ("h_jet_trk_dphi_gt2_lt4_%s", tag), ";#Delta#phi;(1/N_{jet}) (dN_{ch}/d#Delta#phi)", nDPhiBins, dPhiBins);
-    h2_jet_trk_dphi_gt2_lt4_cov[iFile] = new TH2D (Form ("h2_jet_trk_dphi_gt2_lt4_cov_%s", tag), ";#Delta#phi;#Delta#phi;Covariance", nDPhiBins, dPhiBins, nDPhiBins, dPhiBins);
-    h_jet_trk_dphi_gt4_lt6[iFile] = new TH1D (Form ("h_jet_trk_dphi_gt4_lt6_%s", tag), ";#Delta#phi;(1/N_{jet}) (dN_{ch}/d#Delta#phi)", nDPhiBins, dPhiBins);
-    h2_jet_trk_dphi_gt4_lt6_cov[iFile] = new TH2D (Form ("h2_jet_trk_dphi_gt4_lt6_cov_%s", tag), ";#Delta#phi;#Delta#phi;Covariance", nDPhiBins, dPhiBins, nDPhiBins, dPhiBins);
-    h_jet_trk_dphi_gt6_lt8[iFile] = new TH1D (Form ("h_jet_trk_dphi_gt6_lt8_%s", tag), ";#Delta#phi;(1/N_{jet}) (dN_{ch}/d#Delta#phi)", nDPhiBins, dPhiBins);
-    h2_jet_trk_dphi_gt6_lt8_cov[iFile] = new TH2D (Form ("h2_jet_trk_dphi_gt6_lt8_cov_%s", tag), ";#Delta#phi;#Delta#phi;Covariance", nDPhiBins, dPhiBins, nDPhiBins, dPhiBins);
-    h_jet_trk_dphi_gt8_lt10[iFile] = new TH1D (Form ("h_jet_trk_dphi_gt8_lt10_%s", tag), ";#Delta#phi;(1/N_{jet}) (dN_{ch}/d#Delta#phi)", nDPhiBins, dPhiBins);
-    h2_jet_trk_dphi_gt8_lt10_cov[iFile] = new TH2D (Form ("h2_jet_trk_dphi_gt8_lt10_cov_%s", tag), ";#Delta#phi;#Delta#phi;Covariance", nDPhiBins, dPhiBins, nDPhiBins, dPhiBins);
-    h_jet_trk_dphi_gt10_lt15[iFile] = new TH1D (Form ("h_jet_trk_dphi_gt10_lt15_%s", tag), ";#Delta#phi;(1/N_{jet}) (dN_{ch}/d#Delta#phi)", nDPhiBins, dPhiBins);
-    h2_jet_trk_dphi_gt10_lt15_cov[iFile] = new TH2D (Form ("h2_jet_trk_dphi_gt10_lt15_cov_%s", tag), ";#Delta#phi;#Delta#phi;Covariance", nDPhiBins, dPhiBins, nDPhiBins, dPhiBins);
-    h_jet_trk_dphi_gt15_lt20[iFile] = new TH1D (Form ("h_jet_trk_dphi_gt15_lt20_%s", tag), ";#Delta#phi;(1/N_{jet}) (dN_{ch}/d#Delta#phi)", nDPhiBins, dPhiBins);
-    h2_jet_trk_dphi_gt15_lt20_cov[iFile] = new TH2D (Form ("h2_jet_trk_dphi_gt15_lt20_cov_%s", tag), ";#Delta#phi;#Delta#phi;Covariance", nDPhiBins, dPhiBins, nDPhiBins, dPhiBins);
-    h_jet_trk_dphi_gt20_lt30[iFile] = new TH1D (Form ("h_jet_trk_dphi_gt20_lt30_%s", tag), ";#Delta#phi;(1/N_{jet}) (dN_{ch}/d#Delta#phi)", nDPhiBins, dPhiBins);
-    h2_jet_trk_dphi_gt20_lt30_cov[iFile] = new TH2D (Form ("h2_jet_trk_dphi_gt20_lt30_cov_%s", tag), ";#Delta#phi;#Delta#phi;Covariance", nDPhiBins, dPhiBins, nDPhiBins, dPhiBins);
+      const TString pTJ = Form ("%g-%gGeVJets", pTJBins[iPtJ], pTJBins[iPtJ+1]);
 
-    h_jet_trk_pt_ns[iFile] = new TH1D (Form ("h_jet_trk_pt_ns_%s", tag), ";#it{p}_{T}^{ch} [GeV];(1/N_{jet}) (dN_{ch}/d#it{p}_{T}) [GeV^{-1}]", nPtChBins, pTChBins);
-    h2_jet_trk_pt_ns_cov[iFile] = new TH2D (Form ("h2_jet_trk_pt_ns_cov_%s", tag), ";#it{p}_{T}^{ch} [GeV];#it{p}_{T}^{ch} [GeV];Covariance", nPtChBins, pTChBins, nPtChBins, pTChBins);
-    h_jet_trk_pt_perp[iFile] = new TH1D (Form ("h_jet_trk_pt_perp_%s", tag), ";#it{p}_{T}^{ch} [GeV];(1/N_{jet}) (dN_{ch}/d#it{p}_{T}) [GeV^{-1}]", nPtChBins, pTChBins);
-    h2_jet_trk_pt_perp_cov[iFile] = new TH2D (Form ("h2_jet_trk_pt_perp_cov_%s", tag), ";#it{p}_{T}^{ch} [GeV];#it{p}_{T}^{ch} [GeV];Covariance", nPtChBins, pTChBins, nPtChBins, pTChBins);
-    h_jet_trk_pt_as[iFile] = new TH1D (Form ("h_jet_trk_pt_as_%s", tag), ";#it{p}_{T}^{ch} [GeV];(1/N_{jet}) (dN_{ch}/d#it{p}_{T}) [GeV^{-1}]", nPtChBins, pTChBins);
-    h2_jet_trk_pt_as_cov[iFile] = new TH2D (Form ("h2_jet_trk_pt_as_cov_%s", tag), ";#it{p}_{T}^{ch} [GeV];#it{p}_{T}^{ch} [GeV];Covariance", nPtChBins, pTChBins, nPtChBins, pTChBins);
+      h_jet_counts[iFile][iPtJ] = new TH1D (Form ("h_jet_counts_%s_%s", pTJ.Data (), tag),  "", 3, -0.5, 2.5);
 
-  }
+      h2_jet_eta_phi[iFile][iPtJ] = new TH2D (Form ("h2_jet_eta_phi_%s_%s", pTJ.Data (), tag), ";#eta^{jet};#phi^{jet};Counts", 64, -3.2, 3.2, 64, -M_PI, M_PI);
+
+      for (short iPtCh = 0; iPtCh < nPtChSelections; iPtCh++) {
+
+        const TString pTCh = pTChSelections[iPtCh];
+
+        h_jet_trk_dphi[iFile][iPtJ][iPtCh] = new TH1D (Form ("h_jet_trk_dphi_%s_%s_%s", pTCh.Data (), pTJ.Data (), tag), ";#Delta#phi;(1/N_{jet}) (dN_{ch}/d#Delta#phi)", nDPhiBins, dPhiBins);
+        h_jet_trk_dphi[iFile][iPtJ][iPtCh]->Sumw2 ();
+
+        h2_jet_trk_dphi_cov[iFile][iPtJ][iPtCh] = new TH2D (Form ("h2_jet_trk_dphi_cov_%s_%s_%s", pTCh.Data (), pTJ.Data (), tag), ";#Delta#phi;#Delta#phi;Covariance", nDPhiBins, dPhiBins, nDPhiBins, dPhiBins);
+        h2_jet_trk_dphi_cov[iFile][iPtJ][iPtCh]->Sumw2 ();
+
+      } // end loop over iPtCh
+
+      for (short iDir = 0; iDir < nDir; iDir++) {
+
+        const TString dir = directions[iDir];
+
+        h_jet_trk_pt[iFile][iPtJ][iDir] = new TH1D (Form ("h_jet_trk_pt_%s_%s_%s", dir.Data (), pTJ.Data (), tag), ";#it{p}_{T}^{ch} [GeV];(1/N_{jet}) (dN_{ch}/d#it{p}_{T}) [GeV^{-1}]", nPtChBins, pTChBins);
+        h_jet_trk_pt[iFile][iPtJ][iDir]->Sumw2 ();
+
+        h2_jet_trk_pt_cov[iFile][iPtJ][iDir] = new TH2D (Form ("h2_jet_trk_pt_cov_%s_%s_%s", dir.Data (), pTJ.Data (), tag), ";#it{p}_{T}^{ch} [GeV];#it{p}_{T}^{ch} [GeV];Covariance", nPtChBins, pTChBins, nPtChBins, pTChBins);
+        h2_jet_trk_pt_cov[iFile][iPtJ][iDir]->Sumw2 ();
+
+      } // end loop over iDir
+
+    } // end loop over iPtJ
+
+  } // end loop over iFile
 
 
   // arrays for filling histograms & covariance matrices correctly
-  double jet_pt_counts[nPtJBins];
+  double* jet_pt_counts         = Get1DArray <double> (nPtJBins);
 
-  double jet_trk_dphi_gt0p5_lt1_counts[nDPhiBins];
-  double jet_trk_dphi_gt1_lt1p5_counts[nDPhiBins];
-  double jet_trk_dphi_gt1p5_lt2_counts[nDPhiBins];
-  double jet_trk_dphi_gt2_lt4_counts[nDPhiBins];
-  double jet_trk_dphi_gt4_lt6_counts[nDPhiBins];
-  double jet_trk_dphi_gt6_lt8_counts[nDPhiBins];
-  double jet_trk_dphi_gt8_lt10_counts[nDPhiBins];
-  double jet_trk_dphi_gt10_lt15_counts[nDPhiBins];
-  double jet_trk_dphi_gt15_lt20_counts[nDPhiBins];
-  double jet_trk_dphi_gt20_lt30_counts[nDPhiBins];
+  double*** jet_trk_dphi_counts = Get3DArray <double> (nPtJBins, nPtChSelections, nDPhiBins);
+  double*** jet_trk_pt_counts   = Get3DArray <double> (nPtJBins, nDir, nPtChBins);
 
-  double jet_trk_pt_ns_counts[nPtChBins];
-  double jet_trk_pt_perp_counts[nPtChBins];
-  double jet_trk_pt_as_counts[nPtChBins];
-
+  //const long nEvts = (doMixing ? 1. : 1.) * (jetsTree->GetEntries ()); // for debugging... TODO remove me!
   const long nEvts = (doMixing ? 20. : 1.) * (jetsTree->GetEntries ());
   const long nTrkEvts = tracksTree->GetEntries ();
+
+  std::cout << "Correlator will process " << nEvts << " events" << std::endl;
 
 
   // setup centrality matching bins for event mixing according to job configuration
   double* mixCentBins = nullptr;
-  int nMixCentBins = 0;
+  short nMixCentBins = 0;
 
   if (Ispp ()) {
     if      (DoMixCatVar1 ()) { mixCentBins = ppMixVar1Bins;    nMixCentBins = nppMixVar1Bins;    }
@@ -367,14 +336,10 @@ bool Correlator (const char* tag, const char* outFilePattern, TTree* jetsTree, T
     else                      { mixCentBins = ppMixBins;        nMixCentBins = nppMixBins;        }
   }
   else {
-    if (DoMixCatVar2 ())      { mixCentBins = fcalMixVar2Bins;  nMixCentBins = nFcalMixVar2Bins;  }
+    if      (DoMixCatVar2 ()) { mixCentBins = fcalMixVar2Bins;  nMixCentBins = nFcalMixVar2Bins;  }
+    //else if (DoMixCatVar6 ()) { mixCentBins = fcalMixVar6Bins;  nMixCentBins = nFcalMixVar6Bins;  }
     else                      { mixCentBins = fcalMixBins;      nMixCentBins = nFcalMixBins;      }
   }
-
-
-  // for smearing truth jets if specified
-  TRandom3* rndm = new TRandom3 ();
-  TF1* f_jer = LoadJetEnergyResFunction ();
 
 
   // counter for mixed events (declared outside of loop scope to keep its value from one loop to the next)
@@ -395,21 +360,24 @@ bool Correlator (const char* tag, const char* outFilePattern, TTree* jetsTree, T
     jetsTree->GetEntry (iEvt % jetsTree->GetEntries ());
 
 
+    float prescale = 1;
+
+
     // triggering cut, require appropriate jet trigger to have fired
     if (IsCollisions ()) {
       if (!jetTrigger->trigDecision)
         continue;
-      else
-        event_weight = 1; // optionally set to trigger prescale, but not really necessary
+      event_weight = 1; // optionally set to trigger prescale, but not really necessary
+      prescale = jetTrigger->trigPrescale;
     }
 
 
     // vertexing cuts, require no pileup vertices and primary vertex with |vz| < 150mm
+    float vz = -999;
     {
       bool hasPrimary = false;
       bool hasPileup = false;
-      float vz = -999;
-      for (int iVert = 0; iVert < nvert; iVert++) {
+      for (short iVert = 0; iVert < nvert; iVert++) {
         if (vert_type[iVert] == 1) {
           hasPrimary = true;
           vz = vert_z[iVert];
@@ -422,12 +390,29 @@ bool Correlator (const char* tag, const char* outFilePattern, TTree* jetsTree, T
     }
 
 
-    // MC only -- filter sample based on min/max of pThat range
-    // also set appropriate JZ weight
+    {
+      bool isWellTimed = true;
+      if (IsCollisions () && Ispp () && UseMinBiasTriggers ()) {
+        for (short iJ = 0; iJ < GetAktHIJetN (r0p4); iJ++) {
+          if (!MeetsJetAcceptanceCuts (iJ, r0p4, nJESVar))
+            continue; // jet eta/phi & timing cuts
+          if (GetAktHIJetPt (iJ, r0p4) < 15)
+            continue; // minimum pT cut
+          if (GetAktHIJetTiming (iJ, r0p4) > 10)
+            isWellTimed = false;
+        }
+      }
+      if (!isWellTimed)
+        continue; // skip events with a mistimed jet in pp
+    }
+
+
+    // MC only -- filter events in sample based on min/max of pThat range
+    // also sets the appropriate JZ weight
     if (!IsCollisions ()) {
-      int iLTJ = -1;
-      const int nTJ = GetAktTruthJetN (r0p4);
-      for (int iTJ = 0; iTJ < nTJ; iTJ++) {
+      short iLTJ = -1;
+      const short nTJ = GetAktTruthJetN (r0p4);
+      for (short iTJ = 0; iTJ < nTJ; iTJ++) {
         if (iLTJ == -1 || GetAktTruthJetPt (iTJ, r0p4) > GetAktTruthJetPt (iLTJ, r0p4))
           iLTJ = iTJ;
       }
@@ -439,15 +424,20 @@ bool Correlator (const char* tag, const char* outFilePattern, TTree* jetsTree, T
     }
 
 
-    int iCent = 0;
+    // MC only -- get pure overlay A-side FCal Sum ET value to avoid truth event bias
+    if (IspPb () && IsDataOverlay ())
+      fcalA_et = m_overlay_fcalet->at (event_number);
+
+
     // p+Pb only -- split events by centrality
+    short iCent = 0;
     if (IspPb ()) {
-      const double centVar = ((!IsCollisions () || DoFcalCentVar ()  || DoFineFcalCentVar ()) ? fcalA_et : (ZdcCalibEnergy_A * 1e3));
+      const float centVar = ((!IsCollisions () || DoFcalCentVar ()  || DoFineFcalCentVar ()) ? fcalA_et : (ZdcCalibEnergy_A * 1e3));
       iCent = GetBin (centBins, nCentBins, centVar);
-      if (iCent < 0 || iCent > nCentBins-1)
+      if (iCent < 0 || nCentBins <= iCent)
         continue;
     }
-    const int iFile = iCent;
+    const short iFile = iCent;
 
 
     // calculate event plane angle based on FCal q-vector moments
@@ -456,49 +446,20 @@ bool Correlator (const char* tag, const char* outFilePattern, TTree* jetsTree, T
 
 
     // event weights -- these are not 1 in MC due to JZ weighting (they are 1 in data)
-    const double ewgt = event_weight;
+    const double ewgt = event_weight * prescale;
     if (ewgt <= 0.)
       continue;
 
 
     // initialize all histogramming bins to 0 for this event
-    for (int iX = 0; iX < nPtJBins; iX++)
-      jet_pt_counts[iX] = 0;
-    for (int iX = 0; iX < nDPhiBins; iX++) {
-      jet_trk_dphi_gt0p5_lt1_counts[iX] = 0;
-      jet_trk_dphi_gt1_lt1p5_counts[iX] = 0;
-      jet_trk_dphi_gt1p5_lt2_counts[iX] = 0;
-      jet_trk_dphi_gt2_lt4_counts[iX]   = 0;
-      jet_trk_dphi_gt4_lt6_counts[iX]   = 0;
-      jet_trk_dphi_gt6_lt8_counts[iX]   = 0;
-      jet_trk_dphi_gt8_lt10_counts[iX]  = 0;
-      jet_trk_dphi_gt10_lt15_counts[iX] = 0;
-      jet_trk_dphi_gt15_lt20_counts[iX] = 0;
-      jet_trk_dphi_gt20_lt30_counts[iX] = 0;
-    }
-    for (int iX = 0; iX < nPtChBins; iX++) {
-      jet_trk_pt_ns_counts[iX]          = 0;
-      jet_trk_pt_perp_counts[iX]        = 0;
-      jet_trk_pt_as_counts[iX]          = 0;
-    }
+    for (short iPtJ = 0; iPtJ < nPtJBins; iPtJ++)
+      jet_pt_counts[iPtJ] = 0;
 
    
-    // possibly smear truth jet pTs by JER
-    if (DoMCTruthJESSmear ()) {
-      const int jn = GetAktTruthJetN (r0p4);
-      for (int iJet = 0; iJet < jn; iJet++) {
-        const float sf = rndm->Gaus (1, 0.01*f_jer->Eval (akt4_truth_jet_pt[iJet]));
-        akt4_truth_jet_pt[iJet] = sf * akt4_truth_jet_pt[iJet];
-        akt4_truth_jet_e[iJet]  = sf * akt4_truth_jet_e[iJet];
-      }
-    }
+    short nj = 0;
 
-
-    float nj = 0;
-    float jwgt = 0;
-
-    const int jn = UseTruthJets () ? GetAktTruthJetN (r0p4) :  GetAktHIJetN (r0p4);
-    for (int iJet = 0; iJet < jn; iJet++) {
+    const short jn = UseTruthJets () ? GetAktTruthJetN (r0p4) :  GetAktHIJetN (r0p4);
+    for (short iJet = 0; iJet < jn; iJet++) {
 
       const float jpt  = (UseTruthJets () ? GetAktTruthJetPt  (iJet, r0p4) : GetAktHIJetPt  (iJet, r0p4, nJESVar));
       const float jeta = (UseTruthJets () ? GetAktTruthJetEta (iJet, r0p4) : GetAktHIJetEta (iJet, r0p4, nJESVar));
@@ -506,44 +467,63 @@ bool Correlator (const char* tag, const char* outFilePattern, TTree* jetsTree, T
 
       if (!MeetsJetAcceptanceCuts (iJet, r0p4, nJESVar))
         continue; // jet eta/phi & timing cuts
+      if (!MeetsJetPtCut (jpt))
+        continue; // jet pT cuts, for trigger relevance purposes
 
       const float thisjwgt = GetAktJetWeight (jpt, jeta, jphi, r0p4);
       if (thisjwgt <= 0.)
         continue; // sanity check
 
+      // in MC, check that the jet is truth-matched. Otherwise problems can emerge, particularly in the overlay.
+      if (!IsCollisions () && !UseTruthJets ()) {
+        const short iTJet = GetAktTruthJetMatch (iJet, r0p4);
+        if (iTJet == -1)
+          continue; // in case of no truth jet match
+        const float tjpt = GetAktTruthJetPt (iTJet, r0p4);
+        if (std::fabs (jpt/tjpt - 1) > 3*0.01*f_jer->Eval (tjpt))
+          continue; // cut on jets reconstructed well outside the JER
+      }
+
       const short iPtJ = GetPtJBin (jpt);
-      if (0 <= iPtJ && iPtJ < nPtJBins)
-        jet_pt_counts[iPtJ] += jwgt;
-
-      if (!MeetsJetPtCut (jpt))
-        continue; // jet pT cuts
-
-      h2_jet_eta_phi[iFile]->Fill (jeta, jphi);
-
-      nj += 1;
-      jwgt += thisjwgt;
+      if (0 <= iPtJ && iPtJ < nPtJBins) {
+        jet_pt_counts[iPtJ] += thisjwgt;
+        h2_jet_eta_phi[iFile][iPtJ]->Fill (jeta, jphi);
+        nj++; // add to total number of "trigger" jets
+      }
     }
 
-    for (int iX = 0; iX < nPtJBins; iX++) {
-      h_jet_pt[iCent]->SetBinContent (iX+1, h_jet_pt[iCent]->GetBinContent (iX+1) + (ewgt)*(jet_pt_counts[iX]));
-      for (int iY = 0; iY < nPtJBins; iY++)
-        h2_jet_pt_cov[iCent]->SetBinContent (iX+1, iY+1, h2_jet_pt_cov[iCent]->GetBinContent (iX+1, iY+1) + (ewgt)*(jet_pt_counts[iX])*(jet_pt_counts[iY]));
-    }
-
-
-    // skip events with no jets (otherwise will have divide-by-zero errors later on)
+    // skip events with no jets (otherwise the "trigger" didn't fire). This just saves time with mixing really.
     if (nj == 0)
       continue;
 
+    for (short iPtJX = 0; iPtJX < nPtJBins; iPtJX++) {
+      h_jet_pt[iCent]->SetBinContent (iPtJX+1, h_jet_pt[iCent]->GetBinContent (iPtJX+1) + (ewgt)*(jet_pt_counts[iPtJX]));
+      for (short iPtJY = 0; iPtJY < nPtJBins; iPtJY++)
+        h2_jet_pt_cov[iCent]->SetBinContent (iPtJX+1, iPtJY+1, h2_jet_pt_cov[iCent]->GetBinContent (iPtJX+1, iPtJY+1) + (ewgt)*(jet_pt_counts[iPtJX])*(jet_pt_counts[iPtJY]));
+    }
+
+
+    // the weights for the per-trigger jet yield are "w_evt"
+    h_evt_counts[iFile]->SetBinContent (1, h_evt_counts[iFile]->GetBinContent (1) + 1);
+    h_evt_counts[iFile]->SetBinContent (2, h_evt_counts[iFile]->GetBinContent (2) + ewgt);
+    h_evt_counts[iFile]->SetBinContent (3, h_evt_counts[iFile]->GetBinContent (3) + ewgt*ewgt);
+
+    for (short iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
+      const float jwgt = jet_pt_counts[iPtJ];
+
+      if (jwgt <= 0)
+        continue; // IMPORTANT! Skip entries where there were no jets. These shouldn't contribute to the per-jet track yield at all.
+
+      // the weights for the per-jet track yield are "w_evt * sum (w_jet)"
+      h_jet_counts[iFile][iPtJ]->SetBinContent (1, h_jet_counts[iFile][iPtJ]->GetBinContent (1) + 1);
+      h_jet_counts[iFile][iPtJ]->SetBinContent (2, h_jet_counts[iFile][iPtJ]->GetBinContent (2) + ewgt*jwgt);
+      h_jet_counts[iFile][iPtJ]->SetBinContent (3, h_jet_counts[iFile][iPtJ]->GetBinContent (3) + std::pow (ewgt*jwgt, 2));
+
+    } // end loop over iPtJ
+
+
+    // System boost in p+Pb or pp -- requires a run number to be specified to check for pPb vs Pbp
     const float yboost = GetBoost (run_number);
-
-    h_evt_counts[iFile]->Fill (0);
-    h_evt_counts[iFile]->Fill (1, ewgt);
-    h_evt_counts[iFile]->Fill (2, ewgt*ewgt);
-
-    h_jet_counts[iFile]->Fill (0); // adds to number of jets (i.e. denominator)
-    h_jet_counts[iFile]->Fill (1, ewgt*jwgt);
-    h_jet_counts[iFile]->Fill (2, std::pow (ewgt*jwgt, 2));
 
 
     // do mixed event procedure: get a good event to mix with here
@@ -566,29 +546,31 @@ bool Correlator (const char* tag, const char* outFilePattern, TTree* jetsTree, T
         tracksTree->GetEntry (iTrkEvt);
 
         // triggering cut, require appropriate track selection trigger to have fired
-        if (IsCollisions () && !trackTreeTrigger->trigDecision)
+        if (!trackTreeTrigger->trigDecision)
           continue;
 
         // vertexing cuts, require no pileup vertices and primary vertex with |vz| < 150mm
+        float vz_matching = -999;
         {
           bool hasPrimary = false;
           bool hasPileup = false;
-          float vz = -999;
-          for (int iVert = 0; iVert < nvert_matching; iVert++) {
+          for (short iVert = 0; iVert < nvert_matching; iVert++) {
             if (vert_type_matching[iVert] == 1) {
               hasPrimary = true;
-              vz = vert_z_matching[iVert];
+              vz_matching = vert_z_matching[iVert];
             }
             else if (vert_type_matching[iVert] == 3)
               hasPileup = true;
           }
-          if (hasPileup || std::fabs (vz) > 150 || !hasPrimary)
+          if (hasPileup || std::fabs (vz_matching) > 150 || !hasPrimary)
             continue;
         }
 
-        // further mixing categories -- Zdc centrality in p+Pb data and FCal centrality
+        // further mixing categories -- Zdc centrality in p+Pb data and FCal centrality in MC
         if (IsCollisions () && IspPb () && GetBin (zdcCentBins, nZdcCentBins, ZdcCalibEnergy_A_matching*1e3) != GetBin (zdcCentBins, nZdcCentBins, ZdcCalibEnergy_A*1e3))
           continue; // require the same ZDC centrality if doing the p+Pb mixed event
+        //else if (!IsCollisions () && IspPb () && GetBin (fcalCentBins, nFcalCentBins, fcalA_et_matching) != iCent) 
+        //  continue; // require the same FCal centrality in MC
         if (GetBin (mixCentBins, nMixCentBins, fcalA_et_matching + (Ispp () ? fcalC_et_matching : 0)) != iMixCent)
           continue; // then match FCal centrality with jet ("trigger") event
 
@@ -612,27 +594,31 @@ bool Correlator (const char* tag, const char* outFilePattern, TTree* jetsTree, T
 
 
     // initialize all yields to 0
-    for (int iX = 0; iX < nDPhiBins; iX++) {
-      jet_trk_dphi_gt0p5_lt1_counts[iX] = 0;
-      jet_trk_dphi_gt1_lt1p5_counts[iX] = 0;
-      jet_trk_dphi_gt1p5_lt2_counts[iX] = 0;
-      jet_trk_dphi_gt2_lt4_counts[iX]   = 0;
-      jet_trk_dphi_gt4_lt6_counts[iX]   = 0;
-      jet_trk_dphi_gt6_lt8_counts[iX]   = 0;
-      jet_trk_dphi_gt8_lt10_counts[iX]  = 0;
-      jet_trk_dphi_gt10_lt15_counts[iX] = 0;
-      jet_trk_dphi_gt15_lt20_counts[iX] = 0;
-      jet_trk_dphi_gt20_lt30_counts[iX] = 0;
-    }
-    for (int iX = 0; iX < nPtChBins; iX++) {
-      jet_trk_pt_ns_counts[iX]          = 0;
-      jet_trk_pt_perp_counts[iX]        = 0;
-      jet_trk_pt_as_counts[iX]          = 0;
-    }
+    for (short iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
+      for (short iPtCh = 0; iPtCh < nPtChSelections; iPtCh++) {
+        for (short iDPhi = 0; iDPhi < nDPhiBins; iDPhi++) {
+          jet_trk_dphi_counts[iPtJ][iPtCh][iDPhi] = 0;
+        }
+      } // end loop over iPtCh
+      for (short iDir = 0; iDir < nDir; iDir++) {
+        for (short iPtCh = 0; iPtCh < nPtChBins; iPtCh++) {
+          jet_trk_pt_counts[iPtJ][iDir][iPtCh] = 0;
+        }
+      } // end loop over iDir
+    } // end loop over iPtJ
+
+
+    //// Get multiplicity bin for event, must be done after mixing (important)!
+    //short iMult = 0;
+    //while (iMult < nMultBins-1 && multBins[iMult+1] < trk_n)
+    //  iMult++;
+    //if (nMultBins < iMult)
+    //  continue;
+    const short iMult = nMultBins-1;
 
 
     // loop over all jets again in the event but now correlate tracks
-    for (int iJet = 0; iJet < jn; iJet++) {
+    for (short iJet = 0; iJet < jn; iJet++) {
 
       const float jpt  = (UseTruthJets () ? GetAktTruthJetPt  (iJet, r0p4) : GetAktHIJetPt  (iJet, r0p4, nJESVar));
       const float jeta = (UseTruthJets () ? GetAktTruthJetEta (iJet, r0p4) : GetAktHIJetEta (iJet, r0p4, nJESVar));
@@ -641,14 +627,28 @@ bool Correlator (const char* tag, const char* outFilePattern, TTree* jetsTree, T
       if (!MeetsJetAcceptanceCuts (iJet, r0p4, nJESVar))
         continue; // jet eta/phi & timing cuts
       if (!MeetsJetPtCut (jpt))
-        continue; // jet pT cuts
+        continue; // jet pT cuts, for trigger relevance purposes
 
       const float thisjwgt = GetAktJetWeight (jpt, jeta, jphi, r0p4);
       if (thisjwgt <= 0.)
         continue; // sanity check
 
+      // In MC, check that the jet is truth-matched. Otherwise problems can emerge, particularly in the overlay.
+      if (!IsCollisions () && !UseTruthJets ()) {
+        const short iTJet = GetAktTruthJetMatch (iJet, r0p4);
+        if (iTJet == -1)
+          continue; // in case of no truth jet match
+        const float tjpt = GetAktTruthJetPt (iTJet, r0p4);
+        if (std::fabs (jpt/tjpt - 1) > 3*0.01*f_jer->Eval (tjpt))
+          continue; // cut on jets reconstructed well outside the JER
+      }
+
+      const short iPtJ = GetPtJBin (jpt);
+      if (iPtJ < 0 || nPtJBins <= iPtJ) 
+        continue; // sanity check
+
       // correlate charged particles with this jet  
-      for (int iTrk = 0; iTrk < trk_n; iTrk++) {
+      for (short iTrk = 0; iTrk < trk_n; iTrk++) {
 
         if (!MeetsTrackCuts (iTrk, nTrkWPVar))
           continue; // cut on bad quality tracks
@@ -656,18 +656,14 @@ bool Correlator (const char* tag, const char* outFilePattern, TTree* jetsTree, T
         if (trk_pt[iTrk] < pTChBins[0])
           continue; // histogram pT cut on tracks
 
-        const short iPtCh = GetPtChBin (trk_pt[iTrk]);
-        if (iPtCh < 0 || iPtCh >= nPtChBins)
-          continue; // sanity check to avoid under/over-flow
-
-        //// TODO -- better rapidity selection by considering mass more carefully
+        //// better rapidity selection by considering mass more carefully
         //const double trk_m = pion_mass; // assume everyone is a pi^+
         //const double trk_en = std::sqrt (std::pow (trk_m, 2) + trk_pt[iTrk] * std::cosh ((double)(trk_eta[iTrk])));
         //const double trk_pz = ((double)trk_pt[iTrk]) * std::sinh ((double)trk_eta[iTrk]);
         //const double trk_y = (trk_en > trk_pz ? 0.5 * std::log ((trk_en + trk_pz)/(trk_en - trk_pz)) : 0.);
 
         const float trk_y = trk_eta[iTrk];
-        if (std::fabs (trk_y - yboost) > 2.5 - 0.465)
+        if (std::fabs (trk_y - yboost) > 2.035) // 2.035 = 2.5 - 0.465
           continue; // rapidity acceptance cut
 
         const float dphi = DeltaPhi (jphi, trk_phi[iTrk]);
@@ -682,190 +678,145 @@ bool Correlator (const char* tag, const char* outFilePattern, TTree* jetsTree, T
           continue;
 
 
-        const float teff = h2_trk_eff->GetBinContent (h2_trk_eff->FindBin (trk_eta[iTrk], trk_pt[iTrk]));
+        const float teff = h2_trk_eff[iMult]->GetBinContent (h2_trk_eff[iMult]->FindBin (trk_eta[iTrk], trk_pt[iTrk]));
         const float tpur = (DoPrimFitVar () ? h_trk_pur[iEta]->GetBinContent (h_trk_pur[iEta]->FindBin (trk_pt[iTrk])) : f_trk_pur[iEta]->Eval (trk_pt[iTrk]));
         const float twgt = thisjwgt * (UseTruthParticles () ? 1 : (teff > 0. ? tpur / teff : 0.));
 
-        if (0.5 < trk_pt[iTrk] && trk_pt[iTrk] < 1)
-          jet_trk_dphi_gt0p5_lt1_counts[iDPhi]  += twgt;
-        else if (1 < trk_pt[iTrk] && trk_pt[iTrk] < 1.5)
-          jet_trk_dphi_gt1_lt1p5_counts[iDPhi]  += twgt;
-        else if (1.5 < trk_pt[iTrk] && trk_pt[iTrk] < 2)
-          jet_trk_dphi_gt1p5_lt2_counts[iDPhi]  += twgt;
-        else if (2 < trk_pt[iTrk] && trk_pt[iTrk] < 4)
-          jet_trk_dphi_gt2_lt4_counts[iDPhi]    += twgt;
-        else if (4 < trk_pt[iTrk] && trk_pt[iTrk] < 6)
-          jet_trk_dphi_gt4_lt6_counts[iDPhi]    += twgt;
-        else if (6 < trk_pt[iTrk] && trk_pt[iTrk] < 8)
-          jet_trk_dphi_gt6_lt8_counts[iDPhi]    += twgt;
-        else if (8 < trk_pt[iTrk] && trk_pt[iTrk] < 10)
-          jet_trk_dphi_gt8_lt10_counts[iDPhi]   += twgt;
-        else if (10 < trk_pt[iTrk] && trk_pt[iTrk] < 15)
-          jet_trk_dphi_gt10_lt15_counts[iDPhi]  += twgt;
-        else if (15 < trk_pt[iTrk] && trk_pt[iTrk] < 20)
-          jet_trk_dphi_gt15_lt20_counts[iDPhi]  += twgt;
-        else if (20 < trk_pt[iTrk] && trk_pt[iTrk] < 30)
-          jet_trk_dphi_gt20_lt30_counts[iDPhi]  += twgt;
+        for (short iPtCh = 0; iPtCh < nPtChSelections; iPtCh++) {
+          if (pTChStrCuts[iPtCh].first < trk_pt[iTrk] && trk_pt[iTrk] < pTChStrCuts[iPtCh].second) {
+            jet_trk_dphi_counts[iPtJ][iPtCh][iDPhi] += twgt;
+            break;
+          }
+        }
 
+        const short iPtCh = GetPtChBin (trk_pt[iTrk]);
+        if (iPtCh < 0 || iPtCh >= nPtChBins)
+          continue; // sanity check to avoid under/over-flow
+
+        short iDir = -1;
         if (dphi < M_PI/8.)
-          jet_trk_pt_ns_counts[iPtCh]           += twgt;
+          iDir = 0;
+          //jet_trk_pt_ns_counts[iPtCh]           += twgt;
         else if (M_PI/3. < dphi && dphi < 2.*M_PI/3.)
-          jet_trk_pt_perp_counts[iPtCh]         += twgt;
+          iDir = 1;
+          //jet_trk_pt_perp_counts[iPtCh]         += twgt;
         else if (dphi > 7.*M_PI/8.)
-          jet_trk_pt_as_counts[iPtCh]           += twgt;
+          iDir = 2;
+          //jet_trk_pt_as_counts[iPtCh]           += twgt;
+        if (iDir != -1)
+          jet_trk_pt_counts[iPtJ][iDir][iPtCh]  += twgt;
 
       } // end loop over tracks
+
     } // end loop over jets
 
 
-    // calculate per-jet hadron yields for that event by dividing out the number of jets
-    for (int iX = 0; iX < nDPhiBins; iX++) {
-      jet_trk_dphi_gt0p5_lt1_counts[iX] = jet_trk_dphi_gt0p5_lt1_counts[iX] / jwgt;
-      jet_trk_dphi_gt1_lt1p5_counts[iX] = jet_trk_dphi_gt1_lt1p5_counts[iX] / jwgt;
-      jet_trk_dphi_gt1p5_lt2_counts[iX] = jet_trk_dphi_gt1p5_lt2_counts[iX] / jwgt;
-      jet_trk_dphi_gt2_lt4_counts[iX]   = jet_trk_dphi_gt2_lt4_counts[iX]   / jwgt;
-      jet_trk_dphi_gt4_lt6_counts[iX]   = jet_trk_dphi_gt4_lt6_counts[iX]   / jwgt;
-      jet_trk_dphi_gt6_lt8_counts[iX]   = jet_trk_dphi_gt6_lt8_counts[iX]   / jwgt;
-      jet_trk_dphi_gt8_lt10_counts[iX]  = jet_trk_dphi_gt8_lt10_counts[iX]  / jwgt;
-      jet_trk_dphi_gt10_lt15_counts[iX] = jet_trk_dphi_gt10_lt15_counts[iX] / jwgt;
-      jet_trk_dphi_gt15_lt20_counts[iX] = jet_trk_dphi_gt15_lt20_counts[iX] / jwgt;
-      jet_trk_dphi_gt20_lt30_counts[iX] = jet_trk_dphi_gt20_lt30_counts[iX] / jwgt;
-    }
-    for (int iX = 0; iX < nPtChBins; iX++) {
-      jet_trk_pt_ns_counts[iX]          = jet_trk_pt_ns_counts[iX]          / jwgt;
-      jet_trk_pt_perp_counts[iX]        = jet_trk_pt_perp_counts[iX]        / jwgt;
-      jet_trk_pt_as_counts[iX]          = jet_trk_pt_as_counts[iX]          / jwgt;
-    }
+    // evaluate the per-jet hadron yields for that event by dividing out the number of jets
+    for (short iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
+      const float jwgt = jet_pt_counts[iPtJ];
+
+      if (jwgt == 0)
+        continue; // IMPORTANT! Skip entries where there were no jets. These shouldn't contribute to the per-jet track yield at all.
+
+      for (short iPtCh = 0; iPtCh < nPtChSelections; iPtCh++) {
+        for (short iDPhi = 0; iDPhi < nDPhiBins; iDPhi++) {
+          jet_trk_dphi_counts[iPtJ][iPtCh][iDPhi] = jet_trk_dphi_counts[iPtJ][iPtCh][iDPhi] / jwgt;
+        }
+      } // end loop over iPtCh
+      for (short iDir = 0; iDir < nDir; iDir++) {
+        for (short iPtCh = 0; iPtCh < nPtChBins; iPtCh++) {
+          jet_trk_pt_counts[iPtJ][iDir][iPtCh] = jet_trk_pt_counts[iPtJ][iDir][iPtCh] / jwgt;
+        }
+      } // end loop over iDir
+    } // end loop over iPtJ
 
 
     // store results in averaging & covariance histograms
-    for (int iX = 0; iX < nDPhiBins; iX++) {
-      h_jet_trk_dphi_gt0p5_lt1[iFile]->SetBinContent (iX+1, h_jet_trk_dphi_gt0p5_lt1[iFile]->GetBinContent (iX+1) + (ewgt)*(jet_trk_dphi_gt0p5_lt1_counts[iX]));
-      for (int iY = 0; iY < nDPhiBins; iY++)
-        h2_jet_trk_dphi_gt0p5_lt1_cov[iFile]->SetBinContent (iX+1, iY+1, h2_jet_trk_dphi_gt0p5_lt1_cov[iFile]->GetBinContent (iX+1, iY+1) + (ewgt)*(jet_trk_dphi_gt0p5_lt1_counts[iX])*(jet_trk_dphi_gt0p5_lt1_counts[iY]));
-    }
-    for (int iX = 0; iX < nDPhiBins; iX++) {
-      h_jet_trk_dphi_gt1_lt1p5[iFile]->SetBinContent (iX+1, h_jet_trk_dphi_gt1_lt1p5[iFile]->GetBinContent (iX+1) + (ewgt)*(jet_trk_dphi_gt1_lt1p5_counts[iX]));
-      for (int iY = 0; iY < nDPhiBins; iY++)
-        h2_jet_trk_dphi_gt1_lt1p5_cov[iFile]->SetBinContent (iX+1, iY+1, h2_jet_trk_dphi_gt1_lt1p5_cov[iFile]->GetBinContent (iX+1, iY+1) + (ewgt)*(jet_trk_dphi_gt1_lt1p5_counts[iX])*(jet_trk_dphi_gt1_lt1p5_counts[iY]));
-    }
-    for (int iX = 0; iX < nDPhiBins; iX++) {
-      h_jet_trk_dphi_gt1p5_lt2[iFile]->SetBinContent (iX+1, h_jet_trk_dphi_gt1p5_lt2[iFile]->GetBinContent (iX+1) + (ewgt)*(jet_trk_dphi_gt1p5_lt2_counts[iX]));
-      for (int iY = 0; iY < nDPhiBins; iY++)
-        h2_jet_trk_dphi_gt1p5_lt2_cov[iFile]->SetBinContent (iX+1, iY+1, h2_jet_trk_dphi_gt1p5_lt2_cov[iFile]->GetBinContent (iX+1, iY+1) + (ewgt)*(jet_trk_dphi_gt1p5_lt2_counts[iX])*(jet_trk_dphi_gt1p5_lt2_counts[iY]));
-    }
-    for (int iX = 0; iX < nDPhiBins; iX++) {
-      h_jet_trk_dphi_gt2_lt4[iFile]->SetBinContent (iX+1, h_jet_trk_dphi_gt2_lt4[iFile]->GetBinContent (iX+1) + (ewgt)*(jet_trk_dphi_gt2_lt4_counts[iX]));
-      for (int iY = 0; iY < nDPhiBins; iY++)
-        h2_jet_trk_dphi_gt2_lt4_cov[iFile]->SetBinContent (iX+1, iY+1, h2_jet_trk_dphi_gt2_lt4_cov[iFile]->GetBinContent (iX+1, iY+1) + (ewgt)*(jet_trk_dphi_gt2_lt4_counts[iX])*(jet_trk_dphi_gt2_lt4_counts[iY]));
-    }
-    for (int iX = 0; iX < nDPhiBins; iX++) {
-      h_jet_trk_dphi_gt4_lt6[iFile]->SetBinContent (iX+1, h_jet_trk_dphi_gt4_lt6[iFile]->GetBinContent (iX+1) + (ewgt)*(jet_trk_dphi_gt4_lt6_counts[iX]));
-      for (int iY = 0; iY < nDPhiBins; iY++)
-        h2_jet_trk_dphi_gt4_lt6_cov[iFile]->SetBinContent (iX+1, iY+1, h2_jet_trk_dphi_gt4_lt6_cov[iFile]->GetBinContent (iX+1, iY+1) + (ewgt)*(jet_trk_dphi_gt4_lt6_counts[iX])*(jet_trk_dphi_gt4_lt6_counts[iY]));
-    }
-    for (int iX = 0; iX < nDPhiBins; iX++) {
-      h_jet_trk_dphi_gt6_lt8[iFile]->SetBinContent (iX+1, h_jet_trk_dphi_gt6_lt8[iFile]->GetBinContent (iX+1) + (ewgt)*(jet_trk_dphi_gt6_lt8_counts[iX]));
-      for (int iY = 0; iY < nDPhiBins; iY++)
-        h2_jet_trk_dphi_gt6_lt8_cov[iFile]->SetBinContent (iX+1, iY+1, h2_jet_trk_dphi_gt6_lt8_cov[iFile]->GetBinContent (iX+1, iY+1) + (ewgt)*(jet_trk_dphi_gt6_lt8_counts[iX])*(jet_trk_dphi_gt6_lt8_counts[iY]));
-    }
-    for (int iX = 0; iX < nDPhiBins; iX++) {
-      h_jet_trk_dphi_gt8_lt10[iFile]->SetBinContent (iX+1, h_jet_trk_dphi_gt8_lt10[iFile]->GetBinContent (iX+1) + (ewgt)*(jet_trk_dphi_gt8_lt10_counts[iX]));
-      for (int iY = 0; iY < nDPhiBins; iY++)
-        h2_jet_trk_dphi_gt8_lt10_cov[iFile]->SetBinContent (iX+1, iY+1, h2_jet_trk_dphi_gt8_lt10_cov[iFile]->GetBinContent (iX+1, iY+1) + (ewgt)*(jet_trk_dphi_gt8_lt10_counts[iX])*(jet_trk_dphi_gt8_lt10_counts[iY]));
-    }
-    for (int iX = 0; iX < nDPhiBins; iX++) {
-      h_jet_trk_dphi_gt10_lt15[iFile]->SetBinContent (iX+1, h_jet_trk_dphi_gt10_lt15[iFile]->GetBinContent (iX+1) + (ewgt)*(jet_trk_dphi_gt10_lt15_counts[iX]));
-      for (int iY = 0; iY < nDPhiBins; iY++)
-        h2_jet_trk_dphi_gt10_lt15_cov[iFile]->SetBinContent (iX+1, iY+1, h2_jet_trk_dphi_gt10_lt15_cov[iFile]->GetBinContent (iX+1, iY+1) + (ewgt)*(jet_trk_dphi_gt10_lt15_counts[iX])*(jet_trk_dphi_gt10_lt15_counts[iY]));
-    }
-    for (int iX = 0; iX < nDPhiBins; iX++) {
-      h_jet_trk_dphi_gt15_lt20[iFile]->SetBinContent (iX+1, h_jet_trk_dphi_gt15_lt20[iFile]->GetBinContent (iX+1) + (ewgt)*(jet_trk_dphi_gt15_lt20_counts[iX]));
-      for (int iY = 0; iY < nDPhiBins; iY++)
-        h2_jet_trk_dphi_gt15_lt20_cov[iFile]->SetBinContent (iX+1, iY+1, h2_jet_trk_dphi_gt15_lt20_cov[iFile]->GetBinContent (iX+1, iY+1) + (ewgt)*(jet_trk_dphi_gt15_lt20_counts[iX])*(jet_trk_dphi_gt15_lt20_counts[iY]));
-    }
-    for (int iX = 0; iX < nDPhiBins; iX++) {
-      h_jet_trk_dphi_gt20_lt30[iFile]->SetBinContent (iX+1, h_jet_trk_dphi_gt20_lt30[iFile]->GetBinContent (iX+1) + (ewgt)*(jet_trk_dphi_gt20_lt30_counts[iX]));
-      for (int iY = 0; iY < nDPhiBins; iY++)
-        h2_jet_trk_dphi_gt20_lt30_cov[iFile]->SetBinContent (iX+1, iY+1, h2_jet_trk_dphi_gt20_lt30_cov[iFile]->GetBinContent (iX+1, iY+1) + (ewgt)*(jet_trk_dphi_gt20_lt30_counts[iX])*(jet_trk_dphi_gt20_lt30_counts[iY]));
-    }
+    for (short iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
+      const float jwgt = jet_pt_counts[iPtJ];
 
+      if (jwgt == 0)
+        continue; // IMPORTANT! Skip entries where there were no jets. These shouldn't contribute to the per-jet track yield at all.
 
-    for (int iX = 0; iX < nPtChBins; iX++) {
-      h_jet_trk_pt_ns[iFile]->SetBinContent (iX+1, h_jet_trk_pt_ns[iFile]->GetBinContent (iX+1) + (ewgt)*(jet_trk_pt_ns_counts[iX]));
-      for (int iY = 0; iY < nPtChBins; iY++)
-        h2_jet_trk_pt_ns_cov[iFile]->SetBinContent (iX+1, iY+1, h2_jet_trk_pt_ns_cov[iFile]->GetBinContent (iX+1, iY+1) + (ewgt)*(jet_trk_pt_ns_counts[iX])*(jet_trk_pt_ns_counts[iY]));
-    }
-    for (int iX = 0; iX < nPtChBins; iX++) {
-      h_jet_trk_pt_perp[iFile]->SetBinContent (iX+1, h_jet_trk_pt_perp[iFile]->GetBinContent (iX+1) + (ewgt)*(jet_trk_pt_perp_counts[iX]));
-      for (int iY = 0; iY < nPtChBins; iY++)
-        h2_jet_trk_pt_perp_cov[iFile]->SetBinContent (iX+1, iY+1, h2_jet_trk_pt_perp_cov[iFile]->GetBinContent (iX+1, iY+1) + (ewgt)*(jet_trk_pt_perp_counts[iX])*(jet_trk_pt_perp_counts[iY]));
-    }
-    for (int iX = 0; iX < nPtChBins; iX++) {
-      h_jet_trk_pt_as[iFile]->SetBinContent (iX+1, h_jet_trk_pt_as[iFile]->GetBinContent (iX+1) + (ewgt)*(jet_trk_pt_as_counts[iX]));
-      for (int iY = 0; iY < nPtChBins; iY++)
-        h2_jet_trk_pt_as_cov[iFile]->SetBinContent (iX+1, iY+1, h2_jet_trk_pt_as_cov[iFile]->GetBinContent (iX+1, iY+1) + (ewgt)*(jet_trk_pt_as_counts[iX])*(jet_trk_pt_as_counts[iY]));
-    }
+      for (short iPtCh = 0; iPtCh < nPtChSelections; iPtCh++) {
+        TH1D* h = h_jet_trk_dphi[iFile][iPtJ][iPtCh];
+        TH2D* h2 = h2_jet_trk_dphi_cov[iFile][iPtJ][iPtCh];
+        double* counts = jet_trk_dphi_counts[iPtJ][iPtCh];
+        for (short iDPhiX = 0; iDPhiX < nDPhiBins; iDPhiX++) {
+          h->SetBinContent (iDPhiX+1, h->GetBinContent (iDPhiX+1) + (ewgt)*(jwgt)*(counts[iDPhiX]));
+          for (short iDPhiY = 0; iDPhiY < nDPhiBins; iDPhiY++)
+            h2->SetBinContent (iDPhiX+1, iDPhiY+1, h2->GetBinContent (iDPhiX+1, iDPhiY+1) + (ewgt)*(jwgt)*(counts[iDPhiX])*(counts[iDPhiY]));
+        }
+      } // end loop over iPtCh
+
+      for (short iDir = 0; iDir < nDir; iDir++) {
+        TH1D* h = h_jet_trk_pt[iFile][iPtJ][iDir];
+        TH2D* h2 = h2_jet_trk_pt_cov[iFile][iPtJ][iDir];
+        double* counts = jet_trk_pt_counts[iPtJ][iDir];
+        for (short iPtChX = 0; iPtChX < nPtChBins; iPtChX++) {
+          h->SetBinContent (iPtChX+1, h->GetBinContent (iPtChX+1) + (ewgt)*(jwgt)*(counts[iPtChX]));
+          for (short iPtChY = 0; iPtChY < nPtChBins; iPtChY++)
+            h2->SetBinContent (iPtChX+1, iPtChY+1, h2->GetBinContent (iPtChX+1, iPtChY+1) + (ewgt)*(jwgt)*(counts[iPtChX])*(counts[iPtChY]));
+        }
+      } // end loop over iDir
+
+    } // end loop over iPtJ
 
   } // end loop over events
   std::cout << "Finished event loop." << std::endl;
 
 
+  SaferDelete (&f_jer);
+
   SaferDelete (&h2_trk_eff);
 
-  for (int iEta = 0; iEta < nEtaTrkBins; iEta++) {
+  for (short iEta = 0; iEta < nEtaTrkBins; iEta++) {
     SaferDelete (&f_trk_pur[iEta]);
     SaferDelete (&h_trk_pur[iEta]);
   }
   Delete1DArray (f_trk_pur, nEtaTrkBins);
   Delete1DArray (h_trk_pur, nEtaTrkBins);
 
+  //SaferDelete (&h_probs);
 
-  for (int iFile = 0; iFile < nFiles; iFile++) {
+  SaferDelete (&m_overlay_fcalet);
+
+
+  for (short iFile = 0; iFile < nFiles; iFile++) {
 
     outFiles[iFile]->cd ();
 
     h_evt_counts[iFile]->Write ();
-    h_jet_counts[iFile]->Write ();
 
     h_jet_pt[iFile]->Write ();
     h2_jet_pt_cov[iFile]->Write ();
-    h2_jet_eta_phi[iFile]->Write ();
 
-    h_jet_trk_dphi_gt0p5_lt1[iFile]->Write ();
-    h2_jet_trk_dphi_gt0p5_lt1_cov[iFile]->Write ();
-    h_jet_trk_dphi_gt1_lt1p5[iFile]->Write ();
-    h2_jet_trk_dphi_gt1_lt1p5_cov[iFile]->Write ();
-    h_jet_trk_dphi_gt1p5_lt2[iFile]->Write ();
-    h2_jet_trk_dphi_gt1p5_lt2_cov[iFile]->Write ();
-    h_jet_trk_dphi_gt2_lt4[iFile]->Write ();
-    h2_jet_trk_dphi_gt2_lt4_cov[iFile]->Write ();
-    h_jet_trk_dphi_gt4_lt6[iFile]->Write ();
-    h2_jet_trk_dphi_gt4_lt6_cov[iFile]->Write ();
-    h_jet_trk_dphi_gt6_lt8[iFile]->Write ();
-    h2_jet_trk_dphi_gt6_lt8_cov[iFile]->Write ();
-    h_jet_trk_dphi_gt8_lt10[iFile]->Write ();
-    h2_jet_trk_dphi_gt8_lt10_cov[iFile]->Write ();
-    h_jet_trk_dphi_gt10_lt15[iFile]->Write ();
-    h2_jet_trk_dphi_gt10_lt15_cov[iFile]->Write ();
-    h_jet_trk_dphi_gt15_lt20[iFile]->Write ();
-    h2_jet_trk_dphi_gt15_lt20_cov[iFile]->Write ();
-    h_jet_trk_dphi_gt20_lt30[iFile]->Write ();
-    h2_jet_trk_dphi_gt20_lt30_cov[iFile]->Write ();
+    for (short iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
 
-    h_jet_trk_pt_ns[iFile]->Write ();
-    h2_jet_trk_pt_ns_cov[iFile]->Write ();
-    h_jet_trk_pt_perp[iFile]->Write ();
-    h2_jet_trk_pt_perp_cov[iFile]->Write ();
-    h_jet_trk_pt_as[iFile]->Write ();
-    h2_jet_trk_pt_as_cov[iFile]->Write ();
+      h_jet_counts[iFile][iPtJ]->Write ();
 
+      h2_jet_eta_phi[iFile][iPtJ]->Write ();
+
+      for (short iPtCh = 0; iPtCh < nPtChSelections; iPtCh++) {
+        h_jet_trk_dphi[iFile][iPtJ][iPtCh]->Write ();
+        h2_jet_trk_dphi_cov[iFile][iPtJ][iPtCh]->Write ();
+      }
+      for (short iDir = 0; iDir < nDir; iDir++) {
+        h_jet_trk_pt[iFile][iPtJ][iDir]->Write ();
+        h2_jet_trk_pt_cov[iFile][iPtJ][iDir]->Write ();
+      }
+    }
 
     outFiles[iFile]->Close ();
   }
 
   SaferDelete (&jetTrigger);
   SaferDelete (&trackTreeTrigger);
+
+
+  auto end = std::chrono::steady_clock::now (); // time at end of correlator function.
+  auto nseconds = std::chrono::duration_cast <chrono::seconds> (end - start).count ();
+  std::cout << "Correlator completed in " << nseconds << " seconds" << std::endl;
 
   return true;
 }
@@ -892,13 +843,13 @@ bool RunCorrelator (const char* directory,
   doMixing = (tracksInFileName != nullptr && strcmp (tracksInFileName, "") != 0);
 
   // check mixing configuration makes sense
-  if (!doMixing && (DoMixCatVar1 () || DoMixCatVar2 () || DoMixCatVar3 () || DoMixCatVar4 () || DoMixCatVar5 ())) {
+  if (!doMixing && (DoMixCatVar1 () || DoMixCatVar2 () || DoMixCatVar3 () || DoMixCatVar4 () || DoMixCatVar5 () || DoMixCatVar6 ())) {
     std::cout << "In RunCorrelator.cxx: Configured to run mixing variations but no mixing configuration specified? Please investigate. Exiting." << std::endl;
     return false;
   }
 
   // histograms for some mixing variations are symlinks to central values to avoid file copy issues, make sure not to overwrite them by exiting gracefully
-  if ((DoMixCatVar2 () || DoMixCatVar4 ()) && Ispp ()) {
+  if ((DoMixCatVar2 () || DoMixCatVar4 () || DoMixCatVar6 ()) && Ispp ()) {
     std::cout << "In RunCorrelator.cxx: MixCatVar2 and MixCatVar4 do nothing in pp, exiting gracefully." << std::endl;
     return true;
   }
@@ -933,12 +884,12 @@ bool RunCorrelator (const char* directory,
     while (const char* f = gSystem->GetDirEntry (dir)) {
       TString file = TString (f);
 
+      if (!file.Contains (jetsInFileName))
+        continue;
       if (IsCollisions ()) {
         if ((UseMinBiasTriggers () && !file.Contains ("MinBias")) || (UseJetTriggers () && !file.Contains ("Main")))
           continue;
       }
-      if (!file.Contains (jetsInFileName))
-        continue;
 
       std::cout << "Adding " << dataPath + directory + "/" + file + "/*.root" << " to input jets trees TChain" << std::endl;
       jetsInTree->Add (dataPath + directory + "/" + file + "/*.root");
@@ -1021,8 +972,8 @@ int main (int argc, char** argv) {
   int argn                = 1;
   const char* subdir      = argv[argn++];
   const char* tag         = argv[argn++];
-  jet_min_pt = (double) std::atof (argv[argn++]);
-  jet_max_pt = (double) std::atof (argv[argn++]);
+  //jet_min_pt = (double) std::atof (argv[argn++]);
+  //jet_max_pt = (double) std::atof (argv[argn++]);
 
   TString collSys = TString (argv[argn++]);
   if (!SetCollisionSystem (collSys)) {
@@ -1041,6 +992,11 @@ int main (int argc, char** argv) {
     std::cout << "In RunCorrelator.cxx: Invalid trigger type, exiting." << std::endl;
     return 3;
   }
+
+  //jet_min_pt = (!IsCollisions () || !UseJetTriggers ()) ? pTJBins[0] : (UseJ50Triggers () ? 60 : 130); // if we want to use j100 for pp
+  jet_min_pt = (!IsCollisions () || !UseJetTriggers ()) ? pTJBins[0] : 60;
+  //jet_max_pt = (!IsCollisions () || (!Ispp () && UseJ50Triggers ()) || (Ispp () && UseJ100Triggers ())) ? pTJBins[nPtJBins] : (UseMinBiasTriggers () ? 60 : 130); // if we want to use j100 for pp
+  jet_max_pt = (!IsCollisions () || UseJ50Triggers ()) ? pTJBins[nPtJBins] : 60;
 
   TString sFlag = TString (argv[argn++]);
   if (!SetSystFlag (sFlag)) {

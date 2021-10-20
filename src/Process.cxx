@@ -21,7 +21,7 @@ using namespace JetHadronCorrelations;
 int main (int argc, char** argv) {
 
   int argn                = 1;
-  const string alg        = string (argv[argn++]);
+  const string alg        = std::string (argv[argn++]);
   const char* subdir      = argv[argn++];
   const int dataSet       = atoi (argv[argn++]);
 

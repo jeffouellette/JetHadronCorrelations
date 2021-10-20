@@ -41,24 +41,24 @@ void PlotJets (const char* tag, const char* inFileTag) {
 
   TH1D***  h_evt_counts_ref     = Get2DArray <TH1D*> (2, nVar);
   TH1D***  h_jet_counts_ref     = Get2DArray <TH1D*> (2, nVar);
-  TH1D**** h_evt_counts         = Get3DArray <TH1D*> (2, nZdcCentBins, nVar);
-  TH1D**** h_jet_counts         = Get3DArray <TH1D*> (2, nZdcCentBins, nVar);
+  TH1D**** h_evt_counts         = Get3DArray <TH1D*> (2, nZdcCentBins+1, nVar);
+  TH1D**** h_jet_counts         = Get3DArray <TH1D*> (2, nZdcCentBins+1, nVar);
 
   TH1D*** h_jet_pt_ref          = Get2DArray <TH1D*> (2, nVar);
   TH2D*** h2_jet_pt_cov_ref     = Get2DArray <TH2D*> (2, nVar);
 
-  TH1D**** h_jet_pt             = Get3DArray <TH1D*> (2, nZdcCentBins, nVar);
-  TH2D**** h2_jet_pt_cov        = Get3DArray <TH2D*> (2, nZdcCentBins, nVar);
+  TH1D**** h_jet_pt             = Get3DArray <TH1D*> (2, nZdcCentBins+1, nVar);
+  TH2D**** h2_jet_pt_cov        = Get3DArray <TH2D*> (2, nZdcCentBins+1, nVar);
 
-  TH1D**** h_jet_pt_ratio       = Get3DArray <TH1D*> (2, nZdcCentBins, nVar);
+  TH1D**** h_jet_pt_ratio       = Get3DArray <TH1D*> (2, nZdcCentBins+1, nVar);
 
   TH2D***  h2_jet_eta_phi_ref   = Get2DArray <TH2D*> (2, nVar);
-  TH2D**** h2_jet_eta_phi       = Get3DArray <TH2D*> (2, nZdcCentBins, nVar);
+  TH2D**** h2_jet_eta_phi       = Get3DArray <TH2D*> (2, nZdcCentBins+1, nVar);
 
   TGAE**  g_jet_pt_ref_syst     = Get1DArray <TGAE*> (nVar);
-  TGAE*** g_jet_pt_syst         = Get2DArray <TGAE*> (nZdcCentBins, nVar);
+  TGAE*** g_jet_pt_syst         = Get2DArray <TGAE*> (nZdcCentBins+1, nVar);
 
-  TGAE*** g_jet_pt_ratio_syst   = Get2DArray <TGAE*> (nZdcCentBins, nVar);
+  TGAE*** g_jet_pt_ratio_syst   = Get2DArray <TGAE*> (nZdcCentBins+1, nVar);
 
 
   {
@@ -86,15 +86,17 @@ void PlotJets (const char* tag, const char* inFileTag) {
   
         h2_jet_eta_phi_ref[iDType][iVar]  = (TH2D*) inFile->Get (Form ("h2_jet_eta_phi_ref_%s_%s",  dType.Data (), var.Data ()));
   
-        for (int iCent = 0; iCent < nZdcCentBins; iCent++) {
+        for (int iCent = 0; iCent < nZdcCentBins+1; iCent++) {
+
+          const TString cent = (iCent == nZdcCentBins ? "allCent" : Form ("iCent%i", iCent));
   
-          h_evt_counts[iDType][iCent][iVar]   = (TH1D*) inFile->Get (Form ("h_evt_counts_pPb_iCent%i_%s_%s",    iCent, dType.Data (), var.Data ()));
-          h_jet_counts[iDType][iCent][iVar]   = (TH1D*) inFile->Get (Form ("h_jet_counts_pPb_iCent%i_%s_%s",    iCent, dType.Data (), var.Data ()));
+          h_evt_counts[iDType][iCent][iVar]   = (TH1D*) inFile->Get (Form ("h_evt_counts_pPb_%s_%s_%s",   cent.Data (), dType.Data (), var.Data ()));
+          h_jet_counts[iDType][iCent][iVar]   = (TH1D*) inFile->Get (Form ("h_jet_counts_pPb_%s_%s_%s",   cent.Data (), dType.Data (), var.Data ()));
   
-          h_jet_pt[iDType][iCent][iVar]       = (TH1D*) inFile->Get (Form ("h_jet_pt_pPb_iCent%i_%s_%s",        iCent, dType.Data (), var.Data ()));
-          h_jet_pt_ratio[iDType][iCent][iVar] = (TH1D*) inFile->Get (Form ("h_jet_pt_ratio_iCent%i_%s_%s",      iCent, dType.Data (), var.Data ()));
+          h_jet_pt[iDType][iCent][iVar]       = (TH1D*) inFile->Get (Form ("h_jet_pt_pPb_%s_%s_%s",       cent.Data (), dType.Data (), var.Data ()));
+          h_jet_pt_ratio[iDType][iCent][iVar] = (TH1D*) inFile->Get (Form ("h_jet_pt_ratio_%s_%s_%s",     cent.Data (), dType.Data (), var.Data ()));
   
-          h2_jet_eta_phi[iDType][iCent][iVar] = (TH2D*) inFile->Get (Form ("h2_jet_eta_phi_pPb_iCent%i_%s_%s",  iCent, dType.Data (), var.Data ()));
+          h2_jet_eta_phi[iDType][iCent][iVar] = (TH2D*) inFile->Get (Form ("h2_jet_eta_phi_pPb_%s_%s_%s", cent.Data (), dType.Data (), var.Data ()));
   
         } // end loop over iCent
 
@@ -109,10 +111,12 @@ void PlotJets (const char* tag, const char* inFileTag) {
 
       g_jet_pt_ref_syst[iVar] = (TGAE*) inFile->Get (Form ("g_jet_pt_ref_syst_%s", var.Data ()));
 
-      for (int iCent = 0; iCent < nZdcCentBins; iCent++) {
+      for (int iCent = 0; iCent < nZdcCentBins+1; iCent++) {
 
-        g_jet_pt_syst[iCent][iVar]        = (TGAE*) inFile->Get (Form ("g_jet_pt_syst_pPb_iCent%i_%s", iCent, var.Data ()));
-        g_jet_pt_ratio_syst[iCent][iVar]  = (TGAE*) inFile->Get (Form ("g_jet_pt_ratio_syst_iCent%i_%s", iCent, var.Data ()));
+        const TString cent = (iCent == nZdcCentBins ? "allCent" : Form ("iCent%i", iCent));
+
+        g_jet_pt_syst[iCent][iVar]        = (TGAE*) inFile->Get (Form ("g_jet_pt_syst_pPb_%s_%s",   cent.Data (), var.Data ()));
+        g_jet_pt_ratio_syst[iCent][iVar]  = (TGAE*) inFile->Get (Form ("g_jet_pt_ratio_syst_%s_%s", cent.Data (), var.Data ()));
 
       } // end loop over iCent
 
@@ -123,16 +127,51 @@ void PlotJets (const char* tag, const char* inFileTag) {
 
 
   {
-
+    std::cout << "---------------" << std::endl << "JETS IN DATA" << std::endl << "---------------" << std::endl;
     std::cout << "Number of pp jets: " << h_jet_counts_ref[0][0]->GetBinContent (1) << std::endl;
-    for (int iCent = 0; iCent < nZdcCentBins; iCent++)
+    for (int iCent = 0; iCent < nZdcCentBins+1; iCent++)
       std::cout << "Number of p+Pb " << zdcCentPercs[iCent+1] << "\%-" << zdcCentPercs[iCent] << "\% jets: " << h_jet_counts[0][iCent][0]->GetBinContent (1) << std::endl;
 
     std::cout << "Formatted for latex:" << std::endl;
     std::cout << (int) h_jet_counts_ref[0][0]->GetBinContent (1);
-    for (int iCent = 0; iCent < nZdcCentBins; iCent++)
+    for (int iCent = 0; iCent < nZdcCentBins+1; iCent++)
       std::cout << " & " << (int) h_jet_counts[0][iCent][0]->GetBinContent (1);
+    std::cout << std::endl << std::endl;
+
+
+    const float trigpt = (strcmp (tag, "30GeVJets") == 0 ? 30 : 60);
+    float integral = 0;
+    for (int iX = h_jet_pt_ref[0][0]->FindBin (trigpt); iX <= h_jet_pt_ref[0][0]->GetNbinsX (); iX++)
+      integral += h_jet_pt_ref[0][0]->GetBinContent (iX) * h_jet_pt_ref[0][0]->GetBinWidth (iX);
+    std::cout << "Average number of jets per trigger jet in pp: " << integral << std::endl;
+    integral = 0;
+    for (int iX = h_jet_pt[0][nZdcCentBins][0]->FindBin (trigpt); iX <= h_jet_pt[0][nZdcCentBins][0]->GetNbinsX (); iX++)
+      integral += h_jet_pt[0][nZdcCentBins][0]->GetBinContent (iX) * h_jet_pt[0][nZdcCentBins][0]->GetBinWidth (iX);
+    std::cout << "Average number of jets per trigger jet in p+Pb: " << integral << std::endl;
+    std::cout << std::endl << std::endl;
+
+
+    std::cout << "---------------" << std::endl << "JETS IN MC" << std::endl << "---------------" << std::endl;
+    std::cout << "Number of pp jets: " << h_jet_counts_ref[1][0]->GetBinContent (1) << std::endl;
+    for (int iCent = 0; iCent < nZdcCentBins+1; iCent++)
+      std::cout << "Number of p+Pb " << zdcCentPercs[iCent+1] << "\%-" << zdcCentPercs[iCent] << "\% jets: " << h_jet_counts[1][iCent][0]->GetBinContent (1) << std::endl;
+
+    std::cout << "Formatted for latex:" << std::endl;
+    std::cout << (int) h_jet_counts_ref[1][0]->GetBinContent (1);
+    for (int iCent = 0; iCent < nZdcCentBins+1; iCent++)
+      std::cout << " & " << (int) h_jet_counts[1][iCent][0]->GetBinContent (1);
     std::cout << std::endl;
+
+
+    integral = 0;
+    for (int iX = h_jet_pt_ref[1][0]->FindBin (trigpt); iX <= h_jet_pt_ref[1][0]->GetNbinsX (); iX++)
+      integral += h_jet_pt_ref[1][0]->GetBinContent (iX) * h_jet_pt_ref[1][0]->GetBinWidth (iX);
+    std::cout << "Average number of jets per trigger jet in pp: " << integral << std::endl;
+    integral = 0;
+    for (int iX = h_jet_pt[1][nZdcCentBins][0]->FindBin (trigpt); iX <= h_jet_pt[1][nZdcCentBins][0]->GetNbinsX (); iX++)
+      integral += h_jet_pt[1][nZdcCentBins][0]->GetBinContent (iX) * h_jet_pt[1][nZdcCentBins][0]->GetBinWidth (iX);
+    std::cout << "Average number of jets per trigger jet in p+Pb: " << integral << std::endl;
+    std::cout << std::endl << std::endl;
   }
 
 
@@ -193,50 +232,42 @@ void PlotJets (const char* tag, const char* inFileTag) {
     h->DrawCopy ("hist ][");
     SaferDelete (&h);
 
-    g = (TGAE*) g_jet_pt_ref_syst[0]->Clone ();
+    h = (TH1D*) h_jet_pt_ref[iDType][0]->Clone ("htemp");
+    h->Scale (std::pow (10, 3));
+    myDrawHist (h, kBlack, 1, 2);
+    SaferDelete (&h);
+
     h = h_jet_pt_ref[iDType][0];
-    SetCentralValuesKeepRelativeErrors (g, h);
-    ScaleGraph (g, nullptr, std::pow (10, 3));
-    g->SetFillColorAlpha (lauraSystColors[0], 1);
-    ((TGAE*) g->Clone ())->Draw ("2");
+    //g = (TGAE*) g_jet_pt_ref_syst[0]->Clone ();
+    //SetCentralValuesKeepRelativeErrors (g, h);
+    //ScaleGraph (g, nullptr, std::pow (10, 3));
+    //myDrawSystFill (g, colorfulSystColors[0], 1, 1001);
+    //SaferDelete (&g);
    
     g = make_graph (h);
-    ResetXErrors (g);
+    //ResetXErrors (g);
     ScaleGraph (g, nullptr, std::pow (10, 3));
-    g->SetMarkerStyle (kFullCircle);
-    g->SetMarkerColor (lauraColors[0]);
-    g->SetMarkerSize (1.4);
-    g->SetLineColor (lauraColors[0]);
-    g->SetLineWidth (3);
-    ((TGAE*) g->Clone ())->Draw ("P");
+    myDraw (g, colorfulColors[0], kFullCircle, 1.4, 1, 3, "P", false);
+    SaferDelete (&g);
 
-    for (int iCent = 0; iCent < nZdcCentBins; iCent++) {
+    for (int iCent = 0; iCent < nZdcCentBins+1; iCent++) {
 
       h = (TH1D*) h_jet_pt_ref[iDType][0]->Clone ("htemp");
       h->Scale (std::pow (10, 2-iCent));
-      h->SetLineColor (kBlack);
-      h->SetLineWidth (2);
-      h->SetLineStyle (1);
-      h->DrawCopy ("hist ][ same");
+      myDrawHist (h, kBlack, 1, 2);
       SaferDelete (&h);
 
-      g = (TGAE*) g_jet_pt_syst[iCent][0]->Clone ();
       h = h_jet_pt[iDType][iCent][0];
-      SetCentralValuesKeepRelativeErrors (g, h);
-      ScaleGraph (g, nullptr, std::pow (10, 2-iCent));
-      g->SetFillColorAlpha (lauraSystColors[iCent+1], 1);
-      ((TGAE*) g->Clone ())->Draw ("2");
-      SaferDelete (&g);
+      //g = (TGAE*) g_jet_pt_syst[iCent][0]->Clone ();
+      //SetCentralValuesKeepRelativeErrors (g, h);
+      //ScaleGraph (g, nullptr, std::pow (10, 2-iCent));
+      //myDrawSystFill (g, colorfulSystColors[iCent+1], 1, 1001);
+      //SaferDelete (&g);
 
       g = make_graph (h);
-      ResetXErrors (g);
+      //ResetXErrors (g);
       ScaleGraph (g, nullptr, std::pow (10, 2-iCent));
-      g->SetMarkerStyle (kFullCircle);
-      g->SetMarkerColor (lauraColors[iCent+1]);
-      g->SetMarkerSize (1.4);
-      g->SetLineColor (lauraColors[iCent+1]);
-      g->SetLineWidth (3);
-      ((TGAE*) g->Clone ())->Draw ("P");
+      myDraw (g, colorfulColors[iCent+1], kFullCircle, 1.4, 1, 3, "P", false);
       SaferDelete (&g);
 
     } // end loop over iCent
@@ -245,21 +276,25 @@ void PlotJets (const char* tag, const char* inFileTag) {
     myText (0.64, 0.89, kBlack, "#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV", 0.034);
     myText (0.64, 0.84, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.034);
     myText (0.64, 0.79, kBlack, Form ("#bf{#it{p}_{T}^{leading} > %s GeV}", strcmp (tag, "30GeVJets") == 0 ? "30" : "60"), 0.034);
-    if (iDType == 0)
-      myText (0.64, 0.74, kBlack, strcmp (tag, "30GeVJets") == 0 ? "HLT_mb_sptrk_L1MBTS_1" : "HLT_j50_ion_L1J10", 0.034);
+    //if (iDType == 0)
+    //  myText (0.64, 0.74, kBlack, strcmp (tag, "30GeVJets") == 0 ? "HLT_mb_sptrk_L1MBTS_1" : "HLT_j50_ion_L1J10", 0.034);
 
-    mySimpleMarkerAndBoxAndLineText (0.27, 0.16, 1.4, 1001, lauraSystColors[0], 1.0, lauraColors[0], kFullCircle, 1.6, "#it{pp} (#times10^{3})", 0.022/fPad);
+    mySimpleMarkerAndBoxAndLineText (0.27, 0.16, 1.4, 1001, colorfulSystColors[0], 1.0, colorfulColors[0], kFullCircle, 1.6, "#it{pp} (#times10^{3})", 0.022/fPad);
 
     for (int iCent = 0; iCent < nZdcCentBins; iCent++) {
-      mySimpleMarkerAndBoxAndLineText (0.27 + (iCent >= 2 ? 0.4 : 0), 0.16-((iCent+1)%3)*0.04, 1.4, 1001, lauraSystColors[iCent+1], 1.0, lauraColors[iCent+1], kFullCircle, 1.6, Form ("%s %i-%i%% (#times10^{%i})", iDType == 0 ? "ZDC" : "FCal", zdcCentPercs[iCent+1], zdcCentPercs[iCent], 2-iCent), 0.022/fPad);
+      mySimpleMarkerAndBoxAndLineText (0.27 + (iCent >= 2 ? 0.4 : 0), 0.16-((iCent+1)%3)*0.04, 1.4, 1001, colorfulSystColors[iCent+1], 1.0, colorfulColors[iCent+1], kFullCircle, 1.6, Form ("%s %i-%i%% (#times10^{%i})", iDType == 0 ? "ZDC" : "FCal", zdcCentPercs[iCent+1], zdcCentPercs[iCent], 2-iCent), 0.022/fPad);
     } // end loop over iCent
-    mySimpleMarkerAndBoxAndLineText (0.27, 0.04, 1.4, 1001, kWhite, 0.0, kBlack, kDot, 0.0, "#it{pp} (#it{scaled to} #it{p}+Pb)", 0.022/fPad);
+    mySimpleMarkerAndBoxAndLineText (0.67, 0.04, 1.4, 1001, colorfulSystColors[nZdcCentBins+1], 1.0, colorfulColors[nZdcCentBins+1], kFullCircle, 1.6, Form ("All cent. (#times10^{%i})", 2-nZdcCentBins), 0.022/fPad);
+    mySimpleMarkerAndBoxAndLineText (0.27, 0.04, 1.4, 1001, kWhite, 0.0, kBlack, kDot, 0.0, "#it{pp} (#it{scaled})", 0.022/fPad);
+
+    uPad->RedrawAxis();
+
 
     dPad->cd ();
     dPad->SetLogx();
 
-    ymin=0.15;
-    ymax=1.85;
+    ymin=0.00;
+    ymax=2.00;
 
     h = new TH1D ("htemp", ";#it{p}_{T}^{jet} [GeV];#it{p}+Pb / #it{pp} + Const.", 1, pTJBins[0], maxx);
     h->GetXaxis ()->SetMoreLogLabels ();
@@ -277,48 +312,42 @@ void PlotJets (const char* tag, const char* inFileTag) {
     SaferDelete (&h);
 
     double x, y;
-    for (int iCent = 0; iCent < nZdcCentBins; iCent++) {
+    for (int iCent = 0; iCent < nZdcCentBins+1; iCent++) {
 
       const double offset = 0.25*(2-iCent);
 
-      g = (TGAE*) g_jet_pt_ratio_syst[iCent][0]->Clone ();
       h = h_jet_pt_ratio[iDType][iCent][0];
-      SetCentralValuesKeepRelativeErrors (g, h);
-
-      for (int i = 0; i < g->GetN (); i++) {
-        g->GetPoint (i, x, y);
-        g->SetPoint (i, x, y+offset);
-      }
-
-      g->SetFillColorAlpha (lauraSystColors[iCent+1], 1);
-      ((TGAE*) g->Clone ())->Draw ("2");
-      SaferDelete (&g);
+      //g = (TGAE*) g_jet_pt_ratio_syst[iCent][0]->Clone ();
+      //SetCentralValuesKeepRelativeErrors (g, h);
+      //for (int i = 0; i < g->GetN (); i++) {
+      //  g->GetPoint (i, x, y);
+      //  g->SetPoint (i, x, y+offset);
+      //}
+      //myDrawSystFill (g, colorfulSystColors[iCent+1], 1, 1001);
+      //SaferDelete (&g);
 
       g = make_graph (h);
-      ResetXErrors (g);
+      //ResetXErrors (g);
       for (int i = 0; i < g->GetN (); i++) {
         g->GetPoint (i, x, y);
         g->SetPoint (i, x, y+offset);
       }
-      g->SetMarkerStyle (kFullCircle);
-      g->SetMarkerColor (lauraColors[iCent+1]);
-      g->SetMarkerSize (1.4);
-      g->SetLineColor (lauraColors[iCent+1]);
-      g->SetLineWidth (3);
-      ((TGAE*) g->Clone ())->Draw ("P");
+      myDraw (g, colorfulColors[iCent+1], kFullCircle, 1.4, 1, 3, "P", false);
       SaferDelete (&g);
 
       l->SetLineWidth (3);
-      l->SetLineColor (lauraColors[iCent+1]);
+      l->SetLineColor (colorfulColors[iCent+1]);
       l->DrawLine (pTJBins[0], 1+offset, maxx, 1+offset);
 
       tl->SetTextAlign (offset > 0 ? 31 : 33);
       tl->SetTextFont (43);
       tl->SetTextSize (20);
-      tl->SetTextColor (lauraColors[iCent+1]);
+      tl->SetTextColor (colorfulColors[iCent+1]);
       tl->DrawLatex (pTJBins[0] * std::exp (0.97 * std::log (maxx/pTJBins[0])), 1+offset+(offset > 0 ? 0.015:-0.015), Form ("#bf{#it{%s%g}}", offset == 0 ? "" : (offset > 0 ? "+ " : "#minus "), std::fabs (offset)));
 
     } // end loop over iCent
+
+    dPad->RedrawAxis();
 
     c->SaveAs (Form ("%s/Plots/JetDistributions/JetPtSpectrum_%s%s.pdf", workPath.Data (), tag, iDType == 1 ? "_mc" : ""));
 
@@ -327,12 +356,7 @@ void PlotJets (const char* tag, const char* inFileTag) {
 
 
   if (makeMCClosurePlots) {
-    int iMCTruthLevel = 0;
-    while (iMCTruthLevel < nVar && strcmp (variations[iMCTruthLevel], "MCTruthLevel") != 0) iMCTruthLevel++;
-    if (iMCTruthLevel == nVar) {
-      std::cout << "Cannot find MC truth-level result? Please check!" << std::endl;
-      return;
-    }
+    const int iMCTruthLevel = GetVarN ("MCTruthLevel");
 
     const char* canvasName = Form ("c_jet_pt_mcclosure");
 
@@ -367,7 +391,7 @@ void PlotJets (const char* tag, const char* inFileTag) {
     uPad->SetLogy ();
 
     const double maxx = (strcmp (tag, "30GeVJets") == 0 ? 90 : 200);
-    h = new TH1D ("htemp", ";#it{p}_{T}^{jet} [GeV];(1 / N_{jet}) (dN_{jet} / d#it{p}_{T}^{jet}) [GeV^{-1}]", 1, pTJBins[0], maxx);
+    h = new TH1D ("htemp", ";#it{p}_{T}^{jet} [GeV];(1 / N_{trig. jet}) (dN_{jet} / d#it{p}_{T}^{jet}) [GeV^{-1}]", 1, pTJBins[0], maxx);
     h->GetXaxis ()->SetMoreLogLabels ();
     h->GetYaxis ()->SetRangeUser (ymin, ymax);
     h->GetXaxis ()->SetTitleSize (0.028/fPad);
@@ -386,47 +410,37 @@ void PlotJets (const char* tag, const char* inFileTag) {
     myDrawHist (h, kBlack);
     SaferDelete (&h);
 
-    g = (TGAE*) g_jet_pt_ref_syst[0]->Clone ();
     h = h_jet_pt_ref[1][0];
-    SetCentralValuesKeepRelativeErrors (g, h);
-    ScaleGraph (g, nullptr, std::pow (10, 3));
-    g->SetFillColorAlpha (lauraSystColors[0], 1);
-    ((TGAE*) g->Clone ())->Draw ("2");
+    //g = (TGAE*) g_jet_pt_ref_syst[0]->Clone ();
+    //SetCentralValuesKeepRelativeErrors (g, h);
+    //ScaleGraph (g, nullptr, std::pow (10, 3));
+    //myDrawSystFill (g, colorfulSystColors[0], 1, 1001);
+    //SaferDelete (&g);
    
     g = make_graph (h);
-    ResetXErrors (g);
+    //ResetXErrors (g);
     ScaleGraph (g, nullptr, std::pow (10, 3));
-    g->SetMarkerStyle (kFullCircle);
-    g->SetMarkerColor (lauraColors[0]);
-    g->SetMarkerSize (1.4);
-    g->SetLineColor (lauraColors[0]);
-    g->SetLineWidth (3);
-    ((TGAE*) g->Clone ())->Draw ("P");
+    myDraw (g, colorfulColors[0], kFullCircle, 1.4, 1, 3, "P", false);
+    SaferDelete (&g);
 
-    for (int iCent = 0; iCent < nZdcCentBins; iCent++) {
+    for (int iCent = 0; iCent < nZdcCentBins+1; iCent++) {
 
       h = (TH1D*) h_jet_pt[1][iCent][iMCTruthLevel]->Clone ("htemp");
       h->Scale (std::pow (10, 2-iCent));
       myDrawHist (h, kBlack);
       SaferDelete (&h);
 
-      g = (TGAE*) g_jet_pt_syst[iCent][0]->Clone ();
       h = h_jet_pt[1][iCent][0];
-      SetCentralValuesKeepRelativeErrors (g, h);
-      ScaleGraph (g, nullptr, std::pow (10, 2-iCent));
-      g->SetFillColorAlpha (lauraSystColors[iCent+1], 1);
-      ((TGAE*) g->Clone ())->Draw ("2");
-      SaferDelete (&g);
+      //g = (TGAE*) g_jet_pt_syst[iCent][0]->Clone ();
+      //SetCentralValuesKeepRelativeErrors (g, h);
+      //ScaleGraph (g, nullptr, std::pow (10, 2-iCent));
+      //myDrawSystFill (g, colorfulSystColors[iCent+1], 1, 1001);
+      //SaferDelete (&g);
 
       g = make_graph (h);
-      ResetXErrors (g);
+      //ResetXErrors (g);
       ScaleGraph (g, nullptr, std::pow (10, 2-iCent));
-      g->SetMarkerStyle (kFullCircle);
-      g->SetMarkerColor (lauraColors[iCent+1]);
-      g->SetMarkerSize (1.4);
-      g->SetLineColor (lauraColors[iCent+1]);
-      g->SetLineWidth (3);
-      ((TGAE*) g->Clone ())->Draw ("P");
+      myDraw (g, colorfulColors[iCent+1], kFullCircle, 1.4, 1, 3, "P", false);
       SaferDelete (&g);
 
     } // end loop over iCent
@@ -436,18 +450,22 @@ void PlotJets (const char* tag, const char* inFileTag) {
     myText (0.64, 0.84, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.034);
     myText (0.64, 0.79, kBlack, Form ("#bf{#it{p}_{T}^{leading} > %s GeV}", strcmp (tag, "30GeVJets") == 0 ? "30" : "60"), 0.034);
 
-    mySimpleMarkerAndBoxAndLineText (0.27, 0.16, 1.4, 1001, lauraSystColors[0], 1.0, lauraColors[0], kFullCircle, 1.6, "#it{pp} (#times10^{3})", 0.022/fPad);
+    mySimpleMarkerAndBoxAndLineText (0.27, 0.16, 1.4, 1001, colorfulSystColors[0], 1.0, colorfulColors[0], kFullCircle, 1.6, "#it{pp} (#times10^{3})", 0.022/fPad);
 
     for (int iCent = 0; iCent < nZdcCentBins; iCent++) {
-      mySimpleMarkerAndBoxAndLineText (0.27 + (iCent >= 2 ? 0.4 : 0), 0.16-((iCent+1)%3)*0.04, 1.4, 1001, lauraSystColors[iCent+1], 1.0, lauraColors[iCent+1], kFullCircle, 1.6, Form ("FCal %i-%i%% (#times10^{%i})", zdcCentPercs[iCent+1], zdcCentPercs[iCent], 2-iCent), 0.022/fPad);
+      mySimpleMarkerAndBoxAndLineText (0.27 + (iCent >= 2 ? 0.4 : 0), 0.16-((iCent+1)%3)*0.04, 1.4, 1001, colorfulSystColors[iCent+1], 1.0, colorfulColors[iCent+1], kFullCircle, 1.6, Form ("FCal %i-%i%% (#times10^{%i})", zdcCentPercs[iCent+1], zdcCentPercs[iCent], 2-iCent), 0.022/fPad);
     } // end loop over iCent
+    mySimpleMarkerAndBoxAndLineText (0.67, 0.04, 1.4, 1001, colorfulSystColors[nZdcCentBins+1], 1.0, colorfulColors[nZdcCentBins+1], kFullCircle, 1.6, Form ("All cent. (#times10^{%i})", 2-nZdcCentBins), 0.022/fPad);
     mySimpleMarkerAndBoxAndLineText (0.27, 0.04, 1.4, 1001, kWhite, 0.0, kBlack, kDot, 0.0, "MC Truth (scaled)", 0.022/fPad);
+
+    uPad->RedrawAxis();
+
 
     dPad->cd ();
     dPad->SetLogx();
 
-    ymin=0.15;
-    ymax=2.15;
+    ymin=0.00;
+    ymax=2.00;
 
     h = new TH1D ("htemp", ";#it{p}_{T}^{jet} [GeV];Reco. / Truth + Const.", 1, pTJBins[0], maxx);
     h->GetXaxis ()->SetMoreLogLabels ();
@@ -468,89 +486,75 @@ void PlotJets (const char* tag, const char* inFileTag) {
 
     const double offset = 0.25*3;
 
-    g = (TGAE*) g_jet_pt_ref_syst[0]->Clone ();
     h = h_jet_pt_ref[1][0];
-    SetCentralValuesKeepRelativeErrors (g, h);
-    ScaleGraph (g, h_jet_pt_ref[1][iMCTruthLevel]);
-
-    for (int i = 0; i < g->GetN (); i++) {
-      g->GetPoint (i, x, y);
-      g->SetPoint (i, x, y+offset);
-    }
-
-    g->SetFillColorAlpha (lauraSystColors[0], 1);
-    ((TGAE*) g->Clone ())->Draw ("2");
-    SaferDelete (&g);
+    //g = (TGAE*) g_jet_pt_ref_syst[0]->Clone ();
+    //SetCentralValuesKeepRelativeErrors (g, h);
+    //ScaleGraph (g, h_jet_pt_ref[1][iMCTruthLevel]);
+    //for (int i = 0; i < g->GetN (); i++) {
+    //  g->GetPoint (i, x, y);
+    //  g->SetPoint (i, x, y+offset);
+    //}
+    //myDrawSystFill (g, colorfulSystColors[0], 1, 1001);
+    //SaferDelete (&g);
 
     g = make_graph (h);
     ScaleGraph (g, h_jet_pt_ref[1][iMCTruthLevel]);
-    ResetXErrors (g);
+    //ResetXErrors (g);
     for (int i = 0; i< g->GetN (); i++) {
       g->GetPoint (i, x, y);
       g->SetPoint (i, x, y+offset);
     }
-    g->SetMarkerStyle (kFullCircle);
-    g->SetMarkerColor (lauraColors[0]);
-    g->SetMarkerSize (1.4);
-    g->SetLineColor (lauraColors[0]);
-    g->SetLineWidth (3);
-    ((TGAE*) g->Clone ())->Draw ("P");
+    myDraw (g, colorfulColors[0], kFullCircle, 1.4, 1, 3, "P", false);
     SaferDelete (&g);
 
     l->SetLineWidth (3);
-    l->SetLineColor (lauraColors[0]);
+    l->SetLineColor (colorfulColors[0]);
     l->DrawLine (pTJBins[0], 1+offset, maxx, 1+offset);
 
     tl->SetTextAlign (offset > 0 ? 31 : 33);
     tl->SetTextFont (43);
     tl->SetTextSize (20);
-    tl->SetTextColor (lauraColors[0]);
+    tl->SetTextColor (colorfulColors[0]);
     tl->DrawLatex (pTJBins[0] * std::exp (0.97 * std::log (maxx/pTJBins[0])), 1+offset+(offset > 0 ? 0.015:-0.015), Form ("#bf{#it{%s%g}}", offset == 0 ? "" : (offset > 0 ? "+ " : "#minus "), std::fabs (offset)));
 
-    for (int iCent = 0; iCent < nZdcCentBins; iCent++) {
+    for (int iCent = 0; iCent < nZdcCentBins+1; iCent++) {
 
       const double offset = 0.25*(2-iCent);
 
-      g = (TGAE*) g_jet_pt_syst[iCent][0]->Clone ();
       h = h_jet_pt[1][iCent][0];
-      SetCentralValuesKeepRelativeErrors (g, h);
-      ScaleGraph (g, h_jet_pt[1][iCent][iMCTruthLevel]);
-
-      for (int i = 0; i < g->GetN (); i++) {
-        g->GetPoint (i, x, y);
-        g->SetPoint (i, x, y+offset);
-      }
-
-      g->SetFillColorAlpha (lauraSystColors[iCent+1], 1);
-      ((TGAE*) g->Clone ())->Draw ("2");
-      SaferDelete (&g);
+      //g = (TGAE*) g_jet_pt_syst[iCent][0]->Clone ();
+      //SetCentralValuesKeepRelativeErrors (g, h);
+      //ScaleGraph (g, h_jet_pt[1][iCent][iMCTruthLevel]);
+      //for (int i = 0; i < g->GetN (); i++) {
+      //  g->GetPoint (i, x, y);
+      //  g->SetPoint (i, x, y+offset);
+      //}
+      //myDrawSystFill (g, colorfulSystColors[iCent+1], 1, 1001);
+      //SaferDelete (&g);
 
       g = make_graph (h);
       ScaleGraph (g, h_jet_pt[1][iCent][iMCTruthLevel]);
-      ResetXErrors (g);
+      //ResetXErrors (g);
       for (int i = 0; i < g->GetN (); i++) {
         g->GetPoint (i, x, y);
         g->SetPoint (i, x, y+offset);
       }
-      g->SetMarkerStyle (kFullCircle);
-      g->SetMarkerColor (lauraColors[iCent+1]);
-      g->SetMarkerSize (1.4);
-      g->SetLineColor (lauraColors[iCent+1]);
-      g->SetLineWidth (3);
-      ((TGAE*) g->Clone ())->Draw ("P");
+      myDraw (g, colorfulColors[iCent+1], kFullCircle, 1.4, 1, 3, "P", false);
       SaferDelete (&g);
 
       l->SetLineWidth (3);
-      l->SetLineColor (lauraColors[iCent+1]);
+      l->SetLineColor (colorfulColors[iCent+1]);
       l->DrawLine (pTJBins[0], 1+offset, maxx, 1+offset);
 
       tl->SetTextAlign (offset > 0 ? 31 : 33);
       tl->SetTextFont (43);
       tl->SetTextSize (20);
-      tl->SetTextColor (lauraColors[iCent+1]);
+      tl->SetTextColor (colorfulColors[iCent+1]);
       tl->DrawLatex (pTJBins[0] * std::exp (0.97 * std::log (maxx/pTJBins[0])), 1+offset+(offset > 0 ? 0.015:-0.015), Form ("#bf{#it{%s%g}}", offset == 0 ? "" : (offset > 0 ? "+ " : "#minus "), std::fabs (offset)));
 
     } // end loop over iCent
+
+    dPad->RedrawAxis();
 
     c->SaveAs (Form ("%s/Plots/JetDistributions/JetPtSpectrum_MCClosure_%s.pdf", workPath.Data (), tag));
 
@@ -581,7 +585,7 @@ void PlotJets (const char* tag, const char* inFileTag) {
 
 
 
-  for (int iCent = 0; iCent < nZdcCentBins; iCent++) {
+  for (int iCent = 0; iCent < nZdcCentBins+1; iCent++) {
     const char* canvasName = Form ("c_jet_eta_phi_iCent%i", iCent);
 
     TCanvas* c = new TCanvas (canvasName, "", 880, 800);
@@ -595,7 +599,10 @@ void PlotJets (const char* tag, const char* inFileTag) {
     h2->Draw ("colz");
 
     myText (0.22, 0.89, kBlack, "#bf{#it{ATLAS}} Internal", 0.032);
-    myText (0.22, 0.85, kBlack, Form ("#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV, #bf{ZDC %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.032);
+    if (iCent < nZdcCentBins)
+      myText (0.22, 0.85, kBlack, Form ("#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV, #bf{ZDC %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.032);
+    else
+      myText (0.22, 0.85, kBlack, "#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV, All cent.", 0.032);
     myText (0.22, 0.81, kBlack, TString (tag).Contains ("30GeVJets") ? "#it{p}_{T}^{jet} > 30 GeV" : "#it{p}_{T}^{jet} > 60 GeV", 0.032);
 
     c->SaveAs (Form ("%s/Plots/JetDistributions/JetEtaPhiSpectrum_pPb_iCent%i_%s.pdf", workPath.Data (), iCent, tag));

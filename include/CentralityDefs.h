@@ -5,6 +5,7 @@
 
 #include <fstream>
 #include <string>
+#include <cassert>
 
 namespace JetHadronCorrelations { 
 
@@ -90,6 +91,12 @@ int fcalMixVar2Percs[] = {100, 99, 98, 97, 96, 95, 94, 93, 92, 91, 90, 89, 88, 8
 int nFcalMixVar2Bins = sizeof (fcalMixVar2Percs) / sizeof (fcalMixVar2Percs[0]) - 1;
 
 double* fcalMixVar2Bins = InitCentBins (Form ("%s/aux/FCalCentCuts.dat", workPath.Data ()), fcalMixVar2Percs, nFcalMixVar2Bins);
+
+
+int fcalMixVar6Percs[] = {100, 80, 60, 40, 20, 0};
+int nFcalMixVar6Bins = sizeof (fcalMixVar6Percs) / sizeof (fcalMixVar6Percs[0]) - 1;
+
+double* fcalMixVar6Bins = InitCentBins (Form ("%s/aux/FCalCentCuts.dat", workPath.Data ()), fcalMixVar6Percs, nFcalMixVar6Bins);
 
 
 

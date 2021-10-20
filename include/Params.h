@@ -25,7 +25,6 @@ const double muon_mass = 0.105658;
 
 
 const float min_trk_pt = 0.4;
-const float min_akt4_hi_jet_pt = 30;
 
 const float akt2_TruthMatchMaxDR = 0.1; // Truth-matching maximum dR for R=0.2 jets
 const float akt4_TruthMatchMaxDR = 0.2; // Truth-matching maximum dR for R=0.4 jets
@@ -119,13 +118,6 @@ std::map <TString, std::pair <double, double>> pTChStrCuts = {
 };
 
 
-
-// Run vs approx. luminosity in nb^-1 for 2016 p+Pb data at 8.16 TeV
-// p+Pb (period A) 313063 313067 313100 313107 313136 313187 313259 313285 313295 313333 313435
-//                 0.03   1.24   9.66   11.92  10.40  3.67   5.12   4.74   10.69  4.13   0.39
-// Pb+p (period B) 313572 313574 313575 313603 313629 313630 313688 313695 313833 313878 313929 313935 313984 314014 314077 314105 314112 314157 314170
-//                 0.01   1.33   7.54   8.69   6.86   7.90   7.96   4.53   5.11   2.16   0.63   10.96  2.40   7.36   10.19  6.50   10.49  9.83   4.92
-
 const int pPbRuns[] = {312796, 312837, 312937, 312945, 312968, 314199};
 const int npPbRuns = sizeof (pPbRuns) / sizeof(pPbRuns[0]);
 
@@ -142,8 +134,10 @@ const double etaTrkBins[] = {0, 0.5, 1.0, 1.5, 2.0, 2.5};
 const int nEtaTrkBins = sizeof (etaTrkBins) / sizeof (etaTrkBins[0]) - 1;
 
 
-const int nPtJBins = 60;
-double* pTJBins = logspace (30, 450, nPtJBins);
+double pTJBins[] = {15, 20, 30, 45, 60, 90, 120, 160, 200, 240, 300, 350, 400};
+const int nPtJBins = sizeof (pTJBins) / sizeof (pTJBins[0]) - 1;
+//const int nPtJBins = 60;
+//double* pTJBins = logspace (30, 450, nPtJBins);
 
 short GetPtJBin (const float jpt) {
   if (jpt < pTJBins[0])
@@ -173,7 +167,8 @@ short GetDPhiBin (const float dphi) {
 }
 
 
-const double pTChBins[] = {0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2, 2.25, 2.5, 2.75, 3, 3.25, 3.5, 3.75, 4, 4.5, 5, 5.5, 6, 7, 8, 9, 10, 11, 12, 14, 16, 18, 20, 25, 30, 35, 40, 45, 50, 55, 60};
+//const double pTChBins[] = {0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2, 2.25, 2.5, 2.75, 3, 3.25, 3.5, 3.75, 4, 4.5, 5, 5.5, 6, 7, 8, 9, 10, 11, 12, 14, 16, 18, 20, 25, 30, 35, 40, 45, 50, 55, 60};//, 70, 80, 90, 100, 120}; // old binning
+const double pTChBins[] = {0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.2, 1.4, 1.6, 1.8, 2, 2.5, 3, 3.5, 4, 5, 6, 8, 10, 12, 16, 20, 30, 40, 50, 60, 75, 90, 120}; // new binning
 const int nPtChBins = sizeof (pTChBins) / sizeof (pTChBins[0]) - 1;
 short GetPtChBin (const float ptch) {
   if (ptch < pTChBins[0])

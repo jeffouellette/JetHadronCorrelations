@@ -14,8 +14,11 @@
 #include <TH3D.h>
 #include <TChain.h>
 #include <TSystem.h>
+#include <TLorentzVector.h>
+#include <TRandom3.h>
 
 #include <iostream>
+#include <map>
 
 using namespace std;
 
@@ -50,6 +53,10 @@ bool CentralityAnalysis (const char* directory,
   }
   else
     fileIdentifier = inFileName;
+
+
+  const float truth_jet_min_pt = GetJZXR04MinPt (TString (inFileName));
+  const float truth_jet_max_pt = GetJZXR04MaxPt (TString (inFileName));
 
 
   // opens a TTree as a TChain from all files in a directory matching the file identifier
@@ -136,7 +143,7 @@ bool CentralityAnalysis (const char* directory,
   tree->SetBranchAddress ("fcalC_et_Sin4",  &fcalC_et_Sin4);
 
 
-  if (!Ispp ()) {
+  if (IsCollisions () && !Ispp ()) {
     tree->SetBranchAddress ("ZdcCalibEnergy_A",   &ZdcCalibEnergy_A);
     tree->SetBranchAddress ("ZdcCalibEnergy_C",   &ZdcCalibEnergy_C);
     tree->SetBranchAddress ("ZdcRawEnergy_A",     &ZdcRawEnergy_A);
@@ -152,6 +159,29 @@ bool CentralityAnalysis (const char* directory,
   tree->SetBranchAddress ("sumGap_C",          &sumGap_C);
   tree->SetBranchAddress ("edgeGap_A",         &edgeGap_A);
   tree->SetBranchAddress ("edgeGap_C",         &edgeGap_C);
+
+  if (!IsCollisions ()) {
+    tree->SetBranchAddress ("truth_trk_n",          &truth_trk_n);
+    tree->SetBranchAddress ("truth_trk_pt",         &truth_trk_pt);
+    tree->SetBranchAddress ("truth_trk_eta",        &truth_trk_eta);
+    tree->SetBranchAddress ("truth_trk_phi",        &truth_trk_phi);
+    tree->SetBranchAddress ("truth_trk_charge",     &truth_trk_charge);
+    tree->SetBranchAddress ("truth_trk_pdgid",      &truth_trk_pdgid);
+    tree->SetBranchAddress ("truth_trk_barcode",    &truth_trk_barcode);
+    tree->SetBranchAddress ("truth_trk_isHadron",   &truth_trk_isHadron);
+
+    //tree->SetBranchAddress ("akt2_truth_jet_n",     &akt2_truth_jet_n);
+    //tree->SetBranchAddress ("akt2_truth_jet_pt",    &akt2_truth_jet_pt);
+    //tree->SetBranchAddress ("akt2_truth_jet_eta",   &akt2_truth_jet_eta);
+    //tree->SetBranchAddress ("akt2_truth_jet_phi",   &akt2_truth_jet_phi);
+    //tree->SetBranchAddress ("akt2_truth_jet_e",     &akt2_truth_jet_e);
+
+    tree->SetBranchAddress ("akt4_truth_jet_n",     &akt4_truth_jet_n);
+    tree->SetBranchAddress ("akt4_truth_jet_pt",    &akt4_truth_jet_pt);
+    tree->SetBranchAddress ("akt4_truth_jet_eta",   &akt4_truth_jet_eta);
+    tree->SetBranchAddress ("akt4_truth_jet_phi",   &akt4_truth_jet_phi);
+    tree->SetBranchAddress ("akt4_truth_jet_e",     &akt4_truth_jet_e);
+  }
 
 
   if (!Is5TeV ()) {
@@ -210,6 +240,16 @@ bool CentralityAnalysis (const char* directory,
   }
 
 
+  //// for random elements
+  //TRandom3* rndm = new TRandom3 ();
+  ////rndm->SetSeed (9022021); // the date
+
+  //TH1D* h_probs = GetFCalResamplingProbs ();
+
+  // for corrected FCal Et values in data overlay
+  std::map <const unsigned int, float>* m_overlay_fcalet = (IsDataOverlay () ? GetOverlayFCalMap () : nullptr);
+
+
   // Load files for output
   TFile* outFile = new TFile (Form ("%s/%s%s.root", rootPath.Data (), identifier.Data (), Ispp () ? (UseMinBiasTriggers () ? "_mb" : "j50") : ""), "recreate");
 
@@ -229,6 +269,11 @@ bool CentralityAnalysis (const char* directory,
   TH1D* h_mb_p_fcal_et = new TH1D (Form ("h_mb_p_fcal_et_run%i", dataSet), "", 1250, -30, 220);
   h_mb_p_fcal_et->Sumw2 ();
 
+  TH1D* h_mb_Pb_fcal_et_corr = new TH1D (Form ("h_mb_Pb_fcal_et_corr_run%i", dataSet), "", 1250, -30, 220);
+  h_mb_Pb_fcal_et_corr->Sumw2 ();
+  TH1D* h_mb_p_fcal_et_corr = new TH1D (Form ("h_mb_p_fcal_et_corr_run%i", dataSet), "", 1250, -30, 220);
+  h_mb_p_fcal_et_corr->Sumw2 ();
+
   //TH1D* h_mb_Pb_fcal_et_zdcCentral = new TH1D ("h_mb_Pb_fcal_et_zdcCentral", "", 250, -30, 220);
   //h_mb_Pb_fcal_et_zdcCentral->Sumw2 ();
   //TH1D* h_mb_p_fcal_et_zdcCentral = new TH1D ("h_mb_p_fcal_et_zdcCentral", "", 250, -30, 220);
@@ -245,6 +290,16 @@ bool CentralityAnalysis (const char* directory,
   h_jet_Pb_fcal_et->Sumw2 ();
   TH1D* h_jet_p_fcal_et = new TH1D (Form ("h_jet_p_fcal_et_run%i", dataSet), "", 1250, -30, 220);
   h_jet_p_fcal_et->Sumw2 ();
+
+  const int njetbins = 100;
+  const double* jetbins = logspace (20, 400, njetbins);
+  TH2D* h2_ljet_pt_vs_Pb_fcal_et = new TH2D ("h2_ljet_pt_vs_Pb_fcal_et", "", njetbins, jetbins, 250, -30, 220);
+  h2_ljet_pt_vs_Pb_fcal_et->Sumw2 ();
+
+  TH1D* h_jet_Pb_fcal_et_corr = new TH1D (Form ("h_jet_Pb_fcal_et_corr_run%i", dataSet), "", 1250, -30, 220);
+  h_jet_Pb_fcal_et_corr->Sumw2 ();
+  TH1D* h_jet_p_fcal_et_corr = new TH1D (Form ("h_jet_p_fcal_et_corr_run%i", dataSet), "", 1250, -30, 220);
+  h_jet_p_fcal_et_corr->Sumw2 ();
 
   //TH1D* h_jet_Pb_fcal_et_zdcCentral = new TH1D ("h_jet_Pb_fcal_et_zdcCentral", "", 250, -30, 220);
   //h_jet_Pb_fcal_et_zdcCentral->Sumw2 ();
@@ -301,6 +356,16 @@ bool CentralityAnalysis (const char* directory,
     if (IsPbPb () && (IsCollisions () || IsDataOverlay ()) && isOOTPU)
       continue; // check for out-of-time pile-up
 
+
+    //// MC only -- skip event if a randomly generated value is at least the requisite probability
+    //// note that some values in h_probs are > 1 due to fluctuations in the distributions, and so these events will always be selected.
+    //if (IsDataOverlay () && IspPb () && h_probs) {
+    //  rndm->SetSeed (iEvt & tree->GetEntries ()); // set seed to the tree entry so that the behavior for each event is always fixed
+    //  if (h_probs->GetBinContent (h_probs->FindBin (fcalA_et)) < rndm->Rndm ())
+    //    continue;
+    //}
+
+
     // vertexing cuts, require no pileup vertices and primary vertex with |vz| < 150mm
     {
       bool hasPrimary = false;
@@ -318,26 +383,36 @@ bool CentralityAnalysis (const char* directory,
         continue;
     }
 
-    float fcal_et_Pb = 0, fcal_et_p = 0;
+    float fcal_et_Pb = 0, fcal_et_p = 0, fcal_et_corr_Pb = 0, fcal_et_corr_p = 0;
     float zdc_calibE_Pb = 0, zdc_calibE_p = 0;
-    float edgeGap_Pb = 0, edgeGap_p = 0;
-    float q2x_Pb = 0, q2y_Pb = 0, q2x_p = 0, q2y_p = 0, q2_Pb = 0, q2_p = 0, psi2_Pb = 0, psi2_p = 0;
-    float q3x_Pb = 0, q3y_Pb = 0, q3x_p = 0, q3y_p = 0, q3_Pb = 0, q3_p = 0, psi3_Pb = 0, psi3_p = 0;
-    float q4x_Pb = 0, q4y_Pb = 0, q4x_p = 0, q4y_p = 0, q4_Pb = 0, q4_p = 0, psi4_Pb = 0, psi4_p = 0;
-    bool zdc_Pb_decision = false, zdc_p_decision = false;
+    float edgeGap_Pb = 0;//, edgeGap_p = 0;
+    float q2x_Pb = 0, q2y_Pb = 0, q2x_p = 0, q2y_p = 0, q2_Pb = 0, q2_p = 0;//, psi2_Pb = 0, psi2_p = 0;
+    float q3x_Pb = 0, q3y_Pb = 0, q3x_p = 0, q3y_p = 0, q3_Pb = 0, q3_p = 0;//, psi3_Pb = 0, psi3_p = 0;
+    float q4x_Pb = 0, q4y_Pb = 0, q4x_p = 0, q4y_p = 0, q4_Pb = 0, q4_p = 0;//, psi4_Pb = 0, psi4_p = 0;
+    bool zdc_Pb_decision = false;//, zdc_p_decision = false;
+
+    // Try to rederive the MB FCal Et values in MC by subtracting off the contributions of truth jets.
+    float fcalA_et_corr = fcalA_et, fcalC_et_corr = fcalC_et;
+    if (IspPb () && IsDataOverlay ()) {
+      // for corrected FCal Et values in data overlay
+      fcalA_et_corr = m_overlay_fcalet->at (event_number);
+      fcalC_et_corr = fcalC_et;
+    }
 
     if (IspPb ()) {
       fcal_et_Pb = IsPeriodA () ? fcalA_et : fcalC_et; // Pb-going side is the A side in period A (runs < 313435)
       fcal_et_p = IsPeriodA () ? fcalC_et : fcalA_et;
+      fcal_et_corr_Pb = IsPeriodA () ? fcalA_et_corr : fcalC_et_corr;
+      fcal_et_corr_p = IsPeriodA () ? fcalC_et_corr : fcalA_et_corr;
 
-      zdc_calibE_Pb = IsPeriodA () ? ZdcCalibEnergy_A : ZdcCalibEnergy_C;
+      zdc_calibE_Pb = IsPeriodA () ? ZdcCalibEnergy_A : ZdcCalibEnergy_C; // won't be branched for MC (defaults to 0)
       zdc_calibE_p = IsPeriodA () ? ZdcCalibEnergy_C : ZdcCalibEnergy_A;
 
       edgeGap_Pb = IsPeriodA () ? edgeGap_A : edgeGap_C;
-      edgeGap_p = IsPeriodA () ? edgeGap_C : edgeGap_A;
+      //edgeGap_p = IsPeriodA () ? edgeGap_C : edgeGap_A;
 
-      zdc_Pb_decision = IsPeriodA () ? zdcL1Triggers[0]->trigDecision : zdcL1Triggers[1]->trigDecision;
-      zdc_p_decision = IsPeriodA () ? zdcL1Triggers[1]->trigDecision : zdcL1Triggers[0]->trigDecision;
+      zdc_Pb_decision = IsCollisions () ? (IsPeriodA () ? zdcL1Triggers[0]->trigDecision : zdcL1Triggers[1]->trigDecision) : true;
+      //zdc_p_decision = IsCollisions () ? (IsPeriodA () ? zdcL1Triggers[1]->trigDecision : zdcL1Triggers[0]->trigDecision) : true;
 
       q2x_Pb = IsPeriodA () ? fcalA_et_Cos2 : fcalC_et_Cos2;
       q2y_Pb = IsPeriodA () ? fcalA_et_Sin2 : fcalC_et_Sin2;
@@ -355,30 +430,32 @@ bool CentralityAnalysis (const char* directory,
       q2_Pb = std::sqrt (q2x_Pb*q2x_Pb + q2y_Pb*q2y_Pb) / fcal_et_Pb;
       q3_Pb = std::sqrt (q3x_Pb*q3x_Pb + q3y_Pb*q3y_Pb) / fcal_et_Pb;
       q4_Pb = std::sqrt (q4x_Pb*q4x_Pb + q4y_Pb*q4y_Pb) / fcal_et_Pb;
-      psi2_Pb = std::atan2 (q2y_Pb, q2x_Pb) / 2.;
-      psi3_Pb = std::atan2 (q3y_Pb, q3x_Pb) / 3.;
-      psi4_Pb = std::atan2 (q4y_Pb, q4x_Pb) / 4.;
+      //psi2_Pb = std::atan2 (q2y_Pb, q2x_Pb) / 2.;
+      //psi3_Pb = std::atan2 (q3y_Pb, q3x_Pb) / 3.;
+      //psi4_Pb = std::atan2 (q4y_Pb, q4x_Pb) / 4.;
 
       q2_p = std::sqrt (q2x_p*q2x_p + q2y_p*q2y_p) / fcal_et_p;
       q3_p = std::sqrt (q3x_p*q3x_p + q3y_p*q3y_p) / fcal_et_p;
       q4_p = std::sqrt (q4x_p*q4x_p + q4y_p*q4y_p) / fcal_et_p;
-      psi2_p = std::atan2 (q2y_p, q2x_p) / 2.;
-      psi3_p = std::atan2 (q3y_p, q3x_p) / 3.;
-      psi4_p = std::atan2 (q4y_p, q4x_p) / 4.;
+      //psi2_p = std::atan2 (q2y_p, q2x_p) / 2.;
+      //psi3_p = std::atan2 (q3y_p, q3x_p) / 3.;
+      //psi4_p = std::atan2 (q4y_p, q4x_p) / 4.;
     }
 
     else if (Ispp ()) {
       fcal_et_p = fcalA_et + fcalC_et;
       fcal_et_Pb = 0;
+      fcal_et_corr_p = fcalA_et_corr + fcalC_et_corr;
+      fcal_et_corr_Pb = 0;
 
       zdc_calibE_p = ZdcCalibEnergy_A + ZdcCalibEnergy_C;
       zdc_calibE_Pb = 0;
 
-      edgeGap_p = -999;
+      //edgeGap_p = -999;
       edgeGap_Pb = -999;
 
       zdc_Pb_decision = false;
-      zdc_p_decision = false;
+      //zdc_p_decision = false;
 
       q2x_p = fcalA_et_Cos2 + fcalC_et_Cos2;
       q2y_p = fcalA_et_Sin2 + fcalC_et_Sin2;
@@ -396,16 +473,16 @@ bool CentralityAnalysis (const char* directory,
       q2_p = std::sqrt (q2x_p*q2x_p + q2y_p*q2y_p) / fcal_et_p;
       q3_p = std::sqrt (q3x_p*q3x_p + q3y_p*q3y_p) / fcal_et_p;
       q4_p = std::sqrt (q4x_p*q4x_p + q4y_p*q4y_p) / fcal_et_p;
-      psi2_p = std::atan2 (q2y_p, q2x_p) / 2.;
-      psi3_p = std::atan2 (q3y_p, q3x_p) / 3.;
-      psi4_p = std::atan2 (q4y_p, q4x_p) / 4.;
+      //psi2_p = std::atan2 (q2y_p, q2x_p) / 2.;
+      //psi3_p = std::atan2 (q3y_p, q3x_p) / 3.;
+      //psi4_p = std::atan2 (q4y_p, q4x_p) / 4.;
 
       q2_Pb = 0;
       q3_Pb = 0;
       q4_Pb = 0;
-      psi2_Pb = 0;
-      psi3_Pb = 0;
-      psi4_Pb = 0;
+      //psi2_Pb = 0;
+      //psi3_Pb = 0;
+      //psi4_Pb = 0;
     }
 
     zdc_calibE_Pb *= 1e3;
@@ -420,7 +497,23 @@ bool CentralityAnalysis (const char* directory,
     }
 
 
-    if (minbiasTrigger && minbiasTrigger->trigDecision) {
+    if (!IsCollisions ()) {
+      // Get leading truth jet pT and fill FCal correlation diagram
+      float ljet_pt = 0;
+      for (int iTJ = 0; iTJ < GetAktTruthJetN (JetRadius::R0p4); iTJ++) {
+        if (std::fabs (GetAktTruthJetEta (iTJ, JetRadius::R0p4)) > 2.8)
+          continue;
+        ljet_pt = std::fmax (GetAktTruthJetPt (iTJ, JetRadius::R0p4), ljet_pt);
+      }
+
+      if (ljet_pt < truth_jet_min_pt || truth_jet_max_pt < ljet_pt)
+        continue;
+
+      h2_ljet_pt_vs_Pb_fcal_et->Fill (ljet_pt, fcal_et_Pb);
+    }
+
+
+    if ((minbiasTrigger && minbiasTrigger->trigDecision) || !IsCollisions ()) {
       h_mb_instMu->Fill (actualInteractionsPerCrossing);
       h_mb_avgMu->Fill (averageInteractionsPerCrossing);
 
@@ -428,6 +521,9 @@ bool CentralityAnalysis (const char* directory,
       if (!IspPb () || zdc_Pb_decision) {
         h_mb_Pb_fcal_et->Fill (fcal_et_Pb);
         h_mb_p_fcal_et->Fill (fcal_et_p);
+
+        h_mb_Pb_fcal_et_corr->Fill (fcal_et_corr_Pb);
+        h_mb_p_fcal_et_corr->Fill (fcal_et_corr_p);
       }
       h2_mb_Pb_fcal_et_zdc_calibE->Fill (fcal_et_Pb, zdc_calibE_Pb);
 
@@ -444,12 +540,15 @@ bool CentralityAnalysis (const char* directory,
       h3_mb_Pb_fcal_et_p_q4_Pb_zdc_calibE->Fill (fcal_et_Pb, q4_p, zdc_calibE_Pb);
     }
 
-    if (jetTrigger && jetTrigger->trigDecision) {
+    if ((jetTrigger && jetTrigger->trigDecision) || !IsCollisions ()) {
 
       // Require Pb-going ZDC to fire, reducing UPC background contamination
       if (!IspPb () || zdc_Pb_decision) {
         h_jet_Pb_fcal_et->Fill (fcal_et_Pb);
         h_jet_p_fcal_et->Fill (fcal_et_p);
+
+        h_jet_Pb_fcal_et_corr->Fill (fcal_et_corr_Pb);
+        h_jet_p_fcal_et_corr->Fill (fcal_et_corr_p);
       }
       h2_jet_Pb_fcal_et_zdc_calibE->Fill (fcal_et_Pb, zdc_calibE_Pb);
 
@@ -480,6 +579,10 @@ bool CentralityAnalysis (const char* directory,
   SaferDelete (&tree);
 
 
+  //SaferDelete (&rndm);
+  //SaferDelete (&h_probs);
+
+
   outFile->cd ();
 
   h_mb_instMu->Write ();
@@ -500,6 +603,11 @@ bool CentralityAnalysis (const char* directory,
   h_mb_p_zdc_calibE->Write ();
   SaferDelete (&h_mb_p_zdc_calibE);
 
+  h_mb_Pb_fcal_et_corr->Write ();
+  SaferDelete (&h_mb_Pb_fcal_et_corr);
+  h_mb_p_fcal_et_corr->Write ();
+  SaferDelete (&h_mb_p_fcal_et_corr);
+
   h2_jet_Pb_fcal_et_zdc_calibE->Write ();
   SaferDelete (&h2_jet_Pb_fcal_et_zdc_calibE);
   h_jet_Pb_fcal_et->Write ();
@@ -512,6 +620,13 @@ bool CentralityAnalysis (const char* directory,
   SaferDelete (&h_jet_Pb_zdc_calibE_cut);
   h_jet_p_zdc_calibE->Write ();
   SaferDelete (&h_jet_p_zdc_calibE);
+
+  if (!IsCollisions ())
+    h2_ljet_pt_vs_Pb_fcal_et->Write ();
+  h_jet_Pb_fcal_et_corr->Write ();
+  SaferDelete (&h_jet_Pb_fcal_et_corr);
+  h_jet_p_fcal_et_corr->Write ();
+  SaferDelete (&h_jet_p_fcal_et_corr);
 
   h3_mb_Pb_fcal_et_Pb_q2_Pb_zdc_calibE->Write ();
   SaferDelete (&h3_mb_Pb_fcal_et_Pb_q2_Pb_zdc_calibE);

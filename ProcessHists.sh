@@ -7,9 +7,9 @@
 #root -l -b -q 'src/CombineFineFCalPtCh.C("60GeVJets")'
 #root -l -b -q 'src/CombineFineFCalPtCh.C("30GeVJets")'
 
-#root -l -b -q 'src/ProcessJets.C("60GeVJets", "60GeVJets")'
+root -l -b -q 'src/ProcessJets.C("All", "AllJets")'
 #root -l -b -q 'src/ProcessJets.C("30GeVJets", "30GeVJets")'
-  
+
 #root -l -b -q 'src/PlotFineFCalPtCh.C("60GeVJets", "60GeVJets", "60GeVJets")'
 #root -l -b -q 'src/PlotFineFCalPtCh.C("30GeVJets", "30GeVJets", "30GeVJets")'
 
@@ -22,5 +22,5 @@
 #root -l -b -q 'src/CalculateIAAShifts.C("60GeVJets", "60GeVJets")'
 #root -l -b -q 'src/CalculateIAAShifts.C("30GeVJets", "30GeVJets")'
 
-root -l -b -q 'src/PlotPtCh.C("60GeVJets", "60GeVJets")'
-root -l -b -q 'src/PlotPtCh.C("30GeVJets", "30GeVJets")'
+#root -l -b -q 'src/PlotPtCh.C("60GeVJets", "60GeVJets")'
+#root -l -b -q 'src/PlotPtCh.C("30GeVJets", "30GeVJets")'

@@ -4,8 +4,7 @@
 #include <iostream>
 #include <vector>
 #include <map>
-#include <math.h>
-
+#include <math.h> 
 #include <TColor.h>
 #include <TLine.h>
 #include <TBox.h>
@@ -35,7 +34,7 @@ using namespace JetHadronCorrelations;
 TLine* l = new TLine ();
 
 
-const bool makeMCClosurePlots = true;
+const bool makeMCClosurePlots = false;
 
 
 void PlotDPhi (const char* tag, const char* inFileTag) {
@@ -575,12 +574,7 @@ void PlotDPhi (const char* tag, const char* inFileTag) {
   //  cPad->Draw ();
   //  dPad->Draw ();
 
-  //  int iVar = 0;
-  //  while (iVar < nVar && strcmp (variations[iVar], "FcalCentVar") != 0) iVar++;
-  //  if (iVar == nVar) {
-  //    std::cout << "Cannot find FCal centrality binned result??? Please check!" << std::endl;
-  //    return;
-  //  }
+  //  const int iVar = GetVarN ("FcalCentVar");
 
   //  TH1D* h = nullptr; 
   //  TGAE* g = nullptr;
@@ -798,12 +792,7 @@ void PlotDPhi (const char* tag, const char* inFileTag) {
   //  cPad->Draw ();
   //  dPad->Draw ();
 
-  //  int iVar = 0;
-  //  while (iVar < nVar && strcmp (variations[iVar], "FcalCentVar") != 0) iVar++;
-  //  if (iVar == nVar) {
-  //    std::cout << "Cannot find FCal centrality binned result??? Please check!" << std::endl;
-  //    return;
-  //  }
+  //  const int iVar = GetVarN ("FcalCentVar");
 
   //  TH1D* h = nullptr; 
   //  TGAE* g = nullptr;
@@ -1021,10 +1010,7 @@ void PlotDPhi (const char* tag, const char* inFileTag) {
   //  cPad->Draw ();
   //  dPad->Draw ();
 
-  //  int iVar = 0;
-  //  while (iVar < nVar && strcmp (variations[iVar], "NoFcalMixCatVar") != 0) iVar++;
-  //  if (iVar == nVar)
-  //    std::cout << "Cannot find FCal centrality binned result??? Please check!" << std::endl;
+  //  const int iVar = GetVarN ("NoFcalMixCatVar");
 
   //  TH1D* h = nullptr; 
   //  TGAE* g = nullptr;
@@ -1248,10 +1234,7 @@ void PlotDPhi (const char* tag, const char* inFileTag) {
   //  cPad->Draw ();
   //  dPad->Draw ();
 
-  //  int iVar = 0;
-  //  while (iVar < nVar && strcmp (variations[iVar], "NoFcalMixCatVar") != 0) iVar++;
-  //  if (iVar == nVar)
-  //    std::cout << "Cannot find FCal centrality binned result??? Please check!" << std::endl;
+  //  const int iVar = GetVarN ("NoFcalMixCatVar");
 
   //  TH1D* h = nullptr; 
   //  TGAE* g = nullptr;
@@ -1455,12 +1438,7 @@ void PlotDPhi (const char* tag, const char* inFileTag) {
 
 
   if (makeMCClosurePlots) {
-    int iMCTruthLevel = 0;
-    while (iMCTruthLevel < nVar && strcmp (variations[iMCTruthLevel], "MCTruthLevel") != 0) iMCTruthLevel++;
-    if (iMCTruthLevel == nVar) {
-      std::cout << "Cannot find MC truth-level result? Please check!" << std::endl;
-      return;
-    }
+    const int iMCTruthJetsTruthParts = GetVarN ("MCTruthJetsTruthParts");
 
     for (int iPtCh = 0; iPtCh < nPtChSelections; iPtCh++) {
 
@@ -1506,7 +1484,7 @@ void PlotDPhi (const char* tag, const char* inFileTag) {
       SaferDelete (&h);
 
 
-      h = (TH1D*) h_jet_trk_dphi_ref_syst[iPtCh][iMCTruthLevel]->Clone ("htemp");
+      h = (TH1D*) h_jet_trk_dphi_ref_syst[iPtCh][iMCTruthJetsTruthParts]->Clone ("htemp");
       h->Scale (std::pow (10, 3));
       myDrawHist (h, kBlack);
       SaferDelete (&h);
@@ -1526,7 +1504,7 @@ void PlotDPhi (const char* tag, const char* inFileTag) {
 
       for (int iCent = 0; iCent < nZdcCentBins; iCent++) {
 
-        h = (TH1D*) h_jet_trk_dphi_syst[iPtCh][iCent][iMCTruthLevel]->Clone ("htemp");
+        h = (TH1D*) h_jet_trk_dphi_syst[iPtCh][iCent][iMCTruthJetsTruthParts]->Clone ("htemp");
         h->Scale (std::pow (10, 2-iCent));
         myDrawHist (h, colors[iCent]);
         SaferDelete (&h);
@@ -1584,8 +1562,8 @@ void PlotDPhi (const char* tag, const char* inFileTag) {
       h = (TH1D*) h_jet_trk_dphi_ref[1][iPtCh]->Clone ("htemp");
       g = (TGAE*) g_jet_trk_dphi_ref_syst[iPtCh][0]->Clone ();
       SetCentralValuesKeepRelativeErrors (g, h);
-      h->Divide (h_jet_trk_dphi_ref_syst[iPtCh][iMCTruthLevel]);
-      ScaleGraph (g, h_jet_trk_dphi_ref_syst[iPtCh][iMCTruthLevel]);
+      h->Divide (h_jet_trk_dphi_ref_syst[iPtCh][iMCTruthJetsTruthParts]);
+      ScaleGraph (g, h_jet_trk_dphi_ref_syst[iPtCh][iMCTruthJetsTruthParts]);
       myDrawSyst (g, kBlack);
       SaferDelete (&g);
       g = make_graph (h);
@@ -1599,8 +1577,8 @@ void PlotDPhi (const char* tag, const char* inFileTag) {
         h = (TH1D*) h_jet_trk_dphi_sig[1][iPtCh][iCent]->Clone ("htemp");
         g = (TGAE*) g_jet_trk_dphi_sig_syst[iPtCh][iCent][0]->Clone ();
         SetCentralValuesKeepRelativeErrors (g, h);
-        h->Divide (h_jet_trk_dphi_syst[iPtCh][iCent][iMCTruthLevel]);
-        ScaleGraph (g, h_jet_trk_dphi_syst[iPtCh][iCent][iMCTruthLevel]);
+        h->Divide (h_jet_trk_dphi_syst[iPtCh][iCent][iMCTruthJetsTruthParts]);
+        ScaleGraph (g, h_jet_trk_dphi_syst[iPtCh][iCent][iMCTruthJetsTruthParts]);
         myDrawSyst (g, colors[iCent]);
         SaferDelete (&g);
         g = make_graph (h);

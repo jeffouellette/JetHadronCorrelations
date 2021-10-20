@@ -14,11 +14,15 @@
 #include <ArrayTemplates.h>
 
 #include <TSystemDirectory.h>
+#include <TLorentzVector.h>
 
 #include <math.h>
 #include <iostream>
 #include <sstream>
 #include <fstream>
+
+#include <stdlib.h>
+#include <stdio.h>
 
 
 namespace JetHadronCorrelations {
@@ -63,8 +67,8 @@ TString ToTString (const DataType& dType) {
 TString ToTString (const TriggerType& tType) {
   switch (tType) {
     case TriggerType::None:       return TString ("None");
-    case TriggerType::Jet50GeV:   return TString ("Jet50GeV");
-    case TriggerType::Jet100GeV:  return TString ("Jet100GeV");
+    case TriggerType::J50:   return TString ("J50");
+    case TriggerType::J100:  return TString ("J100");
     case TriggerType::MinBias:    return TString ("MinBias");
     default:                      return TString ("???");
   }
@@ -88,6 +92,7 @@ TString ToTString (const SystFlag& sFlag) {
     case SystFlag::MixCatVar3:              return TString ("MixCatVar3");
     case SystFlag::MixCatVar4:              return TString ("MixCatVar4");
     case SystFlag::MixCatVar5:              return TString ("MixCatVar5");
+    case SystFlag::MixCatVar6:              return TString ("MixCatVar6");
     case SystFlag::JESVar0:                 return TString ("JESVar0");
     case SystFlag::JESVar1:                 return TString ("JESVar1");
     case SystFlag::JESVar2:                 return TString ("JESVar2");
@@ -120,9 +125,8 @@ TString ToTString (const SystFlag& sFlag) {
     case SystFlag::JERVar8:                 return TString ("JERVar8");
     case SystFlag::JERVar9:                 return TString ("JERVar9");
     case SystFlag::JERVar10:                return TString ("JERVar10");
-    case SystFlag::MCTruthLevel:            return TString ("MCTruthLevel");
-    case SystFlag::MCTruthJESSmear:         return TString ("MCTruthJESSmear");
-    case SystFlag::MCBbyBReco:              return TString ("MCBbyBReco");
+    case SystFlag::MCTruthJetsTruthParts:   return TString ("MCTruthJetsTruthParts");
+    case SystFlag::MCRecoJetTruthParts:     return TString ("MCRecoJetTruthParts");
     default:                                return TString ("???");
   }
 }
@@ -314,19 +318,19 @@ bool IsHijing (const DataType& dType) {
 
 
 bool UseJetTriggers (const TriggerType& tType) {
-  return UseJet50GeVTriggers (tType) || UseJet100GeVTriggers (tType);
+  return UseJ50Triggers (tType) || UseJ100Triggers (tType);
 }
 
 
 
-bool UseJet50GeVTriggers (const TriggerType& tType) {
-  return tType == TriggerType::Jet50GeV;
+bool UseJ50Triggers (const TriggerType& tType) {
+  return tType == TriggerType::J50;
 }
 
 
 
-bool UseJet100GeVTriggers (const TriggerType& tType) {
-  return tType == TriggerType::Jet100GeV;
+bool UseJ100Triggers (const TriggerType& tType) {
+  return tType == TriggerType::J100;
 }
 
 
@@ -415,6 +419,12 @@ bool DoMixCatVar5 (const SystFlag& sFlag) {
 
 
 
+bool DoMixCatVar6 (const SystFlag& sFlag) {
+  return sFlag == SystFlag::MixCatVar6;
+}
+
+
+
 int GetNJESVar (const SystFlag& sFlag) {
   switch (sFlag) {
     case SystFlag::JESVar0:   return 0;
@@ -463,20 +473,14 @@ int GetNJERVar (const SystFlag& sFlag) {
 
 
 
-bool DoMCTruthLevel (const SystFlag& sFlag) {
-  return sFlag == SystFlag::MCTruthLevel;
+bool DoMCTruthJetsTruthParts (const SystFlag& sFlag) {
+  return sFlag == SystFlag::MCTruthJetsTruthParts;
 }
 
 
 
-bool DoMCTruthJESSmear (const SystFlag& sFlag) {
-  return sFlag == SystFlag::MCTruthJESSmear;
-}
-
-
-
-bool DoMCBbyBReco (const SystFlag& sFlag) {
-  return sFlag == SystFlag::MCBbyBReco;
+bool DoMCRecoJetTruthParts (const SystFlag& sFlag) {
+  return sFlag == SystFlag::MCRecoJetTruthParts;
 }
 
 
@@ -613,14 +617,14 @@ bool UseJetTriggers () {
 
 
 
-bool UseJet50GeVTriggers () {
-  return UseJet50GeVTriggers (triggerType);
+bool UseJ50Triggers () {
+  return UseJ50Triggers (triggerType);
 }
 
 
 
-bool UseJet100GeVTriggers () {
-  return UseJet100GeVTriggers (triggerType);
+bool UseJ100Triggers () {
+  return UseJ100Triggers (triggerType);
 }
 
 
@@ -709,6 +713,12 @@ bool DoMixCatVar5 () {
 
 
 
+bool DoMixCatVar6 () {
+  return DoMixCatVar6 (systFlag);
+}
+
+
+
 int GetNJESVar () {
   return GetNJESVar (systFlag);
 }
@@ -721,32 +731,26 @@ int GetNJERVar () {
 
 
 
-bool DoMCTruthLevel () {
-  return DoMCTruthLevel (systFlag);
+bool DoMCTruthJetsTruthParts () {
+  return DoMCTruthJetsTruthParts (systFlag);
 }
 
 
 
-bool DoMCTruthJESSmear () {
-  return DoMCTruthJESSmear (systFlag);
-}
-
-
-
-bool DoMCBbyBReco () {
-  return DoMCBbyBReco (systFlag);
+bool DoMCRecoJetTruthParts () {
+  return DoMCRecoJetTruthParts (systFlag);
 }
 
 
 
 bool UseTruthJets () {
-  return DoMCTruthLevel () || DoMCTruthJESSmear ();
+  return DoMCTruthJetsTruthParts ();
 }
 
 
 
 bool UseTruthParticles () {
-  return DoMCTruthLevel () || DoMCTruthJESSmear () || DoMCBbyBReco ();
+  return DoMCTruthJetsTruthParts () || DoMCRecoJetTruthParts ();
 }
 
 
@@ -759,10 +763,7 @@ bool UseTruthParticles () {
 double GetBoost (int rn) {
   double boost = 0;
   if (IspPb ()) {
-    if (Is5TeV ())
-      boost = -0.465;
-    if (Is8TeV ())
-      boost = (rn < 313500 ? -0.465 : 0.465);
+    boost = (IsPeriodA () ? -0.465 : 0.465);
   }
   return boost;
 }
@@ -865,6 +866,23 @@ TH1D* GetZdcCuts () {
 
 
 /**
+ * Returns a copy of the histogram detailing the probability of sampling a given MC event.
+ */
+TH1D* GetFCalResamplingProbs () {
+  if (!IsDataOverlay () || !IspPb ())
+    return nullptr;
+
+  TFile* probsFile = new TFile (Form ("%s/aux/MCResampling.root", workPath.Data ()), "read");
+  TH1D* h_probs = (TH1D*) ((TH1D*) probsFile->Get ("hjet_ratio")->Clone ("h_MCResamplingProbs"));
+  h_probs->SetDirectory (0);
+  probsFile->Close ();
+  SaferDelete (&probsFile);
+  return h_probs;
+}
+
+
+
+/**
  * Returns the probability histogram of each FCal ET value in 0-20% ZDC events.
  */
 TH1D* GetFCalZdcWeights () {
@@ -890,6 +908,41 @@ TH1D* GetFCalZdcWeights () {
   SaferDelete (&infile);
 
   return h;
+}
+
+
+
+/**
+ * Returns a map from event numbers to pure overlay A-side FCal ET values.
+ */
+std::map <const unsigned int, float>* GetOverlayFCalMap () {
+
+  TString fname = Form ("%s/aux/OverlayFCalEtMap.dat", workPath.Data ());
+  std::cout << "Loading FCal Et map for p+Pb data overlay from " << fname << std::endl;
+
+  ifstream inFile;
+  inFile.open (fname);
+
+  char fcalA_et[20];
+  char evtNum[20];
+
+  char* endPtr;
+
+  std::map <const unsigned int, float>* overlay_fcalA_et_map = new std::map <const unsigned int, float> ();
+
+  while (inFile) {
+
+    inFile >> evtNum >> fcalA_et;
+
+    overlay_fcalA_et_map->insert (std::pair <const unsigned int, float> (std::strtoul (evtNum, &endPtr, 10), std::strtof (fcalA_et, &endPtr)));
+
+  }
+
+  std::cout << "Loaded map, closing file" << std::endl;
+
+  inFile.close ();
+
+  return overlay_fcalA_et_map;
 }
 
 
@@ -1030,6 +1083,8 @@ bool MeetsTruthJetAcceptanceCuts (int iTJ, const JetRadius& radius) {
   assert (GetAktTruthJetN (radius) > iTJ);
   if (std::fabs (GetAktTruthJetEta (iTJ, radius)) > 2.8)
     return false;
+  if (IspPb () && InDisabledHEC (GetAktTruthJetEta (iTJ, radius), GetAktTruthJetPhi (iTJ, radius), GetRadius (radius)))
+    return false; // cut out jets in the disabled HEC
   return true;
 }
 
@@ -1079,16 +1134,21 @@ bool MeetsTrackCuts (int iTrk, const int nWPVar) {
     return false; // track minimum pT
   if (std::fabs (trk_eta[iTrk]) > 2.5)
     return false; // track maximum eta
+  if (trk_charge[iTrk] == 0)
+    return false; // cut on neutrals
 
   assert (nWPVar >= 0 && nWPVar < (int)trackWPs.size ());
 
   if (!UseTruthParticles ()) {
     if (!trackWPs[nWPVar][iTrk])
       return false;
+    //if (trk_prob_truth[iTrk] < 0.5) 
+    //  return false;
   }
   else if (trk_truth_barcode[iTrk] <= 0 || 200000 <= trk_truth_barcode[iTrk] || !trk_truth_isHadron[iTrk])
     return false;
 
+  // Heavy ion additional vertex matching cuts
   //if (IsPbPb ()) {
   //  if (std::fabs (trk_d0sig[iTrk]) > 3.0)
   //    return false; // d0 significance cut in Pb+Pb
@@ -1097,6 +1157,50 @@ bool MeetsTrackCuts (int iTrk, const int nWPVar) {
   //}
   return true;
 }
+
+
+
+///**
+// * Returns the truth-particle corrected FCal ET values.
+// */
+//FCalEt GetTruthCorrectedFCal (FCalEt values) {
+//  TLorentzVector tlv;
+//  for (int iTTrk = 0; iTTrk < truth_trk_n; iTTrk++) {
+//    const float eta = truth_trk_eta[iTTrk];
+//    const float aeta = std::fabs (eta);
+//
+//    if (aeta > 4.9 || aeta < 3.2)
+//      continue;
+//
+//    if (truth_trk_barcode[iTTrk] <= 0 || truth_trk_barcode[iTTrk] >= 200000)
+//      continue; // cut on secondaries -- we only want particles from the Pythia event! (Otherwise we double count some energy)
+//
+//    //if (truth_trk_charge[iTTrk] != 0 && truth_trk_pt[iTTrk] < 0.0225) // cut on loopers (they never hit the FCal); formula is pT^max = e * B * R^max where R^max ~ 0.5 * 75 mm for the FCal and B ~ 2.0T. For systematics, could use B ~ 1.7T and R^max = 0.5*70mm or 80mm. Try 2 * pT^max?
+//    //  continue;
+//
+//    if (truth_trk_pt[iTTrk] < 0.120) // cut on particles within 2 sigma of noise.
+//      continue;
+//
+//    //float sf = 1; // area-based correction factor for jets only partially in the FCal.
+//    //if (aeta > 4.9) {
+//    //  const float delta = aeta - 4.9;
+//    //  //sf = std::acos (1 - delta/0.4) / M_PI - (0.4 - delta) * std::sqrt (delta * (0.8 - delta)) / (M_PI * 0.16);
+//    //}
+//    //else if (aeta < 3.2) {
+//    //  const float delta = 3.2 - aeta;
+//    //  //sf = std::acos (1 - delta/0.4) / M_PI - (0.4 - delta) * std::sqrt (delta * (0.8 - delta)) / (M_PI * 0.16);
+//    //}
+//
+//    tlv.SetPtEtaPhiM (truth_trk_pt[iTTrk], eta, truth_trk_phi[iTTrk], 0.137); // assume pion mass?
+//    const float subet = tlv.Et ();
+//
+//    if (eta > 0)
+//      values.first = values.first - subet;
+//    else
+//      values.second = values.second - subet;
+//  }
+//  return values;
+//}
 
 
 
@@ -1508,8 +1612,8 @@ float GetAktHIJetTiming (const int iJ, const JetRadius& radius) {
  * Returns 0 if the jet is outside the acceptance.
  */
 double GetAktJetWeight (const float jpt, const float jeta, const float jphi, const JetRadius& jetr) {
-  if (DoMCTruthLevel ())
-    return 1;
+  //if (UseTruthJets ())
+  //  return 1;
   const double accept = ((IspPb () & InDisabledHEC (jeta, jphi, GetRadius (jetr))) || std::fabs (jeta) > 2.8 ? 0. : 1.);
   const double hecwgt = (IspPb () && jeta > 1.1 && jeta < 3.6 ? (2.*M_PI / (3.*M_PI/2. - 2*GetRadius (jetr))) : 1.);
   return accept * hecwgt;
@@ -1568,7 +1672,7 @@ QnVector GetProtonQ2Vec (const bool getMatching) {
 /**
  * Returns the tracking efficiency histograms.
  */
-TH2D* LoadTrackingEfficiency () {
+TH2D** LoadTrackingEfficiency () {
   TDirectory* gdir = gDirectory;
 
   //TString fname = Form ("%s/TrackingPerformance/Nominal/outFile.root", rootPath.Data ());
@@ -1579,29 +1683,32 @@ TH2D* LoadTrackingEfficiency () {
   TFile* infile = new TFile (fname, "read");
 
   const std::string wp = (DoHITightVar () ? "trk_HItight" : (DoHILooseVar () ? "trk_HIloose" : "trk_TightPrimary"));
-  const int iMult = nMultBins-1; // TODO change me for mult. unc.
+  //const int iMult = nMultBins-1; // TODO change me for mult. unc.
   const std::string sys = Ispp () ? "pp" : "pPb";
   const int PID = (DoPartSpcVar () ? 211 : 0);
 
-  TH2D* h2 = (TH2D*) infile->Get (Form ("h2_efficiency_%s_PID%i_%s_iMult%i", sys.c_str (), PID, wp.c_str (), iMult))->Clone ("h2_tracking_efficiency");
-  //TH2D* h2 = (TH2D*) infile->Get (Form ("h2_truth_matched_primary_tracks_%s_PID%i_%s_iMult%i", sys.c_str (), PID, wp.c_str (), iMult))->Clone ("h2_tracking_efficiency");
-  //h2->Divide ((TH2D*) infile->Get (Form ("h2_truth_tracks_%s_PID%i_iMult%i", sys.c_str (), PID, iMult)));
-  std::cout << "Loaded tracking efficiencies, closing file" << std::endl;
+  TH2D** h2arr = new TH2D*[nMultBins];
+  for (int iMult = 0; iMult < nMultBins; iMult++) {
 
-  h2->SetDirectory (gdir);
+    TH2D* h2 = (TH2D*) infile->Get (Form ("h2_efficiency_%s_PID%i_%s_iMult%i", sys.c_str (), PID, wp.c_str (), iMult))->Clone (Form ("h2_tracking_efficiency_iMult%i", iMult));
+    h2arr[iMult] = h2;
 
-  if (DoTrkEffVar ()) {
-    for (int iX = 1; iX <= h2->GetNbinsX (); iX++) {
-      for (int iY = 1; iY <= h2->GetNbinsY (); iY++) {
-        h2->SetBinContent (iX, iY, h2->GetBinContent (iX, iY) * (1.005 + (0.013/2.35)*(std::fabs (h2->GetXaxis ()->GetBinCenter (iX)) - 0.05))); // uncertainty on tracking efficiency, linear in |eta|
+    h2->SetDirectory (gdir);
+
+    if (DoTrkEffVar ()) {
+      for (int iX = 1; iX <= h2->GetNbinsX (); iX++) {
+        for (int iY = 1; iY <= h2->GetNbinsY (); iY++) {
+          h2->SetBinContent (iX, iY, h2->GetBinContent (iX, iY) * (1.005 + (0.013/2.35)*(std::fabs (h2->GetXaxis ()->GetBinCenter (iX)) - 0.05))); // uncertainty on tracking efficiency, linear in |eta|
+        }
       }
     }
   }
+  std::cout << "Loaded tracking efficiencies, closing file" << std::endl;
 
   infile->Close ();
   SaferDelete (&infile);
 
-  return h2;
+  return h2arr;
 }
 
 
@@ -1620,17 +1727,14 @@ TH1D** LoadTrackingPurity () {
   TFile* infile = new TFile (fname, "read");
 
   const std::string wp = (DoHITightVar () ? "trk_HItight" : (DoHILooseVar () ? "trk_HIloose" : "trk_TightPrimary"));
-  const int iMult = nMultBins-1;
+  const int iDR = 3;
   const std::string sys = Ispp () ? "pp" : "pPb";
+  //const std::string sys = "pp";
 
   TH1D** h_trk_pur = Get1DArray <TH1D*> (nEtaTrkBins);
 
   for (int iEta = 0; iEta < nEtaTrkBins; iEta++) {
-    h_trk_pur[iEta] = (TH1D*) infile->Get (Form ("h_primary_rate_%s_%s_iMult%i_iEta%i", sys.c_str (), wp.c_str (), iMult, iEta))->Clone (Form ("h_primary_rate_iMult%i_iEta%i", iMult, iEta));
-    //h_trk_pur[iEta] = (TH1D*) infile->Get (Form ("h_reco_tracks_%s_%s_iMult%i_iEta%i", sys.c_str (), wp.c_str (), iMult, iEta))->Clone (Form ("h_primary_rate_iMult%i_iEta%i", iMult, iEta));
-    //h_trk_pur[iEta]->Add ((TH1D*) infile->Get (Form ("h_fake_tracks_%s_%s_iMult%i_iEta%i", sys.c_str (), wp.c_str (), iMult, iEta)), -1);
-    //h_trk_pur[iEta]->Add ((TH1D*) infile->Get (Form ("h_secondary_tracks_%s_%s_iMult%i_iEta%i", sys.c_str (), wp.c_str (), iMult, iEta)), -1);
-    //h_trk_pur[iEta]->Divide ((TH1D*) infile->Get (Form ("h_reco_tracks_%s_%s_iMult%i_iEta%i", sys.c_str (), wp.c_str (), iMult, iEta)));
+    h_trk_pur[iEta] = (TH1D*) infile->Get (Form ("h_primary_rate_%s_%s_iDR%i_iEta%i", sys.c_str (), wp.c_str (), iDR, iEta))->Clone (Form ("h_primary_rate_iDR%i_iEta%i", iDR, iEta));
 
     h_trk_pur[iEta]->SetDirectory (gdir);
   }
@@ -1654,12 +1758,15 @@ TF1** LoadTrackingPurityFuncs () {
   TFile* infile = new TFile (fname, "read");
 
   const std::string wp = (DoHITightVar () ? "trk_HItight" : (DoHILooseVar () ? "trk_HIloose" : "trk_TightPrimary"));
-  const int iMult = nMultBins-1;
+  //const int iMult = nMultBins-1;
+  const int iDR = 3;
   const std::string sys = Ispp () ? "pp" : "pPb";
+  //const std::string sys = "pp";
+
   TF1** f_trk_pur = Get1DArray <TF1*> (nEtaTrkBins);
 
   for (int iEta = 0; iEta < nEtaTrkBins; iEta++)
-    f_trk_pur[iEta] = (TF1*) ((TF1*) infile->Get (Form ("f_primary_rate%s_%s_%s_iMult%i_iEta%i", DoFakeRateVar () ? "_fakes_p100" : "", sys.c_str (), wp.c_str (), iMult, iEta)))->Clone (Form ("f_primary_rate_iMult%i_iEta%i", iMult, iEta));
+    f_trk_pur[iEta] = (TF1*) ((TF1*) infile->Get (Form ("f_primary_rate%s_%s_%s_iDR%i_iEta%i", DoFakeRateVar () ? "_fakes_p100" : "", sys.c_str (), wp.c_str (), iDR, iEta)))->Clone (Form ("f_primary_rate_iDR%i_iEta%i", iDR, iEta));
 
   std::cout << "Loaded tracking purity functions" << std::endl;
 
@@ -1697,11 +1804,14 @@ TF1* LoadJetEnergyResFunction () {
 /**
  * Converts a TProfile to a TGraph assuming the x-axis of the TProfile is the y-axis of the TGraph.
  */
-TGraphErrors* TProfY2TGE (TProfile* py) {
-  TGraphErrors* g = new TGraphErrors ();
+TGAE* TProfY2TGAE (TProfile* py) {
+  TGAE* g = new TGAE ();
   for (int iX = 1; iX <= py->GetNbinsX (); iX++) {
     g->SetPoint (g->GetN (), py->GetBinContent (iX), py->GetBinCenter (iX));
-    g->SetPointError (g->GetN ()-1, py->GetBinError (iX), py->GetBinWidth (iX) / 2.);
+    g->SetPointEXhigh (g->GetN ()-1, py->GetBinError (iX));
+    g->SetPointEXlow (g->GetN ()-1, py->GetBinError (iX));
+    g->SetPointEYhigh (g->GetN ()-1, py->GetBinWidth (iX) / 2.);
+    g->SetPointEYlow (g->GetN ()-1, py->GetBinWidth (iX) / 2.);
   }
   return g;
 }
@@ -1711,11 +1821,14 @@ TGraphErrors* TProfY2TGE (TProfile* py) {
 /**
  * Converts a TProfile to a TGraph assuming the x-axis of the TProfile is the x-axis of the TGraph.
  */
-TGraphErrors* TProfX2TGE (TProfile* px) {
-  TGraphErrors* g = new TGraphErrors ();
+TGAE* TProfX2TGAE (TProfile* px) {
+  TGAE* g = new TGAE ();
   for (int iX = 1; iX <= px->GetNbinsX (); iX++) {
     g->SetPoint (g->GetN (), px->GetBinCenter (iX), px->GetBinContent (iX));
-    g->SetPointError (g->GetN ()-1, px->GetBinWidth (iX) / 2., px->GetBinError (iX));
+    g->SetPointEXhigh (g->GetN ()-1, px->GetBinWidth (iX) / 2.);
+    g->SetPointEXlow (g->GetN ()-1, px->GetBinWidth (iX) / 2.);
+    g->SetPointEYhigh (g->GetN ()-1, px->GetBinError (iX));
+    g->SetPointEYlow (g->GetN ()-1, px->GetBinError (iX));
   }
   return g;
 }
@@ -1729,7 +1842,7 @@ TGraphErrors* TProfX2TGE (TProfile* px) {
 void SetCentralValuesKeepRelativeErrors (TGAE* g, TH1D* centralValues) {
   assert (g->GetN () == centralValues->GetNbinsX ());
 
-  double xelo, xehi, yelo, yehi, x, y, ynew;
+  double /*xelo, xehi, */yelo, yehi, x, y, ynew;
   for (int i = 0; i < g->GetN (); i++) {
     //xelo = g->GetErrorXlow (i);
     //xehi = g->GetErrorXhigh (i);
@@ -1765,14 +1878,50 @@ void FlipTGAE (TGAE* g) {
 
 
 
+///**
+// * Performs a bin-by-bin unfold on a TH1D y^meas(x) using a given TF1 with unfolding factors f(x) such that y^unfold(x) = y^meas(x) * f(x).
+// */
+//void BinByBinUnfold (TH1D* h, TF1* f, const float mult) {
+//  for (int iX = 1; iX <= h->GetNbinsX (); iX++) {
+//    const float uf = f->Eval (h->GetBinCenter (iX));
+//    h->SetBinContent (iX, h->GetBinContent (iX) * uf);
+//    h->SetBinError (iX, h->GetBinError (iX) * uf);
+//  }
+//  return;
+//}
+
+
 /**
- * Performs a bin-by-bin unfold on a TH1D y^meas(x) using a given TF1 with unfolding factors f(x) such that y^unfold(x) = y^meas(x) * f(x).
+ * Multiplies a target histogram by a given TF1 with an optional multiplier on the function.
  */
-void BinByBinUnfold (TH1D* h, TF1* f) {
+void MultiplyByTF1 (TH1D* h, TF1* f, const float mult) {
   for (int iX = 1; iX <= h->GetNbinsX (); iX++) {
-    const float uf = f->Eval (h->GetBinCenter (iX));
-    h->SetBinContent (iX, h->GetBinContent (iX) * uf);
-    h->SetBinError (iX, h->GetBinError (iX) * uf);
+    //float sf = f->Eval (h->GetBinCenter (iX));
+    //if (sf > 1)
+    //  sf = 1-mult + mult*sf;//mult * (sf - 1) + 1;
+    //else
+    //  sf = 1-mult + mult*sf;//1 - mult * (1 - sf);
+    const float sf = 1-mult + mult * f->Eval (h->GetBinCenter (iX));
+    h->SetBinContent (iX, h->GetBinContent (iX) * sf);
+    h->SetBinError (iX, h->GetBinError (iX) * sf);
+  }
+  return;
+}
+
+
+/**
+ * Divides a target histogram by a given TF1 with an optional multiplier on the function.
+ */
+void DivideByTF1 (TH1D* h, TF1* f, const float mult) {
+  for (int iX = 1; iX <= h->GetNbinsX (); iX++) {
+    //float sf = f->Eval (h->GetBinCenter (iX));
+    //if (sf > 1)
+    //  sf = 1-mult + mult*sf;//mult * (sf - 1) + 1;
+    //else
+    //  sf = 1-mult + mult*sf;//1 - mult * (1 - sf);
+    const float sf = 1-mult + mult * f->Eval (h->GetBinCenter (iX));
+    h->SetBinContent (iX, h->GetBinContent (iX) / sf);
+    h->SetBinError (iX, h->GetBinError (iX) / sf);
   }
   return;
 }

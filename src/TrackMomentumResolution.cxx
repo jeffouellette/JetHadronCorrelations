@@ -268,7 +268,7 @@ bool TrackMomentumResolution (const char* directory,
     }
 
 
-    const float eventWeight = 1;
+    //const float eventWeight = 1;
     //const float eventWeight = ((isPbPb && !isHijing) ? h_weights->GetBinContent (h_weights->FindFixBin (doNchWeighting ? ntrk : fcalA_et+fcalC_et)) : 1); // weight is 1 for pp
     //const float eventWeight = (isPbPb ? h_weights->GetBinContent (h_weights->FindFixBin (doNchWeighting ? ntrk : fcalA_et+fcalC_et)) : 1); // weight is 1 for pp
     for (int iTrk = 0; iTrk < trk_n; iTrk++) {

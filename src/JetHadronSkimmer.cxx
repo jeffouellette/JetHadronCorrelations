@@ -43,7 +43,7 @@ bool JetHadronSkimmer (const char* directory,
     return true;
   }
 
-  if (IspPb () && UseJet100GeVTriggers ()) {
+  if (IspPb () && UseJ100Triggers ()) {
     std::cout << "Info: In JetHadronSkimmer.cxx: No J100 trigger available in p+Pb, please use J50 trigger (exiting gracefully)." << std::endl;
     return true;
   }
@@ -61,9 +61,9 @@ bool JetHadronSkimmer (const char* directory,
       SetupDirectories ("Trees/MC");
   }
   else {
-    if (UseJet50GeVTriggers ())
+    if (UseJ50Triggers ())
       SetupDirectories ("Trees/50GeVJetsData");
-    else if (UseJet100GeVTriggers ())
+    else if (UseJ100Triggers ())
       SetupDirectories ("Trees/100GeVJetsData");
     else if (UseMinBiasTriggers ())
       SetupDirectories ("Trees/MinBiasData");
@@ -319,7 +319,7 @@ bool JetHadronSkimmer (const char* directory,
   Trigger* minbiasTriggers[minbias_trig_n];
 
   if (IsCollisions ()) {
-    if (UseJet50GeVTriggers () || UseJet100GeVTriggers ()) {
+    if (UseJ50Triggers () || UseJ100Triggers ()) {
       for (int iTrig = 0; iTrig < jet_trig_n; iTrig++) {
         jetTriggers[iTrig] = new Trigger (jet_trig_name[iTrig]);
         tree->SetBranchAddress ((jet_trig_name[iTrig]+"_decision").c_str (), &(jetTriggers[iTrig]->trigDecision));
@@ -378,10 +378,10 @@ bool JetHadronSkimmer (const char* directory,
 
     if (IsCollisions ()) {
       event_weight = -1;
-      if (UseJet50GeVTriggers () && jetTriggers[0]->trigDecision)
+      if (UseJ50Triggers () && jetTriggers[0]->trigDecision)
         //event_weight = jetTriggers[0]->trigPrescale;
         event_weight = 1;
-      else if (UseJet100GeVTriggers () && jetTriggers[1]->trigDecision)
+      else if (UseJ100Triggers () && jetTriggers[1]->trigDecision)
         //event_weight = jetTriggers[1]->trigPrescale;
         event_weight = 1;
       else if (UseMinBiasTriggers () && minbiasTriggers[0]->trigDecision)
@@ -582,7 +582,7 @@ bool JetHadronSkimmer (const char* directory,
 
 
   if (IsCollisions ()) {
-    if (UseJet50GeVTriggers () || UseJet100GeVTriggers ()) {
+    if (UseJ50Triggers () || UseJ100Triggers ()) {
       for (int iTrig = 0; iTrig < jet_trig_n; iTrig++)
         SaferDelete (&jetTriggers[iTrig]);
     }

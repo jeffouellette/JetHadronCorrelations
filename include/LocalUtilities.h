@@ -11,9 +11,11 @@
 #include <TProfile.h>
 
 #include <vector>
+#include <map>
 
 typedef TGraphAsymmErrors TGAE;
 typedef std::pair <float, float> QnVector;
+//typedef std::pair <float, float> FCalEt;
 
 namespace JetHadronCorrelations {
 
@@ -26,8 +28,8 @@ enum class DataType { Collisions, MCSignal, MCDataOverlay, MCHijing, MCHijingOve
 static const std::vector <DataType> AllDataType = { DataType::Collisions, DataType::MCSignal, DataType:: MCDataOverlay, DataType::MCHijing, DataType::MCHijingOverlay };
 
 // types of triggers in this analysis
-enum class TriggerType { None, Jet50GeV, Jet100GeV, MinBias };
-static const std::vector <TriggerType> AllTriggerType = { TriggerType::None, TriggerType::Jet50GeV, TriggerType::Jet100GeV, TriggerType::MinBias };
+enum class TriggerType { None, J50, J100, MinBias };
+static const std::vector <TriggerType> AllTriggerType = { TriggerType::None, TriggerType::J50, TriggerType::J100, TriggerType::MinBias };
 
 // types of systematic variations
 enum class SystFlag {
@@ -45,6 +47,7 @@ enum class SystFlag {
   MixCatVar3,
   MixCatVar4,       // 2nd order EP matching in pPb
   MixCatVar5,       // 2nd order EP matching in pp
+  MixCatVar6,       // less fine fcal binning in peripheral?
   JESVar0,          // jet energy scale variations
   JESVar1,
   JESVar2,
@@ -77,9 +80,8 @@ enum class SystFlag {
   JERVar8,
   JERVar9,
   JERVar10,
-  MCTruthLevel,     // does the analysis at the MC-truth level
-  MCTruthJESSmear,  // does the analysis at MC-truth level but smears the JES
-  MCBbyBReco,       // selects truth charged particles with reco jets for BbyB (bin-by-bin) unfolding factors numerator. Denominator is in MCTruthLevel
+  MCTruthJetsTruthParts,  // does the analysis completely at the MC-truth level
+  MCRecoJetTruthParts,    // selects truth charged particles with reco jets for bin-by-bin unfolding factors (numerator). Denominator is in MCTruthJetsTruthParts
 };
 static const std::vector <SystFlag> AllSystFlag = {
   SystFlag::Nominal,
@@ -96,6 +98,7 @@ static const std::vector <SystFlag> AllSystFlag = {
   SystFlag::MixCatVar3,
   SystFlag::MixCatVar4,
   SystFlag::MixCatVar5,
+  SystFlag::MixCatVar6,
   SystFlag::JESVar0,
   SystFlag::JESVar1,
   SystFlag::JESVar2,
@@ -128,9 +131,8 @@ static const std::vector <SystFlag> AllSystFlag = {
   SystFlag::JERVar8,
   SystFlag::JERVar9,
   SystFlag::JERVar10,
-  SystFlag::MCTruthLevel,
-  SystFlag::MCTruthJESSmear,
-  SystFlag::MCBbyBReco,
+  SystFlag::MCTruthJetsTruthParts,
+  SystFlag::MCRecoJetTruthParts,
 };
 
 enum class JetRadius { R0p2, R0p3, R0p4, R0p6, R0p8, R1p0, Invalid };
@@ -173,8 +175,8 @@ bool IsDataOverlay (const DataType& dType);
 bool IsHijing (const DataType& dType);
 
 bool UseJetTriggers (const TriggerType& tType);
-bool UseJet50GeVTriggers (const TriggerType& tType);
-bool UseJet100GeVTriggers (const TriggerType& tType);
+bool UseJ50Triggers (const TriggerType& tType);
+bool UseJ100Triggers (const TriggerType& tType);
 bool UseMinBiasTriggers (const TriggerType& tType);
 
 bool DoHITightVar (const SystFlag& sFlag);
@@ -190,12 +192,13 @@ bool DoMixCatVar2 (const SystFlag& sFlag);
 bool DoMixCatVar3 (const SystFlag& sFlag);
 bool DoMixCatVar4 (const SystFlag& sFlag);
 bool DoMixCatVar5 (const SystFlag& sFlag);
+bool DoMixCatVar6 (const SystFlag& sFlag);
 
 int GetNJESVar (const SystFlag& sFlag);
 int GetNJERVar (const SystFlag& sFlag);
 
-bool DoMCTruthLevel (const SystFlag& sFlag);
-bool DoMCTruthJESSmear (const SystFlag& sFlag);
+bool DoMCTruthJetsTruthParts (const SystFlag& sFlag);
+bool DoMCRecoJetTruthParts (const SystFlag& sFlag);
 
 
 
@@ -223,8 +226,8 @@ bool IsDataOverlay ();
 bool IsHijing ();
 
 bool UseJetTriggers ();
-bool UseJet50GeVTriggers ();
-bool UseJet100GeVTriggers ();
+bool UseJ50Triggers ();
+bool UseJ100Triggers ();
 bool UseMinBiasTriggers ();
 
 bool DoHITightVar ();
@@ -240,12 +243,13 @@ bool DoMixCatVar2 ();
 bool DoMixCatVar3 ();
 bool DoMixCatVar4 ();
 bool DoMixCatVar5 ();
+bool DoMixCatVar6 ();
 
 int GetNJESVar ();
 int GetNJERVar ();
 
-bool DoMCTruthLevel ();
-bool DoMCTruthJESSmear ();
+bool DoMCTruthJetsTruthParts ();
+bool DoMCRecoJetTruthParts ();
 
 bool UseTruthJets ();
 bool UseTruthParticles ();
@@ -288,9 +292,21 @@ TH1D* GetZdcCuts ();
 
 
 /**
+ * Returns a copy of the histogram detailing the probability of sampling a given MC event.
+ */
+TH1D* GetFCalResamplingProbs ();
+
+
+/**
  * Returns the probability histogram of each FCal ET value in 0-20% ZDC events.
  */
 TH1D* GetFCalZdcWeights ();
+
+
+/**
+ * Returns a map from event numbers to pure overlay A-side FCal ET values.
+ */
+std::map <const unsigned int, float>* GetOverlayFCalMap ();
 
 
 /**
@@ -327,6 +343,12 @@ bool MeetsJetPtCut (double jpt);
  * Returns true if this track passes selection criteria.
  */
 bool MeetsTrackCuts (int iTrk, const int nWPVar = 0);
+
+
+///**
+// * Returns the truth-particle corrected FCal ET values.
+// */
+//FCalEt GetTruthCorrectedFCal (FCalEt values);
 
 
 /**
@@ -506,7 +528,7 @@ QnVector GetProtonQ2Vec (const bool getMatching = false);
 /**
  * Returns the tracking efficiency histograms.
  */
-TH2D* LoadTrackingEfficiency ();
+TH2D** LoadTrackingEfficiency ();
 
 
 /**
@@ -530,13 +552,13 @@ TF1* LoadJetEnergyResFunction ();
 /**
  * Converts a TProfile to a TGraph assuming the x-axis of the TProfile is the y-axis of the TGraph.
  */
-TGraphErrors* TProfY2TGE (TProfile* py);
+TGAE* TProfY2TGAE (TProfile* py);
 
 
 /**
  * Converts a TProfile to a TGraph assuming the x-axis of the TProfile is the x-axis of the TGraph.
  */
-TGraphErrors* TProfX2TGE (TProfile* px);
+TGAE* TProfX2TGAE (TProfile* px);
 
 
 /**
@@ -552,10 +574,22 @@ void SetCentralValuesKeepRelativeErrors (TGAE* g, TH1D* centralValues);
 void FlipTGAE (TGAE* g);
 
 
+///**
+// * Performs a bin-by-bin unfold on a TH1D y^meas(x) using a given TF1 with unfolding factors f(x) such that y^unfold(x) = y^meas(x) * f(x).
+// */
+//void BinByBinUnfold (TH1D* h, TF1* f);
+
+
 /**
- * Performs a bin-by-bin unfold on a TH1D y^meas(x) using a given TF1 with unfolding factors f(x) such that y^unfold(x) = y^meas(x) * f(x).
+ * Multiplies a target histogram by a given TF1 with an optional multiplier on the function.
  */
-void BinByBinUnfold (TH1D* h, TF1* f);
+void MultiplyByTF1 (TH1D* h, TF1* f, const float mult = 1.);
+
+
+/**
+ * Divides a target histogram by a given TF1 with an optional multiplier on the function.
+ */
+void DivideByTF1 (TH1D* h, TF1* f, const float mult = 1.);
 
 
 } // end namespace

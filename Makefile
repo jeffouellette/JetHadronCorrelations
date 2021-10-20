@@ -1,10 +1,10 @@
 CXX=g++
-CXXFLAGS=-O3 -g -Wall -fPIC -std=c++1y `root-config --cflags` -Iinclude -I${ROOT_UTILS_PATH}/include -I${ATLAS_PATH}/include
-LDFLAGS=`root-config --glibs --ldflags` -Llib -L${ROOT_UTILS_PATH}/lib -L${ATLAS_PATH}/lib -lUtilities -lAtlasUtils -lAtlasStyle
+CXXFLAGS=-O3 -g -Wall -fPIC -std=c++1y `root-config --cflags` -Iinclude -I${ROOT_UTILS_PATH}/include -I${ATLAS_PATH}/include -I${ROOUNFOLD_INCLUDE_DIR}
+LDFLAGS=`root-config --glibs --ldflags` -Llib -L${ROOT_UTILS_PATH}/lib -L${ATLAS_PATH}/lib -L${ROOUNFOLD_LIBRARY} -lUtilities -lAtlasUtils -lAtlasStyle -lRooUnfold
 
 libraries = LocalUtilities
 algorithms = JetHadronSkimmer CentralityAnalysis JetSubtractedEnergy TrackingPerformance TrackMomentumResolution JetEnergyResolution
-binaries = Process AnalyzeTrackMomentumResolution AnalyzeJetEnergyResolution RunCorrelator
+binaries = Process AnalyzeTrackMomentumResolution AnalyzeJetEnergyResolution RunCorrelator MakeResponseMatrix
 
 .PHONY : libs algs bins directories clean
 
@@ -26,6 +26,9 @@ Process : $(libraries) $(algorithms) src/Process.cxx
 
 RunCorrelator : $(libraries) src/RunCorrelator.cxx
 	$(CXX) $(CXXFLAGS) src/RunCorrelator.cxx $(LDFLAGS) $(libraries:%=-l%) $(algorithms:%=-l%) -o bin/RunCorrelator.exe
+
+MakeResponseMatrix : $(libraries) src/MakeResponseMatrix.cxx
+	$(CXX) $(CXXFLAGS) src/MakeResponseMatrix.cxx $(LDFLAGS) $(libraries:%=-l%) $(algorithms:%=-l%) -o bin/MakeResponseMatrix.exe
 
 AnalyzeTrackMomentumResolution : $(libraries) src/AnalyzeTrackMomentumResolution.C
 	$(CXX) $(CXXFLAGS) src/AnalyzeTrackMomentumResolution.C $(LDFLAGS) $(libraries:%=-l%) $(algorithms:%=-l%) -o bin/AnalyzeTrackMomentumResolution.exe

@@ -201,7 +201,8 @@ bool TrackingPerformance (const char* directory,
   const int nFinerEtaTrkBins = 40;
   const double* finerEtaTrkBins = linspace (-2.5, 2.5, nFinerEtaTrkBins);
 
-  const double pTchBins[] = {0.5, 0.525, 0.55, 0.575, 0.6, 0.625, 0.65, 0.675, 0.7, 0.725, 0.75, 0.775, 0.8, 0.825, 0.85, 0.875, 0.9, 0.925, 0.95, 0.975, 1, 1.05, 1.1, 1.15, 1.2, 1.25, 1.3, 1.35, 1.4, 1.45, 1.5, 1.55, 1.6, 1.65, 1.7, 1.75, 1.8, 1.85, 1.9, 1.95, 2, 2.125, 2.25, 2.375, 2.5, 2.625, 2.75, 2.875, 3, 3.125, 3.25, 3.375, 3.5, 3.625, 3.75, 3.875, 4, 4.25, 4.5, 4.75, 5, 5.25, 5.5, 5.75, 6, 6.5, 7, 7.5, 8, 8.5, 9, 9.5, 10, 10.5, 11, 11.5, 12, 13, 14, 15, 16, 17, 18, 19, 20, 22.5, 25, 27.5, 30, 32.5, 35, 37.5, 40, 42.5, 45, 50, 55, 60, 70, 80, 100};
+  const double pTchBins[] = {0.4, 0.425, 0.45, 0.475, 0.5, 0.525, 0.55, 0.575, 0.6, 0.625, 0.65, 0.675, 0.7, 0.725, 0.75, 0.775, 0.8, 0.825, 0.85, 0.875, 0.9, 0.925, 0.95, 0.975, 1, 1.05, 1.1, 1.15, 1.2, 1.25, 1.3, 1.35, 1.4, 1.45, 1.5, 1.55, 1.6, 1.65, 1.7, 1.75, 1.8, 1.85, 1.9, 1.95, 2, 2.125, 2.25, 2.375, 2.5, 2.625, 2.75, 2.875, 3, 3.125, 3.25, 3.375, 3.5, 3.625, 3.75, 3.875, 4, 4.25, 4.5, 4.75, 5, 5.25, 5.5, 5.75, 6, 6.5, 7, 7.5, 8, 8.5, 9, 9.5, 10, 10.5, 11, 11.5, 12, 13, 14, 15, 16, 17, 18, 19, 20, 22.5, 25, 27.5, 30, 32.5, 35, 37.5, 40, 42.5, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100, 110, 120, 130}; // new binning, 113 elements or 112 bins
+  //const double pTchBins[] = {0.5, 0.525, 0.55, 0.575, 0.6, 0.625, 0.65, 0.675, 0.7, 0.725, 0.75, 0.775, 0.8, 0.825, 0.85, 0.875, 0.9, 0.925, 0.95, 0.975, 1, 1.05, 1.1, 1.15, 1.2, 1.25, 1.3, 1.35, 1.4, 1.45, 1.5, 1.55, 1.6, 1.65, 1.7, 1.75, 1.8, 1.85, 1.9, 1.95, 2, 2.125, 2.25, 2.375, 2.5, 2.625, 2.75, 2.875, 3, 3.125, 3.25, 3.375, 3.5, 3.625, 3.75, 3.875, 4, 4.25, 4.5, 4.75, 5, 5.25, 5.5, 5.75, 6, 6.5, 7, 7.5, 8, 8.5, 9, 9.5, 10, 10.5, 11, 11.5, 12, 13, 14, 15, 16, 17, 18, 19, 20, 22.5, 25, 27.5, 30, 32.5, 35, 37.5, 40, 42.5, 45, 50, 55, 60, 70, 80, 90, 100}; // old binning
   const int nPtchBins = sizeof (pTchBins) / sizeof (pTchBins[0]) - 1;
 
                     //pi+, k+,  p+,   e-, mu-, sigma+, sigma-, xi-,  omega-, everyone
@@ -216,24 +217,24 @@ bool TrackingPerformance (const char* directory,
   TH2D***  h2_truth_tracks                 = Get2DArray <TH2D*> (nPIDs, nMultBins);
   TH2D***  h2_truth_tracks_wgt2            = Get2DArray <TH2D*> (nPIDs, nMultBins);
 
-  TH2D*** h2_fake_tracks        = Get2DArray <TH2D*> (trackWPs.size (), nDRBins);
-  TH2D*** h2_secondary_tracks   = Get2DArray <TH2D*> (trackWPs.size (), nDRBins);
-  TH2D*** h2_strange_tracks     = Get2DArray <TH2D*> (trackWPs.size (), nDRBins);
-  TH2D*** h2_primary_tracks     = Get2DArray <TH2D*> (trackWPs.size (), nDRBins);
-  TH2D*** h2_reco_tracks        = Get2DArray <TH2D*> (trackWPs.size (), nDRBins);
-  TH2D*** h2_reco_tracks_wgt2   = Get2DArray <TH2D*> (trackWPs.size (), nDRBins);
+  TH2D*** h2_fake_tracks            = Get2DArray <TH2D*> (trackWPs.size (), nDRBins);
+  TH2D*** h2_secondary_tracks       = Get2DArray <TH2D*> (trackWPs.size (), nDRBins);
+  TH2D*** h2_strange_tracks         = Get2DArray <TH2D*> (trackWPs.size (), nDRBins);
+  TH2D*** h2_primary_tracks         = Get2DArray <TH2D*> (trackWPs.size (), nDRBins);
+  TH2D*** h2_reco_tracks            = Get2DArray <TH2D*> (trackWPs.size (), nDRBins);
+  TH2D*** h2_reco_tracks_wgt2       = Get2DArray <TH2D*> (trackWPs.size (), nDRBins);
 
 
   TH1D***** h_truth_matched_primary_tracks = Get4DArray <TH1D*> (nPIDs, trackWPs.size (), nMultBins, nEtaTrkBins);
   TH1D****  h_truth_tracks                 = Get3DArray <TH1D*> (nPIDs, nMultBins, nEtaTrkBins);
   TH1D****  h_truth_tracks_wgt2            = Get3DArray <TH1D*> (nPIDs, nMultBins, nEtaTrkBins);
 
-  TH1D**** h_fake_tracks        = Get3DArray <TH1D*> (trackWPs.size (), nDRBins, nEtaTrkBins);
-  TH1D**** h_secondary_tracks   = Get3DArray <TH1D*> (trackWPs.size (), nDRBins, nEtaTrkBins);
-  TH1D**** h_strange_tracks     = Get3DArray <TH1D*> (trackWPs.size (), nDRBins, nEtaTrkBins);
-  TH1D**** h_primary_tracks     = Get3DArray <TH1D*> (trackWPs.size (), nDRBins, nEtaTrkBins);
-  TH1D**** h_reco_tracks        = Get3DArray <TH1D*> (trackWPs.size (), nDRBins, nEtaTrkBins);
-  TH1D**** h_reco_tracks_wgt2   = Get3DArray <TH1D*> (trackWPs.size (), nDRBins, nEtaTrkBins);
+  TH1D**** h_fake_tracks            = Get3DArray <TH1D*> (trackWPs.size (), nDRBins, nEtaTrkBins);
+  TH1D**** h_secondary_tracks       = Get3DArray <TH1D*> (trackWPs.size (), nDRBins, nEtaTrkBins);
+  TH1D**** h_strange_tracks         = Get3DArray <TH1D*> (trackWPs.size (), nDRBins, nEtaTrkBins);
+  TH1D**** h_primary_tracks         = Get3DArray <TH1D*> (trackWPs.size (), nDRBins, nEtaTrkBins);
+  TH1D**** h_reco_tracks            = Get3DArray <TH1D*> (trackWPs.size (), nDRBins, nEtaTrkBins);
+  TH1D**** h_reco_tracks_wgt2       = Get3DArray <TH1D*> (trackWPs.size (), nDRBins, nEtaTrkBins);
 
 
   for (int iPID = 0; iPID < nPIDs; iPID++) {
@@ -295,7 +296,6 @@ bool TrackingPerformance (const char* directory,
       h2_strange_tracks[iWP][iDR]->Sumw2 ();
       h2_primary_tracks[iWP][iDR] = new TH2D (Form ("h2_primary_tracks_%s_%s_iDR%i", sys.Data (), trackWPNames[iWP].c_str (), iDR), ";#eta;#it{p}_{T} [GeV]", nFinerEtaTrkBins, finerEtaTrkBins, nPtchBins, pTchBins);
       h2_primary_tracks[iWP][iDR]->Sumw2 ();
-
       h2_reco_tracks[iWP][iDR] = new TH2D (Form ("h2_reco_tracks_%s_%s_iDR%i", sys.Data (), trackWPNames[iWP].c_str (), iDR), ";#eta;#it{p}_{T} [GeV]", nFinerEtaTrkBins, finerEtaTrkBins, nPtchBins, pTchBins);
       h2_reco_tracks[iWP][iDR]->Sumw2 ();
 
@@ -312,7 +312,6 @@ bool TrackingPerformance (const char* directory,
         h_strange_tracks[iWP][iDR][iEta]->Sumw2 ();
         h_primary_tracks[iWP][iDR][iEta] = new TH1D (Form ("h_primary_tracks_%s_%s_iDR%i_iEta%i", sys.Data (), trackWPNames[iWP].c_str (), iDR, iEta), ";#it{p}_{T} [GeV]", nPtchBins, pTchBins);
         h_primary_tracks[iWP][iDR][iEta]->Sumw2 ();
-
         h_reco_tracks[iWP][iDR][iEta] = new TH1D (Form ("h_reco_tracks_%s_%s_iDR%i_iEta%i", sys.Data (), trackWPNames[iWP].c_str (), iDR, iEta), ";#it{p}_{T} [GeV]", nPtchBins, pTchBins);
         h_reco_tracks[iWP][iDR][iEta]->Sumw2 ();
 
@@ -378,6 +377,10 @@ bool TrackingPerformance (const char* directory,
     const double eventWeight = 1;
     //const double eventWeight = (IsHijing () ? 1 : mcEventWeights->at (0) * crossSectionPicoBarns * mcFilterEfficiency * GetJetLuminosity () / mcNumberEvents); // sigma * f * L_int
 
+    // minimum and maximum barcodes, 0 < barcode < 10000 in Pythia and 10000 < barcode < 200000 in Hijing
+    const int minBarcode = 0;
+    const int maxBarcode = 200000;
+
     const int njet = GetAktHIJetN (r0p4);
 
     for (int iTrk = 0; iTrk < trk_n; iTrk++) {
@@ -393,6 +396,20 @@ bool TrackingPerformance (const char* directory,
       while (etaTrkBins[iEtaReco+1] < std::fabs (trk_eta[iTrk]))
         iEtaReco++;
 
+      // has trigger jet?
+      bool hasTrigJet = false;
+      for (int iJet = 0; !hasTrigJet && iJet < GetAktHIJetN (r0p4); iJet++) {
+        if (!MeetsJetAcceptanceCuts (iJet, r0p4))
+          continue; // jet eta/phi & timing cuts
+
+        if (!MeetsJetPtCut (GetAktHIJetPt  (iJet, r0p4)))
+          continue; // jet pT cuts
+
+        hasTrigJet = true;
+      }
+      if (!hasTrigJet)
+        continue;
+
 
       for (int iWP = 0; iWP < (int)trackWPs.size (); iWP++) {
 
@@ -406,7 +423,7 @@ bool TrackingPerformance (const char* directory,
 
         const bool isFake = !isTruthMatched;
 
-        const bool isSecondary = isTruthMatched && (trk_truth_barcode[iTrk] <= 0 || 200000 <= trk_truth_barcode[iTrk]);
+        const bool isSecondary = isTruthMatched && (trk_truth_barcode[iTrk] <= minBarcode || maxBarcode <= trk_truth_barcode[iTrk]);
 
         const bool isStrangeBaryon = !isFake && !isSecondary && (std::abs (trk_truth_pdgid[iTrk]) == 3112 || std::abs (trk_truth_pdgid[iTrk]) == 3222 || std::abs (trk_truth_pdgid[iTrk]) == 3312 || std::abs (trk_truth_pdgid[iTrk]) == 3334);
 
@@ -416,10 +433,10 @@ bool TrackingPerformance (const char* directory,
         if (!IsDataOverlay ()) {
 
           if (isFake) {
-            h2_fake_tracks[iWP][iDR]->Fill (trk_eta[iTrk], trk_pt[iTrk], eventWeight);
-            h_fake_tracks[iWP][iDR][iEtaReco]->Fill (trk_pt[iTrk], eventWeight);
-            h2_fake_tracks[iWP][nDRBins-1]->Fill (trk_eta[iTrk], trk_pt[iTrk], eventWeight);
-            h_fake_tracks[iWP][nDRBins-1][iEtaReco]->Fill (trk_pt[iTrk], eventWeight);
+            h2_fake_tracks[iWP][iDR]->Fill (trk_eta[iTrk], trk_pt[iTrk]);
+            h_fake_tracks[iWP][iDR][iEtaReco]->Fill (trk_pt[iTrk]);
+            h2_fake_tracks[iWP][nDRBins-1]->Fill (trk_eta[iTrk], trk_pt[iTrk]);
+            h_fake_tracks[iWP][nDRBins-1][iEtaReco]->Fill (trk_pt[iTrk]);
           }
           else if (isSecondary) {
             h2_secondary_tracks[iWP][iDR]->Fill (trk_eta[iTrk], trk_pt[iTrk], eventWeight);
@@ -428,22 +445,22 @@ bool TrackingPerformance (const char* directory,
             h_secondary_tracks[iWP][nDRBins-1][iEtaReco]->Fill (trk_pt[iTrk], eventWeight);
           }
           else if (isStrangeBaryon) {
-            h2_strange_tracks[iWP][iDR]->Fill (trk_eta[iTrk], trk_pt[iTrk], eventWeight);
-            h_strange_tracks[iWP][iDR][iEtaReco]->Fill (trk_pt[iTrk], eventWeight);
-            h2_strange_tracks[iWP][nDRBins-1]->Fill (trk_eta[iTrk], trk_pt[iTrk], eventWeight);
-            h_strange_tracks[iWP][nDRBins-1][iEtaReco]->Fill (trk_pt[iTrk], eventWeight);
+            h2_strange_tracks[iWP][iDR]->Fill (trk_eta[iTrk], trk_pt[iTrk]);
+            h_strange_tracks[iWP][iDR][iEtaReco]->Fill (trk_pt[iTrk]);
+            h2_strange_tracks[iWP][nDRBins-1]->Fill (trk_eta[iTrk], trk_pt[iTrk]);
+            h_strange_tracks[iWP][nDRBins-1][iEtaReco]->Fill (trk_pt[iTrk]);
           }
           else if (isPrimary) {
-            h2_primary_tracks[iWP][iDR]->Fill (trk_eta[iTrk], trk_pt[iTrk], eventWeight);
-            h_primary_tracks[iWP][iDR][iEtaReco]->Fill (trk_pt[iTrk], eventWeight);
-            h2_primary_tracks[iWP][nDRBins-1]->Fill (trk_eta[iTrk], trk_pt[iTrk], eventWeight);
-            h_primary_tracks[iWP][nDRBins-1][iEtaReco]->Fill (trk_pt[iTrk], eventWeight);
+            h2_primary_tracks[iWP][iDR]->Fill (trk_eta[iTrk], trk_pt[iTrk]);
+            h_primary_tracks[iWP][iDR][iEtaReco]->Fill (trk_pt[iTrk]);
+            h2_primary_tracks[iWP][nDRBins-1]->Fill (trk_eta[iTrk], trk_pt[iTrk]);
+            h_primary_tracks[iWP][nDRBins-1][iEtaReco]->Fill (trk_pt[iTrk]);
           }
 
-          h2_reco_tracks[iWP][iDR]->Fill (trk_eta[iTrk], trk_pt[iTrk], eventWeight);
-          h_reco_tracks[iWP][iDR][iEtaReco]->Fill (trk_pt[iTrk], eventWeight);
-          h2_reco_tracks[iWP][nDRBins-1]->Fill (trk_eta[iTrk], trk_pt[iTrk], eventWeight);
-          h_reco_tracks[iWP][nDRBins-1][iEtaReco]->Fill (trk_pt[iTrk], eventWeight);
+          h2_reco_tracks[iWP][iDR]->Fill (trk_eta[iTrk], trk_pt[iTrk]);
+          h_reco_tracks[iWP][iDR][iEtaReco]->Fill (trk_pt[iTrk]);
+          h2_reco_tracks[iWP][nDRBins-1]->Fill (trk_eta[iTrk], trk_pt[iTrk]);
+          h_reco_tracks[iWP][nDRBins-1][iEtaReco]->Fill (trk_pt[iTrk]);
 
           h2_reco_tracks_wgt2[iWP][iDR]->Fill (trk_eta[iTrk], trk_pt[iTrk], eventWeight*eventWeight);
           h_reco_tracks_wgt2[iWP][iDR][iEtaReco]->Fill (trk_pt[iTrk], eventWeight*eventWeight);
@@ -454,6 +471,7 @@ bool TrackingPerformance (const char* directory,
 
 
         if (!IsHijing () && (isPrimary || isStrangeBaryon)) {
+        //if (isPrimary || isStrangeBaryon) {
 
           if (trk_truth_charge[iTrk] == 0 || std::fabs (trk_truth_eta[iTrk]) > 2.5)
             continue; // truth-level acceptance cut
@@ -494,11 +512,11 @@ bool TrackingPerformance (const char* directory,
         if (truth_trk_charge[iTTrk] == 0 || std::fabs (truth_trk_eta[iTTrk]) > 2.5)
           continue; // truth-level acceptance cut
 
-        const bool isSecondary = (truth_trk_barcode[iTTrk] <= 0 || 200000 <= truth_trk_barcode[iTTrk]);
+        const bool isSecondary = (truth_trk_barcode[iTTrk] <= minBarcode || maxBarcode <= truth_trk_barcode[iTTrk]);
         if (isSecondary)
           continue; // don't work with secondaries
 
-        const bool isStrangeBaryon = !isSecondary && (std::abs (truth_trk_pdgid[iTTrk]) == 3112 || std::abs (truth_trk_pdgid[iTTrk]) == 3222 || std::abs (truth_trk_pdgid[iTTrk]) == 3312 || std::abs (truth_trk_pdgid[iTTrk]) == 3334);
+        //const bool isStrangeBaryon = !isSecondary && (std::abs (truth_trk_pdgid[iTTrk]) == 3112 || std::abs (truth_trk_pdgid[iTTrk]) == 3222 || std::abs (truth_trk_pdgid[iTTrk]) == 3312 || std::abs (truth_trk_pdgid[iTTrk]) == 3334);
 
         const bool isPrimary = !isSecondary;// && !isStrangeBaryon;
 
