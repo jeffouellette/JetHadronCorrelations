@@ -116,9 +116,6 @@ bool JetEnergyResolution (const char* directory,
   tree->SetBranchAddress ("run_number",     &run_number);
   tree->SetBranchAddress ("event_number",   &event_number);
   tree->SetBranchAddress ("lumi_block",     &lumi_block);
-  tree->SetBranchAddress ("isOOTPU",        &isOOTPU);
-  tree->SetBranchAddress ("BlayerDesyn",    &BlayerDesyn);
-  tree->SetBranchAddress ("passes_toroid",  &passes_toroid);
 
 
   tree->SetBranchAddress ("actualInteractionsPerCrossing",  &actualInteractionsPerCrossing);

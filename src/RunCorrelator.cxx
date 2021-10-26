@@ -104,9 +104,15 @@ bool Correlator (const char* tag, const char* outFilePattern, TTree* jetsTree, T
   jetsTree->SetBranchAddress ("lumi_block",    &lumi_block);
   jetsTree->SetBranchAddress ("run_number",    &run_number);
 
+  if (doMixing) {
+    tracksTree->SetBranchAddress ("event_number",  &event_number_matching);
+    tracksTree->SetBranchAddress ("lumi_block",    &lumi_block_matching);
+    tracksTree->SetBranchAddress ("run_number",    &run_number_matching);
+  }
 
-  jetsTree->SetBranchAddress ("actualInteractionsPerCrossing",  &actualInteractionsPerCrossing);
-  jetsTree->SetBranchAddress ("averageInteractionsPerCrossing", &averageInteractionsPerCrossing);
+
+  //jetsTree->SetBranchAddress ("actualInteractionsPerCrossing",  &actualInteractionsPerCrossing);
+  //jetsTree->SetBranchAddress ("averageInteractionsPerCrossing", &averageInteractionsPerCrossing);
 
 
   if (!IsCollisions ())
@@ -239,6 +245,10 @@ bool Correlator (const char* tag, const char* outFilePattern, TTree* jetsTree, T
   TH2D** h2_trk_eff = LoadTrackingEfficiency ();
   TH1D** h_trk_pur = LoadTrackingPurity ();
   TF1** f_trk_pur = LoadTrackingPurityFuncs ();
+
+
+  // for MC reweighting to data
+  TF1** f_jet_wgts = LoadJetPtWeights ();
 
 
   // for corrected FCal Et values in data overlay
@@ -544,6 +554,10 @@ bool Correlator (const char* tag, const char* outFilePattern, TTree* jetsTree, T
           continue;
 
         tracksTree->GetEntry (iTrkEvt);
+
+        // make sure we are not mixing an event with itself (better version)
+        if (run_number == run_number_matching && lumi_block == lumi_block_matching && event_number == event_number_matching)
+          continue;
 
         // triggering cut, require appropriate track selection trigger to have fired
         if (!trackTreeTrigger->trigDecision)
@@ -880,20 +894,25 @@ bool RunCorrelator (const char* directory,
   {
     // opens a bunch of TTrees as a TChain from all files in a directory matching the file identifier
     std::cout << "DataPath = " << dataPath << std::endl;
-    auto dir = gSystem->OpenDirectory (dataPath + directory);
-    while (const char* f = gSystem->GetDirEntry (dir)) {
-      TString file = TString (f);
+    if (TString (jetsInFileName).EndsWith (".root")) 
+      jetsInTree->Add (dataPath + directory + "/" + jetsInFileName);
 
-      if (!file.Contains (jetsInFileName))
-        continue;
-      if (IsCollisions ()) {
-        if ((UseMinBiasTriggers () && !file.Contains ("MinBias")) || (UseJetTriggers () && !file.Contains ("Main")))
+    else {
+      auto dir = gSystem->OpenDirectory (dataPath + directory);
+      while (const char* f = gSystem->GetDirEntry (dir)) {
+        TString file = TString (f);
+
+        if (!file.Contains (jetsInFileName))
           continue;
-      }
+        //if (IsCollisions ()) {
+        //  if ((Ispp () && UseMinBiasTriggers () && !file.Contains ("MinBias")) || (!Ispp () && UseJetTriggers () && !file.Contains ("Main")))
+        //    continue;
+        //}
 
-      std::cout << "Adding " << dataPath + directory + "/" + file + "/*.root" << " to input jets trees TChain" << std::endl;
-      jetsInTree->Add (dataPath + directory + "/" + file + "/*.root");
-      break;
+        std::cout << "Adding " << dataPath + directory + "/" + file + "/*.root" << " to input jets trees TChain" << std::endl;
+        jetsInTree->Add (dataPath + directory + "/" + file + "/*.root");
+        break;
+      }
     }
     if (jetsInTree->GetEntries () == 0) {
       std::cout << "Info: In RunCorrelator.cxx: Jet input chain has " << jetsInTree->GetEntries () << " entries, exiting gracefully." << std::endl;

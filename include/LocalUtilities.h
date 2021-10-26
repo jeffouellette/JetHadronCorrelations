@@ -526,6 +526,12 @@ QnVector GetProtonQ2Vec (const bool getMatching = false);
 
 
 /**
+ * Returns the jet pT weight functions for MC.
+ */
+TF1** LoadJetPtWeights ();
+
+
+/**
  * Returns the tracking efficiency histograms.
  */
 TH2D** LoadTrackingEfficiency ();
@@ -590,6 +596,12 @@ void MultiplyByTF1 (TH1D* h, TF1* f, const float mult = 1.);
  * Divides a target histogram by a given TF1 with an optional multiplier on the function.
  */
 void DivideByTF1 (TH1D* h, TF1* f, const float mult = 1.);
+
+
+/**
+ * Divides a histogram by another without propagating uncertainties.
+ */
+void DivideNoErrors (TH1D* h, const TH1D* hd);
 
 
 } // end namespace

@@ -27,8 +27,8 @@ std::vector <TString> variations = {
 
   "MixCatVar1",
   "MixCatVar2",
-  "MixCatVar3",
-  "NonClosureVar",
+  "MixCatVar3",*/
+  "NonClosureVar",/*
 
   "JESVar0",
   "JESVar1",
@@ -51,10 +51,11 @@ std::vector <TString> variations = {
   "JESVar18",
   "JESVar19",
   //"JESVar20",
+*/
 
   "MCTruthJetsTruthParts",     // Truth-level jets and truth-level charged particles
-  "MCRecoJetTruthParts",       // Reco-level jets and truth-level charged particles
-*/
+  //"MCRecoJetTruthParts",       // Reco-level jets and truth-level charged particles
+
 };
 const int nVar = (int)variations.size ();
 

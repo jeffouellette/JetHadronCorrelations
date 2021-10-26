@@ -1,0 +1,132 @@
+Universe = vanilla
+Executable = /atlasgpfs01/usatlas/workarea/jeff/JetHadronCorrelations/bin/MakeResponseMatrix.exe
+Priority = +1
+GetEnv = True
+InitialDir = /atlasgpfs01/usatlas/workarea/jeff/JetHadronCorrelations
+accounting_group = group_atlas.boulder
+
+
+# Useful variables to set:
+# ATLAS software version
+swVersion=21.2.169
+
+# grid pass version
+gridPass=090
+
+# Systematic config; Nominal, JESVar0, JESVar1,..., JESVar15, (don't run 16 or 20), JESVar17, JESVar18, JESVar19, MixVar1, MixVar2, MixVar3, MCTruthJetsTruthParts, MCRecoJetsTruthParts, FcalCentVar (at the moment)
+syst=Nominal
+
+
+# pp dijet MC (low pThat)
+Arguments = mc_$(gridPass) pp17_5TeV MCSignal $(syst) user.jeouelle.$(swVersion).hadrons.$(gridPass).mc16_5TeV.pp.420010.JZ0R04.recon.AOD.e4108_s3238_r11199_Tree.root/user.jeouelle.26757220._$INT(nfile,%06d).Tree.root pp17_JZ0_SampleA_file$(nfile).root
+Error = run/errors/MakeResponseMatrix_Pythia8_pp_JZ0R04_file$(nfile).err
+Log = /tmp/jeff/logs/MakeResponseMatrix_Pythia8_pp_JZ0R04_file$(nfile).log
+Output = run/outputs/MakeResponseMatrix_Pythia8_pp_JZ0R04_file$(nfile).out
+Queue nfile from seq 1 6 |
+
+Arguments = mc_$(gridPass) pp17_5TeV MCSignal $(syst) user.jeouelle.$(swVersion).hadrons.$(gridPass).mc16_5TeV.pp.420011.JZ1R04.recon.AOD.e4108_s3238_r11199_Tree.root/user.jeouelle.26757219._$INT(nfile,%06d).Tree.root pp17_JZ1_SampleA_file$(nfile).root
+Error = run/errors/MakeResponseMatrix_Pythia8_pp_JZ1R04_a_file$(nfile).err
+Log = /tmp/jeff/logs/MakeResponseMatrix_Pythia8_pp_JZ1R04_a_file$(nfile).log
+Output = run/outputs/MakeResponseMatrix_Pythia8_pp_JZ1R04_a_file$(nfile).out
+Queue nfile from seq 1 14 |
+Arguments = mc_$(gridPass) pp17_5TeV MCSignal $(syst) user.jeouelle.$(swVersion).hadrons.$(gridPass).mc16_5TeV.pp.420011.JZ1R04.recon.AOD.e6608_s3238_r11199_Tree.root/user.jeouelle.26757216._$INT(nfile,%06d).Tree.root pp17_JZ1_SampleB_file$(nfile).root
+Error = run/errors/MakeResponseMatrix_Pythia8_pp_JZ1R04_b_file$(nfile).err
+Log = /tmp/jeff/logs/MakeResponseMatrix_Pythia8_pp_JZ1R04_b_file$(nfile).log
+Output = run/outputs/MakeResponseMatrix_Pythia8_pp_JZ1R04_b_file$(nfile).out
+Queue nfile from seq 1 22 |
+
+Arguments = mc_$(gridPass) pp17_5TeV MCSignal $(syst) user.jeouelle.$(swVersion).hadrons.$(gridPass).mc16_5TeV.pp.420012.JZ2R04.recon.AOD.e4108_s3238_r11199_Tree.root/user.jeouelle.26757222._$INT(nfile,%06d).Tree.root pp17_JZ2_SampleA_file$(nfile).root
+Error = run/errors/MakeResponseMatrix_Pythia8_pp_JZ2R04_a_file$(nfile).err
+Log = /tmp/jeff/logs/MakeResponseMatrix_Pythia8_pp_JZ2R04_a_file$(nfile).log
+Output = run/outputs/MakeResponseMatrix_Pythia8_pp_JZ2R04_a_file$(nfile).out
+Queue nfile from seq 1 13 |
+Arguments = mc_$(gridPass) pp17_5TeV MCSignal $(syst) user.jeouelle.$(swVersion).hadrons.$(gridPass).mc16_5TeV.pp.420012.JZ2R04.recon.AOD.e6608_s3238_r11199_Tree.root/user.jeouelle.26757223._$INT(nfile,%06d).Tree.root pp17_JZ2_SampleB_file$(nfile).root
+Error = run/errors/MakeResponseMatrix_Pythia8_pp_JZ2R04_b_file$(nfile).err
+Log = /tmp/jeff/logs/MakeResponseMatrix_Pythia8_pp_JZ2R04_b_file$(nfile).log
+Output = run/outputs/MakeResponseMatrix_Pythia8_pp_JZ2R04_b_file$(nfile).out
+Queue nfile from seq 1 23 |
+
+Arguments = mc_$(gridPass) pp17_5TeV MCSignal $(syst) user.jeouelle.$(swVersion).hadrons.$(gridPass).mc16_5TeV.pp.420013.JZ3R04.recon.AOD.e4108_s3238_r11199_Tree.root/user.jeouelle.26757215._$INT(nfile,%06d).Tree.root pp17_JZ3_SampleA_file$(nfile).root
+Error = run/errors/MakeResponseMatrix_Pythia8_pp_JZ3R04_a_file$(nfile).err
+Log = /tmp/jeff/logs/MakeResponseMatrix_Pythia8_pp_JZ3R04_a_file$(nfile).log
+Output = run/outputs/MakeResponseMatrix_Pythia8_pp_JZ3R04_a_file$(nfile).out
+Queue nfile from seq 1 16 |
+Arguments = mc_$(gridPass) pp17_5TeV MCSignal $(syst) user.jeouelle.$(swVersion).hadrons.$(gridPass).mc16_5TeV.pp.420013.JZ3R04.recon.AOD.e6608_s3238_r11199_Tree.root/user.jeouelle.26757213._$INT(nfile,%06d).Tree.root pp17_JZ3_SampleB_file$(nfile).root
+Error = run/errors/MakeResponseMatrix_Pythia8_pp_JZ3R04_b_file$(nfile).err
+Log = /tmp/jeff/logs/MakeResponseMatrix_Pythia8_pp_JZ3R04_b_file$(nfile).log
+Output = run/outputs/MakeResponseMatrix_Pythia8_pp_JZ3R04_b_file$(nfile).out
+Queue nfile in (1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 20 21 22 23 24 25 26 27 28 29)
+
+
+## pp dijet MC (high pThat)
+#Arguments = mc_$(gridPass) pp17_5TeV MCSignal $(syst) user.jeouelle.$(swVersion).hadrons.$(gridPass).mc16_5TeV.pp.420014.JZ4R04.recon.AOD.e4108_s3238_r11199_Tree.root/user.jeouelle.26757214._$INT(nfile,%06d).Tree.root pp17_JZ4_SampleA_file$(nfile).root
+#Error = run/errors/MakeResponseMatrix_Pythia8_pp_JZ4R04_a_file$(nfile).err
+#Log = /tmp/jeff/logs/MakeResponseMatrix_Pythia8_pp_JZ4R04_a_file$(nfile).log
+#Output = run/outputs/MakeResponseMatrix_Pythia8_pp_JZ4R04_a_file$(nfile).out
+#Queue nfile from seq 1 13 |
+#Arguments = mc_$(gridPass) pp17_5TeV MCSignal $(syst) user.jeouelle.$(swVersion).hadrons.$(gridPass).mc16_5TeV.pp.420014.JZ4R04.recon.AOD.e6608_s3238_r11199_Tree.root/user.jeouelle.26757217._$INT(nfile,%06d).Tree.root pp17_JZ4_SampleB_file$(nfile).root
+#Error = run/errors/MakeResponseMatrix_Pythia8_pp_JZ4R04_b_file$(nfile).err
+#Log = /tmp/jeff/logs/MakeResponseMatrix_Pythia8_pp_JZ4R04_b_file$(nfile).log
+#Output = run/outputs/MakeResponseMatrix_Pythia8_pp_JZ4R04_b_file$(nfile).out
+#Queue nfile from seq 1 21 |
+#
+#Arguments = mc_$(gridPass) pp17_5TeV MCSignal $(syst) user.jeouelle.$(swVersion).hadrons.$(gridPass).mc16_5TeV.pp.420015.JZ5R04.recon.AOD.e4108_s3238_r11199_Tree.root/user.jeouelle.26757221._$INT(nfile,%06d).Tree.root pp17_JZ5_SampleA_file$(nfile).root
+#Error = run/errors/MakeResponseMatrix_Pythia8_pp_JZ5R04_a_file$(nfile).err
+#Log = /tmp/jeff/logs/MakeResponseMatrix_Pythia8_pp_JZ5R04_a_file$(nfile).log
+#Output = run/outputs/MakeResponseMatrix_Pythia8_pp_JZ5R04_a_file$(nfile).out
+#Queue nfile in (1 2 3 4 6 7 8 9 10 11 12 13 14 16 17 18)
+#Arguments = mc_$(gridPass) pp17_5TeV MCSignal $(syst) user.jeouelle.$(swVersion).hadrons.$(gridPass).mc16_5TeV.pp.420015.JZ5R04.recon.AOD.e6608_s3238_r11199_Tree.root/user.jeouelle.26757218._$INT(nfile,%06d).Tree.root pp17_JZ5_SampleB_file$(nfile).root
+#Error = run/errors/MakeResponseMatrix_Pythia8_pp_JZ5R04_b_file$(nfile).err
+#Log = /tmp/jeff/logs/MakeResponseMatrix_Pythia8_pp_JZ5R04_b_file$(nfile).log
+#Output = run/outputs/MakeResponseMatrix_Pythia8_pp_JZ5R04_b_file$(nfile).out
+#Queue nfile from seq 1 21 |
+
+
+
+
+# p+Pb data overlay dijet MC
+Arguments = mc_$(gridPass) pPb16_5TeV MCDataOverlay $(syst) user.jeouelle.$(swVersion).hadrons.$(gridPass).mc16_5TeV.pPb.420011.JZ1R04.merge.AOD.e8362_d1667_r12722_r11932_Tree.root/user.jeouelle.26625268._$INT(nfile,%06d).Tree.root pPb16_JZ1_file$(nfile).root
+Error = run/errors/MakeResponseMatrix_Pythia8_pPb_JZ1R04_file$(nfile).err
+Log = /tmp/jeff/logs/MakeResponseMatrix_Pythia8_pPb_JZ1R04_file$(nfile).log
+Output = run/outputs/MakeResponseMatrix_Pythia8_pPb_JZ1R04_file$(nfile).out
+Queue nfile in (1 2 5 7 8 9)
+
+Arguments = mc_$(gridPass) pPb16_5TeV MCDataOverlay $(syst) user.jeouelle.$(swVersion).hadrons.$(gridPass).mc16_5TeV.pPb.420012.JZ2R04.merge.AOD.e8362_d1667_r12722_r11932_Tree.root/user.jeouelle.26625269._$INT(nfile,%06d).Tree.root pPb16_JZ2_file$(nfile).root
+Error = run/errors/MakeResponseMatrix_Pythia8_pPb_JZ2R04_file$(nfile).err
+Log = /tmp/jeff/logs/MakeResponseMatrix_Pythia8_pPb_JZ2R04_file$(nfile).log
+Output = run/outputs/MakeResponseMatrix_Pythia8_pPb_JZ2R04_file$(nfile).out
+Queue nfile from seq 1 9 |
+
+Arguments = mc_$(gridPass) pPb16_5TeV MCDataOverlay $(syst) user.jeouelle.$(swVersion).hadrons.$(gridPass).mc16_5TeV.pPb.420013.JZ3R04.merge.AOD.e8362_d1667_r12722_r11932_Tree.root/user.jeouelle.26625270._$INT(nfile,%06d).Tree.root pPb16_JZ3_file$(nfile).root
+Error = run/errors/MakeResponseMatrix_Pythia8_pPb_JZ3R04_file$(nfile).err
+Log = /tmp/jeff/logs/MakeResponseMatrix_Pythia8_pPb_JZ3R04_file$(nfile).log
+Output = run/outputs/MakeResponseMatrix_Pythia8_pPb_JZ3R04_file$(nfile).out
+Queue nfile in (1 2 8 9 10 11 13 14)
+
+
+## p+Pb Hijing MC
+#Arguments = mc_$(gridPass) pPb16_5TeV MCHijing $(syst) user.jeouelle.$(swVersion).hadrons.$(gridPass).mc16_5TeV.pPb.Hijing_MinBias_Flow.420118.recon.AOD.e7285_s3699_r12713_Tree.root
+#Error = run/errors/MakeResponseMatrix_Hijing_pPb.err
+#Log = /tmp/jeff/logs/MakeResponseMatrix_Hijing_pPb.log
+#Output = run/outputs/MakeResponseMatrix_Hijing_pPb.out
+#Queue 1
+
+
+## p+Pb signal-only dijet MC
+#Arguments = mc_$(gridPass) pPb16_5TeV MCSignal $(syst) user.jeouelle.$(swVersion).hadrons.$(gridPass).mc16_5TeV.pPb.420011.JZ1R04.recon.AOD.e8362_s3701_r12721_Tree.root
+#Error = run/errors/MakeResponseMatrix_Pythia8_pPb_so_JZ1R04.err
+#Log = /tmp/jeff/logs/MakeResponseMatrix_Pythia8_pPb_so_JZ1R04.log
+#Output = run/outputs/MakeResponseMatrix_Pythia8_pPb_so_JZ1R04.out
+#Queue 1
+#
+#Arguments = mc_$(gridPass) pPb16_5TeV MCSignal $(syst) user.jeouelle.$(swVersion).hadrons.$(gridPass).mc16_5TeV.pPb.420012.JZ2R04.recon.AOD.e8362_s3701_r12721_Tree.root
+#Error = run/errors/MakeResponseMatrix_Pythia8_pPb_so_JZ2R04.err
+#Log = /tmp/jeff/logs/MakeResponseMatrix_Pythia8_pPb_so_JZ2R04.log
+#Output = run/outputs/MakeResponseMatrix_Pythia8_pPb_so_JZ2R04.out
+#Queue 1
+#
+#Arguments = mc_$(gridPass) pPb16_5TeV MCSignal $(syst) user.jeouelle.$(swVersion).hadrons.$(gridPass).mc16_5TeV.pPb.420013.JZ3R04.recon.AOD.e8362_s3701_r12721_Tree.root
+#Error = run/errors/MakeResponseMatrix_Pythia8_pPb_so_JZ3R04.err
+#Log = /tmp/jeff/logs/MakeResponseMatrix_Pythia8_pPb_so_JZ3R04.log
+#Output = run/outputs/MakeResponseMatrix_Pythia8_pPb_so_JZ3R04.out
+#Queue 1

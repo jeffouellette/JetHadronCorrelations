@@ -14,9 +14,10 @@ float event_weight = 0;
 unsigned int run_number;
 unsigned int lumi_block;
 unsigned int event_number;
-bool passes_toroid; 
-bool isOOTPU;
-bool BlayerDesyn;
+
+unsigned int run_number_matching;
+unsigned int lumi_block_matching;
+unsigned int event_number_matching;
 
 // collision info
 float actualInteractionsPerCrossing;

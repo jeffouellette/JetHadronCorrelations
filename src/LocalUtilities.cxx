@@ -1670,6 +1670,37 @@ QnVector GetProtonQ2Vec (const bool getMatching) {
 
 
 /**
+ * Returns the jet pT weight functions for MC.
+ */
+TF1** LoadJetPtWeights () {
+  //TDirectory* gdir = gDirectory;
+
+  TString fname = Form ("%s/aux/JetPtWeights.root", workPath.Data ());
+  std::cout << "Trying to resolve MC jet pT weights file in " << fname.Data () << std::endl;
+  TFile* infile = new TFile (fname, "read");
+
+  const short nBins = (Ispp () ? 1 : nZdcCentBins+1);
+
+  TF1** farr = new TF1*[nBins];
+  for (int iBin = 0; iBin < nBins; iBin++) {
+
+    TF1* f = (TF1*) infile->Get (Form ("f_jet_pt_datamc_ratio_%s_Nominal", Ispp () ? "ref" : (iBin < nZdcCentBins ? Form ("iCent%i", iBin) : "allCent")))->Clone (Form ("f_jet_pt_weights_%s_Nominal", Ispp () ? "ref" : (iBin < nZdcCentBins ? Form ("iCent%i", iBin) : "allCent")));
+
+    farr[iBin] = f;
+
+    //f->SetDirectory (gdir);
+  }
+  std::cout << "Loaded MC jet pT weights, closing file" << std::endl;
+
+  infile->Close ();
+  SaferDelete (&infile);
+
+  return farr;
+}
+
+
+
+/**
  * Returns the tracking efficiency histograms.
  */
 TH2D** LoadTrackingEfficiency () {
@@ -1922,6 +1953,22 @@ void DivideByTF1 (TH1D* h, TF1* f, const float mult) {
     const float sf = 1-mult + mult * f->Eval (h->GetBinCenter (iX));
     h->SetBinContent (iX, h->GetBinContent (iX) / sf);
     h->SetBinError (iX, h->GetBinError (iX) / sf);
+  }
+  return;
+}
+
+
+/**
+ * Divides a histogram by another without propagating uncertainties.
+ */
+void DivideNoErrors (TH1D* h, const TH1D* hd) {
+  assert (hd->GetNbinsX () == h->GetNbinsX ());
+  for (int iX = 1; iX <= h->GetNbinsX (); iX++) {
+    assert (hd->GetBinCenter (iX) == h->GetBinCenter (iX));
+    if (hd->GetBinContent (iX) != 0) {
+      h->SetBinContent (iX, h->GetBinContent (iX) / hd->GetBinContent (iX));
+      h->SetBinError (iX, h->GetBinError (iX) / hd->GetBinContent (iX));
+    }
   }
   return;
 }

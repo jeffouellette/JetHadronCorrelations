@@ -94,9 +94,6 @@ bool CentralityAnalysis (const char* directory,
   tree->SetBranchAddress ("run_number",     &run_number);
   tree->SetBranchAddress ("event_number",   &event_number);
   tree->SetBranchAddress ("lumi_block",     &lumi_block);
-  tree->SetBranchAddress ("isOOTPU",        &isOOTPU);
-  tree->SetBranchAddress ("BlayerDesyn",    &BlayerDesyn);
-  tree->SetBranchAddress ("passes_toroid",  &passes_toroid);
 
 
   tree->SetBranchAddress ("actualInteractionsPerCrossing",  &actualInteractionsPerCrossing);
@@ -350,11 +347,6 @@ bool CentralityAnalysis (const char* directory,
       std::cout << "Info: In CentralityAnalysis.cxx: Events " << iEvt / (nEvts / 100) << "\% done...\r" << std::flush;
 
     tree->GetEntry (iEvt);
-
-    if (IsPbPb18 () && (IsCollisions () || IsDataOverlay ()) && BlayerDesyn)
-      continue; // check for B layer desynchronization
-    if (IsPbPb () && (IsCollisions () || IsDataOverlay ()) && isOOTPU)
-      continue; // check for out-of-time pile-up
 
 
     //// MC only -- skip event if a randomly generated value is at least the requisite probability

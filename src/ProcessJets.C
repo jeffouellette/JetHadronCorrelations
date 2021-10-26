@@ -24,9 +24,9 @@ void ProcessJets (const char* tag, const char* outFileTag) {
   TFile* inFile = nullptr;
 
   TH1D***   h_evt_counts_ref     = Get2DArray <TH1D*> (2, nVar);
-  //TH1D****  h_jet_counts_ref     = Get3DArray <TH1D*> (2, nPtJBins, nVar);
+  TH1D****  h_jet_counts_ref     = Get3DArray <TH1D*> (2, nPtJBins, nVar);
   TH1D****  h_evt_counts         = Get3DArray <TH1D*> (2, nZdcCentBins+1, nVar);
-  //TH1D***** h_jet_counts         = Get4DArray <TH1D*> (2, nPtJBins, nZdcCentBins+1, nVar);
+  TH1D***** h_jet_counts         = Get4DArray <TH1D*> (2, nPtJBins, nZdcCentBins+1, nVar);
 
   TH1D***   h_jet_pt_ref          = Get2DArray <TH1D*> (2, nVar);
   TH2D***   h2_jet_pt_cov_ref     = Get2DArray <TH2D*> (2, nVar);
@@ -38,6 +38,9 @@ void ProcessJets (const char* tag, const char* outFileTag) {
 
   TH1D**    h_jet_pt_datamc_ratio_ref  = Get1DArray <TH1D*> (nVar);
   TH1D***   h_jet_pt_datamc_ratio      = Get2DArray <TH1D*> (nZdcCentBins+1, nVar);
+
+  TF1**     f_jet_pt_datamc_ratio_ref  = Get1DArray <TF1*> (nVar);
+  TF1***    f_jet_pt_datamc_ratio      = Get2DArray <TF1*> (nZdcCentBins+1, nVar);
 
   TH2D****  h2_jet_eta_phi_ref   = Get3DArray <TH2D*> (2, nPtJBins, nVar);
   TH2D***** h2_jet_eta_phi       = Get4DArray <TH2D*> (2, nPtJBins, nZdcCentBins+1, nVar);
@@ -120,11 +123,11 @@ void ProcessJets (const char* tag, const char* outFileTag) {
 
           const TString pTJ = Form ("%g-%gGeVJets", pTJBins[iPtJ], pTJBins[iPtJ+1]);
 
-          //h_jet_counts_ref[iDType][iPtJ][iVar]    = (TH1D*) inFile->Get (Form ("h_jet_counts_%s_%s17",  pTJ.Data (), dType.Data ()))->Clone (Form ("h_jet_counts_ref_%s_%s_%s",  dType.Data (), pTJ.Data (), var.Data ()));
+          h_jet_counts_ref[iDType][iPtJ][iVar]    = (TH1D*) inFile->Get (Form ("h_jet_counts_%s_%s17",  pTJ.Data (), dType.Data ()))->Clone (Form ("h_jet_counts_ref_%s_%s_%s",  dType.Data (), pTJ.Data (), var.Data ()));
 
           h2_jet_eta_phi_ref[iDType][iPtJ][iVar]  = (TH2D*) inFile->Get (Form ("h2_jet_eta_phi_%s_%s17", pTJ.Data (), dType.Data ()))->Clone (Form ("h2_jet_eta_phi_ref_%s_%s", dType.Data (), var.Data ()));
 
-        }
+        } // end loop over iPtJ
 
         inFile->Close ();
 
@@ -133,6 +136,8 @@ void ProcessJets (const char* tag, const char* outFileTag) {
 
         //CalcUncertainties (h_jet_pt_ref[iDType][iVar], h2_jet_pt_cov_ref[iDType][iVar], h_jet_counts_ref[iDType][iVar]);
         CalcUncertainties (h_jet_pt_ref[iDType][iVar], h2_jet_pt_cov_ref[iDType][iVar], h_evt_counts_ref[iDType][iVar]);
+
+        h_jet_pt_ref[iDType][iVar]->Scale (1./h_jet_pt_ref[iDType][iVar]->Integral ());
 
         if (iDType == 0 && (iVar == 0)) {
           TH1D* h = h_jet_pt_ref[iDType][iVar];
@@ -188,11 +193,11 @@ void ProcessJets (const char* tag, const char* outFileTag) {
 
           const TString pTJ = Form ("%g-%gGeVJets", pTJBins[iPtJ], pTJBins[iPtJ+1]);
 
-          //h_jet_counts[iDType][iPtJ][iCent][iVar]   = (TH1D*) inFile->Get (Form ("h_jet_counts_%s_%s16",  pTJ.Data (), dType.Data ()))->Clone (Form ("h_jet_counts_pPb_%s_%s_%s", cent.Data (), dType.Data (), pTJ.Data (), var.Data ()));
+          h_jet_counts[iDType][iPtJ][iCent][iVar]   = (TH1D*) inFile->Get (Form ("h_jet_counts_%s_%s16",  pTJ.Data (), dType.Data ()))->Clone (Form ("h_jet_counts_pPb_%s_%s_%s_%s", cent.Data (), dType.Data (), pTJ.Data (), var.Data ()));
 
           h2_jet_eta_phi[iDType][iPtJ][iCent][iVar]  = (TH2D*) inFile->Get (Form ("h2_jet_eta_phi_%s_%s16", pTJ.Data (), dType.Data ()))->Clone (Form ("h2_jet_eta_phi_pPb_%s_%s_%s_%s", cent.Data (), dType.Data (), pTJ.Data (), var.Data ()));
 
-        }
+        } // end loop over iPtJ
 
         inFile->Close ();
     
@@ -201,6 +206,8 @@ void ProcessJets (const char* tag, const char* outFileTag) {
 
         //CalcUncertainties (h_jet_pt[iDType][iCent][iVar], h2_jet_pt_cov[iDType][iCent][iVar], h_jet_counts[iDType][iCent][iVar]);
         CalcUncertainties (h_jet_pt[iDType][iCent][iVar], h2_jet_pt_cov[iDType][iCent][iVar], h_evt_counts[iDType][iCent][iVar]);
+
+        h_jet_pt[iDType][iCent][iVar]->Scale (1./h_jet_pt[iDType][iCent][iVar]->Integral ());
 
         if (iDType == 0 && (iVar == 0)) {
           TH1D* h = h_jet_pt[iDType][iCent][iVar];
@@ -255,6 +262,13 @@ void ProcessJets (const char* tag, const char* outFileTag) {
 
 
   {
+    //const TString funcStr = "[0]+[1]*pow(log(x),-1)+[2]*pow(log(x),-2)+[3]*pow(log(x),-3)+[4]*pow(log(x),-4)";
+    //const TString funcStr = "[0]+[1]*pow(log(x),-1)+[2]*pow(log(x),-2)+[3]*pow(log(x),-3)+[4]*pow(log(x),-4)+[5]*pow(log(x),-5)+[6]*pow(log(x),-6)";
+    //const TString funcStr = "[0]+[1]*pow(log(x),-1)+[2]*pow(log(x),-2)";
+    //const TString funcStr = "(exp([0]*x) + [1]*pow(x,[2])) / ([3]*exp([4]*x) + [5]*pow(x,[6]))";
+    //const TString funcStr = "[0] * exp([1]*x) + [2] * pow (x, [3])";
+    const TString funcStr = "[0]+exp([1]+[2]*log(x))";
+
     for (int iVar = 0; iVar < nVar; iVar++) {
 
       const TString var = variations[iVar];
@@ -262,7 +276,11 @@ void ProcessJets (const char* tag, const char* outFileTag) {
       h_jet_pt_datamc_ratio_ref[iVar] = (TH1D*) h_jet_pt_ref[0][iVar]->Clone (Form ("h_jet_pt_datamc_ratio_ref_%s", var.Data ()));
       h_jet_pt_datamc_ratio_ref[iVar]->Divide (h_jet_pt_ref[1][iVar]);
 
-      h_jet_pt_datamc_ratio_ref[iVar]->Scale (h_jet_pt_ref[1][iVar]->Integral () / h_jet_pt_ref[0][iVar]->Integral ());
+      //h_jet_pt_datamc_ratio_ref[iVar]->Scale (h_jet_pt_ref[1][iVar]->Integral () / h_jet_pt_ref[0][iVar]->Integral ());
+
+      TF1* f = new TF1 (Form ("f_jet_pt_datamc_ratio_ref_%s", var.Data ()), funcStr.Data (), pTJBins[0], pTJBins[nPtJBins]);
+      h_jet_pt_datamc_ratio_ref[iVar]->Fit (f, "RN0Q");
+      f_jet_pt_datamc_ratio_ref[iVar] = f;
 
       for (int iCent = 0; iCent < nZdcCentBins+1; iCent++) {
 
@@ -271,7 +289,11 @@ void ProcessJets (const char* tag, const char* outFileTag) {
         h_jet_pt_datamc_ratio[iCent][iVar] = (TH1D*) h_jet_pt[0][iCent][iVar]->Clone (Form ("h_jet_pt_datamc_ratio_%s_%s", cent.Data (), var.Data ()));
         h_jet_pt_datamc_ratio[iCent][iVar]->Divide (h_jet_pt[1][iCent][iVar]);
 
-        h_jet_pt_datamc_ratio[iCent][iVar]->Scale (h_jet_pt_ref[1][iVar]->Integral () / h_jet_pt_ref[0][iVar]->Integral ());
+        //h_jet_pt_datamc_ratio[iCent][iVar]->Scale (h_jet_pt_ref[1][iVar]->Integral () / h_jet_pt_ref[0][iVar]->Integral ());
+
+        TF1* f = new TF1 (Form ("f_jet_pt_datamc_ratio_%s_%s", cent.Data (), var.Data ()), funcStr.Data (), pTJBins[0], pTJBins[nPtJBins]);
+        h_jet_pt_datamc_ratio[iCent][iVar]->Fit (f, "RN0Q");
+        f_jet_pt_datamc_ratio[iCent][iVar] = f;
 
       } // end loop over iCent
 
@@ -441,23 +463,23 @@ void ProcessJets (const char* tag, const char* outFileTag) {
 
         } // end loop over iCent
 
+        for (short iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
+
+          h_jet_counts_ref[iDType][iPtJ][iVar]->Write ();
+
+          h2_jet_eta_phi_ref[iDType][iPtJ][iVar]->Write ();
+
+          for (int iCent = 0; iCent < nZdcCentBins+1; iCent++) {
+
+            h_jet_counts[iDType][iPtJ][iCent][iVar]->Write ();
+
+            h2_jet_eta_phi[iDType][iPtJ][iCent][iVar]->Write ();
+
+          } // end loop over iCent
+
+        } // end loop over iPtJ
+
       } // end loop over iVar
-
-      for (short iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
-
-        //h_jet_counts_ref[iDType][iPtJ][iVar]->Write ();
-
-        h2_jet_eta_phi_ref[iDType][iPtJ][0]->Write ();
-
-        for (int iCent = 0; iCent < nZdcCentBins+1; iCent++) {
-
-          //h_jet_counts[iDType][iPtJ][iCent][iVar]->Write ();
-
-          h2_jet_eta_phi[iDType][iPtJ][iCent][0]->Write ();
-
-        } // end loop over iCent
-
-      } // end loop over iPtJ
 
     } // end loop over iDType
 
@@ -465,10 +487,12 @@ void ProcessJets (const char* tag, const char* outFileTag) {
     for (int iVar = 0; iVar < nVar; iVar++) {
 
       h_jet_pt_datamc_ratio_ref[iVar]->Write ();
+      f_jet_pt_datamc_ratio_ref[iVar]->Write ();
 
       for (int iCent = 0; iCent < nZdcCentBins+1; iCent++) {
 
         h_jet_pt_datamc_ratio[iCent][iVar]->Write ();
+        f_jet_pt_datamc_ratio[iCent][iVar]->Write ();
 
       } // end loop over iCent
 
@@ -482,10 +506,12 @@ void ProcessJets (const char* tag, const char* outFileTag) {
     for (int iVar = 0; iVar < nVar; iVar++) {
 
       h_jet_pt_datamc_ratio_ref[iVar]->Write ();
+      f_jet_pt_datamc_ratio_ref[iVar]->Write ();
 
       for (int iCent = 0; iCent < nZdcCentBins+1; iCent++) {
 
         h_jet_pt_datamc_ratio[iCent][iVar]->Write ();
+        f_jet_pt_datamc_ratio[iCent][iVar]->Write ();
 
       } // end loop over iCent
 

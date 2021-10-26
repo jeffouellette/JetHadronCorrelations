@@ -119,25 +119,29 @@ std::map <TString, std::pair <double, double>> pTChStrCuts = {
 
 
 const int pPbRuns[] = {312796, 312837, 312937, 312945, 312968, 314199};
-const int npPbRuns = sizeof (pPbRuns) / sizeof(pPbRuns[0]);
+const short npPbRuns = sizeof (pPbRuns) / sizeof(pPbRuns[0]);
 
 const int ppRuns[] = {340644, 340683, 340697, 340718, 340814, 340849, 340850, 340910, 340925, 340973, 341027, 341123, 341184};
-const int nppRuns = sizeof (ppRuns) / sizeof (ppRuns[0]);
+const short nppRuns = sizeof (ppRuns) / sizeof (ppRuns[0]);
 
 const double multBins[] = {-0.5, 60.5, 120.5, 999.5};
-const int nMultBins = sizeof (multBins) / sizeof (multBins[0]); // last bin is inclusive in multiplicity
+const short nMultBins = sizeof (multBins) / sizeof (multBins[0]); // last bin is inclusive in multiplicity
 
 const double drBins[] = {0, 0.2, 0.4, M_PI};
-const int nDRBins = sizeof (drBins) / sizeof (drBins[0]); // last bin is inclusive in dR
+const short nDRBins = sizeof (drBins) / sizeof (drBins[0]); // last bin is inclusive in dR
 
 const double etaTrkBins[] = {0, 0.5, 1.0, 1.5, 2.0, 2.5};
-const int nEtaTrkBins = sizeof (etaTrkBins) / sizeof (etaTrkBins[0]) - 1;
+const short nEtaTrkBins = sizeof (etaTrkBins) / sizeof (etaTrkBins[0]) - 1;
 
 
+//double pTJBins[] = {15, 30, 60, 120, 200, 300, 400};
 double pTJBins[] = {15, 20, 30, 45, 60, 90, 120, 160, 200, 240, 300, 350, 400};
-const int nPtJBins = sizeof (pTJBins) / sizeof (pTJBins[0]) - 1;
+//double pTJBins[] = {30, 45, 60, 90, 120, 160, 200, 240, 300, 350, 400};
+const short nPtJBins = sizeof (pTJBins) / sizeof (pTJBins[0]) - 1;
 //const int nPtJBins = 60;
 //double* pTJBins = logspace (30, 450, nPtJBins);
+double finerpTJBins[] = {15, 20, 30, 45, 60, 90, 120, 160, 200, 240, 300, 350, 400};
+const short nFinerpTJBins = sizeof (finerpTJBins) / sizeof (finerpTJBins[0]) - 1;
 
 short GetPtJBin (const float jpt) {
   if (jpt < pTJBins[0])
@@ -154,7 +158,7 @@ short GetPtJBin (const float jpt) {
 
 
 const double dPhiBins[] = {0, M_PI/24., M_PI/12., M_PI/8., M_PI/6., 5*M_PI/24., M_PI/4., 7*M_PI/24., M_PI/3., 9*M_PI/24., 5*M_PI/12., 11*M_PI/24., M_PI/2., 13*M_PI/24., 7*M_PI/12., 5*M_PI/8., 2*M_PI/3., 17*M_PI/24., 3*M_PI/4., 19*M_PI/24., 5*M_PI/6., 7*M_PI/8., 11*M_PI/12., 23*M_PI/24., M_PI};
-const int nDPhiBins = sizeof (dPhiBins) / sizeof (dPhiBins[0]) - 1;
+const short nDPhiBins = sizeof (dPhiBins) / sizeof (dPhiBins[0]) - 1;
 short GetDPhiBin (const float dphi) {
   short iDPhi = 0;
   while (iDPhi < nDPhiBins) {
@@ -169,7 +173,7 @@ short GetDPhiBin (const float dphi) {
 
 //const double pTChBins[] = {0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2, 2.25, 2.5, 2.75, 3, 3.25, 3.5, 3.75, 4, 4.5, 5, 5.5, 6, 7, 8, 9, 10, 11, 12, 14, 16, 18, 20, 25, 30, 35, 40, 45, 50, 55, 60};//, 70, 80, 90, 100, 120}; // old binning
 const double pTChBins[] = {0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.2, 1.4, 1.6, 1.8, 2, 2.5, 3, 3.5, 4, 5, 6, 8, 10, 12, 16, 20, 30, 40, 50, 60, 75, 90, 120}; // new binning
-const int nPtChBins = sizeof (pTChBins) / sizeof (pTChBins[0]) - 1;
+const short nPtChBins = sizeof (pTChBins) / sizeof (pTChBins[0]) - 1;
 short GetPtChBin (const float ptch) {
   if (ptch < pTChBins[0])
     return -1;
