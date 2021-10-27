@@ -28,10 +28,6 @@
 using namespace JetHadronCorrelations;
 
 
-TLine* l = new TLine ();
-TLatex* tl = new TLatex ();
-
-
 const bool makeTotalSystPlots = false;
 const bool makeBkgdSystPlots  = false;
 const bool makeSigSystPlots   = false;
@@ -95,6 +91,9 @@ const float maxMCSyst = 10; // maximum y-axis for MC-driven systematics
 
 
 void PlotPtCh (const char* inFileTag) {
+
+  TLine* l = new TLine ();
+  TLatex* tl = new TLatex ();
 
   TFile* inFile = nullptr;
 

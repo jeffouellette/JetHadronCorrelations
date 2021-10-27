@@ -975,6 +975,78 @@ void PlotResponseMatrix () {
           const TString dir = directions[iDir];
   
           const char* canvasName = Form ("c_jet_trk_pt_%s_%iGeVJets_%sClosure", dir.Data (), minJetPt, evFrac.Data ());
+          TCanvas* c = new TCanvas (canvasName, "", 800, 800);
+  
+          TH1D* h = nullptr;
+          TGAE* g = nullptr;
+  
+          double x, y;
+          {
+            gPad->SetLogx ();
+  
+            h = new TH1D ("h", ";#it{p}_{T}^{ch} [GeV];Ratio", 1, pTChBins[1], pTChBins[nPtChBins-4]);
+            h->GetXaxis ()->SetMoreLogLabels ();
+            h->GetYaxis ()->SetRangeUser (0.9, 1.2);
+            h->GetYaxis ()->CenterTitle ();
+            h->SetBinContent (1, 1);
+            h->SetLineStyle (2);
+            h->SetLineWidth (2);
+            h->SetLineColor (kBlack);
+            h->DrawCopy ("hist ][");
+            SaferDelete (&h);
+  
+            l->SetLineWidth (2);
+            l->SetLineColor (kGray+1);
+            l->SetLineStyle (2);
+            l->DrawLine (pTChBins[1], 1.05, pTChBins[nPtChBins-4], 1.05);
+            l->DrawLine (pTChBins[1], 0.95, pTChBins[nPtChBins-4], 0.95);
+  
+            const Color_t col = colorfulColors[0];
+            g = make_graph (h_jetInt_trk_pt_ref_sig_unf[iEvFrac][iPtJInt][iDir][5]);
+            ScaleGraph (g, h_jetInt_trk_pt_ref_sig[iEvFrac][iPtJInt][iDir][1]);
+            myDraw (g, col, kOpenCircle, 1.0, 1, 2, "P", false);
+            SaferDelete (&g);
+          }
+  
+          for (short iCent = 0; iCent < nFcalCentBins+1; iCent++) {
+            const Color_t col = colorfulColors[iCent+1];
+            g = make_graph (h_jetInt_trk_pt_sig_unf[iEvFrac][iPtJInt][iDir][iCent][5]);
+            ScaleGraph (g, h_jetInt_trk_pt_sig[iEvFrac][iPtJInt][iDir][iCent][1]);
+            myDraw (g, col, kOpenCircle, 1.0, 1, 2, "P", false);
+            SaferDelete (&g);
+          } // end loop over iCent
+  
+          //myText (0.1, 0.84, kBlack, "#bf{#it{ATLAS}} Simulation Internal", 0.07);
+          //myText (0.1, 0.75, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.07);
+          //myText (0.1, 0.66, kBlack, "#it{p}+Pb, #sqrt{s} = 5.02 TeV", 0.07);
+          //myText (0.1, 0.57, kBlack, Form ("#it{p}_{T}^{jet} > %i GeV, %s", minJetPt, (dir == "ns" ? "Near-side" : (dir == "perp" ? "Perpendicular" : "Away-side"))), 0.07);
+          myText (0.65, 0.88, colorfulColors[0], "#bf{#it{pp}}", 0.032);
+
+          for (short iCent = 0; iCent < nFcalCentBins+1; iCent++) {
+            if (iCent < nFcalCentBins)
+              myText (0.65, 0.88-0.04*(iCent+1), colorfulColors[iCent+1], Form ("#bf{FCal %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.032);
+            else
+              myText (0.65, 0.88-0.04*(iCent+1), colorfulColors[iCent+1], "#bf{All centralities}", 0.032);
+          } // end loop over iCent
+  
+          c->SaveAs (Form ("%s/Plots/Unfolding/MC_Jet_TrkPt_%s_%iGeVJets_%sClosure_6Iters.pdf", workPath.Data (), dir.Data (), minJetPt, evFrac.Data ()));
+  
+        } // end loop over iDir
+  
+      } // end loop over iPtJInt
+
+
+
+
+      for (short iPtJInt : {0, 1}) {
+  
+        const int minJetPt = (iPtJInt == 0 ? 30 : 60);
+  
+        for (short iDir = 0; iDir < 3; iDir++) {
+  
+          const TString dir = directions[iDir];
+  
+          const char* canvasName = Form ("c_jet_trk_pt_%s_%iGeVJets_%sClosure", dir.Data (), minJetPt, evFrac.Data ());
           TCanvas* c = new TCanvas (canvasName, "", 1300, 700);
           c->Divide (4, 2);
   
