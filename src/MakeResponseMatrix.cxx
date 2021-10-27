@@ -46,8 +46,10 @@ bool MakeResponseMatrix (const char* directory,
   //const double pTJBins[] = {20, 30, 45, 60, 80, 100, 130, 160, 200, 240, 320};
   //const short nPtJBins = sizeof (pTJBins) / sizeof (pTJBins[0]) - 1;
 
+  TH1D***    h_jet_pt_wgts                  = Get2DArray <TH1D*> (nFiles, 2);
   TH1D***    h_jet_pt_fullClosure           = Get2DArray <TH1D*> (nFiles, 2);
   TH1D***    h_jet_pt_halfClosure           = Get2DArray <TH1D*> (nFiles, 2);
+  TH2D****   h2_jet_trk_pt_sig_wgts         = Get3DArray <TH2D*> (nDir, nFiles, 2);
   TH2D****   h2_jet_trk_pt_sig_fullClosure  = Get3DArray <TH2D*> (nDir, nFiles, 2);
   TH2D****   h2_jet_trk_pt_sig_halfClosure  = Get3DArray <TH2D*> (nDir, nFiles, 2);
 
@@ -80,6 +82,8 @@ bool MakeResponseMatrix (const char* directory,
 
       const char* cent = (Ispp () ? "ref" : (iFile == nZdcCentBins ? "pPb_allCent" : Form ("pPb_iCent%i", iFile)));
 
+      h_jet_pt_wgts[iFile][iVar] = new TH1D (Form ("h_jet_pt_wgts_%s_mc_%s",  cent, var.Data ()), ";#it{p}_{T}^{jet} [GeV]", nPtJBins, pTJBins);
+      h_jet_pt_wgts[iFile][iVar]->Sumw2 ();
       h_jet_pt_fullClosure[iFile][iVar] = new TH1D (Form ("h_jet_pt_fullClosure_%s_mc_%s",  cent, var.Data ()), ";#it{p}_{T}^{jet} [GeV]", nPtJBins, pTJBins);
       h_jet_pt_fullClosure[iFile][iVar]->Sumw2 ();
       h_jet_pt_halfClosure[iFile][iVar] = new TH1D (Form ("h_jet_pt_halfClosure_%s_mc_%s",  cent, var.Data ()), ";#it{p}_{T}^{jet} [GeV]", nPtJBins, pTJBins);
@@ -89,6 +93,8 @@ bool MakeResponseMatrix (const char* directory,
 
         const TString dir = directions[iDir];
   
+        h2_jet_trk_pt_sig_wgts[iDir][iFile][iVar]  = new TH2D (Form ("h2_jet_trk_pt_wgts_%s_%s_sig_mc_%s",  dir.Data (), cent, var.Data ()), ";#it{p}_{T}^{jet} [GeV];#it{p}_{T}^{ch} [GeV]", nPtChBins, pTChBins, nPtJBins, pTJBins);
+        h2_jet_trk_pt_sig_wgts[iDir][iFile][iVar]->Sumw2 ();
         h2_jet_trk_pt_sig_fullClosure[iDir][iFile][iVar]  = new TH2D (Form ("h2_jet_trk_pt_fullClosure_%s_%s_sig_mc_%s",  dir.Data (), cent, var.Data ()), ";#it{p}_{T}^{jet} [GeV];#it{p}_{T}^{ch} [GeV]", nPtChBins, pTChBins, nPtJBins, pTJBins);
         h2_jet_trk_pt_sig_fullClosure[iDir][iFile][iVar]->Sumw2 ();
         h2_jet_trk_pt_sig_halfClosure[iDir][iFile][iVar]  = new TH2D (Form ("h2_jet_trk_pt_halfClosure_%s_%s_sig_mc_%s",  dir.Data (), cent, var.Data ()), ";#it{p}_{T}^{jet} [GeV];#it{p}_{T}^{ch} [GeV]", nPtChBins, pTChBins, nPtJBins, pTJBins);
@@ -431,11 +437,15 @@ bool MakeResponseMatrix (const char* directory,
 
       if (isReconstructed) {
         rooUnfResp_jet_pt_wgts[iFile]->Fill (rjpt, tjpt, ewgt*(iRJet < 0 ? 0. : f_jet_wgts[iFile]->Eval (rjpt)));
-        if (IspPb ())
-          rooUnfResp_jet_pt_wgts[iFile]->Fill (rjpt, tjpt, ewgt*(iRJet < 0 ? 0. : f_jet_wgts[nZdcCentBins]->Eval (rjpt)));
         rooUnfResp_jet_pt_fullClosure[iFile]->Fill (rjpt, tjpt, ewgt);
         if (iEvt % 2 == 0)
-          rooUnfResp_jet_pt_halfClosure[iFile]->Fill (rjpt, tjpt, ewgt);
+          rooUnfResp_jet_pt_halfClosur[iFile]->Fill (rjpt, tjpt, ewgt);
+        if (IspPb ()) {
+          rooUnfResp_jet_pt_wgts[nFiles-1]->Fill (rjpt, tjpt, ewgt*(iRJet < 0 ? 0. : f_jet_wgts[nFiles-1]->Eval (rjpt)));
+          rooUnfResp_jet_pt_fullClosure[nFiles-1]->Fill (rjpt, tjpt, ewgt);
+          if (iEvt % 2 == 0)
+            rooUnfResp_jet_pt_halfClosure[nFiles-1]->Fill (rjpt, tjpt, ewgt);
+        }
       }
 
 
@@ -473,19 +483,31 @@ bool MakeResponseMatrix (const char* directory,
         
         if (isReconstructed) {
           rooUnfResp_jet_trk_pt_sig_wgts[iDir][iFile]->Fill (trk_pt[iTrk], rjpt, trk_truth_pt[iTrk], tjpt, ewgt*(iRJet < 0 ? 0. : f_jet_wgts[iFile]->Eval (rjpt)));
-          if (IspPb ())
-            rooUnfResp_jet_trk_pt_sig_wgts[iDir][iFile]->Fill (trk_pt[iTrk], rjpt, trk_truth_pt[iTrk], tjpt, ewgt*(iRJet < 0 ? 0. : f_jet_wgts[nZdcCentBins]->Eval (rjpt)));
           rooUnfResp_jet_trk_pt_sig_fullClosure[iDir][iFile]->Fill (trk_pt[iTrk], rjpt, trk_truth_pt[iTrk], tjpt, ewgt);
           if (iEvt % 2 == 0)
             rooUnfResp_jet_trk_pt_sig_halfClosure[iDir][iFile]->Fill (trk_pt[iTrk], rjpt, trk_truth_pt[iTrk], tjpt, ewgt);
+          if (IspPb ()) {
+            rooUnfResp_jet_trk_pt_sig_wgts[iDir][nFiles-1]->Fill (trk_pt[iTrk], rjpt, trk_truth_pt[iTrk], tjpt, ewgt*(iRJet < 0 ? 0. : f_jet_wgts[nFiles-1]->Eval (rjpt)));
+            rooUnfResp_jet_trk_pt_sig_fullClosure[iDir][nFiles-1]->Fill (trk_pt[iTrk], rjpt, trk_truth_pt[iTrk], tjpt, ewgt);
+            if (iEvt % 2 == 0)
+              rooUnfResp_jet_trk_pt_sig_halfClosure[iDir][nFiles-1]->Fill (trk_pt[iTrk], rjpt, trk_truth_pt[iTrk], tjpt, ewgt);
+          }
         }
+
       } // end loop over tracks
 
 
       // fill truth jet pT spectrum
+      h_jet_pt_wgts[iFile][1]->Fill (tjpt, ewgt*(iRJet < 0 ? 0. : f_jet_wgts[iFile]->Eval (rjpt)));
       h_jet_pt_fullClosure[iFile][1]->Fill (tjpt, ewgt);
       if (iEvt % 2 == 1)
         h_jet_pt_halfClosure[iFile][1]->Fill (tjpt, ewgt);
+      if (IspPb ()) {
+        h_jet_pt_wgts[nFiles-1][1]->Fill (tjpt, ewgt*(iRJet < 0 ? 0. : f_jet_wgts[nFiles-1]->Eval (rjpt)));
+        h_jet_pt_fullClosure[nFiles-1][1]->Fill (tjpt, ewgt);
+        if (iEvt % 2 == 1)
+          h_jet_pt_halfClosure[nFiles-1][1]->Fill (tjpt, ewgt);
+      }
 
 
       // correlate truth charged particles with this jet  
@@ -520,9 +542,16 @@ bool MakeResponseMatrix (const char* directory,
           continue;
 
         // fill truth jet FF plots
+        h2_jet_trk_pt_sig_wgts[iDir][iFile][1]->Fill (truth_trk_pt[iTTrk], tjpt, ewgt*(iRJet < 0 ? 0. : f_jet_wgts[iFile]->Eval (rjpt)));
         h2_jet_trk_pt_sig_fullClosure[iDir][iFile][1]->Fill (truth_trk_pt[iTTrk], tjpt, ewgt);
         if (iEvt % 2 == 1)
           h2_jet_trk_pt_sig_halfClosure[iDir][iFile][1]->Fill (truth_trk_pt[iTTrk], tjpt, ewgt);
+        if (IspPb ()) {
+          h2_jet_trk_pt_sig_wgts[iDir][nFiles-1][1]->Fill (truth_trk_pt[iTTrk], tjpt, ewgt*(iRJet < 0 ? 0. : f_jet_wgts[nFiles-1]->Eval (rjpt)));
+          h2_jet_trk_pt_sig_fullClosure[iDir][nFiles-1][1]->Fill (truth_trk_pt[iTTrk], tjpt, ewgt);
+          if (iEvt % 2 == 1)
+            h2_jet_trk_pt_sig_halfClosure[iDir][nFiles-1][1]->Fill (truth_trk_pt[iTTrk], tjpt, ewgt);
+        }
 
       } // end loop over truth tracks
 
@@ -564,9 +593,16 @@ bool MakeResponseMatrix (const char* directory,
 
 
       // fill reco jet spectrum
+      h_jet_pt_wgts[iFile][0]->Fill (rjpt, ewgt*(iRJet < 0 ? 0. : f_jet_wgts[iFile]->Eval (rjpt)));
       h_jet_pt_fullClosure[iFile][0]->Fill (rjpt, ewgt);
       if (iEvt % 2 == 1)
         h_jet_pt_halfClosure[iFile][0]->Fill (rjpt, ewgt);
+      if (IspPb ()) {
+        h_jet_pt_wgts[nFiles-1][0]->Fill (rjpt, ewgt*(iRJet < 0 ? 0. : f_jet_wgts[nFiles-1]->Eval (rjpt)));
+        h_jet_pt_fullClosure[nFiles-1][0]->Fill (rjpt, ewgt);
+        if (iEvt % 2 == 1)
+          h_jet_pt_halfClosure[nFiles-1][0]->Fill (rjpt, ewgt);
+      }
 
 
       // correlate charged particles with this jet  
@@ -604,9 +640,16 @@ bool MakeResponseMatrix (const char* directory,
         const float twgt = (teff > 0. ? tpur / teff : 0.);
 
         // fill reco jet FF plots
+        h2_jet_trk_pt_sig_wgts[iDir][iFile][0]->Fill (trk_pt[iTrk], rjpt, ewgt*twgt*(iRJet < 0 ? 0. : f_jet_wgts[iFile]->Eval (rjpt)));
         h2_jet_trk_pt_sig_fullClosure[iDir][iFile][0]->Fill (trk_pt[iTrk], rjpt, ewgt*twgt);
         if (iEvt % 2 == 1)
           h2_jet_trk_pt_sig_halfClosure[iDir][iFile][0]->Fill (trk_pt[iTrk], rjpt, ewgt*twgt);
+        if (IspPb ()) {
+          h2_jet_trk_pt_sig_wgts[iDir][nFiles-1][0]->Fill (trk_pt[iTrk], rjpt, ewgt*twgt*(iRJet < 0 ? 0. : f_jet_wgts[nFiles-1]->Eval (rjpt)));
+          h2_jet_trk_pt_sig_fullClosure[iDir][nFiles-1][0]->Fill (trk_pt[iTrk], rjpt, ewgt*twgt);
+          if (iEvt % 2 == 1)
+            h2_jet_trk_pt_sig_halfClosure[iDir][nFiles-1][0]->Fill (trk_pt[iTrk], rjpt, ewgt*twgt);
+        }
 
       } // end loop over tracks
 
@@ -644,35 +687,6 @@ bool MakeResponseMatrix (const char* directory,
 
 
   //////////////////////////////////////////////////////////////////////////////////////////////////// 
-  // CALCULATE CENTRALITY INTEGRATED PLOTS
-  //////////////////////////////////////////////////////////////////////////////////////////////////// 
-  if (IspPb ()) {
-    for (short iFile = 0; iFile < nFiles-1; iFile++) {
-
-      h_jet_pt_fullClosure[nFiles-1][0]->Add (h_jet_pt_fullClosure[iFile][0]);
-      h_jet_pt_fullClosure[nFiles-1][1]->Add (h_jet_pt_fullClosure[iFile][1]);
-
-      h_jet_pt_halfClosure[nFiles-1][0]->Add (h_jet_pt_halfClosure[iFile][0]);
-      h_jet_pt_halfClosure[nFiles-1][1]->Add (h_jet_pt_halfClosure[iFile][1]);
-
-      for (short iDir = 0; iDir < nDir; iDir++) {
-  
-        h2_jet_trk_pt_sig_fullClosure[iDir][nFiles-1][0]->Add (h2_jet_trk_pt_sig_fullClosure[iDir][iFile][0]);
-        h2_jet_trk_pt_sig_fullClosure[iDir][nFiles-1][1]->Add (h2_jet_trk_pt_sig_fullClosure[iDir][iFile][1]);
-
-        h2_jet_trk_pt_sig_halfClosure[iDir][nFiles-1][0]->Add (h2_jet_trk_pt_sig_halfClosure[iDir][iFile][0]);
-        h2_jet_trk_pt_sig_halfClosure[iDir][nFiles-1][1]->Add (h2_jet_trk_pt_sig_halfClosure[iDir][iFile][1]);
-
-      } // end loop over iDir
-
-    } // end loop over iFile
-
-  }
-
-
-
-
-  //////////////////////////////////////////////////////////////////////////////////////////////////// 
   // FINALLY WRITE OUT EVERYTHING TO A SINGLE ROOT FILE WITH ALL THE RESULTS.
   //////////////////////////////////////////////////////////////////////////////////////////////////// 
   {
@@ -684,6 +698,8 @@ bool MakeResponseMatrix (const char* directory,
       rooUnfResp_jet_pt_fullClosure[iFile]->Write ();
       rooUnfResp_jet_pt_halfClosure[iFile]->Write ();
 
+      h_jet_pt_wgts[iFile][0]->Write ();
+      h_jet_pt_wgts[iFile][1]->Write ();
       h_jet_pt_fullClosure[iFile][0]->Write ();
       h_jet_pt_fullClosure[iFile][1]->Write ();
       h_jet_pt_halfClosure[iFile][0]->Write ();
@@ -695,6 +711,8 @@ bool MakeResponseMatrix (const char* directory,
         rooUnfResp_jet_trk_pt_sig_fullClosure[iDir][iFile]->Write ();
         rooUnfResp_jet_trk_pt_sig_halfClosure[iDir][iFile]->Write ();
 
+        h2_jet_trk_pt_sig_wgts[iDir][iFile][0]->Write ();
+        h2_jet_trk_pt_sig_wgts[iDir][iFile][1]->Write ();
         h2_jet_trk_pt_sig_fullClosure[iDir][iFile][0]->Write ();
         h2_jet_trk_pt_sig_fullClosure[iDir][iFile][1]->Write ();
         h2_jet_trk_pt_sig_halfClosure[iDir][iFile][0]->Write ();
