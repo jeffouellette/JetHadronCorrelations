@@ -32,24 +32,24 @@ short GetJetSpectraNIters (const short iPtJInt, const short iCent) {
   switch (iPtJInt) {
     case 0: // pTJ > 30 GeV
     switch (iCent) {
-      case 5:  return 7;
-      case 0:  return 8;
-      case 1:  return 7;
-      case 2:  return 7;
-      case 3:  return 6;
-      case 4:  return 6;
-      case -1: return 5;
+      case 5:  return 4;
+      case 0:  return 4;
+      case 1:  return 4;
+      case 2:  return 4;
+      case 3:  return 4;
+      case 4:  return 4;
+      case -1: return 4;
       default: return 0;
     }
     case 1: // pTJ > 60 GeV
     switch (iCent) {
-      case 5:  return 2;
-      case 0:  return 2;
-      case 1:  return 2;
-      case 2:  return 2;
-      case 3:  return 1;
-      case 4:  return 1;
-      case -1: return 2;
+      case 5:  return 3;
+      case 0:  return 3;
+      case 1:  return 3;
+      case 2:  return 3;
+      case 3:  return 3;
+      case 4:  return 3;
+      case -1: return 3;
       default: return 0;
     }
     default: return 0;
@@ -58,84 +58,84 @@ short GetJetSpectraNIters (const short iPtJInt, const short iCent) {
 
 
 short GetTrkSpectraNIters (const short iPtJInt, const short iDir, const short iCent) {
-  switch (iPtJInt) {
-    case 0: // pTJ > 30 GeV
-      //return GetTrkSpectraNIters (1, iDir, iCent); // should default to same nIters for 30 GeV and 60 GeV jets since both use the same unfolded distribution.
-    switch (iDir) {
-      case 0: // near-side
-      switch (iCent) {
-        case 5:  return 7;
-        case 0:  return 8;
-        case 1:  return 7;
-        case 2:  return 7;
-        case 3:  return 6;
-        case 4:  return 6;
-        case -1: return 5;
-        default: return 0;
-      }
-      case 1: // perpendicular
-      switch (iCent) {
-        case 5:  return 1;
-        case 0:  return 1;
-        case 1:  return 1;
-        case 2:  return 1;
-        case 3:  return 1;
-        case 4:  return 1;
-        case -1: return 1;
-        default: return 0;
-      }
-      case 2: // away-side
-      switch (iCent) {
-        case 5:  return 7;
-        case 0:  return 8;
-        case 1:  return 7;
-        case 2:  return 7;
-        case 3:  return 6;
-        case 4:  return 6;
-        case -1: return 5;
-        default: return 0;
-      }
-      default: return 0;
-    }
-    case 1: // pTJ > 60 GeV
-    switch (iDir) {
-      case 0: // near-side
-      switch (iCent) {
-        case 5:  return 2;
-        case 0:  return 2;
-        case 1:  return 2;
-        case 2:  return 2;
-        case 3:  return 1;
-        case 4:  return 1;
-        case -1: return 2;
-        default: return 0;
-      }
-      case 1: // perpendicular
-      switch (iCent) {
-        case 5:  return 1;
-        case 0:  return 1;
-        case 1:  return 1;
-        case 2:  return 1;
-        case 3:  return 1;
-        case 4:  return 1;
-        case -1: return 3;
-        default: return 0;
-      }
-      case 2: // away-side
-      switch (iCent) {
-        case 5:  return 3;
-        case 0:  return 2;
-        case 1:  return 2;
-        case 2:  return 2;
-        case 3:  return 1;
-        case 4:  return 1;
-        case -1: return 3;
-        default: return 0;
-      }
-      default: return 0;
-    }
-    default: return 0;
-  }
+  return GetJetSpectraNIters (iPtJInt, iCent);
+  //switch (iPtJInt) {
+  //  case 0: // pTJ > 30 GeV
+  //  switch (iDir) {
+  //    case 0: // near-side
+  //    switch (iCent) {
+  //      case 5:  return 7;
+  //      case 0:  return 8;
+  //      case 1:  return 7;
+  //      case 2:  return 7;
+  //      case 3:  return 6;
+  //      case 4:  return 6;
+  //      case -1: return 5;
+  //      default: return 0;
+  //    }
+  //    case 1: // perpendicular
+  //    switch (iCent) {
+  //      case 5:  return 1;
+  //      case 0:  return 1;
+  //      case 1:  return 1;
+  //      case 2:  return 1;
+  //      case 3:  return 1;
+  //      case 4:  return 1;
+  //      case -1: return 1;
+  //      default: return 0;
+  //    }
+  //    case 2: // away-side
+  //    switch (iCent) {
+  //      case 5:  return 7;
+  //      case 0:  return 8;
+  //      case 1:  return 7;
+  //      case 2:  return 7;
+  //      case 3:  return 6;
+  //      case 4:  return 6;
+  //      case -1: return 5;
+  //      default: return 0;
+  //    }
+  //    default: return 0;
+  //  }
+  //  case 1: // pTJ > 60 GeV
+  //  switch (iDir) {
+  //    case 0: // near-side
+  //    switch (iCent) {
+  //      case 5:  return 2;
+  //      case 0:  return 2;
+  //      case 1:  return 2;
+  //      case 2:  return 2;
+  //      case 3:  return 1;
+  //      case 4:  return 1;
+  //      case -1: return 2;
+  //      default: return 0;
+  //    }
+  //    case 1: // perpendicular
+  //    switch (iCent) {
+  //      case 5:  return 1;
+  //      case 0:  return 1;
+  //      case 1:  return 1;
+  //      case 2:  return 1;
+  //      case 3:  return 1;
+  //      case 4:  return 1;
+  //      case -1: return 3;
+  //      default: return 0;
+  //    }
+  //    case 2: // away-side
+  //    switch (iCent) {
+  //      case 5:  return 3;
+  //      case 0:  return 2;
+  //      case 1:  return 2;
+  //      case 2:  return 2;
+  //      case 3:  return 1;
+  //      case 4:  return 1;
+  //      case -1: return 3;
+  //      default: return 0;
+  //    }
+  //    default: return 0;
+  //  }
+  //  default: return 0;
+  //}
 }
 
 
@@ -1070,7 +1070,7 @@ void ProcessCorrelations (const char* tag, const char* outFileTag, const int nIt
     
               if (0.5 * (pTJBins[iPtJ] + pTJBins[iPtJ+1]) < minJetPt || 300 < 0.5 * (pTJBins[iPtJ] + pTJBins[iPtJ+1])) continue;
     
-              totalJetsUF += h_jet_pt_ref_unf[iDType][iPtJInt][iVar]->GetBinContent (iPtJ+1);
+              totalJetsUF += h_jet_pt_ref_unf_nIters[iIter]->GetBinContent (iPtJ+1);
     
               for (short iPtCh = 0; iPtCh < nPtChBins; iPtCh++) {
                 h->SetBinContent (iPtCh+1, h->GetBinContent (iPtCh+1) + h2_unf->GetBinContent (iPtCh+1, iPtJ+1));
@@ -1139,7 +1139,7 @@ void ProcessCorrelations (const char* tag, const char* outFileTag, const int nIt
     
                 if (0.5 * (pTJBins[iPtJ] + pTJBins[iPtJ+1]) < minJetPt || 300 < 0.5 * (pTJBins[iPtJ] + pTJBins[iPtJ+1])) continue;
     
-                totalJetsUF += h_jet_pt_unf[iDType][iPtJInt][iCent][iVar]->GetBinContent (iPtJ+1);
+                totalJetsUF += h_jet_pt_unf_nIters[iCent][iIter]->GetBinContent (iPtJ+1);
     
                 for (short iPtCh = 0; iPtCh < nPtChBins; iPtCh++) {
                   h->SetBinContent (iPtCh+1, h->GetBinContent (iPtCh+1) + h2_unf->GetBinContent (iPtCh+1, iPtJ+1));

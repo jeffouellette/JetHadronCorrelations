@@ -1497,7 +1497,7 @@ void PlotPtCh (const char* inFileTag) {
 
     for (int iDir : {0, 1, 2}) {
   
-      const char* canvasName = Form ("c_jetInt_trk_pt_signal_and_ratio_%s_%s", directions[iDir].Data (), pTJInt.Data ());
+      const char* canvasName = Form ("c_jetInt_trk_pt_signalYields_%s_%s", directions[iDir].Data (), pTJInt.Data ());
       TCanvas* c = new TCanvas (canvasName, "", 800, 1000);
       c->cd ();
   
