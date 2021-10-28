@@ -23,12 +23,25 @@ float vz = 0;
 
 float fcal_et_Pb = 0;
 float fcal_et_p = 0;
+float q2x_A = 0;
+float q2y_A = 0;
+float q2x_C = 0;
+float q2y_C = 0;
 float q2x_Pb = 0;
 float q2y_Pb = 0;
 float q2x_p = 0;
 float q2y_p = 0;
 float zdc_calibE_Pb = 0;
 float zdc_calibE_p = 0;
+
+float cluster_sumGap_Pb = 0;
+float cluster_sumGap_p = 0;
+float cluster_edgeGap_Pb = 0;
+float cluster_edgeGap_p = 0;
+float sumGap_Pb = 0;
+float sumGap_p = 0;
+float edgeGap_Pb = 0;
+float edgeGap_p = 0;
 
 int   leading_jet = 0;
 int   subleading_jet = 0;
@@ -112,14 +125,42 @@ struct OutTree {
 
       tree->Branch ("vz",            &vz,            "vz/F");
 
-      tree->Branch ("fcal_et_Pb",    &fcal_et_Pb,    "fcal_et_Pb/F");
-      tree->Branch ("fcal_et_p",     &fcal_et_p,     "fcal_et_p/F");
-      tree->Branch ("q2x_Pb",        &q2x_Pb,        "q2x_Pb/F");
-      tree->Branch ("q2y_Pb",        &q2y_Pb,        "q2y_Pb/F");
-      tree->Branch ("q2x_p",         &q2x_p,         "q2x_p/F");
-      tree->Branch ("q2y_p",         &q2y_p,         "q2y_p/F");
-      tree->Branch ("zdc_calibE_Pb", &zdc_calibE_Pb, "zdc_calibE_Pb/F");
-      tree->Branch ("zdc_calibE_p",  &zdc_calibE_p,  "zdc_calibE_p/F");
+      if (!Ispp ()) {
+        tree->Branch ("fcal_et_Pb",    &fcal_et_Pb,    "fcal_et_Pb/F");
+        tree->Branch ("fcal_et_p",     &fcal_et_p,     "fcal_et_p/F");
+        tree->Branch ("q2x_Pb",        &q2x_Pb,        "q2x_Pb/F");
+        tree->Branch ("q2y_Pb",        &q2y_Pb,        "q2y_Pb/F");
+        tree->Branch ("q2x_p",         &q2x_p,         "q2x_p/F");
+        tree->Branch ("q2y_p",         &q2y_p,         "q2y_p/F");
+        tree->Branch ("zdc_calibE_Pb", &zdc_calibE_Pb, "zdc_calibE_Pb/F");
+        tree->Branch ("zdc_calibE_p",  &zdc_calibE_p,  "zdc_calibE_p/F");
+
+        tree->Branch ("cluster_sumGap_Pb",  &cluster_sumGap_Pb,   "cluster_sumGap_Pb/F");
+        tree->Branch ("cluster_sumGap_p",   &cluster_sumGap_p,    "cluster_sumGap_p/F");
+        tree->Branch ("cluster_edgeGap_Pb", &cluster_edgeGap_Pb,  "cluster_edgeGap_Pb/F");
+        tree->Branch ("cluster_edgeGap_p",  &cluster_edgeGap_p,   "cluster_edgeGap_p/F");
+        tree->Branch ("sumGap_Pb",          &sumGap_Pb,           "sumGap_Pb/F");
+        tree->Branch ("sumGap_p",           &sumGap_p,            "sumGap_p/F");
+        tree->Branch ("edgeGap_Pb",         &edgeGap_Pb,          "edgeGap_Pb/F");
+        tree->Branch ("edgeGap_p",          &edgeGap_p,           "edgeGap_p/F");
+      }
+      else {
+        tree->Branch ("fcal_et_A",  &fcalA_et,  "fcal_et_A/F");
+        tree->Branch ("fcal_et_C",  &fcalC_et,  "fcal_et_C/F");
+        tree->Branch ("q2x_A",      &q2x_A,     "q2x_A/F");
+        tree->Branch ("q2y_A",      &q2y_A,     "q2y_A/F");
+        tree->Branch ("q2x_C",      &q2x_C,     "q2x_C/F");
+        tree->Branch ("q2y_C",      &q2y_C,     "q2y_C/F");
+
+        tree->Branch ("cluster_sumGap_A",   &cluster_sumGap_A,  "cluster_sumGap_A/F");
+        tree->Branch ("cluster_sumGap_C",   &cluster_sumGap_C,  "cluster_sumGap_C/F");
+        tree->Branch ("cluster_edgeGap_A",  &cluster_edgeGap_A, "cluster_edgeGap_A/F");
+        tree->Branch ("cluster_edgeGap_C",  &cluster_edgeGap_C, "cluster_edgeGap_C/F");
+        tree->Branch ("sumGap_A",           &sumGap_A,          "sumGap_A/F");
+        tree->Branch ("sumGap_C",           &sumGap_C,          "sumGap_C/F");
+        tree->Branch ("edgeGap_A",          &edgeGap_A,         "edgeGap_A/F");
+        tree->Branch ("edgeGap_C",          &edgeGap_C,         "edgeGap_C/F");
+      }
     }
 
     if (!IsCollisions () && branchTruthTracks) {

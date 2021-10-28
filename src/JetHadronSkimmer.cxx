@@ -62,11 +62,11 @@ bool JetHadronSkimmer (const char* directory,
   }
   else {
     if (UseJ50Triggers ())
-      SetupDirectories ("Trees/50GeVJetsData");
+      SetupDirectories ("Trees/J50");
     else if (UseJ100Triggers ())
-      SetupDirectories ("Trees/100GeVJetsData");
+      SetupDirectories ("Trees/J100");
     else if (UseMinBiasTriggers ())
-      SetupDirectories ("Trees/MinBiasData");
+      SetupDirectories ("Trees/MinBias");
   }
 
 
@@ -128,13 +128,6 @@ bool JetHadronSkimmer (const char* directory,
       return true;
     }
     std::cout << "Info: In JetHadronSkimmer.cxx: Chain has " << tree->GetListOfFiles ()->GetEntries () << " files, " << tree->GetEntries () << " entries" << std::endl;
-  }
-
-
-  if (!IsHijing ()) {
-    assert (crossSectionPicoBarns > 0);
-    assert (mcFilterEfficiency > 0);
-    assert (mcNumberEvents > 0);
   }
 
 
@@ -204,57 +197,55 @@ bool JetHadronSkimmer (const char* directory,
   }
 
 
-  if (IsPbPb ()) {
-    tree->SetBranchAddress ("cluster_sumGap_A",  &cluster_sumGap_A);
-    tree->SetBranchAddress ("cluster_sumGap_C",  &cluster_sumGap_C);
-    tree->SetBranchAddress ("cluster_edgeGap_A", &cluster_edgeGap_A);
-    tree->SetBranchAddress ("cluster_edgeGap_C", &cluster_edgeGap_C);
-    tree->SetBranchAddress ("sumGap_A",          &sumGap_A);
-    tree->SetBranchAddress ("sumGap_C",          &sumGap_C);
-    tree->SetBranchAddress ("edgeGap_A",         &edgeGap_A);
-    tree->SetBranchAddress ("edgeGap_C",         &edgeGap_C);
-  }
+  tree->SetBranchAddress ("cluster_sumGap_A",  &cluster_sumGap_A);
+  tree->SetBranchAddress ("cluster_sumGap_C",  &cluster_sumGap_C);
+  tree->SetBranchAddress ("cluster_edgeGap_A", &cluster_edgeGap_A);
+  tree->SetBranchAddress ("cluster_edgeGap_C", &cluster_edgeGap_C);
+  tree->SetBranchAddress ("sumGap_A",          &sumGap_A);
+  tree->SetBranchAddress ("sumGap_C",          &sumGap_C);
+  tree->SetBranchAddress ("edgeGap_A",         &edgeGap_A);
+  tree->SetBranchAddress ("edgeGap_C",         &edgeGap_C);
 
 
-  if (!IsCollisions ()) {
-    tree->SetBranchAddress ("truth_trk_n",        &truth_trk_n);
-    tree->SetBranchAddress ("truth_trk_pt",       &truth_trk_pt);
-    tree->SetBranchAddress ("truth_trk_eta",      &truth_trk_eta);
-    tree->SetBranchAddress ("truth_trk_phi",      &truth_trk_phi);
-    tree->SetBranchAddress ("truth_trk_charge",   &truth_trk_charge);
-    tree->SetBranchAddress ("truth_trk_pdgid",    &truth_trk_pdgid);
-    tree->SetBranchAddress ("truth_trk_barcode",  &truth_trk_barcode);
-    tree->SetBranchAddress ("truth_trk_isHadron", &truth_trk_isHadron);
-  }
+  //if (!IsCollisions ()) {
+  //  tree->SetBranchAddress ("truth_trk_n",        &truth_trk_n);
+  //  tree->SetBranchAddress ("truth_trk_pt",       &truth_trk_pt);
+  //  tree->SetBranchAddress ("truth_trk_eta",      &truth_trk_eta);
+  //  tree->SetBranchAddress ("truth_trk_phi",      &truth_trk_phi);
+  //  tree->SetBranchAddress ("truth_trk_charge",   &truth_trk_charge);
+  //  tree->SetBranchAddress ("truth_trk_pdgid",    &truth_trk_pdgid);
+  //  tree->SetBranchAddress ("truth_trk_barcode",  &truth_trk_barcode);
+  //  tree->SetBranchAddress ("truth_trk_isHadron", &truth_trk_isHadron);
+  //}
 
-  tree->SetBranchAddress ("ntrk",                   &trk_n);
-  tree->SetBranchAddress ("trk_pt",                 &trk_pt);
-  tree->SetBranchAddress ("trk_eta",                &trk_eta);
-  tree->SetBranchAddress ("trk_phi",                &trk_phi);
-  tree->SetBranchAddress ("trk_charge",             &trk_charge);
-  tree->SetBranchAddress ("trk_HITight",            &trk_HITight);
-  tree->SetBranchAddress ("trk_HILoose",            &trk_HILoose);
-  tree->SetBranchAddress ("trk_TightPrimary",       &trk_TightPrimary);
-  tree->SetBranchAddress ("trk_d0",                 &trk_d0);
-  tree->SetBranchAddress ("trk_d0sig",              &trk_d0sig);
-  tree->SetBranchAddress ("trk_z0",                 &trk_z0);
-  tree->SetBranchAddress ("trk_z0sig",              &trk_z0sig);
-  tree->SetBranchAddress ("trk_theta",              &trk_theta);
-  tree->SetBranchAddress ("trk_vz",                 &trk_vz);
-  if (!IsCollisions ()) {
-    tree->SetBranchAddress ("trk_prob_truth",     &trk_prob_truth);
-    tree->SetBranchAddress ("trk_truth_pt",       &trk_truth_pt);
-    tree->SetBranchAddress ("trk_truth_eta",      &trk_truth_eta);
-    tree->SetBranchAddress ("trk_truth_phi",      &trk_truth_phi);
-    tree->SetBranchAddress ("trk_truth_charge",   &trk_truth_charge);
-    tree->SetBranchAddress ("trk_truth_type",     &trk_truth_type);
-    tree->SetBranchAddress ("trk_truth_orig",     &trk_truth_orig);
-    tree->SetBranchAddress ("trk_truth_barcode",  &trk_truth_barcode);
-    tree->SetBranchAddress ("trk_truth_pdgid",    &trk_truth_pdgid);
-    tree->SetBranchAddress ("trk_truth_vz",       &trk_truth_vz);
-    tree->SetBranchAddress ("trk_truth_nIn",      &trk_truth_nIn);
-    tree->SetBranchAddress ("trk_truth_isHadron", &trk_truth_isHadron);
-  }
+  //tree->SetBranchAddress ("ntrk",                   &trk_n);
+  //tree->SetBranchAddress ("trk_pt",                 &trk_pt);
+  //tree->SetBranchAddress ("trk_eta",                &trk_eta);
+  //tree->SetBranchAddress ("trk_phi",                &trk_phi);
+  //tree->SetBranchAddress ("trk_charge",             &trk_charge);
+  //tree->SetBranchAddress ("trk_HITight",            &trk_HITight);
+  //tree->SetBranchAddress ("trk_HILoose",            &trk_HILoose);
+  //tree->SetBranchAddress ("trk_TightPrimary",       &trk_TightPrimary);
+  //tree->SetBranchAddress ("trk_d0",                 &trk_d0);
+  //tree->SetBranchAddress ("trk_d0sig",              &trk_d0sig);
+  //tree->SetBranchAddress ("trk_z0",                 &trk_z0);
+  //tree->SetBranchAddress ("trk_z0sig",              &trk_z0sig);
+  //tree->SetBranchAddress ("trk_theta",              &trk_theta);
+  //tree->SetBranchAddress ("trk_vz",                 &trk_vz);
+  //if (!IsCollisions ()) {
+  //  tree->SetBranchAddress ("trk_prob_truth",     &trk_prob_truth);
+  //  tree->SetBranchAddress ("trk_truth_pt",       &trk_truth_pt);
+  //  tree->SetBranchAddress ("trk_truth_eta",      &trk_truth_eta);
+  //  tree->SetBranchAddress ("trk_truth_phi",      &trk_truth_phi);
+  //  tree->SetBranchAddress ("trk_truth_charge",   &trk_truth_charge);
+  //  tree->SetBranchAddress ("trk_truth_type",     &trk_truth_type);
+  //  tree->SetBranchAddress ("trk_truth_orig",     &trk_truth_orig);
+  //  tree->SetBranchAddress ("trk_truth_barcode",  &trk_truth_barcode);
+  //  tree->SetBranchAddress ("trk_truth_pdgid",    &trk_truth_pdgid);
+  //  tree->SetBranchAddress ("trk_truth_vz",       &trk_truth_vz);
+  //  tree->SetBranchAddress ("trk_truth_nIn",      &trk_truth_nIn);
+  //  tree->SetBranchAddress ("trk_truth_isHadron", &trk_truth_isHadron);
+  //}
 
 
   if (!IsCollisions ()) {
@@ -266,18 +257,25 @@ bool JetHadronSkimmer (const char* directory,
   }
 
   tree->SetBranchAddress ("akt4_hi_jet_n",            &akt4_hi_jet_n);
-  tree->SetBranchAddress ("akt4_hi_jet_pt_precalib",  &akt4_hi_jet_pt_precalib);
+  //tree->SetBranchAddress ("akt4_hi_jet_pt_precalib",  &akt4_hi_jet_pt_precalib);
   tree->SetBranchAddress ("akt4_hi_jet_pt_etajes",    &akt4_hi_jet_pt_etajes);
   tree->SetBranchAddress ("akt4_hi_jet_pt_xcalib",    &akt4_hi_jet_pt_xcalib);
-  tree->SetBranchAddress ("akt4_hi_jet_eta_precalib", &akt4_hi_jet_eta_precalib);
+  //tree->SetBranchAddress ("akt4_hi_jet_eta_precalib", &akt4_hi_jet_eta_precalib);
   tree->SetBranchAddress ("akt4_hi_jet_eta_etajes",   &akt4_hi_jet_eta_etajes);
   tree->SetBranchAddress ("akt4_hi_jet_eta_xcalib",   &akt4_hi_jet_eta_xcalib);
   tree->SetBranchAddress ("akt4_hi_jet_phi",          &akt4_hi_jet_phi);
-  tree->SetBranchAddress ("akt4_hi_jet_e_precalib",   &akt4_hi_jet_e_precalib);
+  //tree->SetBranchAddress ("akt4_hi_jet_e_precalib",   &akt4_hi_jet_e_precalib);
   tree->SetBranchAddress ("akt4_hi_jet_e_etajes",     &akt4_hi_jet_e_etajes);
   tree->SetBranchAddress ("akt4_hi_jet_e_xcalib",     &akt4_hi_jet_e_xcalib);
-  tree->SetBranchAddress ("akt4_hi_jet_sub_et",       &akt4_hi_jet_sub_et);
-  tree->SetBranchAddress ("akt4_hi_jet_sub_e",        &akt4_hi_jet_sub_e);
+  //tree->SetBranchAddress ("akt4_hi_jet_sub_et",       &akt4_hi_jet_sub_et);
+  //tree->SetBranchAddress ("akt4_hi_jet_sub_e",        &akt4_hi_jet_sub_e);
+
+  const short nJESVar = GetNJESVar ();
+  if (!IsCollisions () && nJESVar != -1) {
+    std::cout << "Info: In RunCorrelator.cxx: Branching JES variation " << nJESVar << std::endl;
+    tree->SetBranchAddress (Form ("akt4_hi_jet_pt_sys_JES_%i", nJESVar), akt4_hi_jet_pt_sys_JES_ALL[nJESVar]);
+  }
+
   
 
   TString outTreeName = "";
@@ -299,42 +297,48 @@ bool JetHadronSkimmer (const char* directory,
     jet_trig_n = jet_trig_n_pp17;
     jet_trig_name = jet_trig_name_pp17;
   }
-  else if (IsPbPb18 ()) {
-    outTreeName = "PbPbTree";
-    minbias_trig_n = minbias_trig_n_PbPb18;
-    minbias_trig_name = minbias_trig_name_PbPb18;
-    jet_trig_n = jet_trig_n_PbPb18;
-    jet_trig_name = jet_trig_name_PbPb18;
-  }
   else {
     std::cout << "Error: In JetHadronSkimmer.cxx::JetHadronSkimmer (const char*, const int, const char*): Beam configuration not recognized, quitting." << std::endl;
     return false;
   }
 
 
-  Trigger* jetTriggers[jet_trig_n];
-  Trigger* minbiasTriggers[minbias_trig_n];
+  Trigger* jetTrigger = nullptr;
 
   if (IsCollisions ()) {
-    if (UseJ50Triggers () || UseJ100Triggers ()) {
-      for (int iTrig = 0; iTrig < jet_trig_n; iTrig++) {
-        jetTriggers[iTrig] = new Trigger (jet_trig_name[iTrig]);
-        tree->SetBranchAddress ((jet_trig_name[iTrig]+"_decision").c_str (), &(jetTriggers[iTrig]->trigDecision));
-        tree->SetBranchAddress ((jet_trig_name[iTrig]+"_prescale").c_str (), &(jetTriggers[iTrig]->trigPrescale));
-      }
+    if (UseJ50Triggers ()) {
+      jetTrigger = new Trigger (jet_trig_name[0]);
+      std::cout << "Info: In JetHadronSkimmer.cxx: Looking for " << jet_trig_name[0] << " trigger" << std::endl;
+      tree->SetBranchAddress ((jet_trig_name[0]+"_decision").c_str (), &(jetTrigger->trigDecision));
+      tree->SetBranchAddress ((jet_trig_name[0]+"_prescale").c_str (), &(jetTrigger->trigPrescale));
     }
-    else if (UseMinBiasTriggers ()) {
-      for (int iTrig = 0; iTrig < minbias_trig_n; iTrig++) {
-        minbiasTriggers[iTrig] = new Trigger (minbias_trig_name[iTrig]);
-        tree->SetBranchAddress ((minbias_trig_name[iTrig]+"_decision").c_str (), &(minbiasTriggers[iTrig]->trigDecision));
-        tree->SetBranchAddress ((minbias_trig_name[iTrig]+"_prescale").c_str (), &(minbiasTriggers[iTrig]->trigPrescale));
-      }
+    else if (UseJ100Triggers ()) {
+      jetTrigger = new Trigger (jet_trig_name[1]);
+      std::cout << "Info: In JetHadronSkimmer.cxx: Looking for " << jet_trig_name[1] << " trigger" << std::endl;
+      tree->SetBranchAddress ((jet_trig_name[1]+"_decision").c_str (), &(jetTrigger->trigDecision));
+      tree->SetBranchAddress ((jet_trig_name[1]+"_prescale").c_str (), &(jetTrigger->trigPrescale));
+    }
+    else if (!UseJetTriggers ()) {
+      jetTrigger = new Trigger (minbias_trig_name[0]);
+      std::cout << "Info: In JetHadronSkimmer.cxx: Looking for " << minbias_trig_name[0] << " trigger" << std::endl;
+      tree->SetBranchAddress ((minbias_trig_name[0]+"_decision").c_str (), &(jetTrigger->trigDecision));
+      tree->SetBranchAddress ((minbias_trig_name[0]+"_prescale").c_str (), &(jetTrigger->trigPrescale));
+    }
+    else {
+      std::cout << "Error: In JetHadronSkimmer.cxx: Invalid trigger scheme? Please debug! Exiting." << std::endl;
+      return false;
     }
   }
 
 
-  //*centBins = (DoFcalCentVar () ? fcalCentBins : (DoFineFcalCentVar () ? fineFcalCentBins : zdcCentBins));
-  const int nCentBins = (DoFcalCentVar () ? nFcalCentBins : (DoFineFcalCentVar () ? nFineFcalCentBins : nZdcCentBins));
+  // setup centrality bins (only relevant for p+Pb)
+  double* centBins = (DoFcalCentVar () ? fcalCentBins : (DoFineFcalCentVar () ? fineFcalCentBins : (!IsCollisions () ? fcalCentBins : zdcCentBins)));
+  const short nCentBins = (DoFcalCentVar () ? nFcalCentBins : (DoFineFcalCentVar () ? nFineFcalCentBins : (!IsCollisions () ? nFcalCentBins : nZdcCentBins)));
+
+  std::cout << "Centrality bin cuts: ";
+  for (short iCent = 0; iCent < nCentBins; iCent++)
+    std::cout << centBins[iCent] << ", ";
+  std::cout << centBins[nCentBins] << std::endl;
 
 
   // Load files for output
@@ -349,23 +353,13 @@ bool JetHadronSkimmer (const char* directory,
     outTrees[iFile] = new OutTree (outTreeName.Data (), outFiles[iFile]);
     outTrees[iFile]->SetBranchEventInfo ();
     outTrees[iFile]->SetBranchJets ();
-    outTrees[iFile]->SetBranchTracks ();
     outTrees[iFile]->SetBranches ();
   }
-
-
-  //TH1D* h_fineFcalWgts = nullptr;
-  //if (DoFineFcalCentVar ())
-  //  h_fineFcalWgts = GetFCalZdcWeights ();
 
 
   const JetRadius r0p4 = JetRadius::R0p4;
   const int nEvts = tree->GetEntries ();
 
-  //std::random_device rndm;
-  //std::mt19937 mt19937_gen (rndm ());
-  //std::normal_distribution <double> jetES2PercSmearDist (1.0, 0.02);
-  //std::normal_distribution <double> jetES5PercSmearDist (1.0, 0.05);
 
   for (int iEvt = 0; iEvt < nEvts; iEvt++) {
     if (nEvts > 100 && iEvt % (nEvts / 100) == 0)
@@ -373,28 +367,33 @@ bool JetHadronSkimmer (const char* directory,
 
     tree->GetEntry (iEvt);
 
+    // triggering cut, require appropriate jet trigger to have fired
     if (IsCollisions ()) {
-      event_weight = -1;
-      if (UseJ50Triggers () && jetTriggers[0]->trigDecision)
-        //event_weight = jetTriggers[0]->trigPrescale;
-        event_weight = 1;
-      else if (UseJ100Triggers () && jetTriggers[1]->trigDecision)
-        //event_weight = jetTriggers[1]->trigPrescale;
-        event_weight = 1;
-      else if (UseMinBiasTriggers () && minbiasTriggers[0]->trigDecision)
-        //event_weight = minbiasTriggers[0]->trigPrescale;
-        event_weight = 1;
-    }
-    else {
-      event_weight = mcEventWeights->at (0) * crossSectionPicoBarns * mcFilterEfficiency * GetJetLuminosity () / mcNumberEvents; // sigma * f * L_int
-      if (IsHijing ()) {
-        assert (truth_event_n > 0);
-        ip = impactParameter[0];
-        eventPlane = eventPlaneAngle[0];
-      }
+      if (!jetTrigger->trigDecision)
+        continue;
+      event_weight = jetTrigger->trigPrescale;
     }
 
-    if (!IsHijing ()) {
+
+    {
+      bool isWellTimed = true;
+      if (IsCollisions () && Ispp () && UseMinBiasTriggers ()) {
+        for (short iJ = 0; iJ < GetAktHIJetN (r0p4); iJ++) {
+          if (!MeetsJetAcceptanceCuts (iJ, r0p4, nJESVar))
+            continue; // jet eta/phi & timing cuts
+          if (GetAktHIJetPt (iJ, r0p4) < 15)
+            continue; // minimum pT cut
+          if (GetAktHIJetTiming (iJ, r0p4) > 10)
+            isWellTimed = false;
+        }
+      }
+      if (!isWellTimed)
+        continue; // skip events with a mistimed jet in pp
+    }
+
+
+    // vertexing cuts, require no pileup vertices and primary vertex with |vz| < 150mm
+    {
       bool hasPrimary = false;
       bool hasPileup = false;
       vz = -999;
@@ -409,23 +408,22 @@ bool JetHadronSkimmer (const char* directory,
       if (hasPileup || std::fabs (vz) > 150 || !hasPrimary)
         continue;
     }
-    else {
-      if (nvert > 0) vz = vert_z[0];
-      else vz = 0;
-    }
 
 
-    // Filter sample based on min/max of pThat range
-    if (!IsHijing ()) {
-      int iLTJ = -1;
-      const int nTJ = GetAktTruthJetN (r0p4);
-      for (int iTJ = 0; iTJ < nTJ; iTJ++) {
+    // MC only -- filter events in sample based on min/max of pThat range
+    // also sets the appropriate JZ weight
+    if (!IsCollisions ()) {
+      short iLTJ = -1;
+      const short nTJ = GetAktTruthJetN (r0p4);
+      for (short iTJ = 0; iTJ < nTJ; iTJ++) {
         if (iLTJ == -1 || GetAktTruthJetPt (iTJ, r0p4) > GetAktTruthJetPt (iLTJ, r0p4))
           iLTJ = iTJ;
       }
 
       if (iLTJ == -1 || GetAktTruthJetPt (iLTJ, r0p4) < truth_jet_min_pt || GetAktTruthJetPt (iLTJ, r0p4) > truth_jet_max_pt)
         continue;
+
+      event_weight = mcEventWeights->at (0) * crossSectionPicoBarns * mcFilterEfficiency * GetJetLuminosity () / mcNumberEvents; // sigma * f * L_int
     }
 
 
@@ -442,151 +440,75 @@ bool JetHadronSkimmer (const char* directory,
       zdc_calibE_Pb *= 1e3;
       zdc_calibE_p *= 1e3;
 
-      if (DoFcalCentVar ())
-        iCent = GetBin (fcalCentBins, nFcalCentBins, fcal_et_Pb);
-      else if (DoFineFcalCentVar ())
-        iCent = GetBin (fineFcalCentBins, nFineFcalCentBins, fcal_et_Pb);
-      else
-        iCent = GetBin (zdcCentBins, nZdcCentBins, zdc_calibE_Pb);
+      cluster_sumGap_Pb   = cluster_sumGap_A;
+      cluster_sumGap_p    = cluster_sumGap_C;
+      cluster_edgeGap_Pb  = cluster_edgeGap_A;
+      cluster_edgeGap_p   = cluster_edgeGap_C;
+      sumGap_Pb   = sumGap_A;
+      sumGap_p    = sumGap_C;
+      edgeGap_Pb  = edgeGap_A;
+      edgeGap_p   = edgeGap_C;
+
+      const float centVar = ((!IsCollisions () || DoFcalCentVar ()  || DoFineFcalCentVar ()) ? fcalA_et : (ZdcCalibEnergy_A * 1e3));
+      iCent = GetBin (centBins, nCentBins, centVar);
+      if (iCent < 0 || nCentBins <= iCent)
+        continue;
     }
     else if (Ispp ()) {
-      fcal_et_Pb = -999;
-      fcal_et_p = fcalA_et + fcalC_et;
-      q2x_Pb = -999;
-      q2y_Pb = -999;
-      q2x_p = fcalA_et_Cos2 + fcalC_et_Cos2;
-      q2y_p = fcalA_et_Sin2 + fcalC_et_Sin2;
-      zdc_calibE_Pb = -999;
-      zdc_calibE_p = 0;
       iCent = 0;
+      q2x_A = fcalA_et_Cos2;
+      q2y_A = fcalA_et_Sin2;
+      q2x_C = fcalC_et_Cos2;
+      q2y_C = fcalC_et_Sin2;
     }
-
-    if (iCent < 0 || iCent > nCentBins-1)
-      continue;
-
-    //if (IspPb () && iCent < 1)
-    //  continue;
-
-    //if (DoFineFcalCentVar ()) {
-    //  event_weight *= h_fineFcalWgts->GetBinContent (h_fineFcalWgts->FindBin (fcal_et_Pb));
-    //}
 
     const short iFile = iCent;
 
-    if (event_weight > 0) { // trigger requirement
+    out_akt4_hi_jet_n = 0;
+    const int jn = GetAktHIJetN (r0p4);
 
-      out_akt4_hi_jet_n = 0;
-      const int jn = GetAktHIJetN (r0p4);
-      for (int iJ = 0; iJ < jn; iJ++) {
-        if (!MeetsJetAcceptanceCuts (iJ, r0p4))
-          continue;
+    for (int iJ = 0; iJ < jn; iJ++) {
 
-        // Crude systematic -- smear jet energy scale by 2% or 5% (ad-hoc)
-        float jpt = GetAktHIJetPt (iJ, r0p4);
-        float jen = GetAktHIJetEn (iJ, r0p4);
+      if (!MeetsJetAcceptanceCuts (iJ, r0p4))
+        continue;
 
-        //if (DoJetES5PercUpVar ())    { jpt *= 1.05;  jen *= 1.05; }
-        //if (DoJetES5PercDownVar ())  { jpt *= 0.95;  jen *= 0.95; }
-        //if (DoJetES5PercSmearVar ()) { 
-        //  float sf = jetES5PercSmearDist (mt19937_gen);
-        //  jpt *= sf;
-        //  jen *= sf;
-        //}
-        //if (DoJetES2PercUpVar ())    { jpt *= 1.02;  jen *= 1.02; }
-        //if (DoJetES2PercDownVar ())  { jpt *= 0.98;  jen *= 0.98; }
-        //if (DoJetES2PercSmearVar ()) { 
-        //  float sf = jetES2PercSmearDist (mt19937_gen);
-        //  jpt *= sf;
-        //  jen *= sf;
-        //}
+      // Crude systematic -- smear jet energy scale by 2% or 5% (ad-hoc)
+      float jpt = GetAktHIJetPt (iJ, r0p4);
+      float jen = GetAktHIJetEn (iJ, r0p4);
 
-        out_akt4_hi_jet_pt[out_akt4_hi_jet_n] = jpt;
-        out_akt4_hi_jet_eta[out_akt4_hi_jet_n] = GetAktHIJetEta (iJ, r0p4);
-        out_akt4_hi_jet_phi[out_akt4_hi_jet_n] = GetAktHIJetEta (iJ, r0p4);
-        out_akt4_hi_jet_e[out_akt4_hi_jet_n] = jen;
-        out_akt4_hi_jet_n++;
-      }
+      out_akt4_hi_jet_pt[out_akt4_hi_jet_n]   = jpt;
+      out_akt4_hi_jet_eta[out_akt4_hi_jet_n]  = GetAktHIJetEta (iJ, r0p4);
+      out_akt4_hi_jet_phi[out_akt4_hi_jet_n]  = GetAktHIJetPhi (iJ, r0p4);
+      out_akt4_hi_jet_e[out_akt4_hi_jet_n]    = jen;
+      out_akt4_hi_jet_n++;
+    }
 
-      int lJ = -1, slJ = -1;
-      for (int iJ = 0; iJ < out_akt4_hi_jet_n; iJ++) {
-        if (lJ == -1 || out_akt4_hi_jet_pt[lJ] < out_akt4_hi_jet_pt[iJ])
-          lJ = iJ;
-      } // finds leading jet
-      for (int iJ = 0; iJ < out_akt4_hi_jet_n; iJ++) {
-        if (iJ == lJ)
-          continue;
-        if (slJ == -1 || out_akt4_hi_jet_pt[slJ] < out_akt4_hi_jet_pt[iJ])
-          slJ = iJ;
-      } // finds subleading jet
+    int lJ = -1, slJ = -1;
+    for (int iJ = 0; iJ < out_akt4_hi_jet_n; iJ++) {
+      if (lJ == -1 || out_akt4_hi_jet_pt[lJ] < out_akt4_hi_jet_pt[iJ])
+        lJ = iJ;
+    } // finds leading jet
+    for (int iJ = 0; iJ < out_akt4_hi_jet_n; iJ++) {
+      if (iJ == lJ)
+        continue;
+      if (slJ == -1 || out_akt4_hi_jet_pt[slJ] < out_akt4_hi_jet_pt[iJ])
+        slJ = iJ;
+    } // finds subleading jet
 
-      leading_jet = lJ;
-      subleading_jet = slJ;
+    leading_jet = lJ;
+    subleading_jet = slJ;
 
-      if (UseJetTriggers () && leading_jet == -1)
-        continue; // skip jet triggered events with no leading jet
+    if (UseJetTriggers () && leading_jet == -1)
+      continue; // skip jet triggered events with no leading jet
 
-
-      out_trk_n = 0;
-      for (int iTrk = 0; iTrk < trk_n; iTrk++) {
-
-        bool isOKTrack = false;
-        for (int iWP = 0; iWP < (int)trackWPs.size (); iWP++) {
-          isOKTrack = isOKTrack || MeetsTrackCuts (iTrk, iWP);
-        }
-        if (!isOKTrack)
-          continue;
-
-        out_trk_pt[out_trk_n] = trk_pt[iTrk];
-        out_trk_eta[out_trk_n] = trk_eta[iTrk];
-        out_trk_phi[out_trk_n] = trk_phi[iTrk];
-        out_trk_charge[out_trk_n] = trk_charge[iTrk];
-        out_trk_d0[out_trk_n] = trk_d0[iTrk];
-        out_trk_z0[out_trk_n] = trk_z0[iTrk];
-        out_trk_TightPrimary[out_trk_n] = trk_TightPrimary[iTrk];
-        out_trk_HITight[out_trk_n] = trk_HITight[iTrk];
-        out_trk_HILoose[out_trk_n] = trk_HILoose[iTrk];
-        if (!IsCollisions ())
-          out_trk_truth_matched[out_trk_n] = (trk_prob_truth[iTrk] > 0.5);
-        out_trk_n++;
-      }
-
-      float sumptcw = 0, sumptccw = 0;
-      for (int iTrk = 0; iTrk < out_trk_n; iTrk++) {
-        float dphi = DeltaPhi (out_trk_phi[iTrk], out_akt4_hi_jet_phi[leading_jet], true);
-        if (M_PI/3. < std::fabs (dphi) && std::fabs (dphi) < 2.*M_PI/3.) {
-          if (dphi < 0) // then trackphi is ccw of zphi
-            sumptccw += out_trk_pt[iTrk];
-          else
-            sumptcw += out_trk_pt[iTrk];
-        }
-      } // end loop over tracks
-
-      if (sumptccw > sumptcw) {
-        leading_jet_phi_transmax = out_akt4_hi_jet_phi[leading_jet] + M_PI/2.;
-        leading_jet_phi_transmin = out_akt4_hi_jet_phi[leading_jet] - M_PI/2.;
-      }
-      else {
-        leading_jet_phi_transmax = out_akt4_hi_jet_phi[leading_jet] - M_PI/2.;
-        leading_jet_phi_transmin = out_akt4_hi_jet_phi[leading_jet] + M_PI/2.;
-      }
-
-      outTrees[iFile]->Fill ();
-
-    } // end jet trigger scope
+    outTrees[iFile]->Fill ();
 
   } // end event selection
   std::cout << std::endl << "Info: In JetHadronSkimmer.cxx: Finished processing events." << std::endl;
 
 
   if (IsCollisions ()) {
-    if (UseJ50Triggers () || UseJ100Triggers ()) {
-      for (int iTrig = 0; iTrig < jet_trig_n; iTrig++)
-        SaferDelete (&jetTriggers[iTrig]);
-    }
-    else if (UseMinBiasTriggers ()) {
-      for (int iTrig = 0; iTrig < minbias_trig_n; iTrig++)
-        SaferDelete (&minbiasTriggers[iTrig]);
-    }
+    SaferDelete (&jetTrigger);
   }
   SaferDelete (&tree);
 

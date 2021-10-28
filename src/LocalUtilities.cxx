@@ -126,7 +126,7 @@ TString ToTString (const SystFlag& sFlag) {
     case SystFlag::JERVar9:                 return TString ("JERVar9");
     case SystFlag::JERVar10:                return TString ("JERVar10");
     case SystFlag::MCTruthJetsTruthParts:   return TString ("MCTruthJetsTruthParts");
-    case SystFlag::MCRecoJetTruthParts:     return TString ("MCRecoJetTruthParts");
+    case SystFlag::MCRecoJetsTruthParts:    return TString ("MCRecoJetsTruthParts");
     default:                                return TString ("???");
   }
 }
@@ -479,8 +479,8 @@ bool DoMCTruthJetsTruthParts (const SystFlag& sFlag) {
 
 
 
-bool DoMCRecoJetTruthParts (const SystFlag& sFlag) {
-  return sFlag == SystFlag::MCRecoJetTruthParts;
+bool DoMCRecoJetsTruthParts (const SystFlag& sFlag) {
+  return sFlag == SystFlag::MCRecoJetsTruthParts;
 }
 
 
@@ -737,8 +737,8 @@ bool DoMCTruthJetsTruthParts () {
 
 
 
-bool DoMCRecoJetTruthParts () {
-  return DoMCRecoJetTruthParts (systFlag);
+bool DoMCRecoJetsTruthParts () {
+  return DoMCRecoJetsTruthParts (systFlag);
 }
 
 
@@ -750,7 +750,7 @@ bool UseTruthJets () {
 
 
 bool UseTruthParticles () {
-  return DoMCTruthJetsTruthParts () || DoMCRecoJetTruthParts ();
+  return DoMCTruthJetsTruthParts () || DoMCRecoJetsTruthParts ();
 }
 
 

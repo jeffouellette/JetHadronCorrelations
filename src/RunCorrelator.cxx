@@ -347,7 +347,7 @@ bool Correlator (const char* tag, const char* outFilePattern, TTree* jetsTree, T
   }
   else {
     if      (DoMixCatVar2 ()) { mixCentBins = fcalMixVar2Bins;  nMixCentBins = nFcalMixVar2Bins;  }
-    //else if (DoMixCatVar6 ()) { mixCentBins = fcalMixVar6Bins;  nMixCentBins = nFcalMixVar6Bins;  }
+    else if (DoMixCatVar6 ()) { mixCentBins = fcalMixVar6Bins;  nMixCentBins = nFcalMixVar6Bins;  }
     else                      { mixCentBins = fcalMixBins;      nMixCentBins = nFcalMixBins;      }
   }
 

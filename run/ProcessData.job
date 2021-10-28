@@ -11,13 +11,13 @@ accounting_group = group_atlas.boulder
 gridPass=090
 
 # alg values: JetHadronSkimmer, JetSubtractedEnergy
-alg=JetSubtractedEnergy
+alg=JetHadronSkimmer
 
 # Trigger config; MinBias, J50, J100
 #trig=J50
 
 # Systematic config; Nominal, JESVar0, JESVar1,..., JESVar15, (don't run 16 or 20), JESVar17, JESVar18, JESVar19, MixVar1, MixVar2, MixVar3, MCTruthJetsTruthParts, MCRecoJetsTruthParts, FcalCentVar (at the moment)
-#syst=Nominal
+syst=Nominal
 
 
 Arguments = $(alg) data_$(gridPass) $(runNumber) pPb16_5TeV Collisions $(trig) $(syst) 
