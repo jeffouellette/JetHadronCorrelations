@@ -71,6 +71,8 @@ double* InitCentBins (const char* fName, const int* percs, const int nBins) {
 // See Run 2 centrality discussion in Kurt's note: https://cds.cern.ch/record/2301540/
 // See Run 1 centrality overview in Dennis' note: https://cds.cern.ch/record/1545591/
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+const double fcalNcollValues[] = {3.434, 6.366, 8.968, 11.17, 14.11, 17.46, 22.61};
+const double fcalNcollErrors[] = {0.26,  0.493, 0.596, 0.68,  0.862, 1.13,  2.46};
 int fcalCentPercs[] = {100, 80, 60, 40, 20, 0};
 int nFcalCentBins = sizeof (fcalCentPercs) / sizeof (fcalCentPercs[0]) - 1;
 

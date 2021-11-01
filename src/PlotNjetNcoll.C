@@ -30,113 +30,27 @@ TLatex* tl = new TLatex ();
 
 void PlotNjetNcoll () {
 
-  TFile* f1 = new TFile ("rootFiles/Results/ProcessJets_60GeVJets.root", "read");
-  TFile* f2 = new TFile ("rootFiles/Results/ProcessJets_30GeVJets.root", "read");
-  TFile** files = new TFile*[2];
-  files[0] = f1;
-  files[1] = f2;
-  const int nFiles = 2;
+  TFile* inFile = new TFile (Form ("%s/PeripheralStudy/NjetNcoll.root", rootPath.Data ()), "read");
 
-  TH1D**  h_jet_counts_ref  = Get1DArray <TH1D*> (nFiles);
-  TH1D*** h_jet_counts      = Get2DArray <TH1D*> (nFiles, nZdcCentBins);
+  TGAE** g_njet_ncoll = new TGAE*[2];
+  TGAE** g_njet_ncoll_syst = new TGAE*[2];
 
-  TGAE** g_njet_ncoll = new TGAE*[nFiles];
-  TGAE** g_njet_ncoll_syst = new TGAE*[nFiles];
+  TGAE** g_njetoverncoll_ncoll = new TGAE*[2];
+  TGAE** g_njetoverncoll_ncoll_syst = new TGAE*[2];
 
-  TGAE** g_njetoverncoll_ncoll = new TGAE*[nFiles];
-  TGAE** g_njetoverncoll_ncoll_syst = new TGAE*[nFiles];
-
-  for (int iFile = 0; iFile < nFiles; iFile++) {
-
-    TFile* inFile = files[iFile];
-
-    h_jet_counts_ref[iFile] = (TH1D*) inFile->Get (Form ("h_jet_counts_ref_data_Nominal"));
-  
-    for (int iCent = 0; iCent < nZdcCentBins; iCent++) {
-  
-      h_jet_counts[iFile][iCent] = (TH1D*) inFile->Get (Form ("h_jet_counts_pPb_iCent%i_data_Nominal", iCent));
-  
-    } // end loop over iCent
-
-    g_njet_ncoll[iFile] = new TGAE ();
-    g_njet_ncoll_syst[iFile] = new TGAE ();
-
-    g_njetoverncoll_ncoll[iFile] = new TGAE ();
-    g_njetoverncoll_ncoll_syst[iFile] = new TGAE ();
-
-    double njetlumipp = 1;
-
-    {
-      const double njet = h_jet_counts_ref[iFile]->GetBinContent (1);
-      const double ncoll = 1;
-      const double sigma_ncoll = 0;
-      const double lumi = (iFile == 0 ? 3.57487e6 : 2.65513e3) * 0.244; // multiply by Poisson probability of 1 with lambda=2.2 (average pileup rate for run 340718).
-
-      njetlumipp = njet / lumi;
-
-      g_njet_ncoll[iFile]->SetPoint (0, ncoll, 1);
-      g_njet_ncoll[iFile]->SetPointEXhigh (0, 0);
-      g_njet_ncoll[iFile]->SetPointEXlow (0, 0);
-      g_njet_ncoll[iFile]->SetPointEYhigh (0, 0);
-      g_njet_ncoll[iFile]->SetPointEYlow (0, 0);
-
-      g_njet_ncoll_syst[iFile]->SetPoint (0, ncoll, 1);
-      g_njet_ncoll_syst[iFile]->SetPointEXhigh (0, 0);
-      g_njet_ncoll_syst[iFile]->SetPointEXlow (0, 0);
-      g_njet_ncoll_syst[iFile]->SetPointEYhigh (0, 0);
-      g_njet_ncoll_syst[iFile]->SetPointEYlow (0, 0);
-
-      g_njetoverncoll_ncoll[iFile]->SetPoint (0, ncoll, 1);//njet / (lumi * ncoll));
-      g_njetoverncoll_ncoll[iFile]->SetPointEXhigh (0, 0);
-      g_njetoverncoll_ncoll[iFile]->SetPointEXlow (0, 0);
-      g_njetoverncoll_ncoll[iFile]->SetPointEYhigh (0, 0);
-      g_njetoverncoll_ncoll[iFile]->SetPointEYlow (0, 0);
-
-      g_njetoverncoll_ncoll_syst[iFile]->SetPoint (0, ncoll, 1);
-      g_njetoverncoll_ncoll_syst[iFile]->SetPointEXhigh (0, 0);
-      g_njetoverncoll_ncoll_syst[iFile]->SetPointEXlow (0, 0);
-      g_njetoverncoll_ncoll_syst[iFile]->SetPointEYhigh (0, 0);
-      g_njetoverncoll_ncoll_syst[iFile]->SetPointEYlow (0, 0);
-
-    }
-
-    for (int iCent = 0; iCent < nZdcCentBins; iCent++) {
-
-      const double njet = h_jet_counts[iFile][iCent]->GetBinContent (1);
-      const double ncoll = zdcNcollValues[iCent];
-      const double sigma_ncoll = zdcNcollErrors[iCent];
-      const double lumi = (iFile == 0 ? 3.55545e2 : 25.1334) / 0.2;
-
-      g_njet_ncoll[iFile]->SetPoint (iCent+1, ncoll, njet / (njetlumipp * lumi));
-      g_njet_ncoll[iFile]->SetPointEXhigh (iCent+1, 0);
-      g_njet_ncoll[iFile]->SetPointEXlow (iCent+1, 0);
-      g_njet_ncoll[iFile]->SetPointEYhigh (iCent+1, std::sqrt (njet) / (njetlumipp * lumi));
-      g_njet_ncoll[iFile]->SetPointEYlow (iCent+1, std::sqrt (njet) / (njetlumipp * lumi));
-
-      g_njet_ncoll_syst[iFile]->SetPoint (iCent+1, ncoll, njet / (njetlumipp * lumi));
-      g_njet_ncoll_syst[iFile]->SetPointEXhigh (iCent+1, sigma_ncoll);
-      g_njet_ncoll_syst[iFile]->SetPointEXlow (iCent+1, sigma_ncoll);
-      g_njet_ncoll_syst[iFile]->SetPointEYhigh (iCent+1, 0.4);
-      g_njet_ncoll_syst[iFile]->SetPointEYlow (iCent+1, 0.4);
-
-      g_njetoverncoll_ncoll[iFile]->SetPoint (iCent+1, ncoll, njet / (njetlumipp * lumi * ncoll));
-      g_njetoverncoll_ncoll[iFile]->SetPointEXhigh (iCent+1, 0);
-      g_njetoverncoll_ncoll[iFile]->SetPointEXlow (iCent+1, 0);
-      g_njetoverncoll_ncoll[iFile]->SetPointEYhigh (iCent+1, std::sqrt (njet / std::pow (njetlumipp * lumi * ncoll, 2)));
-      g_njetoverncoll_ncoll[iFile]->SetPointEYlow (iCent+1, std::sqrt (njet / std::pow (njetlumipp * lumi * ncoll, 2)));
-
-      g_njetoverncoll_ncoll_syst[iFile]->SetPoint (iCent, ncoll, njet / (njetlumipp * lumi * ncoll));
-      g_njetoverncoll_ncoll_syst[iFile]->SetPointEXhigh (iCent, sigma_ncoll);
-      g_njetoverncoll_ncoll_syst[iFile]->SetPointEXlow (iCent, sigma_ncoll);
-      g_njetoverncoll_ncoll_syst[iFile]->SetPointEYhigh (iCent, std::fabs (njet * sigma_ncoll / (njetlumipp * lumi * ncoll * ncoll)));
-      g_njetoverncoll_ncoll_syst[iFile]->SetPointEYlow (iCent, std::fabs (njet * sigma_ncoll / (njetlumipp * lumi * ncoll * ncoll)));
-
-    } // end loop over iCent
-
+  for (short iPtJInt : {0, 1}) {
+    g_njet_ncoll[iPtJInt] = (TGAE*) inFile->Get (Form ("g_njet_ncoll_%s", iPtJInt == 0 ? "30GeVJets" : "60GeVJets"));
+    g_njet_ncoll_syst[iPtJInt] = (TGAE*) inFile->Get (Form ("g_njet_ncoll_syst_%s", iPtJInt == 0 ? "30GeVJets" : "60GeVJets"));
+    g_njetoverncoll_ncoll[iPtJInt] = (TGAE*) inFile->Get (Form ("g_njetoverncoll_ncoll_%s", iPtJInt == 0 ? "30GeVJets" : "60GeVJets"));
+    g_njetoverncoll_ncoll_syst[iPtJInt] = (TGAE*) inFile->Get (Form ("g_njetoverncoll_ncoll_syst_%s", iPtJInt == 0 ? "30GeVJets" : "60GeVJets"));
   }
 
 
   TLatex* tl = new TLatex ();
+  TLine* l = new TLine ();
+  const Style_t shapes[] = {kFullCircle, kFullSquare, kOpenTriangleUp, kOpenTriangleDown};
+  const Color_t colors[] = {(Color_t) TColor::GetColor (255, 102, 0), (Color_t) TColor::GetColor (0, 0, 153)};
+  const Color_t systColors[] = {(Color_t) TColor::GetColor (255, 204, 0), (Color_t) TColor::GetColor (102, 102, 204)};
 
   {
     const char* canvasName = "c";
@@ -155,20 +69,19 @@ void PlotNjetNcoll () {
 
     //c->SetLogy ();
 
-    TH1D* htemp = new TH1D ("htemp", ";#LTN_{coll}#GT;(1 / #LTN_{coll}#GT) #times (#sigma_{jet} / #sigma_{jet}^{#it{pp}})", 1, 0, 16);
+    TH1D* htemp = new TH1D ("htemp", ";#LTN_{coll}#GT;#it{R}_{#it{p}Pb}^{jet}", 1, 0, 18);
     TAxis* xax = htemp->GetXaxis ();
     TAxis* yax = htemp->GetYaxis ();
 
     xax->SetTitleOffset (0.9 * xax->GetTitleOffset ());
-    yax->SetLabelFont (43);
-    yax->SetLabelSize (32);
+    xax->SetLabelFont (43);
+    xax->SetLabelSize (32);
 
-    //yax->SetTitle ("f_{evt} #times N_{jet} / (#LTN_{coll}#GT #times L_{int}) [#mub]");
     yax->SetLabelFont (43);
     yax->SetLabelSize (32);
     yax->SetLabelOffset (1.8 * yax->GetLabelOffset ());
     const double ymin = 0;
-    const double ymax = 3;
+    const double ymax = 2.6;
     yax->SetRangeUser (ymin, ymax);
 
     htemp->SetLineWidth (0);
@@ -176,20 +89,27 @@ void PlotNjetNcoll () {
     htemp->DrawCopy ("hist");
     SaferDelete (&htemp);
 
-    const Style_t shapes[] = {kFullCircle, kFullSquare, kOpenTriangleUp, kOpenTriangleDown};
-    const Color_t colors[] = {(Color_t) TColor::GetColor (0, 0, 153), (Color_t) TColor::GetColor (255, 102, 0)};
-    const Color_t systColors[] = {(Color_t) TColor::GetColor (102, 102, 204), (Color_t) TColor::GetColor (255, 204, 0)};
-    for (int iFile = 0; iFile < nFiles; iFile++) {
-      TGAE* g = g_njetoverncoll_ncoll_syst[iFile];
+    l->SetLineStyle (2);
+    l->SetLineWidth (2);
+    l->SetLineColor (kBlack);
+    l->DrawLine (0, 1, 18, 1);
 
-      g->SetFillColorAlpha (systColors[iFile], 1);
+    tl->SetTextAlign (12);
+    tl->SetTextFont (43);
+    tl->SetTextSize (24);
+    tl->DrawLatex (14.0, 1.10, "#LTN_{coll}#GT scaling");
+
+    for (short iPtJInt : {1, 0}) {
+      TGAE* g = g_njetoverncoll_ncoll_syst[iPtJInt];
+
+      g->SetFillColorAlpha (systColors[iPtJInt], 1);
       g->Draw ("2");
 
-      g = g_njetoverncoll_ncoll[iFile];
-      g->SetMarkerStyle (shapes[iFile]);
-      g->SetMarkerColor (colors[iFile]);
+      g = g_njetoverncoll_ncoll[iPtJInt];
+      g->SetMarkerStyle (shapes[iPtJInt]);
+      g->SetMarkerColor (colors[iPtJInt]);
       g->SetMarkerSize (1.6);
-      g->SetLineColor (colors[iFile]);
+      g->SetLineColor (colors[iPtJInt]);
       g->SetLineWidth (3);
       g->Draw ("P");
     }
@@ -203,9 +123,12 @@ void PlotNjetNcoll () {
     tl->SetTextSize (24);
     tl->DrawLatexNDC (0.55, 0.850, "#it{pp}, #sqrt{s} = 5.02 TeV");
     tl->DrawLatexNDC (0.55, 0.810, "#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV");
+    tl->DrawLatexNDC (0.55, 0.760, "#left|#eta_{CM}#right| < 2.0");
+    tl->DrawLatexNDC (0.55, 0.710, "20% ZDC percentiles");
+    //tl->DrawLatexNDC (0.55, 0.710, "FCal percentiles");
 
-    mySimpleMarkerAndBoxAndLineText (0.62, 0.76, 1.4, 1001, systColors[0], 1.0, colors[0], kFullCircle, 1.6, "#it{p}_{T}^{jet} > 60 GeV", 0.028);
-    mySimpleMarkerAndBoxAndLineText (0.62, 0.71, 1.4, 1001, systColors[1], 1.0, colors[1], kFullCircle, 1.6, "#it{p}_{T}^{jet} > 30 GeV", 0.028);
+    mySimpleMarkerAndBoxAndLineText (0.62, 0.66, 1.4, 1001, systColors[0], 1.0, colors[0], kFullCircle, 1.6, "#it{p}_{T}^{jet} > 30 GeV", 0.028);
+    mySimpleMarkerAndBoxAndLineText (0.62, 0.61, 1.4, 1001, systColors[1], 1.0, colors[1], kFullCircle, 1.6, "#it{p}_{T}^{jet} > 60 GeV", 0.028);
 
     c->SaveAs ("Plots/NjetOverNcoll_vs_Ncoll.pdf");
   }
@@ -229,20 +152,20 @@ void PlotNjetNcoll () {
 
     //c->SetLogy ();
 
-    TH1D* htemp = new TH1D ("htemp", ";#LTN_{coll}#GT;#sigma_{jet} / #sigma_{jet}^{#it{pp}}", 1, 0, 16);
+    TH1D* htemp = new TH1D ("htemp", ";#LTN_{coll}#GT;#LTN_{coll}#GT #times #it{R}_{#it{p}Pb}^{jet}", 1, 0, 18);
     TAxis* xax = htemp->GetXaxis ();
     TAxis* yax = htemp->GetYaxis ();
 
     xax->SetTitleOffset (0.9 * xax->GetTitleOffset ());
-    yax->SetLabelFont (43);
-    yax->SetLabelSize (32);
+    xax->SetLabelFont (43);
+    xax->SetLabelSize (32);
 
     //yax->SetTitle ("(f_{evt} #times N_{jet} / L_{int}) / (f_{evt} #times N_{jet} / L_{int})_{#it{pp}}");
     yax->SetLabelFont (43);
     yax->SetLabelSize (32);
     yax->SetLabelOffset (1.8 * yax->GetLabelOffset ());
     const double ymin = 0;
-    const double ymax = 24;
+    const double ymax = 19;
     yax->SetRangeUser (ymin, ymax);
 
     htemp->SetLineWidth (0);
@@ -250,19 +173,28 @@ void PlotNjetNcoll () {
     htemp->DrawCopy ("hist");
     SaferDelete (&htemp);
 
-    const Style_t shapes[] = {kFullCircle, kFullSquare, kOpenTriangleUp, kOpenTriangleDown};
-    const Color_t colors[] = {(Color_t) TColor::GetColor (0, 0, 153), (Color_t) TColor::GetColor (255, 102, 0)};
-    const Color_t systColors[] = {(Color_t) TColor::GetColor (102, 102, 204), (Color_t) TColor::GetColor (255, 204, 0)};
-    for (int iFile = 0; iFile < nFiles; iFile++) {
-      TGAE* g = g_njet_ncoll_syst[iFile];
-      g->SetFillColorAlpha (systColors[iFile], 1);
+    l->SetLineStyle (2);
+    l->SetLineWidth (2);
+    l->SetLineColor (kBlack);
+    l->DrawLine (0, 0, 18, 18);
+
+    tl->SetTextAlign (12);
+    tl->SetTextFont (43);
+    tl->SetTextSize (24);
+    tl->SetTextAngle (43);
+    tl->DrawLatex (14.5, 15.3, "#LTN_{coll}#GT scaling");
+    tl->SetTextAngle (0);
+
+    for (short iPtJInt : {1, 0}) {
+      TGAE* g = g_njet_ncoll_syst[iPtJInt];
+      g->SetFillColorAlpha (systColors[iPtJInt], 1);
       g->Draw ("2");
 
-      g = g_njet_ncoll[iFile];
-      g->SetMarkerStyle (shapes[iFile]);
-      g->SetMarkerColor (colors[iFile]);
+      g = g_njet_ncoll[iPtJInt];
+      g->SetMarkerStyle (shapes[iPtJInt]);
+      g->SetMarkerColor (colors[iPtJInt]);
       g->SetMarkerSize (1.6);
-      g->SetLineColor (colors[iFile]);
+      g->SetLineColor (colors[iPtJInt]);
       g->SetLineWidth (3);
       g->Draw ("P");
     }
@@ -272,13 +204,16 @@ void PlotNjetNcoll () {
     tl->SetTextFont (43);
 
     tl->SetTextSize (28);
-    tl->DrawLatexNDC (0.55, 0.890, "#bf{#it{ATLAS}} Internal");
+    tl->DrawLatexNDC (0.25, 0.890, "#bf{#it{ATLAS}} Internal");
     tl->SetTextSize (24);
-    tl->DrawLatexNDC (0.55, 0.850, "#it{pp}, #sqrt{s} = 5.02 TeV");
-    tl->DrawLatexNDC (0.55, 0.810, "#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV");
+    tl->DrawLatexNDC (0.25, 0.850, "#it{pp}, #sqrt{s} = 5.02 TeV");
+    tl->DrawLatexNDC (0.25, 0.810, "#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV");
+    tl->DrawLatexNDC (0.25, 0.760, "#left|#eta_{CM}#right| < 2.0");
+    tl->DrawLatexNDC (0.25, 0.710, "20% ZDC percentiles");
+    //tl->DrawLatexNDC (0.25, 0.710, "FCal percentiles");
 
-    mySimpleMarkerAndBoxAndLineText (0.62, 0.76, 1.4, 1001, systColors[0], 1.0, colors[0], kFullCircle, 1.6, "#it{p}_{T}^{jet} > 60 GeV", 0.028);
-    mySimpleMarkerAndBoxAndLineText (0.62, 0.71, 1.4, 1001, systColors[1], 1.0, colors[1], kFullCircle, 1.6, "#it{p}_{T}^{jet} > 30 GeV", 0.028);
+    mySimpleMarkerAndBoxAndLineText (0.32, 0.66, 1.4, 1001, systColors[0], 1.0, colors[0], kFullCircle, 1.6, "#it{p}_{T}^{jet} > 30 GeV", 0.028);
+    mySimpleMarkerAndBoxAndLineText (0.32, 0.61, 1.4, 1001, systColors[1], 1.0, colors[1], kFullCircle, 1.6, "#it{p}_{T}^{jet} > 60 GeV", 0.028);
 
     c->SaveAs ("Plots/Njet_vs_Ncoll.pdf");
   }
