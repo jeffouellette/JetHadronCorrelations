@@ -54,8 +54,8 @@ std::vector <TString> variations = {
 */
 
   "MCTruthJetsTruthParts",     // Truth-level jets and truth-level charged particles
-  //"MCRecoJetTruthParts",       // Reco-level jets and truth-level charged particles
-
+  //"MCRecoJetsTruthParts",       // Reco-level jets and truth-level charged particles
+  "MCRecoJetsTruthMatchedParts",  // Reco-level jets and reco-level, truth-matched charged particles
 };
 const int nVar = (int)variations.size ();
 
@@ -114,19 +114,22 @@ std::set <TString> dataVariations = {
 // other variations in MC which are not to be considered as systematics
 std::set <TString> otherMCVariations = {
   "MCTruthJetsTruthParts",
-  "MCRecoJetTruthParts",
+  "MCRecoJetsTruthParts",
+  "MCRecoJetsTruthMatchedParts",
 };
 
 // these variations don't need a background subtraction in pp
 std::set <TString> variationsWithNoppBkgd = {
   "MCTruthJetsTruthParts",
-  "MCRecoJetTruthParts",
+  "MCRecoJetsTruthParts",
+  "MCRecoJetsTruthMatchedParts",
 };
 
 // these variations don't need a background subtraction in p+Pb
 std::set <TString> variationsWithNopPbBkgd = {
   "MCTruthJetsTruthParts",
-  "MCRecoJetTruthParts",
+  "MCRecoJetsTruthParts",
+  "MCRecoJetsTruthMatchedParts",
 };
 
 // these variations don't need an unfold performed on them

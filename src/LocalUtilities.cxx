@@ -78,56 +78,57 @@ TString ToTString (const TriggerType& tType) {
 
 TString ToTString (const SystFlag& sFlag) {
   switch (sFlag) {
-    case SystFlag::Nominal:                 return TString ("Nominal");
-    case SystFlag::HITightVar:              return TString ("HITightVar");
-    case SystFlag::HILooseVar:              return TString ("HILooseVar");
-    case SystFlag::TrkEffVar:               return TString ("TrkEffVar");
-    case SystFlag::FakeRateVar:             return TString ("FakeRateVar");
-    case SystFlag::PrimFitVar:              return TString ("PrimFitVar");
-    case SystFlag::PartSpcVar:              return TString ("PartSpcVar");
-    case SystFlag::FcalCentVar:             return TString ("FcalCentVar");
-    case SystFlag::FineFcalCentVar:         return TString ("FineFcalCentVar");
-    case SystFlag::MixCatVar1:              return TString ("MixCatVar1");
-    case SystFlag::MixCatVar2:              return TString ("MixCatVar2");
-    case SystFlag::MixCatVar3:              return TString ("MixCatVar3");
-    case SystFlag::MixCatVar4:              return TString ("MixCatVar4");
-    case SystFlag::MixCatVar5:              return TString ("MixCatVar5");
-    case SystFlag::MixCatVar6:              return TString ("MixCatVar6");
-    case SystFlag::JESVar0:                 return TString ("JESVar0");
-    case SystFlag::JESVar1:                 return TString ("JESVar1");
-    case SystFlag::JESVar2:                 return TString ("JESVar2");
-    case SystFlag::JESVar3:                 return TString ("JESVar3");
-    case SystFlag::JESVar4:                 return TString ("JESVar4");
-    case SystFlag::JESVar5:                 return TString ("JESVar5");
-    case SystFlag::JESVar6:                 return TString ("JESVar6");
-    case SystFlag::JESVar7:                 return TString ("JESVar7");
-    case SystFlag::JESVar8:                 return TString ("JESVar8");
-    case SystFlag::JESVar9:                 return TString ("JESVar9");
-    case SystFlag::JESVar10:                return TString ("JESVar10");
-    case SystFlag::JESVar11:                return TString ("JESVar11");
-    case SystFlag::JESVar12:                return TString ("JESVar12");
-    case SystFlag::JESVar13:                return TString ("JESVar13");
-    case SystFlag::JESVar14:                return TString ("JESVar14");
-    case SystFlag::JESVar15:                return TString ("JESVar15");
-    case SystFlag::JESVar16:                return TString ("JESVar16");
-    case SystFlag::JESVar17:                return TString ("JESVar17");
-    case SystFlag::JESVar18:                return TString ("JESVar18");
-    case SystFlag::JESVar19:                return TString ("JESVar19");
-    case SystFlag::JESVar20:                return TString ("JESVar20");
-    case SystFlag::JERVar0:                 return TString ("JERVar0");
-    case SystFlag::JERVar1:                 return TString ("JERVar1");
-    case SystFlag::JERVar2:                 return TString ("JERVar2");
-    case SystFlag::JERVar3:                 return TString ("JERVar3");
-    case SystFlag::JERVar4:                 return TString ("JERVar4");
-    case SystFlag::JERVar5:                 return TString ("JERVar5");
-    case SystFlag::JERVar6:                 return TString ("JERVar6");
-    case SystFlag::JERVar7:                 return TString ("JERVar7");
-    case SystFlag::JERVar8:                 return TString ("JERVar8");
-    case SystFlag::JERVar9:                 return TString ("JERVar9");
-    case SystFlag::JERVar10:                return TString ("JERVar10");
-    case SystFlag::MCTruthJetsTruthParts:   return TString ("MCTruthJetsTruthParts");
-    case SystFlag::MCRecoJetsTruthParts:    return TString ("MCRecoJetsTruthParts");
-    default:                                return TString ("???");
+    case SystFlag::Nominal:                     return TString ("Nominal");
+    case SystFlag::HITightVar:                  return TString ("HITightVar");
+    case SystFlag::HILooseVar:                  return TString ("HILooseVar");
+    case SystFlag::TrkEffVar:                   return TString ("TrkEffVar");
+    case SystFlag::FakeRateVar:                 return TString ("FakeRateVar");
+    case SystFlag::PrimFitVar:                  return TString ("PrimFitVar");
+    case SystFlag::PartSpcVar:                  return TString ("PartSpcVar");
+    case SystFlag::FcalCentVar:                 return TString ("FcalCentVar");
+    case SystFlag::FineFcalCentVar:             return TString ("FineFcalCentVar");
+    case SystFlag::MixCatVar1:                  return TString ("MixCatVar1");
+    case SystFlag::MixCatVar2:                  return TString ("MixCatVar2");
+    case SystFlag::MixCatVar3:                  return TString ("MixCatVar3");
+    case SystFlag::MixCatVar4:                  return TString ("MixCatVar4");
+    case SystFlag::MixCatVar5:                  return TString ("MixCatVar5");
+    case SystFlag::MixCatVar6:                  return TString ("MixCatVar6");
+    case SystFlag::JESVar0:                     return TString ("JESVar0");
+    case SystFlag::JESVar1:                     return TString ("JESVar1");
+    case SystFlag::JESVar2:                     return TString ("JESVar2");
+    case SystFlag::JESVar3:                     return TString ("JESVar3");
+    case SystFlag::JESVar4:                     return TString ("JESVar4");
+    case SystFlag::JESVar5:                     return TString ("JESVar5");
+    case SystFlag::JESVar6:                     return TString ("JESVar6");
+    case SystFlag::JESVar7:                     return TString ("JESVar7");
+    case SystFlag::JESVar8:                     return TString ("JESVar8");
+    case SystFlag::JESVar9:                     return TString ("JESVar9");
+    case SystFlag::JESVar10:                    return TString ("JESVar10");
+    case SystFlag::JESVar11:                    return TString ("JESVar11");
+    case SystFlag::JESVar12:                    return TString ("JESVar12");
+    case SystFlag::JESVar13:                    return TString ("JESVar13");
+    case SystFlag::JESVar14:                    return TString ("JESVar14");
+    case SystFlag::JESVar15:                    return TString ("JESVar15");
+    case SystFlag::JESVar16:                    return TString ("JESVar16");
+    case SystFlag::JESVar17:                    return TString ("JESVar17");
+    case SystFlag::JESVar18:                    return TString ("JESVar18");
+    case SystFlag::JESVar19:                    return TString ("JESVar19");
+    case SystFlag::JESVar20:                    return TString ("JESVar20");
+    case SystFlag::JERVar0:                     return TString ("JERVar0");
+    case SystFlag::JERVar1:                     return TString ("JERVar1");
+    case SystFlag::JERVar2:                     return TString ("JERVar2");
+    case SystFlag::JERVar3:                     return TString ("JERVar3");
+    case SystFlag::JERVar4:                     return TString ("JERVar4");
+    case SystFlag::JERVar5:                     return TString ("JERVar5");
+    case SystFlag::JERVar6:                     return TString ("JERVar6");
+    case SystFlag::JERVar7:                     return TString ("JERVar7");
+    case SystFlag::JERVar8:                     return TString ("JERVar8");
+    case SystFlag::JERVar9:                     return TString ("JERVar9");
+    case SystFlag::JERVar10:                    return TString ("JERVar10");
+    case SystFlag::MCTruthJetsTruthParts:       return TString ("MCTruthJetsTruthParts");
+    case SystFlag::MCRecoJetsTruthParts:        return TString ("MCRecoJetsTruthParts");
+    case SystFlag::MCRecoJetsTruthMatchedParts: return TString ("MCRecoJetsTruthMatchedParts");
+    default:                                    return TString ("???");
   }
 }
 
@@ -485,6 +486,12 @@ bool DoMCRecoJetsTruthParts (const SystFlag& sFlag) {
 
 
 
+bool DoMCRecoJetsTruthMatchedParts (const SystFlag& sFlag) {
+  return sFlag == SystFlag::MCRecoJetsTruthMatchedParts;
+}
+
+
+
 bool IsIons () {
   return IsIons (collisionSystem);
 }
@@ -743,6 +750,12 @@ bool DoMCRecoJetsTruthParts () {
 
 
 
+bool DoMCRecoJetsTruthMatchedParts () {
+  return DoMCRecoJetsTruthMatchedParts (systFlag);
+}
+
+
+
 bool UseTruthJets () {
   return DoMCTruthJetsTruthParts ();
 }
@@ -751,6 +764,12 @@ bool UseTruthJets () {
 
 bool UseTruthParticles () {
   return DoMCTruthJetsTruthParts () || DoMCRecoJetsTruthParts ();
+}
+
+
+
+bool UseTruthMatchedParticles () {
+  return DoMCRecoJetsTruthMatchedParts ();
 }
 
 
@@ -1142,8 +1161,8 @@ bool MeetsTrackCuts (int iTrk, const int nWPVar) {
   if (!UseTruthParticles ()) {
     if (!trackWPs[nWPVar][iTrk])
       return false;
-    //if (trk_prob_truth[iTrk] < 0.5) 
-    //  return false;
+    if (UseTruthMatchedParticles () && trk_prob_truth[iTrk] < 0.5) 
+      return false;
   }
   else if (trk_truth_barcode[iTrk] <= 0 || 200000 <= trk_truth_barcode[iTrk] || !trk_truth_isHadron[iTrk])
     return false;

@@ -353,6 +353,7 @@ bool JetHadronSkimmer (const char* directory,
     outTrees[iFile] = new OutTree (outTreeName.Data (), outFiles[iFile]);
     outTrees[iFile]->SetBranchEventInfo ();
     outTrees[iFile]->SetBranchJets ();
+    outTrees[iFile]->SetBranchTracks ();
     outTrees[iFile]->SetBranches ();
   }
 
@@ -405,7 +406,9 @@ bool JetHadronSkimmer (const char* directory,
         else if (vert_type[iVert] == 3)
           hasPileup = true;
       }
-      if (hasPileup || std::fabs (vz) > 150 || !hasPrimary)
+      //if (hasPileup || std::fabs (vz) > 150 || !hasPrimary)
+      //  continue;
+      if (std::fabs (vz) > 150 || !hasPrimary)
         continue;
     }
 

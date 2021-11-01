@@ -1262,7 +1262,7 @@ void PlotCentralityAnalysis () {
     double ymin = 0;
     double ymax = 0.038;
 
-    h->SetLineColor (kBlack);
+    h->SetLineColor (colorfulColors[0]);
 
     h->GetYaxis ()->SetRangeUser (ymin, ymax);
 
@@ -1281,31 +1281,31 @@ void PlotCentralityAnalysis () {
     h = (TH1D*) h_mb_Pb_fcal_et_zdc_0t20->Clone ("htemp");
     h->Rebin (2);
     h->Scale (0.5);
-    h->SetLineColor (colors[0]);
+    h->SetLineColor (colorfulColors[1]);
     h->DrawCopy ("hist same");
     SaferDelete (&h);
     h = (TH1D*) h_mb_Pb_fcal_et_zdc_20t40->Clone ("htemp");
     h->Rebin (2);
     h->Scale (0.5);
-    h->SetLineColor (colors[1]);
+    h->SetLineColor (colorfulColors[2]);
     h->DrawCopy ("hist same");
     SaferDelete (&h);
     h = (TH1D*) h_mb_Pb_fcal_et_zdc_40t60->Clone ("htemp");
     h->Rebin (2);
     h->Scale (0.5);
-    h->SetLineColor (colors[2]);
+    h->SetLineColor (colorfulColors[3]);
     h->DrawCopy ("hist same");
     SaferDelete (&h);
     h = (TH1D*) h_mb_Pb_fcal_et_zdc_60t80->Clone ("htemp");
     h->Rebin (2);
     h->Scale (0.5);
-    h->SetLineColor (colors[3]);
+    h->SetLineColor (colorfulColors[4]);
     h->DrawCopy ("hist same");
     SaferDelete (&h);
     h = (TH1D*) h_mb_Pb_fcal_et_zdc_80t100->Clone ("htemp");
     h->Rebin (2);
     h->Scale (0.5);
-    h->SetLineColor (colors[4]);
+    h->SetLineColor (colorfulColors[5]);
     h->DrawCopy ("hist same");
     SaferDelete (&h);
 
@@ -1313,12 +1313,12 @@ void PlotCentralityAnalysis () {
     myText (0.59, 0.900, kBlack, "#bf{#it{ATLAS}} Internal", 0.036);
     myText (0.59, 0.860, kBlack, "#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV", 0.032);
     myText (0.59, 0.820, kBlack, "HLT_mb_sptrk_L1MBTS_1", 0.032);
-    myText (0.56, 0.740, kBlack, "P(#Sigma#it{E}_{T}^{FCal,Pb})", 0.026);
-    myText (0.56, 0.700, colors[0], "0.2 #times P(#Sigma#it{E}_{T}^{FCal,Pb} | Zdc 0-20%)", 0.026);
-    myText (0.56, 0.660, colors[1], "0.2 #times P(#Sigma#it{E}_{T}^{FCal,Pb} | Zdc 20-40%)", 0.026);
-    myText (0.56, 0.620, colors[2], "0.2 #times P(#Sigma#it{E}_{T}^{FCal,Pb} | Zdc 40-60%)", 0.026);
-    myText (0.56, 0.580, colors[3], "0.2 #times P(#Sigma#it{E}_{T}^{FCal,Pb} | Zdc 60-80%)", 0.026);
-    myText (0.56, 0.540, colors[4], "0.2 #times P(#Sigma#it{E}_{T}^{FCal,Pb} | Zdc 80-100%)", 0.026);
+    myText (0.56, 0.740, colorfulColors[0], "P(#Sigma#it{E}_{T}^{FCal,Pb})", 0.026);
+    myText (0.56, 0.700, colorfulColors[1], "0.2 #times P(#Sigma#it{E}_{T}^{FCal,Pb} | Zdc 0-20%)", 0.026);
+    myText (0.56, 0.660, colorfulColors[2], "0.2 #times P(#Sigma#it{E}_{T}^{FCal,Pb} | Zdc 20-40%)", 0.026);
+    myText (0.56, 0.620, colorfulColors[3], "0.2 #times P(#Sigma#it{E}_{T}^{FCal,Pb} | Zdc 40-60%)", 0.026);
+    myText (0.56, 0.580, colorfulColors[4], "0.2 #times P(#Sigma#it{E}_{T}^{FCal,Pb} | Zdc 60-80%)", 0.026);
+    myText (0.56, 0.540, colorfulColors[5], "0.2 #times P(#Sigma#it{E}_{T}^{FCal,Pb} | Zdc 80-100%)", 0.026);
 
     c->SaveAs (Form ("%s/Plots/CentralityAnalysis/allruns_fcal_et_zdcBinned.pdf", workPath.Data ()));
   }

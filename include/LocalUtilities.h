@@ -82,7 +82,7 @@ enum class SystFlag {
   JERVar10,
   MCTruthJetsTruthParts,  // does the analysis completely at the MC-truth level
   MCRecoJetsTruthParts,    // selects truth charged particles with reco jets for bin-by-bin unfolding factors (numerator). Denominator is in MCTruthJetsTruthParts
-  MCRecoJetsTruthMatchedParts,
+  MCRecoJetsTruthMatchedParts, // does the nominal analysis but only with truth-matched particles (so no background component).
 };
 static const std::vector <SystFlag> AllSystFlag = {
   SystFlag::Nominal,
@@ -134,6 +134,7 @@ static const std::vector <SystFlag> AllSystFlag = {
   SystFlag::JERVar10,
   SystFlag::MCTruthJetsTruthParts,
   SystFlag::MCRecoJetsTruthParts,
+  SystFlag::MCRecoJetsTruthMatchedParts,
 };
 
 enum class JetRadius { R0p2, R0p3, R0p4, R0p6, R0p8, R1p0, Invalid };
@@ -200,6 +201,7 @@ int GetNJERVar (const SystFlag& sFlag);
 
 bool DoMCTruthJetsTruthParts (const SystFlag& sFlag);
 bool DoMCRecoJetsTruthParts (const SystFlag& sFlag);
+bool DoMCRecoJetsTruthMatchedParts (const SystFlag& sFlag);
 
 
 
@@ -251,9 +253,11 @@ int GetNJERVar ();
 
 bool DoMCTruthJetsTruthParts ();
 bool DoMCRecoJetsTruthParts ();
+bool DoMCRecoJetsTruthMatchedParts ();
 
 bool UseTruthJets ();
 bool UseTruthParticles ();
+bool UseTruthMatchedParticles ();
 
 
 /**

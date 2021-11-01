@@ -32,6 +32,17 @@ short GetJetSpectraNIters (const short iPtJInt, const short iCent) {
   switch (iPtJInt) {
     case 0: // pTJ > 30 GeV
     switch (iCent) {
+      case 5:  return 6;
+      case 0:  return 6;
+      case 1:  return 6;
+      case 2:  return 6;
+      case 3:  return 6;
+      case 4:  return 6;
+      case -1: return 6;
+      default: return 0;
+    }
+    case 1: // pTJ > 60 GeV
+    switch (iCent) {
       case 5:  return 4;
       case 0:  return 4;
       case 1:  return 4;
@@ -39,17 +50,6 @@ short GetJetSpectraNIters (const short iPtJInt, const short iCent) {
       case 3:  return 4;
       case 4:  return 4;
       case -1: return 4;
-      default: return 0;
-    }
-    case 1: // pTJ > 60 GeV
-    switch (iCent) {
-      case 5:  return 3;
-      case 0:  return 3;
-      case 1:  return 3;
-      case 2:  return 3;
-      case 3:  return 3;
-      case 4:  return 3;
-      case -1: return 3;
       default: return 0;
     }
     default: return 0;

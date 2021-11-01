@@ -613,6 +613,11 @@ bool MakeResponseMatrix (const char* directory,
       // correlate charged particles with this jet  
       for (int iTrk = 0; iTrk < trk_n; iTrk++) {
 
+        const bool isTruthMatched = (trk_prob_truth[iTrk] > 0.5);
+
+        if (!isTruthMatched)
+          continue;
+
         if (!MeetsTrackCuts (iTrk, nTrkWPVar))
           continue; // cut on bad quality tracks
 

@@ -165,24 +165,24 @@ struct OutTree {
 
     if (!IsCollisions () && branchTruthTracks) {
       tree->Branch ("truth_trk_n",          &out_truth_trk_n,       "truth_trk_n/I");
-      tree->Branch ("truth_trk_pt",         &out_truth_trk_pt,      "truth_trk_pt[truth_trk_n]/F");
-      tree->Branch ("truth_trk_eta",        &out_truth_trk_eta,     "truth_trk_eta[truth_trk_n]/F");
-      tree->Branch ("truth_trk_phi",        &out_truth_trk_phi,     "truth_trk_phi[truth_trk_n]/F");
-      tree->Branch ("truth_trk_charge",     &out_truth_trk_charge,  "truth_trk_charge[truth_trk_n]/F");
+      //tree->Branch ("truth_trk_pt",         &out_truth_trk_pt,      "truth_trk_pt[truth_trk_n]/F");
+      //tree->Branch ("truth_trk_eta",        &out_truth_trk_eta,     "truth_trk_eta[truth_trk_n]/F");
+      //tree->Branch ("truth_trk_phi",        &out_truth_trk_phi,     "truth_trk_phi[truth_trk_n]/F");
+      //tree->Branch ("truth_trk_charge",     &out_truth_trk_charge,  "truth_trk_charge[truth_trk_n]/F");
     }
     if (branchTracks) {
       tree->Branch ("trk_n",                &out_trk_n,             "trk_n/I");
-      tree->Branch ("trk_pt",               &out_trk_pt,            "trk_pt[trk_n]/F");
-      tree->Branch ("trk_eta",              &out_trk_eta,           "trk_eta[trk_n]/F");
-      tree->Branch ("trk_phi",              &out_trk_phi,           "trk_phi[trk_n]/F");
-      tree->Branch ("trk_charge",           &out_trk_charge,        "trk_charge[trk_n]/F");
-      tree->Branch ("trk_d0",               &out_trk_d0,            "trk_d0[trk_n]/F");
-      tree->Branch ("trk_z0",               &out_trk_z0,            "trk_z0[trk_n]/F");
-      tree->Branch ("trk_TightPrimary",     &out_trk_TightPrimary,  "trk_TightPrimary[trk_n]/O");
-      tree->Branch ("trk_HITight",          &out_trk_HITight,       "trk_HITight[trk_n]/O");
-      tree->Branch ("trk_HILoose",          &out_trk_HILoose,       "trk_HILoose[trk_n]/O");
-      if (!IsCollisions ())
-        tree->Branch ("trk_truth_matched",  &out_trk_truth_matched, "trk_truth_matched[trk_n]/O");
+      //tree->Branch ("trk_pt",               &out_trk_pt,            "trk_pt[trk_n]/F");
+      //tree->Branch ("trk_eta",              &out_trk_eta,           "trk_eta[trk_n]/F");
+      //tree->Branch ("trk_phi",              &out_trk_phi,           "trk_phi[trk_n]/F");
+      //tree->Branch ("trk_charge",           &out_trk_charge,        "trk_charge[trk_n]/F");
+      //tree->Branch ("trk_d0",               &out_trk_d0,            "trk_d0[trk_n]/F");
+      //tree->Branch ("trk_z0",               &out_trk_z0,            "trk_z0[trk_n]/F");
+      //tree->Branch ("trk_TightPrimary",     &out_trk_TightPrimary,  "trk_TightPrimary[trk_n]/O");
+      //tree->Branch ("trk_HITight",          &out_trk_HITight,       "trk_HITight[trk_n]/O");
+      //tree->Branch ("trk_HILoose",          &out_trk_HILoose,       "trk_HILoose[trk_n]/O");
+      //if (!IsCollisions ())
+      //  tree->Branch ("trk_truth_matched",  &out_trk_truth_matched, "trk_truth_matched[trk_n]/O");
     }
 
     if (!IsCollisions () && branchTruthJets) {

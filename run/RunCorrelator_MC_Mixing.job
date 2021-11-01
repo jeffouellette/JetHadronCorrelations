@@ -111,28 +111,28 @@ Queue nfile in (1 2 8 9 10 11 13 14)
 
 
 ## p+Pb Hijing MC
-#Arguments = mc_$(gridPass) mixed_mc16 pPb16_5TeV MCHijing None $(syst) ./rootFiles/Histograms/MC/MixedHists/$(syst)/pPb16_Hijing_iCent_hists.root user.jeouelle.$(swVersion).hadrons.$(gridPass).mc16_5TeV.pPb.Hijing_MinBias_Flow.420118.recon.AOD.e7285_s3699_r12713_Tree.root
+#Arguments = mc_$(gridPass) mixed_mc16 pPb16_5TeV MCHijing None $(syst) ./rootFiles/Histograms/MC/MixedHists/$(syst)/pPb16_Hijing_iCent_hists.root user.jeouelle.$(swVersion).hadrons.$(gridPass).mc16_5TeV.pPb.Hijing_MinBias_Flow.420118.recon.AOD.e7285_s3699_r12713_Tree.root/user.jeouelle.26625272._$INT(nfile,%06d).Tree.root
 #Error = run/errors/RunCorrelator_MC_MixedHists_pPb16_Hijing_$(syst).err
 #Log = /tmp/jeff/logs/RunCorrelator_MC_MixedHists_pPb16_Hijing_$(syst).log
 #Output = run/outputs/RunCorrelator_MC_MixedHists_pPb16_Hijing_$(syst).out
-#Queue 1
+#Queue nfile in (1 2 3 4 6 7 8 9 10 11 12)
 
 
 ## p+Pb signal-only dijet MC
-#Arguments = mc_$(gridPass) mixed_mc16 pPb16_5TeV MCSignal None $(syst) ./rootFiles/Histograms/MC/MixedHists/$(syst)/pPb16_JZ1_iCent_hists.root user.jeouelle.$(swVersion).hadrons.$(gridPass).mc16_5TeV.pPb.420011.JZ1R04.recon.AOD.e8362_s3701_r12721_Tree.root
+#Arguments = mc_$(gridPass) mixed_mc16 pPb16_5TeV MCSignal None $(syst) ./rootFiles/Histograms/MC/MixedHists/$(syst)/pPb16_JZ1_iCent_hists.root user.jeouelle.$(swVersion).hadrons.$(gridPass).mc16_5TeV.pPb.420011.JZ1R04.recon.AOD.e8362_s3701_r12721_Tree.root/user.jeouelle.26625271._$INT(nfile,%06d).Tree.root
 #Error = run/errors/RunCorrelator_MC_MixedHists_pPb16_so_JZ1_$(syst).err
 #Log = /tmp/jeff/logs/RunCorrelator_MC_MixedHists_pPb16_so_JZ1_$(syst).log
 #Output = run/outputs/RunCorrelator_MC_MixedHists_pPb16_so_JZ1_$(syst).out
-#Queue 1
+#Queue nfile from seq 1 11 |
 #
-#Arguments = mc_$(gridPass) mixed_mc16 pPb16_5TeV MCSignal None $(syst) ./rootFiles/Histograms/MC/MixedHists/$(syst)/pPb16_JZ2_iCent_hists.root user.jeouelle.$(swVersion).hadrons.$(gridPass).mc16_5TeV.pPb.420012.JZ2R04.recon.AOD.e8362_s3701_r12721_Tree.root
+#Arguments = mc_$(gridPass) mixed_mc16 pPb16_5TeV MCSignal None $(syst) ./rootFiles/Histograms/MC/MixedHists/$(syst)/pPb16_JZ2_iCent_hists.root user.jeouelle.$(swVersion).hadrons.$(gridPass).mc16_5TeV.pPb.420012.JZ2R04.recon.AOD.e8362_s3701_r12721_Tree.root/user.jeouelle.26625271._$INT(nfile,%06d).Tree.root
 #Error = run/errors/RunCorrelator_MC_MixedHists_pPb16_so_JZ2_$(syst).err
 #Log = /tmp/jeff/logs/RunCorrelator_MC_MixedHists_pPb16_so_JZ2_$(syst).log
 #Output = run/outputs/RunCorrelator_MC_MixedHists_pPb16_so_JZ2_$(syst).out
-#Queue 1
+#Queue nfile from seq 1 6 |
 #
-#Arguments = mc_$(gridPass) mixed_mc16 pPb16_5TeV MCSignal None $(syst) ./rootFiles/Histograms/MC/MixedHists/$(syst)/pPb16_JZ3_iCent_hists.root user.jeouelle.$(swVersion).hadrons.$(gridPass).mc16_5TeV.pPb.420013.JZ3R04.recon.AOD.e8362_s3701_r12721_Tree.root
+#Arguments = mc_$(gridPass) mixed_mc16 pPb16_5TeV MCSignal None $(syst) ./rootFiles/Histograms/MC/MixedHists/$(syst)/pPb16_JZ3_iCent_hists.root user.jeouelle.$(swVersion).hadrons.$(gridPass).mc16_5TeV.pPb.420013.JZ3R04.recon.AOD.e8362_s3701_r12721_Tree.root/user.jeouelle.26679294._$INT(nfile,%06d).Tree.root
 #Error = run/errors/RunCorrelator_MC_MixedHists_pPb16_so_JZ3_$(syst).err
 #Log = /tmp/jeff/logs/RunCorrelator_MC_MixedHists_pPb16_so_JZ3_$(syst).log
 #Output = run/outputs/RunCorrelator_MC_MixedHists_pPb16_so_JZ3_$(syst).out
-#Queue 1
+#Queue nfile from seq 1 6 |

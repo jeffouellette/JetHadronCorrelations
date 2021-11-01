@@ -309,7 +309,9 @@ void PlotResponseMatrix () {
 
     const TString cent = (iCent == nFcalCentBins ? "allCent" : Form ("iCent%i", iCent));
 
-    TFile* inFile = new TFile (Form ("%s/Histograms/All/MixedHists/Nominal/mc16_5TeV_%s_hists.root", rootPath.Data (), cent.Data ()), "read");
+    //TFile* inFile = new TFile (Form ("%s/Histograms/All/MixedHists/Nominal/mc16_5TeV_%s_hists.root", rootPath.Data (), cent.Data ()), "read");
+    TFile* inFile = new TFile (Form ("%s/Histograms/All/MixedHists/MixCatVar2/mc16_5TeV_%s_hists.root", rootPath.Data (), cent.Data ()), "read");
+    //TFile* inFile = new TFile (Form ("%s/Histograms/All/MixedHists/MixCatVar6/mc16_5TeV_%s_hists.root", rootPath.Data (), cent.Data ()), "read");
 
     for (short iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
 
@@ -376,8 +378,10 @@ void PlotResponseMatrix () {
     
             for (short iPtChX = 1; iPtChX <= nPtChBins; iPtChX++) {
 
-              h2sig->SetBinContent (iPtChX, iPtJY, h2tot->GetBinContent (iPtChX, iPtJY) - (iVar == 0 ? nJetSF * hbkg->GetBinContent (iPtChX) * hbkg->GetBinWidth (iPtChX) : 0));
-              h2sig->SetBinError   (iPtChX, iPtJY, std::hypot (h2tot->GetBinError (iPtChX, iPtJY), (iVar == 0 ? nJetSF * hbkg->GetBinError (iPtChX) * hbkg->GetBinWidth (iPtChX) : 0)));
+              h2sig->SetBinContent (iPtChX, iPtJY, h2tot->GetBinContent (iPtChX, iPtJY));
+              h2sig->SetBinError   (iPtChX, iPtJY, h2tot->GetBinError (iPtChX, iPtJY));
+              //h2sig->SetBinContent (iPtChX, iPtJY, h2tot->GetBinContent (iPtChX, iPtJY) - (iVar == 0 ? nJetSF * hbkg->GetBinContent (iPtChX) * hbkg->GetBinWidth (iPtChX) : 0));
+              //h2sig->SetBinError   (iPtChX, iPtJY, std::hypot (h2tot->GetBinError (iPtChX, iPtJY), (iVar == 0 ? nJetSF * hbkg->GetBinError (iPtChX) * hbkg->GetBinWidth (iPtChX) : 0)));
     
             } // end loop over iPtChY
     
@@ -1342,19 +1346,143 @@ void PlotResponseMatrix () {
       tl->DrawLatexNDC (0.26, 0.810, (dir == "ns" ? "Near-side" : (dir == "perp" ? "Perpendicular" : "Away-side")));
 
       l->SetLineColor (kGreen+2);
-      l->DrawLine (0, nPtChBins*2, 348, nPtChBins*2);
-      l->DrawLine (nPtChBins*2, 0, nPtChBins*2, 348);
+      l->DrawLine (0, nPtChBins*2, nPtChBins*10, nPtChBins*2);
+      l->DrawLine (nPtChBins*2, 0, nPtChBins*2, nPtChBins*10);
 
       l->SetLineColor (kMagenta+2);
-      l->DrawLine (0, nPtChBins*4, 348, nPtChBins*4);
-      l->DrawLine (nPtChBins*4, 0, nPtChBins*4, 348);
+      l->DrawLine (nPtChBins*4, nPtChBins*4, nPtChBins*10, nPtChBins*4);
+      l->DrawLine (nPtChBins*4, nPtChBins*4, nPtChBins*4, nPtChBins*10);
 
       l->SetLineColor (kBlack);
-      l->DrawLine (nPtChBins*10, 0, nPtChBins*10, 348);
-      l->DrawLine (0, nPtChBins*10, 348, nPtChBins*10);
+      l->DrawLine (nPtChBins*10, nPtChBins*2, nPtChBins*10, nPtChBins*10);
+      l->DrawLine (nPtChBins*2, nPtChBins*10, nPtChBins*10, nPtChBins*10);
 
       c->SaveAs (Form ("%s/Plots/Unfolding/MC_Jet_TrkPt_ResponseMatrix_ref_2D_%s.pdf", workPath.Data (), dir.Data ()));
     } // end loop over iDir
+
+
+
+
+    for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
+
+      const char* cent = (iCent == nFcalCentBins ? "pPb_allCent" : Form ("pPb_iCent%i", iCent));
+
+      for (short iDir = 0; iDir < 3; iDir++) {
+
+        const TString dir = directions[iDir];
+
+        const char* cname = Form ("c_2d_respMatrix_%s_%s", dir.Data (), cent);
+
+        TCanvas* c = new TCanvas (cname, "", 880, 800);
+        const double lMargin = 0.17;
+        const double rMargin = 0.11;
+        const double bMargin = 0.17;
+        const double tMargin = 0.04;
+
+        c->SetLeftMargin (lMargin);
+        c->SetRightMargin (rMargin);
+        c->SetBottomMargin (bMargin);
+        c->SetTopMargin (tMargin);
+
+        c->SetLogz ();
+
+        TH2D* h2 = (TH2D*) rooUnfResp_jet_trk_pt_sig[1][iDir][iCent]->HresponseNoOverflow ()->Clone ("htemp");
+
+        TAxis* xax = h2->GetXaxis ();
+        TAxis* yax = h2->GetYaxis ();
+        TAxis* zax = h2->GetZaxis ();
+
+        xax->SetTitle ("Truth-level #it{p}_{T}^{jet}");
+        yax->SetTitle ("Reco.-level #it{p}_{T}^{jet}");
+        zax->SetTitle ("");
+
+        xax->SetTitleFont (43);
+        xax->SetTitleSize (32);
+        yax->SetTitleFont (43);
+        yax->SetTitleSize (32);
+        zax->SetTitleFont (43);
+        zax->SetTitleSize (32);
+        xax->SetLabelFont (43);
+        xax->SetLabelSize (0);
+        yax->SetLabelFont (43);
+        yax->SetLabelSize (0);
+        zax->SetLabelFont (43);
+        zax->SetLabelSize (24);
+
+        xax->SetTitleOffset (2.0);
+        yax->SetTitleOffset (2.0);
+
+        xax->SetNdivisions (-12);
+        yax->SetNdivisions (-12);
+
+        h2->DrawCopy ("colz");
+        SaferDelete (&h2);
+
+        tl->SetTextFont (43);
+        tl->SetTextSize (16);
+        tl->SetTextAlign (33);
+        tl->SetTextAngle (30);
+
+        tl->DrawLatex (std::floor (0.5*nPtChBins), -3, "15-20 GeV");
+        tl->DrawLatex (std::floor (1.5*nPtChBins), -3, "20-30 GeV");
+        tl->DrawLatex (std::floor (2.5*nPtChBins), -3, "30-45 GeV");
+        tl->DrawLatex (std::floor (3.5*nPtChBins), -3, "45-60 GeV");
+        tl->DrawLatex (std::floor (4.5*nPtChBins), -3, "60-90 GeV");
+        tl->DrawLatex (std::floor (5.5*nPtChBins), -3, "90-120 GeV");
+        tl->DrawLatex (std::floor (6.5*nPtChBins), -3, "120-160 GeV");
+        tl->DrawLatex (std::floor (7.5*nPtChBins), -3, "160-200 GeV");
+        tl->DrawLatex (std::floor (8.5*nPtChBins), -3, "200-240 GeV");
+        tl->DrawLatex (std::floor (9.5*nPtChBins), -3, "240-300 GeV");
+        tl->DrawLatex (std::floor (10.5*nPtChBins), -3, "300-350 GeV");
+        tl->DrawLatex (std::floor (11.5*nPtChBins), -3, "350-400 GeV");
+
+        tl->SetTextAlign (32);
+        tl->SetTextAngle (330);
+
+        tl->DrawLatex (-3, 1+std::floor (0.5*nPtChBins), "15-20 GeV");
+        tl->DrawLatex (-3, 1+std::floor (1.5*nPtChBins), "20-30 GeV");
+        tl->DrawLatex (-3, 1+std::floor (2.5*nPtChBins), "30-45 GeV");
+        tl->DrawLatex (-3, 1+std::floor (3.5*nPtChBins), "45-60 GeV");
+        tl->DrawLatex (-3, 1+std::floor (4.5*nPtChBins), "60-90 GeV");
+        tl->DrawLatex (-3, 1+std::floor (5.5*nPtChBins), "90-120 GeV");
+        tl->DrawLatex (-3, 1+std::floor (6.5*nPtChBins), "120-160 GeV");
+        tl->DrawLatex (-3, 1+std::floor (7.5*nPtChBins), "160-200 GeV");
+        tl->DrawLatex (-3, 1+std::floor (8.5*nPtChBins), "200-240 GeV");
+        tl->DrawLatex (-3, 1+std::floor (9.5*nPtChBins), "240-300 GeV");
+        tl->DrawLatex (-3, 1+std::floor (10.5*nPtChBins), "300-350 GeV");
+        tl->DrawLatex (-3, 1+std::floor (11.5*nPtChBins), "350-400 GeV");
+
+        tl->SetTextFont (43);
+        tl->SetTextSize (32);
+        tl->SetTextAlign (21);
+        tl->SetTextAngle (0);
+        
+        tl->SetTextColor (kBlack);
+        tl->SetTextAlign (12);
+
+        tl->SetTextSize (26);
+        tl->DrawLatexNDC (0.26, 0.890, "#bf{#it{ATLAS}} Simulation Internal");
+        tl->DrawLatexNDC (0.26, 0.850, "Pythia8 #it{pp} + #it{p}+Pb overlay, #sqrt{s} = 5.02 TeV");
+        tl->DrawLatexNDC (0.26, 0.810, iCent == nZdcCentBins ? "All centralities" : Form ("FCal %i-%i%%", zdcCentPercs[iCent+1], zdcCentPercs[iCent]));
+        tl->DrawLatexNDC (0.26, 0.770, (dir == "ns" ? "Near-side" : (dir == "perp" ? "Perpendicular" : "Away-side")));
+
+        l->SetLineColor (kGreen+2);
+        l->DrawLine (nPtChBins*2, nPtChBins*2, nPtChBins*10, nPtChBins*2);
+        l->DrawLine (nPtChBins*2, nPtChBins*2, nPtChBins*2, nPtChBins*10);
+
+        l->SetLineColor (kMagenta+2);
+        l->DrawLine (nPtChBins*4, nPtChBins*4, nPtChBins*10, nPtChBins*4);
+        l->DrawLine (nPtChBins*4, nPtChBins*4, nPtChBins*4, nPtChBins*10);
+
+        l->SetLineColor (kBlack);
+        l->DrawLine (nPtChBins*10, nPtChBins*2, nPtChBins*10, nPtChBins*10);
+        l->DrawLine (nPtChBins*2, nPtChBins*10, nPtChBins*10, nPtChBins*10);
+
+        c->SaveAs (Form ("%s/Plots/Unfolding/MC_Jet_TrkPt_ResponseMatrix_%s_2D_%s.pdf", workPath.Data (), cent, dir.Data ()));
+
+      } // end loop over iDir
+
+    } // end loop over iCent
 
 
 
@@ -1425,19 +1553,106 @@ void PlotResponseMatrix () {
       tl->DrawLatexNDC (0.26, 0.850, "Pythia8 #it{pp}, #sqrt{s} = 5.02 TeV");
 
       l->SetLineColor (kGreen+2);
-      l->DrawLine (30, 15, 30, 400);
-      l->DrawLine (15, 30, 400, 30);
+      l->DrawLine (30, 30, 30, 300);
+      l->DrawLine (30, 30, 300, 30);
 
       l->SetLineColor (kMagenta+2);
-      l->DrawLine (60, 15, 60, 400);
-      l->DrawLine (15, 60, 400, 60);
+      l->DrawLine (60, 60, 60, 300);
+      l->DrawLine (60, 60, 300, 60);
 
       l->SetLineColor (kBlack);
-      l->DrawLine (300, 15, 300, 400);
-      l->DrawLine (15, 300, 400, 300);
+      l->DrawLine (300, 30, 300, 300);
+      l->DrawLine (30, 300, 300, 300);
 
       c->SaveAs (Form ("%s/Plots/Unfolding/MC_JetPt_ResponseMatrix_ref_2D.pdf", workPath.Data ()));
     }
+
+
+
+
+    for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
+
+      const char* cent = (iCent == nFcalCentBins ? "pPb_allCent" : Form ("pPb_iCent%i", iCent));
+
+      const char* cname = Form ("c_2d_respMatrix_%s", cent);
+
+      TCanvas* c = new TCanvas (cname, "", 880, 800);
+      const double lMargin = 0.17;
+      const double rMargin = 0.11;
+      const double bMargin = 0.17;
+      const double tMargin = 0.04;
+
+      c->SetLeftMargin (lMargin);
+      c->SetRightMargin (rMargin);
+      c->SetBottomMargin (bMargin);
+      c->SetTopMargin (tMargin);
+
+      c->SetLogx ();
+      c->SetLogy ();
+      c->SetLogz ();
+
+      TH2D* h2 = (TH2D*) rooUnfResp_jet_pt[1][iCent]->HresponseNoOverflow ()->Clone ("htemp");
+
+      TAxis* xax = h2->GetXaxis ();
+      TAxis* yax = h2->GetYaxis ();
+      TAxis* zax = h2->GetZaxis ();
+
+      xax->SetTitle ("Truth-level #it{p}_{T}^{jet}");
+      yax->SetTitle ("Reco.-level #it{p}_{T}^{jet}");
+      zax->SetTitle ("");
+
+      xax->SetMoreLogLabels ();
+      yax->SetMoreLogLabels ();
+
+      xax->SetTitleFont (43);
+      xax->SetTitleSize (32);
+      yax->SetTitleFont (43);
+      yax->SetTitleSize (32);
+      zax->SetTitleFont (43);
+      zax->SetTitleSize (32);
+      xax->SetLabelFont (43);
+      xax->SetLabelSize (32);
+      yax->SetLabelFont (43);
+      yax->SetLabelSize (32);
+      zax->SetLabelFont (43);
+      zax->SetLabelSize (24);
+
+      xax->SetTitleOffset (2.0);
+      yax->SetTitleOffset (2.0);
+
+      xax->SetNdivisions (-12);
+      yax->SetNdivisions (-12);
+
+      h2->DrawCopy ("colz");
+      SaferDelete (&h2);
+
+      tl->SetTextFont (43);
+      tl->SetTextSize (32);
+      tl->SetTextAlign (21);
+      tl->SetTextAngle (0);
+      
+      tl->SetTextColor (kBlack);
+      tl->SetTextAlign (12);
+
+      tl->SetTextSize (26);
+      tl->DrawLatexNDC (0.26, 0.890, "#bf{#it{ATLAS}} Simulation Internal");
+      tl->DrawLatexNDC (0.26, 0.850, "Pythia8 #it{pp} + #it{p}+Pb overlay, #sqrt{s} = 5.02 TeV");
+      tl->DrawLatexNDC (0.26, 0.810, iCent == nZdcCentBins ? "All centralities" : Form ("FCal %i-%i%%", zdcCentPercs[iCent+1], zdcCentPercs[iCent]));
+
+      l->SetLineColor (kGreen+2);
+      l->DrawLine (30, 30, 30, 300);
+      l->DrawLine (30, 30, 300, 30);
+
+      l->SetLineColor (kMagenta+2);
+      l->DrawLine (60, 60, 60, 300);
+      l->DrawLine (60, 60, 300, 60);
+
+      l->SetLineColor (kBlack);
+      l->DrawLine (300, 30, 300, 300);
+      l->DrawLine (30, 300, 300, 300);
+
+      c->SaveAs (Form ("%s/Plots/Unfolding/MC_JetPt_ResponseMatrix_%s_2D.pdf", workPath.Data (), cent));
+    } // end loop over iCent
 
 
     /*

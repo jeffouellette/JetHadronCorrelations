@@ -486,6 +486,12 @@ bool CentralityAnalysis (const char* directory,
     if (IspPb ()) {
       if (edgeGap_Pb > 1.8)
         continue;
+
+      //if (sumGap_A > 2.5)
+      //  continue;
+
+      if (zdc_calibE_Pb == 0)
+        continue;
     }
 
 

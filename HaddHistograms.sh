@@ -8,7 +8,10 @@ declare -a datavardirs=("Nominal")
 #declare -a mcvardirs=("Nominal" "JESVar0" "JESVar1" "JESVar2" "JESVar3" "JESVar4" "JESVar5" "JESVar6" "JESVar7" "JESVar8" "JESVar9" "JESVar10" "JESVar11" "JESVar12" "JESVar13" "JESVar14" "JESVar15" "JESVar16" "JESVar17" "JESVar18" "JESVar19" "JESVar20") # don't run JESVar16 or JESVar20, they are not applicable
 #declare -a mcvardirs=("Nominal" "JESVar0" "JESVar1" "JESVar2" "JESVar3" "JESVar4" "JESVar5" "JESVar6" "JESVar7" "JESVar8" "JESVar9" "JESVar10" "JESVar11" "JESVar12" "JESVar13" "JESVar14" "JESVar15" "JESVar17" "JESVar18" "JESVar19")
 #declare -a mcvardirs=("Nominal" "JESVar0" "JESVar1" "JESVar2" "JESVar3" "JESVar4" "JESVar5" "JESVar6" "JESVar7" "JESVar8" "JESVar9" "JESVar10" "JESVar11" "JESVar12" "JESVar13" "JESVar14" "JESVar15" "JESVar17" "JESVar18" "JESVar19" "MCRecoJetsTruthParts" "MCTruthJetsTruthParts")
-declare -a mcvardirs=("Nominal" "MCTruthJetsTruthParts")
+#declare -a mcvardirs=("Nominal" "MCTruthJetsTruthParts")
+declare -a mcvardirs=("MCRecoJetsTruthMatchedParts")
+
+#declare -a mcmixvardirs=("Nominal" "MixCatVar2" "MixCatVar6")
 
 #declare -a sigmixdirs=("JetsHists" "MixedHists")
 declare -a sigmixdirs=("MixedHists")
@@ -52,32 +55,32 @@ for sigmix in ${sigmixdirs[@]}; do
     #        ${mbPath}/341123_hists.root \
     #        ${mbPath}/341184_hists.root &
 
-    wait
+    #wait
   
-    for cent in $(seq 0 4); do   
+    #for cent in $(seq 0 4); do   
   
-      hadd -f ${targetPath}/data16_5TeV_iCent${cent}_hists.root \
-              ${j50Path}/312796*iCent${cent}_hists.root \
-              ${j50Path}/312837*iCent${cent}_hists.root \
-              ${j50Path}/312937*iCent${cent}_hists.root \
-              ${j50Path}/312945*iCent${cent}_hists.root \
-              ${j50Path}/312968*iCent${cent}_hists.root \
-              ${j50Path}/314199*iCent${cent}_hists.root \
-              ${mbPath}/312796*iCent${cent}_hists.root \
-              ${mbPath}/312837*iCent${cent}_hists.root \
-              ${mbPath}/312937*iCent${cent}_hists.root \
-              ${mbPath}/312945*iCent${cent}_hists.root \
-              ${mbPath}/312968*iCent${cent}_hists.root \
-              ${mbPath}/314199*iCent${cent}_hists.root
+    #  hadd -f ${targetPath}/data16_5TeV_iCent${cent}_hists.root \
+    #          ${j50Path}/312796*iCent${cent}_hists.root \
+    #          ${j50Path}/312837*iCent${cent}_hists.root \
+    #          ${j50Path}/312937*iCent${cent}_hists.root \
+    #          ${j50Path}/312945*iCent${cent}_hists.root \
+    #          ${j50Path}/312968*iCent${cent}_hists.root \
+    #          ${j50Path}/314199*iCent${cent}_hists.root \
+    #          ${mbPath}/312796*iCent${cent}_hists.root \
+    #          ${mbPath}/312837*iCent${cent}_hists.root \
+    #          ${mbPath}/312937*iCent${cent}_hists.root \
+    #          ${mbPath}/312945*iCent${cent}_hists.root \
+    #          ${mbPath}/312968*iCent${cent}_hists.root \
+    #          ${mbPath}/314199*iCent${cent}_hists.root
   
-    done
+    #done
   
-    hadd -f ${targetPath}/data16_5TeV_allCent_hists.root \
-            ${targetPath}/data16_5TeV_iCent0_hists.root \
-            ${targetPath}/data16_5TeV_iCent1_hists.root \
-            ${targetPath}/data16_5TeV_iCent2_hists.root \
-            ${targetPath}/data16_5TeV_iCent3_hists.root \
-            ${targetPath}/data16_5TeV_iCent4_hists.root &
+    #hadd -f ${targetPath}/data16_5TeV_allCent_hists.root \
+    #        ${targetPath}/data16_5TeV_iCent0_hists.root \
+    #        ${targetPath}/data16_5TeV_iCent1_hists.root \
+    #        ${targetPath}/data16_5TeV_iCent2_hists.root \
+    #        ${targetPath}/data16_5TeV_iCent3_hists.root \
+    #        ${targetPath}/data16_5TeV_iCent4_hists.root &
 
   done
 
@@ -86,31 +89,68 @@ done
   
   
   
-#for vardir in ${mcvardirs[@]}; do
+for vardir in ${mcvardirs[@]}; do
+
+  targetPath=rootFiles/Histograms/All/JetsHists/${vardir}
+  mcPath=rootFiles/Histograms/MC/JetsHists/${vardir}
+
+  hadd -f ${targetPath}/mc17_5TeV_hists.root \
+          ${mcPath}/pp17_JZ0*hists.root \
+          ${mcPath}/pp17_JZ1_a*hists.root \
+          ${mcPath}/pp17_JZ1_b*hists.root \
+          ${mcPath}/pp17_JZ2_a*hists.root \
+          ${mcPath}/pp17_JZ2_b*hists.root \
+          ${mcPath}/pp17_JZ3_a*hists.root \
+          ${mcPath}/pp17_JZ3_b*hists.root &
+
+  for cent in $(seq 0 4); do   
+
+    hadd -f ${targetPath}/mc16_5TeV_iCent${cent}_hists.root \
+            ${mcPath}/pPb16_JZ1*iCent${cent}_hists.root \
+            ${mcPath}/pPb16_JZ2*iCent${cent}_hists.root \
+            ${mcPath}/pPb16_JZ3*iCent${cent}_hists.root &
+
+  done
+
+  wait
+
+  hadd -f ${targetPath}/mc16_5TeV_allCent_hists.root \
+          ${targetPath}/mc16_5TeV_iCent0_hists.root \
+          ${targetPath}/mc16_5TeV_iCent1_hists.root \
+          ${targetPath}/mc16_5TeV_iCent2_hists.root \
+          ${targetPath}/mc16_5TeV_iCent3_hists.root \
+          ${targetPath}/mc16_5TeV_iCent4_hists.root & 
+
+done
+
+
+
+
+#for vardir in ${mcmixvardirs[@]}; do
 #
-#  targetPath=rootFiles/Histograms/All/JetsHists/${vardir}
-#  mcPath=rootFiles/Histograms/MC/JetsHists/${vardir}
-#
+#  targetPath=rootFiles/Histograms/All/MixedHists/${vardir}
+#  mcPath=rootFiles/Histograms/MC/MixedHists/${vardir}
+#  
 #  hadd -f ${targetPath}/mc17_5TeV_hists.root \
-#          ${mcPath}/pp17_JZ0_hists.root \
-#          ${mcPath}/pp17_JZ1_a_hists.root \
-#          ${mcPath}/pp17_JZ1_b_hists.root \
-#          ${mcPath}/pp17_JZ2_a_hists.root \
-#          ${mcPath}/pp17_JZ2_b_hists.root \
-#          ${mcPath}/pp17_JZ3_a_hists.root \
-#          ${mcPath}/pp17_JZ3_b_hists.root &
-#
+#          ${mcPath}/pp17_JZ0*hists.root \
+#          ${mcPath}/pp17_JZ1_a*hists.root \
+#          ${mcPath}/pp17_JZ1_b*hists.root \
+#          ${mcPath}/pp17_JZ2_a*hists.root \
+#          ${mcPath}/pp17_JZ2_b*hists.root \
+#          ${mcPath}/pp17_JZ3_a*hists.root \
+#          ${mcPath}/pp17_JZ3_b*hists.root &
+#  
 #  for cent in $(seq 0 4); do   
-#
+#  
 #    hadd -f ${targetPath}/mc16_5TeV_iCent${cent}_hists.root \
-#            ${mcPath}/pPb16_JZ1_iCent${cent}_hists.root \
-#            ${mcPath}/pPb16_JZ2_iCent${cent}_hists.root \
-#            ${mcPath}/pPb16_JZ3_iCent${cent}_hists.root &
-#
+#            ${mcPath}/pPb16_JZ1*iCent${cent}_hists.root \
+#            ${mcPath}/pPb16_JZ2*iCent${cent}_hists.root \
+#            ${mcPath}/pPb16_JZ3*iCent${cent}_hists.root &
+#  
 #  done
-#
+#  
 #  wait
-#
+#  
 #  hadd -f ${targetPath}/mc16_5TeV_allCent_hists.root \
 #          ${targetPath}/mc16_5TeV_iCent0_hists.root \
 #          ${targetPath}/mc16_5TeV_iCent1_hists.root \
@@ -119,39 +159,6 @@ done
 #          ${targetPath}/mc16_5TeV_iCent4_hists.root & 
 #
 #done
-
-
-
-
-targetPath=rootFiles/Histograms/All/MixedHists/Nominal
-mcPath=rootFiles/Histograms/MC/MixedHists/Nominal
-
-hadd -f ${targetPath}/mc17_5TeV_hists.root \
-        ${mcPath}/pp17_JZ0*hists.root \
-        ${mcPath}/pp17_JZ1_a*hists.root \
-        ${mcPath}/pp17_JZ1_b*hists.root \
-        ${mcPath}/pp17_JZ2_a*hists.root \
-        ${mcPath}/pp17_JZ2_b*hists.root \
-        ${mcPath}/pp17_JZ3_a*hists.root \
-        ${mcPath}/pp17_JZ3_b*hists.root &
-
-for cent in $(seq 0 4); do   
-
-  hadd -f ${targetPath}/mc16_5TeV_iCent${cent}_hists.root \
-          ${mcPath}/pPb16_JZ1_iCent${cent}_hists.root \
-          ${mcPath}/pPb16_JZ2_iCent${cent}_hists.root \
-          ${mcPath}/pPb16_JZ3_iCent${cent}_hists.root &
-
-done
-
-wait
-
-hadd -f ${targetPath}/mc16_5TeV_allCent_hists.root \
-        ${targetPath}/mc16_5TeV_iCent0_hists.root \
-        ${targetPath}/mc16_5TeV_iCent1_hists.root \
-        ${targetPath}/mc16_5TeV_iCent2_hists.root \
-        ${targetPath}/mc16_5TeV_iCent3_hists.root \
-        ${targetPath}/mc16_5TeV_iCent4_hists.root & 
 
 
 
