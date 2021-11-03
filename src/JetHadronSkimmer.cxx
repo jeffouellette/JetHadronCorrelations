@@ -304,6 +304,7 @@ bool JetHadronSkimmer (const char* directory,
 
 
   Trigger* jetTrigger = nullptr;
+  Trigger* mbTrigger = nullptr;
 
   if (IsCollisions ()) {
     if (UseJ50Triggers ()) {
@@ -311,12 +312,20 @@ bool JetHadronSkimmer (const char* directory,
       std::cout << "Info: In JetHadronSkimmer.cxx: Looking for " << jet_trig_name[0] << " trigger" << std::endl;
       tree->SetBranchAddress ((jet_trig_name[0]+"_decision").c_str (), &(jetTrigger->trigDecision));
       tree->SetBranchAddress ((jet_trig_name[0]+"_prescale").c_str (), &(jetTrigger->trigPrescale));
+      mbTrigger = new Trigger (minbias_trig_name[0]);
+      std::cout << "Info: In JetHadronSkimmer.cxx: Looking for " << minbias_trig_name[0] << " trigger" << std::endl;
+      tree->SetBranchAddress ((minbias_trig_name[0]+"_decision").c_str (), &(mbTrigger->trigDecision));
+      tree->SetBranchAddress ((minbias_trig_name[0]+"_prescale").c_str (), &(mbTrigger->trigPrescale));
     }
     else if (UseJ100Triggers ()) {
       jetTrigger = new Trigger (jet_trig_name[1]);
       std::cout << "Info: In JetHadronSkimmer.cxx: Looking for " << jet_trig_name[1] << " trigger" << std::endl;
       tree->SetBranchAddress ((jet_trig_name[1]+"_decision").c_str (), &(jetTrigger->trigDecision));
       tree->SetBranchAddress ((jet_trig_name[1]+"_prescale").c_str (), &(jetTrigger->trigPrescale));
+      mbTrigger = new Trigger (minbias_trig_name[0]);
+      std::cout << "Info: In JetHadronSkimmer.cxx: Looking for " << minbias_trig_name[0] << " trigger" << std::endl;
+      tree->SetBranchAddress ((minbias_trig_name[0]+"_decision").c_str (), &(mbTrigger->trigDecision));
+      tree->SetBranchAddress ((minbias_trig_name[0]+"_prescale").c_str (), &(mbTrigger->trigPrescale));
     }
     else if (!UseJetTriggers ()) {
       jetTrigger = new Trigger (minbias_trig_name[0]);
@@ -370,9 +379,14 @@ bool JetHadronSkimmer (const char* directory,
 
     // triggering cut, require appropriate jet trigger to have fired
     if (IsCollisions ()) {
-      if (!jetTrigger->trigDecision)
+      const bool trigFired = jetTrigger->trigDecision || (mbTrigger != nullptr && !mbTrigger->trigDecision);
+      if (!trigFired)
         continue;
       event_weight = jetTrigger->trigPrescale;
+      jetTrigPS = jetTrigger->trigPrescale;
+      jetTrig = jetTrigger->trigDecision;
+      mbTrigPS = (mbTrigger != nullptr ? mbTrigger->trigPrescale : 0);
+      mbTrig = (mbTrigger != nullptr ? mbTrigger->trigDecision : 0);
     }
 
 
@@ -512,6 +526,7 @@ bool JetHadronSkimmer (const char* directory,
 
   if (IsCollisions ()) {
     SaferDelete (&jetTrigger);
+    SaferDelete (&mbTrigger);
   }
   SaferDelete (&tree);
 

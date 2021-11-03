@@ -21,6 +21,11 @@ float eventPlane = 0;
 float zdcEnergy = 0;
 float vz = 0;
 
+bool mbTrig = false;
+float mbTrigPS = 0;
+bool jetTrig = false;
+float jetTrigPS = 0;
+
 float fcal_et_Pb = 0;
 float fcal_et_p = 0;
 float q2x_A = 0;
@@ -124,6 +129,14 @@ struct OutTree {
       }
 
       tree->Branch ("vz",            &vz,            "vz/F");
+
+
+      if (IspPb ()) {
+        tree->Branch ("jetTrig",    &jetTrig,   "jetTrig/O");
+        tree->Branch ("jetTrigPS",  &jetTrigPS, "jetTrigPS/F");
+        tree->Branch ("mbTrig",     &mbTrig,    "mbTrig/O");
+        tree->Branch ("mbTrigPS",   &mbTrigPS,  "mbTrigPS/F");
+      }
 
       if (!Ispp ()) {
         tree->Branch ("fcal_et_Pb",    &fcal_et_Pb,    "fcal_et_Pb/F");

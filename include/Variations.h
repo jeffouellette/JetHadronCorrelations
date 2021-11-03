@@ -28,7 +28,8 @@ std::vector <TString> variations = {
   "MixCatVar1",
   "MixCatVar2",
   "MixCatVar3",*/
-  "NonClosureVar",/*
+  //"NonClosureVar",
+  /*
 
   "JESVar0",
   "JESVar1",

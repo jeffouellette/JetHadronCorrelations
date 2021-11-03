@@ -1514,7 +1514,7 @@ void PlotPtCh (const char* inFileTag) {
 
       float ymin = 2e-9;
       float ymax = 3e4;
-      h = new TH1D ("htemp", ";#it{p}_{T}^{ch} [GeV];(1/N_{jet}) (dN_{ch} / d#it{p}_{T}^{ch}) [GeV^{-1}]", 1, pTChBins[1], pTChBins[nPtChBins-(iPtJInt == 0 ? 4 : 2)]);
+      h = new TH1D ("htemp", ";#it{p}_{T}^{ch} [GeV];(1/N_{jet}) (dN_{ch} / d#it{p}_{T}^{ch}) [GeV^{-1}]", 1, pTChBins[1], pTChBins[nPtChBins-(iPtJInt == 0 ? 3 : 1)]);
       h->GetXaxis ()->SetMoreLogLabels ();
       h->GetYaxis ()->SetRangeUser (ymin, ymax);
       h->GetXaxis ()->SetTitleSize (0.036);
@@ -1602,7 +1602,7 @@ void PlotPtCh (const char* inFileTag) {
 
         gPad->SetLogx ();
 
-        TH1D* h = new TH1D ("h", ";#it{p}_{T}^{ch} [GeV];#it{I}_{#it{p}Pb}", 1, pTChBins[1], iDir == 1 ? 10 : pTChBins[nPtChBins-(iPtJInt == 0 ? 4 : 2)]);//pTChBins[nPtChBins]);
+        TH1D* h = new TH1D ("h", ";#it{p}_{T}^{ch} [GeV];#it{I}_{#it{p}Pb}", 1, pTChBins[1], iDir == 1 ? 10 : pTChBins[nPtChBins-(iPtJInt == 0 ? 3 : 1)]);//pTChBins[nPtChBins]);
         h->GetXaxis ()->SetMoreLogLabels ();
         h->GetYaxis ()->SetRangeUser (0.74, 1.4);
         h->SetBinContent (1, 1);

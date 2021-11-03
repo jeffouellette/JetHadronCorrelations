@@ -32,24 +32,24 @@ short GetJetSpectraNIters (const short iPtJInt, const short iCent) {
   switch (iPtJInt) {
     case 0: // pTJ > 30 GeV
     switch (iCent) {
-      case 5:  return 6;
-      case 0:  return 6;
-      case 1:  return 6;
-      case 2:  return 6;
-      case 3:  return 6;
-      case 4:  return 6;
-      case -1: return 6;
+      case 5:  return 9; // all centralities
+      case 0:  return 9; // 0-20%
+      case 1:  return 9; // 20-40%...
+      case 2:  return 9;
+      case 3:  return 7;
+      case 4:  return 7; // ... 80-100%
+      case -1: return 7; // pp
       default: return 0;
     }
     case 1: // pTJ > 60 GeV
     switch (iCent) {
-      case 5:  return 4;
-      case 0:  return 4;
-      case 1:  return 4;
-      case 2:  return 4;
-      case 3:  return 4;
-      case 4:  return 4;
-      case -1: return 4;
+      case 5:  return 17; // all centralities
+      case 0:  return 15; // 0-20%
+      case 1:  return 13; // 20-40%...
+      case 2:  return 13;
+      case 3:  return 11;
+      case 4:  return 9; // ... 80-100%
+      case -1: return 15; // pp
       default: return 0;
     }
     default: return 0;
@@ -58,84 +58,84 @@ short GetJetSpectraNIters (const short iPtJInt, const short iCent) {
 
 
 short GetTrkSpectraNIters (const short iPtJInt, const short iDir, const short iCent) {
-  return GetJetSpectraNIters (iPtJInt, iCent);
-  //switch (iPtJInt) {
-  //  case 0: // pTJ > 30 GeV
-  //  switch (iDir) {
-  //    case 0: // near-side
-  //    switch (iCent) {
-  //      case 5:  return 7;
-  //      case 0:  return 8;
-  //      case 1:  return 7;
-  //      case 2:  return 7;
-  //      case 3:  return 6;
-  //      case 4:  return 6;
-  //      case -1: return 5;
-  //      default: return 0;
-  //    }
-  //    case 1: // perpendicular
-  //    switch (iCent) {
-  //      case 5:  return 1;
-  //      case 0:  return 1;
-  //      case 1:  return 1;
-  //      case 2:  return 1;
-  //      case 3:  return 1;
-  //      case 4:  return 1;
-  //      case -1: return 1;
-  //      default: return 0;
-  //    }
-  //    case 2: // away-side
-  //    switch (iCent) {
-  //      case 5:  return 7;
-  //      case 0:  return 8;
-  //      case 1:  return 7;
-  //      case 2:  return 7;
-  //      case 3:  return 6;
-  //      case 4:  return 6;
-  //      case -1: return 5;
-  //      default: return 0;
-  //    }
-  //    default: return 0;
-  //  }
-  //  case 1: // pTJ > 60 GeV
-  //  switch (iDir) {
-  //    case 0: // near-side
-  //    switch (iCent) {
-  //      case 5:  return 2;
-  //      case 0:  return 2;
-  //      case 1:  return 2;
-  //      case 2:  return 2;
-  //      case 3:  return 1;
-  //      case 4:  return 1;
-  //      case -1: return 2;
-  //      default: return 0;
-  //    }
-  //    case 1: // perpendicular
-  //    switch (iCent) {
-  //      case 5:  return 1;
-  //      case 0:  return 1;
-  //      case 1:  return 1;
-  //      case 2:  return 1;
-  //      case 3:  return 1;
-  //      case 4:  return 1;
-  //      case -1: return 3;
-  //      default: return 0;
-  //    }
-  //    case 2: // away-side
-  //    switch (iCent) {
-  //      case 5:  return 3;
-  //      case 0:  return 2;
-  //      case 1:  return 2;
-  //      case 2:  return 2;
-  //      case 3:  return 1;
-  //      case 4:  return 1;
-  //      case -1: return 3;
-  //      default: return 0;
-  //    }
-  //    default: return 0;
-  //  }
-  //  default: return 0;
-  //}
+  //return GetJetSpectraNIters (iPtJInt, iCent);
+  switch (iPtJInt) {
+    case 0: // pTJ > 30 GeV
+    switch (iDir) {
+      case 0: // near-side
+      switch (iCent) {
+        case 5:  return 9; // all centralities
+        case 0:  return 9; // 0-20%
+        case 1:  return 9; // 20-40%...
+        case 2:  return 9;
+        case 3:  return 7;
+        case 4:  return 7; // ... 80-100%
+        case -1: return 7; // pp
+        default: return 0;
+      }
+      case 1: // perpendicular
+      switch (iCent) {
+        case 5:  return 1;
+        case 0:  return 1;
+        case 1:  return 1;
+        case 2:  return 1;
+        case 3:  return 1;
+        case 4:  return 1;
+        case -1: return 1;
+        default: return 0;
+      }
+      case 2: // away-side
+      switch (iCent) {
+        case 5:  return 9; // all centralities
+        case 0:  return 9; // 0-20%
+        case 1:  return 7; // 20-40%...
+        case 2:  return 7;
+        case 3:  return 7;
+        case 4:  return 7; // ... 80-100%
+        case -1: return 7; // pp
+        default: return 0;
+      }
+      default: return 0;
+    }
+    case 1: // pTJ > 60 GeV
+    switch (iDir) {
+      case 0: // near-side
+      switch (iCent) {
+        case 5:  return 17; // all centralities
+        case 0:  return 15; // 0-20%
+        case 1:  return 13; // 20-40%...
+        case 2:  return 13;
+        case 3:  return 11;
+        case 4:  return 9; // ... 80-100%
+        case -1: return 15; // pp
+        default: return 0;
+      }
+      case 1: // perpendicular
+      switch (iCent) {
+        case 5:  return 1;
+        case 0:  return 1;
+        case 1:  return 1;
+        case 2:  return 1;
+        case 3:  return 1;
+        case 4:  return 1;
+        case -1: return 3;
+        default: return 0;
+      }
+      case 2: // away-side
+      switch (iCent) {
+        case 5:  return 15; // all centralities
+        case 0:  return 13; // 0-20%
+        case 1:  return 11; // 20-40%...
+        case 2:  return 11;
+        case 3:  return 9;
+        case 4:  return 7; // ... 80-100%
+        case -1: return 13; // pp
+        default: return 0;
+      }
+      default: return 0;
+    }
+    default: return 0;
+  }
 }
 
 
@@ -868,6 +868,7 @@ void ProcessCorrelations (const char* tag, const char* outFileTag, const int nIt
 
             const TString pTJInt = (iPtJInt == 0 ? "30GeV" : "60GeV");
             const float minJetPt = (iPtJInt == 0 ? 30. : 60.);
+            const float maxJetPt = 300;
 
             RooUnfoldBayes* bayesUnf = new RooUnfoldBayes (rooUnfResp_jet_trk_pt_ref_sig[iDir], h2, GetTrkSpectraNIters (iPtJInt, iDir, -1));
             bayesUnf->SetVerbose (-1);
@@ -881,7 +882,7 @@ void ProcessCorrelations (const char* tag, const char* outFileTag, const int nIt
             double totalJetsUF = 0;
             for (short iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
 
-              if (0.5 * (pTJBins[iPtJ] + pTJBins[iPtJ+1]) < minJetPt || 300 < 0.5 * (pTJBins[iPtJ] + pTJBins[iPtJ+1])) continue;
+              if (0.5 * (pTJBins[iPtJ] + pTJBins[iPtJ+1]) < minJetPt || maxJetPt < 0.5 * (pTJBins[iPtJ] + pTJBins[iPtJ+1])) continue;
 
               totalJetsUF += h_jet_pt_ref_unf[iDType][iPtJInt][iVar]->GetBinContent (iPtJ+1);
 
@@ -933,6 +934,7 @@ void ProcessCorrelations (const char* tag, const char* outFileTag, const int nIt
 
               const TString pTJInt = (iPtJInt == 0 ? "30GeV" : "60GeV");
               const float minJetPt = (iPtJInt == 0 ? 30. : 60.);
+              const float maxJetPt = 300;
 
               RooUnfoldBayes* bayesUnf = new RooUnfoldBayes (rooUnfResp_jet_trk_pt_sig[iDir][iCent], h2, GetTrkSpectraNIters (iPtJInt, iDir, iCent));
               bayesUnf->SetVerbose (-1);
@@ -946,7 +948,7 @@ void ProcessCorrelations (const char* tag, const char* outFileTag, const int nIt
               double totalJetsUF = 0;
               for (short iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
 
-                if (0.5 * (pTJBins[iPtJ] + pTJBins[iPtJ+1]) < minJetPt || 300 < 0.5 * (pTJBins[iPtJ] + pTJBins[iPtJ+1])) continue;
+                if (0.5 * (pTJBins[iPtJ] + pTJBins[iPtJ+1]) < minJetPt || maxJetPt < 0.5 * (pTJBins[iPtJ] + pTJBins[iPtJ+1])) continue;
 
                 totalJetsUF += h_jet_pt_unf[iDType][iPtJInt][iCent][iVar]->GetBinContent (iPtJ+1);
 
@@ -1060,6 +1062,7 @@ void ProcessCorrelations (const char* tag, const char* outFileTag, const int nIt
 
             const TString pTJInt = (iPtJInt == 0 ? "30GeV" : "60GeV");
             const float minJetPt = (iPtJInt == 0 ? 30. : 60.);
+            const float maxJetPt = 300;
 
             TH1D* h = new TH1D (Form ("h_jetInt_trk_pt_%s_ref_unf_data_%s_Nominal_nIters%i", dir.Data (), pTJInt.Data (), nIters), "", nPtChBins, pTChBins);
             h->Sumw2 ();
@@ -1068,7 +1071,7 @@ void ProcessCorrelations (const char* tag, const char* outFileTag, const int nIt
             double totalJetsUF = 0;
             for (short iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
     
-              if (0.5 * (pTJBins[iPtJ] + pTJBins[iPtJ+1]) < minJetPt || 300 < 0.5 * (pTJBins[iPtJ] + pTJBins[iPtJ+1])) continue;
+              if (0.5 * (pTJBins[iPtJ] + pTJBins[iPtJ+1]) < minJetPt || maxJetPt < 0.5 * (pTJBins[iPtJ] + pTJBins[iPtJ+1])) continue;
     
               totalJetsUF += h_jet_pt_ref_unf_nIters[iIter]->GetBinContent (iPtJ+1);
     
@@ -1129,6 +1132,7 @@ void ProcessCorrelations (const char* tag, const char* outFileTag, const int nIt
 
               const TString pTJInt = (iPtJInt == 0 ? "30GeV" : "60GeV");
               const float minJetPt = (iPtJInt == 0 ? 30. : 60.);
+              const float maxJetPt = 300;
 
               TH1D* h = new TH1D (Form ("h_jetInt_trk_pt_%s_pPb_unf_%s_data_%s_Nominal_nIters%i", dir.Data (), cent.Data (), pTJInt.Data (), nIters), "", nPtChBins, pTChBins);
               h->Sumw2 ();
@@ -1137,7 +1141,7 @@ void ProcessCorrelations (const char* tag, const char* outFileTag, const int nIt
               double totalJetsUF = 0;
               for (short iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
     
-                if (0.5 * (pTJBins[iPtJ] + pTJBins[iPtJ+1]) < minJetPt || 300 < 0.5 * (pTJBins[iPtJ] + pTJBins[iPtJ+1])) continue;
+                if (0.5 * (pTJBins[iPtJ] + pTJBins[iPtJ+1]) < minJetPt || maxJetPt < 0.5 * (pTJBins[iPtJ] + pTJBins[iPtJ+1])) continue;
     
                 totalJetsUF += h_jet_pt_unf_nIters[iCent][iIter]->GetBinContent (iPtJ+1);
     
@@ -1181,6 +1185,7 @@ void ProcessCorrelations (const char* tag, const char* outFileTag, const int nIt
 
       const TString pTJInt = (iPtJInt == 0 ? "30GeV" : "60GeV");
       const float minJetPt = (iPtJInt == 0 ? 30. : 60.);
+      const float maxJetPt = 300;
 
       for (short iVar = 0; iVar < nVar; iVar++) {
 
@@ -1209,7 +1214,7 @@ void ProcessCorrelations (const char* tag, const char* outFileTag, const int nIt
             double totalJets = 0;//, totalJetsUF = 0;
             for (short iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
 
-              if (0.5 * (pTJBins[iPtJ] + pTJBins[iPtJ+1]) < minJetPt || 300 < 0.5 * (pTJBins[iPtJ] + pTJBins[iPtJ+1])) continue;
+              if (0.5 * (pTJBins[iPtJ] + pTJBins[iPtJ+1]) < minJetPt || maxJetPt < 0.5 * (pTJBins[iPtJ] + pTJBins[iPtJ+1])) continue;
 
               const double nJets = h_jet_pt_ref[iDType][iVar]->GetBinContent (iPtJ+1);
               h_jetInt_trk_pt_ref[iDType][iPtJInt][iDir][iVar]->Add (h_jet_trk_pt_ref[iDType][iPtJ][iDir][iVar], nJets);
@@ -1249,7 +1254,7 @@ void ProcessCorrelations (const char* tag, const char* outFileTag, const int nIt
             double totalJets = 0;//, totalJetsUF = 0;
             for (short iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
 
-              if (0.5 * (pTJBins[iPtJ] + pTJBins[iPtJ+1]) < minJetPt || 300 < 0.5 * (pTJBins[iPtJ] + pTJBins[iPtJ+1])) continue;
+              if (0.5 * (pTJBins[iPtJ] + pTJBins[iPtJ+1]) < minJetPt || maxJetPt < 0.5 * (pTJBins[iPtJ] + pTJBins[iPtJ+1])) continue;
 
               const double nJets = h_jet_pt[iDType][iCent][iVar]->GetBinContent (iPtJ+1);
               h_jetInt_trk_pt[iDType][iPtJInt][iDir][iCent][iVar]->Add (h_jet_trk_pt[iDType][iPtJ][iDir][iCent][iVar], nJets);
@@ -1292,7 +1297,7 @@ void ProcessCorrelations (const char* tag, const char* outFileTag, const int nIt
             double totalJets = 0;
             for (short iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
 
-              if (0.5 * (pTJBins[iPtJ] + pTJBins[iPtJ+1]) < minJetPt || 300 < 0.5 * (pTJBins[iPtJ] + pTJBins[iPtJ+1])) continue;
+              if (0.5 * (pTJBins[iPtJ] + pTJBins[iPtJ+1]) < minJetPt || maxJetPt < 0.5 * (pTJBins[iPtJ] + pTJBins[iPtJ+1])) continue;
 
               const double nJets = h_jet_pt_ref[iDType][iVar]->GetBinContent (iPtJ+1);
               h_jetInt_trk_dphi_ref[iDType][iPtJInt][iPtCh][iVar]->Add (h_jet_trk_dphi_ref[iDType][iPtJ][iPtCh][iVar], nJets);
@@ -1321,7 +1326,7 @@ void ProcessCorrelations (const char* tag, const char* outFileTag, const int nIt
             double totalJets = 0;
             for (short iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
 
-              if (0.5 * (pTJBins[iPtJ] + pTJBins[iPtJ+1]) < minJetPt || 300 < 0.5 * (pTJBins[iPtJ] + pTJBins[iPtJ+1])) continue;
+              if (0.5 * (pTJBins[iPtJ] + pTJBins[iPtJ+1]) < minJetPt || maxJetPt < 0.5 * (pTJBins[iPtJ] + pTJBins[iPtJ+1])) continue;
 
               const double nJets = h_jet_pt[iDType][iCent][iVar]->GetBinContent (iPtJ+1);
               h_jetInt_trk_dphi[iDType][iPtJInt][iPtCh][iCent][iVar]->Add (h_jet_trk_dphi[iDType][iPtJ][iPtCh][iCent][iVar], nJets);
