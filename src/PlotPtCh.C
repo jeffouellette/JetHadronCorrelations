@@ -30,8 +30,8 @@ using namespace JetHadronCorrelations;
 
 const bool makeTotalSystPlots = false;
 const bool makeBkgdSystPlots  = false;
-const bool makeSigSystPlots   = false;
-const bool makeIpPbSystPlots  = false;
+const bool makeSigSystPlots   = true;
+const bool makeIpPbSystPlots  = true;
 const bool makeMCClosurePlots = true;
 const bool makeUnfoldingPlots = true;
 
@@ -406,16 +406,13 @@ void PlotPtCh (const char* inFileTag) {
 
         float ymin = 8e-6;
         float ymax = 3e1;
-        h = (TH1D*) h_jetInt_trk_pt_ref[iDType][iPtJInt][0]->Clone ("h");
-        h->Reset ();
+        h = new TH1D ("h", ";;(1/N_{jet}) (dN_{ch} / d#it{p}_{T}^{ch}) [GeV^{-1}]", 1, pTChBins[1], pTChBins[nPtChBins-(iPtJInt == 0 ? 3 : 1)]);
         h->GetYaxis ()->SetRangeUser (ymin, ymax);
-        h->GetYaxis ()->SetTitle ("(1/N_{jet}) (dN_{ch} / d#it{p}_{T}^{ch}) [GeV^{-1}]");
         h->GetYaxis ()->SetTitleSize (0.028/fuPad);
         h->GetYaxis ()->SetLabelSize (0.028/fuPad);
         h->GetYaxis ()->SetTitleOffset (3.0*fuPad);
 
-        h->SetLineWidth (1);
-        h->SetLineStyle (2);
+        h->SetLineWidth (0);
         h->DrawCopy ("hist ][");
         SaferDelete (&h);
 
@@ -475,16 +472,13 @@ void PlotPtCh (const char* inFileTag) {
         ymin = 8e-6;
         ymax = 3e1;
 
-        h = (TH1D*) h_jetInt_trk_pt_ref[iDType][iPtJInt][2]->Clone ("h");
-        h->Reset ();
+        h = new TH1D ("h", ";;(1/N_{jet}) (dN_{ch} / d#it{p}_{T}^{ch}) [GeV^{-1}]", 1, pTChBins[1], pTChBins[nPtChBins-(iPtJInt == 0 ? 3 : 1)]);
         h->GetYaxis ()->SetRangeUser (ymin, ymax);
-        h->GetYaxis ()->SetTitle ("(1/N_{jet}) (dN_{ch} / d#it{p}_{T}^{ch}) [GeV^{-1}]");
         h->GetYaxis ()->SetTitleSize (0.028/fuPad);
         h->GetYaxis ()->SetLabelSize (0.028/fuPad);
         h->GetYaxis ()->SetTitleOffset (3.0*fuPad);
 
-        h->SetLineWidth (1);
-        h->SetLineStyle (2);
+        h->SetLineWidth (0);
         h->DrawCopy ("hist ][");
         SaferDelete (&h);
 
@@ -548,18 +542,15 @@ void PlotPtCh (const char* inFileTag) {
         ymin = 8e-6;
         ymax = 3e1;
 
-        h = (TH1D*) h_jetInt_trk_pt_ref_sig[iDType][iPtJInt][0]->Clone ("h");
-        h->Reset ();
+        h = new TH1D ("h", ";;(Sig.+Bkg.) - Bkg.", 1, pTChBins[1], pTChBins[nPtChBins-(iPtJInt == 0 ? 3 : 1)]);
         h->GetXaxis ()->SetMoreLogLabels ();
         h->GetYaxis ()->SetRangeUser (ymin, ymax);
-        h->GetYaxis ()->SetTitle ("(Sig.+Bkg.) - Bkg.");
         h->GetYaxis ()->SetTitleSize (0.028/fdPad);
         h->GetYaxis ()->SetLabelSize (0.028/fdPad);
         h->GetYaxis ()->SetTitleOffset (3.0*fdPad);
         h->GetYaxis ()->CenterTitle ();
 
-        h->SetLineWidth (1);
-        h->SetLineStyle (2);
+        h->SetLineWidth (0);
         h->DrawCopy ("hist ][");
         SaferDelete (&h);
 
@@ -616,18 +607,15 @@ void PlotPtCh (const char* inFileTag) {
         ymin = 8e-6;
         ymax = 3e1;
 
-        h = (TH1D*) h_jetInt_trk_pt_ref_sig[iDType][iPtJInt][2]->Clone ("h");
-        h->Reset ();
+        h = new TH1D ("h", ";;(Sig.+Bkg.) - Bkg.", 1, pTChBins[1], pTChBins[nPtChBins-(iPtJInt == 0 ? 3 : 1)]);
         h->GetXaxis ()->SetMoreLogLabels ();
         h->GetYaxis ()->SetRangeUser (ymin, ymax);
-        h->GetYaxis ()->SetTitle ("(Sig.+Bkg.) - Bkg.");
         h->GetYaxis ()->SetTitleSize (0.028/fdPad);
         h->GetYaxis ()->SetLabelSize (0.028/fdPad);
         h->GetYaxis ()->SetTitleOffset (3.0*fdPad);
         h->GetYaxis ()->CenterTitle ();
 
-        h->SetLineWidth (1);
-        h->SetLineStyle (2);
+        h->SetLineWidth (0);
         h->DrawCopy ("hist ][");
         SaferDelete (&h);
 
@@ -679,17 +667,14 @@ void PlotPtCh (const char* inFileTag) {
         ymin = 0.53;
         ymax = 1.47;//(strcmp (tag, "30GeVJets") == 0 || strcmp (tag, "15GeVJets") == 0 ? 1.45 : 1.17);
 
-        h = (TH1D*) h_jetInt_trk_pt_iaa[iDType][iPtJInt][0][iCent]->Clone ("h");
-        h->Reset ();
-        for (int i = 1; i <= h->GetNbinsX (); i++) h->SetBinContent (i, 1);
+        h = new TH1D ("h", ";#it{p}_{T}^{ch} [GeV];#it{I}_{#it{p}Pb} = #it{p}+Pb / #it{pp}", 1, pTChBins[1], pTChBins[nPtChBins-(iPtJInt == 0 ? 3 : 1)]);
+        h->SetBinContent (1, 1);
         h->GetXaxis ()->SetMoreLogLabels ();
         h->GetYaxis ()->SetRangeUser (ymin, ymax);
-        h->GetXaxis ()->SetTitle ("#it{p}_{T}^{ch} [GeV]");
         h->GetXaxis ()->SetTitleSize (0.028/fdPad);
         h->GetXaxis ()->SetLabelSize (0.028/fdPad);
         h->GetXaxis ()->SetTitleOffset (3.7*fdPad);
         h->GetXaxis ()->SetLabelOffset (-0.05*fdPad);
-        h->GetYaxis ()->SetTitle ("#it{I}_{#it{p}Pb} = #it{p}+Pb / #it{pp}");
         h->GetYaxis ()->SetTitleSize (0.028/fdPad);
         h->GetYaxis ()->SetLabelSize (0.028/fdPad);
         h->GetYaxis ()->SetTitleOffset (3.0*fdPad);
@@ -717,17 +702,14 @@ void PlotPtCh (const char* inFileTag) {
         ymin = 0.53;
         ymax = 1.47;//(strcmp (tag, "30GeVJets") == 0 || strcmp (tag, "15GeVJets") == 0 ? 1.45 : 1.17);
 
-        h = (TH1D*) h_jetInt_trk_pt_iaa[iDType][iPtJInt][2][iCent]->Clone ("h");
-        h->Reset ();
-        for (int i = 1; i <= h->GetNbinsX (); i++) h->SetBinContent (i, 1);
+        h = new TH1D ("h", ";#it{p}_{T}^{ch} [GeV];#it{I}_{#it{p}Pb} = #it{p}+Pb / #it{pp}", 1, pTChBins[1], pTChBins[nPtChBins-(iPtJInt == 0 ? 3 : 1)]);
+        h->SetBinContent (1, 1);
         h->GetXaxis ()->SetMoreLogLabels ();
         h->GetYaxis ()->SetRangeUser (ymin, ymax);
-        h->GetXaxis ()->SetTitle ("#it{p}_{T}^{ch} [GeV]");
         h->GetXaxis ()->SetTitleSize (0.028/fdPad);
         h->GetXaxis ()->SetLabelSize (0.028/fdPad);
         h->GetXaxis ()->SetTitleOffset (3.7*fdPad);
         h->GetXaxis ()->SetLabelOffset (-0.05*fdPad);
-        h->GetYaxis ()->SetTitle ("#it{I}_{#it{p}Pb} = #it{p}+Pb / #it{pp}");
         h->GetYaxis ()->SetTitleSize (0.028/fdPad);
         h->GetYaxis ()->SetLabelSize (0.028/fdPad);
         h->GetYaxis ()->SetTitleOffset (3.0*fdPad);
@@ -817,16 +799,13 @@ void PlotPtCh (const char* inFileTag) {
     float ymin = 8e-6;
     float ymax = 3e1;
 
-    h = (TH1D*) h_jetInt_trk_pt_ref[0][iPtJInt][0]->Clone ("h");
-    h->Reset ();
+    h = new TH1D ("h", ";;(1/N_{jet}) (dN_{ch} / d#it{p}_{T}^{ch}) [GeV^{-1}]", 1, pTChBins[1], pTChBins[nPtChBins-(iPtJInt == 0 ? 3 : 1)]);
     h->GetYaxis ()->SetRangeUser (ymin, ymax);
-    h->GetYaxis ()->SetTitle ("(1/N_{jet}) (dN_{ch} / d#it{p}_{T}^{ch}) [GeV^{-1}]");
     h->GetYaxis ()->SetTitleSize (0.028/fuPad);
     h->GetYaxis ()->SetLabelSize (0.028/fuPad);
     h->GetYaxis ()->SetTitleOffset (3.0*fuPad);
 
-    h->SetLineWidth (1);
-    h->SetLineStyle (2);
+    h->SetLineWidth (0);
     h->DrawCopy ("hist ][");
     SaferDelete (&h);
 
@@ -885,16 +864,13 @@ void PlotPtCh (const char* inFileTag) {
     ymin = 8e-6;
     ymax = 3e1;
 
-    h = (TH1D*) h_jetInt_trk_pt_ref[0][iPtJInt][2]->Clone ("h");
-    h->Reset ();
+    h = new TH1D ("h", ";;(1/N_{jet}) (dN_{ch} / d#it{p}_{T}^{ch}) [GeV^{-1}]", 1, pTChBins[1], pTChBins[nPtChBins-(iPtJInt == 0 ? 3 : 1)]);
     h->GetYaxis ()->SetRangeUser (ymin, ymax);
-    h->GetYaxis ()->SetTitle ("(1/N_{jet}) (dN_{ch} / d#it{p}_{T}^{ch}) [GeV^{-1}]");
     h->GetYaxis ()->SetTitleSize (0.028/fuPad);
     h->GetYaxis ()->SetLabelSize (0.028/fuPad);
     h->GetYaxis ()->SetTitleOffset (3.0*fuPad);
 
-    h->SetLineWidth (1);
-    h->SetLineStyle (2);
+    h->SetLineWidth (0);
     h->DrawCopy ("hist ][");
     SaferDelete (&h);
 
@@ -952,18 +928,15 @@ void PlotPtCh (const char* inFileTag) {
     ymin = 8e-6;
     ymax = 3e1;
 
-    h = (TH1D*) h_jetInt_trk_pt_ref_sig[0][iPtJInt][0]->Clone ("h");
-    h->Reset ();
+    h = new TH1D ("h", ";;(Sig.+Bkg.) - Bkg.", 1, pTChBins[1], pTChBins[nPtChBins-(iPtJInt == 0 ? 3 : 1)]);
     h->GetXaxis ()->SetMoreLogLabels ();
     h->GetYaxis ()->SetRangeUser (ymin, ymax);
-    h->GetYaxis ()->SetTitle ("(Sig.+Bkg.) - Bkg.");
     h->GetYaxis ()->SetTitleSize (0.028/fdPad);
     h->GetYaxis ()->SetLabelSize (0.028/fdPad);
     h->GetYaxis ()->SetTitleOffset (3.0*fdPad);
     h->GetYaxis ()->CenterTitle ();
 
-    h->SetLineWidth (1);
-    h->SetLineStyle (2);
+    h->SetLineWidth (0);
     h->DrawCopy ("hist ][");
     SaferDelete (&h);
 
@@ -997,18 +970,15 @@ void PlotPtCh (const char* inFileTag) {
     ymin = 8e-6;
     ymax = 3e1;
 
-    h = (TH1D*) h_jetInt_trk_pt_ref_sig[0][iPtJInt][2]->Clone ("h");
-    h->Reset ();
+    h = new TH1D ("h", ";;(Sig.+Bkg.) - Bkg.", 1, pTChBins[1], pTChBins[nPtChBins-(iPtJInt == 0 ? 3 : 1)]);
     h->GetXaxis ()->SetMoreLogLabels ();
     h->GetYaxis ()->SetRangeUser (ymin, ymax);
-    h->GetYaxis ()->SetTitle ("(Sig.+Bkg.) - Bkg.");
     h->GetYaxis ()->SetTitleSize (0.028/fdPad);
     h->GetYaxis ()->SetLabelSize (0.028/fdPad);
     h->GetYaxis ()->SetTitleOffset (3.0*fdPad);
     h->GetYaxis ()->CenterTitle ();
 
-    h->SetLineWidth (1);
-    h->SetLineStyle (2);
+    h->SetLineWidth (0);
     h->DrawCopy ("hist ][");
     SaferDelete (&h);
 
@@ -1037,17 +1007,14 @@ void PlotPtCh (const char* inFileTag) {
     ymin = 0.53;
     ymax = (strcmp (tag, "30GeVJets") == 0 || strcmp (tag, "15GeVJets") == 0 ? 1.45 : 1.17);
 
-    h = (TH1D*) h_jetInt_trk_pt_iaa[0][iPtJInt][0][iCent]->Clone ("h");
-    h->Reset ();
-    for (int i = 1; i <= h->GetNbinsX (); i++) h->SetBinContent (i, 1);
+    h = new TH1D ("h", ";#it{p}_{T}^{ch} [GeV];#it{I}_{#it{p}Pb} = #it{p}+Pb / #it{pp}", 1, pTChBins[1], pTChBins[nPtChBins-(iPtJInt == 0 ? 3 : 1)]);
+    h->SetBinContent (1, 1);
     h->GetXaxis ()->SetMoreLogLabels ();
     h->GetYaxis ()->SetRangeUser (ymin, ymax);
-    h->GetXaxis ()->SetTitle ("#it{p}_{T}^{ch} [GeV]");
     h->GetXaxis ()->SetTitleSize (0.028/fdPad);
     h->GetXaxis ()->SetLabelSize (0.028/fdPad);
     h->GetXaxis ()->SetTitleOffset (3.7*fdPad);
     h->GetXaxis ()->SetLabelOffset (-0.05*fdPad);
-    h->GetYaxis ()->SetTitle ("#it{I}_{#it{p}Pb} = #it{p}+Pb / #it{pp}");
     h->GetYaxis ()->SetTitleSize (0.028/fdPad);
     h->GetYaxis ()->SetLabelSize (0.028/fdPad);
     h->GetYaxis ()->SetTitleOffset (3.0*fdPad);
@@ -1077,17 +1044,14 @@ void PlotPtCh (const char* inFileTag) {
     ymin = 0.53;
     ymax = (strcmp (tag, "30GeVJets") == 0 || strcmp (tag, "15GeVJets") == 0 ? 1.45 : 1.17);
 
-    h = (TH1D*) h_jetInt_trk_pt_iaa[0][iPtJInt][2][iCent]->Clone ("h");
-    h->Reset ();
-    for (int i = 1; i <= h->GetNbinsX (); i++) h->SetBinContent (i, 1);
+    h = new TH1D ("h", ";#it{p}_{T}^{ch} [GeV];#it{I}_{#it{p}Pb} = #it{p}+Pb / #it{pp}", 1, pTChBins[1], pTChBins[nPtChBins-(iPtJInt == 0 ? 3 : 1)]);
+    h->SetBinContent (1, 1);
     h->GetXaxis ()->SetMoreLogLabels ();
     h->GetYaxis ()->SetRangeUser (ymin, ymax);
-    h->GetXaxis ()->SetTitle ("#it{p}_{T}^{ch} [GeV]");
     h->GetXaxis ()->SetTitleSize (0.028/fdPad);
     h->GetXaxis ()->SetLabelSize (0.028/fdPad);
     h->GetXaxis ()->SetTitleOffset (3.7*fdPad);
     h->GetXaxis ()->SetLabelOffset (-0.05*fdPad);
-    h->GetYaxis ()->SetTitle ("#it{I}_{#it{p}Pb} = #it{p}+Pb / #it{pp}");
     h->GetYaxis ()->SetTitleSize (0.028/fdPad);
     h->GetYaxis ()->SetLabelSize (0.028/fdPad);
     h->GetYaxis ()->SetTitleOffset (3.0*fdPad);
@@ -1174,16 +1138,13 @@ void PlotPtCh (const char* inFileTag) {
     float ymin = 8e-6;
     float ymax = 3e1;
 
-    h = (TH1D*) h_jetInt_trk_pt_ref[0][iPtJInt][0]->Clone ("h");
-    h->Reset ();
+    h = new TH1D ("h", ";;(1/N_{jet}) (dN_{ch} / d#it{p}_{T}^{ch}) [GeV^{-1}]", 1, pTChBins[1], pTChBins[nPtChBins-(iPtJInt == 0 ? 3 : 1)]);
     h->GetYaxis ()->SetRangeUser (ymin, ymax);
-    h->GetYaxis ()->SetTitle ("(1/N_{jet}) (dN_{ch} / d#it{p}_{T}^{ch}) [GeV^{-1}]");
     h->GetYaxis ()->SetTitleSize (0.028/fuPad);
     h->GetYaxis ()->SetLabelSize (0.028/fuPad);
     h->GetYaxis ()->SetTitleOffset (3.0*fuPad);
 
-    h->SetLineWidth (1);
-    h->SetLineStyle (2);
+    h->SetLineWidth (0);
     h->DrawCopy ("hist ][");
     SaferDelete (&h);
 
@@ -1241,16 +1202,14 @@ void PlotPtCh (const char* inFileTag) {
     ymin = 8e-6;
     ymax = 3e1;
 
-    h = (TH1D*) h_jetInt_trk_pt_ref[0][iPtJInt][2]->Clone ("h");
-    h->Reset ();
+    h = new TH1D ("h", ";;(1/N_{jet}) (dN_{ch} / d#it{p}_{T}^{ch}) [GeV^{-1}]", 1, pTChBins[1], pTChBins[nPtChBins-(iPtJInt == 0 ? 3 : 1)]);
     h->GetYaxis ()->SetRangeUser (ymin, ymax);
     h->GetYaxis ()->SetTitle ("(1/N_{jet}) (dN_{ch} / d#it{p}_{T}^{ch}) [GeV^{-1}]");
     h->GetYaxis ()->SetTitleSize (0.028/fuPad);
     h->GetYaxis ()->SetLabelSize (0.028/fuPad);
     h->GetYaxis ()->SetTitleOffset (3.0*fuPad);
 
-    h->SetLineWidth (1);
-    h->SetLineStyle (2);
+    h->SetLineWidth (0);
     h->DrawCopy ("hist ][");
     SaferDelete (&h);
 
@@ -1308,18 +1267,15 @@ void PlotPtCh (const char* inFileTag) {
     ymin = 8e-6;
     ymax = 3e1;
 
-    h = (TH1D*) h_jetInt_trk_pt_ref_sig[0][iPtJInt][0]->Clone ("h");
-    h->Reset ();
+    h = new TH1D ("h", ";;(Sig.+Bkg.) - Bkg.", 1, pTChBins[1], pTChBins[nPtChBins-(iPtJInt == 0 ? 3 : 1)]);
     h->GetXaxis ()->SetMoreLogLabels ();
     h->GetYaxis ()->SetRangeUser (ymin, ymax);
-    h->GetYaxis ()->SetTitle ("(Sig.+Bkg.) - Bkg.");
     h->GetYaxis ()->SetTitleSize (0.028/fdPad);
     h->GetYaxis ()->SetLabelSize (0.028/fdPad);
     h->GetYaxis ()->SetTitleOffset (3.0*fdPad);
     h->GetYaxis ()->CenterTitle ();
 
-    h->SetLineWidth (1);
-    h->SetLineStyle (2);
+    h->SetLineWidth (0);
     h->DrawCopy ("hist ][");
     SaferDelete (&h);
 
@@ -1358,18 +1314,15 @@ void PlotPtCh (const char* inFileTag) {
     ymin = 8e-6;
     ymax = 3e1;
 
-    h = (TH1D*) h_jetInt_trk_pt_ref_sig[0][iPtJInt][2]->Clone ("h");
-    h->Reset ();
+    h = new TH1D ("h", ";;(Sig.+Bkg.) - Bkg.", 1, pTChBins[1], pTChBins[nPtChBins-(iPtJInt == 0 ? 3 : 1)]);
     h->GetXaxis ()->SetMoreLogLabels ();
     h->GetYaxis ()->SetRangeUser (ymin, ymax);
-    h->GetYaxis ()->SetTitle ("(Sig.+Bkg.) - Bkg.");
     h->GetYaxis ()->SetTitleSize (0.028/fdPad);
     h->GetYaxis ()->SetLabelSize (0.028/fdPad);
     h->GetYaxis ()->SetTitleOffset (3.0*fdPad);
     h->GetYaxis ()->CenterTitle ();
 
-    h->SetLineWidth (1);
-    h->SetLineStyle (2);
+    h->SetLineWidth (0);
     h->DrawCopy ("hist ][");
     SaferDelete (&h);
 
@@ -1409,24 +1362,20 @@ void PlotPtCh (const char* inFileTag) {
     ymin = 0.53;
     ymax = (strcmp (tag, "30GeVJets") == 0 || strcmp (tag, "15GeVJets") == 0 ? 1.45 : 1.17);
 
-    h = (TH1D*) h_jetInt_trk_pt_iaa[0][iPtJInt][0][iCent]->Clone ("h");
-    h->Reset ();
-    for (int i = 1; i <= h->GetNbinsX (); i++) h->SetBinContent (i, 1);
+    h = new TH1D ("h", ";#it{p}_{T}^{ch} [GeV];#it{I}_{#it{p}Pb} = #it{p}+Pb / #it{pp}", 1, pTChBins[1], pTChBins[nPtChBins-(iPtJInt == 0 ? 3 : 1)]);
+    h->SetBinContent (1, 1);
     h->GetXaxis ()->SetMoreLogLabels ();
     h->GetYaxis ()->SetRangeUser (ymin, ymax);
-    h->GetXaxis ()->SetTitle ("#it{p}_{T}^{ch} [GeV]");
     h->GetXaxis ()->SetTitleSize (0.028/fdPad);
     h->GetXaxis ()->SetLabelSize (0.028/fdPad);
     h->GetXaxis ()->SetTitleOffset (3.7*fdPad);
     h->GetXaxis ()->SetLabelOffset (-0.05*fdPad);
-    h->GetYaxis ()->SetTitle ("#it{I}_{#it{p}Pb} = #it{p}+Pb / #it{pp}");
     h->GetYaxis ()->SetTitleSize (0.028/fdPad);
     h->GetYaxis ()->SetLabelSize (0.028/fdPad);
     h->GetYaxis ()->SetTitleOffset (3.0*fdPad);
     h->GetYaxis ()->CenterTitle ();
 
-    h->SetLineWidth (1);
-    h->SetLineStyle (2);
+    h->SetLineWidth (0);
     h->DrawCopy ("hist ][");
     SaferDelete (&h);
 
@@ -1449,24 +1398,20 @@ void PlotPtCh (const char* inFileTag) {
     ymin = 0.53;
     ymax = (strcmp (tag, "30GeVJets") == 0 || strcmp (tag, "15GeVJets") == 0 ? 1.45 : 1.17);
 
-    h = (TH1D*) h_jetInt_trk_pt_iaa[0][iPtJInt][2][iCent]->Clone ("h");
-    h->Reset ();
-    for (int i = 1; i <= h->GetNbinsX (); i++) h->SetBinContent (i, 1);
+    h = new TH1D ("h", ";#it{p}_{T}^{ch} [GeV];#it{I}_{#it{p}Pb} = #it{p}+Pb / #it{pp}", 1, pTChBins[1], pTChBins[nPtChBins-(iPtJInt == 0 ? 3 : 1)]);
+    h->SetBinContent (1, 1);
     h->GetXaxis ()->SetMoreLogLabels ();
     h->GetYaxis ()->SetRangeUser (ymin, ymax);
-    h->GetXaxis ()->SetTitle ("#it{p}_{T}^{ch} [GeV]");
     h->GetXaxis ()->SetTitleSize (0.028/fdPad);
     h->GetXaxis ()->SetLabelSize (0.028/fdPad);
     h->GetXaxis ()->SetTitleOffset (3.7*fdPad);
     h->GetXaxis ()->SetLabelOffset (-0.05*fdPad);
-    h->GetYaxis ()->SetTitle ("#it{I}_{#it{p}Pb} = #it{p}+Pb / #it{pp}");
     h->GetYaxis ()->SetTitleSize (0.028/fdPad);
     h->GetYaxis ()->SetLabelSize (0.028/fdPad);
     h->GetYaxis ()->SetTitleOffset (3.0*fdPad);
     h->GetYaxis ()->CenterTitle ();
 
-    h->SetLineWidth (1);
-    h->SetLineStyle (2);
+    h->SetLineWidth (0);
     h->DrawCopy ("hist ][");
     SaferDelete (&h);
 
@@ -1605,6 +1550,7 @@ void PlotPtCh (const char* inFileTag) {
         TH1D* h = new TH1D ("h", ";#it{p}_{T}^{ch} [GeV];#it{I}_{#it{p}Pb}", 1, pTChBins[1], iDir == 1 ? 10 : pTChBins[nPtChBins-(iPtJInt == 0 ? 3 : 1)]);//pTChBins[nPtChBins]);
         h->GetXaxis ()->SetMoreLogLabels ();
         h->GetYaxis ()->SetRangeUser (0.74, 1.4);
+        //h->GetYaxis ()->SetRangeUser (0.0, 3);
         h->SetBinContent (1, 1);
         h->SetLineStyle (2);
         h->SetLineWidth (2);
@@ -2185,16 +2131,9 @@ void PlotPtCh (const char* inFileTag) {
           const float ymin = (iDType == 0 ? -maxDataSyst : -maxMCSyst);
           const float ymax = (iDType == 0 ?  maxDataSyst :  maxMCSyst);
 
-          h = (TH1D*) h_jetInt_trk_pt_ref[iDType][iPtJInt][iDir]->Clone ("h");
-          h->Reset ();
+          h = new TH1D ("h", ";#it{p}_{T}^{ch} [GeV];#delta N_{ch} / N_{ch} [%]", 1, pTChBins[1], iDir == 1 ? 10 : pTChBins[nPtChBins-(iPtJInt == 0 ? 3 : 1)]);
           h->GetXaxis ()->SetMoreLogLabels ();
           h->GetYaxis ()->SetRangeUser (ymin, ymax);
-          h->GetXaxis ()->SetTitle ("#it{p}_{T}^{ch} [GeV]");
-          //h->GetXaxis ()->SetTitleSize (0.028);
-          //h->GetXaxis ()->SetLabelSize (0.028);
-          h->GetYaxis ()->SetTitle ("#delta N_{ch} / N_{ch} [%]");
-          //h->GetYaxis ()->SetTitleSize (0.028);
-          //h->GetYaxis ()->SetLabelSize (0.028);
 
           h->SetLineWidth (1);
           h->SetLineStyle (2);
@@ -2278,16 +2217,9 @@ void PlotPtCh (const char* inFileTag) {
             const float ymin = (iDType == 0 ? -maxDataSyst : -maxMCSyst);
             const float ymax = (iDType == 0 ?  maxDataSyst :  maxMCSyst);
 
-            h = (TH1D*) h_jetInt_trk_pt[iDType][iPtJInt][iDir][iCent]->Clone ("h");
-            h->Reset ();
+            h = new TH1D ("h", ";#it{p}_{T}^{ch} [GeV];#delta N_{ch} / N_{ch} [%]", 1, pTChBins[1], iDir == 1 ? 10 : pTChBins[nPtChBins-(iPtJInt == 0 ? 3 : 1)]);
             h->GetXaxis ()->SetMoreLogLabels ();
             h->GetYaxis ()->SetRangeUser (ymin, ymax);
-            h->GetXaxis ()->SetTitle ("#it{p}_{T}^{ch} [GeV]");
-            //h->GetXaxis ()->SetTitleSize (0.028);
-            //h->GetXaxis ()->SetLabelSize (0.028);
-            h->GetYaxis ()->SetTitle ("#delta N_{ch} / N_{ch} [%]");
-            //h->GetYaxis ()->SetTitleSize (0.028);
-            //h->GetYaxis ()->SetLabelSize (0.028);
 
             h->SetLineWidth (1);
             h->SetLineStyle (2);
@@ -2373,16 +2305,9 @@ void PlotPtCh (const char* inFileTag) {
           const float ymin = (iDType == 0 ? -maxDataSyst : -maxMCSyst);
           const float ymax = (iDType == 0 ?  maxDataSyst :  maxMCSyst);
 
-          h = (TH1D*) h_jetInt_trk_pt_ref_bkg[iDType][iPtJInt][iDir]->Clone ("h");
-          h->Reset ();
+          h = new TH1D ("h", ";#it{p}_{T}^{ch} [GeV];#delta N_{ch} / N_{ch} [%]", 1, pTChBins[1], iDir == 1 ? 10 : pTChBins[nPtChBins-(iPtJInt == 0 ? 3 : 1)]);
           h->GetXaxis ()->SetMoreLogLabels ();
           h->GetYaxis ()->SetRangeUser (ymin, ymax);
-          h->GetXaxis ()->SetTitle ("#it{p}_{T}^{ch} [GeV]");
-          //h->GetXaxis ()->SetTitleSize (0.028);
-          //h->GetXaxis ()->SetLabelSize (0.028);
-          h->GetYaxis ()->SetTitle ("#delta N_{ch} / N_{ch} [%]");
-          //h->GetYaxis ()->SetTitleSize (0.028);
-          //h->GetYaxis ()->SetLabelSize (0.028);
 
           h->SetLineWidth (1);
           h->SetLineStyle (2);
@@ -2466,16 +2391,9 @@ void PlotPtCh (const char* inFileTag) {
             const float ymin = (iDType == 0 ? -maxDataSyst : -maxMCSyst);
             const float ymax = (iDType == 0 ?  maxDataSyst :  maxMCSyst);
 
-            h = (TH1D*) h_jetInt_trk_pt_bkg[iDType][iPtJInt][iDir][iCent]->Clone ("h");
-            h->Reset ();
+            h = new TH1D ("h", ";#it{p}_{T}^{ch} [GeV];#delta N_{ch} / N_{ch} [%]", 1, pTChBins[1], iDir == 1 ? 10 : pTChBins[nPtChBins-(iPtJInt == 0 ? 3 : 1)]);
             h->GetXaxis ()->SetMoreLogLabels ();
             h->GetYaxis ()->SetRangeUser (ymin, ymax);
-            h->GetXaxis ()->SetTitle ("#it{p}_{T}^{ch} [GeV]");
-            //h->GetXaxis ()->SetTitleSize (0.028);
-            //h->GetXaxis ()->SetLabelSize (0.028);
-            h->GetYaxis ()->SetTitle ("#delta N_{ch} / N_{ch} [%]");
-            //h->GetYaxis ()->SetTitleSize (0.028);
-            //h->GetYaxis ()->SetLabelSize (0.028);
 
             h->SetLineWidth (1);
             h->SetLineStyle (2);
@@ -2562,16 +2480,9 @@ void PlotPtCh (const char* inFileTag) {
           const float ymin = (iDType == 0 ? -maxDataSyst : -maxMCSyst);
           const float ymax = (iDType == 0 ?  maxDataSyst :  maxMCSyst);
 
-          h = (TH1D*) h_jetInt_trk_pt_ref_sig[iDType][iPtJInt][iDir]->Clone ("h");
-          h->Reset ();
+          h = new TH1D ("h", ";#it{p}_{T}^{ch} [GeV];#delta N_{ch} / N_{ch} [%]", 1, pTChBins[1], iDir == 1 ? 10 : pTChBins[nPtChBins-(iPtJInt == 0 ? 3 : 1)]);
           h->GetXaxis ()->SetMoreLogLabels ();
           h->GetYaxis ()->SetRangeUser (ymin, ymax);
-          h->GetXaxis ()->SetTitle ("#it{p}_{T}^{ch} [GeV]");
-          //h->GetXaxis ()->SetTitleSize (0.028);
-          //h->GetXaxis ()->SetLabelSize (0.028);
-          h->GetYaxis ()->SetTitle ("#delta N_{ch} / N_{ch} [%]");
-          //h->GetYaxis ()->SetTitleSize (0.028);
-          //h->GetYaxis ()->SetLabelSize (0.028);
 
           h->SetLineWidth (1);
           h->SetLineStyle (2);
@@ -2659,16 +2570,9 @@ void PlotPtCh (const char* inFileTag) {
             const float ymin = (iDType == 0 ? -maxDataSyst : -maxMCSyst);
             const float ymax = (iDType == 0 ?  maxDataSyst :  maxMCSyst);
 
-            h = (TH1D*) h_jetInt_trk_pt_sig[iDType][iPtJInt][iDir][iCent]->Clone ("h");
-            h->Reset ();
+            h = new TH1D ("h", ";#it{p}_{T}^{ch} [GeV];#delta N_{ch} / N_{ch} [%]", 1, pTChBins[1], iDir == 1 ? 10 : pTChBins[nPtChBins-(iPtJInt == 0 ? 3 : 1)]);
             h->GetXaxis ()->SetMoreLogLabels ();
             h->GetYaxis ()->SetRangeUser (ymin, ymax);
-            h->GetXaxis ()->SetTitle ("#it{p}_{T}^{ch} [GeV]");
-            //h->GetXaxis ()->SetTitleSize (0.028);
-            //h->GetXaxis ()->SetLabelSize (0.028);
-            h->GetYaxis ()->SetTitle ("#delta N_{ch} / N_{ch} [%]");
-            //h->GetYaxis ()->SetTitleSize (0.028);
-            //h->GetYaxis ()->SetLabelSize (0.028);
 
             h->SetLineWidth (1);
             h->SetLineStyle (2);
@@ -2760,16 +2664,9 @@ void PlotPtCh (const char* inFileTag) {
             const float ymin = (iDType == 0 ? -maxDataSyst : -maxMCSyst);
             const float ymax = (iDType == 0 ?  maxDataSyst :  maxMCSyst);
   
-            h = (TH1D*) h_jetInt_trk_pt_iaa[iDType][iPtJInt][iDir][iCent]->Clone ("h");
-            h->Reset ();
+            h = new TH1D ("h", ";#it{p}_{T}^{ch} [GeV];#delta I_{pPb} / I_{pPb} [%]", 1, pTChBins[1], iDir == 1 ? 10 : pTChBins[nPtChBins-(iPtJInt == 0 ? 3 : 1)]);
             h->GetXaxis ()->SetMoreLogLabels ();
             h->GetYaxis ()->SetRangeUser (ymin, ymax);
-            h->GetXaxis ()->SetTitle ("#it{p}_{T}^{ch} [GeV]");
-            //h->GetXaxis ()->SetTitleSize (0.028);
-            //h->GetXaxis ()->SetLabelSize (0.028);
-            h->GetYaxis ()->SetTitle ("#delta I_{pPb} / I_{pPb} [%]");
-            //h->GetYaxis ()->SetTitleSize (0.028);
-            //h->GetYaxis ()->SetLabelSize (0.028);
   
             h->SetLineWidth (1);
             h->SetLineStyle (2);
@@ -2946,16 +2843,9 @@ void PlotPtCh (const char* inFileTag) {
             const float ymin = -maxDataSyst;
             const float ymax =  maxDataSyst;
 
-            h = (TH1D*) h_jetInt_trk_pt_sig[0][iPtJInt][iDir][iCent]->Clone ("h");
-            h->Reset ();
+            h = new TH1D ("h", ";#it{p}_{T}^{ch} [GeV];#delta N_{ch} / N_{ch} [%]", 1, pTChBins[1], iDir == 1 ? 10 : pTChBins[nPtChBins-(iPtJInt == 0 ? 3 : 1)]);
             h->GetXaxis ()->SetMoreLogLabels ();
             h->GetYaxis ()->SetRangeUser (ymin, ymax);
-            h->GetXaxis ()->SetTitle ("#it{p}_{T}^{ch} [GeV]");
-            //h->GetXaxis ()->SetTitleSize (0.028);
-            //h->GetXaxis ()->SetLabelSize (0.028);
-            h->GetYaxis ()->SetTitle ("#delta N_{ch} / N_{ch} [%]");
-            //h->GetYaxis ()->SetTitleSize (0.028);
-            //h->GetYaxis ()->SetLabelSize (0.028);
 
             h->SetLineWidth (1);
             h->SetLineStyle (2);
@@ -3027,16 +2917,9 @@ void PlotPtCh (const char* inFileTag) {
             const float ymin = -maxDataSyst;
             const float ymax =  maxDataSyst;
 
-            h = (TH1D*) h_jetInt_trk_pt_iaa[0][iPtJInt][iDir][iCent]->Clone ("h");
-            h->Reset ();
+            h = new TH1D ("h", ";#it{p}_{T}^{ch} [GeV];#delta I_{pPb} / I_{pPb} [%]", 1, pTChBins[1], iDir == 1 ? 10 : pTChBins[nPtChBins-(iPtJInt == 0 ? 3 : 1)]);
             h->GetXaxis ()->SetMoreLogLabels ();
             h->GetYaxis ()->SetRangeUser (ymin, ymax);
-            h->GetXaxis ()->SetTitle ("#it{p}_{T}^{ch} [GeV]");
-            //h->GetXaxis ()->SetTitleSize (0.028);
-            //h->GetXaxis ()->SetLabelSize (0.028);
-            h->GetYaxis ()->SetTitle ("#delta I_{pPb} / I_{pPb} [%]");
-            //h->GetYaxis ()->SetTitleSize (0.028);
-            //h->GetYaxis ()->SetLabelSize (0.028);
 
             h->SetLineWidth (1);
             h->SetLineStyle (2);
