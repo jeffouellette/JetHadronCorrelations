@@ -14,12 +14,13 @@
 std::vector <TString> variations = {
   "Nominal",
 
-/*
+
   "HITightVar",
   "HILooseVar",
   "TrkEffVar",
   "FakeRateVar",
   "PrimFitVar",
+  "JetPrimFracVar",
   "PartSpcVar",
 
   //"FcalCentVar",
@@ -27,10 +28,10 @@ std::vector <TString> variations = {
 
   "MixCatVar1",
   "MixCatVar2",
-  "MixCatVar3",*/
-  //"NonClosureVar",
-  /*
+  "MixCatVar3",
 
+  //"NonClosureVar",
+/*
   "JESVar0",
   "JESVar1",
   "JESVar2",
@@ -50,13 +51,12 @@ std::vector <TString> variations = {
   //"JESVar16",
   "JESVar17",
   "JESVar18",
-  "JESVar19",
-  //"JESVar20",
-*/
+  "JESVar19"
+  //"JESVar20",*/
 
-  "MCTruthJetsTruthParts",     // Truth-level jets and truth-level charged particles
+  //"MCTruthJetsTruthParts",     // Truth-level jets and truth-level charged particles
   //"MCRecoJetsTruthParts",       // Reco-level jets and truth-level charged particles
-  "MCRecoJetsTruthMatchedParts",  // Reco-level jets and reco-level, truth-matched charged particles
+  //"MCRecoJetsTruthMatchedParts",  // Reco-level jets and reco-level, truth-matched charged particles
 };
 const int nVar = (int)variations.size ();
 
@@ -108,6 +108,7 @@ std::set <TString> dataVariations = {
   "MixCatVar1",
   "MixCatVar2",
   "MixCatVar3",
+
   "NonClosureVar",
 };
 
@@ -154,6 +155,7 @@ std::vector <std::vector <TString>> variationGroups = {
   {"TrkEffVar"},
   {"FakeRateVar"},
   {"PrimFitVar"},
+  {"JetPrimFracVar"},
   {"PartSpcVar"},
 
   //{"FcalCentVar"},
@@ -193,6 +195,7 @@ std::map <TString, MyStyle> varStyles = {
   {"TrkEffVar",         MyStyle (myLitePurple,    4)},
   {"FakeRateVar",       MyStyle (myLiteYellow,    4)},
   {"PrimFitVar",        MyStyle (myLiteBlue,      4)},
+  {"JetPrimFracVar",    MyStyle (kRed,            4)},
   {"PartSpcVar",        MyStyle (myLiteGreen,     4)},
 
   {"FcalCentVar",       MyStyle (kViolet-5,       5)},
@@ -243,6 +246,7 @@ std::map <TString, TString> varFullNames = {
   {"TrkEffVar",         "Tracking efficiency"},
   {"FakeRateVar",       "Fake rate"},
   {"PrimFitVar",        "Primary fraction fit"},
+  {"JetPrimFracVar",    "Jet-sample primary fraction"},
   {"PartSpcVar",        "Particle species"},
 
   {"FcalCentVar",       "FCal-based centrality"},
@@ -321,6 +325,35 @@ short GetVarN (const TString& s) {
     return -1;
   }
   return iVar;
+}
+
+
+TString GetVarBkg (const TString& s) {
+  if (s == "JESVar0" ||
+      s == "JESVar1" ||
+      s == "JESVar2" ||
+      s == "JESVar3" ||
+      s == "JESVar4" ||
+      s == "JESVar5" ||
+      s == "JESVar6" ||
+      s == "JESVar7" ||
+      s == "JESVar8" ||
+      s == "JESVar9" ||
+      s == "JESVar10" ||
+      s == "JESVar11" ||
+      s == "JESVar12" ||
+      s == "JESVar13" ||
+      s == "JESVar14" ||
+      s == "JESVar15" ||
+      s == "JESVar16" ||
+      s == "JESVar17" ||
+      s == "JESVar18" ||
+      s == "JESVar19" ||
+      s == "JetPrimFracVar") {
+    return "Nominal";
+  } else {
+    return s; 
+  }
 }
 
 

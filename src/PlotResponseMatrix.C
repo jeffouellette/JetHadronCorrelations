@@ -35,8 +35,9 @@ void PlotResponseMatrix () {
 
   //const double pTJBins[] = {20, 30, 45, 60, 80, 100, 130, 160, 200, 240, 320};
   //const short nPtJBins = sizeof (pTJBins) / sizeof (pTJBins[0]) - 1;
+  const Color_t cols[10] = {myCyan, myLiteBlue, myLitePurple, myPurple, myRed, myMaroon, myOrange, myLiteYellow, myLiteGreen, myGreen};
 
-  const short maxIters = 6;
+  const short maxIters = 20;
 
   // jet yield histograms
   TH1D***       h_jet_pt_ref                      = Get2DArray <TH1D*> (2, 2);
@@ -102,6 +103,7 @@ void PlotResponseMatrix () {
 
   {
     TFile* inFile = new TFile (Form ("%s/MakeResponseMatrix/Nominal/allSamples.root", rootPath.Data ()), "read");
+    //TFile* inFile = new TFile (Form ("%s/MakeResponseMatrix/Nominal/allSamples_primTracksOnly.root", rootPath.Data ()), "read");
 
     
     //////////////////////////////////////////////////////////////////////////////////////////////////// 
@@ -309,8 +311,8 @@ void PlotResponseMatrix () {
 
     const TString cent = (iCent == nFcalCentBins ? "allCent" : Form ("iCent%i", iCent));
 
-    //TFile* inFile = new TFile (Form ("%s/Histograms/All/MixedHists/Nominal/mc16_5TeV_%s_hists.root", rootPath.Data (), cent.Data ()), "read");
-    TFile* inFile = new TFile (Form ("%s/Histograms/All/MixedHists/MixCatVar2/mc16_5TeV_%s_hists.root", rootPath.Data (), cent.Data ()), "read");
+    TFile* inFile = new TFile (Form ("%s/Histograms/All/MixedHists/Nominal/mc16_5TeV_%s_hists.root", rootPath.Data (), cent.Data ()), "read");
+    //TFile* inFile = new TFile (Form ("%s/Histograms/All/MixedHists/MixCatVar2/mc16_5TeV_%s_hists.root", rootPath.Data (), cent.Data ()), "read");
     //TFile* inFile = new TFile (Form ("%s/Histograms/All/MixedHists/MixCatVar6/mc16_5TeV_%s_hists.root", rootPath.Data (), cent.Data ()), "read");
 
     for (short iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
@@ -378,10 +380,10 @@ void PlotResponseMatrix () {
     
             for (short iPtChX = 1; iPtChX <= nPtChBins; iPtChX++) {
 
-              h2sig->SetBinContent (iPtChX, iPtJY, h2tot->GetBinContent (iPtChX, iPtJY));
-              h2sig->SetBinError   (iPtChX, iPtJY, h2tot->GetBinError (iPtChX, iPtJY));
-              //h2sig->SetBinContent (iPtChX, iPtJY, h2tot->GetBinContent (iPtChX, iPtJY) - (iVar == 0 ? nJetSF * hbkg->GetBinContent (iPtChX) * hbkg->GetBinWidth (iPtChX) : 0));
-              //h2sig->SetBinError   (iPtChX, iPtJY, std::hypot (h2tot->GetBinError (iPtChX, iPtJY), (iVar == 0 ? nJetSF * hbkg->GetBinError (iPtChX) * hbkg->GetBinWidth (iPtChX) : 0)));
+              //h2sig->SetBinContent (iPtChX, iPtJY, h2tot->GetBinContent (iPtChX, iPtJY));
+              //h2sig->SetBinError   (iPtChX, iPtJY, h2tot->GetBinError (iPtChX, iPtJY));
+              h2sig->SetBinContent (iPtChX, iPtJY, h2tot->GetBinContent (iPtChX, iPtJY) - (iVar == 0 ? nJetSF * hbkg->GetBinContent (iPtChX) * hbkg->GetBinWidth (iPtChX) : 0));
+              h2sig->SetBinError   (iPtChX, iPtJY, std::hypot (h2tot->GetBinError (iPtChX, iPtJY), (iVar == 0 ? nJetSF * hbkg->GetBinError (iPtChX) * hbkg->GetBinWidth (iPtChX) : 0)));
     
             } // end loop over iPtChY
     
@@ -620,6 +622,7 @@ void PlotResponseMatrix () {
 
       const TString pTJInt = (iPtJInt == 0 ? "30GeV" : "60GeV");
       const double minJetPt = (iPtJInt == 0 ? 30. : 60.);
+      const double maxJetPt = 300;
 
       for (short iDir = 0; iDir < nDir; iDir++) {
     
@@ -635,7 +638,7 @@ void PlotResponseMatrix () {
             double norm = 0;
             for (short iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
               const double jpt = 0.5 * (pTJBins[iPtJ] + pTJBins[iPtJ+1]);
-              if (jpt < minJetPt || 300 < jpt) continue;
+              if (jpt < minJetPt || maxJetPt < jpt) continue;
               const double nJets = h_jet_pt_ref[iEvFrac][iVar]->GetBinContent (h_jet_pt_ref[iEvFrac][iVar]->FindBin (jpt));
               h_jetInt_trk_pt_ref_sig[iEvFrac][iPtJInt][iDir][iVar]->Add (h_jet_trk_pt_ref_sig[iEvFrac][iPtJ][iDir][iVar], nJets);
               norm += nJets;
@@ -653,7 +656,7 @@ void PlotResponseMatrix () {
             double norm = 0;
             for (short iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
               const double jpt = 0.5 * (pTJBins[iPtJ] + pTJBins[iPtJ+1]);
-              if (jpt < minJetPt || 300 < jpt) continue;
+              if (jpt < minJetPt || maxJetPt < jpt) continue;
               const double nJets = h_jet_pt[iEvFrac][iCent][iVar]->GetBinContent (h_jet_pt[iEvFrac][iCent][iVar]->FindBin (jpt));
               h_jetInt_trk_pt_sig[iEvFrac][iPtJInt][iDir][iCent][iVar]->Add (h_jet_trk_pt_sig[iEvFrac][iPtJ][iDir][iCent][iVar], nJets);
               norm += nJets;
@@ -669,13 +672,12 @@ void PlotResponseMatrix () {
     
           {
             h_jetInt_trk_pt_ref_sig_unf[iEvFrac][iPtJInt][iDir][nIter] = new TH1D (Form ("h_jetInt_trk_pt_%s_ref_sig_unf_%s_%s_mc_nIter%i", dir.Data (), evFrac.Data (), pTJInt.Data (), nIter+1), "", nPtChBins, pTChBins);
-    
             TH1D* h = h_jet_pt_ref_unf[iEvFrac][1];
     
             double norm = 0;
             for (short iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
               const double jpt = 0.5 * (pTJBins[iPtJ] + pTJBins[iPtJ+1]);
-              if (jpt < minJetPt || 300 < jpt) continue;
+              if (jpt < minJetPt || maxJetPt < jpt) continue;
               const double nJets = h->GetBinContent (h->FindBin (jpt));
               h_jetInt_trk_pt_ref_sig_unf[iEvFrac][iPtJInt][iDir][nIter]->Add (h_jet_trk_pt_ref_sig_unf[iEvFrac][iPtJ][iDir][nIter], nJets);
               norm += nJets;
@@ -694,7 +696,7 @@ void PlotResponseMatrix () {
             double norm = 0;
             for (short iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
               const double jpt = 0.5 * (pTJBins[iPtJ] + pTJBins[iPtJ+1]);
-              if (jpt < minJetPt || 300 < jpt) continue;
+              if (jpt < minJetPt || maxJetPt < jpt) continue;
               const double nJets = h->GetBinContent (h->FindBin (jpt));
               h_jetInt_trk_pt_sig_unf[iEvFrac][iPtJInt][iDir][iCent][nIter]->Add (h_jet_trk_pt_sig_unf[iEvFrac][iPtJ][iDir][iCent][nIter], nJets);
               norm += nJets;
@@ -786,8 +788,8 @@ void PlotResponseMatrix () {
       h_jetInt_trk_pt_ref_sig_unf_halfClosure[iPtJInt][iDir] = (TH1D*) h_jetInt_trk_pt_ref_sig_unf[0][iPtJInt][iDir][1]->Clone (Form ("h_jetInt_trk_pt_%s_ref_sig_unf_%s_halfClosure", dir.Data (), pTJInt.Data ()));
       DivideNoErrors (h_jetInt_trk_pt_ref_sig_unf_halfClosure[iPtJInt][iDir], h_jetInt_trk_pt_ref_sig[0][iPtJInt][iDir][1]);
 
-      //f_jetInt_trk_pt_ref_sig_unf_halfClosure[iPtJInt][iDir] = new TF1 (Form ("f_jetInt_trk_pt_%s_ref_sig_unf_%s_halfClosure", dir.Data (), pTJInt.Data ()), funcStr.Data (), 0.5, 50);
-      f_jetInt_trk_pt_ref_sig_unf_halfClosure[iPtJInt][iDir] = new TF1 (Form ("f_jetInt_trk_pt_%s_ref_sig_unf_%s_halfClosure", dir.Data (), pTJInt.Data ()), &bbbf, 0.5, (iPtJInt == 0 ? 50 : 75), ndf);
+      //f_jetInt_trk_pt_ref_sig_unf_halfClosure[iPtJInt][iDir] = new TF1 (Form ("f_jetInt_trk_pt_%s_ref_sig_unf_%s_halfClosure", dir.Data (), pTJInt.Data ()), funcStr.Data (), pTChBins[1], pTChBins[nPtChBins - (iPtJInt == 0 ? 3 : 1)]);
+      f_jetInt_trk_pt_ref_sig_unf_halfClosure[iPtJInt][iDir] = new TF1 (Form ("f_jetInt_trk_pt_%s_ref_sig_unf_%s_halfClosure", dir.Data (), pTJInt.Data ()), &bbbf, pTChBins[1], pTChBins[nPtChBins - (iPtJInt == 0 ? 3 : 1)], ndf);
       f_jetInt_trk_pt_ref_sig_unf_halfClosure[iPtJInt][iDir]->SetParameter (0, 10);
       f_jetInt_trk_pt_ref_sig_unf_halfClosure[iPtJInt][iDir]->SetParameter (1, 0);
       f_jetInt_trk_pt_ref_sig_unf_halfClosure[iPtJInt][iDir]->SetParameter (2, 0);
@@ -802,8 +804,8 @@ void PlotResponseMatrix () {
         h_jetInt_trk_pt_sig_unf_halfClosure[iPtJInt][iDir][iCent] = (TH1D*) h_jetInt_trk_pt_sig_unf[0][iPtJInt][iDir][iCent][1]->Clone (Form ("h_jetInt_trk_pt_%s_%s_sig_unf_%s_halfClosure", dir.Data (), cent, pTJInt.Data ()));
         DivideNoErrors (h_jetInt_trk_pt_sig_unf_halfClosure[iPtJInt][iDir][iCent], h_jetInt_trk_pt_sig[0][iPtJInt][iDir][iCent][1]);
 
-        //f_jetInt_trk_pt_sig_unf_halfClosure[iPtJInt][iDir][iCent] = new TF1 (Form ("f_jetInt_trk_pt_%s_%s_sig_unf_%s_halfClosure", dir.Data (), cent, pTJInt.Data ()), funcStr.Data (), 0.5, 50);
-        f_jetInt_trk_pt_sig_unf_halfClosure[iPtJInt][iDir][iCent] = new TF1 (Form ("f_jetInt_trk_pt_%s_%s_sig_unf_%s_halfClosure", dir.Data (), cent, pTJInt.Data ()), &bbbf, 0.5, (iPtJInt == 0 ? 50 : 75), ndf);
+        //f_jetInt_trk_pt_sig_unf_halfClosure[iPtJInt][iDir][iCent] = new TF1 (Form ("f_jetInt_trk_pt_%s_%s_sig_unf_%s_halfClosure", dir.Data (), cent, pTJInt.Data ()), funcStr.Data (), pTChBins[1], pTChBins[nPtChBins - (iPtJInt == 0 ? 3 : 1)]);
+        f_jetInt_trk_pt_sig_unf_halfClosure[iPtJInt][iDir][iCent] = new TF1 (Form ("f_jetInt_trk_pt_%s_%s_sig_unf_%s_halfClosure", dir.Data (), cent, pTJInt.Data ()), &bbbf, pTChBins[1], pTChBins[nPtChBins - (iPtJInt == 0 ? 3 : 1)], ndf);
         f_jetInt_trk_pt_sig_unf_halfClosure[iPtJInt][iDir][iCent]->SetParameter (0, 10);
         f_jetInt_trk_pt_sig_unf_halfClosure[iPtJInt][iDir][iCent]->SetParameter (1, 0);
         f_jetInt_trk_pt_sig_unf_halfClosure[iPtJInt][iDir][iCent]->SetParameter (2, 0);
@@ -813,8 +815,8 @@ void PlotResponseMatrix () {
         h_jetInt_trk_pt_iaa_unf_halfClosure[iPtJInt][iDir][iCent] = (TH1D*) h_jetInt_trk_pt_iaa_unf[0][iPtJInt][iDir][iCent][1]->Clone (Form ("h_jetInt_trk_pt_%s_%s_iaa_unf_%s_halfClosure", dir.Data (), cent, pTJInt.Data ()));
         DivideNoErrors (h_jetInt_trk_pt_iaa_unf_halfClosure[iPtJInt][iDir][iCent], h_jetInt_trk_pt_iaa[0][iPtJInt][iDir][iCent][1]);
 
-        //f_jetInt_trk_pt_iaa_unf_halfClosure[iPtJInt][iDir][iCent] = new TF1 (Form ("f_jetInt_trk_pt_%s_%s_iaa_unf_%s_halfClosure", dir.Data (), cent, pTJInt.Data ()), funcStr.Data (), 0.5, 50);
-        f_jetInt_trk_pt_iaa_unf_halfClosure[iPtJInt][iDir][iCent] = new TF1 (Form ("f_jetInt_trk_pt_%s_%s_iaa_unf_%s_halfClosure", dir.Data (), cent, pTJInt.Data ()), &bbbf, 0.5, 50, ndf);
+        //f_jetInt_trk_pt_iaa_unf_halfClosure[iPtJInt][iDir][iCent] = new TF1 (Form ("f_jetInt_trk_pt_%s_%s_iaa_unf_%s_halfClosure", dir.Data (), cent, pTJInt.Data ()), funcStr.Data (), pTChBins[1], pTChBins[nPtChBins - (iPtJInt == 0 ? 3 : 1)]);
+        f_jetInt_trk_pt_iaa_unf_halfClosure[iPtJInt][iDir][iCent] = new TF1 (Form ("f_jetInt_trk_pt_%s_%s_iaa_unf_%s_halfClosure", dir.Data (), cent, pTJInt.Data ()), &bbbf, pTChBins[1], pTChBins[nPtChBins - (iPtJInt == 0 ? 3 : 1)], ndf);
         f_jetInt_trk_pt_iaa_unf_halfClosure[iPtJInt][iDir][iCent]->SetParameter (0, 10);
         f_jetInt_trk_pt_iaa_unf_halfClosure[iPtJInt][iDir][iCent]->SetParameter (1, 0);
         f_jetInt_trk_pt_iaa_unf_halfClosure[iPtJInt][iDir][iCent]->SetParameter (2, 0);
@@ -829,30 +831,30 @@ void PlotResponseMatrix () {
 
 
 
-  {
-    TFile* outFile = new TFile (Form ("%s/aux/MCClosureHists.root", workPath.Data ()), "recreate");
+  //{
+  //  TFile* outFile = new TFile (Form ("%s/aux/MCClosureHists.root", workPath.Data ()), "recreate");
 
-    for (short iPtJInt : {0, 1}) {
+  //  for (short iPtJInt : {0, 1}) {
 
-      for (short iDir = 0; iDir < nDir; iDir++) {
+  //    for (short iDir = 0; iDir < nDir; iDir++) {
 
-        h_jetInt_trk_pt_ref_sig_unf_halfClosure[iPtJInt][iDir]->Write ();
-        f_jetInt_trk_pt_ref_sig_unf_halfClosure[iPtJInt][iDir]->Write ();
+  //      h_jetInt_trk_pt_ref_sig_unf_halfClosure[iPtJInt][iDir]->Write ();
+  //      f_jetInt_trk_pt_ref_sig_unf_halfClosure[iPtJInt][iDir]->Write ();
 
-        for (short iCent = 0; iCent < nFcalCentBins+1; iCent++) {
+  //      for (short iCent = 0; iCent < nFcalCentBins+1; iCent++) {
 
-          h_jetInt_trk_pt_sig_unf_halfClosure[iPtJInt][iDir][iCent]->Write ();
-          f_jetInt_trk_pt_sig_unf_halfClosure[iPtJInt][iDir][iCent]->Write ();
-      
-          h_jetInt_trk_pt_iaa_unf_halfClosure[iPtJInt][iDir][iCent]->Write ();
-          f_jetInt_trk_pt_iaa_unf_halfClosure[iPtJInt][iDir][iCent]->Write ();
+  //        h_jetInt_trk_pt_sig_unf_halfClosure[iPtJInt][iDir][iCent]->Write ();
+  //        f_jetInt_trk_pt_sig_unf_halfClosure[iPtJInt][iDir][iCent]->Write ();
+  //    
+  //        h_jetInt_trk_pt_iaa_unf_halfClosure[iPtJInt][iDir][iCent]->Write ();
+  //        f_jetInt_trk_pt_iaa_unf_halfClosure[iPtJInt][iDir][iCent]->Write ();
 
-        } // end loop over iCent
+  //      } // end loop over iCent
  
-      } // end loop over iDir
+  //    } // end loop over iDir
 
-    } // end loop over iPtJInt
-  }
+  //  } // end loop over iPtJInt
+  //}
 
 
 
@@ -881,7 +883,8 @@ void PlotResponseMatrix () {
   
           h = new TH1D ("h", ";#it{p}_{T}^{jet} [GeV];Ratio", 1, pTJBins[0], pTJBins[nPtJBins]);
           h->GetXaxis ()->SetMoreLogLabels ();
-          h->GetYaxis ()->SetRangeUser (0.0, 2.0);
+          //h->GetYaxis ()->SetRangeUser (0.0, 2.0);
+          h->GetYaxis ()->SetRangeUser (0.6, 1.8);
           h->GetYaxis ()->CenterTitle ();
           h->SetBinContent (1, 1);
           h->SetLineStyle (2);
@@ -895,9 +898,18 @@ void PlotResponseMatrix () {
           l->SetLineStyle (2);
           l->DrawLine (pTJBins[0], 1.05, pTJBins[nPtJBins], 1.05);
           l->DrawLine (pTJBins[0], 0.95, pTJBins[nPtJBins], 0.95);
-  
-          for (short nIter : {1, 3, 5}) {
-            const Color_t col = (nIter == 1 ? myLiteBlue : (nIter == 3 ? myLitePurple : myPurple));
+
+          l->SetLineWidth (2);
+          l->SetLineColor (kBlack);
+          l->SetLineStyle (2);
+          l->DrawLine (30, 0.6, 30, 1.6);
+          l->DrawLine (300, 0.6, 300, 1.8);
+ 
+          short iCol = 9;
+          for (short nIter : {17, 15, 13, 11, 9, 7, 5, 3, 1}) {
+          //short iCol = 3;
+          //for (short nIter : {5, 3, 1}) {
+            const Color_t col = cols[iCol--];
             g = make_graph (h_jet_pt_ref_unf[iEvFrac][nIter]);
             ScaleGraph (g, h_jet_pt_ref[iEvFrac][1]);
             myDraw (g, col, kOpenCircle, 1.0, 1, 2, "P", false);
@@ -919,7 +931,8 @@ void PlotResponseMatrix () {
   
           h = new TH1D ("h", ";#it{p}_{T}^{jet} [GeV];Ratio", 1, pTJBins[0], pTJBins[nPtJBins]);
           h->GetXaxis ()->SetMoreLogLabels ();
-          h->GetYaxis ()->SetRangeUser (0.0, 2.0);
+          //h->GetYaxis ()->SetRangeUser (0.0, 2.0);
+          h->GetYaxis ()->SetRangeUser (0.6, 1.8);
           h->GetYaxis ()->CenterTitle ();
           h->SetBinContent (1, 1);
           h->SetLineStyle (2);
@@ -933,9 +946,18 @@ void PlotResponseMatrix () {
           l->SetLineStyle (2);
           l->DrawLine (pTJBins[0], 1.05, pTJBins[nPtJBins], 1.05);
           l->DrawLine (pTJBins[0], 0.95, pTJBins[nPtJBins], 0.95);
-  
-          for (short nIter : {1, 3, 5}) {
-            const Color_t col = (nIter == 1 ? myLiteBlue : (nIter == 3 ? myLitePurple : myPurple));
+
+          l->SetLineWidth (2);
+          l->SetLineColor (kBlack);
+          l->SetLineStyle (2);
+          l->DrawLine (30, 0.6, 30, 1.6);
+          l->DrawLine (300, 0.6, 300, 1.8);
+ 
+          short iCol = 9;
+          for (short nIter : {17, 15, 13, 11, 9, 7, 5, 3, 1}) {
+          //short iCol = 3;
+          //for (short nIter : {5, 3, 1}) {
+            const Color_t col = cols[iCol--];
             g = make_graph (h_jet_pt_unf[iEvFrac][iCent][nIter]);
             ScaleGraph (g, h_jet_pt[iEvFrac][iCent][1]);
             myDraw (g, col, kOpenCircle, 1.0, 1, 2, "P", false);
@@ -958,10 +980,16 @@ void PlotResponseMatrix () {
         myText (0.1, 0.84, kBlack, "#bf{#it{ATLAS}} Simulation Internal", 0.07);
         myText (0.1, 0.75, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.07);
         myText (0.1, 0.66, kBlack, "#it{p}+Pb, #sqrt{s} = 5.02 TeV", 0.07);
-        myLineText2 (0.15, 0.48, myCyan,        kFullCircle, "Raw / truth", 1.2, 0.06);
-        myLineText2 (0.15, 0.40, myLiteBlue,    kOpenCircle, "Unfolded / truth (2 iterations)", 1.2, 0.06);
-        myLineText2 (0.15, 0.32, myLitePurple,  kOpenCircle, "Unfolded / truth (4 iterations)", 1.2, 0.06);
-        myLineText2 (0.15, 0.24, myPurple,      kOpenCircle, "Unfolded / truth (6 iterations)", 1.2, 0.06);
+        myLineText2 (0.15, 0.56, myCyan,        kFullCircle, "Raw / truth", 1.2, 0.06);
+        myLineText2 (0.15, 0.48, myLiteBlue,    kOpenCircle, "2 iters.", 1.2, 0.06);
+        myLineText2 (0.15, 0.40, myLitePurple,  kOpenCircle, "4 iters.", 1.2, 0.06);
+        myLineText2 (0.15, 0.32, myPurple,      kOpenCircle, "6 iters.", 1.2, 0.06);
+        myLineText2 (0.15, 0.24, myRed,         kOpenCircle, "8 iters.", 1.2, 0.06);
+        myLineText2 (0.15, 0.16, myMaroon,      kOpenCircle, "10 iters.", 1.2, 0.06);
+        myLineText2 (0.55, 0.48, myOrange,      kOpenCircle, "12 iters.", 1.2, 0.06);
+        myLineText2 (0.55, 0.40, myLiteYellow,  kOpenCircle, "14 iters.", 1.2, 0.06);
+        myLineText2 (0.55, 0.32, myLiteGreen,   kOpenCircle, "16 iters.", 1.2, 0.06);
+        myLineText2 (0.55, 0.24, myGreen,       kOpenCircle, "18 iters.", 1.2, 0.06);
   
         c->SaveAs (Form ("%s/Plots/Unfolding/MC_JetPt_%sClosure.pdf", workPath.Data (), evFrac.Data ()));
   
@@ -978,7 +1006,7 @@ void PlotResponseMatrix () {
   
           const TString dir = directions[iDir];
   
-          const char* canvasName = Form ("c_jet_trk_pt_%s_%iGeVJets_%sClosure", dir.Data (), minJetPt, evFrac.Data ());
+          const char* canvasName = Form ("c_jet_trk_pt_%s_%iGeVJets_%sClosure_6Iters", dir.Data (), minJetPt, evFrac.Data ());
           TCanvas* c = new TCanvas (canvasName, "", 800, 800);
   
           TH1D* h = nullptr;
@@ -988,7 +1016,7 @@ void PlotResponseMatrix () {
           {
             gPad->SetLogx ();
   
-            h = new TH1D ("h", ";#it{p}_{T}^{ch} [GeV];Ratio", 1, pTChBins[1], pTChBins[nPtChBins-4]);
+            h = new TH1D ("h", ";#it{p}_{T}^{ch} [GeV];Ratio", 1, pTChBins[1], pTChBins[nPtChBins-(iPtJInt == 0 ? 3 : 1)]);
             h->GetXaxis ()->SetMoreLogLabels ();
             h->GetYaxis ()->SetRangeUser (0.9, 1.2);
             h->GetYaxis ()->CenterTitle ();
@@ -1002,8 +1030,8 @@ void PlotResponseMatrix () {
             l->SetLineWidth (2);
             l->SetLineColor (kGray+1);
             l->SetLineStyle (2);
-            l->DrawLine (pTChBins[1], 1.05, pTChBins[nPtChBins-4], 1.05);
-            l->DrawLine (pTChBins[1], 0.95, pTChBins[nPtChBins-4], 0.95);
+            l->DrawLine (pTChBins[1], 1.05, pTChBins[nPtChBins-(iPtJInt == 0 ? 3 : 1)], 1.05);
+            l->DrawLine (pTChBins[1], 0.95, pTChBins[nPtChBins-(iPtJInt == 0 ? 3 : 1)], 0.95);
   
             const Color_t col = colorfulColors[0];
             g = make_graph (h_jetInt_trk_pt_ref_sig_unf[iEvFrac][iPtJInt][iDir][5]);
@@ -1063,7 +1091,7 @@ void PlotResponseMatrix () {
   
             gPad->SetLogx ();
   
-            h = new TH1D ("h", ";#it{p}_{T}^{ch} [GeV];Ratio", 1, pTChBins[1], pTChBins[nPtChBins-4]);
+            h = new TH1D ("h", ";#it{p}_{T}^{ch} [GeV];Ratio", 1, pTChBins[1], pTChBins[nPtChBins-(iPtJInt == 0 ? 3 : 1)]);
             h->GetXaxis ()->SetMoreLogLabels ();
             h->GetYaxis ()->SetRangeUser (0.7, 1.3);
             h->GetYaxis ()->CenterTitle ();
@@ -1105,7 +1133,7 @@ void PlotResponseMatrix () {
   
             gPad->SetLogx ();
   
-            h = new TH1D ("h", ";#it{p}_{T}^{ch} [GeV];Ratio", 1, pTChBins[1], pTChBins[nPtChBins-4]);
+            h = new TH1D ("h", ";#it{p}_{T}^{ch} [GeV];Ratio", 1, pTChBins[1], pTChBins[nPtChBins-(iPtJInt == 0 ? 3 : 1)]);
             h->GetXaxis ()->SetMoreLogLabels ();
             h->GetYaxis ()->SetRangeUser (0.7, 1.3);
             h->GetYaxis ()->CenterTitle ();
@@ -1119,8 +1147,8 @@ void PlotResponseMatrix () {
             l->SetLineWidth (2);
             l->SetLineColor (kGray+1);
             l->SetLineStyle (2);
-            l->DrawLine (pTChBins[1], 1.05, pTChBins[nPtChBins-4], 1.05);
-            l->DrawLine (pTChBins[1], 0.95, pTChBins[nPtChBins-4], 0.95);
+            l->DrawLine (pTChBins[1], 1.05, pTChBins[nPtChBins-(iPtJInt == 0 ? 3 : 1)], 1.05);
+            l->DrawLine (pTChBins[1], 0.95, pTChBins[nPtChBins-(iPtJInt == 0 ? 3 : 1)], 0.95);
   
             for (short nIter : {1, 3, 5}) {
             //for (short nIter : {1}) {
@@ -1185,7 +1213,7 @@ void PlotResponseMatrix () {
   
             gPad->SetLogx ();
   
-            h = new TH1D ("h", ";#it{p}_{T}^{ch} [GeV];Ratio", 1, pTChBins[1], pTChBins[nPtChBins-4]);
+            h = new TH1D ("h", ";#it{p}_{T}^{ch} [GeV];Ratio", 1, pTChBins[1], pTChBins[nPtChBins-(iPtJInt == 0 ? 3 : 1)]);
             h->GetXaxis ()->SetMoreLogLabels ();
             h->GetYaxis ()->SetRangeUser (0.7, 1.3);
             h->GetYaxis ()->CenterTitle ();
@@ -1199,8 +1227,8 @@ void PlotResponseMatrix () {
             l->SetLineWidth (2);
             l->SetLineColor (kGray+1);
             l->SetLineStyle (2);
-            l->DrawLine (pTChBins[1], 1.05, pTChBins[nPtChBins-4], 1.05);
-            l->DrawLine (pTChBins[1], 0.95, pTChBins[nPtChBins-4], 0.95);
+            l->DrawLine (pTChBins[1], 1.05, pTChBins[nPtChBins-(iPtJInt == 0 ? 3 : 1)], 1.05);
+            l->DrawLine (pTChBins[1], 0.95, pTChBins[nPtChBins-(iPtJInt == 0 ? 3 : 1)], 0.95);
   
             for (short nIter : {1, 3, 5}) {
             //for (short nIter : {1}) {
@@ -1357,6 +1385,7 @@ void PlotResponseMatrix () {
       l->DrawLine (nPtChBins*10, nPtChBins*2, nPtChBins*10, nPtChBins*10);
       l->DrawLine (nPtChBins*2, nPtChBins*10, nPtChBins*10, nPtChBins*10);
 
+      c->SaveAs (Form ("%s/Plots/Unfolding/MC_Jet_TrkPt_ResponseMatrix_ref_2D_%s.png", workPath.Data (), dir.Data ()));
       c->SaveAs (Form ("%s/Plots/Unfolding/MC_Jet_TrkPt_ResponseMatrix_ref_2D_%s.pdf", workPath.Data (), dir.Data ()));
     } // end loop over iDir
 
@@ -1478,6 +1507,7 @@ void PlotResponseMatrix () {
         l->DrawLine (nPtChBins*10, nPtChBins*2, nPtChBins*10, nPtChBins*10);
         l->DrawLine (nPtChBins*2, nPtChBins*10, nPtChBins*10, nPtChBins*10);
 
+        c->SaveAs (Form ("%s/Plots/Unfolding/MC_Jet_TrkPt_ResponseMatrix_%s_2D_%s.png", workPath.Data (), cent, dir.Data ()));
         c->SaveAs (Form ("%s/Plots/Unfolding/MC_Jet_TrkPt_ResponseMatrix_%s_2D_%s.pdf", workPath.Data (), cent, dir.Data ()));
 
       } // end loop over iDir
@@ -1564,6 +1594,7 @@ void PlotResponseMatrix () {
       l->DrawLine (300, 30, 300, 300);
       l->DrawLine (30, 300, 300, 300);
 
+      c->SaveAs (Form ("%s/Plots/Unfolding/MC_JetPt_ResponseMatrix_ref_2D.png", workPath.Data ()));
       c->SaveAs (Form ("%s/Plots/Unfolding/MC_JetPt_ResponseMatrix_ref_2D.pdf", workPath.Data ()));
     }
 
@@ -1651,6 +1682,7 @@ void PlotResponseMatrix () {
       l->DrawLine (300, 30, 300, 300);
       l->DrawLine (30, 300, 300, 300);
 
+      c->SaveAs (Form ("%s/Plots/Unfolding/MC_JetPt_ResponseMatrix_%s_2D.png", workPath.Data (), cent));
       c->SaveAs (Form ("%s/Plots/Unfolding/MC_JetPt_ResponseMatrix_%s_2D.pdf", workPath.Data (), cent));
     } // end loop over iCent
 

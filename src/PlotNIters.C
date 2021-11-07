@@ -24,6 +24,8 @@
 #include "LocalUtilities.h"
 #include "Variations.h"
 
+#include "ProcessCorrelations.C" // gets NIter functions for plotting purposes
+
 
 using namespace JetHadronCorrelations;
 
@@ -621,330 +623,6 @@ void PlotNIters (const char* inFileTag) {
 
     const TString pTJInt = (iPtJInt == 0 ? "30GeV" : "60GeV");
 
-    const char* canvasName = Form ("c_jet_pt_unfUncs_%s", pTJInt.Data ());
-    TCanvas* c = new TCanvas (canvasName, "", 1400, 700);
-    c->Divide (4, 2);
-
-    TGraph* g = nullptr;
-
-    l->SetLineStyle (2);
-    l->SetLineWidth (2);
-    l->SetLineColor (kBlack);
-
-    double ymax = 0, ymin = 0;
-    {
-      c->cd (7);
-
-      if (doLogY) gPad->SetLogy ();
-
-      double x, y, xopt = -1;
-      ymax = 0, ymin = DBL_MAX;
-      g = g_jet_pt_ref_unfTotUnc[iPtJInt];
-      for (short i = 0; i < g->GetN (); i++) {
-        g->GetPoint (i, x, y);
-        if (ymax > 0 && y > 2. * ymax) continue;
-        ymax = std::fmax (y, ymax);
-      }
-      ymax *= ymaxSF;
-
-      g = g_jet_pt_ref_unfStatUnc[iPtJInt];
-      for (short i = 0; i < g->GetN (); i++) {
-        g->GetPoint (i, x, y);
-        if (x != 0 && y < ymin && y > 0) ymin = y;
-      }
-      g = g_jet_pt_ref_unfIterUnc[iPtJInt];
-      for (short i = 0; i < g->GetN (); i++) {
-        g->GetPoint (i, x, y);
-        if (x != 0 && y < ymin && y > 0) ymin = y;
-      }
-      short i = 0;
-      while (xopt == -1 && i < g_jet_pt_ref_unfIterUnc[iPtJInt]->GetN ()) {
-        g_jet_pt_ref_unfStatUnc[iPtJInt]->GetPoint (i, x, y);
-        double ydum = y;
-        g_jet_pt_ref_unfIterUnc[iPtJInt]->GetPoint (i, x, y);
-        if (ydum > y)
-          xopt = x;
-        i++;
-      }
-
-      if (doLogY) ymin *= 0.2;
-      else        ymin = 0;
-
-      TH1D* h = new TH1D ("h", ";Iterations;#sqrt{#Sigma #sigma_{n}^{2}}", 1, 0, 20);
-      h->GetYaxis ()->SetRangeUser (ymin, ymax);
-      h->SetLineWidth (0);
-      h->DrawCopy ("hist ][");
-      SaferDelete (&h);
-
-      g = g_jet_pt_ref_unfTotUnc[iPtJInt];
-      g->SetMarkerColor (kBlack);
-      g->SetMarkerStyle (kFullCircle);
-      g->Draw ("P");
-
-      g = g_jet_pt_ref_unfStatUnc[iPtJInt];
-      g->SetMarkerColor (kBlue);
-      g->SetMarkerStyle (kOpenCircle);
-      g->Draw ("P");
-
-      g = g_jet_pt_ref_unfIterUnc[iPtJInt];
-      g->SetMarkerColor (kRed);
-      g->SetMarkerStyle (kOpenSquare);
-      g->Draw ("P");
-
-      myText (0.2, 0.865, kBlack, "#bf{#it{pp}}", 0.05);
-      l->DrawLine (xopt, ymin, xopt, ymax/ymaxSF);
-    }
-
-
-    for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
-      c->cd (nZdcCentBins+1-iCent);
-
-      if (doLogY) gPad->SetLogy ();
-
-      double x, y, xopt = -1;
-      ymax = 0, ymin = DBL_MAX;
-      g = g_jet_pt_unfTotUnc[iPtJInt][iCent];
-      for (short i = 0; i < g->GetN (); i++) {
-        g->GetPoint (i, x, y);
-        if (ymax > 0 && y > 2. * ymax) continue;
-        ymax = std::fmax (y, ymax);
-      }
-      ymax *= ymaxSF;
-
-      g = g_jet_pt_unfStatUnc[iPtJInt][iCent];
-      for (short i = 0; i < g->GetN (); i++) {
-        g->GetPoint (i, x, y);
-        if (x != 0 && y < ymin && y > 0) ymin = y;
-      }
-      g = g_jet_pt_unfIterUnc[iPtJInt][iCent];
-      for (short i = 0; i < g->GetN (); i++) {
-        g->GetPoint (i, x, y);
-        if (x != 0 && y < ymin && y > 0) ymin = y;
-      }
-      short i = 0;
-      while (xopt == -1 && i < g_jet_pt_unfIterUnc[iPtJInt][iCent]->GetN ()) {
-        g_jet_pt_unfStatUnc[iPtJInt][iCent]->GetPoint (i, x, y);
-        double ydum = y;
-        g_jet_pt_unfIterUnc[iPtJInt][iCent]->GetPoint (i, x, y);
-        if (ydum > y)
-          xopt = x;
-        i++;
-      }
-
-      if (doLogY) ymin *= 0.2;
-      else        ymin = 0;
-
-      TH1D* h = new TH1D ("h", ";Iterations;#sqrt{#Sigma #sigma_{n}^{2}}", 1, 0, 20);
-      h->GetYaxis ()->SetRangeUser (ymin, ymax);
-      h->SetLineWidth (0);
-      h->DrawCopy ("hist ][");
-      SaferDelete (&h);
-
-      g = g_jet_pt_unfTotUnc[iPtJInt][iCent];
-      g->SetMarkerColor (kBlack);
-      g->SetMarkerStyle (kFullCircle);
-      g->Draw ("P");
-
-      g = g_jet_pt_unfStatUnc[iPtJInt][iCent];
-      g->SetMarkerColor (kBlue);
-      g->SetMarkerStyle (kOpenCircle);
-      g->Draw ("P");
-
-      g = g_jet_pt_unfIterUnc[iPtJInt][iCent];
-      g->SetMarkerColor (kRed);
-      g->SetMarkerStyle (kOpenSquare);
-      g->Draw ("P");
-
-      if (iCent < nZdcCentBins)
-        myText (0.2, 0.865, kBlack, Form ("#bf{ZDC %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.05);
-      else
-        myText (0.2, 0.865, kBlack, "#bf{All centralities}", 0.05);
-      l->DrawLine (xopt, ymin, xopt, ymax/ymaxSF);
-
-    } // end loop over iCent
-
-    c->cd (8);
-    myText (0.1, 0.93, kBlack, "#bf{#it{ATLAS}} Internal", 0.07);
-    myText (0.1, 0.84, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.07);
-    myText (0.1, 0.75, kBlack, "#it{p}+Pb, #sqrt{s} = 5.02 TeV", 0.07);
-    myText (0.1, 0.66, kBlack, Form ("#it{p}_{T}^{jet} [GeV] #in (%i, 300)", iPtJInt == 0 ? 30 : 60), 0.065);
-    myLineText2 (0.15, 0.56, kBlack,        kFullCircle, "#sigma_{stat} #oplus #sigma_{iter}, #alpha = 0", 1.2, 0.06);
-    myLineText2 (0.15, 0.48, kBlue,         kOpenCircle, "#sigma_{stat} only, #alpha = 0", 1.2, 0.06);
-    myLineText2 (0.15, 0.40, kRed,          kOpenSquare, "#sigma_{iter} only, #alpha = 0", 1.2, 0.06);
-
-    c->SaveAs (Form ("%s/Plots/PtCh/UnfUncs_Summary_JetSpectra_%s.pdf", workPath.Data (), pTJInt.Data ()));
-
-  } // end loop over iPtJInt
-
-
-
-
-  for (short iPtJInt : {0, 1}) {
-
-    const TString pTJInt = (iPtJInt == 0 ? "30GeV" : "60GeV");
-
-    const char* canvasName = Form ("c_jet_pt_unfRelUncs_%s", pTJInt.Data ());
-    TCanvas* c = new TCanvas (canvasName, "", 1400, 700);
-    c->Divide (4, 2);
-
-    TGraph* g = nullptr;
-
-    l->SetLineStyle (2);
-    l->SetLineWidth (2);
-    l->SetLineColor (kBlack);
-
-    double ymax = 0, ymin = 0;
-    {
-      c->cd (7);
-
-      if (doLogY) gPad->SetLogy ();
-
-      double x, y, xopt = -1;
-      ymax = 0, ymin = DBL_MAX;
-      g = g_jet_pt_ref_unfTotRelUnc[iPtJInt];
-      for (short i = 0; i < g->GetN (); i++) {
-        g->GetPoint (i, x, y);
-        if (ymax > 0 && y > 2. * ymax) continue;
-        ymax = std::fmax (y, ymax);
-      }
-      ymax *= ymaxSF;
-
-      g = g_jet_pt_ref_unfStatRelUnc[iPtJInt];
-      for (short i = 0; i < g->GetN (); i++) {
-        g->GetPoint (i, x, y);
-        if (x != 0 && y < ymin && y > 0) ymin = y;
-      }
-      g = g_jet_pt_ref_unfIterRelUnc[iPtJInt];
-      for (short i = 0; i < g->GetN (); i++) {
-        g->GetPoint (i, x, y);
-        if (x != 0 && y < ymin && y > 0) ymin = y;
-      }
-      short i = 0;
-      while (xopt == -1 && i < g_jet_pt_ref_unfIterRelUnc[iPtJInt]->GetN ()) {
-        g_jet_pt_ref_unfStatRelUnc[iPtJInt]->GetPoint (i, x, y);
-        double ydum = y;
-        g_jet_pt_ref_unfIterRelUnc[iPtJInt]->GetPoint (i, x, y);
-        if (ydum > y)
-          xopt = x;
-        i++;
-      }
-
-      if (doLogY) ymin *= 0.2;
-      else        ymin = 0;
-
-      TH1D* h = new TH1D ("h", ";Iterations;#sqrt{#Sigma #sigma_{n}^{2} / n^{2}}", 1, 0, 20);
-      h->GetYaxis ()->SetRangeUser (ymin, ymax);
-      h->SetLineWidth (0);
-      h->DrawCopy ("hist ][");
-      SaferDelete (&h);
-
-      g = g_jet_pt_ref_unfTotRelUnc[iPtJInt];
-      g->SetMarkerColor (kBlack);
-      g->SetMarkerStyle (kFullCircle);
-      g->Draw ("P");
-
-      g = g_jet_pt_ref_unfStatRelUnc[iPtJInt];
-      g->SetMarkerColor (kBlue);
-      g->SetMarkerStyle (kOpenCircle);
-      g->Draw ("P");
-
-      g = g_jet_pt_ref_unfIterRelUnc[iPtJInt];
-      g->SetMarkerColor (kRed);
-      g->SetMarkerStyle (kOpenSquare);
-      g->Draw ("P");
-
-      myText (0.2, 0.865, kBlack, "#bf{#it{pp}}", 0.05);
-      l->DrawLine (xopt, ymin, xopt, ymax/5);
-    }
-
-
-    for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
-      c->cd (nZdcCentBins+1-iCent);
-
-      if (doLogY) gPad->SetLogy ();
-
-      double x, y, xopt = -1;
-      ymax = 0, ymin = DBL_MAX;
-      g = g_jet_pt_unfTotRelUnc[iPtJInt][iCent];
-      for (short i = 0; i < g->GetN (); i++) {
-        g->GetPoint (i, x, y);
-        if (ymax > 0 && y > 2. * ymax) continue;
-        ymax = std::fmax (y, ymax);
-      }
-      ymax *= ymaxSF;
-
-      g = g_jet_pt_unfStatRelUnc[iPtJInt][iCent];
-      for (short i = 0; i < g->GetN (); i++) {
-        g->GetPoint (i, x, y);
-        if (x != 0 && y < ymin && y > 0) ymin = y;
-      }
-      g = g_jet_pt_unfIterRelUnc[iPtJInt][iCent];
-      for (short i = 0; i < g->GetN (); i++) {
-        g->GetPoint (i, x, y);
-        if (x != 0 && y < ymin && y > 0) ymin = y;
-      }
-      short i = 0;
-      while (xopt == -1 && i < g_jet_pt_unfIterRelUnc[iPtJInt][iCent]->GetN ()) {
-        g_jet_pt_unfStatRelUnc[iPtJInt][iCent]->GetPoint (i, x, y);
-        double ydum = y;
-        g_jet_pt_unfIterRelUnc[iPtJInt][iCent]->GetPoint (i, x, y);
-        if (ydum > y)
-          xopt = x;
-        i++;
-      }
-
-      if (doLogY) ymin *= 0.2;
-      else        ymin = 0;
-
-      TH1D* h = new TH1D ("h", ";Iterations;#sqrt{#Sigma #sigma_{n}^{2} / n^{2}}", 1, 0, 20);
-      h->GetYaxis ()->SetRangeUser (ymin, ymax);
-      h->SetLineWidth (0);
-      h->DrawCopy ("hist ][");
-      SaferDelete (&h);
-
-      g = g_jet_pt_unfTotRelUnc[iPtJInt][iCent];
-      g->SetMarkerColor (kBlack);
-      g->SetMarkerStyle (kFullCircle);
-      g->Draw ("P");
-
-      g = g_jet_pt_unfStatRelUnc[iPtJInt][iCent];
-      g->SetMarkerColor (kBlue);
-      g->SetMarkerStyle (kOpenCircle);
-      g->Draw ("P");
-
-      g = g_jet_pt_unfIterRelUnc[iPtJInt][iCent];
-      g->SetMarkerColor (kRed);
-      g->SetMarkerStyle (kOpenSquare);
-      g->Draw ("P");
-
-      if (iCent < nZdcCentBins)
-        myText (0.2, 0.865, kBlack, Form ("#bf{ZDC %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.05);
-      else
-        myText (0.2, 0.865, kBlack, "#bf{All centralities}", 0.05);
-      l->DrawLine (xopt, ymin, xopt, ymax/5);
-
-    } // end loop over iCent
-
-    c->cd (8);
-    myText (0.1, 0.93, kBlack, "#bf{#it{ATLAS}} Internal", 0.07);
-    myText (0.1, 0.84, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.07);
-    myText (0.1, 0.75, kBlack, "#it{p}+Pb, #sqrt{s} = 5.02 TeV", 0.07);
-    myText (0.1, 0.66, kBlack, Form ("#it{p}_{T}^{jet} [GeV] #in (%i, 300)", iPtJInt == 0 ? 30 : 60), 0.065);
-    myLineText2 (0.15, 0.56, kBlack,        kFullCircle, "#sigma_{stat} #oplus #sigma_{iter}, #alpha = 1", 1.2, 0.06);
-    myLineText2 (0.15, 0.48, kBlue,         kOpenCircle, "#sigma_{stat} only, #alpha = 1", 1.2, 0.06);
-    myLineText2 (0.15, 0.40, kRed,          kOpenSquare, "#sigma_{iter} only, #alpha = 1", 1.2, 0.06);
-
-    c->SaveAs (Form ("%s/Plots/PtCh/UnfRelUncs_Summary_JetSpectra_%s.pdf", workPath.Data (), pTJInt.Data ()));
-
-  } // end loop over iPtJInt
-
-
-
-
-  for (short iPtJInt : {0, 1}) {
-
-    const TString pTJInt = (iPtJInt == 0 ? "30GeV" : "60GeV");
-
     for (short iDir : {0, 1, 2}) {
 
       const char* canvasName = Form ("c_jetInt_trk_pt_unfUncs_iDir%i_%s", iDir, pTJInt.Data ());
@@ -1020,6 +698,13 @@ void PlotNIters (const char* inFileTag) {
 
         myText (0.2, 0.865, kBlack, "#bf{#it{pp}}", 0.05);
         l->DrawLine (xopt, ymin, xopt, ymax/ymaxSF);
+
+        l->SetLineColor (myGreen);
+        l->SetLineStyle (3);
+        const int xopt_2d = GetTrkSpectraNIters (iPtJInt, iDir, -1);
+        l->DrawLine (xopt_2d, ymin, xopt_2d, ymax/ymaxSF);
+        l->SetLineColor (kBlack);
+        l->SetLineStyle (2);
 
         jetInt_trk_pt_ref_niter_opt[iPtJInt][iDir][0] = xopt;
       }
@@ -1099,6 +784,13 @@ void PlotNIters (const char* inFileTag) {
         else
           myText (0.2, 0.865, kBlack, "#bf{All centralities}", 0.05);
         l->DrawLine (xopt, ymin, xopt, ymax/ymaxSF);
+
+        l->SetLineColor (myGreen);
+        l->SetLineStyle (3);
+        const int xopt_2d = GetTrkSpectraNIters (iPtJInt, iDir, iCent);
+        l->DrawLine (xopt_2d, ymin, xopt_2d, ymax/ymaxSF);
+        l->SetLineColor (kBlack);
+        l->SetLineStyle (2);
 
         jetInt_trk_pt_niter_opt[iPtJInt][iDir][iCent][0] = xopt;
 
@@ -1204,6 +896,13 @@ void PlotNIters (const char* inFileTag) {
         myText (0.2, 0.865, kBlack, "#bf{#it{pp}}", 0.05);
         l->DrawLine (xopt, ymin, xopt, ymax/ymaxSF);
 
+        l->SetLineColor (myGreen);
+        l->SetLineStyle (3);
+        const int xopt_2d = GetTrkSpectraNIters (iPtJInt, iDir, -1);
+        l->DrawLine (xopt_2d, ymin, xopt_2d, ymax/ymaxSF);
+        l->SetLineColor (kBlack);
+        l->SetLineStyle (2);
+
         jetInt_trk_pt_ref_niter_opt[iPtJInt][iDir][1] = xopt;
       }
 
@@ -1273,6 +972,13 @@ void PlotNIters (const char* inFileTag) {
         else
           myText (0.2, 0.865, kBlack, "#bf{All centralities}", 0.05);
         l->DrawLine (xopt, ymin, xopt, ymax/ymaxSF);
+
+        l->SetLineColor (myGreen);
+        l->SetLineStyle (3);
+        const int xopt_2d = GetTrkSpectraNIters (iPtJInt, iDir, iCent);
+        l->DrawLine (xopt_2d, ymin, xopt_2d, ymax/ymaxSF);
+        l->SetLineColor (kBlack);
+        l->SetLineStyle (2);
 
         jetInt_trk_pt_niter_opt[iPtJInt][iDir][iCent][1] = xopt;
 
@@ -1378,6 +1084,13 @@ void PlotNIters (const char* inFileTag) {
         myText (0.2, 0.865, kBlack, "#bf{#it{pp}}", 0.05);
         l->DrawLine (xopt, ymin, xopt, ymax/ymaxSF);
 
+        l->SetLineColor (myGreen);
+        l->SetLineStyle (3);
+        const int xopt_2d = GetTrkSpectraNIters (iPtJInt, iDir, -1);
+        l->DrawLine (xopt_2d, ymin, xopt_2d, ymax/ymaxSF);
+        l->SetLineColor (kBlack);
+        l->SetLineStyle (2);
+
         jetInt_trk_pt_ref_niter_opt[iPtJInt][iDir][2] = xopt;
       }
 
@@ -1448,6 +1161,13 @@ void PlotNIters (const char* inFileTag) {
           myText (0.2, 0.865, kBlack, "#bf{All centralities}", 0.05);
         l->DrawLine (xopt, ymin, xopt, ymax/ymaxSF);
 
+        l->SetLineColor (myGreen);
+        l->SetLineStyle (3);
+        const int xopt_2d = GetTrkSpectraNIters (iPtJInt, iDir, iCent);
+        l->DrawLine (xopt_2d, ymin, xopt_2d, ymax/ymaxSF);
+        l->SetLineColor (kBlack);
+        l->SetLineStyle (2);
+
         jetInt_trk_pt_niter_opt[iPtJInt][iDir][iCent][2] = xopt;
 
       } // end loop over iCent
@@ -1466,6 +1186,540 @@ void PlotNIters (const char* inFileTag) {
       c->SaveAs (Form ("%s/Plots/PtCh/UnfRelUncs_Summary_%iGeVJets_%s.pdf", workPath.Data (), iPtJInt == 0 ? 30 : 60, directions[iDir] == "ns" ? "nearside" : (directions[iDir] == "as" ? "awayside" : "perpendicular")));
 
     } // end loop over iDir
+
+  } // end loop over iPtJInt
+
+
+
+
+  for (short iPtJInt : {0, 1}) {
+
+    const TString pTJInt = (iPtJInt == 0 ? "30GeV" : "60GeV");
+
+    const char* canvasName = Form ("c_jet_pt_unfUncs_%s", pTJInt.Data ());
+    TCanvas* c = new TCanvas (canvasName, "", 1400, 700);
+    c->Divide (4, 2);
+
+    TGraph* g = nullptr;
+
+    l->SetLineStyle (2);
+    l->SetLineWidth (2);
+    l->SetLineColor (kBlack);
+
+    double ymax = 0, ymin = 0;
+    {
+      c->cd (7);
+
+      if (doLogY) gPad->SetLogy ();
+
+      double x, y, xopt = -1;
+      ymax = 0, ymin = DBL_MAX;
+      g = g_jet_pt_ref_unfTotUnc[iPtJInt];
+      for (short i = 0; i < g->GetN (); i++) {
+        g->GetPoint (i, x, y);
+        if (ymax > 0 && y > 2. * ymax) continue;
+        ymax = std::fmax (y, ymax);
+      }
+      ymax *= ymaxSF;
+
+      g = g_jet_pt_ref_unfStatUnc[iPtJInt];
+      for (short i = 0; i < g->GetN (); i++) {
+        g->GetPoint (i, x, y);
+        if (x != 0 && y < ymin && y > 0) ymin = y;
+      }
+      g = g_jet_pt_ref_unfIterUnc[iPtJInt];
+      for (short i = 0; i < g->GetN (); i++) {
+        g->GetPoint (i, x, y);
+        if (x != 0 && y < ymin && y > 0) ymin = y;
+      }
+      for (short i = 0; i < g_jet_pt_ref_unfIterUnc[iPtJInt]->GetN (); i++) {
+        g_jet_pt_ref_unfStatUnc[iPtJInt]->GetPoint (i, x, y);
+        double ydum = y;
+        g_jet_pt_ref_unfIterUnc[iPtJInt]->GetPoint (i, x, y);
+        if ((xopt == -1 && ydum > y) || i == g_jet_pt_ref_unfIterUnc[iPtJInt]->GetN () - 1)
+          xopt = x;
+        else if (ydum < y)
+          xopt = -1;
+        i++;
+      }
+
+      if (doLogY) ymin *= 0.2;
+      else        ymin = 0;
+
+      TH1D* h = new TH1D ("h", ";Iterations;#sqrt{#Sigma #sigma_{n}^{2}}", 1, 0, 20);
+      h->GetYaxis ()->SetRangeUser (ymin, ymax);
+      h->SetLineWidth (0);
+      h->DrawCopy ("hist ][");
+      SaferDelete (&h);
+
+      g = g_jet_pt_ref_unfTotUnc[iPtJInt];
+      g->SetMarkerColor (kBlack);
+      g->SetMarkerStyle (kFullCircle);
+      g->Draw ("P");
+
+      g = g_jet_pt_ref_unfStatUnc[iPtJInt];
+      g->SetMarkerColor (kBlue);
+      g->SetMarkerStyle (kOpenCircle);
+      g->Draw ("P");
+
+      g = g_jet_pt_ref_unfIterUnc[iPtJInt];
+      g->SetMarkerColor (kRed);
+      g->SetMarkerStyle (kOpenSquare);
+      g->Draw ("P");
+
+      myText (0.2, 0.865, kBlack, "#bf{#it{pp}}", 0.05);
+      l->DrawLine (xopt, ymin, xopt, ymax/ymaxSF);
+
+      l->SetLineColor (myGreen);
+      l->SetLineStyle (3);
+      const int xopt_2d = GetJetSpectraNIters (iPtJInt, -1);
+      l->DrawLine (xopt_2d, ymin, xopt_2d, ymax/ymaxSF);
+      l->SetLineColor (kBlack);
+      l->SetLineStyle (2);
+    }
+
+
+    for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
+      c->cd (nZdcCentBins+1-iCent);
+
+      if (doLogY) gPad->SetLogy ();
+
+      double x, y, xopt = -1;
+      ymax = 0, ymin = DBL_MAX;
+      g = g_jet_pt_unfTotUnc[iPtJInt][iCent];
+      for (short i = 0; i < g->GetN (); i++) {
+        g->GetPoint (i, x, y);
+        if (ymax > 0 && y > 2. * ymax) continue;
+        ymax = std::fmax (y, ymax);
+      }
+      ymax *= ymaxSF;
+
+      g = g_jet_pt_unfStatUnc[iPtJInt][iCent];
+      for (short i = 0; i < g->GetN (); i++) {
+        g->GetPoint (i, x, y);
+        if (x != 0 && y < ymin && y > 0) ymin = y;
+      }
+      g = g_jet_pt_unfIterUnc[iPtJInt][iCent];
+      for (short i = 0; i < g->GetN (); i++) {
+        g->GetPoint (i, x, y);
+        if (x != 0 && y < ymin && y > 0) ymin = y;
+      }
+      for (short i = 0; i < g_jet_pt_unfIterUnc[iPtJInt][iCent]->GetN (); i++) {
+        g_jet_pt_unfStatUnc[iPtJInt][iCent]->GetPoint (i, x, y);
+        double ydum = y;
+        g_jet_pt_unfIterUnc[iPtJInt][iCent]->GetPoint (i, x, y);
+        if ((xopt == -1 && ydum > y) || i == g_jet_pt_unfIterUnc[iPtJInt][iCent]->GetN () - 1)
+          xopt = x;
+        else if (ydum < y)
+          xopt = -1;
+        i++;
+      }
+
+      if (doLogY) ymin *= 0.2;
+      else        ymin = 0;
+
+      TH1D* h = new TH1D ("h", ";Iterations;#sqrt{#Sigma #sigma_{n}^{2}}", 1, 0, 20);
+      h->GetYaxis ()->SetRangeUser (ymin, ymax);
+      h->SetLineWidth (0);
+      h->DrawCopy ("hist ][");
+      SaferDelete (&h);
+
+      g = g_jet_pt_unfTotUnc[iPtJInt][iCent];
+      g->SetMarkerColor (kBlack);
+      g->SetMarkerStyle (kFullCircle);
+      g->Draw ("P");
+
+      g = g_jet_pt_unfStatUnc[iPtJInt][iCent];
+      g->SetMarkerColor (kBlue);
+      g->SetMarkerStyle (kOpenCircle);
+      g->Draw ("P");
+
+      g = g_jet_pt_unfIterUnc[iPtJInt][iCent];
+      g->SetMarkerColor (kRed);
+      g->SetMarkerStyle (kOpenSquare);
+      g->Draw ("P");
+
+      if (iCent < nZdcCentBins)
+        myText (0.2, 0.865, kBlack, Form ("#bf{ZDC %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.05);
+      else
+        myText (0.2, 0.865, kBlack, "#bf{All centralities}", 0.05);
+      l->DrawLine (xopt, ymin, xopt, ymax/ymaxSF);
+
+      l->SetLineColor (myGreen);
+      l->SetLineStyle (3);
+      const int xopt_2d = GetJetSpectraNIters (iPtJInt, iCent);
+      l->DrawLine (xopt_2d, ymin, xopt_2d, ymax/ymaxSF);
+      l->SetLineColor (kBlack);
+      l->SetLineStyle (2);
+
+    } // end loop over iCent
+
+    c->cd (8);
+    myText (0.1, 0.93, kBlack, "#bf{#it{ATLAS}} Internal", 0.07);
+    myText (0.1, 0.84, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.07);
+    myText (0.1, 0.75, kBlack, "#it{p}+Pb, #sqrt{s} = 5.02 TeV", 0.07);
+    myText (0.1, 0.66, kBlack, Form ("#it{p}_{T}^{jet} [GeV] #in (%i, 300)", iPtJInt == 0 ? 30 : 60), 0.065);
+    myLineText2 (0.15, 0.56, kBlack,        kFullCircle, "#sigma_{stat} #oplus #sigma_{iter}, #alpha = 0", 1.2, 0.06);
+    myLineText2 (0.15, 0.48, kBlue,         kOpenCircle, "#sigma_{stat} only, #alpha = 0", 1.2, 0.06);
+    myLineText2 (0.15, 0.40, kRed,          kOpenSquare, "#sigma_{iter} only, #alpha = 0", 1.2, 0.06);
+
+    c->SaveAs (Form ("%s/Plots/PtCh/UnfUncs_Summary_JetSpectra_%s.pdf", workPath.Data (), pTJInt.Data ()));
+
+  } // end loop over iPtJInt
+
+
+
+
+  for (short iPtJInt : {0, 1}) {
+
+    const TString pTJInt = (iPtJInt == 0 ? "30GeV" : "60GeV");
+
+    const char* canvasName = Form ("c_jet_pt_unfHybUncs_%s", pTJInt.Data ());
+    TCanvas* c = new TCanvas (canvasName, "", 1400, 700);
+    c->Divide (4, 2);
+
+    TGraph* g = nullptr;
+
+    l->SetLineStyle (2);
+    l->SetLineWidth (2);
+    l->SetLineColor (kBlack);
+
+    double ymax = 0, ymin = 0;
+    {
+      c->cd (7);
+
+      if (doLogY) gPad->SetLogy ();
+
+      double x, y, xopt = -1;
+      ymax = 0, ymin = DBL_MAX;
+      g = g_jet_pt_ref_unfTotHybUnc[iPtJInt];
+      for (short i = 0; i < g->GetN (); i++) {
+        g->GetPoint (i, x, y);
+        if (ymax > 0 && y > 2. * ymax) continue;
+        ymax = std::fmax (y, ymax);
+      }
+      ymax *= ymaxSF;
+
+      g = g_jet_pt_ref_unfStatHybUnc[iPtJInt];
+      for (short i = 0; i < g->GetN (); i++) {
+        g->GetPoint (i, x, y);
+        if (x != 0 && y < ymin && y > 0) ymin = y;
+      }
+      g = g_jet_pt_ref_unfIterHybUnc[iPtJInt];
+      for (short i = 0; i < g->GetN (); i++) {
+        g->GetPoint (i, x, y);
+        if (x != 0 && y < ymin && y > 0) ymin = y;
+      }
+      for (short i = 0; i < g_jet_pt_ref_unfIterHybUnc[iPtJInt]->GetN (); i++) {
+        g_jet_pt_ref_unfStatHybUnc[iPtJInt]->GetPoint (i, x, y);
+        double ydum = y;
+        g_jet_pt_ref_unfIterHybUnc[iPtJInt]->GetPoint (i, x, y);
+        if ((xopt == -1 && ydum > y) || i == g_jet_pt_ref_unfIterHybUnc[iPtJInt]->GetN () - 1)
+          xopt = x;
+        else if (ydum < y)
+          xopt = -1;
+        i++;
+      }
+
+      if (doLogY) ymin *= 0.2;
+      else        ymin = 0;
+
+      TH1D* h = new TH1D ("h", ";Iterations;#sqrt{#Sigma #sigma_{n}^{2} / n}", 1, 0, 20);
+      h->GetYaxis ()->SetRangeUser (ymin, ymax);
+      h->SetLineWidth (0);
+      h->DrawCopy ("hist ][");
+      SaferDelete (&h);
+
+      g = g_jet_pt_ref_unfTotHybUnc[iPtJInt];
+      g->SetMarkerColor (kBlack);
+      g->SetMarkerStyle (kFullCircle);
+      g->Draw ("P");
+
+      g = g_jet_pt_ref_unfStatHybUnc[iPtJInt];
+      g->SetMarkerColor (kBlue);
+      g->SetMarkerStyle (kOpenCircle);
+      g->Draw ("P");
+
+      g = g_jet_pt_ref_unfIterHybUnc[iPtJInt];
+      g->SetMarkerColor (kRed);
+      g->SetMarkerStyle (kOpenSquare);
+      g->Draw ("P");
+
+      myText (0.2, 0.865, kBlack, "#bf{#it{pp}}", 0.05);
+      l->DrawLine (xopt, ymin, xopt, ymax/ymaxSF);
+
+      l->SetLineColor (myGreen);
+      l->SetLineStyle (3);
+      const int xopt_2d = GetJetSpectraNIters (iPtJInt, -1);
+      l->DrawLine (xopt_2d, ymin, xopt_2d, ymax/ymaxSF);
+      l->SetLineColor (kBlack);
+      l->SetLineStyle (2);
+    }
+
+
+    for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
+      c->cd (nZdcCentBins+1-iCent);
+
+      if (doLogY) gPad->SetLogy ();
+
+      double x, y, xopt = -1;
+      ymax = 0, ymin = DBL_MAX;
+      g = g_jet_pt_unfTotHybUnc[iPtJInt][iCent];
+      for (short i = 0; i < g->GetN (); i++) {
+        g->GetPoint (i, x, y);
+        if (ymax > 0 && y > 2. * ymax) continue;
+        ymax = std::fmax (y, ymax);
+      }
+      ymax *= ymaxSF;
+
+      g = g_jet_pt_unfStatHybUnc[iPtJInt][iCent];
+      for (short i = 0; i < g->GetN (); i++) {
+        g->GetPoint (i, x, y);
+        if (x != 0 && y < ymin && y > 0) ymin = y;
+      }
+      g = g_jet_pt_unfIterHybUnc[iPtJInt][iCent];
+      for (short i = 0; i < g->GetN (); i++) {
+        g->GetPoint (i, x, y);
+        if (x != 0 && y < ymin && y > 0) ymin = y;
+      }
+      for (short i = 0; i < g_jet_pt_unfIterHybUnc[iPtJInt][iCent]->GetN (); i++) {
+        g_jet_pt_unfStatHybUnc[iPtJInt][iCent]->GetPoint (i, x, y);
+        double ydum = y;
+        g_jet_pt_unfIterHybUnc[iPtJInt][iCent]->GetPoint (i, x, y);
+        if ((xopt == -1 && ydum > y) || i == g_jet_pt_unfIterHybUnc[iPtJInt][iCent]->GetN () - 1)
+          xopt = x;
+        else if (ydum < y)
+          xopt = -1;
+        i++;
+      }
+
+      if (doLogY) ymin *= 0.2;
+      else        ymin = 0;
+
+      TH1D* h = new TH1D ("h", ";Iterations;#sqrt{#Sigma #sigma_{n}^{2} / n}", 1, 0, 20);
+      h->GetYaxis ()->SetRangeUser (ymin, ymax);
+      h->SetLineWidth (0);
+      h->DrawCopy ("hist ][");
+      SaferDelete (&h);
+
+      g = g_jet_pt_unfTotHybUnc[iPtJInt][iCent];
+      g->SetMarkerColor (kBlack);
+      g->SetMarkerStyle (kFullCircle);
+      g->Draw ("P");
+
+      g = g_jet_pt_unfStatHybUnc[iPtJInt][iCent];
+      g->SetMarkerColor (kBlue);
+      g->SetMarkerStyle (kOpenCircle);
+      g->Draw ("P");
+
+      g = g_jet_pt_unfIterHybUnc[iPtJInt][iCent];
+      g->SetMarkerColor (kRed);
+      g->SetMarkerStyle (kOpenSquare);
+      g->Draw ("P");
+
+      if (iCent < nZdcCentBins)
+        myText (0.2, 0.865, kBlack, Form ("#bf{ZDC %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.05);
+      else
+        myText (0.2, 0.865, kBlack, "#bf{All centralities}", 0.05);
+      l->DrawLine (xopt, ymin, xopt, ymax/ymaxSF);
+
+      l->SetLineColor (myGreen);
+      l->SetLineStyle (3);
+      const int xopt_2d = GetJetSpectraNIters (iPtJInt, iCent);
+      l->DrawLine (xopt_2d, ymin, xopt_2d, ymax/ymaxSF);
+      l->SetLineColor (kBlack);
+      l->SetLineStyle (2);
+
+    } // end loop over iCent
+
+    c->cd (8);
+    myText (0.1, 0.93, kBlack, "#bf{#it{ATLAS}} Internal", 0.07);
+    myText (0.1, 0.84, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.07);
+    myText (0.1, 0.75, kBlack, "#it{p}+Pb, #sqrt{s} = 5.02 TeV", 0.07);
+    myText (0.1, 0.66, kBlack, Form ("#it{p}_{T}^{jet} [GeV] #in (%i, 300)", iPtJInt == 0 ? 30 : 60), 0.065);
+    myLineText2 (0.15, 0.56, kBlack,        kFullCircle, "#sigma_{stat} #oplus #sigma_{iter}, #alpha = 0.5", 1.2, 0.06);
+    myLineText2 (0.15, 0.48, kBlue,         kOpenCircle, "#sigma_{stat} only, #alpha = 0.5", 1.2, 0.06);
+    myLineText2 (0.15, 0.40, kRed,          kOpenSquare, "#sigma_{iter} only, #alpha = 0.5", 1.2, 0.06);
+
+    c->SaveAs (Form ("%s/Plots/PtCh/UnfHybUncs_Summary_JetSpectra_%s.pdf", workPath.Data (), pTJInt.Data ()));
+
+  } // end loop over iPtJInt
+
+
+
+
+  for (short iPtJInt : {0, 1}) {
+
+    const TString pTJInt = (iPtJInt == 0 ? "30GeV" : "60GeV");
+
+    const char* canvasName = Form ("c_jet_pt_unfRelUncs_%s", pTJInt.Data ());
+    TCanvas* c = new TCanvas (canvasName, "", 1400, 700);
+    c->Divide (4, 2);
+
+    TGraph* g = nullptr;
+
+    l->SetLineStyle (2);
+    l->SetLineWidth (2);
+    l->SetLineColor (kBlack);
+
+    double ymax = 0, ymin = 0;
+    {
+      c->cd (7);
+
+      if (doLogY) gPad->SetLogy ();
+
+      double x, y, xopt = -1;
+      ymax = 0, ymin = DBL_MAX;
+      g = g_jet_pt_ref_unfTotRelUnc[iPtJInt];
+      for (short i = 0; i < g->GetN (); i++) {
+        g->GetPoint (i, x, y);
+        if (ymax > 0 && y > 2. * ymax) continue;
+        ymax = std::fmax (y, ymax);
+      }
+      ymax *= ymaxSF;
+
+      g = g_jet_pt_ref_unfStatRelUnc[iPtJInt];
+      for (short i = 0; i < g->GetN (); i++) {
+        g->GetPoint (i, x, y);
+        if (x != 0 && y < ymin && y > 0) ymin = y;
+      }
+      g = g_jet_pt_ref_unfIterRelUnc[iPtJInt];
+      for (short i = 0; i < g->GetN (); i++) {
+        g->GetPoint (i, x, y);
+        if (x != 0 && y < ymin && y > 0) ymin = y;
+      }
+      for (short i = 0; i < g_jet_pt_ref_unfIterRelUnc[iPtJInt]->GetN (); i++) {
+        g_jet_pt_ref_unfStatRelUnc[iPtJInt]->GetPoint (i, x, y);
+        double ydum = y;
+        g_jet_pt_ref_unfIterRelUnc[iPtJInt]->GetPoint (i, x, y);
+        if ((xopt == -1 && ydum > y) || i == g_jet_pt_ref_unfIterRelUnc[iPtJInt]->GetN () - 1)
+          xopt = x;
+        else if (ydum < y)
+          xopt = -1;
+        i++;
+      }
+
+      if (doLogY) ymin *= 0.2;
+      else        ymin = 0;
+
+      TH1D* h = new TH1D ("h", ";Iterations;#sqrt{#Sigma #sigma_{n}^{2} / n^{2}}", 1, 0, 20);
+      h->GetYaxis ()->SetRangeUser (ymin, ymax);
+      h->SetLineWidth (0);
+      h->DrawCopy ("hist ][");
+      SaferDelete (&h);
+
+      g = g_jet_pt_ref_unfTotRelUnc[iPtJInt];
+      g->SetMarkerColor (kBlack);
+      g->SetMarkerStyle (kFullCircle);
+      g->Draw ("P");
+
+      g = g_jet_pt_ref_unfStatRelUnc[iPtJInt];
+      g->SetMarkerColor (kBlue);
+      g->SetMarkerStyle (kOpenCircle);
+      g->Draw ("P");
+
+      g = g_jet_pt_ref_unfIterRelUnc[iPtJInt];
+      g->SetMarkerColor (kRed);
+      g->SetMarkerStyle (kOpenSquare);
+      g->Draw ("P");
+
+      myText (0.2, 0.865, kBlack, "#bf{#it{pp}}", 0.05);
+      l->DrawLine (xopt, ymin, xopt, ymax/ymaxSF);
+
+      l->SetLineColor (myGreen);
+      l->SetLineStyle (3);
+      const int xopt_2d = GetJetSpectraNIters (iPtJInt, -1);
+      l->DrawLine (xopt_2d, ymin, xopt_2d, ymax/ymaxSF);
+      l->SetLineColor (kBlack);
+      l->SetLineStyle (2);
+    }
+
+
+    for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
+      c->cd (nZdcCentBins+1-iCent);
+
+      if (doLogY) gPad->SetLogy ();
+
+      double x, y, xopt = -1;
+      ymax = 0, ymin = DBL_MAX;
+      g = g_jet_pt_unfTotRelUnc[iPtJInt][iCent];
+      for (short i = 0; i < g->GetN (); i++) {
+        g->GetPoint (i, x, y);
+        if (ymax > 0 && y > 2. * ymax) continue;
+        ymax = std::fmax (y, ymax);
+      }
+      ymax *= ymaxSF;
+
+      g = g_jet_pt_unfStatRelUnc[iPtJInt][iCent];
+      for (short i = 0; i < g->GetN (); i++) {
+        g->GetPoint (i, x, y);
+        if (x != 0 && y < ymin && y > 0) ymin = y;
+      }
+      g = g_jet_pt_unfIterRelUnc[iPtJInt][iCent];
+      for (short i = 0; i < g->GetN (); i++) {
+        g->GetPoint (i, x, y);
+        if (x != 0 && y < ymin && y > 0) ymin = y;
+      }
+      for (short i = 0; i < g_jet_pt_unfIterRelUnc[iPtJInt][iCent]->GetN (); i++) {
+        g_jet_pt_unfStatRelUnc[iPtJInt][iCent]->GetPoint (i, x, y);
+        double ydum = y;
+        g_jet_pt_unfIterRelUnc[iPtJInt][iCent]->GetPoint (i, x, y);
+        if ((xopt == -1 && ydum > y) || i == g_jet_pt_unfIterRelUnc[iPtJInt][iCent]->GetN () - 1)
+          xopt = x;
+        else if (ydum < y)
+          xopt = -1;
+        i++;
+      }
+
+      if (doLogY) ymin *= 0.2;
+      else        ymin = 0;
+
+      TH1D* h = new TH1D ("h", ";Iterations;#sqrt{#Sigma #sigma_{n}^{2} / n^{2}}", 1, 0, 20);
+      h->GetYaxis ()->SetRangeUser (ymin, ymax);
+      h->SetLineWidth (0);
+      h->DrawCopy ("hist ][");
+      SaferDelete (&h);
+
+      g = g_jet_pt_unfTotRelUnc[iPtJInt][iCent];
+      g->SetMarkerColor (kBlack);
+      g->SetMarkerStyle (kFullCircle);
+      g->Draw ("P");
+
+      g = g_jet_pt_unfStatRelUnc[iPtJInt][iCent];
+      g->SetMarkerColor (kBlue);
+      g->SetMarkerStyle (kOpenCircle);
+      g->Draw ("P");
+
+      g = g_jet_pt_unfIterRelUnc[iPtJInt][iCent];
+      g->SetMarkerColor (kRed);
+      g->SetMarkerStyle (kOpenSquare);
+      g->Draw ("P");
+
+      if (iCent < nZdcCentBins)
+        myText (0.2, 0.865, kBlack, Form ("#bf{ZDC %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.05);
+      else
+        myText (0.2, 0.865, kBlack, "#bf{All centralities}", 0.05);
+      l->DrawLine (xopt, ymin, xopt, ymax/ymaxSF);
+
+      l->SetLineColor (myGreen);
+      l->SetLineStyle (3);
+      const int xopt_2d = GetJetSpectraNIters (iPtJInt, iCent);
+      l->DrawLine (xopt_2d, ymin, xopt_2d, ymax/ymaxSF);
+      l->SetLineColor (kBlack);
+      l->SetLineStyle (2);
+
+    } // end loop over iCent
+
+    c->cd (8);
+    myText (0.1, 0.93, kBlack, "#bf{#it{ATLAS}} Internal", 0.07);
+    myText (0.1, 0.84, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.07);
+    myText (0.1, 0.75, kBlack, "#it{p}+Pb, #sqrt{s} = 5.02 TeV", 0.07);
+    myText (0.1, 0.66, kBlack, Form ("#it{p}_{T}^{jet} [GeV] #in (%i, 300)", iPtJInt == 0 ? 30 : 60), 0.065);
+    myLineText2 (0.15, 0.56, kBlack,        kFullCircle, "#sigma_{stat} #oplus #sigma_{iter}, #alpha = 1", 1.2, 0.06);
+    myLineText2 (0.15, 0.48, kBlue,         kOpenCircle, "#sigma_{stat} only, #alpha = 1", 1.2, 0.06);
+    myLineText2 (0.15, 0.40, kRed,          kOpenSquare, "#sigma_{iter} only, #alpha = 1", 1.2, 0.06);
+
+    c->SaveAs (Form ("%s/Plots/PtCh/UnfRelUncs_Summary_JetSpectra_%s.pdf", workPath.Data (), pTJInt.Data ()));
 
   } // end loop over iPtJInt
 
@@ -1506,6 +1760,12 @@ void PlotNIters (const char* inFileTag) {
         SaferDelete (&g);
       }
 
+      l->SetLineStyle (2);
+      l->SetLineWidth (2);
+      l->SetLineColor (kBlack);
+      l->DrawLine (30, 0.25, 30, 1.75);
+      l->DrawLine (300, 0.25, 300, 1.75);
+
       myText (0.2, 0.865, kBlack, "#bf{#it{pp}}", 0.05);
     }
 
@@ -1534,6 +1794,12 @@ void PlotNIters (const char* inFileTag) {
         myDraw (g, colorfulColors[iCol--], kOpenCircle, 1.0, 1, 2, "P", false);
         SaferDelete (&g);
       }
+
+      l->SetLineStyle (2);
+      l->SetLineWidth (2);
+      l->SetLineColor (kBlack);
+      l->DrawLine (30, 0.25, 30, 1.75);
+      l->DrawLine (300, 0.25, 300, 1.75);
 
       if (iCent < nZdcCentBins)
         myText (0.2, 0.865, kBlack, Form ("#bf{ZDC %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.05);
@@ -1679,7 +1945,7 @@ void PlotNIters (const char* inFileTag) {
 
         gPad->SetLogx ();
 
-        const short nIterOpt = jetInt_trk_pt_ref_niter_opt[iPtJInt][iDir][iPtJInt == 0 ? 1 : 0];
+        const short nIterOpt = GetTrkSpectraNIters (iPtJInt, iDir, -1);//jetInt_trk_pt_ref_niter_opt[iPtJInt][iDir][iPtJInt == 0 ? 1 : 0];
         const short nIterVar = nIterOpt + 1;//jetInt_trk_pt_ref_niter_opt[iPtJInt][iDir][0];
 
         TH1D* h = new TH1D ("h", Form (";#it{p}_{T}^{ch} [GeV];%i vs. %i iterations", nIterOpt, nIterVar), 1, pTChBins[1], iDir == 1 ? 10 : pTChBins[nPtChBins-(iPtJInt == 0 ? 3 : 1)]);//pTChBins[nPtChBins]);
@@ -1721,7 +1987,7 @@ void PlotNIters (const char* inFileTag) {
 
         gPad->SetLogx ();
 
-        const short nIterOpt = jetInt_trk_pt_niter_opt[iPtJInt][iDir][iCent][iPtJInt == 0 ? 1 : 0];
+        const short nIterOpt = GetTrkSpectraNIters (iPtJInt, iDir, iCent);//jetInt_trk_pt_niter_opt[iPtJInt][iDir][iCent][iPtJInt == 0 ? 1 : 0];
         const short nIterVar = nIterOpt + 1;//jetInt_trk_pt_niter_opt[iPtJInt][iDir][iCent][0];
 
         TH1D* h = new TH1D ("h", Form (";#it{p}_{T}^{ch} [GeV];%i vs. %i iterations", nIterOpt, nIterVar), 1, pTChBins[1], iDir == 1 ? 10 : pTChBins[nPtChBins-(iPtJInt == 0 ? 3 : 1)]);//pTChBins[nPtChBins]);

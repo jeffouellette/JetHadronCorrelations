@@ -4,7 +4,7 @@ LDFLAGS=`root-config --glibs --ldflags` -Llib -L${ROOT_UTILS_PATH}/lib -L${ATLAS
 
 libraries = LocalUtilities
 algorithms = JetHadronSkimmer CentralityAnalysis JetSubtractedEnergy TrackingPerformance TrackMomentumResolution JetEnergyResolution
-binaries = Process AnalyzeTrackMomentumResolution AnalyzeJetEnergyResolution RunCorrelator MakeResponseMatrix
+binaries = Process AnalyzeTrackMomentumResolution AnalyzeJetEnergyResolution RunCorrelator MakeResponseMatrix ProcessCorrelations ProcessUnfolding
 
 .PHONY : libs algs bins directories clean
 
@@ -29,6 +29,12 @@ RunCorrelator : $(libraries) src/RunCorrelator.cxx
 
 MakeResponseMatrix : $(libraries) src/MakeResponseMatrix.cxx
 	$(CXX) $(CXXFLAGS) src/MakeResponseMatrix.cxx $(LDFLAGS) $(libraries:%=-l%) $(algorithms:%=-l%) -o bin/MakeResponseMatrix.exe
+
+ProcessCorrelations : $(libraries) src/ProcessCorrelations.C
+	$(CXX) $(CXXFLAGS) src/ProcessCorrelations.C $(LDFLAGS) $(libraries:%=-l%) $(algorithms:%=-l%) -o bin/ProcessCorrelations.exe
+
+ProcessUnfolding : $(libraries) src/ProcessUnfolding.C
+	$(CXX) $(CXXFLAGS) src/ProcessUnfolding.C $(LDFLAGS) $(libraries:%=-l%) $(algorithms:%=-l%) -o bin/ProcessUnfolding.exe
 
 AnalyzeTrackMomentumResolution : $(libraries) src/AnalyzeTrackMomentumResolution.C
 	$(CXX) $(CXXFLAGS) src/AnalyzeTrackMomentumResolution.C $(LDFLAGS) $(libraries:%=-l%) $(algorithms:%=-l%) -o bin/AnalyzeTrackMomentumResolution.exe

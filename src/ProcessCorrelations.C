@@ -7,7 +7,6 @@
 #include "TreeVariables.h"
 #include "LocalUtilities.h"
 #include "Variations.h"
-#include "PrimaryFractionFit.h"
 
 #include <ArrayTemplates.h>
 #include <Utilities.h>
@@ -15,139 +14,21 @@
 #include <TH1D.h>
 #include <TH2D.h>
 
-#if !(defined(__CINT__) || defined(__CLING__)) || defined(__ACLIC__)
-#include "RooUnfoldResponse.h"
-#include "RooUnfoldBayes.h"
-#endif
-
 #include <iostream>
 #include <string.h>
 #include <math.h>
 
 using namespace JetHadronCorrelations;
 
-PrimaryFractionFit bbbf;
 
-short GetJetSpectraNIters (const short iPtJInt, const short iCent) {
-  switch (iPtJInt) {
-    case 0: // pTJ > 30 GeV
-    switch (iCent) {
-      case 5:  return 9; // all centralities
-      case 0:  return 9; // 0-20%
-      case 1:  return 9; // 20-40%...
-      case 2:  return 9;
-      case 3:  return 7;
-      case 4:  return 7; // ... 80-100%
-      case -1: return 7; // pp
-      default: return 0;
-    }
-    case 1: // pTJ > 60 GeV
-    switch (iCent) {
-      case 5:  return 17; // all centralities
-      case 0:  return 15; // 0-20%
-      case 1:  return 13; // 20-40%...
-      case 2:  return 13;
-      case 3:  return 11;
-      case 4:  return 9; // ... 80-100%
-      case -1: return 15; // pp
-      default: return 0;
-    }
-    default: return 0;
-  }
-}
-
-
-short GetTrkSpectraNIters (const short iPtJInt, const short iDir, const short iCent) {
-  //return GetJetSpectraNIters (iPtJInt, iCent);
-  switch (iPtJInt) {
-    case 0: // pTJ > 30 GeV
-    switch (iDir) {
-      case 0: // near-side
-      switch (iCent) {
-        case 5:  return 9; // all centralities
-        case 0:  return 9; // 0-20%
-        case 1:  return 9; // 20-40%...
-        case 2:  return 9;
-        case 3:  return 7;
-        case 4:  return 7; // ... 80-100%
-        case -1: return 7; // pp
-        default: return 0;
-      }
-      case 1: // perpendicular
-      switch (iCent) {
-        case 5:  return 1;
-        case 0:  return 1;
-        case 1:  return 1;
-        case 2:  return 1;
-        case 3:  return 1;
-        case 4:  return 1;
-        case -1: return 1;
-        default: return 0;
-      }
-      case 2: // away-side
-      switch (iCent) {
-        case 5:  return 9; // all centralities
-        case 0:  return 9; // 0-20%
-        case 1:  return 7; // 20-40%...
-        case 2:  return 7;
-        case 3:  return 7;
-        case 4:  return 7; // ... 80-100%
-        case -1: return 7; // pp
-        default: return 0;
-      }
-      default: return 0;
-    }
-    case 1: // pTJ > 60 GeV
-    switch (iDir) {
-      case 0: // near-side
-      switch (iCent) {
-        case 5:  return 17; // all centralities
-        case 0:  return 15; // 0-20%
-        case 1:  return 13; // 20-40%...
-        case 2:  return 13;
-        case 3:  return 11;
-        case 4:  return 9; // ... 80-100%
-        case -1: return 15; // pp
-        default: return 0;
-      }
-      case 1: // perpendicular
-      switch (iCent) {
-        case 5:  return 1;
-        case 0:  return 1;
-        case 1:  return 1;
-        case 2:  return 1;
-        case 3:  return 1;
-        case 4:  return 1;
-        case -1: return 3;
-        default: return 0;
-      }
-      case 2: // away-side
-      switch (iCent) {
-        case 5:  return 15; // all centralities
-        case 0:  return 13; // 0-20%
-        case 1:  return 11; // 20-40%...
-        case 2:  return 11;
-        case 3:  return 9;
-        case 4:  return 7; // ... 80-100%
-        case -1: return 13; // pp
-        default: return 0;
-      }
-      default: return 0;
-    }
-    default: return 0;
-  }
-}
-
-
-
-void ProcessCorrelations (const char* tag, const char* outFileTag, const int nItersMax = 20) {
+void ProcessCorrelations (const char* tag, const char* outFileTag) {//, const int nItersMax = 20) {
 
   TFile* inFile = nullptr;
 
-  const int nItersMin = 1;
-  const double* nItersVals = linspace (nItersMin, nItersMax, nItersMax-nItersMin);
+  //const int nItersMin = 1;
+  //const double* nItersVals = linspace (nItersMin, nItersMax, nItersMax-nItersMin);
 
-  const bool useJetWgts = true;
+  //const bool useJetWgts = true;
 
   TH1D***   h_evt_counts_ref              = Get2DArray <TH1D*> (2, nVar);
   TH1D****  h_jet_counts_ref              = Get3DArray <TH1D*> (2, nPtJBins, nVar);
@@ -188,26 +69,6 @@ void ProcessCorrelations (const char* tag, const char* outFileTag, const int nIt
   TH1D*****   h_jet_trk_dphi_ref_sig      = Get4DArray <TH1D*> (2, nPtJBins, nPtChSelections, nVar);
   TH1D******  h_jet_trk_dphi_sig          = Get5DArray <TH1D*> (2, nPtJBins, nPtChSelections, nZdcCentBins+1, nVar);
 
-  TH1D**      h_jet_pt_ref_unf_nIters     = Get1DArray <TH1D*> (nItersMax-nItersMin+2);
-  TH1D***     h_jet_pt_unf_nIters         = Get2DArray <TH1D*> (nZdcCentBins+1, nItersMax-nItersMin+2);
-
-  TGraph**    g_jet_pt_ref_unfIterUnc     = Get1DArray <TGraph*> (2);                 // sums of iterations uncertainties as a function of nIter -- data only
-  TGraph***   g_jet_pt_unfIterUnc         = Get2DArray <TGraph*> (2, nZdcCentBins+1); // sums of iterations uncertainties as a function of nIter -- data only
-  TGraph**    g_jet_pt_ref_unfSumUnc      = Get1DArray <TGraph*> (2);                 // sums of statistical uncertainties as a function of nIter -- data only
-  TGraph***   g_jet_pt_unfSumUnc          = Get2DArray <TGraph*> (2, nZdcCentBins+1); // sums of statistical uncertainties as a function of nIter -- data only
-  TGraph**    g_jet_pt_ref_unfTotUnc      = Get1DArray <TGraph*> (2);                 // sums of total uncertainties as a function of nIter -- data only
-  TGraph***   g_jet_pt_unfTotUnc          = Get2DArray <TGraph*> (2, nZdcCentBins+1); // sums of total uncertainties as a function of nIter -- data only
-
-  TGraph**    g_jet_pt_ref_unfIterRelUnc  = Get1DArray <TGraph*> (2);                 // sums of iterations relative uncertainties as a function of nIter -- data only
-  TGraph***   g_jet_pt_unfIterRelUnc      = Get2DArray <TGraph*> (2, nZdcCentBins+1); // sums of iterations relative uncertainties as a function of nIter -- data only
-  TGraph**    g_jet_pt_ref_unfSumRelUnc   = Get1DArray <TGraph*> (2);                 // sums of statistical relative uncertainties as a function of nIter -- data only
-  TGraph***   g_jet_pt_unfSumRelUnc       = Get2DArray <TGraph*> (2, nZdcCentBins+1); // sums of statistical relative uncertainties as a function of nIter -- data only
-  TGraph**    g_jet_pt_ref_unfTotRelUnc   = Get1DArray <TGraph*> (2);                 // sums of total relative uncertainties as a function of nIter -- data only
-  TGraph***   g_jet_pt_unfTotRelUnc       = Get2DArray <TGraph*> (2, nZdcCentBins+1); // sums of total relative uncertainties as a function of nIter -- data only
-
-  TH1D****    h_jet_pt_ref_unf            = Get3DArray <TH1D*> (2, 2, nVar);          // iDType, iPtJInt, nVar
-  TH1D*****   h_jet_pt_unf                = Get4DArray <TH1D*> (2, 2, nZdcCentBins+1, nVar);
-
   // now the pTJet-integrated histograms (e.g. > 30 GeV and > 60 GeV)
   TH1D*****   h_jetInt_trk_pt_ref                 = Get4DArray <TH1D*> (2, 2, nDir, nVar);
   TH1D******  h_jetInt_trk_pt                     = Get5DArray <TH1D*> (2, 2, nDir, nZdcCentBins+1, nVar);
@@ -215,29 +76,6 @@ void ProcessCorrelations (const char* tag, const char* outFileTag, const int nIt
   TH1D******  h_jetInt_trk_pt_bkg                 = Get5DArray <TH1D*> (2, 2, nDir, nZdcCentBins+1, nVar);
   TH1D*****   h_jetInt_trk_pt_ref_sig             = Get4DArray <TH1D*> (2, 2, nDir, nVar);
   TH1D******  h_jetInt_trk_pt_sig                 = Get5DArray <TH1D*> (2, 2, nDir, nZdcCentBins+1, nVar);
-
-  TH1D****    h_jetInt_trk_pt_ref_unf_nIters      = Get3DArray <TH1D*> (nPtJBins, nDir, nItersMax-nItersMin+2);
-  TH1D*****   h_jetInt_trk_pt_unf_nIters          = Get4DArray <TH1D*> (nPtJBins, nDir, nZdcCentBins+1, nItersMax-nItersMin+2);
-
-  TGraph***   g_jetInt_trk_pt_ref_unfIterUnc      = Get2DArray <TGraph*> (2, nDir);                           // sums of iterations uncertainties as a function of nIter -- data only
-  TGraph****  g_jetInt_trk_pt_unfIterUnc          = Get3DArray <TGraph*> (2, nDir, nZdcCentBins+1);           // sums of iterations uncertainties as a function of nIter -- data only
-  TGraph***   g_jetInt_trk_pt_ref_unfSumUnc       = Get2DArray <TGraph*> (2, nDir);                           // sums of statistical uncertainties as a function of nIter -- data only
-  TGraph****  g_jetInt_trk_pt_unfSumUnc           = Get3DArray <TGraph*> (2, nDir, nZdcCentBins+1);           // sums of statistical uncertainties as a function of nIter -- data only
-  TGraph***   g_jetInt_trk_pt_ref_unfTotUnc       = Get2DArray <TGraph*> (2, nDir);                           // sums of total uncertainties as a function of nIter -- data only
-  TGraph****  g_jetInt_trk_pt_unfTotUnc           = Get3DArray <TGraph*> (2, nDir, nZdcCentBins+1);           // sums of total uncertainties as a function of nIter -- data only
-
-  TGraph***   g_jetInt_trk_pt_ref_unfIterRelUnc   = Get2DArray <TGraph*> (2, nDir);                           // sums of iterations relative uncertainties as a function of nIter -- data only
-  TGraph****  g_jetInt_trk_pt_unfIterRelUnc       = Get3DArray <TGraph*> (2, nDir, nZdcCentBins+1);           // sums of iterations relative uncertainties as a function of nIter -- data only
-  TGraph***   g_jetInt_trk_pt_ref_unfSumRelUnc    = Get2DArray <TGraph*> (2, nDir);                           // sums of statistical relative uncertainties as a function of nIter -- data only
-  TGraph****  g_jetInt_trk_pt_unfSumRelUnc        = Get3DArray <TGraph*> (2, nDir, nZdcCentBins+1);           // sums of statistical relative uncertainties as a function of nIter -- data only
-  TGraph***   g_jetInt_trk_pt_ref_unfTotRelUnc    = Get2DArray <TGraph*> (2, nDir);                           // sums of total relative uncertainties as a function of nIter -- data only
-  TGraph****  g_jetInt_trk_pt_unfTotRelUnc        = Get3DArray <TGraph*> (2, nDir, nZdcCentBins+1);           // sums of total relative uncertainties as a function of nIter -- data only
-
-  TH1D*****   h_jetInt_trk_pt_ref_unf             = Get4DArray <TH1D*> (2, 2, nDir, nVar);
-  TH1D******  h_jetInt_trk_pt_unf                 = Get5DArray <TH1D*> (2, 2, nDir, nZdcCentBins+1, nVar);
-
-  TH1D******  h_jetInt_trk_pt_iaa                 = Get5DArray <TH1D*> (2, 2, nDir, nZdcCentBins+1, nVar);
-  TH1D******  h_jetInt_trk_pt_iaaNoUnf            = Get5DArray <TH1D*> (2, 2, nDir, nZdcCentBins+1, nVar);
 
   TH1D*****   h_jetInt_trk_dphi_ref               = Get4DArray <TH1D*> (2, 2, nPtChSelections, nVar);
   TH1D******  h_jetInt_trk_dphi                   = Get5DArray <TH1D*> (2, 2, nPtChSelections, nZdcCentBins+1, nVar);
@@ -247,62 +85,42 @@ void ProcessCorrelations (const char* tag, const char* outFileTag, const int nIt
   TH1D******  h_jetInt_trk_dphi_sig               = Get5DArray <TH1D*> (2, 2, nPtChSelections, nZdcCentBins+1, nVar);
 
 
-  TH1D******  h_jetInt_trk_dphi_iaa               = Get5DArray <TH1D*> (2, 2, nPtChSelections, nZdcCentBins+1, nVar);
-
-  TH1D***     h_jetInt_trk_pt_ref_unf_closure = Get2DArray <TH1D*> (2, nDir);
-  TF1***      f_jetInt_trk_pt_ref_unf_closure = Get2DArray <TF1*> (2, nDir);
-  TH1D****    h_jetInt_trk_pt_unf_closure     = Get3DArray <TH1D*> (2, nDir, nZdcCentBins+1);
-  TF1****     f_jetInt_trk_pt_unf_closure     = Get3DArray <TF1*> (2, nDir, nZdcCentBins+1);
-  TH1D****    h_jetInt_trk_pt_iaa_closure     = Get3DArray <TH1D*> (2, nDir, nZdcCentBins+1);
-  TF1****     f_jetInt_trk_pt_iaa_closure     = Get3DArray <TF1*> (2, nDir, nZdcCentBins+1);
-
-
-  RooUnfoldResponse*    rooUnfResp_jet_pt_ref                     = nullptr;
-  RooUnfoldResponse**   rooUnfResp_jet_pt                         = Get1DArray <RooUnfoldResponse*> (nFcalCentBins+1);
-  RooUnfoldResponse**   rooUnfResp_jet_trk_pt_ref_sig             = Get1DArray <RooUnfoldResponse*> (nDir);
-  RooUnfoldResponse***  rooUnfResp_jet_trk_pt_sig                 = Get2DArray <RooUnfoldResponse*> (nDir, nFcalCentBins+1);
-
-
-  TGAE****  g_jetInt_trk_pt_ref_syst          = Get3DArray <TGAE*> (2, nDir, nVar);
-  TGAE****  g_jetInt_trk_pt_ref_bkg_syst      = Get3DArray <TGAE*> (2, nDir, nVar);
+  //TGAE****  g_jetInt_trk_pt_ref_syst          = Get3DArray <TGAE*> (2, nDir, nVar);
+  //TGAE****  g_jetInt_trk_pt_ref_bkg_syst      = Get3DArray <TGAE*> (2, nDir, nVar);
   TGAE****  g_jetInt_trk_pt_ref_sig_syst      = Get3DArray <TGAE*> (2, nDir, nVar);
-  TGAE****  g_jetInt_trk_pt_ref_unf_syst      = Get3DArray <TGAE*> (2, nDir, nVar);
 
-  TGAE***** g_jetInt_trk_pt_syst              = Get4DArray <TGAE*> (2, nDir, nZdcCentBins+1, nVar);
-  TGAE***** g_jetInt_trk_pt_bkg_syst          = Get4DArray <TGAE*> (2, nDir, nZdcCentBins+1, nVar);
+  //TGAE***** g_jetInt_trk_pt_syst              = Get4DArray <TGAE*> (2, nDir, nZdcCentBins+1, nVar);
+  //TGAE***** g_jetInt_trk_pt_bkg_syst          = Get4DArray <TGAE*> (2, nDir, nZdcCentBins+1, nVar);
   TGAE***** g_jetInt_trk_pt_sig_syst          = Get4DArray <TGAE*> (2, nDir, nZdcCentBins+1, nVar);
-  TGAE***** g_jetInt_trk_pt_unf_syst          = Get4DArray <TGAE*> (2, nDir, nZdcCentBins+1, nVar);
-  TGAE***** g_jetInt_trk_pt_iaa_syst          = Get4DArray <TGAE*> (2, nDir, nZdcCentBins+1, nVar);
 
-  TGAE****  g_jetInt_trk_dphi_ref_syst        = Get3DArray <TGAE*> (2, nPtChSelections, nVar);
-  TGAE****  g_jetInt_trk_dphi_ref_bkg_syst    = Get3DArray <TGAE*> (2, nPtChSelections, nVar);
+  // for propagating uncertainties thru unfolding...
+  TGAE****  g_jet_trk_pt_ref_sig_syst         = Get3DArray <TGAE*> (nPtJBins, nDir, nVar);
+  TGAE***** g_jet_trk_pt_sig_syst             = Get4DArray <TGAE*> (nPtJBins, nDir, nZdcCentBins+1, nVar);
+
+  //TGAE****  g_jetInt_trk_dphi_ref_syst        = Get3DArray <TGAE*> (2, nPtChSelections, nVar);
+  //TGAE****  g_jetInt_trk_dphi_ref_bkg_syst    = Get3DArray <TGAE*> (2, nPtChSelections, nVar);
   TGAE****  g_jetInt_trk_dphi_ref_sig_syst    = Get3DArray <TGAE*> (2, nPtChSelections, nVar);
 
-  TGAE***** g_jetInt_trk_dphi_syst            = Get4DArray <TGAE*> (2, nPtChSelections, nZdcCentBins+1, nVar);
-  TGAE***** g_jetInt_trk_dphi_bkg_syst        = Get4DArray <TGAE*> (2, nPtChSelections, nZdcCentBins+1, nVar);
+  //TGAE***** g_jetInt_trk_dphi_syst            = Get4DArray <TGAE*> (2, nPtChSelections, nZdcCentBins+1, nVar);
+  //TGAE***** g_jetInt_trk_dphi_bkg_syst        = Get4DArray <TGAE*> (2, nPtChSelections, nZdcCentBins+1, nVar);
   TGAE***** g_jetInt_trk_dphi_sig_syst        = Get4DArray <TGAE*> (2, nPtChSelections, nZdcCentBins+1, nVar);
-  TGAE***** g_jetInt_trk_dphi_iaa_syst        = Get4DArray <TGAE*> (2, nPtChSelections, nZdcCentBins+1, nVar);
 
 
-  TGAE****  g_jetInt_trk_pt_ref_systTot       = Get3DArray <TGAE*> (2, nDir, 3);
-  TGAE****  g_jetInt_trk_pt_ref_bkg_systTot   = Get3DArray <TGAE*> (2, nDir, 3);
+  //TGAE****  g_jetInt_trk_pt_ref_systTot       = Get3DArray <TGAE*> (2, nDir, 3);
+  //TGAE****  g_jetInt_trk_pt_ref_bkg_systTot   = Get3DArray <TGAE*> (2, nDir, 3);
   TGAE****  g_jetInt_trk_pt_ref_sig_systTot   = Get3DArray <TGAE*> (2, nDir, 3);
-  TGAE****  g_jetInt_trk_pt_ref_unf_systTot   = Get3DArray <TGAE*> (2, nDir, 3);
 
-  TGAE***** g_jetInt_trk_pt_systTot           = Get4DArray <TGAE*> (2, nDir, nZdcCentBins+1, 3);
-  TGAE***** g_jetInt_trk_pt_bkg_systTot       = Get4DArray <TGAE*> (2, nDir, nZdcCentBins+1, 3);
+  //TGAE***** g_jetInt_trk_pt_systTot           = Get4DArray <TGAE*> (2, nDir, nZdcCentBins+1, 3);
+  //TGAE***** g_jetInt_trk_pt_bkg_systTot       = Get4DArray <TGAE*> (2, nDir, nZdcCentBins+1, 3);
   TGAE***** g_jetInt_trk_pt_sig_systTot       = Get4DArray <TGAE*> (2, nDir, nZdcCentBins+1, 3);
-  TGAE***** g_jetInt_trk_pt_unf_systTot       = Get4DArray <TGAE*> (2, nDir, nZdcCentBins+1, 3);
-  TGAE***** g_jetInt_trk_pt_iaa_systTot       = Get4DArray <TGAE*> (2, nDir, nZdcCentBins+1, 3);
  
-  TGAE****  g_jetInt_trk_dphi_ref_systTot     = Get3DArray <TGAE*> (2, nPtChSelections, 3);
-  TGAE****  g_jetInt_trk_dphi_ref_bkg_systTot = Get3DArray <TGAE*> (2, nPtChSelections, 3);
+  //TGAE****  g_jetInt_trk_dphi_ref_systTot     = Get3DArray <TGAE*> (2, nPtChSelections, 3);
+  //TGAE****  g_jetInt_trk_dphi_ref_bkg_systTot = Get3DArray <TGAE*> (2, nPtChSelections, 3);
   TGAE****  g_jetInt_trk_dphi_ref_sig_systTot = Get3DArray <TGAE*> (2, nPtChSelections, 3);
 
-  TGAE***** g_jetInt_trk_dphi_systTot         = Get4DArray <TGAE*> (2, nPtChSelections, nZdcCentBins+1, 3);
-  TGAE***** g_jetInt_trk_dphi_bkg_systTot     = Get4DArray <TGAE*> (2, nPtChSelections, nZdcCentBins+1, 3);
+  //TGAE***** g_jetInt_trk_dphi_systTot         = Get4DArray <TGAE*> (2, nPtChSelections, nZdcCentBins+1, 3);
+  //TGAE***** g_jetInt_trk_dphi_bkg_systTot     = Get4DArray <TGAE*> (2, nPtChSelections, nZdcCentBins+1, 3);
   TGAE***** g_jetInt_trk_dphi_sig_systTot     = Get4DArray <TGAE*> (2, nPtChSelections, nZdcCentBins+1, 3);
-  TGAE***** g_jetInt_trk_dphi_iaa_systTot     = Get4DArray <TGAE*> (2, nPtChSelections, nZdcCentBins+1, 3);
 
 
   TString outFileName = outFileTag;
@@ -318,6 +136,8 @@ void ProcessCorrelations (const char* tag, const char* outFileTag, const int nIt
     for (short iVar = 0; iVar < nVar; iVar++) {
 
       const TString var = variations[iVar];
+      const TString varBkg = GetVarBkg (var);
+      const short iVarBkg = (varBkg == var ? iVar : GetVarN (varBkg));
 
       if ((iDType == 0 && dataVariations.count (var) == 0) || (iDType == 1 && mcVariations.count (var) + otherMCVariations.count (var) == 0))
         continue;
@@ -337,6 +157,7 @@ void ProcessCorrelations (const char* tag, const char* outFileTag, const int nIt
         h_jet_pt_ref[iDType][iVar]->Scale (h_evt_counts_ref[iDType][iVar]->GetBinContent (2)); // convert distribution to total number of jets by un-scaling 1/N_evt factor
         UnscaleWidth (h_jet_pt_ref[iDType][iVar]);
 
+        SaferDelete (&h_evt_counts_ref[iDType][iVar]);
         SaferDelete (&h2_jet_pt_cov_ref[iDType][iVar]);
 
 
@@ -355,7 +176,6 @@ void ProcessCorrelations (const char* tag, const char* outFileTag, const int nIt
 
             CalcUncertainties (h_jet_trk_pt_ref[iDType][iPtJ][iDir][iVar], h2_jet_trk_pt_cov_ref[iDType][iPtJ][iDir][iVar], h_jet_counts_ref[iDType][iPtJ][iVar]);
 
-            //h_jet_trk_pt_ref[iDType][iPtJ][iDir][iVar]->Rebin (iDir == 1 ? 5 : 2);
             h_jet_trk_pt_ref[iDType][iPtJ][iDir][iVar]->Scale (1., "width");
 
             SaferDelete (&h2_jet_trk_pt_cov_ref[iDType][iPtJ][iDir][iVar]);
@@ -377,22 +197,21 @@ void ProcessCorrelations (const char* tag, const char* outFileTag, const int nIt
 
           } // end loop over iPtCh
 
+          SaferDelete (&h_jet_counts_ref[iDType][iPtJ][iVar]);
+
         } // end loop over iPtJ
 
         inFile->Close ();
-
+        SaferDelete (&inFile);
       }
 
 
 
-      {
+      if (iVar == iVarBkg) {
         TString inFileName = Form ("%s/Histograms/%s/MixedHists/%s/%s17_5TeV_hists.root", rootPath.Data (), tag, var.Data (), dType.Data ());
         std::cout << "Reading " << inFileName.Data () << std::endl;
         inFile = new TFile (inFileName.Data (), "read");
         outFile->cd ();
-
-        //h_evt_counts_ref_bkg[iDType][iVar] = (TH1D*) inFile->Get (Form ("h_evt_counts_mixed_%s17", dType.Data ()))->Clone (Form ("h_evt_counts_ref_bkg_%s_%s", dType.Data (), var.Data ()));
-
 
         for (short iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
 
@@ -409,7 +228,6 @@ void ProcessCorrelations (const char* tag, const char* outFileTag, const int nIt
 
             CalcUncertainties (h_jet_trk_pt_ref_bkg[iDType][iPtJ][iDir][iVar], h2_jet_trk_pt_cov_ref_bkg[iDType][iPtJ][iDir][iVar], h_jet_counts_ref_bkg[iDType][iPtJ][iVar]);
 
-            //h_jet_trk_pt_ref_bkg[iDType][iPtJ][iDir][iVar]->Rebin (iDir == 1 ? 5 : 2);
             h_jet_trk_pt_ref_bkg[iDType][iPtJ][iDir][iVar]->Scale (1., "width");
 
             SaferDelete (&h2_jet_trk_pt_cov_ref_bkg[iDType][iPtJ][iDir][iVar]);
@@ -431,10 +249,25 @@ void ProcessCorrelations (const char* tag, const char* outFileTag, const int nIt
 
           } // end loop over iPtCh
 
+          SaferDelete (&h_jet_counts_ref_bkg[iDType][iPtJ][iVar]);
+
         } // end loop over iPtJ
 
         inFile->Close ();
+        SaferDelete (&inFile);
 
+      } else {
+        for (short iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
+          h_jet_counts_ref_bkg[iDType][iPtJ][iVar] = h_jet_counts_ref_bkg[iDType][iPtJ][iVarBkg];
+
+          for (short iDir = 0; iDir < nDir; iDir++) {
+            h_jet_trk_pt_ref_bkg[iDType][iPtJ][iDir][iVar] = h_jet_trk_pt_ref_bkg[iDType][iPtJ][iDir][iVarBkg];
+          } // end loop over iDir
+
+          for (short iPtCh = 0; iPtCh < nPtChSelections; iPtCh++) {
+            h_jet_trk_dphi_ref_bkg[iDType][iPtJ][iPtCh][iVar] = h_jet_trk_dphi_ref_bkg[iDType][iPtJ][iPtCh][iVarBkg];
+          } // end loop over iPtCh
+        } // end loop over iPtJ
       }
 
 
@@ -457,6 +290,7 @@ void ProcessCorrelations (const char* tag, const char* outFileTag, const int nIt
         h_jet_pt[iDType][iCent][iVar]->Scale (h_evt_counts[iDType][iCent][iVar]->GetBinContent (2)); // convert distribution to total number of jets by un-scaling 1/N_evt factor
         UnscaleWidth (h_jet_pt[iDType][iCent][iVar]);
 
+        SaferDelete (&h_evt_counts[iDType][iCent][iVar]);
         SaferDelete (&h2_jet_pt_cov[iDType][iCent][iVar]);
 
         for (short iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
@@ -474,7 +308,6 @@ void ProcessCorrelations (const char* tag, const char* outFileTag, const int nIt
 
             CalcUncertainties (h_jet_trk_pt[iDType][iPtJ][iDir][iCent][iVar], h2_jet_trk_pt_cov[iDType][iPtJ][iDir][iCent][iVar], h_jet_counts[iDType][iPtJ][iCent][iVar]);
 
-            //h_jet_trk_pt[iDType][iPtJ][iDir][iCent][iVar]->Rebin (iDir == 1 ? 5 : 2);
             h_jet_trk_pt[iDType][iPtJ][iDir][iCent][iVar]->Scale (1., "width");
 
             SaferDelete (&h2_jet_trk_pt_cov[iDType][iPtJ][iDir][iCent][iVar]);
@@ -496,214 +329,89 @@ void ProcessCorrelations (const char* tag, const char* outFileTag, const int nIt
 
           } // end loop over iPtCh
 
-        } // end loop over iPtJ
-
-        inFile->Close ();
-
-      } // end loop over iCent
-
-
-
-      for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
-
-        const TString cent = (iCent == nZdcCentBins ? "allCent" : Form ("iCent%i", iCent));
-
-        TString inFileName = Form ("%s/Histograms/%s/MixedHists/%s/%s16_5TeV_%s_hists.root", rootPath.Data (), tag, var.Data (), dType.Data (), cent.Data ());
-        std::cout << "Reading " << inFileName.Data () << std::endl;
-        inFile = new TFile (inFileName.Data (), "read");
-        outFile->cd ();
-
-        //h_evt_counts_bkg[iDType][iCent][iVar] = (TH1D*) inFile->Get (Form ("h_evt_counts_mixed_%s16", dType.Data ()))->Clone (Form ("h_evt_counts_pPb_bkg_%s_%s_%s", cent.Data (), dType.Data (), var.Data ()));
-
-
-        for (short iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
-
-          const TString pTJ = Form ("%g-%gGeVJets", pTJBins[iPtJ], pTJBins[iPtJ+1]);
-
-          h_jet_counts_bkg[iDType][iPtJ][iCent][iVar] = (TH1D*) inFile->Get (Form ("h_jet_counts_%s_mixed_%s16",  pTJ.Data (), dType.Data ()))->Clone (Form ("h_jet_counts_pPb_bkg_%s_%s_%s_%s", cent.Data (), dType.Data (), pTJ.Data (), var.Data ()));
-
-
-          for (short iDir = 0; iDir < nDir; iDir++) {
-
-            const TString dir = directions[iDir];
-
-            h_jet_trk_pt_bkg[iDType][iPtJ][iDir][iCent][iVar]       = (TH1D*) inFile->Get (Form ("h_jet_trk_pt_%s_%s_mixed_%s16",       dir.Data (), pTJ.Data (), dType.Data ()))->Clone (Form ("h_jet_trk_pt_%s_pPb_bkg_%s_%s_%s_%s",       dir.Data (), cent.Data (), dType.Data (), pTJ.Data (), var.Data ()));
-            h2_jet_trk_pt_cov_bkg[iDType][iPtJ][iDir][iCent][iVar]  = (TH2D*) inFile->Get (Form ("h2_jet_trk_pt_cov_%s_%s_mixed_%s16",  dir.Data (), pTJ.Data (), dType.Data ()))->Clone (Form ("h2_jet_trk_pt_cov_%s_pPb_bkg_%s_%s_%s_%s",  dir.Data (), cent.Data (), dType.Data (), pTJ.Data (), var.Data ()));
-
-            CalcUncertainties (h_jet_trk_pt_bkg[iDType][iPtJ][iDir][iCent][iVar], h2_jet_trk_pt_cov_bkg[iDType][iPtJ][iDir][iCent][iVar], h_jet_counts_bkg[iDType][iPtJ][iCent][iVar]);
-
-            //h_jet_trk_pt_bkg[iDType][iPtJ][iDir][iCent][iVar]->Rebin (iDir == 1 ? 5 : 2);
-            h_jet_trk_pt_bkg[iDType][iPtJ][iDir][iCent][iVar]->Scale (1., "width");
-
-            SaferDelete (&h2_jet_trk_pt_cov_bkg[iDType][iPtJ][iDir][iCent][iVar]);
-
-          } // end loop over iDir
-
-          for (short iPtCh = 0; iPtCh < nPtChSelections; iPtCh++) {
-
-            const TString ptch = pTChSelections[iPtCh].Data ();
-
-            h_jet_trk_dphi_bkg[iDType][iPtJ][iPtCh][iCent][iVar]      = (TH1D*) inFile->Get (Form ("h_jet_trk_dphi_%s_%s_mixed_%s16",       ptch.Data (), pTJ.Data (), dType.Data ()))->Clone (Form ("h_jet_trk_dphi_%s_pPb_bkg_%s_%s_%s_%s",      ptch.Data (), cent.Data (), dType.Data (), pTJ.Data (), var.Data ()));
-            h2_jet_trk_dphi_cov_bkg[iDType][iPtJ][iPtCh][iCent][iVar] = (TH2D*) inFile->Get (Form ("h2_jet_trk_dphi_cov_%s_%s_mixed_%s16",  ptch.Data (), pTJ.Data (), dType.Data ()))->Clone (Form ("h2_jet_trk_dphi_cov_%s_pPb_bkg_%s_%s_%s_%s", ptch.Data (), cent.Data (), dType.Data (), pTJ.Data (), var.Data ()));
-
-            CalcUncertainties (h_jet_trk_dphi_bkg[iDType][iPtJ][iPtCh][iCent][iVar], h2_jet_trk_dphi_cov_bkg[iDType][iPtJ][iPtCh][iCent][iVar], h_jet_counts_bkg[iDType][iPtJ][iCent][iVar]);
-
-            h_jet_trk_dphi_bkg[iDType][iPtJ][iPtCh][iCent][iVar]->Scale (1., "width");
-
-            SaferDelete (&h2_jet_trk_dphi_cov_bkg[iDType][iPtJ][iPtCh][iCent][iVar]);
-
-          } // end loop over iPtCh
+          SaferDelete (&h_jet_counts[iDType][iPtJ][iCent][iVar]);
 
         } // end loop over iPtJ
 
         inFile->Close ();
-
+        SaferDelete (&inFile);
       } // end loop over iCent
+
+
+
+      if (iVar == iVarBkg) {
+        for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
+
+          const TString cent = (iCent == nZdcCentBins ? "allCent" : Form ("iCent%i", iCent));
+
+          TString inFileName = Form ("%s/Histograms/%s/MixedHists/%s/%s16_5TeV_%s_hists.root", rootPath.Data (), tag, var.Data (), dType.Data (), cent.Data ());
+          std::cout << "Reading " << inFileName.Data () << std::endl;
+          inFile = new TFile (inFileName.Data (), "read");
+          outFile->cd ();
+
+          for (short iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
+
+            const TString pTJ = Form ("%g-%gGeVJets", pTJBins[iPtJ], pTJBins[iPtJ+1]);
+
+            h_jet_counts_bkg[iDType][iPtJ][iCent][iVar] = (TH1D*) inFile->Get (Form ("h_jet_counts_%s_mixed_%s16",  pTJ.Data (), dType.Data ()))->Clone (Form ("h_jet_counts_pPb_bkg_%s_%s_%s_%s", cent.Data (), dType.Data (), pTJ.Data (), var.Data ()));
+
+            for (short iDir = 0; iDir < nDir; iDir++) {
+
+              const TString dir = directions[iDir];
+
+              h_jet_trk_pt_bkg[iDType][iPtJ][iDir][iCent][iVar]       = (TH1D*) inFile->Get (Form ("h_jet_trk_pt_%s_%s_mixed_%s16",       dir.Data (), pTJ.Data (), dType.Data ()))->Clone (Form ("h_jet_trk_pt_%s_pPb_bkg_%s_%s_%s_%s",       dir.Data (), cent.Data (), dType.Data (), pTJ.Data (), var.Data ()));
+              h2_jet_trk_pt_cov_bkg[iDType][iPtJ][iDir][iCent][iVar]  = (TH2D*) inFile->Get (Form ("h2_jet_trk_pt_cov_%s_%s_mixed_%s16",  dir.Data (), pTJ.Data (), dType.Data ()))->Clone (Form ("h2_jet_trk_pt_cov_%s_pPb_bkg_%s_%s_%s_%s",  dir.Data (), cent.Data (), dType.Data (), pTJ.Data (), var.Data ()));
+
+              CalcUncertainties (h_jet_trk_pt_bkg[iDType][iPtJ][iDir][iCent][iVar], h2_jet_trk_pt_cov_bkg[iDType][iPtJ][iDir][iCent][iVar], h_jet_counts_bkg[iDType][iPtJ][iCent][iVar]);
+
+              h_jet_trk_pt_bkg[iDType][iPtJ][iDir][iCent][iVar]->Scale (1., "width");
+
+              SaferDelete (&h2_jet_trk_pt_cov_bkg[iDType][iPtJ][iDir][iCent][iVar]);
+
+            } // end loop over iDir
+
+            for (short iPtCh = 0; iPtCh < nPtChSelections; iPtCh++) {
+
+              const TString ptch = pTChSelections[iPtCh].Data ();
+
+              h_jet_trk_dphi_bkg[iDType][iPtJ][iPtCh][iCent][iVar]      = (TH1D*) inFile->Get (Form ("h_jet_trk_dphi_%s_%s_mixed_%s16",       ptch.Data (), pTJ.Data (), dType.Data ()))->Clone (Form ("h_jet_trk_dphi_%s_pPb_bkg_%s_%s_%s_%s",      ptch.Data (), cent.Data (), dType.Data (), pTJ.Data (), var.Data ()));
+              h2_jet_trk_dphi_cov_bkg[iDType][iPtJ][iPtCh][iCent][iVar] = (TH2D*) inFile->Get (Form ("h2_jet_trk_dphi_cov_%s_%s_mixed_%s16",  ptch.Data (), pTJ.Data (), dType.Data ()))->Clone (Form ("h2_jet_trk_dphi_cov_%s_pPb_bkg_%s_%s_%s_%s", ptch.Data (), cent.Data (), dType.Data (), pTJ.Data (), var.Data ()));
+
+              CalcUncertainties (h_jet_trk_dphi_bkg[iDType][iPtJ][iPtCh][iCent][iVar], h2_jet_trk_dphi_cov_bkg[iDType][iPtJ][iPtCh][iCent][iVar], h_jet_counts_bkg[iDType][iPtJ][iCent][iVar]);
+
+              h_jet_trk_dphi_bkg[iDType][iPtJ][iPtCh][iCent][iVar]->Scale (1., "width");
+
+              SaferDelete (&h2_jet_trk_dphi_cov_bkg[iDType][iPtJ][iPtCh][iCent][iVar]);
+
+            } // end loop over iPtCh
+
+            SaferDelete (&h_jet_counts_bkg[iDType][iPtJ][iCent][iVar]);
+
+          } // end loop over iPtJ
+
+          inFile->Close ();
+          SaferDelete (&inFile);
+
+        } // end loop over iCent
+      } else {
+        for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
+          for (short iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
+            h_jet_counts_bkg[iDType][iPtJ][iCent][iVar] = h_jet_counts_bkg[iDType][iPtJ][iCent][iVarBkg];
+
+            for (short iDir = 0; iDir < nDir; iDir++) {
+              h_jet_trk_pt_bkg[iDType][iPtJ][iDir][iCent][iVar] = h_jet_trk_pt_bkg[iDType][iPtJ][iDir][iCent][iVarBkg];
+            } // end loop over iDir
+
+            for (short iPtCh = 0; iPtCh < nPtChSelections; iPtCh++) {
+              h_jet_trk_dphi_bkg[iDType][iPtJ][iPtCh][iCent][iVar] = h_jet_trk_dphi_bkg[iDType][iPtJ][iPtCh][iCent][iVarBkg];
+            } // end loop over iPtCh
+          } // end loop over iPtJ
+        } // end loop over iCent
+      }
 
     } // end loop over iVar
 
   } // end loop over iDType
-
-
-
-
-  {
-    TFile* inFile = new TFile (Form ("%s/MakeResponseMatrix/Nominal/allSamples.root", rootPath.Data ()), "read");
-
-    if (useJetWgts) rooUnfResp_jet_pt_ref = (RooUnfoldResponse*) inFile->Get ("rooUnfResp_jet_pt_ref_mc_wgts");
-    else            rooUnfResp_jet_pt_ref = (RooUnfoldResponse*) inFile->Get ("rooUnfResp_jet_pt_ref_mc_fullClosure");
-
-    for (short iDir = 0; iDir < nDir; iDir++) {
-
-      const TString dir = directions[iDir];
-
-      if (useJetWgts) rooUnfResp_jet_trk_pt_ref_sig[iDir] = (RooUnfoldResponse*) inFile->Get (Form ("rooUnfResp_jet_trk_pt_%s_ref_sig_mc_wgts", dir.Data ()));
-      else            rooUnfResp_jet_trk_pt_ref_sig[iDir] = (RooUnfoldResponse*) inFile->Get (Form ("rooUnfResp_jet_trk_pt_%s_ref_sig_mc_fullClosure", dir.Data ()));
-
-    } // end loop over iDir
-
-    for (short iCent = 0; iCent < nFcalCentBins+1; iCent++) {
-
-      const char* cent = (iCent == nFcalCentBins ? "pPb_allCent" : Form ("pPb_iCent%i", iCent));
-
-      if (useJetWgts) rooUnfResp_jet_pt[iCent] = (RooUnfoldResponse*) inFile->Get (Form ("rooUnfResp_jet_pt_%s_mc_wgts", cent));
-      else            rooUnfResp_jet_pt[iCent] = (RooUnfoldResponse*) inFile->Get (Form ("rooUnfResp_jet_pt_%s_mc_fullClosure", cent));
-
-      for (short iDir = 0; iDir < nDir; iDir++) {
-
-        const TString dir = directions[iDir];
-
-        if (useJetWgts) rooUnfResp_jet_trk_pt_sig[iDir][iCent] = (RooUnfoldResponse*) inFile->Get (Form ("rooUnfResp_jet_trk_pt_%s_%s_sig_mc_wgts", dir.Data (), cent));
-        else            rooUnfResp_jet_trk_pt_sig[iDir][iCent] = (RooUnfoldResponse*) inFile->Get (Form ("rooUnfResp_jet_trk_pt_%s_%s_sig_mc_fullClosure", dir.Data (), cent));
-
-      } // end loop over iFile
-
-    } // end loop over iDir
-  }
-
-
-
-
-  {
-    TFile* inFile = new TFile (Form ("%s/aux/MCClosureHists.root", workPath.Data ()), "read");
-
-    for (short iPtJInt : {0, 1}) {
-
-      const TString pTJInt = (iPtJInt == 0 ? "30GeV" : "60GeV");
-
-      for (short iDir = 0; iDir < nDir; iDir++) {
-
-        const TString dir = directions[iDir];
-
-        h_jetInt_trk_pt_ref_unf_closure[iPtJInt][iDir] = (TH1D*) inFile->Get (Form ("h_jetInt_trk_pt_%s_ref_sig_unf_%s_halfClosure", dir.Data (), pTJInt.Data ()));
-        f_jetInt_trk_pt_ref_unf_closure[iPtJInt][iDir] = (TF1*)  inFile->Get (Form ("f_jetInt_trk_pt_%s_ref_sig_unf_%s_halfClosure", dir.Data (), pTJInt.Data ()));
-
-        for (short iCent = 0; iCent < nFcalCentBins+1; iCent++) {
-
-          const char* cent = (iCent == nFcalCentBins ? "pPb_allCent" : Form ("pPb_iCent%i", iCent));
-
-          h_jetInt_trk_pt_unf_closure[iPtJInt][iDir][iCent] = (TH1D*) inFile->Get (Form ("h_jetInt_trk_pt_%s_%s_sig_unf_%s_halfClosure", dir.Data (), cent, pTJInt.Data ()));
-          f_jetInt_trk_pt_unf_closure[iPtJInt][iDir][iCent] = (TF1*)  inFile->Get (Form ("f_jetInt_trk_pt_%s_%s_sig_unf_%s_halfClosure", dir.Data (), cent, pTJInt.Data ()));
-
-          h_jetInt_trk_pt_iaa_closure[iPtJInt][iDir][iCent] = (TH1D*) inFile->Get (Form ("h_jetInt_trk_pt_%s_%s_iaa_unf_%s_halfClosure", dir.Data (), cent, pTJInt.Data ()));
-          f_jetInt_trk_pt_iaa_closure[iPtJInt][iDir][iCent] = (TF1*)  inFile->Get (Form ("f_jetInt_trk_pt_%s_%s_iaa_unf_%s_halfClosure", dir.Data (), cent, pTJInt.Data ()));
-
-        } // end loop over iCent
-
-      } // end loop over iDir
-
-    } // end loop over iPtJInt
-  }
-
-
-
-
-  ////////////////////////////////////////////////////////////////////////////////////////////////////// 
-  //// DERIVE BIN-BY-BIN UNFOLDING FACTORS
-  ////////////////////////////////////////////////////////////////////////////////////////////////////// 
-  //{
-  //  const short iVarNum = GetVarN ("MCTruthJetsTruthParts");
-  //  const short iVarDen = GetVarN ("MCRecoJetTruthParts");
-
-  //  TF1* f = nullptr;
-
-  //  const TString funcStr = "[0]+[1]*log(x)+[2]*pow(log(x),2)+[3]*pow(log(x),3)+[4]*pow(log(x),4)";
-
-  //  //bbbf.SetNDeriv (2);
-  //  //bbbf.SetDegree (6);
-
-  //  //const int ndf = bbbf.NDF ();
-
-  //  for (short iDir = 0; iDir < nDir; iDir++) {
-
-  //    const TString dir = directions[iDir];
-
-  //    TH1D* h = nullptr;
-
-  //    h = (TH1D*) h_jet_trk_pt_ref[1][iDir][iVarNum]->Clone (Form ("h_jet_trk_pt_%s_ref_sig_bbb", dir.Data ()));
-  //    h->Divide (h_jet_trk_pt_ref[1][iDir][iVarDen]);
-  //    h_jet_trk_pt_ref_sig_bbb[iDir] = h;
-
-  //    f = new TF1 (Form ("f_jet_trk_pt_%s_ref_sig_bbb", dir.Data ()), funcStr, h->GetXaxis ()->GetBinLowEdge (1), h->GetXaxis ()->GetBinLowEdge (h->GetNbinsX () + 1));
-  //    //f = new TF1 (Form ("f_jet_trk_pt_%s_ref_sig_bbb", dir.Data ()), &bbbf, h->GetXaxis ()->GetBinLowEdge (1), h->GetXaxis ()->GetBinLowEdge (h->GetNbinsX () + 1), ndf);
-  //    if (iDir == 1) {
-  //      double x1, x2;
-  //      f->GetRange (x1, x2);
-  //      f->SetRange (x1, 20);
-  //    }
-  //    //f->SetParameter (0, 100);
-  //    //f->SetParameter (1, 0);
-  //    //f->SetParameter (2, 0);
-
-  //    f_jet_trk_pt_ref_sig_bbb[iDir] = f;
-  //    h->Fit (f, "RN0Q");
-
-  //    for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
-
-  //      const TString cent = (iCent == nZdcCentBins ? "allCent" : Form ("iCent%i", iCent));
-
-  //      h = (TH1D*) h_jet_trk_pt[1][iDir][iCent][iVarNum]->Clone (Form ("h_jet_trk_pt_%s_pPb_sig_bbb_%s", dir.Data (), cent.Data ()));
-  //      h->Divide (h_jet_trk_pt[1][iDir][iCent][iVarDen]);
-  //      h_jet_trk_pt_sig_bbb[iDir][iCent] = h;
-
-  //      f = new TF1 (Form ("f_jet_trk_pt_%s_pPb_sig_bbb_%s", dir.Data (), cent.Data ()), funcStr, h->GetXaxis ()->GetBinLowEdge (1), h->GetXaxis ()->GetBinLowEdge (h->GetNbinsX () + 1));
-  //      //f = new TF1 (Form ("f_jet_trk_pt_%s_pPb_sig_bbb_%s", dir.Data (), cent.Data ()), &bbbf, h->GetXaxis ()->GetBinLowEdge (1), h->GetXaxis ()->GetBinLowEdge (h->GetNbinsX () + 1), ndf);
-  //      if (iDir == 1) {
-  //        double x1, x2;
-  //        f->GetRange (x1, x2);
-  //        f->SetRange (x1, 20);
-  //      }
-  //      //f->SetParameter (0, 100);
-  //      //f->SetParameter (1, 0);
-  //      //f->SetParameter (2, 0);
-
-  //      f_jet_trk_pt_sig_bbb[iDir][iCent] = f;
-  //      h->Fit (f, "RN0Q");
-
-  //    } // end loop over iCent
-
-  //  } // end loop over iDir
-  //}
 
 
 
@@ -723,7 +431,6 @@ void ProcessCorrelations (const char* tag, const char* outFileTag, const int nIt
         continue;
 
       const bool hasRefBkg = (iDType != 1 && variationsWithNoppBkgd.count (var) == 0);
-      //const bool hasRefBkg = (variationsWithNoppBkgd.count (var) == 0);
       const bool hasBkg = (variationsWithNopPbBkgd.count (var) == 0);
 
       for (short iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
@@ -738,9 +445,6 @@ void ProcessCorrelations (const char* tag, const char* outFileTag, const int nIt
           if (hasRefBkg)
             h_jet_trk_pt_ref_sig[iDType][iPtJ][iDir][iVar]->Add (h_jet_trk_pt_ref_bkg[iDType][iPtJ][iDir][iVar], -1);
 
-          //if (doUnfold)
-          //   MultiplyByTF1 (h_jet_trk_pt_ref_sig[iDType][iDir][iVar], f_jet_trk_pt_ref_sig_bbb[iDir]);
-
           for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
 
             const TString cent = (iCent == nZdcCentBins ? "allCent" : Form ("iCent%i", iCent));
@@ -748,12 +452,6 @@ void ProcessCorrelations (const char* tag, const char* outFileTag, const int nIt
             h_jet_trk_pt_sig[iDType][iPtJ][iDir][iCent][iVar] = (TH1D*) h_jet_trk_pt[iDType][iPtJ][iDir][iCent][iVar]->Clone (Form ("h_jet_trk_pt_%s_pPb_sig_%s_%s_%s_%s", dir.Data (), cent.Data (), dType.Data (), pTJ.Data (), var.Data ()));
             if (hasBkg)
               h_jet_trk_pt_sig[iDType][iPtJ][iDir][iCent][iVar]->Add (h_jet_trk_pt_bkg[iDType][iPtJ][iDir][iCent][iVar], -1);
-
-            //if (doUnfold)
-            //  MultiplyByTF1 (h_jet_trk_pt_sig[iDType][iDir][iCent][iVar], f_jet_trk_pt_sig_bbb[iDir][iCent]);
-
-            //h_jet_trk_pt_iaa[iDType][iPtJ][iDir][iCent][iVar] = (TH1D*) h_jet_trk_pt_sig[iDType][iPtJ][iDir][iCent][iVar]->Clone (Form ("h_jet_trk_pt_%s_iaa_%s_%s_%s_%s", dir.Data (), cent.Data (), dType.Data (), pTJ.Data (), var.Data ()));
-            //h_jet_trk_pt_iaa[iDType][iPtJ][iDir][iCent][iVar]->Divide (h_jet_trk_pt_ref_sig[iDType][iPtJ][iDir][iVar]);
 
           } // end loop over iCent
 
@@ -776,9 +474,6 @@ void ProcessCorrelations (const char* tag, const char* outFileTag, const int nIt
             if (hasBkg)
               h_jet_trk_dphi_sig[iDType][iPtJ][iPtCh][iCent][iVar]->Add (h_jet_trk_dphi_bkg[iDType][iPtJ][iPtCh][iCent][iVar], -1);
 
-            //h_jet_trk_dphi_iaa[iDType][iPtJ][iPtCh][iCent][iVar] = (TH1D*) h_jet_trk_dphi_sig[iDType][iPtJ][iPtCh][iCent][iVar]->Clone (Form ("h_jet_trk_dphi_%s_iaa_%s_%s_%s_%s", ptch.Data (), cent.Data (), dType.Data (), pTJ.Data (), var.Data ()));
-            //h_jet_trk_dphi_iaa[iDType][iPtJ][iPtCh][iCent][iVar]->Divide (h_jet_trk_dphi_ref_sig[iDType][iPtJ][iPtCh][iVar]);
-
           } // end loop over iCent
 
         } // end loop over iPtCh
@@ -788,388 +483,6 @@ void ProcessCorrelations (const char* tag, const char* outFileTag, const int nIt
     } // end loop over iVar
 
   } // end loop over iDType
-
-
-
-
-  //////////////////////////////////////////////////////////////////////////////////////////////////// 
-  // CREATE 2D RESULT HISTOGRAMS, DO NOMINAL 2D BAYES UNFOLD
-  // THEN CONVERT BACK TO 1D HISTOGRAMS FOR INTEGRATED JET PT SELECTIONS
-  //////////////////////////////////////////////////////////////////////////////////////////////////// 
-  for (short iDType = 0; iDType < 2; iDType++) {
-
-    const TString dType = (iDType == 0 ? "data" : "mc");
-
-    for (short iVar = 0; iVar < nVar; iVar++) {
-
-      const TString var = variations[iVar];
-
-      if ((iDType == 0 && dataVariations.count (var) == 0) || (iDType == 1 && mcVariations.count (var) + otherMCVariations.count (var) == 0))
-        continue;
-
-      const bool doUnfold = (variationsWithNoUnfold.count (var) == 0);
-
-      {
-        for (short iPtJInt : {0, 1}) { 
-          const TString pTJInt = (iPtJInt == 0 ? "30GeV" : "60GeV");
-          if (doUnfold) {
-            RooUnfoldBayes* bayesUnf = new RooUnfoldBayes (rooUnfResp_jet_pt_ref, h_jet_pt_ref[iDType][iVar], GetJetSpectraNIters (iPtJInt, -1));
-            bayesUnf->SetVerbose (-1);
-            h_jet_pt_ref_unf[iDType][iPtJInt][iVar] = (TH1D*) bayesUnf->Hreco ()->Clone (Form ("h_jet_pt_ref_unf_%s_%s_%s", dType.Data (), pTJInt.Data (), var.Data ()));
-            SaferDelete (&bayesUnf);
-          }
-          else
-            h_jet_pt_ref_unf[iDType][iPtJInt][iVar] = (TH1D*) h_jet_pt_ref[iDType][iVar]->Clone (Form ("h_jet_pt_ref_unf_%s_%s_%s", dType.Data (), pTJInt.Data (), var.Data ()));
-        } // end loop over iPtJInt
-      }
-
-      for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
-
-        const TString cent = (iCent == nZdcCentBins ? "allCent" : Form ("iCent%i", iCent));
-
-        for (short iPtJInt : {0, 1}) { 
-          const TString pTJInt = (iPtJInt == 0 ? "30GeV" : "60GeV");
-          if (doUnfold) {
-            RooUnfoldBayes* bayesUnf = new RooUnfoldBayes (rooUnfResp_jet_pt[iCent], h_jet_pt[iDType][iCent][iVar], GetJetSpectraNIters (iPtJInt, iCent));
-            bayesUnf->SetVerbose (-1);
-            h_jet_pt_unf[iDType][iPtJInt][iCent][iVar] = (TH1D*) bayesUnf->Hreco ()->Clone (Form ("h_jet_pt_unf_%s_%s_%s_%s", dType.Data (), cent.Data (), pTJInt.Data (), var.Data ()));
-            SaferDelete (&bayesUnf);
-          }
-          else
-            h_jet_pt_unf[iDType][iPtJInt][iCent][iVar] = (TH1D*) h_jet_pt[iDType][iCent][iVar]->Clone (Form ("h_jet_pt_unf_%s_%s_%s_%s", dType.Data (), cent.Data (), pTJInt.Data (), var.Data ()));
-        } // end loop over iPtJInt
-
-      } // end loop over iCent
-
-
-      if (doUnfold) {
-
-        for (short iDir = 0; iDir < nDir; iDir++) {
-
-          const TString dir = directions[iDir];
-
-          TH2D* h2 = new TH2D ("h2_temp", "", nPtChBins, pTChBins, nPtJBins, pTJBins);
-          h2->Sumw2 ();
-
-          for (short iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
-
-            TH1D* h = h_jet_trk_pt_ref_sig[iDType][iPtJ][iDir][iVar];
-            const float nJet = h_jet_pt_ref[iDType][iVar]->GetBinContent (iPtJ+1);
-
-            for (short iPtCh = 0; iPtCh < nPtChBins; iPtCh++) {
-              h2->SetBinContent (iPtCh+1, iPtJ+1, nJet * h->GetBinContent (iPtCh+1) * h->GetBinWidth (iPtCh+1));
-              h2->SetBinError   (iPtCh+1, iPtJ+1, nJet * h->GetBinError   (iPtCh+1) * h->GetBinWidth (iPtCh+1));
-            } // end loop over iPtCh
-
-          } // end loop over iPtJ
-
-
-          for (short iPtJInt : {0, 1}) {
-
-            const TString pTJInt = (iPtJInt == 0 ? "30GeV" : "60GeV");
-            const float minJetPt = (iPtJInt == 0 ? 30. : 60.);
-            const float maxJetPt = 300;
-
-            RooUnfoldBayes* bayesUnf = new RooUnfoldBayes (rooUnfResp_jet_trk_pt_ref_sig[iDir], h2, GetTrkSpectraNIters (iPtJInt, iDir, -1));
-            bayesUnf->SetVerbose (-1);
-            TH2D* h2_unf = (TH2D*) bayesUnf->Hreco ()->Clone ("h2_unf");
-            SaferDelete (&bayesUnf);
-
-            TH1D* h = new TH1D (Form ("h_jetInt_trk_pt_%s_ref_unf_%s_%s_%s", dir.Data (), dType.Data (), pTJInt.Data (), var.Data ()), "", nPtChBins, pTChBins);
-            h->Sumw2 ();
-            h_jetInt_trk_pt_ref_unf[iDType][iPtJInt][iDir][iVar] = h;
-
-            double totalJetsUF = 0;
-            for (short iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
-
-              if (0.5 * (pTJBins[iPtJ] + pTJBins[iPtJ+1]) < minJetPt || maxJetPt < 0.5 * (pTJBins[iPtJ] + pTJBins[iPtJ+1])) continue;
-
-              totalJetsUF += h_jet_pt_ref_unf[iDType][iPtJInt][iVar]->GetBinContent (iPtJ+1);
-
-              for (short iPtCh = 0; iPtCh < nPtChBins; iPtCh++) {
-                h->SetBinContent (iPtCh+1, h->GetBinContent (iPtCh+1) + h2_unf->GetBinContent (iPtCh+1, iPtJ+1));
-                h->SetBinError (iPtCh+1, h->GetBinError (iPtCh+1) + std::pow (h2_unf->GetBinError (iPtCh+1, iPtJ+1), 2));
-              } // end loop over iPtCh
-
-            } // end loop over iPtJ
-
-            SaferDelete (&h2_unf);
-
-            for (short iPtCh = 0; iPtCh < nPtChBins; iPtCh++) {
-              h->SetBinContent (iPtCh+1, h->GetBinContent (iPtCh+1) / (totalJetsUF * h->GetBinWidth (iPtCh+1)));
-              h->SetBinError (iPtCh+1, std::sqrt (h->GetBinError (iPtCh+1)) / (totalJetsUF * h->GetBinWidth (iPtCh+1)));
-            } // end loop over iPtCh
-
-          } // end loop over iPtJInt
-
-          SaferDelete (&h2);
-
-        } // end loop over iDir
-
-
-        for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
-
-          const TString cent = (iCent == nZdcCentBins ? "allCent" : Form ("iCent%i", iCent)); 
-          for (short iDir = 0; iDir < nDir; iDir++) {
-
-            const TString dir = directions[iDir];
-
-            TH2D* h2 = new TH2D ("h2_temp", "", nPtChBins, pTChBins, nPtJBins, pTJBins);
-            h2->Sumw2 ();
-
-            for (short iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
-
-              TH1D* h = h_jet_trk_pt_sig[iDType][iPtJ][iDir][iCent][iVar];
-              const float nJet = h_jet_pt[iDType][iCent][iVar]->GetBinContent (iPtJ+1);
-
-              for (short iPtCh = 0; iPtCh < nPtChBins; iPtCh++) {
-                h2->SetBinContent (iPtCh+1, iPtJ+1, nJet * h->GetBinContent (iPtCh+1) * h->GetBinWidth (iPtCh+1));
-                h2->SetBinError   (iPtCh+1, iPtJ+1, nJet * h->GetBinError   (iPtCh+1) * h->GetBinWidth (iPtCh+1));
-              } // end loop over iPtCh
-
-            } // end loop over iPtJ
-
-
-            for (short iPtJInt : {0, 1}) {
-
-              const TString pTJInt = (iPtJInt == 0 ? "30GeV" : "60GeV");
-              const float minJetPt = (iPtJInt == 0 ? 30. : 60.);
-              const float maxJetPt = 300;
-
-              RooUnfoldBayes* bayesUnf = new RooUnfoldBayes (rooUnfResp_jet_trk_pt_sig[iDir][iCent], h2, GetTrkSpectraNIters (iPtJInt, iDir, iCent));
-              bayesUnf->SetVerbose (-1);
-              TH2D* h2_unf = (TH2D*) bayesUnf->Hreco ()->Clone ("h2_unf");
-              SaferDelete (&bayesUnf);
-
-              TH1D* h = new TH1D (Form ("h_jetInt_trk_pt_%s_pPb_unf_%s_%s_%s_%s", dir.Data (), cent.Data (), dType.Data (), pTJInt.Data (), var.Data ()), "", nPtChBins, pTChBins);
-              h->Sumw2 ();
-              h_jetInt_trk_pt_unf[iDType][iPtJInt][iDir][iCent][iVar] = h;
-
-              double totalJetsUF = 0;
-              for (short iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
-
-                if (0.5 * (pTJBins[iPtJ] + pTJBins[iPtJ+1]) < minJetPt || maxJetPt < 0.5 * (pTJBins[iPtJ] + pTJBins[iPtJ+1])) continue;
-
-                totalJetsUF += h_jet_pt_unf[iDType][iPtJInt][iCent][iVar]->GetBinContent (iPtJ+1);
-
-                for (short iPtCh = 0; iPtCh < nPtChBins; iPtCh++) {
-                  h->SetBinContent (iPtCh+1, h->GetBinContent (iPtCh+1) + h2_unf->GetBinContent (iPtCh+1, iPtJ+1));
-                  h->SetBinError (iPtCh+1, h->GetBinError (iPtCh+1) + std::pow (h2_unf->GetBinError (iPtCh+1, iPtJ+1), 2));
-                } // end loop over iPtCh
-
-              } // end loop over iPtJ
-
-              SaferDelete (&h2_unf);
-
-              for (short iPtCh = 0; iPtCh < nPtChBins; iPtCh++) {
-                h->SetBinContent (iPtCh+1, h->GetBinContent (iPtCh+1) / (totalJetsUF * h->GetBinWidth (iPtCh+1)));
-                h->SetBinError (iPtCh+1, std::sqrt (h->GetBinError (iPtCh+1)) / (totalJetsUF * h->GetBinWidth (iPtCh+1)));
-              } // end loop over iPtCh
-
-            } // end loop over iPtJInt
-
-            SaferDelete (&h2);
-
-          } // end loop over iDir
-
-        } // end loop over iCent
-
-      }
-
-    } // end loop over iVar
-
-  } // end loop over iDType
-
-
-
-
-  //////////////////////////////////////////////////////////////////////////////////////////////////// 
-  // CREATE 2D RESULT HISTOGRAMS AND DO 2D BAYES UNFOLD STUDY VS # OF ITERATIONS
-  // THEN CONVERT BACK TO 1D HISTOGRAMS FOR INTEGRATED JET PT SELECTIONS
-  //////////////////////////////////////////////////////////////////////////////////////////////////// 
-  {
-    const short iDType = 0;
-    const TString dType = "data";
-
-    {
-      const short iVar = 0;
-      const TString var = "Nominal";
-
-      {
-        for (short iIter = 0; iIter < nItersMax-nItersMin+2; iIter++) {
-
-          const short nIters = (short) nItersVals[iIter];
-
-          RooUnfoldBayes* bayesUnf = new RooUnfoldBayes (rooUnfResp_jet_pt_ref, h_jet_pt_ref[iDType][iVar], nIters);
-          bayesUnf->SetVerbose (-1);
-          TH1D* h_unf = (TH1D*) bayesUnf->Hreco ()->Clone (Form ("h_jet_pt_ref_unf_data_Nominal_nIters%i", nIters));
-          SaferDelete (&bayesUnf);
-
-          h_jet_pt_ref_unf_nIters[iIter] = h_unf;
-        } // end loop over iIter
-      }
-
-
-      for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
-
-        const TString cent = (iCent == nZdcCentBins ? "allCent" : Form ("iCent%i", iCent));
-
-        for (short iIter = 0; iIter < nItersMax-nItersMin+2; iIter++) {
-  
-          const short nIters = (short) nItersVals[iIter];
-
-          RooUnfoldBayes* bayesUnf = new RooUnfoldBayes (rooUnfResp_jet_pt[iCent], h_jet_pt[iDType][iCent][iVar], nIters);
-          bayesUnf->SetVerbose (-1);
-          TH1D* h_unf = (TH1D*) bayesUnf->Hreco ()->Clone (Form ("h_jet_pt_unf_data_%s_Nominal_nIters%i", cent.Data (), nIters));
-          SaferDelete (&bayesUnf);
-
-          h_jet_pt_unf_nIters[iCent][iIter] = h_unf;
-        } // end loop over iIter
-
-      } // end loop over iCent
-
-
-      for (short iDir = 0; iDir < nDir; iDir++) {
-
-        const TString dir = directions[iDir];
-
-        TH2D* h2 = new TH2D ("h2_temp", "", nPtChBins, pTChBins, nPtJBins, pTJBins);
-        h2->Sumw2 ();
-
-        for (short iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
-
-          TH1D* h = h_jet_trk_pt_ref_sig[iDType][iPtJ][iDir][iVar];
-          const float nJet = h_jet_pt_ref[iDType][iVar]->GetBinContent (iPtJ+1);
-
-          for (short iPtCh = 0; iPtCh < nPtChBins; iPtCh++) {
-            h2->SetBinContent (iPtCh+1, iPtJ+1, nJet * h->GetBinContent (iPtCh+1) * h->GetBinWidth (iPtCh+1));
-            h2->SetBinError   (iPtCh+1, iPtJ+1, nJet * h->GetBinError   (iPtCh+1) * h->GetBinWidth (iPtCh+1));
-          } // end loop over iPtCh
-
-        } // end loop over iPtJ
-
-
-        for (short iIter = 0; iIter < nItersMax-nItersMin+2; iIter++) {
-  
-          const short nIters = (short) nItersVals[iIter];
-
-          RooUnfoldBayes* bayesUnf = new RooUnfoldBayes (rooUnfResp_jet_trk_pt_ref_sig[iDir], h2, nIters);
-          bayesUnf->SetVerbose (-1);
-          TH2D* h2_unf = (TH2D*) bayesUnf->Hreco ()->Clone (Form ("h2_unf_%iIters", nIters));
-          SaferDelete (&bayesUnf);
-
-          for (short iPtJInt : {0, 1}) {
-
-            const TString pTJInt = (iPtJInt == 0 ? "30GeV" : "60GeV");
-            const float minJetPt = (iPtJInt == 0 ? 30. : 60.);
-            const float maxJetPt = 300;
-
-            TH1D* h = new TH1D (Form ("h_jetInt_trk_pt_%s_ref_unf_data_%s_Nominal_nIters%i", dir.Data (), pTJInt.Data (), nIters), "", nPtChBins, pTChBins);
-            h->Sumw2 ();
-            h_jetInt_trk_pt_ref_unf_nIters[iPtJInt][iDir][iIter] = h;
-  
-            double totalJetsUF = 0;
-            for (short iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
-    
-              if (0.5 * (pTJBins[iPtJ] + pTJBins[iPtJ+1]) < minJetPt || maxJetPt < 0.5 * (pTJBins[iPtJ] + pTJBins[iPtJ+1])) continue;
-    
-              totalJetsUF += h_jet_pt_ref_unf_nIters[iIter]->GetBinContent (iPtJ+1);
-    
-              for (short iPtCh = 0; iPtCh < nPtChBins; iPtCh++) {
-                h->SetBinContent (iPtCh+1, h->GetBinContent (iPtCh+1) + h2_unf->GetBinContent (iPtCh+1, iPtJ+1));
-                h->SetBinError (iPtCh+1, h->GetBinError (iPtCh+1) + std::pow (h2_unf->GetBinError (iPtCh+1, iPtJ+1), 2));
-              } // end loop over iPtCh
-    
-            } // end loop over iPtJ
-
-            for (short iPtCh = 0; iPtCh < nPtChBins; iPtCh++) {
-              h->SetBinContent (iPtCh+1, h->GetBinContent (iPtCh+1) / (totalJetsUF * h->GetBinWidth (iPtCh+1)));
-              h->SetBinError (iPtCh+1, std::sqrt (h->GetBinError (iPtCh+1)) / (totalJetsUF * h->GetBinWidth (iPtCh+1)));
-            } // end loop over iPtCh
-
-          } // end loop over iPtJInt
-
-          SaferDelete (&h2_unf);
-        } // end loop over iIter
-
-        SaferDelete (&h2);
-      } // end loop over iDir
-
-
-      for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
-
-        const TString cent = (iCent == nZdcCentBins ? "allCent" : Form ("iCent%i", iCent)); 
-        for (short iDir = 0; iDir < nDir; iDir++) {
-
-          const TString dir = directions[iDir];
-
-          TH2D* h2 = new TH2D ("h2_temp", "", nPtChBins, pTChBins, nPtJBins, pTJBins);
-          h2->Sumw2 ();
-
-          for (short iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
-
-            TH1D* h = h_jet_trk_pt_sig[iDType][iPtJ][iDir][iCent][iVar];
-            const float nJet = h_jet_pt[iDType][iCent][iVar]->GetBinContent (iPtJ+1);
-
-            for (short iPtCh = 0; iPtCh < nPtChBins; iPtCh++) {
-              h2->SetBinContent (iPtCh+1, iPtJ+1, nJet * h->GetBinContent (iPtCh+1) * h->GetBinWidth (iPtCh+1));
-              h2->SetBinError   (iPtCh+1, iPtJ+1, nJet * h->GetBinError   (iPtCh+1) * h->GetBinWidth (iPtCh+1));
-            } // end loop over iPtCh
-
-          } // end loop over iPtJ
-
-
-          for (short iIter = 0; iIter < nItersMax-nItersMin+2; iIter++) {
-
-            const short nIters = (short) nItersVals[iIter];
-
-            RooUnfoldBayes* bayesUnf = new RooUnfoldBayes (rooUnfResp_jet_trk_pt_sig[iDir][iCent], h2, nIters);
-            bayesUnf->SetVerbose (-1);
-            TH2D* h2_unf = (TH2D*) bayesUnf->Hreco ()->Clone (Form ("h2_unf_%iIters", nIters));
-            SaferDelete (&bayesUnf);
-
-            for (short iPtJInt : {0, 1}) {
-
-              const TString pTJInt = (iPtJInt == 0 ? "30GeV" : "60GeV");
-              const float minJetPt = (iPtJInt == 0 ? 30. : 60.);
-              const float maxJetPt = 300;
-
-              TH1D* h = new TH1D (Form ("h_jetInt_trk_pt_%s_pPb_unf_%s_data_%s_Nominal_nIters%i", dir.Data (), cent.Data (), pTJInt.Data (), nIters), "", nPtChBins, pTChBins);
-              h->Sumw2 ();
-              h_jetInt_trk_pt_unf_nIters[iPtJInt][iDir][iCent][iIter] = h;
-
-              double totalJetsUF = 0;
-              for (short iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
-    
-                if (0.5 * (pTJBins[iPtJ] + pTJBins[iPtJ+1]) < minJetPt || maxJetPt < 0.5 * (pTJBins[iPtJ] + pTJBins[iPtJ+1])) continue;
-    
-                totalJetsUF += h_jet_pt_unf_nIters[iCent][iIter]->GetBinContent (iPtJ+1);
-    
-                for (short iPtCh = 0; iPtCh < nPtChBins; iPtCh++) {
-                  h->SetBinContent (iPtCh+1, h->GetBinContent (iPtCh+1) + h2_unf->GetBinContent (iPtCh+1, iPtJ+1));
-                  h->SetBinError (iPtCh+1, h->GetBinError (iPtCh+1) + std::pow (h2_unf->GetBinError (iPtCh+1, iPtJ+1), 2));
-                } // end loop over iPtCh
-    
-              } // end loop over iPtJ
-
-              for (short iPtCh = 0; iPtCh < nPtChBins; iPtCh++) {
-                h->SetBinContent (iPtCh+1, h->GetBinContent (iPtCh+1) / (totalJetsUF * h->GetBinWidth (iPtCh+1)));
-                h->SetBinError (iPtCh+1, std::sqrt (h->GetBinError (iPtCh+1)) / (totalJetsUF * h->GetBinWidth (iPtCh+1)));
-              } // end loop over iPtCh
-
-            } // end loop over iPtJInt
-
-            SaferDelete (&h2_unf);
-          } // end loop over iIter
-
-          SaferDelete (&h2);
-        } // end loop over iDir
-
-      } // end loop over iCent
-
-    } // end iVar = 0
-
-  } // end iDType = 0
 
 
 
@@ -1194,8 +507,6 @@ void ProcessCorrelations (const char* tag, const char* outFileTag, const int nIt
         if ((iDType == 0 && dataVariations.count (var) == 0) || (iDType == 1 && mcVariations.count (var) + otherMCVariations.count (var) == 0))
           continue;
 
-        const bool doUnfold = (variationsWithNoUnfold.count (var) == 0);
-
         for (short iDir = 0; iDir < nDir; iDir++) {
 
           const TString dir = directions[iDir];
@@ -1204,12 +515,10 @@ void ProcessCorrelations (const char* tag, const char* outFileTag, const int nIt
             h_jetInt_trk_pt_ref[iDType][iPtJInt][iDir][iVar]     = new TH1D (Form ("h_jetInt_trk_pt_%s_ref_%s_%s_%s",     dir.Data (), dType.Data (), pTJInt.Data (), var.Data ()), "", nPtChBins, pTChBins);
             h_jetInt_trk_pt_ref_bkg[iDType][iPtJInt][iDir][iVar] = new TH1D (Form ("h_jetInt_trk_pt_%s_ref_bkg_%s_%s_%s", dir.Data (), dType.Data (), pTJInt.Data (), var.Data ()), "", nPtChBins, pTChBins);
             h_jetInt_trk_pt_ref_sig[iDType][iPtJInt][iDir][iVar] = new TH1D (Form ("h_jetInt_trk_pt_%s_ref_sig_%s_%s_%s", dir.Data (), dType.Data (), pTJInt.Data (), var.Data ()), "", nPtChBins, pTChBins);
-            //h_jetInt_trk_pt_ref_unf[iDType][iPtJInt][iDir][iVar] = new TH1D (Form ("h_jetInt_trk_pt_%s_ref_unf_%s_%s_%s", dir.Data (), dType.Data (), pTJInt.Data (), var.Data ()), "", nPtChBins, pTChBins);
 
             h_jetInt_trk_pt_ref[iDType][iPtJInt][iDir][iVar]->Sumw2 ();
             h_jetInt_trk_pt_ref_bkg[iDType][iPtJInt][iDir][iVar]->Sumw2 ();
             h_jetInt_trk_pt_ref_sig[iDType][iPtJInt][iDir][iVar]->Sumw2 ();
-            //h_jetInt_trk_pt_ref_unf[iDType][iPtJInt][iDir][iVar]->Sumw2 ();
 
             double totalJets = 0;//, totalJetsUF = 0;
             for (short iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
@@ -1222,19 +531,11 @@ void ProcessCorrelations (const char* tag, const char* outFileTag, const int nIt
               h_jetInt_trk_pt_ref_sig[iDType][iPtJInt][iDir][iVar]->Add (h_jet_trk_pt_ref_sig[iDType][iPtJ][iDir][iVar], nJets);
               totalJets += nJets;
 
-              //const double nJetsUF = h_jet_pt_ref_unf[iDType][iPtJInt][iVar]->GetBinContent (iPtJ+1);
-              //h_jetInt_trk_pt_ref_unf[iDType][iPtJInt][iDir][iVar]->Add (h_jet_trk_pt_ref_unf[iDType][iPtJ][iDir][iVar], nJetsUF);
-              //totalJetsUF += nJetsUF;
-
             } // end loop over iPtJ
 
             h_jetInt_trk_pt_ref[iDType][iPtJInt][iDir][iVar]->Scale (1./totalJets);
             h_jetInt_trk_pt_ref_bkg[iDType][iPtJInt][iDir][iVar]->Scale (1./totalJets);
             h_jetInt_trk_pt_ref_sig[iDType][iPtJInt][iDir][iVar]->Scale (1./totalJets);
-            //h_jetInt_trk_pt_ref_unf[iDType][iPtJInt][iDir][iVar]->Scale (1./totalJetsUF);
-
-            if (!doUnfold)
-              h_jetInt_trk_pt_ref_unf[iDType][iPtJInt][iDir][iVar] = (TH1D*) h_jetInt_trk_pt_ref_sig[iDType][iPtJInt][iDir][iVar]->Clone (Form ("h_jetInt_trk_pt_%s_ref_unf_%s_%s_%s", dir.Data (), dType.Data (), pTJInt.Data (), var.Data ()));
           }
 
           for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
@@ -1244,12 +545,10 @@ void ProcessCorrelations (const char* tag, const char* outFileTag, const int nIt
             h_jetInt_trk_pt[iDType][iPtJInt][iDir][iCent][iVar]     = new TH1D (Form ("h_jetInt_trk_pt_%s_pPb_%s_%s_%s_%s",     dir.Data (), cent.Data (), dType.Data (), pTJInt.Data (), var.Data ()), "", nPtChBins, pTChBins);
             h_jetInt_trk_pt_bkg[iDType][iPtJInt][iDir][iCent][iVar] = new TH1D (Form ("h_jetInt_trk_pt_%s_pPb_bkg_%s_%s_%s_%s", dir.Data (), cent.Data (), dType.Data (), pTJInt.Data (), var.Data ()), "", nPtChBins, pTChBins);
             h_jetInt_trk_pt_sig[iDType][iPtJInt][iDir][iCent][iVar] = new TH1D (Form ("h_jetInt_trk_pt_%s_pPb_sig_%s_%s_%s_%s", dir.Data (), cent.Data (), dType.Data (), pTJInt.Data (), var.Data ()), "", nPtChBins, pTChBins);
-            //h_jetInt_trk_pt_unf[iDType][iPtJInt][iDir][iCent][iVar] = new TH1D (Form ("h_jetInt_trk_pt_%s_pPb_unf_%s_%s_%s_%s", dir.Data (), cent.Data (), dType.Data (), pTJInt.Data (), var.Data ()), "", nPtChBins, pTChBins);
 
             h_jetInt_trk_pt[iDType][iPtJInt][iDir][iCent][iVar]->Sumw2 ();
             h_jetInt_trk_pt_bkg[iDType][iPtJInt][iDir][iCent][iVar]->Sumw2 ();
             h_jetInt_trk_pt_sig[iDType][iPtJInt][iDir][iCent][iVar]->Sumw2 ();
-            //h_jetInt_trk_pt_unf[iDType][iPtJInt][iDir][iCent][iVar]->Sumw2 ();
 
             double totalJets = 0;//, totalJetsUF = 0;
             for (short iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
@@ -1262,19 +561,11 @@ void ProcessCorrelations (const char* tag, const char* outFileTag, const int nIt
               h_jetInt_trk_pt_sig[iDType][iPtJInt][iDir][iCent][iVar]->Add (h_jet_trk_pt_sig[iDType][iPtJ][iDir][iCent][iVar], nJets);
               totalJets += nJets;
 
-              //const double nJetsUF = h_jet_pt_unf[iDType][iPtJInt][iCent][iVar]->GetBinContent (iPtJ+1);
-              //h_jetInt_trk_pt_unf[iDType][iPtJInt][iDir][iCent][iVar]->Add (h_jet_trk_pt_unf[iDType][iPtJ][iDir][iCent][iVar], nJetsUF);
-              //totalJetsUF += nJetsUF;
-
             } // end loop over iPtJ
 
             h_jetInt_trk_pt[iDType][iPtJInt][iDir][iCent][iVar]->Scale (1./totalJets);
             h_jetInt_trk_pt_bkg[iDType][iPtJInt][iDir][iCent][iVar]->Scale (1./totalJets);
             h_jetInt_trk_pt_sig[iDType][iPtJInt][iDir][iCent][iVar]->Scale (1./totalJets);
-            //h_jetInt_trk_pt_unf[iDType][iPtJInt][iDir][iCent][iVar]->Scale (1./totalJetsUF);
-
-            if (!doUnfold)
-              h_jetInt_trk_pt_unf[iDType][iPtJInt][iDir][iCent][iVar] = (TH1D*) h_jetInt_trk_pt_sig[iDType][iPtJInt][iDir][iCent][iVar]->Clone (Form ("h_jetInt_trk_pt_%s_pPb_unf_%s_%s_%s_%s", dir.Data (), cent.Data (), dType.Data (), pTJInt.Data (), var.Data ()));
 
           } // end loop over iCent
 
@@ -1354,226 +645,57 @@ void ProcessCorrelations (const char* tag, const char* outFileTag, const int nIt
 
 
   //////////////////////////////////////////////////////////////////////////////////////////////////// 
-  // CALCULATE IAA RATIOS FOR INTEGRATED JET PT SELECTIONS
-  //////////////////////////////////////////////////////////////////////////////////////////////////// 
-  for (short iDType = 0; iDType < 2; iDType++) {
-
-    const TString dType = (iDType == 0 ? "data" : "mc");
-
-    for (short iVar = 0; iVar < nVar; iVar++) {
-
-      const TString var = variations[iVar];
-
-      if ((iDType == 0 && dataVariations.count (var) == 0) || (iDType == 1 && mcVariations.count (var) + otherMCVariations.count (var) == 0))
-        continue;
-
-      for (short iPtJInt : {0, 1}) {
-
-        const TString pTJInt = (iPtJInt == 0 ? "30GeV" : "60GeV");
-
-        for (short iDir = 0; iDir < nDir; iDir++) {
-
-          const TString dir = directions[iDir];
-
-          for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
-
-            const TString cent = (iCent == nZdcCentBins ? "allCent" : Form ("iCent%i", iCent));
-
-            h_jetInt_trk_pt_iaa[iDType][iPtJInt][iDir][iCent][iVar] = (TH1D*) h_jetInt_trk_pt_unf[iDType][iPtJInt][iDir][iCent][iVar]->Clone (Form ("h_jetInt_trk_pt_%s_iaa_%s_%s_%s_%s", dir.Data (), cent.Data (), dType.Data (), pTJInt.Data (), var.Data ()));
-            h_jetInt_trk_pt_iaa[iDType][iPtJInt][iDir][iCent][iVar]->Divide (h_jetInt_trk_pt_ref_unf[iDType][iPtJInt][iDir][iVar]);
-
-            h_jetInt_trk_pt_iaaNoUnf[iDType][iPtJInt][iDir][iCent][iVar] = (TH1D*) h_jetInt_trk_pt_sig[iDType][iPtJInt][iDir][iCent][iVar]->Clone (Form ("h_jetInt_trk_pt_%s_iaaNoUnf_%s_%s_%s_%s", dir.Data (), cent.Data (), dType.Data (), pTJInt.Data (), var.Data ()));
-            h_jetInt_trk_pt_iaaNoUnf[iDType][iPtJInt][iDir][iCent][iVar]->Divide (h_jetInt_trk_pt_ref_sig[iDType][iPtJInt][iDir][iVar]);
-
-          } // end loop over iCent
-
-        } // end loop over iDir
-
-
-        for (short iPtCh = 0; iPtCh < nPtChSelections; iPtCh++) {
-
-          const TString ptch = pTChSelections[iPtCh].Data ();
-
-          for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
-
-            const TString cent = (iCent == nZdcCentBins ? "allCent" : Form ("iCent%i", iCent));
-
-            h_jetInt_trk_dphi_iaa[iDType][iPtJInt][iPtCh][iCent][iVar] = (TH1D*) h_jetInt_trk_dphi_sig[iDType][iPtJInt][iPtCh][iCent][iVar]->Clone (Form ("h_jetInt_trk_dphi_%s_iaa_%s_%s_%s_%s", ptch.Data (), cent.Data (), dType.Data (), pTJInt.Data (), var.Data ()));
-            h_jetInt_trk_dphi_iaa[iDType][iPtJInt][iPtCh][iCent][iVar]->Divide (h_jetInt_trk_dphi_ref_sig[iDType][iPtJInt][iPtCh][iVar]);
-
-          } // end loop over iCent
-
-        } // end loop over iPtCh
-
-      } // end loop over iPtJInt
-
-    } // end loop over iVar
-
-  } // end loop over iDType
-
-
-
-
-  ////////////////////////////////////////////////////////////////////////////////////////////////////// 
-  //// CALCULATE MC CLOSURE AND SMOOTH OVER FLUCTUATIONS
-  ////////////////////////////////////////////////////////////////////////////////////////////////////// 
-  //{
-  //  const short iVarNum = 0;//GetVarN ("Nominal");
-  //  const short iVarDen = GetVarN ("MCTruthJetsTruthParts");
-
-  //  TF1* f = nullptr;
-
-  //  const TString funcStr = "[0]+[1]*log(x)+[2]*pow(log(x),2)+[3]*pow(log(x),3)+[4]*pow(log(x),4)";
-
-  //  //bbbf.SetNDeriv (2);
-  //  //bbbf.SetDegree (6);
-
-  //  //const int ndf = bbbf.NDF ();
-
-  //  for (short iPtJInt : {0, 1}) {
-
-  //    const TString pTJInt = (iPtJInt == 0 ? "30GeV" : "60GeV");
-
-  //    for (short iDir = 0; iDir < nDir; iDir++) {
-
-  //      const TString dir = directions[iDir];
-
-  //      TH1D* h = nullptr;
-
-  //      h = (TH1D*) h_jetInt_trk_pt_ref_unf[1][iPtJInt][iDir][iVarNum]->Clone (Form ("h_jetInt_trk_pt_%s_ref_unf_closure_%s", dir.Data (), pTJInt.Data ()));
-  //      h->Divide (h_jetInt_trk_pt_ref_unf[1][iPtJInt][iDir][iVarDen]);
-  //      h_jetInt_trk_pt_ref_unf_closure[iPtJInt][iDir] = h;
-
-  //      f = new TF1 (Form ("f_jetInt_trk_pt_%s_%s_ref_unf_closure", dir.Data (), pTJInt.Data ()), funcStr, h->GetXaxis ()->GetBinLowEdge (1), h->GetXaxis ()->GetBinLowEdge (h->GetNbinsX () + 1));
-  //      if (iDir == 1) {
-  //        double x1, x2;
-  //        f->GetRange (x1, x2);
-  //        f->SetRange (x1, 20);
-  //      }
-  //      //f->SetParameter (0, 100);
-  //      //f->SetParameter (1, 0);
-  //      //f->SetParameter (2, 0);
-
-  //      f_jetInt_trk_pt_ref_unf_closure[iPtJInt][iDir] = f;
-  //      h->Fit (f, "RN0Q");
-
-  //      for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
-
-  //        const TString cent = (iCent == nZdcCentBins ? "allCent" : Form ("iCent%i", iCent));
-
-  //        h = (TH1D*) h_jetInt_trk_pt_unf[1][iPtJInt][iDir][iCent][iVarNum]->Clone (Form ("h_jet_trk_pt_%s_pPb_unf_closure_%s_%s", dir.Data (), cent.Data (), pTJInt.Data ()));
-  //        h->Divide (h_jetInt_trk_pt_unf[1][iPtJInt][iDir][iCent][iVarDen]);
-  //        h_jetInt_trk_pt_unf_closure[iPtJInt][iDir][iCent] = h;
-
-  //        f = new TF1 (Form ("f_jetInt_trk_pt_%s_pPb_unf_closure_%s_%s", dir.Data (), cent.Data (), pTJInt.Data ()), funcStr, h->GetXaxis ()->GetBinLowEdge (1), h->GetXaxis ()->GetBinLowEdge (h->GetNbinsX () + 1));
-  //        if (iDir == 1) {
-  //          double x1, x2;
-  //          f->GetRange (x1, x2);
-  //          f->SetRange (x1, 20);
-  //        }
-  //        //f->SetParameter (0, 100);
-  //        //f->SetParameter (1, 0);
-  //        //f->SetParameter (2, 0);
-
-  //        f_jetInt_trk_pt_unf_closure[iPtJInt][iDir][iCent] = f;
-  //        h->Fit (f, "RN0Q");
-
-
-  //        h = (TH1D*) h_jetInt_trk_pt_iaa[1][iPtJInt][iDir][iCent][iVarNum]->Clone (Form ("h_jet_trk_pt_%s_iaa_closure_%s_%s", dir.Data (), cent.Data (), pTJInt.Data ()));
-  //        h->Divide (h_jetInt_trk_pt_iaa[1][iPtJInt][iDir][iCent][iVarDen]);
-  //        h_jetInt_trk_pt_iaa_closure[iPtJInt][iDir][iCent] = h;
-
-  //        f = new TF1 (Form ("f_jetInt_trk_pt_%s_iaa_closure_%s_%s", dir.Data (), cent.Data (), pTJInt.Data ()), funcStr, h->GetXaxis ()->GetBinLowEdge (1), h->GetXaxis ()->GetBinLowEdge (h->GetNbinsX () + 1));
-  //        if (iDir == 1) {
-  //          double x1, x2;
-  //          f->GetRange (x1, x2);
-  //          f->SetRange (x1, 20);
-  //        }
-  //        //f->SetParameter (0, 100);
-  //        //f->SetParameter (1, 0);
-  //        //f->SetParameter (2, 0);
-
-  //        f_jetInt_trk_pt_iaa_closure[iPtJInt][iDir][iCent] = f;
-  //        h->Fit (f, "RN0Q");
-
-  //      } // end loop over iCent
-
-  //    } // end loop over iDir
-
-  //  } // end loop over iPtJInt
-  //}
-
-
-
-
-  //////////////////////////////////////////////////////////////////////////////////////////////////// 
-  // CORRECT HISTOGRAMS BY NON-CLOSURE FITS
-  //////////////////////////////////////////////////////////////////////////////////////////////////// 
-  for (short iDType = 0; iDType < 2; iDType++) {
-
-    for (short iVar = 0; iVar < nVar; iVar++) {
-
-      const TString var = variations[iVar];
-
-      if ((variationsWithNoUnfold.count (var) > 0) || (iDType == 0 && dataVariations.count (var) == 0) || (iDType == 1 && mcVariations.count (var) + otherMCVariations.count (var) == 0))
-        continue;
-
-      const float scaleFactor = (var == "NonClosureVar" ? 1.0 : 0.5); // for non-closure systematic correct by 100% of non-closure; nominal only corrects by 50%
-
-      for (short iPtJInt : {0, 1}) {
-
-        for (short iDir = 0; iDir < nDir; iDir++) {
-
-          DivideByTF1 (h_jetInt_trk_pt_ref_unf[iDType][iPtJInt][iDir][iVar], f_jetInt_trk_pt_ref_unf_closure[iPtJInt][iDir], scaleFactor);
-
-          for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
-
-            DivideByTF1 (h_jetInt_trk_pt_unf[iDType][iPtJInt][iDir][iCent][iVar], f_jetInt_trk_pt_unf_closure[iPtJInt][iDir][iCent], scaleFactor);
-            DivideByTF1 (h_jetInt_trk_pt_iaa[iDType][iPtJInt][iDir][iCent][iVar], f_jetInt_trk_pt_iaa_closure[iPtJInt][iDir][iCent], scaleFactor);
-
-          } // end loop over iCent
-
-        } // end loop over iDir
-
-      } // end loop over iPtJInt
-
-    } // end loop over iVar
-
-  } // end loop over iDType
-
-
-
-
-  //////////////////////////////////////////////////////////////////////////////////////////////////// 
   // CREATE GRAPHS THAT WILL STORE TOTAL SYSTEMATIC UNCERTAINTIES
   //////////////////////////////////////////////////////////////////////////////////////////////////// 
+  for (short iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
+
+    for (short iDir = 0; iDir < nDir; iDir++) {
+
+      //g_jet_trk_pt_ref_syst[iPtJ][iDir][0]     = make_graph (h_jet_trk_pt_ref[0][iPtJ][iDir][0]);
+      //g_jet_trk_pt_ref_bkg_syst[iPtJ][iDir][0] = make_graph (h_jet_trk_pt_ref_bkg[0][iPtJ][iDir][0]);
+      g_jet_trk_pt_ref_sig_syst[iPtJ][iDir][0] = make_graph (h_jet_trk_pt_ref_sig[0][iPtJ][iDir][0]);
+
+      //ResetTGAEErrors (g_jet_trk_pt_ref_syst[iPtJ][iDir][0]);
+      //ResetTGAEErrors (g_jet_trk_pt_ref_bkg_syst[iPtJ][iDir][0]);
+      ResetTGAEErrors (g_jet_trk_pt_ref_sig_syst[iPtJ][iDir][0]);
+
+      for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
+
+        //g_jet_trk_pt_syst[iPtJ][iDir][iCent][0]        = make_graph (h_jet_trk_pt[0][iPtJ][iDir][iCent][0]);
+        //g_jet_trk_pt_bkg_syst[iPtJ][iDir][iCent][0]    = make_graph (h_jet_trk_pt_bkg[0][iPtJ][iDir][iCent][0]);
+        g_jet_trk_pt_sig_syst[iPtJ][iDir][iCent][0]    = make_graph (h_jet_trk_pt_sig[0][iPtJ][iDir][iCent][0]);
+
+        //ResetTGAEErrors (g_jet_trk_pt_syst[iPtJ][iDir][iCent][0]);
+        //ResetTGAEErrors (g_jet_trk_pt_bkg_syst[iPtJ][iDir][iCent][0]);
+        ResetTGAEErrors (g_jet_trk_pt_sig_syst[iPtJ][iDir][iCent][0]);
+
+      } // end loop over iCent
+
+    } // end loop over iDir
+
+  } // end loop over iPtJInt
+
   for (short iPtJInt : {0, 1}) {
 
     for (short iDir = 0; iDir < nDir; iDir++) {
 
-      g_jetInt_trk_pt_ref_syst[iPtJInt][iDir][0]     = make_graph (h_jetInt_trk_pt_ref[0][iPtJInt][iDir][0]);
-      g_jetInt_trk_pt_ref_bkg_syst[iPtJInt][iDir][0] = make_graph (h_jetInt_trk_pt_ref_bkg[0][iPtJInt][iDir][0]);
+      //g_jetInt_trk_pt_ref_syst[iPtJInt][iDir][0]     = make_graph (h_jetInt_trk_pt_ref[0][iPtJInt][iDir][0]);
+      //g_jetInt_trk_pt_ref_bkg_syst[iPtJInt][iDir][0] = make_graph (h_jetInt_trk_pt_ref_bkg[0][iPtJInt][iDir][0]);
       g_jetInt_trk_pt_ref_sig_syst[iPtJInt][iDir][0] = make_graph (h_jetInt_trk_pt_ref_sig[0][iPtJInt][iDir][0]);
-      g_jetInt_trk_pt_ref_unf_syst[iPtJInt][iDir][0] = make_graph (h_jetInt_trk_pt_ref_unf[0][iPtJInt][iDir][0]);
 
-      ResetTGAEErrors (g_jetInt_trk_pt_ref_syst[iPtJInt][iDir][0]);
-      ResetTGAEErrors (g_jetInt_trk_pt_ref_bkg_syst[iPtJInt][iDir][0]);
+      //ResetTGAEErrors (g_jetInt_trk_pt_ref_syst[iPtJInt][iDir][0]);
+      //ResetTGAEErrors (g_jetInt_trk_pt_ref_bkg_syst[iPtJInt][iDir][0]);
       ResetTGAEErrors (g_jetInt_trk_pt_ref_sig_syst[iPtJInt][iDir][0]);
-      ResetTGAEErrors (g_jetInt_trk_pt_ref_unf_syst[iPtJInt][iDir][0]);
 
       for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
 
-        g_jetInt_trk_pt_syst[iPtJInt][iDir][iCent][0]        = make_graph (h_jetInt_trk_pt[0][iPtJInt][iDir][iCent][0]);
-        g_jetInt_trk_pt_bkg_syst[iPtJInt][iDir][iCent][0]    = make_graph (h_jetInt_trk_pt_bkg[0][iPtJInt][iDir][iCent][0]);
+        //g_jetInt_trk_pt_syst[iPtJInt][iDir][iCent][0]        = make_graph (h_jetInt_trk_pt[0][iPtJInt][iDir][iCent][0]);
+        //g_jetInt_trk_pt_bkg_syst[iPtJInt][iDir][iCent][0]    = make_graph (h_jetInt_trk_pt_bkg[0][iPtJInt][iDir][iCent][0]);
         g_jetInt_trk_pt_sig_syst[iPtJInt][iDir][iCent][0]    = make_graph (h_jetInt_trk_pt_sig[0][iPtJInt][iDir][iCent][0]);
-        g_jetInt_trk_pt_unf_syst[iPtJInt][iDir][iCent][0]    = make_graph (h_jetInt_trk_pt_unf[0][iPtJInt][iDir][iCent][0]);
-        g_jetInt_trk_pt_iaa_syst[iPtJInt][iDir][iCent][0]    = make_graph (h_jetInt_trk_pt_iaa[0][iPtJInt][iDir][iCent][0]);
 
-        ResetTGAEErrors (g_jetInt_trk_pt_syst[iPtJInt][iDir][iCent][0]);
-        ResetTGAEErrors (g_jetInt_trk_pt_bkg_syst[iPtJInt][iDir][iCent][0]);
+        //ResetTGAEErrors (g_jetInt_trk_pt_syst[iPtJInt][iDir][iCent][0]);
+        //ResetTGAEErrors (g_jetInt_trk_pt_bkg_syst[iPtJInt][iDir][iCent][0]);
         ResetTGAEErrors (g_jetInt_trk_pt_sig_syst[iPtJInt][iDir][iCent][0]);
-        ResetTGAEErrors (g_jetInt_trk_pt_unf_syst[iPtJInt][iDir][iCent][0]);
-        ResetTGAEErrors (g_jetInt_trk_pt_iaa_syst[iPtJInt][iDir][iCent][0]);
 
       } // end loop over iCent
 
@@ -1581,25 +703,23 @@ void ProcessCorrelations (const char* tag, const char* outFileTag, const int nIt
 
     for (short iPtCh = 0; iPtCh < nPtChSelections; iPtCh++) {
 
-      g_jetInt_trk_dphi_ref_syst[iPtJInt][iPtCh][0]     = make_graph (h_jetInt_trk_dphi_ref[0][iPtJInt][iPtCh][0]);
-      g_jetInt_trk_dphi_ref_bkg_syst[iPtJInt][iPtCh][0] = make_graph (h_jetInt_trk_dphi_ref_bkg[0][iPtJInt][iPtCh][0]);
+      //g_jetInt_trk_dphi_ref_syst[iPtJInt][iPtCh][0]     = make_graph (h_jetInt_trk_dphi_ref[0][iPtJInt][iPtCh][0]);
+      //g_jetInt_trk_dphi_ref_bkg_syst[iPtJInt][iPtCh][0] = make_graph (h_jetInt_trk_dphi_ref_bkg[0][iPtJInt][iPtCh][0]);
       g_jetInt_trk_dphi_ref_sig_syst[iPtJInt][iPtCh][0] = make_graph (h_jetInt_trk_dphi_ref_sig[0][iPtJInt][iPtCh][0]);
 
-      ResetTGAEErrors (g_jetInt_trk_dphi_ref_syst[iPtJInt][iPtCh][0]);
-      ResetTGAEErrors (g_jetInt_trk_dphi_ref_bkg_syst[iPtJInt][iPtCh][0]);
+      //ResetTGAEErrors (g_jetInt_trk_dphi_ref_syst[iPtJInt][iPtCh][0]);
+      //ResetTGAEErrors (g_jetInt_trk_dphi_ref_bkg_syst[iPtJInt][iPtCh][0]);
       ResetTGAEErrors (g_jetInt_trk_dphi_ref_sig_syst[iPtJInt][iPtCh][0]);
 
       for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
 
-        g_jetInt_trk_dphi_syst[iPtJInt][iPtCh][iCent][0]      = make_graph (h_jetInt_trk_dphi[0][iPtJInt][iPtCh][iCent][0]);
-        g_jetInt_trk_dphi_bkg_syst[iPtJInt][iPtCh][iCent][0]  = make_graph (h_jetInt_trk_dphi_bkg[0][iPtJInt][iPtCh][iCent][0]);
+        //g_jetInt_trk_dphi_syst[iPtJInt][iPtCh][iCent][0]      = make_graph (h_jetInt_trk_dphi[0][iPtJInt][iPtCh][iCent][0]);
+        //g_jetInt_trk_dphi_bkg_syst[iPtJInt][iPtCh][iCent][0]  = make_graph (h_jetInt_trk_dphi_bkg[0][iPtJInt][iPtCh][iCent][0]);
         g_jetInt_trk_dphi_sig_syst[iPtJInt][iPtCh][iCent][0]  = make_graph (h_jetInt_trk_dphi_sig[0][iPtJInt][iPtCh][iCent][0]);
-        g_jetInt_trk_dphi_iaa_syst[iPtJInt][iPtCh][iCent][0]  = make_graph (h_jetInt_trk_dphi_iaa[0][iPtJInt][iPtCh][iCent][0]);
 
-        ResetTGAEErrors (g_jetInt_trk_dphi_syst[iPtJInt][iPtCh][iCent][0]);
-        ResetTGAEErrors (g_jetInt_trk_dphi_bkg_syst[iPtJInt][iPtCh][iCent][0]);
+        //ResetTGAEErrors (g_jetInt_trk_dphi_syst[iPtJInt][iPtCh][iCent][0]);
+        //ResetTGAEErrors (g_jetInt_trk_dphi_bkg_syst[iPtJInt][iPtCh][iCent][0]);
         ResetTGAEErrors (g_jetInt_trk_dphi_sig_syst[iPtJInt][iPtCh][iCent][0]);
-        ResetTGAEErrors (g_jetInt_trk_dphi_iaa_syst[iPtJInt][iPtCh][iCent][0]);
 
       } // end loop over iCent
 
@@ -1616,6 +736,67 @@ void ProcessCorrelations (const char* tag, const char* outFileTag, const int nIt
   //////////////////////////////////////////////////////////////////////////////////////////////////// 
   for (short iDType = 0; iDType < 2; iDType++) {
 
+    for (short iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
+
+      for (short iVar = 1; iVar < nVar; iVar++) {
+
+        const TString var = variations[iVar];
+
+        if ((iDType == 0 && dataVariations.count (var) == 0) || (iDType == 1 && mcVariations.count (var) == 0))
+          continue;
+
+        for (short iDir = 0; iDir < nDir; iDir++) {
+
+          g_jet_trk_pt_ref_sig_syst[iPtJ][iDir][iVar] = new TGAE ();
+
+          CalcSystematics (g_jet_trk_pt_ref_sig_syst[iPtJ][iDir][iVar], h_jet_trk_pt_ref_sig[iDType][iPtJ][iDir][0],  h_jet_trk_pt_ref_sig[iDType][iPtJ][iDir][iVar]);
+
+          // allow some uncertainties to not cancel in the bkgd. subtracted (signal) yield by overwriting the current uncertainties
+          if (variationsThatDontCancelInSig.count (var) != 0) {
+            TGAE* g_tot = new TGAE ();
+            TGAE* g_bkg = new TGAE ();
+
+            CalcSystematics (g_tot, h_jet_trk_pt_ref[iDType][iPtJ][iDir][0],      h_jet_trk_pt_ref[iDType][iPtJ][iDir][iVar]);
+            CalcSystematics (g_bkg, h_jet_trk_pt_ref_bkg[iDType][iPtJ][iDir][0],  h_jet_trk_pt_ref_bkg[iDType][iPtJ][iDir][iVar]);
+
+            ResetTGAEErrors (g_jet_trk_pt_ref_sig_syst[iPtJ][iDir][iVar]);
+            AddErrorsInQuadrature (g_jet_trk_pt_ref_sig_syst[iPtJ][iDir][iVar], g_tot, false, false);
+            AddErrorsInQuadrature (g_jet_trk_pt_ref_sig_syst[iPtJ][iDir][iVar], g_bkg, false, false);
+
+            delete g_tot;
+            delete g_bkg;
+          }
+
+          for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
+
+            g_jet_trk_pt_sig_syst[iPtJ][iDir][iCent][iVar]  = new TGAE ();
+
+            CalcSystematics (g_jet_trk_pt_sig_syst[iPtJ][iDir][iCent][iVar], h_jet_trk_pt_sig[iDType][iPtJ][iDir][iCent][0], h_jet_trk_pt_sig[iDType][iPtJ][iDir][iCent][iVar]);
+
+            // allow some uncertainties to not cancel in the bkgd. subtracted (signal) yield by overwriting the current uncertainties
+            if (variationsThatDontCancelInSig.count (var) != 0) {
+              TGAE* g_tot = new TGAE ();
+              TGAE* g_bkg = new TGAE ();
+
+              CalcSystematics (g_tot, h_jet_trk_pt[iDType][iPtJ][iDir][iCent][0],     h_jet_trk_pt[iDType][iPtJ][iDir][iCent][iVar]);
+              CalcSystematics (g_bkg, h_jet_trk_pt_bkg[iDType][iPtJ][iDir][iCent][0], h_jet_trk_pt_bkg[iDType][iPtJ][iDir][iCent][iVar]);
+
+              ResetTGAEErrors (g_jet_trk_pt_sig_syst[iPtJ][iDir][iCent][iVar]);
+              AddErrorsInQuadrature (g_jet_trk_pt_sig_syst[iPtJ][iDir][iCent][iVar], g_tot, false, false);
+              AddErrorsInQuadrature (g_jet_trk_pt_sig_syst[iPtJ][iDir][iCent][iVar], g_bkg, false, false);
+
+              delete g_tot;
+              delete g_bkg;
+            }
+
+          } // end loop over iCent
+
+        } // end loop over iDir
+
+      } // end loop over iVar
+
+    } // end loop over iPtJ
+
     for (short iPtJInt : {0, 1}) {
 
       for (short iVar = 1; iVar < nVar; iVar++) {
@@ -1627,48 +808,46 @@ void ProcessCorrelations (const char* tag, const char* outFileTag, const int nIt
 
         for (short iDir = 0; iDir < nDir; iDir++) {
 
-          g_jetInt_trk_pt_ref_syst[iPtJInt][iDir][iVar]     = new TGAE ();
-          g_jetInt_trk_pt_ref_bkg_syst[iPtJInt][iDir][iVar] = new TGAE ();
           g_jetInt_trk_pt_ref_sig_syst[iPtJInt][iDir][iVar] = new TGAE ();
-          g_jetInt_trk_pt_ref_unf_syst[iPtJInt][iDir][iVar] = new TGAE ();
 
-          CalcSystematics (g_jetInt_trk_pt_ref_syst[iPtJInt][iDir][iVar],     h_jetInt_trk_pt_ref[iDType][iPtJInt][iDir][0],      h_jetInt_trk_pt_ref[iDType][iPtJInt][iDir][iVar]);
-          CalcSystematics (g_jetInt_trk_pt_ref_bkg_syst[iPtJInt][iDir][iVar], h_jetInt_trk_pt_ref_bkg[iDType][iPtJInt][iDir][0],  h_jetInt_trk_pt_ref_bkg[iDType][iPtJInt][iDir][iVar]);
           CalcSystematics (g_jetInt_trk_pt_ref_sig_syst[iPtJInt][iDir][iVar], h_jetInt_trk_pt_ref_sig[iDType][iPtJInt][iDir][0],  h_jetInt_trk_pt_ref_sig[iDType][iPtJInt][iDir][iVar]);
-          CalcSystematics (g_jetInt_trk_pt_ref_unf_syst[iPtJInt][iDir][iVar], h_jetInt_trk_pt_ref_unf[iDType][iPtJInt][iDir][0],  h_jetInt_trk_pt_ref_unf[iDType][iPtJInt][iDir][iVar]);
 
           // allow some uncertainties to not cancel in the bkgd. subtracted (signal) yield by overwriting the current uncertainties
           if (variationsThatDontCancelInSig.count (var) != 0) {
+            TGAE* g_tot = new TGAE ();
+            TGAE* g_bkg = new TGAE ();
+
+            CalcSystematics (g_tot, h_jetInt_trk_pt_ref[iDType][iPtJInt][iDir][0],      h_jetInt_trk_pt_ref[iDType][iPtJInt][iDir][iVar]);
+            CalcSystematics (g_bkg, h_jetInt_trk_pt_ref_bkg[iDType][iPtJInt][iDir][0],  h_jetInt_trk_pt_ref_bkg[iDType][iPtJInt][iDir][iVar]);
+
             ResetTGAEErrors (g_jetInt_trk_pt_ref_sig_syst[iPtJInt][iDir][iVar]);
-            AddErrorsInQuadrature (g_jetInt_trk_pt_ref_sig_syst[iPtJInt][iDir][iVar], g_jetInt_trk_pt_ref_syst[iPtJInt][iDir][iVar], false, false);
-            AddErrorsInQuadrature (g_jetInt_trk_pt_ref_sig_syst[iPtJInt][iDir][iVar], g_jetInt_trk_pt_ref_bkg_syst[iPtJInt][iDir][iVar], false, false);
+            AddErrorsInQuadrature (g_jetInt_trk_pt_ref_sig_syst[iPtJInt][iDir][iVar], g_tot, false, false);
+            AddErrorsInQuadrature (g_jetInt_trk_pt_ref_sig_syst[iPtJInt][iDir][iVar], g_bkg, false, false);
+
+            delete g_tot;
+            delete g_bkg;
           }
 
           for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
 
-            g_jetInt_trk_pt_syst[iPtJInt][iDir][iCent][iVar]     = new TGAE ();
-            g_jetInt_trk_pt_bkg_syst[iPtJInt][iDir][iCent][iVar] = new TGAE ();
             g_jetInt_trk_pt_sig_syst[iPtJInt][iDir][iCent][iVar] = new TGAE ();
-            g_jetInt_trk_pt_unf_syst[iPtJInt][iDir][iCent][iVar] = new TGAE ();
-            g_jetInt_trk_pt_iaa_syst[iPtJInt][iDir][iCent][iVar] = new TGAE ();
 
-            CalcSystematics (g_jetInt_trk_pt_syst[iPtJInt][iDir][iCent][iVar],     h_jetInt_trk_pt[iDType][iPtJInt][iDir][iCent][0],     h_jetInt_trk_pt[iDType][iPtJInt][iDir][iCent][iVar]);
-            CalcSystematics (g_jetInt_trk_pt_bkg_syst[iPtJInt][iDir][iCent][iVar], h_jetInt_trk_pt_bkg[iDType][iPtJInt][iDir][iCent][0], h_jetInt_trk_pt_bkg[iDType][iPtJInt][iDir][iCent][iVar]);
             CalcSystematics (g_jetInt_trk_pt_sig_syst[iPtJInt][iDir][iCent][iVar], h_jetInt_trk_pt_sig[iDType][iPtJInt][iDir][iCent][0], h_jetInt_trk_pt_sig[iDType][iPtJInt][iDir][iCent][iVar]);
-            CalcSystematics (g_jetInt_trk_pt_unf_syst[iPtJInt][iDir][iCent][iVar], h_jetInt_trk_pt_unf[iDType][iPtJInt][iDir][iCent][0], h_jetInt_trk_pt_unf[iDType][iPtJInt][iDir][iCent][iVar]);
-            CalcSystematics (g_jetInt_trk_pt_iaa_syst[iPtJInt][iDir][iCent][iVar], h_jetInt_trk_pt_iaa[iDType][iPtJInt][iDir][iCent][0], h_jetInt_trk_pt_iaa[iDType][iPtJInt][iDir][iCent][iVar]);
 
             // allow some uncertainties to not cancel in the bkgd. subtracted (signal) yield by overwriting the current uncertainties
             if (variationsThatDontCancelInSig.count (var) != 0) {
+              TGAE* g_tot = new TGAE ();
+              TGAE* g_bkg = new TGAE ();
+
+              CalcSystematics (g_tot, h_jetInt_trk_pt[iDType][iPtJInt][iDir][iCent][0],     h_jetInt_trk_pt[iDType][iPtJInt][iDir][iCent][iVar]);
+              CalcSystematics (g_bkg, h_jetInt_trk_pt_bkg[iDType][iPtJInt][iDir][iCent][0], h_jetInt_trk_pt_bkg[iDType][iPtJInt][iDir][iCent][iVar]);
+
               ResetTGAEErrors (g_jetInt_trk_pt_sig_syst[iPtJInt][iDir][iCent][iVar]);
-              AddErrorsInQuadrature (g_jetInt_trk_pt_sig_syst[iPtJInt][iDir][iCent][iVar], g_jetInt_trk_pt_syst[iPtJInt][iDir][iCent][iVar], false, false);
-              AddErrorsInQuadrature (g_jetInt_trk_pt_sig_syst[iPtJInt][iDir][iCent][iVar], g_jetInt_trk_pt_bkg_syst[iPtJInt][iDir][iCent][iVar], false, false);
-            }
-            // allow some uncertainties to not cancel in the p+Pb / pp ratio by overwriting the current uncertainties
-            if (variationsThatDontCancelInRatio.count (var) != 0) {
-              ResetTGAEErrors (g_jetInt_trk_pt_iaa_syst[iPtJInt][iDir][iCent][iVar]);
-              AddRelErrorsInQuadrature (g_jetInt_trk_pt_iaa_syst[iPtJInt][iDir][iCent][iVar], g_jetInt_trk_pt_ref_sig_syst[iPtJInt][iDir][iVar], false, false);
-              AddRelErrorsInQuadrature (g_jetInt_trk_pt_iaa_syst[iPtJInt][iDir][iCent][iVar], g_jetInt_trk_pt_sig_syst[iPtJInt][iDir][iCent][iVar], false, false);
+              AddErrorsInQuadrature (g_jetInt_trk_pt_sig_syst[iPtJInt][iDir][iCent][iVar], g_tot, false, false);
+              AddErrorsInQuadrature (g_jetInt_trk_pt_sig_syst[iPtJInt][iDir][iCent][iVar], g_bkg, false, false);
+
+              delete g_tot;
+              delete g_bkg;
             }
 
           } // end loop over iCent
@@ -1677,44 +856,46 @@ void ProcessCorrelations (const char* tag, const char* outFileTag, const int nIt
 
         for (short iPtCh = 0; iPtCh < nPtChSelections; iPtCh++) {
 
-          g_jetInt_trk_dphi_ref_syst[iPtJInt][iPtCh][iVar]      = new TGAE ();
-          g_jetInt_trk_dphi_ref_bkg_syst[iPtJInt][iPtCh][iVar]  = new TGAE ();
           g_jetInt_trk_dphi_ref_sig_syst[iPtJInt][iPtCh][iVar]  = new TGAE ();
 
-          CalcSystematics (g_jetInt_trk_dphi_ref_syst[iPtJInt][iPtCh][iVar],      h_jetInt_trk_dphi_ref[iDType][iPtJInt][iPtCh][0],     h_jetInt_trk_dphi_ref[iDType][iPtJInt][iPtCh][iVar]);
-          CalcSystematics (g_jetInt_trk_dphi_ref_bkg_syst[iPtJInt][iPtCh][iVar],  h_jetInt_trk_dphi_ref_bkg[iDType][iPtJInt][iPtCh][0], h_jetInt_trk_dphi_ref_bkg[iDType][iPtJInt][iPtCh][iVar]);
           CalcSystematics (g_jetInt_trk_dphi_ref_sig_syst[iPtJInt][iPtCh][iVar],  h_jetInt_trk_dphi_ref_sig[iDType][iPtJInt][iPtCh][0], h_jetInt_trk_dphi_ref_sig[iDType][iPtJInt][iPtCh][iVar]);
 
           // allow some uncertainties to not cancel in the bkgd. subtracted (signal) yield by overwriting the current uncertainties
           if (variationsThatDontCancelInSig.count (var) != 0) {
+            TGAE* g_tot = new TGAE ();
+            TGAE* g_bkg = new TGAE ();
+
+            CalcSystematics (g_tot, h_jetInt_trk_dphi_ref[iDType][iPtJInt][iPtCh][0],     h_jetInt_trk_dphi_ref[iDType][iPtJInt][iPtCh][iVar]);
+            CalcSystematics (g_bkg, h_jetInt_trk_dphi_ref_bkg[iDType][iPtJInt][iPtCh][0], h_jetInt_trk_dphi_ref_bkg[iDType][iPtJInt][iPtCh][iVar]);
+
             ResetTGAEErrors (g_jetInt_trk_dphi_ref_sig_syst[iPtJInt][iPtCh][iVar]);
-            AddErrorsInQuadrature (g_jetInt_trk_dphi_ref_sig_syst[iPtJInt][iPtCh][iVar], g_jetInt_trk_dphi_ref_syst[iPtJInt][iPtCh][iVar], false, false);
-            AddErrorsInQuadrature (g_jetInt_trk_dphi_ref_sig_syst[iPtJInt][iPtCh][iVar], g_jetInt_trk_dphi_ref_bkg_syst[iPtJInt][iPtCh][iVar], false, false);
+            AddErrorsInQuadrature (g_jetInt_trk_dphi_ref_sig_syst[iPtJInt][iPtCh][iVar], g_tot, false, false);
+            AddErrorsInQuadrature (g_jetInt_trk_dphi_ref_sig_syst[iPtJInt][iPtCh][iVar], g_bkg, false, false);
+
+            delete g_tot;
+            delete g_bkg;
           }
 
           for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
 
-            g_jetInt_trk_dphi_syst[iPtJInt][iPtCh][iCent][iVar]     = new TGAE ();
-            g_jetInt_trk_dphi_bkg_syst[iPtJInt][iPtCh][iCent][iVar] = new TGAE ();
             g_jetInt_trk_dphi_sig_syst[iPtJInt][iPtCh][iCent][iVar] = new TGAE ();
-            g_jetInt_trk_dphi_iaa_syst[iPtJInt][iPtCh][iCent][iVar] = new TGAE ();
 
-            CalcSystematics (g_jetInt_trk_dphi_syst[iPtJInt][iPtCh][iCent][iVar],     h_jetInt_trk_dphi[iDType][iPtJInt][iPtCh][iCent][0],      h_jetInt_trk_dphi[iDType][iPtJInt][iPtCh][iCent][iVar]);
-            CalcSystematics (g_jetInt_trk_dphi_bkg_syst[iPtJInt][iPtCh][iCent][iVar], h_jetInt_trk_dphi_bkg[iDType][iPtJInt][iPtCh][iCent][0],  h_jetInt_trk_dphi_bkg[iDType][iPtJInt][iPtCh][iCent][iVar]);
             CalcSystematics (g_jetInt_trk_dphi_sig_syst[iPtJInt][iPtCh][iCent][iVar], h_jetInt_trk_dphi_sig[iDType][iPtJInt][iPtCh][iCent][0],  h_jetInt_trk_dphi_sig[iDType][iPtJInt][iPtCh][iCent][iVar]);
-            CalcSystematics (g_jetInt_trk_dphi_iaa_syst[iPtJInt][iPtCh][iCent][iVar], h_jetInt_trk_dphi_iaa[iDType][iPtJInt][iPtCh][iCent][0],  h_jetInt_trk_dphi_iaa[iDType][iPtJInt][iPtCh][iCent][iVar]);
 
             // allow some uncertainties to not cancel in the bkgd. subtracted (signal) yield by overwriting the current uncertainties
             if (variationsThatDontCancelInSig.count (var) != 0) {
+              TGAE* g_tot = new TGAE ();
+              TGAE* g_bkg = new TGAE ();
+
+              CalcSystematics (g_tot, h_jetInt_trk_dphi[iDType][iPtJInt][iPtCh][iCent][0],      h_jetInt_trk_dphi[iDType][iPtJInt][iPtCh][iCent][iVar]);
+              CalcSystematics (g_bkg, h_jetInt_trk_dphi_bkg[iDType][iPtJInt][iPtCh][iCent][0],  h_jetInt_trk_dphi_bkg[iDType][iPtJInt][iPtCh][iCent][iVar]);
+
               ResetTGAEErrors (g_jetInt_trk_dphi_sig_syst[iPtJInt][iPtCh][iCent][iVar]);
-              AddErrorsInQuadrature (g_jetInt_trk_dphi_sig_syst[iPtJInt][iPtCh][iCent][iVar], g_jetInt_trk_dphi_syst[iPtJInt][iPtCh][iCent][iVar], false, false);
-              AddErrorsInQuadrature (g_jetInt_trk_dphi_sig_syst[iPtJInt][iPtCh][iCent][iVar], g_jetInt_trk_dphi_bkg_syst[iPtJInt][iPtCh][iCent][iVar], false, false);
-            }
-            // allow some uncertainties to not cancel in the p+Pb / pp ratio by overwriting the current uncertainties
-            if (variationsThatDontCancelInRatio.count (var) != 0) {
-              ResetTGAEErrors (g_jetInt_trk_dphi_iaa_syst[iPtJInt][iPtCh][iCent][iVar]);
-              AddRelErrorsInQuadrature (g_jetInt_trk_dphi_iaa_syst[iPtJInt][iPtCh][iCent][iVar], g_jetInt_trk_dphi_ref_sig_syst[iPtJInt][iPtCh][iVar], false, false);
-              AddRelErrorsInQuadrature (g_jetInt_trk_dphi_iaa_syst[iPtJInt][iPtCh][iCent][iVar], g_jetInt_trk_dphi_sig_syst[iPtJInt][iPtCh][iCent][iVar], false, false);
+              AddErrorsInQuadrature (g_jetInt_trk_dphi_sig_syst[iPtJInt][iPtCh][iCent][iVar], g_tot, false, false);
+              AddErrorsInQuadrature (g_jetInt_trk_dphi_sig_syst[iPtJInt][iPtCh][iCent][iVar], g_bkg, false, false);
+
+              delete g_tot;
+              delete g_bkg;
             }
 
           } // end loop over iCent
@@ -1741,22 +922,35 @@ void ProcessCorrelations (const char* tag, const char* outFileTag, const int nIt
     if (dataVariations.count (var) > 0 || mcVariations.count (var) == 0)
       continue; // skip variations already evaluated in data or that are not evaluated in MC
 
+    for (short iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
+
+      for (short iDir = 0; iDir < nDir; iDir++) {
+
+        SetCentralValuesKeepRelativeErrors (g_jet_trk_pt_ref_sig_syst[iPtJ][iDir][iVar],  h_jet_trk_pt_ref_sig[0][iPtJ][iDir][0]);
+
+        for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
+
+          SetCentralValuesKeepRelativeErrors (g_jet_trk_pt_sig_syst[iPtJ][iDir][iCent][iVar], h_jet_trk_pt_sig[0][iPtJ][iDir][iCent][0]);
+
+        } // end loop over iCent
+
+      } // end loop over iDir
+
+    } // end loop over iPtJ
+
     for (short iPtJInt : {0, 1}) {
 
       for (short iDir = 0; iDir < nDir; iDir++) {
 
-        SetCentralValuesKeepRelativeErrors (g_jetInt_trk_pt_ref_syst[iPtJInt][iDir][iVar],      h_jetInt_trk_pt_ref[0][iPtJInt][iDir][0]);
-        SetCentralValuesKeepRelativeErrors (g_jetInt_trk_pt_ref_bkg_syst[iPtJInt][iDir][iVar],  h_jetInt_trk_pt_ref_bkg[0][iPtJInt][iDir][0]);
+        //SetCentralValuesKeepRelativeErrors (g_jetInt_trk_pt_ref_syst[iPtJInt][iDir][iVar],      h_jetInt_trk_pt_ref[0][iPtJInt][iDir][0]);
+        //SetCentralValuesKeepRelativeErrors (g_jetInt_trk_pt_ref_bkg_syst[iPtJInt][iDir][iVar],  h_jetInt_trk_pt_ref_bkg[0][iPtJInt][iDir][0]);
         SetCentralValuesKeepRelativeErrors (g_jetInt_trk_pt_ref_sig_syst[iPtJInt][iDir][iVar],  h_jetInt_trk_pt_ref_sig[0][iPtJInt][iDir][0]);
-        SetCentralValuesKeepRelativeErrors (g_jetInt_trk_pt_ref_unf_syst[iPtJInt][iDir][iVar],  h_jetInt_trk_pt_ref_unf[0][iPtJInt][iDir][0]);
 
         for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
 
-          SetCentralValuesKeepRelativeErrors (g_jetInt_trk_pt_syst[iPtJInt][iDir][iCent][iVar],     h_jetInt_trk_pt[0][iPtJInt][iDir][iCent][0]);
-          SetCentralValuesKeepRelativeErrors (g_jetInt_trk_pt_bkg_syst[iPtJInt][iDir][iCent][iVar], h_jetInt_trk_pt_bkg[0][iPtJInt][iDir][iCent][0]);
+          //SetCentralValuesKeepRelativeErrors (g_jetInt_trk_pt_syst[iPtJInt][iDir][iCent][iVar],     h_jetInt_trk_pt[0][iPtJInt][iDir][iCent][0]);
+          //SetCentralValuesKeepRelativeErrors (g_jetInt_trk_pt_bkg_syst[iPtJInt][iDir][iCent][iVar], h_jetInt_trk_pt_bkg[0][iPtJInt][iDir][iCent][0]);
           SetCentralValuesKeepRelativeErrors (g_jetInt_trk_pt_sig_syst[iPtJInt][iDir][iCent][iVar], h_jetInt_trk_pt_sig[0][iPtJInt][iDir][iCent][0]);
-          SetCentralValuesKeepRelativeErrors (g_jetInt_trk_pt_unf_syst[iPtJInt][iDir][iCent][iVar], h_jetInt_trk_pt_unf[0][iPtJInt][iDir][iCent][0]);
-          SetCentralValuesKeepRelativeErrors (g_jetInt_trk_pt_iaa_syst[iPtJInt][iDir][iCent][iVar], h_jetInt_trk_pt_iaa[0][iPtJInt][iDir][iCent][0]);
 
         } // end loop over iCent
 
@@ -1764,16 +958,15 @@ void ProcessCorrelations (const char* tag, const char* outFileTag, const int nIt
 
       for (short iPtCh = 0; iPtCh < nPtChSelections; iPtCh++) {
 
-        SetCentralValuesKeepRelativeErrors (g_jetInt_trk_dphi_ref_syst[iPtJInt][iPtCh][iVar],     h_jetInt_trk_dphi_ref[0][iPtJInt][iPtCh][0]);
-        SetCentralValuesKeepRelativeErrors (g_jetInt_trk_dphi_ref_bkg_syst[iPtJInt][iPtCh][iVar], h_jetInt_trk_dphi_ref_bkg[0][iPtJInt][iPtCh][0]);
+        //SetCentralValuesKeepRelativeErrors (g_jetInt_trk_dphi_ref_syst[iPtJInt][iPtCh][iVar],     h_jetInt_trk_dphi_ref[0][iPtJInt][iPtCh][0]);
+        //SetCentralValuesKeepRelativeErrors (g_jetInt_trk_dphi_ref_bkg_syst[iPtJInt][iPtCh][iVar], h_jetInt_trk_dphi_ref_bkg[0][iPtJInt][iPtCh][0]);
         SetCentralValuesKeepRelativeErrors (g_jetInt_trk_dphi_ref_sig_syst[iPtJInt][iPtCh][iVar], h_jetInt_trk_dphi_ref_sig[0][iPtJInt][iPtCh][0]);
 
         for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
 
-          SetCentralValuesKeepRelativeErrors (g_jetInt_trk_dphi_syst[iPtJInt][iPtCh][iCent][iVar],      h_jetInt_trk_dphi[0][iPtJInt][iPtCh][iCent][0]);
-          SetCentralValuesKeepRelativeErrors (g_jetInt_trk_dphi_bkg_syst[iPtJInt][iPtCh][iCent][iVar],  h_jetInt_trk_dphi_bkg[0][iPtJInt][iPtCh][iCent][0]);
+          //SetCentralValuesKeepRelativeErrors (g_jetInt_trk_dphi_syst[iPtJInt][iPtCh][iCent][iVar],      h_jetInt_trk_dphi[0][iPtJInt][iPtCh][iCent][0]);
+          //SetCentralValuesKeepRelativeErrors (g_jetInt_trk_dphi_bkg_syst[iPtJInt][iPtCh][iCent][iVar],  h_jetInt_trk_dphi_bkg[0][iPtJInt][iPtCh][iCent][0]);
           SetCentralValuesKeepRelativeErrors (g_jetInt_trk_dphi_sig_syst[iPtJInt][iPtCh][iCent][iVar],  h_jetInt_trk_dphi_sig[0][iPtJInt][iPtCh][iCent][0]);
-          SetCentralValuesKeepRelativeErrors (g_jetInt_trk_dphi_iaa_syst[iPtJInt][iPtCh][iCent][iVar],  h_jetInt_trk_dphi_iaa[0][iPtJInt][iPtCh][iCent][0]);
 
         } // end loop over iCent
 
@@ -1795,18 +988,15 @@ void ProcessCorrelations (const char* tag, const char* outFileTag, const int nIt
 
       for (short iDir = 0; iDir < nDir; iDir++) {
 
-        g_jetInt_trk_pt_ref_systTot[iPtJInt][iDir][iTotVar]     = (TGAE*) g_jetInt_trk_pt_ref_syst[iPtJInt][iDir][0]->Clone ();
-        g_jetInt_trk_pt_ref_bkg_systTot[iPtJInt][iDir][iTotVar] = (TGAE*) g_jetInt_trk_pt_ref_bkg_syst[iPtJInt][iDir][0]->Clone ();
+        //g_jetInt_trk_pt_ref_systTot[iPtJInt][iDir][iTotVar]     = (TGAE*) g_jetInt_trk_pt_ref_syst[iPtJInt][iDir][0]->Clone ();
+        //g_jetInt_trk_pt_ref_bkg_systTot[iPtJInt][iDir][iTotVar] = (TGAE*) g_jetInt_trk_pt_ref_bkg_syst[iPtJInt][iDir][0]->Clone ();
         g_jetInt_trk_pt_ref_sig_systTot[iPtJInt][iDir][iTotVar] = (TGAE*) g_jetInt_trk_pt_ref_sig_syst[iPtJInt][iDir][0]->Clone ();
-        g_jetInt_trk_pt_ref_unf_systTot[iPtJInt][iDir][iTotVar] = (TGAE*) g_jetInt_trk_pt_ref_unf_syst[iPtJInt][iDir][0]->Clone ();
 
         for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
 
-          g_jetInt_trk_pt_systTot[iPtJInt][iDir][iCent][iTotVar]     = (TGAE*) g_jetInt_trk_pt_syst[iPtJInt][iDir][iCent][0]->Clone ();
-          g_jetInt_trk_pt_bkg_systTot[iPtJInt][iDir][iCent][iTotVar] = (TGAE*) g_jetInt_trk_pt_bkg_syst[iPtJInt][iDir][iCent][0]->Clone ();
+          //g_jetInt_trk_pt_systTot[iPtJInt][iDir][iCent][iTotVar]     = (TGAE*) g_jetInt_trk_pt_syst[iPtJInt][iDir][iCent][0]->Clone ();
+          //g_jetInt_trk_pt_bkg_systTot[iPtJInt][iDir][iCent][iTotVar] = (TGAE*) g_jetInt_trk_pt_bkg_syst[iPtJInt][iDir][iCent][0]->Clone ();
           g_jetInt_trk_pt_sig_systTot[iPtJInt][iDir][iCent][iTotVar] = (TGAE*) g_jetInt_trk_pt_sig_syst[iPtJInt][iDir][iCent][0]->Clone ();
-          g_jetInt_trk_pt_unf_systTot[iPtJInt][iDir][iCent][iTotVar] = (TGAE*) g_jetInt_trk_pt_unf_syst[iPtJInt][iDir][iCent][0]->Clone ();
-          g_jetInt_trk_pt_iaa_systTot[iPtJInt][iDir][iCent][iTotVar] = (TGAE*) g_jetInt_trk_pt_iaa_syst[iPtJInt][iDir][iCent][0]->Clone ();
 
         } // end loop over iCent
 
@@ -1814,16 +1004,15 @@ void ProcessCorrelations (const char* tag, const char* outFileTag, const int nIt
 
       for (short iPtCh = 0; iPtCh < nPtChSelections; iPtCh++) {
 
-        g_jetInt_trk_dphi_ref_systTot[iPtJInt][iPtCh][iTotVar]     = (TGAE*) g_jetInt_trk_dphi_ref_syst[iPtJInt][iPtCh][0]->Clone ();
-        g_jetInt_trk_dphi_ref_bkg_systTot[iPtJInt][iPtCh][iTotVar] = (TGAE*) g_jetInt_trk_dphi_ref_bkg_syst[iPtJInt][iPtCh][0]->Clone ();
+        //g_jetInt_trk_dphi_ref_systTot[iPtJInt][iPtCh][iTotVar]     = (TGAE*) g_jetInt_trk_dphi_ref_syst[iPtJInt][iPtCh][0]->Clone ();
+        //g_jetInt_trk_dphi_ref_bkg_systTot[iPtJInt][iPtCh][iTotVar] = (TGAE*) g_jetInt_trk_dphi_ref_bkg_syst[iPtJInt][iPtCh][0]->Clone ();
         g_jetInt_trk_dphi_ref_sig_systTot[iPtJInt][iPtCh][iTotVar] = (TGAE*) g_jetInt_trk_dphi_ref_sig_syst[iPtJInt][iPtCh][0]->Clone ();
 
         for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
 
-          g_jetInt_trk_dphi_systTot[iPtJInt][iPtCh][iCent][iTotVar]     = (TGAE*) g_jetInt_trk_dphi_syst[iPtJInt][iPtCh][iCent][0]->Clone ();
-          g_jetInt_trk_dphi_bkg_systTot[iPtJInt][iPtCh][iCent][iTotVar] = (TGAE*) g_jetInt_trk_dphi_bkg_syst[iPtJInt][iPtCh][iCent][0]->Clone ();
+          //g_jetInt_trk_dphi_systTot[iPtJInt][iPtCh][iCent][iTotVar]     = (TGAE*) g_jetInt_trk_dphi_syst[iPtJInt][iPtCh][iCent][0]->Clone ();
+          //g_jetInt_trk_dphi_bkg_systTot[iPtJInt][iPtCh][iCent][iTotVar] = (TGAE*) g_jetInt_trk_dphi_bkg_syst[iPtJInt][iPtCh][iCent][0]->Clone ();
           g_jetInt_trk_dphi_sig_systTot[iPtJInt][iPtCh][iCent][iTotVar] = (TGAE*) g_jetInt_trk_dphi_sig_syst[iPtJInt][iPtCh][iCent][0]->Clone ();
-          g_jetInt_trk_dphi_iaa_systTot[iPtJInt][iPtCh][iCent][iTotVar] = (TGAE*) g_jetInt_trk_dphi_iaa_syst[iPtJInt][iPtCh][iCent][0]->Clone ();
 
         } // end loop over iCent
 
@@ -1861,18 +1050,15 @@ void ProcessCorrelations (const char* tag, const char* outFileTag, const int nIt
 
         for (short iDir = 0; iDir < nDir; iDir++) {
 
-          AddErrorsInQuadrature (g_jetInt_trk_pt_ref_systTot[iPtJInt][iDir][iTotVar],      g_jetInt_trk_pt_ref_syst[iPtJInt][iDir][iVar], false, true);
-          AddErrorsInQuadrature (g_jetInt_trk_pt_ref_bkg_systTot[iPtJInt][iDir][iTotVar],  g_jetInt_trk_pt_ref_bkg_syst[iPtJInt][iDir][iVar], false, true);
+          //AddErrorsInQuadrature (g_jetInt_trk_pt_ref_systTot[iPtJInt][iDir][iTotVar],      g_jetInt_trk_pt_ref_syst[iPtJInt][iDir][iVar], false, true);
+          //AddErrorsInQuadrature (g_jetInt_trk_pt_ref_bkg_systTot[iPtJInt][iDir][iTotVar],  g_jetInt_trk_pt_ref_bkg_syst[iPtJInt][iDir][iVar], false, true);
           AddErrorsInQuadrature (g_jetInt_trk_pt_ref_sig_systTot[iPtJInt][iDir][iTotVar],  g_jetInt_trk_pt_ref_sig_syst[iPtJInt][iDir][iVar], false, true);
-          AddErrorsInQuadrature (g_jetInt_trk_pt_ref_unf_systTot[iPtJInt][iDir][iTotVar],  g_jetInt_trk_pt_ref_unf_syst[iPtJInt][iDir][iVar], false, true);
 
           for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
 
-            AddErrorsInQuadrature (g_jetInt_trk_pt_systTot[iPtJInt][iDir][iCent][iTotVar],     g_jetInt_trk_pt_syst[iPtJInt][iDir][iCent][iVar], false, true);
-            AddErrorsInQuadrature (g_jetInt_trk_pt_bkg_systTot[iPtJInt][iDir][iCent][iTotVar], g_jetInt_trk_pt_bkg_syst[iPtJInt][iDir][iCent][iVar], false, true);
+            //AddErrorsInQuadrature (g_jetInt_trk_pt_systTot[iPtJInt][iDir][iCent][iTotVar],     g_jetInt_trk_pt_syst[iPtJInt][iDir][iCent][iVar], false, true);
+            //AddErrorsInQuadrature (g_jetInt_trk_pt_bkg_systTot[iPtJInt][iDir][iCent][iTotVar], g_jetInt_trk_pt_bkg_syst[iPtJInt][iDir][iCent][iVar], false, true);
             AddErrorsInQuadrature (g_jetInt_trk_pt_sig_systTot[iPtJInt][iDir][iCent][iTotVar], g_jetInt_trk_pt_sig_syst[iPtJInt][iDir][iCent][iVar], false, true);
-            AddErrorsInQuadrature (g_jetInt_trk_pt_unf_systTot[iPtJInt][iDir][iCent][iTotVar], g_jetInt_trk_pt_unf_syst[iPtJInt][iDir][iCent][iVar], false, true);
-            AddErrorsInQuadrature (g_jetInt_trk_pt_iaa_systTot[iPtJInt][iDir][iCent][iTotVar], g_jetInt_trk_pt_iaa_syst[iPtJInt][iDir][iCent][iVar], false, true);
 
           } // end loop over iCent
 
@@ -1880,16 +1066,15 @@ void ProcessCorrelations (const char* tag, const char* outFileTag, const int nIt
 
         for (short iPtCh = 0; iPtCh < nPtChSelections; iPtCh++) {
 
-          AddErrorsInQuadrature (g_jetInt_trk_dphi_ref_systTot[iPtJInt][iPtCh][iTotVar],     g_jetInt_trk_dphi_ref_syst[iPtJInt][iPtCh][iVar], false, true);
-          AddErrorsInQuadrature (g_jetInt_trk_dphi_ref_bkg_systTot[iPtJInt][iPtCh][iTotVar], g_jetInt_trk_dphi_ref_bkg_syst[iPtJInt][iPtCh][iVar], false, true);
+          //AddErrorsInQuadrature (g_jetInt_trk_dphi_ref_systTot[iPtJInt][iPtCh][iTotVar],     g_jetInt_trk_dphi_ref_syst[iPtJInt][iPtCh][iVar], false, true);
+          //AddErrorsInQuadrature (g_jetInt_trk_dphi_ref_bkg_systTot[iPtJInt][iPtCh][iTotVar], g_jetInt_trk_dphi_ref_bkg_syst[iPtJInt][iPtCh][iVar], false, true);
           AddErrorsInQuadrature (g_jetInt_trk_dphi_ref_sig_systTot[iPtJInt][iPtCh][iTotVar], g_jetInt_trk_dphi_ref_sig_syst[iPtJInt][iPtCh][iVar], false, true);
 
           for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
 
-            AddErrorsInQuadrature (g_jetInt_trk_dphi_systTot[iPtJInt][iPtCh][iCent][iTotVar],      g_jetInt_trk_dphi_syst[iPtJInt][iPtCh][iCent][iVar], false, true);
-            AddErrorsInQuadrature (g_jetInt_trk_dphi_bkg_systTot[iPtJInt][iPtCh][iCent][iTotVar],  g_jetInt_trk_dphi_bkg_syst[iPtJInt][iPtCh][iCent][iVar], false, true);
+            //AddErrorsInQuadrature (g_jetInt_trk_dphi_systTot[iPtJInt][iPtCh][iCent][iTotVar],      g_jetInt_trk_dphi_syst[iPtJInt][iPtCh][iCent][iVar], false, true);
+            //AddErrorsInQuadrature (g_jetInt_trk_dphi_bkg_systTot[iPtJInt][iPtCh][iCent][iTotVar],  g_jetInt_trk_dphi_bkg_syst[iPtJInt][iPtCh][iCent][iVar], false, true);
             AddErrorsInQuadrature (g_jetInt_trk_dphi_sig_systTot[iPtJInt][iPtCh][iCent][iTotVar],  g_jetInt_trk_dphi_sig_syst[iPtJInt][iPtCh][iCent][iVar], false, true);
-            AddErrorsInQuadrature (g_jetInt_trk_dphi_iaa_systTot[iPtJInt][iPtCh][iCent][iTotVar],  g_jetInt_trk_dphi_iaa_syst[iPtJInt][iPtCh][iCent][iVar], false, true);
 
           } // end loop over iCent
 
@@ -1904,18 +1089,15 @@ void ProcessCorrelations (const char* tag, const char* outFileTag, const int nIt
 
         for (short iDir = 0; iDir < nDir; iDir++) {
 
-          AddErrorsInQuadrature (g_jetInt_trk_pt_ref_systTot[iPtJInt][iDir][iTotVar],      g_jetInt_trk_pt_ref_syst[iPtJInt][iDir],     &iVars, true);
-          AddErrorsInQuadrature (g_jetInt_trk_pt_ref_bkg_systTot[iPtJInt][iDir][iTotVar],  g_jetInt_trk_pt_ref_bkg_syst[iPtJInt][iDir], &iVars, true);
+          //AddErrorsInQuadrature (g_jetInt_trk_pt_ref_systTot[iPtJInt][iDir][iTotVar],      g_jetInt_trk_pt_ref_syst[iPtJInt][iDir],     &iVars, true);
+          //AddErrorsInQuadrature (g_jetInt_trk_pt_ref_bkg_systTot[iPtJInt][iDir][iTotVar],  g_jetInt_trk_pt_ref_bkg_syst[iPtJInt][iDir], &iVars, true);
           AddErrorsInQuadrature (g_jetInt_trk_pt_ref_sig_systTot[iPtJInt][iDir][iTotVar],  g_jetInt_trk_pt_ref_sig_syst[iPtJInt][iDir], &iVars, true);
-          AddErrorsInQuadrature (g_jetInt_trk_pt_ref_unf_systTot[iPtJInt][iDir][iTotVar],  g_jetInt_trk_pt_ref_unf_syst[iPtJInt][iDir], &iVars, true);
 
           for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
 
-            AddErrorsInQuadrature (g_jetInt_trk_pt_systTot[iPtJInt][iDir][iCent][iTotVar],     g_jetInt_trk_pt_syst[iPtJInt][iDir][iCent],      &iVars, true);
-            AddErrorsInQuadrature (g_jetInt_trk_pt_bkg_systTot[iPtJInt][iDir][iCent][iTotVar], g_jetInt_trk_pt_bkg_syst[iPtJInt][iDir][iCent],  &iVars, true);
+            //AddErrorsInQuadrature (g_jetInt_trk_pt_systTot[iPtJInt][iDir][iCent][iTotVar],     g_jetInt_trk_pt_syst[iPtJInt][iDir][iCent],      &iVars, true);
+            //AddErrorsInQuadrature (g_jetInt_trk_pt_bkg_systTot[iPtJInt][iDir][iCent][iTotVar], g_jetInt_trk_pt_bkg_syst[iPtJInt][iDir][iCent],  &iVars, true);
             AddErrorsInQuadrature (g_jetInt_trk_pt_sig_systTot[iPtJInt][iDir][iCent][iTotVar], g_jetInt_trk_pt_sig_syst[iPtJInt][iDir][iCent],  &iVars, true);
-            AddErrorsInQuadrature (g_jetInt_trk_pt_unf_systTot[iPtJInt][iDir][iCent][iTotVar], g_jetInt_trk_pt_unf_syst[iPtJInt][iDir][iCent],  &iVars, true);
-            AddErrorsInQuadrature (g_jetInt_trk_pt_iaa_systTot[iPtJInt][iDir][iCent][iTotVar], g_jetInt_trk_pt_iaa_syst[iPtJInt][iDir][iCent],  &iVars, true);
 
           } // end loop over iCent
 
@@ -1923,16 +1105,15 @@ void ProcessCorrelations (const char* tag, const char* outFileTag, const int nIt
 
         for (short iPtCh = 0; iPtCh < nPtChSelections; iPtCh++) {
 
-          AddErrorsInQuadrature (g_jetInt_trk_dphi_ref_systTot[iPtJInt][iPtCh][iTotVar],     g_jetInt_trk_dphi_ref_syst[iPtJInt][iPtCh],      &iVars, true);
-          AddErrorsInQuadrature (g_jetInt_trk_dphi_ref_bkg_systTot[iPtJInt][iPtCh][iTotVar], g_jetInt_trk_dphi_ref_bkg_syst[iPtJInt][iPtCh],  &iVars, true);
+          //AddErrorsInQuadrature (g_jetInt_trk_dphi_ref_systTot[iPtJInt][iPtCh][iTotVar],     g_jetInt_trk_dphi_ref_syst[iPtJInt][iPtCh],      &iVars, true);
+          //AddErrorsInQuadrature (g_jetInt_trk_dphi_ref_bkg_systTot[iPtJInt][iPtCh][iTotVar], g_jetInt_trk_dphi_ref_bkg_syst[iPtJInt][iPtCh],  &iVars, true);
           AddErrorsInQuadrature (g_jetInt_trk_dphi_ref_sig_systTot[iPtJInt][iPtCh][iTotVar], g_jetInt_trk_dphi_ref_sig_syst[iPtJInt][iPtCh],  &iVars, true);
 
           for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
 
-            AddErrorsInQuadrature (g_jetInt_trk_dphi_systTot[iPtJInt][iPtCh][iCent][iTotVar],      g_jetInt_trk_dphi_syst[iPtJInt][iPtCh][iCent],     &iVars, true);
-            AddErrorsInQuadrature (g_jetInt_trk_dphi_bkg_systTot[iPtJInt][iPtCh][iCent][iTotVar],  g_jetInt_trk_dphi_bkg_syst[iPtJInt][iPtCh][iCent], &iVars, true);
+            //AddErrorsInQuadrature (g_jetInt_trk_dphi_systTot[iPtJInt][iPtCh][iCent][iTotVar],      g_jetInt_trk_dphi_syst[iPtJInt][iPtCh][iCent],     &iVars, true);
+            //AddErrorsInQuadrature (g_jetInt_trk_dphi_bkg_systTot[iPtJInt][iPtCh][iCent][iTotVar],  g_jetInt_trk_dphi_bkg_syst[iPtJInt][iPtCh][iCent], &iVars, true);
             AddErrorsInQuadrature (g_jetInt_trk_dphi_sig_systTot[iPtJInt][iPtCh][iCent][iTotVar],  g_jetInt_trk_dphi_sig_syst[iPtJInt][iPtCh][iCent], &iVars, true);
-            AddErrorsInQuadrature (g_jetInt_trk_dphi_iaa_systTot[iPtJInt][iPtCh][iCent][iTotVar],  g_jetInt_trk_dphi_iaa_syst[iPtJInt][iPtCh][iCent], &iVars, true);
 
           } // end loop over iCent
 
@@ -1956,18 +1137,15 @@ void ProcessCorrelations (const char* tag, const char* outFileTag, const int nIt
 
       for (short iDir = 0; iDir < nDir; iDir++) {
     
-        AddErrorsInQuadrature (g_jetInt_trk_pt_ref_syst[iPtJInt][iDir][0],      g_jetInt_trk_pt_ref_systTot[iPtJInt][iDir][iTotVar]);
-        AddErrorsInQuadrature (g_jetInt_trk_pt_ref_bkg_syst[iPtJInt][iDir][0],  g_jetInt_trk_pt_ref_bkg_systTot[iPtJInt][iDir][iTotVar]);
+        //AddErrorsInQuadrature (g_jetInt_trk_pt_ref_syst[iPtJInt][iDir][0],      g_jetInt_trk_pt_ref_systTot[iPtJInt][iDir][iTotVar]);
+        //AddErrorsInQuadrature (g_jetInt_trk_pt_ref_bkg_syst[iPtJInt][iDir][0],  g_jetInt_trk_pt_ref_bkg_systTot[iPtJInt][iDir][iTotVar]);
         AddErrorsInQuadrature (g_jetInt_trk_pt_ref_sig_syst[iPtJInt][iDir][0],  g_jetInt_trk_pt_ref_sig_systTot[iPtJInt][iDir][iTotVar]);
-        AddErrorsInQuadrature (g_jetInt_trk_pt_ref_unf_syst[iPtJInt][iDir][0],  g_jetInt_trk_pt_ref_unf_systTot[iPtJInt][iDir][iTotVar]);
     
         for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
     
-          AddErrorsInQuadrature (g_jetInt_trk_pt_syst[iPtJInt][iDir][iCent][0],     g_jetInt_trk_pt_systTot[iPtJInt][iDir][iCent][iTotVar]);
-          AddErrorsInQuadrature (g_jetInt_trk_pt_bkg_syst[iPtJInt][iDir][iCent][0], g_jetInt_trk_pt_bkg_systTot[iPtJInt][iDir][iCent][iTotVar]);
+          //AddErrorsInQuadrature (g_jetInt_trk_pt_syst[iPtJInt][iDir][iCent][0],     g_jetInt_trk_pt_systTot[iPtJInt][iDir][iCent][iTotVar]);
+          //AddErrorsInQuadrature (g_jetInt_trk_pt_bkg_syst[iPtJInt][iDir][iCent][0], g_jetInt_trk_pt_bkg_systTot[iPtJInt][iDir][iCent][iTotVar]);
           AddErrorsInQuadrature (g_jetInt_trk_pt_sig_syst[iPtJInt][iDir][iCent][0], g_jetInt_trk_pt_sig_systTot[iPtJInt][iDir][iCent][iTotVar]);
-          AddErrorsInQuadrature (g_jetInt_trk_pt_unf_syst[iPtJInt][iDir][iCent][0], g_jetInt_trk_pt_unf_systTot[iPtJInt][iDir][iCent][iTotVar]);
-          AddErrorsInQuadrature (g_jetInt_trk_pt_iaa_syst[iPtJInt][iDir][iCent][0], g_jetInt_trk_pt_iaa_systTot[iPtJInt][iDir][iCent][iTotVar]);
     
         } // end loop over iCent
     
@@ -1975,16 +1153,15 @@ void ProcessCorrelations (const char* tag, const char* outFileTag, const int nIt
     
       for (short iPtCh = 0; iPtCh < nPtChSelections; iPtCh++) {
     
-        AddErrorsInQuadrature (g_jetInt_trk_dphi_ref_syst[iPtJInt][iPtCh][0],     g_jetInt_trk_dphi_ref_systTot[iPtJInt][iPtCh][iTotVar]);
-        AddErrorsInQuadrature (g_jetInt_trk_dphi_ref_bkg_syst[iPtJInt][iPtCh][0], g_jetInt_trk_dphi_ref_bkg_systTot[iPtJInt][iPtCh][iTotVar]);
+        //AddErrorsInQuadrature (g_jetInt_trk_dphi_ref_syst[iPtJInt][iPtCh][0],     g_jetInt_trk_dphi_ref_systTot[iPtJInt][iPtCh][iTotVar]);
+        //AddErrorsInQuadrature (g_jetInt_trk_dphi_ref_bkg_syst[iPtJInt][iPtCh][0], g_jetInt_trk_dphi_ref_bkg_systTot[iPtJInt][iPtCh][iTotVar]);
         AddErrorsInQuadrature (g_jetInt_trk_dphi_ref_sig_syst[iPtJInt][iPtCh][0], g_jetInt_trk_dphi_ref_sig_systTot[iPtJInt][iPtCh][iTotVar]);
     
         for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
     
-          AddErrorsInQuadrature (g_jetInt_trk_dphi_syst[iPtJInt][iPtCh][iCent][0],      g_jetInt_trk_dphi_systTot[iPtJInt][iPtCh][iCent][iTotVar]);
-          AddErrorsInQuadrature (g_jetInt_trk_dphi_bkg_syst[iPtJInt][iPtCh][iCent][0],  g_jetInt_trk_dphi_bkg_systTot[iPtJInt][iPtCh][iCent][iTotVar]);
+          //AddErrorsInQuadrature (g_jetInt_trk_dphi_syst[iPtJInt][iPtCh][iCent][0],      g_jetInt_trk_dphi_systTot[iPtJInt][iPtCh][iCent][iTotVar]);
+          //AddErrorsInQuadrature (g_jetInt_trk_dphi_bkg_syst[iPtJInt][iPtCh][iCent][0],  g_jetInt_trk_dphi_bkg_systTot[iPtJInt][iPtCh][iCent][iTotVar]);
           AddErrorsInQuadrature (g_jetInt_trk_dphi_sig_syst[iPtJInt][iPtCh][iCent][0],  g_jetInt_trk_dphi_sig_systTot[iPtJInt][iPtCh][iCent][iTotVar]);
-          AddErrorsInQuadrature (g_jetInt_trk_dphi_iaa_syst[iPtJInt][iPtCh][iCent][0],  g_jetInt_trk_dphi_iaa_systTot[iPtJInt][iPtCh][iCent][iTotVar]);
     
         } // end loop over iCent
     
@@ -2010,6 +1187,28 @@ void ProcessCorrelations (const char* tag, const char* outFileTag, const int nIt
       if (dataVariations.count (var) == 0 && mcVariations.count (var) == 0)
         continue;
 
+      for (short iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
+
+        const TString pTJ = Form ("%g-%gGeVJets", pTJBins[iPtJ], pTJBins[iPtJ+1]);
+
+        for (short iDir = 0; iDir < nDir; iDir++) {
+
+          const TString dir = directions[iDir];
+
+          g_jet_trk_pt_ref_sig_syst[iPtJ][iDir][iVar]->Write (Form ("g_jet_trk_pt_%s_ref_sig_syst_%s_%s",  dir.Data (), pTJ.Data (), var.Data ()));
+
+          for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
+
+            const TString cent = (iCent == nZdcCentBins ? "allCent" : Form ("iCent%i", iCent));
+
+            g_jet_trk_pt_sig_syst[iPtJ][iDir][iCent][iVar]->Write  (Form ("g_jet_trk_pt_%s_sig_syst_%s_%s_%s", dir.Data (), cent.Data (), pTJ.Data (), var.Data ()));
+
+          } // end loop over iCent
+
+        } // end loop over iDir
+
+      } // end loop over iPtJ
+
       for (short iPtJInt : {0, 1}) {
 
         const TString pTJInt = (iPtJInt == 0 ? "30GeV" : "60GeV");
@@ -2018,20 +1217,17 @@ void ProcessCorrelations (const char* tag, const char* outFileTag, const int nIt
 
           const TString dir = directions[iDir];
 
-          g_jetInt_trk_pt_ref_syst[iPtJInt][iDir][iVar]->Write     (Form ("g_jetInt_trk_pt_%s_ref_syst_%s_%s",      dir.Data (), pTJInt.Data (), var.Data ()));
-          g_jetInt_trk_pt_ref_bkg_syst[iPtJInt][iDir][iVar]->Write (Form ("g_jetInt_trk_pt_%s_ref_bkg_syst_%s_%s",  dir.Data (), pTJInt.Data (), var.Data ()));
+          //g_jetInt_trk_pt_ref_syst[iPtJInt][iDir][iVar]->Write     (Form ("g_jetInt_trk_pt_%s_ref_syst_%s_%s",      dir.Data (), pTJInt.Data (), var.Data ()));
+          //g_jetInt_trk_pt_ref_bkg_syst[iPtJInt][iDir][iVar]->Write (Form ("g_jetInt_trk_pt_%s_ref_bkg_syst_%s_%s",  dir.Data (), pTJInt.Data (), var.Data ()));
           g_jetInt_trk_pt_ref_sig_syst[iPtJInt][iDir][iVar]->Write (Form ("g_jetInt_trk_pt_%s_ref_sig_syst_%s_%s",  dir.Data (), pTJInt.Data (), var.Data ()));
-          g_jetInt_trk_pt_ref_unf_syst[iPtJInt][iDir][iVar]->Write (Form ("g_jetInt_trk_pt_%s_ref_unf_syst_%s_%s",  dir.Data (), pTJInt.Data (), var.Data ()));
 
           for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
 
             const TString cent = (iCent == nZdcCentBins ? "allCent" : Form ("iCent%i", iCent));
 
-            g_jetInt_trk_pt_syst[iPtJInt][iDir][iCent][iVar]->Write      (Form ("g_jetInt_trk_pt_%s_syst_%s_%s_%s",     dir.Data (), cent.Data (), pTJInt.Data (), var.Data ()));
-            g_jetInt_trk_pt_bkg_syst[iPtJInt][iDir][iCent][iVar]->Write  (Form ("g_jetInt_trk_pt_%s_bkg_syst_%s_%s_%s", dir.Data (), cent.Data (), pTJInt.Data (), var.Data ()));
+            //g_jetInt_trk_pt_syst[iPtJInt][iDir][iCent][iVar]->Write      (Form ("g_jetInt_trk_pt_%s_syst_%s_%s_%s",     dir.Data (), cent.Data (), pTJInt.Data (), var.Data ()));
+            //g_jetInt_trk_pt_bkg_syst[iPtJInt][iDir][iCent][iVar]->Write  (Form ("g_jetInt_trk_pt_%s_bkg_syst_%s_%s_%s", dir.Data (), cent.Data (), pTJInt.Data (), var.Data ()));
             g_jetInt_trk_pt_sig_syst[iPtJInt][iDir][iCent][iVar]->Write  (Form ("g_jetInt_trk_pt_%s_sig_syst_%s_%s_%s", dir.Data (), cent.Data (), pTJInt.Data (), var.Data ()));
-            g_jetInt_trk_pt_unf_syst[iPtJInt][iDir][iCent][iVar]->Write  (Form ("g_jetInt_trk_pt_%s_unf_syst_%s_%s_%s", dir.Data (), cent.Data (), pTJInt.Data (), var.Data ()));
-            g_jetInt_trk_pt_iaa_syst[iPtJInt][iDir][iCent][iVar]->Write  (Form ("g_jetInt_trk_pt_%s_iaa_syst_%s_%s_%s", dir.Data (), cent.Data (), pTJInt.Data (), var.Data ()));
 
           } // end loop over iCent
 
@@ -2041,18 +1237,17 @@ void ProcessCorrelations (const char* tag, const char* outFileTag, const int nIt
 
           const TString ptch = pTChSelections[iPtCh].Data ();
 
-          g_jetInt_trk_dphi_ref_syst[iPtJInt][iPtCh][iVar]->Write      (Form ("g_jetInt_trk_dphi_%s_ref_syst_%s_%s",      ptch.Data (), pTJInt.Data (), var.Data ()));
-          g_jetInt_trk_dphi_ref_bkg_syst[iPtJInt][iPtCh][iVar]->Write  (Form ("g_jetInt_trk_dphi_%s_ref_bkg_syst_%s_%s",  ptch.Data (), pTJInt.Data (), var.Data ()));
+          //g_jetInt_trk_dphi_ref_syst[iPtJInt][iPtCh][iVar]->Write      (Form ("g_jetInt_trk_dphi_%s_ref_syst_%s_%s",      ptch.Data (), pTJInt.Data (), var.Data ()));
+          //g_jetInt_trk_dphi_ref_bkg_syst[iPtJInt][iPtCh][iVar]->Write  (Form ("g_jetInt_trk_dphi_%s_ref_bkg_syst_%s_%s",  ptch.Data (), pTJInt.Data (), var.Data ()));
           g_jetInt_trk_dphi_ref_sig_syst[iPtJInt][iPtCh][iVar]->Write  (Form ("g_jetInt_trk_dphi_%s_ref_sig_syst_%s_%s",  ptch.Data (), pTJInt.Data (), var.Data ()));
 
           for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
 
             const TString cent = (iCent == nZdcCentBins ? "allCent" : Form ("iCent%i", iCent));
 
-            g_jetInt_trk_dphi_syst[iPtJInt][iPtCh][iCent][iVar]->Write     (Form ("g_jetInt_trk_dphi_%s_syst_%s_%s_%s",     ptch.Data (), cent.Data (), pTJInt.Data (), var.Data ()));
-            g_jetInt_trk_dphi_bkg_syst[iPtJInt][iPtCh][iCent][iVar]->Write (Form ("g_jetInt_trk_dphi_%s_bkg_syst_%s_%s_%s", ptch.Data (), cent.Data (), pTJInt.Data (), var.Data ()));
+            //g_jetInt_trk_dphi_syst[iPtJInt][iPtCh][iCent][iVar]->Write     (Form ("g_jetInt_trk_dphi_%s_syst_%s_%s_%s",     ptch.Data (), cent.Data (), pTJInt.Data (), var.Data ()));
+            //g_jetInt_trk_dphi_bkg_syst[iPtJInt][iPtCh][iCent][iVar]->Write (Form ("g_jetInt_trk_dphi_%s_bkg_syst_%s_%s_%s", ptch.Data (), cent.Data (), pTJInt.Data (), var.Data ()));
             g_jetInt_trk_dphi_sig_syst[iPtJInt][iPtCh][iCent][iVar]->Write (Form ("g_jetInt_trk_dphi_%s_sig_syst_%s_%s_%s", ptch.Data (), cent.Data (), pTJInt.Data (), var.Data ()));
-            g_jetInt_trk_dphi_iaa_syst[iPtJInt][iPtCh][iCent][iVar]->Write (Form ("g_jetInt_trk_dphi_%s_iaa_syst_%s_%s_%s", ptch.Data (), cent.Data (), pTJInt.Data (), var.Data ()));
 
           } // end loop over iCent
 
@@ -2075,20 +1270,17 @@ void ProcessCorrelations (const char* tag, const char* outFileTag, const int nIt
 
           const TString dir = directions[iDir];
 
-          g_jetInt_trk_pt_ref_systTot[iPtJInt][iDir][iTotVar]->Write     (Form ("g_jetInt_trk_pt_%s_ref_%s_systTot_%s",      dir.Data (), totVar.Data (), pTJInt.Data ()));
-          g_jetInt_trk_pt_ref_bkg_systTot[iPtJInt][iDir][iTotVar]->Write (Form ("g_jetInt_trk_pt_%s_ref_bkg_%s_systTot_%s",  dir.Data (), totVar.Data (), pTJInt.Data ()));
+          //g_jetInt_trk_pt_ref_systTot[iPtJInt][iDir][iTotVar]->Write     (Form ("g_jetInt_trk_pt_%s_ref_%s_systTot_%s",      dir.Data (), totVar.Data (), pTJInt.Data ()));
+          //g_jetInt_trk_pt_ref_bkg_systTot[iPtJInt][iDir][iTotVar]->Write (Form ("g_jetInt_trk_pt_%s_ref_bkg_%s_systTot_%s",  dir.Data (), totVar.Data (), pTJInt.Data ()));
           g_jetInt_trk_pt_ref_sig_systTot[iPtJInt][iDir][iTotVar]->Write (Form ("g_jetInt_trk_pt_%s_ref_sig_%s_systTot_%s",  dir.Data (), totVar.Data (), pTJInt.Data ()));
-          g_jetInt_trk_pt_ref_unf_systTot[iPtJInt][iDir][iTotVar]->Write (Form ("g_jetInt_trk_pt_%s_ref_unf_%s_systTot_%s",  dir.Data (), totVar.Data (), pTJInt.Data ()));
 
           for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
 
             const TString cent = (iCent == nZdcCentBins ? "allCent" : Form ("iCent%i", iCent));
 
-            g_jetInt_trk_pt_systTot[iPtJInt][iDir][iCent][iTotVar]->Write      (Form ("g_jetInt_trk_pt_%s_%s_systTot_%s_%s",     dir.Data (), totVar.Data (), cent.Data (), pTJInt.Data ()));
-            g_jetInt_trk_pt_bkg_systTot[iPtJInt][iDir][iCent][iTotVar]->Write  (Form ("g_jetInt_trk_pt_%s_bkg_%s_systTot_%s_%s", dir.Data (), totVar.Data (), cent.Data (), pTJInt.Data ()));
+            //g_jetInt_trk_pt_systTot[iPtJInt][iDir][iCent][iTotVar]->Write      (Form ("g_jetInt_trk_pt_%s_%s_systTot_%s_%s",     dir.Data (), totVar.Data (), cent.Data (), pTJInt.Data ()));
+            //g_jetInt_trk_pt_bkg_systTot[iPtJInt][iDir][iCent][iTotVar]->Write  (Form ("g_jetInt_trk_pt_%s_bkg_%s_systTot_%s_%s", dir.Data (), totVar.Data (), cent.Data (), pTJInt.Data ()));
             g_jetInt_trk_pt_sig_systTot[iPtJInt][iDir][iCent][iTotVar]->Write  (Form ("g_jetInt_trk_pt_%s_sig_%s_systTot_%s_%s", dir.Data (), totVar.Data (), cent.Data (), pTJInt.Data ()));
-            g_jetInt_trk_pt_unf_systTot[iPtJInt][iDir][iCent][iTotVar]->Write  (Form ("g_jetInt_trk_pt_%s_unf_%s_systTot_%s_%s", dir.Data (), totVar.Data (), cent.Data (), pTJInt.Data ()));
-            g_jetInt_trk_pt_iaa_systTot[iPtJInt][iDir][iCent][iTotVar]->Write  (Form ("g_jetInt_trk_pt_%s_iaa_%s_systTot_%s_%s", dir.Data (), totVar.Data (), cent.Data (), pTJInt.Data ()));
 
           } // end loop over iCent
 
@@ -2098,18 +1290,17 @@ void ProcessCorrelations (const char* tag, const char* outFileTag, const int nIt
 
           const TString ptch = pTChSelections[iPtCh].Data ();
 
-          g_jetInt_trk_dphi_ref_systTot[iPtJInt][iPtCh][iTotVar]->Write      (Form ("g_jetInt_trk_dphi_%s_ref_%s_systTot_%s",      ptch.Data (), totVar.Data (), pTJInt.Data ()));
-          g_jetInt_trk_dphi_ref_bkg_systTot[iPtJInt][iPtCh][iTotVar]->Write  (Form ("g_jetInt_trk_dphi_%s_ref_bkg_%s_systTot_%s",  ptch.Data (), totVar.Data (), pTJInt.Data ()));
+          //g_jetInt_trk_dphi_ref_systTot[iPtJInt][iPtCh][iTotVar]->Write      (Form ("g_jetInt_trk_dphi_%s_ref_%s_systTot_%s",      ptch.Data (), totVar.Data (), pTJInt.Data ()));
+          //g_jetInt_trk_dphi_ref_bkg_systTot[iPtJInt][iPtCh][iTotVar]->Write  (Form ("g_jetInt_trk_dphi_%s_ref_bkg_%s_systTot_%s",  ptch.Data (), totVar.Data (), pTJInt.Data ()));
           g_jetInt_trk_dphi_ref_sig_systTot[iPtJInt][iPtCh][iTotVar]->Write  (Form ("g_jetInt_trk_dphi_%s_ref_sig_%s_systTot_%s",  ptch.Data (), totVar.Data (), pTJInt.Data ()));
 
           for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
 
             const TString cent = (iCent == nZdcCentBins ? "allCent" : Form ("iCent%i", iCent));
 
-            g_jetInt_trk_dphi_systTot[iPtJInt][iPtCh][iCent][iTotVar]->Write     (Form ("g_jetInt_trk_dphi_%s_%s_systTot_%s_%s",      ptch.Data (), totVar.Data (), cent.Data (), pTJInt.Data ()));
-            g_jetInt_trk_dphi_bkg_systTot[iPtJInt][iPtCh][iCent][iTotVar]->Write (Form ("g_jetInt_trk_dphi_%s_bkg_%s_systTot_%s_%s",  ptch.Data (), totVar.Data (), cent.Data (), pTJInt.Data ()));
+            //g_jetInt_trk_dphi_systTot[iPtJInt][iPtCh][iCent][iTotVar]->Write     (Form ("g_jetInt_trk_dphi_%s_%s_systTot_%s_%s",      ptch.Data (), totVar.Data (), cent.Data (), pTJInt.Data ()));
+            //g_jetInt_trk_dphi_bkg_systTot[iPtJInt][iPtCh][iCent][iTotVar]->Write (Form ("g_jetInt_trk_dphi_%s_bkg_%s_systTot_%s_%s",  ptch.Data (), totVar.Data (), cent.Data (), pTJInt.Data ()));
             g_jetInt_trk_dphi_sig_systTot[iPtJInt][iPtCh][iCent][iTotVar]->Write (Form ("g_jetInt_trk_dphi_%s_sig_%s_systTot_%s_%s",  ptch.Data (), totVar.Data (), cent.Data (), pTJInt.Data ()));
-            g_jetInt_trk_dphi_iaa_systTot[iPtJInt][iPtCh][iCent][iTotVar]->Write (Form ("g_jetInt_trk_dphi_%s_iaa_%s_systTot_%s_%s",  ptch.Data (), totVar.Data (), cent.Data (), pTJInt.Data ()));
 
           } // end loop over iCent
 
@@ -2130,42 +1321,22 @@ void ProcessCorrelations (const char* tag, const char* outFileTag, const int nIt
         if ((iDType == 0 && dataVariations.count (var) == 0) || (iDType == 1 && mcVariations.count (var) + otherMCVariations.count (var) == 0))
           continue;
 
-        h_evt_counts_ref[iDType][iVar]->Write ();
-
-        for (short iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
-
-          h_jet_counts_ref[iDType][iPtJ][iVar]->Write ();
-
-        } // end loop over iPtJ
-
         h_jet_pt_ref[iDType][iVar]->Write ();
-        for (short iPtJInt : {0, 1})
-          h_jet_pt_ref_unf[iDType][iPtJInt][iVar]->Write ();
 
         for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
 
-          h_evt_counts[iDType][iCent][iVar]->Write ();
-
           h_jet_pt[iDType][iCent][iVar]->Write ();
-          for (short iPtJInt : {0, 1})
-            h_jet_pt_unf[iDType][iPtJInt][iCent][iVar]->Write ();
-
-          for (short iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
-
-            h_jet_counts[iDType][iPtJ][iCent][iVar]->Write ();
-
-          } // end loop over iPtJ
 
         } // end loop over iCent
 
       } // end loop over iVar
 
 
-      for (short iPtJInt : {0, 1}) {
+      for (short iVar = 0; iVar < nVar; iVar++) {
 
-        for (short iVar = 0; iVar < nVar; iVar++) {
+        const TString var = variations[iVar];
 
-          const TString var = variations[iVar];
+        for (short iPtJInt : {0, 1}) {
 
           if ((iDType == 0 && dataVariations.count (var) == 0) || (iDType == 1 && mcVariations.count (var) + otherMCVariations.count (var) == 0))
             continue;
@@ -2175,16 +1346,12 @@ void ProcessCorrelations (const char* tag, const char* outFileTag, const int nIt
             h_jetInt_trk_pt_ref[iDType][iPtJInt][iDir][iVar]->Write ();
             h_jetInt_trk_pt_ref_bkg[iDType][iPtJInt][iDir][iVar]->Write ();
             h_jetInt_trk_pt_ref_sig[iDType][iPtJInt][iDir][iVar]->Write ();
-            h_jetInt_trk_pt_ref_unf[iDType][iPtJInt][iDir][iVar]->Write ();
 
             for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
 
               h_jetInt_trk_pt[iDType][iPtJInt][iDir][iCent][iVar]->Write ();
               h_jetInt_trk_pt_bkg[iDType][iPtJInt][iDir][iCent][iVar]->Write ();
               h_jetInt_trk_pt_sig[iDType][iPtJInt][iDir][iCent][iVar]->Write ();
-              h_jetInt_trk_pt_unf[iDType][iPtJInt][iDir][iCent][iVar]->Write ();
-              h_jetInt_trk_pt_iaa[iDType][iPtJInt][iDir][iCent][iVar]->Write ();
-              h_jetInt_trk_pt_iaaNoUnf[iDType][iPtJInt][iDir][iCent][iVar]->Write ();
 
             } // end loop over iCent
 
@@ -2201,81 +1368,65 @@ void ProcessCorrelations (const char* tag, const char* outFileTag, const int nIt
               h_jetInt_trk_dphi[iDType][iPtJInt][iPtCh][iCent][iVar]->Write ();
               h_jetInt_trk_dphi_bkg[iDType][iPtJInt][iPtCh][iCent][iVar]->Write ();
               h_jetInt_trk_dphi_sig[iDType][iPtJInt][iPtCh][iCent][iVar]->Write ();
-              h_jetInt_trk_dphi_iaa[iDType][iPtJInt][iPtCh][iCent][iVar]->Write ();
 
             } // end loop over iCent
 
           } // end loop over iPtCh
 
-        } // end loop over iVar
+        } // end loop over iPtJInt
 
-      } // end loop over iPtJInt
+
+        for (short iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
+
+          if ((iDType == 0 && dataVariations.count (var) == 0) || (iDType == 1 && mcVariations.count (var) + otherMCVariations.count (var) == 0))
+            continue;
+
+          for (short iDir = 0; iDir < nDir; iDir++) {
+
+            h_jet_trk_pt_ref[iDType][iPtJ][iDir][iVar]->Write ();
+            h_jet_trk_pt_ref_bkg[iDType][iPtJ][iDir][iVar]->Write ();
+            h_jet_trk_pt_ref_sig[iDType][iPtJ][iDir][iVar]->Write ();
+
+            for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
+
+              h_jet_trk_pt[iDType][iPtJ][iDir][iCent][iVar]->Write ();
+              h_jet_trk_pt_bkg[iDType][iPtJ][iDir][iCent][iVar]->Write ();
+              h_jet_trk_pt_sig[iDType][iPtJ][iDir][iCent][iVar]->Write ();
+
+            } // end loop over iCent
+
+          } // end loop over iDir
+
+          for (short iPtCh = 0; iPtCh < nPtChSelections; iPtCh++) {
+
+            h_jet_trk_dphi_ref[iDType][iPtJ][iPtCh][iVar]->Write ();
+            h_jet_trk_dphi_ref_bkg[iDType][iPtJ][iPtCh][iVar]->Write ();
+            h_jet_trk_dphi_ref_sig[iDType][iPtJ][iPtCh][iVar]->Write ();
+
+            for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
+
+              h_jet_trk_dphi[iDType][iPtJ][iPtCh][iCent][iVar]->Write ();
+              h_jet_trk_dphi_bkg[iDType][iPtJ][iPtCh][iCent][iVar]->Write ();
+              h_jet_trk_dphi_sig[iDType][iPtJ][iPtCh][iCent][iVar]->Write ();
+
+            } // end loop over iCent
+
+          } // end loop over iPtCh
+
+        } // end loop over iPtJ
+
+      } // end loop over iVar
 
     } // end loop over iDType
 
-
-
-    //for (short iPtJInt : {0, 1}) {
-
-    //  for (short iDir = 0; iDir < nDir; iDir++) {
-
-    //    //h_jetInt_trk_pt_ref_sig_bbb[iDir]->Write ();
-    //    //f_jet_trk_pt_ref_sig_bbb[iDir]->Write ();
-
-    //    h_jetInt_trk_pt_ref_unf_closure[iPtJInt][iDir]->Write ();
-    //    f_jetInt_trk_pt_ref_unf_closure[iPtJInt][iDir]->Write ();
-
-    //    for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
-
-    //      //h_jetInt_trk_pt_sig_bbb[iDir][iCent]->Write ();
-    //      //f_jet_trk_pt_sig_bbb[iDir][iCent]->Write ();
-
-    //      h_jetInt_trk_pt_unf_closure[iPtJInt][iDir][iCent]->Write ();
-    //      f_jetInt_trk_pt_unf_closure[iPtJInt][iDir][iCent]->Write ();
-
-    //      h_jetInt_trk_pt_iaa_closure[iPtJInt][iDir][iCent]->Write ();
-    //      f_jetInt_trk_pt_iaa_closure[iPtJInt][iDir][iCent]->Write ();
-
-    //    } // end loop over iCent
-
-    //  } // end loop over iDir
-
-    //} // end loop over iPtJInt
-
-
-
-    for (short iIter = 0; iIter < nItersMax-nItersMin+2; iIter++) {
-
-      for (short iPtJInt : {0, 1}) {
-
-        h_jet_pt_ref_unf_nIters[iIter]->Write ();
-
-        for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
-  
-          h_jet_pt_unf_nIters[iCent][iIter]->Write ();
-  
-        } // end loop over iCent
-
-        for (short iDir = 0; iDir < nDir; iDir++) {
-    
-          h_jetInt_trk_pt_ref_unf_nIters[iPtJInt][iDir][iIter]->Write ();
-
-          for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
-
-            h_jetInt_trk_pt_unf_nIters[iPtJInt][iDir][iCent][iIter]->Write ();
-
-          } // end loop over iCent
-  
-        } // end loop over iDir
-
-      } // end loop over iPtJInt
-
-    } // end loop over iIter
-
-
-
     outFile->Close ();
   }
+}
+
+
+int main  (int argn, char** argv) {
+  assert (argn >= 3); 
+  ProcessCorrelations (argv[1], argv[2]);//, atoi (argv[3]));
 }
 
 

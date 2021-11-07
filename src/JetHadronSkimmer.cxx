@@ -379,14 +379,14 @@ bool JetHadronSkimmer (const char* directory,
 
     // triggering cut, require appropriate jet trigger to have fired
     if (IsCollisions ()) {
-      const bool trigFired = jetTrigger->trigDecision || (mbTrigger != nullptr && !mbTrigger->trigDecision);
+      jetTrigPS = (jetTrigger != nullptr ? jetTrigger->trigPrescale : 0);
+      jetTrig   = (jetTrigger != nullptr ? jetTrigger->trigDecision : 0);
+      mbTrigPS  = (mbTrigger  != nullptr ? mbTrigger->trigPrescale  : 0);
+      mbTrig    = (mbTrigger  != nullptr ? mbTrigger->trigDecision  : 0);
+      const bool trigFired = (jetTrig || mbTrig);
       if (!trigFired)
         continue;
       event_weight = jetTrigger->trigPrescale;
-      jetTrigPS = jetTrigger->trigPrescale;
-      jetTrig = jetTrigger->trigDecision;
-      mbTrigPS = (mbTrigger != nullptr ? mbTrigger->trigPrescale : 0);
-      mbTrig = (mbTrigger != nullptr ? mbTrigger->trigDecision : 0);
     }
 
 

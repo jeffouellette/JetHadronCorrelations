@@ -38,8 +38,9 @@ enum class SystFlag {
   HILooseVar,
   TrkEffVar,        // tracking efficiency uncertainty
   FakeRateVar,      // fake rate uncertainty
-  PrimFitVar,       // primary fraction uncertainty from fit  //TODO
-  PartSpcVar,       // particle species uncertainty           //TODO
+  PrimFitVar,       // primary fraction uncertainty from fit
+  JetPrimFracVar,   // use pp primary fraction instead of Hijing in p+Pb signal component
+  PartSpcVar,       // particle species uncertainty
   FcalCentVar,      // centrality variations
   FineFcalCentVar,
   MixCatVar1,       // mixing variations
@@ -91,6 +92,7 @@ static const std::vector <SystFlag> AllSystFlag = {
   SystFlag::TrkEffVar,
   SystFlag::FakeRateVar,
   SystFlag::PrimFitVar,
+  SystFlag::JetPrimFracVar,
   SystFlag::PartSpcVar,
   SystFlag::FcalCentVar,
   SystFlag::FineFcalCentVar,
@@ -186,6 +188,7 @@ bool DoHILooseVar (const SystFlag& sFlag);
 bool DoTrkEffVar (const SystFlag& sFlag);
 bool DoFakeRateVar (const SystFlag& sFlag);
 bool DoPrimFitVar (const SystFlag& sFlag);
+bool DoJetPrimFracVar (const SystFlag& sFlag);
 bool DoPartSpcVar (const SystFlag& sFlag);
 bool DoFcalCentVar (const SystFlag& sFlag);
 bool DoFineFcalCentVar (const SystFlag& sFlag);
@@ -238,6 +241,7 @@ bool DoHILooseVar ();
 bool DoTrkEffVar ();
 bool DoFakeRateVar ();
 bool DoPrimFitVar ();
+bool DoJetPrimFracVar ();
 bool DoPartSpcVar ();
 bool DoFcalCentVar ();
 bool DoFineFcalCentVar ();
@@ -551,7 +555,7 @@ TH1D** LoadTrackingPurity ();
 /**
  * Returns array of functions that fit the tracking purity.
  */
-TF1** LoadTrackingPurityFuncs ();
+TF1** LoadTrackingPurityFuncs (const bool usePPFrac);
 
 
 /**

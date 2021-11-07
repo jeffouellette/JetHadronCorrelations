@@ -244,7 +244,7 @@ bool Correlator (const char* tag, const char* outFilePattern, TTree* jetsTree, T
   // for tracking corections
   TH2D** h2_trk_eff = LoadTrackingEfficiency ();
   TH1D** h_trk_pur = LoadTrackingPurity ();
-  TF1** f_trk_pur = LoadTrackingPurityFuncs ();
+  TF1** f_trk_pur = LoadTrackingPurityFuncs (Ispp () || DoJetPrimFracVar () ? true : false);
 
 
   // for MC reweighting to data
@@ -861,10 +861,14 @@ bool RunCorrelator (const char* directory,
     std::cout << "In RunCorrelator.cxx: Configured to run mixing variations but no mixing configuration specified? Please investigate. Exiting." << std::endl;
     return false;
   }
+  else if (doMixing && (DoJetPrimFracVar ())) {
+    std::cout << "In RunCorrelator.cxx: Configured to run jet primary fraction variation but mixing configuration specified? Please investigate. Exiting." << std::endl;
+    return false;
+  }
 
   // histograms for some mixing variations are symlinks to central values to avoid file copy issues, make sure not to overwrite them by exiting gracefully
-  if ((DoMixCatVar2 () || DoMixCatVar4 () || DoMixCatVar6 ()) && Ispp ()) {
-    std::cout << "In RunCorrelator.cxx: MixCatVar2 and MixCatVar4 do nothing in pp, exiting gracefully." << std::endl;
+  if ((DoJetPrimFracVar () || DoMixCatVar2 () || DoMixCatVar4 () || DoMixCatVar6 ()) && Ispp ()) {
+    std::cout << "In RunCorrelator.cxx: JetPrimFracVar, MixCatVar2, and MixCatVar4 do nothing in pp, exiting gracefully." << std::endl;
     return true;
   }
   else if ((DoMixCatVar1 () || DoMixCatVar3 () || DoMixCatVar5 ()) && IspPb ()) {
@@ -894,23 +898,24 @@ bool RunCorrelator (const char* directory,
   {
     // opens a bunch of TTrees as a TChain from all files in a directory matching the file identifier
     std::cout << "DataPath = " << dataPath << std::endl;
-    if (TString (jetsInFileName).EndsWith (".root")) 
+    if (TString (jetsInFileName).EndsWith (".root"))
       jetsInTree->Add (dataPath + directory + "/" + jetsInFileName);
 
     else {
-      auto dir = gSystem->OpenDirectory (dataPath + directory);
+      auto dir = gSystem->OpenDirectory (dataPath + directory + "/" + jetsInFileName + "/");
+      std::cout << "Searching for files in " << dataPath + directory + "/" + jetsInFileName + "/" << std::endl;
       while (const char* f = gSystem->GetDirEntry (dir)) {
         TString file = TString (f);
 
-        if (!file.Contains (jetsInFileName))
-          continue;
+        //if (!file.Contains (jetsInFileName))
+        //  continue;
         //if (IsCollisions ()) {
         //  if ((Ispp () && UseMinBiasTriggers () && !file.Contains ("MinBias")) || (!Ispp () && UseJetTriggers () && !file.Contains ("Main")))
         //    continue;
         //}
 
-        std::cout << "Adding " << dataPath + directory + "/" + file + "/*.root" << " to input jets trees TChain" << std::endl;
-        jetsInTree->Add (dataPath + directory + "/" + file + "/*.root");
+        std::cout << "Adding " << dataPath + directory + "/" + jetsInFileName + "/" + file + "/*.root" << " to input jets trees TChain" << std::endl;
+        jetsInTree->Add (dataPath + directory + "/" + jetsInFileName + "/" + file + "/*.root");
         break;
       }
     }

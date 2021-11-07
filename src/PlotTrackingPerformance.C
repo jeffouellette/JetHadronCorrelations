@@ -61,7 +61,7 @@ TF1* DoPurityFit (TH1D* h, const int degree, const int nderiv) {
 
   const int ndf = pff.NDF ();
 
-  TF1* fit = new TF1 (fname.c_str (), &pff, 0.4, 150, ndf);
+  TF1* fit = new TF1 (fname.c_str (), &pff, 0.5, 150, ndf);
 
   double mean = 0, den = 0;
   for (int ix = 1; ix <= h->GetNbinsX (); ix++) {
@@ -318,7 +318,7 @@ void PlotTrackingPerformance () {
   {
     //double coarserPtchBins[] = {0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2, 2.25, 2.5, 2.75, 3, 3.25, 3.5, 3.75, 4, 4.5, 5, 5.5, 6, 7, 8, 10, 14, 20, 40, 100};
     //const double pTchBins[] = {0.5, 0.525, 0.55, 0.575, 0.6, 0.625, 0.65, 0.675, 0.7, 0.725, 0.75, 0.775, 0.8, 0.825, 0.85, 0.875, 0.9, 0.925, 0.95, 0.975, 1, 1.05, 1.1, 1.15, 1.2, 1.25, 1.3, 1.35, 1.4, 1.45, 1.5, 1.55, 1.6, 1.65, 1.7, 1.75, 1.8, 1.85, 1.9, 1.95, 2, 2.125, 2.25, 2.375, 2.5, 2.625, 2.75, 2.875, 3, 3.125, 3.25, 3.375, 3.5, 3.625, 3.75, 3.875, 4, 4.25, 4.5, 4.75, 5, 5.25, 5.5, 5.75, 6, 6.5, 7, 7.5, 8, 8.5, 9, 9.5, 10, 10.5, 11, 11.5, 12, 13, 14, 15, 16, 17, 18, 19, 20, 22.5, 25, 27.5, 30, 32.5, 35, 37.5, 40, 42.5, 45, 50, 55, 60, 70, 80, 100};
-    double coarserPtchBins[] = {0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2, 2.25, 2.5, 2.75, 3, 3.25, 3.5, 4, 4.5, 5, 6, 8, 12, 150};
+    double coarserPtchBins[] = {0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2, 2.25, 2.5, 2.75, 3, 3.25, 3.5, 4, 4.5, 5, 6, 8, 12, 150};
     int nCoarserPtchBins = sizeof (coarserPtchBins) / sizeof (coarserPtchBins[0]) - 1;
 
     for (int iWP = 0; iWP < trackWPs.size (); iWP++) {
@@ -513,19 +513,19 @@ void PlotTrackingPerformance () {
     myLineText2 (0.26, 0.80, kRed+1, kFullCircle, "Pythia8 + #it{p}+Pb overlay, #sqrt{s_{NN}} = 5.02 TeV", 1.4, 0.032, true);
     tl->DrawLatexNDC (0.22, 0.75, Form ("%s tracks", trackWPStrs[iWP].c_str ()));
 
-    TLine* l0p3 = new TLine (0.3, 0.5, 0.3, 1.4e5);                                
-    TLine* l0p5 = new TLine (0.5, 0.5, 0.5, 1.4e5);                                
-    TLine* l0p6 = new TLine (0.6, 0.5, 0.6, 1.4e5);                                
-                                                                                   
-    l0p3->SetLineWidth (1);                                                        
-    l0p3->SetLineStyle (2);                                                        
-    l0p5->SetLineWidth (1);                                                        
-    l0p5->SetLineStyle (2);                                                        
-    l0p6->SetLineWidth (1);                                                        
-    l0p6->SetLineStyle (2);                                                        
-                                                                                   
-    l0p3->Draw ("same");                                                           
-    l0p5->Draw ("same");                                                           
+    TLine* l0p3 = new TLine (0.3, 0.5, 0.3, 1.4e5);
+    TLine* l0p5 = new TLine (0.5, 0.5, 0.5, 1.4e5);
+    TLine* l0p6 = new TLine (0.6, 0.5, 0.6, 1.4e5);
+
+    l0p3->SetLineWidth (1);
+    l0p3->SetLineStyle (2);
+    l0p5->SetLineWidth (1);
+    l0p5->SetLineStyle (2);
+    l0p6->SetLineWidth (1);
+    l0p6->SetLineStyle (2);
+
+    l0p3->Draw ("same");
+    l0p5->Draw ("same");
     l0p6->Draw ("same");    
 
     const float i_pp_0p3 = 100 * h_pp->Integral (h_pp->FindFixBin (0.3), h_pp->FindFixBin (1)) / h_pp->Integral (h_pp->FindFixBin (0), h_pp->FindFixBin (1));
@@ -707,7 +707,7 @@ void PlotTrackingPerformance () {
     tl->SetTextAlign (21);
     
     const double yoff = ymin - 0.04 * (ymax-ymin) / (1.-tMargin-bMargin);
-    //tl->DrawLatex (0.5,  yoff, "0.5");
+    tl->DrawLatex (0.4,  yoff, "0.4");
     tl->DrawLatex (0.7,  yoff, "0.7");
     tl->DrawLatex (1,  yoff, "1");
     tl->DrawLatex (2,  yoff, "2");
@@ -797,7 +797,7 @@ void PlotTrackingPerformance () {
         tl->SetTextAlign (21);
         
         const double yoff = ymin - 0.04 * (ymax-ymin) / (1.-tMargin-bMargin);
-        //tl->DrawLatex (0.5,  yoff, "0.5");
+        tl->DrawLatex (0.4,  yoff, "0.r");
         tl->DrawLatex (0.7,  yoff, "0.7");
         tl->DrawLatex (1,  yoff, "1");
         tl->DrawLatex (2,  yoff, "2");
@@ -819,6 +819,7 @@ void PlotTrackingPerformance () {
         myDraw (h_primary_rate[iSys][iWP][iDR][iEta], colors[iEta], kOpenCircle, 0.6);
         TF1* f = f_primary_rate[iSys][iWP][iDR][iEta];
         if (f) {
+          f->SetRange (0.4, 150);
           f->SetLineColor (colors[iEta]);
           f->SetLineWidth (1);
           f->Draw ("same");
@@ -899,7 +900,7 @@ void PlotTrackingPerformance () {
     tl->SetTextAlign (21);
     
     const double yoff = ymin - 0.04 * (ymax-ymin) / (1.-tMargin-bMargin);
-    //tl->DrawLatex (0.5,  yoff, "0.5");
+    tl->DrawLatex (0.4,  yoff, "0.4");
     tl->DrawLatex (0.7,  yoff, "0.7");
     tl->DrawLatex (1,  yoff, "1");
     tl->DrawLatex (2,  yoff, "2");
@@ -920,6 +921,7 @@ void PlotTrackingPerformance () {
       myDraw (h_primary_rate[iSys][iWP][iDR][iEta], colors[iEta], kOpenCircle, 0.8);
       TF1* f = f_primary_rate[iSys][iWP][iDR][iEta];
       if (f != nullptr) {
+        f->SetRange (0.4, 150);
         f->SetLineColor (colors[iEta]);
         f->SetLineWidth (1);
         f->Draw ("same");
@@ -996,7 +998,7 @@ void PlotTrackingPerformance () {
     tl->SetTextAlign (21);
     
     const double yoff = ymin - 0.04 * (ymax-ymin) / (1.-tMargin-bMargin);
-    //tl->DrawLatex (0.5,  yoff, "0.5");
+    tl->DrawLatex (0.4,  yoff, "0.4");
     tl->DrawLatex (0.7,  yoff, "0.7");
     tl->DrawLatex (1,  yoff, "1");
     tl->DrawLatex (2,  yoff, "2");
@@ -1083,7 +1085,7 @@ void PlotTrackingPerformance () {
     tl->SetTextAlign (21);
     
     const double yoff = ymin - 0.04 * (ymax-ymin) / (1.-tMargin-bMargin);
-    //tl->DrawLatex (0.5,  yoff, "0.5");
+    tl->DrawLatex (0.4,  yoff, "0.4");
     tl->DrawLatex (0.7,  yoff, "0.7");
     tl->DrawLatex (1,  yoff, "1");
     tl->DrawLatex (2,  yoff, "2");
@@ -1101,13 +1103,13 @@ void PlotTrackingPerformance () {
     tl->DrawLatex (100, yoff, "100");
 
     for (int iEta : {0, 3})
+      myDraw (h_strange_rate[iSys][iWP][iDR][iEta], colors[iEta], kOpenSquare, 1.0);
+
+    for (int iEta : {0, 3})
       myDraw (h_fake_rate[iSys][iWP][iDR][iEta], colors[iEta], kOpenCrossX, 1.0);
 
     for (int iEta : {0, 3})
       myDraw (h_secondary_rate[iSys][iWP][iDR][iEta], colors[iEta], kOpenCross, 1.0);
-
-    for (int iEta : {0, 3})
-      myDraw (h_strange_rate[iSys][iWP][iDR][iEta], colors[iEta], kOpenSquare, 1.0);
 
     for (int iEta : {0, 3})
       myDraw (h_primary_rate[iSys][iWP][iDR][iEta], colors[iEta], kOpenCircle, 1.0);
@@ -1240,7 +1242,7 @@ void PlotTrackingPerformance () {
     yax->SetTitle ("#it{p}_{T}^{ch} [GeV]");
     zax->SetTitle ("Primary Fraction");
 
-    const double zmin = 0.5;
+    const double zmin = 0.8;
     const double zmax = 1;
 
     h2->SetLineWidth (0);

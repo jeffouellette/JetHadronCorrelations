@@ -293,7 +293,7 @@ bool MakeResponseMatrix (const char* directory,
   // for tracking corections
   TH2D** h2_trk_eff = LoadTrackingEfficiency ();
   TH1D** h_trk_pur = LoadTrackingPurity ();
-  TF1** f_trk_pur = LoadTrackingPurityFuncs ();
+  TF1** f_trk_pur = LoadTrackingPurityFuncs (Ispp () || DoJetPrimFracVar () ? true : false);
 
 
   // for MC reweighting to data
@@ -613,10 +613,16 @@ bool MakeResponseMatrix (const char* directory,
       // correlate charged particles with this jet  
       for (int iTrk = 0; iTrk < trk_n; iTrk++) {
 
-        const bool isTruthMatched = (trk_prob_truth[iTrk] > 0.5);
+        //const bool isTruthMatched = (trk_prob_truth[iTrk] > 0.5);
 
-        if (!isTruthMatched)
-          continue;
+        //const bool isFake = !isTruthMatched;
+
+        //const bool isSecondary = isTruthMatched && (trk_truth_barcode[iTrk] <= minBarcode || maxBarcode <= trk_truth_barcode[iTrk]);
+
+        //const bool isPrimary = !isFake && !isSecondary;
+
+        //if (!isPrimary)
+        //  continue;
 
         if (!MeetsTrackCuts (iTrk, nTrkWPVar))
           continue; // cut on bad quality tracks

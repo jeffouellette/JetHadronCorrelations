@@ -84,6 +84,7 @@ TString ToTString (const SystFlag& sFlag) {
     case SystFlag::TrkEffVar:                   return TString ("TrkEffVar");
     case SystFlag::FakeRateVar:                 return TString ("FakeRateVar");
     case SystFlag::PrimFitVar:                  return TString ("PrimFitVar");
+    case SystFlag::JetPrimFracVar:              return TString ("JetPrimFracVar");
     case SystFlag::PartSpcVar:                  return TString ("PartSpcVar");
     case SystFlag::FcalCentVar:                 return TString ("FcalCentVar");
     case SystFlag::FineFcalCentVar:             return TString ("FineFcalCentVar");
@@ -368,6 +369,12 @@ bool DoFakeRateVar (const SystFlag& sFlag) {
 
 bool DoPrimFitVar (const SystFlag& sFlag) {
   return sFlag == SystFlag::PrimFitVar;
+}
+
+
+
+bool DoJetPrimFracVar (const SystFlag& sFlag) {
+  return sFlag == SystFlag::JetPrimFracVar;
 }
 
 
@@ -668,6 +675,12 @@ bool DoFakeRateVar () {
 
 bool DoPrimFitVar () {
   return DoPrimFitVar (systFlag);
+}
+
+
+
+bool DoJetPrimFracVar () {
+  return DoJetPrimFracVar (systFlag);
 }
 
 
@@ -1802,7 +1815,7 @@ TH1D** LoadTrackingPurity () {
 /**
  * Returns array of functions that fit the tracking purity.
  */
-TF1** LoadTrackingPurityFuncs () {
+TF1** LoadTrackingPurityFuncs (const bool usePPFrac) {
   TString fname = Form ("%s/aux/TrackingPerformance.root", workPath.Data ());
   std::cout << "Trying to resolve tracking performance file in " << fname.Data () << std::endl;
   TFile* infile = new TFile (fname, "read");
@@ -1810,8 +1823,9 @@ TF1** LoadTrackingPurityFuncs () {
   const std::string wp = (DoHITightVar () ? "trk_HItight" : (DoHILooseVar () ? "trk_HIloose" : "trk_TightPrimary"));
   //const int iMult = nMultBins-1;
   const int iDR = 3;
-  const std::string sys = Ispp () ? "pp" : "pPb";
-  //const std::string sys = "pp";
+  const std::string sys = usePPFrac ? "pp" : "pPb";
+  //const std::string sys = Ispp () ? "pp" : "pPb";
+  //const std::string sys = (DoJetPrimFracVar () ? "pPb" : "pp");
 
   TF1** f_trk_pur = Get1DArray <TF1*> (nEtaTrkBins);
 
@@ -1951,7 +1965,8 @@ void MultiplyByTF1 (TH1D* h, TF1* f, const float mult) {
     //  sf = 1-mult + mult*sf;//mult * (sf - 1) + 1;
     //else
     //  sf = 1-mult + mult*sf;//1 - mult * (1 - sf);
-    const float sf = 1-mult + mult * f->Eval (h->GetBinCenter (iX));
+    const float sf = 1-mult + mult * f->Eval (h->GetBinCenter (iX)); // check: if mult=0.5 and f->Eval()=1.1, then sf=1-0.5+0.5*1.1=0.5+0.55=1.05.
+                                                                     // note that if f evals to 0 when it should be ~1, then sf=1-0.5=0.5 incorrectly!
     h->SetBinContent (iX, h->GetBinContent (iX) * sf);
     h->SetBinError (iX, h->GetBinError (iX) * sf);
   }
@@ -1969,7 +1984,8 @@ void DivideByTF1 (TH1D* h, TF1* f, const float mult) {
     //  sf = 1-mult + mult*sf;//mult * (sf - 1) + 1;
     //else
     //  sf = 1-mult + mult*sf;//1 - mult * (1 - sf);
-    const float sf = 1-mult + mult * f->Eval (h->GetBinCenter (iX));
+    const float sf = 1-mult + mult * f->Eval (h->GetBinCenter (iX)); // check: if mult=0.5 and f->Eval()=1.1, then sf=1-0.5+0.5*1.1=0.5+0.55=1.05.
+                                                                     // note that if f evals to 0 when it should be ~1, then sf=1-0.5=0.5 incorrectly!
     h->SetBinContent (iX, h->GetBinContent (iX) / sf);
     h->SetBinError (iX, h->GetBinError (iX) / sf);
   }
