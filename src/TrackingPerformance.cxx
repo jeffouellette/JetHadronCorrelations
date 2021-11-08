@@ -280,7 +280,7 @@ bool TrackingPerformance (const char* directory,
 
   for (int iWP = 0; iWP < (int)trackWPs.size (); iWP++) {
 
-    h_truth_matching_prob[iWP] = new TH1D (Form ("h_truth_matching_prob_%s_%s", sys.Data (), trackWPNames[iWP].c_str ()), ";Truth matching prob.;N_{ch}^{rec}", 200, 0, 1);
+    h_truth_matching_prob[iWP] = new TH1D (Form ("h_truth_matching_prob_%s%s_%s", sys.Data (), IsHijing () ? "_Hijing" : "", trackWPNames[iWP].c_str ()), ";Truth matching prob.;N_{ch}^{rec}", 200, 0, 1);
     h_truth_matching_prob[iWP]->Sumw2 ();
 
     for (int iDR = 0; iDR < nDRBins; iDR++) {

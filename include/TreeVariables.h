@@ -541,7 +541,7 @@ const std::vector <bool*> trackWPs = {trk_TightPrimary, trk_HITight, trk_HILoose
 const std::vector <std::string> trackWPStrs = {"TightPrimary", "HITight", "HILoose"};
 
 // Anti-kT R=0.2 Truth Jets info
-const static int max_akt2_truth_jet_n = 40;
+const static int max_akt2_truth_jet_n = 200;
 int akt2_truth_jet_n;
 float akt2_truth_jet_pt[max_akt2_truth_jet_n];
 float akt2_truth_jet_eta[max_akt2_truth_jet_n];
@@ -549,7 +549,7 @@ float akt2_truth_jet_phi[max_akt2_truth_jet_n];
 float akt2_truth_jet_e[max_akt2_truth_jet_n];
 
 // Anti-kT R=0.4 Truth Jets info
-const static int max_akt4_truth_jet_n = 40;
+const static int max_akt4_truth_jet_n = 200;
 int akt4_truth_jet_n;
 float akt4_truth_jet_pt[max_akt4_truth_jet_n];
 float akt4_truth_jet_eta[max_akt4_truth_jet_n];

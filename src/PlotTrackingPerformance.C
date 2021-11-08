@@ -63,7 +63,7 @@ TF1* DoPurityFit (TH1D* h, const int degree, const int nderiv, const float seedC
 
   const int ndf = pff.NDF ();
 
-  TF1* fit = new TF1 ("ftemp", &pff, 0.5, 150, ndf);
+  TF1* fit = new TF1 (fname.c_str (), &pff, 0.4, 150, ndf);
 
   TH1D* hf = (TH1D*) h->Clone ("hf");
 
@@ -1123,6 +1123,104 @@ void PlotTrackingPerformance () {
 
     c->SaveAs (Form ("%s/Plots/TrackingPerformance/PuritySummary_DR_%s.pdf", workPath.Data (), iSys == 0 ? "pp" : "pPb"));
   } // end loop over iSys
+
+
+  for (int iWPhere = 0; iWPhere < trackWPs.size (); iWPhere++) {
+  //{ const short iWPhere = iWP;
+    for (int iSys : systems) {
+
+      const int iDR = nDRBins-1;
+      const char* cname = Form ("c_pur_sum_%s_%s", iSys == 0 ? "pp" : "pPb", trackWPNames[iWPhere].c_str ());
+
+      TCanvas* c = new TCanvas (cname, "", 800, 800);
+
+      const double lMargin = 0.15;
+      const double rMargin = 0.04;
+      const double bMargin = 0.15;
+      const double tMargin = 0.04;
+
+      c->SetLeftMargin (lMargin);
+      c->SetRightMargin (rMargin);
+      c->SetBottomMargin (bMargin);
+      c->SetTopMargin (tMargin);
+
+      c->SetLogx ();
+
+      TH1D* htemp = new TH1D ("htemp", "", 1, pTchBins[0], pTchBins[nPtchBins]); 
+      htemp->SetBinContent (1, 1);
+
+      TAxis* xax = htemp->GetXaxis ();
+      TAxis* yax = htemp->GetYaxis ();
+
+      xax->SetTitle ("#it{p}_{T}^{ch} [GeV]");
+      xax->SetTitleOffset (0.9 * xax->GetTitleOffset ());
+      xax->SetLabelSize (0);
+
+      yax->SetTitle ("Primary Fraction");
+      yax->SetLabelFont (43);
+      yax->SetLabelSize (32);
+      yax->SetLabelOffset (1.8 * yax->GetLabelOffset ());
+      const double ymin = 0.82;
+      const double ymax = 1.06;
+      yax->SetRangeUser (ymin, ymax);
+
+      htemp->SetLineWidth (1);
+      htemp->SetLineStyle (2);
+
+      htemp->DrawCopy ("hist");
+      SaferDelete (&htemp);
+
+      tl->SetTextFont (43);
+      tl->SetTextSize (32);
+      tl->SetTextAlign (21);
+
+      const double yoff = ymin - 0.04 * (ymax-ymin) / (1.-tMargin-bMargin);      
+      tl->DrawLatex (0.4,  yoff, "0.4");
+      tl->DrawLatex (0.7,  yoff, "0.7");
+      tl->DrawLatex (1,  yoff, "1");
+      tl->DrawLatex (2,  yoff, "2");
+      tl->DrawLatex (3,  yoff, "3");
+      tl->DrawLatex (4,  yoff, "4");
+      tl->DrawLatex (5,  yoff, "5");
+      tl->DrawLatex (6,  yoff, "6");
+      tl->DrawLatex (7,  yoff, "7");
+      tl->DrawLatex (10, yoff, "10");
+      tl->DrawLatex (20, yoff, "20");
+      tl->DrawLatex (30, yoff, "30");
+      tl->DrawLatex (40, yoff, "40");
+      tl->DrawLatex (60, yoff, "60");
+      //tl->DrawLatex (80, yoff, "80");
+      tl->DrawLatex (100, yoff, "100");
+
+      for (int iEta = 0; iEta < nEtaTrkBins; iEta++) {
+        myDraw (h_primary_rate[iSys][iWPhere][iDR][iEta], colors[iEta], kOpenCircle, 0.8);
+        //myDraw (gf_primary_rate[iSys][iWPhere][iDR][iEta], colors[iEta], kDot, 1.0, 1, 1, "L");
+        TF1* f = f_primary_rate[iSys][iWPhere][iDR][iEta];
+        if (f != nullptr) {
+          //f->SetRange (0.4, 150);
+          myDraw (f, colors[iEta], 1, 1);
+          //SaferDelete (&f);
+        }
+      }
+
+      tl->SetTextColor (kBlack);
+      tl->SetTextAlign (11);
+
+      tl->SetTextSize (28);
+      tl->DrawLatexNDC (0.22, 0.89, "#bf{#it{ATLAS}} Simulation Internal");      
+      tl->SetTextSize (24);
+      tl->DrawLatexNDC (0.22, 0.85, iSys == 0 ? "Pythia8 #it{pp}, #sqrt{s} = 5.02 TeV" : "Hijing #it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV");
+      tl->DrawLatexNDC (0.22, 0.81, Form ("%s tracks", trackWPStrs[iWPhere].c_str ()));
+
+      tl->SetTextSize (18);
+      tl->SetTextAlign (21);
+      tl->DrawLatexNDC (0.705, 0.37, "Primaries");
+      for (int iEta = 0; iEta < nEtaTrkBins; iEta++)
+        myLineText2 (0.74, 0.34-iEta*0.036, colors[iEta], kOpenCircle, Form ("%g < |#eta| < %g", etaTrkBins[iEta], etaTrkBins[iEta+1]), 1.2, 0.026, true);
+
+      c->SaveAs (Form ("%s/Plots/TrackingPerformance/PuritySummary_%s_%s.pdf", workPath.Data (), iSys == 0 ? "pp" : "pPb", trackWPNames[iWPhere].c_str ()));
+    } // end loop over iSys
+  } // end loop over iWPhere      
 
 
 

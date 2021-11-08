@@ -14,8 +14,8 @@ declare -a mcvardirs=("Nominal" "JESVar0" "JESVar1" "JESVar2" "JESVar3" "JESVar4
 
 #declare -a mcmixvardirs=("Nominal" "MixCatVar2" "MixCatVar6")
 
-#declare -a sigmixdirs=("JetsHists" "MixedHists")
-declare -a sigmixdirs=("MixedHists")
+declare -a sigmixdirs=("JetsHists" "MixedHists")
+#declare -a sigmixdirs=("MixedHists")
 
 
 
