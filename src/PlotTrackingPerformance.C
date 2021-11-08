@@ -63,7 +63,7 @@ TF1* DoPurityFit (TH1D* h, const int degree, const int nderiv, const float seedC
 
   const int ndf = pff.NDF ();
 
-  TF1* fit = new TF1 (fname.c_str (), &pff, 0.4, 150, ndf);
+  TF1* fit = new TF1 (fname.c_str (), &pff, 0.5, 150, ndf);
 
   TH1D* hf = (TH1D*) h->Clone ("hf");
 
@@ -77,7 +77,7 @@ TF1* DoPurityFit (TH1D* h, const int degree, const int nderiv, const float seedC
   }
   mean = mean / den;
 
-  int bin1 = hf->FindBin (0.5+0.001);
+  //const int bin1 = hf->FindBin (0.5+0.001);
 
   fit->SetParameter (0, seedConst);//hf->GetBinCenter (hf->GetNbinsX ()));
   fit->SetParameter (1, mean);//hf->GetBinContent (bin1+1));
@@ -87,7 +87,7 @@ TF1* DoPurityFit (TH1D* h, const int degree, const int nderiv, const float seedC
   hf->Fit (fit, "RN0Q");
   SaferDelete (&hf);
 
-  if (fit->GetChisquare () / fit->GetNDF () > 4) {//2.5e-5 * 3*3 * h->GetNbinsX ()) {
+  if (fit->GetChisquare () / fit->GetNDF () > 2) {//2.5e-5 * 3*3 * h->GetNbinsX ()) {
     std::cout << "--> Fit didn't work for " << fname << ", chi2/ndf = " << fit->GetChisquare () << " / " << fit->GetNDF () << std::endl;
     if (degree < 10) {
       std::cout << "  |-->   Trying again with a degree-" << degree+1 << " polynomial" << std::endl;
@@ -98,7 +98,6 @@ TF1* DoPurityFit (TH1D* h, const int degree, const int nderiv, const float seedC
       std::cout << "  |--> Fit failed, please investigate!" << std::endl;
     }
   }
-    
 
   return fit;
 }
@@ -468,11 +467,13 @@ void PlotTrackingPerformance () {
 
         for (int iEta = 0; iEta < nEtaTrkBins; iEta++) {
 
-          f_primary_rate[iSys][iWP][iDR][iEta] = DoPurityFit (h_primary_rate[iSys][iWP][iDR][iEta], iWP > 0 ? 4 : 6, 2, iWP > 0 ? 150 : 20, iWP > 0 ? 0.001 : 0.005);
-          gf_primary_rate[iSys][iWP][iDR][iEta] = EvalFunction (Form ("gf_primary_rate_%s_%s_iDR%i_iEta%i", sys.Data (), trackWPNames[iWP].c_str (), iDR, iEta), f_primary_rate[iSys][iWP][iDR][iEta], 0.4, 150, 10000);
-          
-          f_primary_rate_fakes_p100[iSys][iWP][iDR][iEta] = DoPurityFit (h_primary_rate_fakes_p100[iSys][iWP][iDR][iEta], iWP > 0 ? 4 : 6, 2, iWP > 0 ? 150 : 20, iWP > 0 ? 0.001 : 0.005);
-          gf_primary_rate_fakes_p100[iSys][iWP][iDR][iEta] = EvalFunction (Form ("gf_primary_rate_fakes_p100_%s_%s_iDR%i_iEta%i", sys.Data (), trackWPNames[iWP].c_str (), iDR, iEta), f_primary_rate_fakes_p100[iSys][iWP][iDR][iEta], 0.4, 150, 10000);
+          TF1* f = DoPurityFit (h_primary_rate[iSys][iWP][iDR][iEta], iWP > 0 ? 4 : 6, 2, iWP > 0 ? 100 : 20, iWP > 0 ? 0.001 : 0.005);
+          gf_primary_rate[iSys][iWP][iDR][iEta] = EvalFunction (Form ("gf_primary_rate_%s_%s_iDR%i_iEta%i", sys.Data (), trackWPNames[iWP].c_str (), iDR, iEta), f, 0.4, 150, 10000);
+          f_primary_rate[iSys][iWP][iDR][iEta] = f;
+
+          f = DoPurityFit (h_primary_rate_fakes_p100[iSys][iWP][iDR][iEta], iWP > 0 ? 4 : 6, 2, iWP > 0 ? 100 : 20, iWP > 0 ? 0.001 : 0.005);; 
+          gf_primary_rate_fakes_p100[iSys][iWP][iDR][iEta] = EvalFunction (Form ("gf_primary_rate_fakes_p100_%s_%s_iDR%i_iEta%i", sys.Data (), trackWPNames[iWP].c_str (), iDR, iEta), f, 0.4, 150, 10000);
+          f_primary_rate_fakes_p100[iSys][iWP][iDR][iEta] = f;
 
         } // end loop over iEta
 
