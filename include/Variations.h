@@ -26,12 +26,13 @@ std::vector <TString> variations = {
   //"FcalCentVar",
   //"FineFcalCentVar",
 
+
   "MixCatVar1",
   "MixCatVar2",
   "MixCatVar3",
 
   //"NonClosureVar",
-/*
+
   "JESVar0",
   "JESVar1",
   "JESVar2",
@@ -52,7 +53,8 @@ std::vector <TString> variations = {
   "JESVar17",
   "JESVar18",
   "JESVar19"
-  //"JESVar20",*/
+  //"JESVar20",
+
 
   //"MCTruthJetsTruthParts",     // Truth-level jets and truth-level charged particles
   //"MCRecoJetsTruthParts",       // Reco-level jets and truth-level charged particles
@@ -103,6 +105,7 @@ std::set <TString> dataVariations = {
   "TrkEffVar",
   "FakeRateVar",
   "PrimFitVar",
+  "JetPrimFracVar",
   "PartSpcVar",
 
   "MixCatVar1",
@@ -246,7 +249,7 @@ std::map <TString, TString> varFullNames = {
   {"TrkEffVar",         "Tracking efficiency"},
   {"FakeRateVar",       "Fake rate"},
   {"PrimFitVar",        "Primary fraction fit"},
-  {"JetPrimFracVar",    "Jet-sample primary fraction"},
+  {"JetPrimFracVar",    "Jet vs. MB primaries"},
   {"PartSpcVar",        "Particle species"},
 
   {"FcalCentVar",       "FCal-based centrality"},
@@ -266,31 +269,31 @@ std::map <TString, TString> varFullNames = {
   {"MixCatVar2",        "Mixing variation 2"},
   {"MixCatVar3",        "Mixing variation 3"},
 
-  {"JESVar0",           "JET_EtaIntercalibration_Modelling"},
-  {"JESVar1",           "JET_EtaIntercalibration_TotalStat"},
-  {"JESVar2",           "JET_EtaIntercalibration_NonClosure_highE"},
-  {"JESVar3",           "JET_EtaIntercalibration_NonClosure_negEta"},
-  {"JESVar4",           "JET_EtaIntercalibration_NonClosure_posEta"},
-  {"JESVar5",           "JET_PunchThrough_MC16"},
-  {"JESVar6",           "JET_EffectiveNP_1"},
-  {"JESVar7",           "JET_EffectiveNP_2"},
-  {"JESVar8",           "JET_EffectiveNP_3"},
-  {"JESVar9",           "JET_EffectiveNP_4"},
-  {"JESVar10",          "JET_EffectiveNP_5"},
-  {"JESVar11",          "JET_EffectiveNP_6"},
-  {"JESVar12",          "JET_EffectiveNP_7"},
-  {"JESVar13",          "JET_EffectiveNP_8restTerm"},
-  {"JESVar14",          "JET_SingleParticle_HighPt"},
-  {"JESVar15",          "JET_RelativeNonClosure_MC16"},
-  //{"JESVar16",          "JET_EtaIntercalibration_NonClosure_2018data"},
+  {"JESVar0",           "EtaIntercalibration_Modelling"},
+  {"JESVar1",           "EtaIntercalibration_TotalStat"},
+  {"JESVar2",           "EtaIntercalibration_NonClosure_highE"},
+  {"JESVar3",           "EtaIntercalibration_NonClosure_negEta"},
+  {"JESVar4",           "EtaIntercalibration_NonClosure_posEta"},
+  {"JESVar5",           "PunchThrough_MC16"},
+  {"JESVar6",           "EffectiveNP_1"},
+  {"JESVar7",           "EffectiveNP_2"},
+  {"JESVar8",           "EffectiveNP_3"},
+  {"JESVar9",           "EffectiveNP_4"},
+  {"JESVar10",          "EffectiveNP_5"},
+  {"JESVar11",          "EffectiveNP_6"},
+  {"JESVar12",          "EffectiveNP_7"},
+  {"JESVar13",          "EffectiveNP_8restTerm"},
+  {"JESVar14",          "SingleParticle_HighPt"},
+  {"JESVar15",          "RelativeNonClosure_MC16"},
+  //{"JESVar16",          "EtaIntercalibration_NonClosure_2018data"},
   {"JESVar17",          "Cross-calibration"},
   {"JESVar18",          "Flavor-dep. response"},
   {"JESVar19",          "Flavor fraction"},
   //{"JESVar20",          "R-scan"},
 
-  {"Mixing",            "Total mixing"},
-  {"Tracking",          "Total tracking"},
-  {"Jets",              "Total jets"}
+  {"Mixing",            "#bf{Total mixing}"},
+  {"Tracking",          "#bf{Total tracking}"},
+  {"Jets",              "#bf{Total jets}"}
 };
 
 

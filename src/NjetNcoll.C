@@ -35,12 +35,13 @@ TLatex* tl = new TLatex ();
 
 void NjetNcoll () {
 
-  TFile* outFile = new TFile (Form ("%s/PeripheralStudy/NjetNcoll.root", rootPath.Data ()), "recreate");
+  TFile* outFile = new TFile (Form ("%s/NjetNcoll.root", rootPath.Data ()), "recreate");
 
   float zdcE = 0, fcalE = 0;
   int jet_n = 0;
   float* jet_pt = new float[40];
   float* jet_eta = new float[40];
+  bool jetTrig = false;
 
   const float sigmapp = 67600; // in µb
 
@@ -62,26 +63,31 @@ void NjetNcoll () {
   }
 
 
+  TChain* pPbTree = new TChain ("pPbTree", "pPbTree");
   for (short iPtJInt : {0, 1}) {
 
     const float minJetPt = (iPtJInt == 0 ? 30 : 60);
 
-    TChain* pPbTree = new TChain ("pPbTree", "pPbTree");
     {
-      const TString inFilePattern = Form ("%s/Trees/%s/Nominal/data16_5TeV_iCent*.root", rootPath.Data (), iPtJInt == 0 ? "MinBias" : "J50");
+      const TString inFilePattern = Form ("%s/Trees/%s/data16_5TeV_iCent*.root", rootPath.Data (), iPtJInt == 0 ? "MinBias" : "J50");
       std::cout << "Reading " << inFilePattern.Data () << std::endl;
       pPbTree->Reset ();
-      pPbTree->Add (Form ("%s/Trees/%s/Nominal/data16_5TeV_iCent0.root", rootPath.Data (), iPtJInt == 0 ? "MinBias" : "J50"));
-      pPbTree->Add (Form ("%s/Trees/%s/Nominal/data16_5TeV_iCent1.root", rootPath.Data (), iPtJInt == 0 ? "MinBias" : "J50"));
-      pPbTree->Add (Form ("%s/Trees/%s/Nominal/data16_5TeV_iCent2.root", rootPath.Data (), iPtJInt == 0 ? "MinBias" : "J50"));
-      pPbTree->Add (Form ("%s/Trees/%s/Nominal/data16_5TeV_iCent3.root", rootPath.Data (), iPtJInt == 0 ? "MinBias" : "J50"));
-      pPbTree->Add (Form ("%s/Trees/%s/Nominal/data16_5TeV_iCent4.root", rootPath.Data (), iPtJInt == 0 ? "MinBias" : "J50"));
+      pPbTree->Add (Form ("%s/Trees/%s/data16_5TeV_iCent0.root", rootPath.Data (), iPtJInt == 0 ? "MinBias" : "J50"));
+      pPbTree->Add (Form ("%s/Trees/%s/data16_5TeV_iCent1.root", rootPath.Data (), iPtJInt == 0 ? "MinBias" : "J50"));
+      pPbTree->Add (Form ("%s/Trees/%s/data16_5TeV_iCent2.root", rootPath.Data (), iPtJInt == 0 ? "MinBias" : "J50"));
+      pPbTree->Add (Form ("%s/Trees/%s/data16_5TeV_iCent3.root", rootPath.Data (), iPtJInt == 0 ? "MinBias" : "J50"));
+      pPbTree->Add (Form ("%s/Trees/%s/data16_5TeV_iCent4.root", rootPath.Data (), iPtJInt == 0 ? "MinBias" : "J50"));
 
       pPbTree->SetBranchAddress ("fcal_et_Pb",         &fcalE);
       pPbTree->SetBranchAddress ("zdc_calibE_Pb",      &zdcE);
       pPbTree->SetBranchAddress ("akt4_hi_jet_n",      &jet_n);
       pPbTree->SetBranchAddress ("akt4_hi_jet_pt",     jet_pt);
       pPbTree->SetBranchAddress ("akt4_hi_jet_eta",    jet_eta);
+
+      if (iPtJInt == 1)
+        pPbTree->SetBranchAddress ("jetTrig",          &jetTrig);
+      else
+        jetTrig = true;
 
       const long nEvts = pPbTree->GetEntries ();
       for (long iEvt = 0; iEvt < nEvts; iEvt++) {
@@ -91,6 +97,9 @@ void NjetNcoll () {
         pPbTree->GetEntry (iEvt);
 
         if (zdcE == 0)
+          continue;
+
+        if (iPtJInt == 1 && !jetTrig)
           continue;
 
         short iCent = 0;
@@ -124,7 +133,7 @@ void NjetNcoll () {
         //  iCent = 6; // 0-5%
 
         for (short iJet = 0; iJet < jet_n; iJet++) {
-          if (jet_pt[iJet] > minJetPt && std::fabs (jet_eta[iJet] - yboost) < 2.0)
+          if (jet_pt[iJet] > minJetPt)// && std::fabs (jet_eta[iJet] - yboost) < 2.0)
             jet_counts[iPtJInt][iCent] = jet_counts[iPtJInt][iCent] + 1;
         }
       }
@@ -133,7 +142,7 @@ void NjetNcoll () {
 
 
     {
-      const TString inFileName = Form ("rootFiles/Trees/%s/Nominal/data17_5TeV.root", iPtJInt == 0 ? "MinBias" : "J50");
+      const TString inFileName = Form ("rootFiles/Trees/%s/data17_5TeV.root", iPtJInt == 0 ? "MinBias" : "J50");
       std::cout << "Reading " << inFileName.Data () << std::endl;
       TFile* inFile = new TFile (inFileName.Data (), "read");
       TTree* ppTree = (TTree*) inFile->Get ("ppTree");
@@ -142,6 +151,8 @@ void NjetNcoll () {
       ppTree->SetBranchAddress ("akt4_hi_jet_pt",     jet_pt);
       ppTree->SetBranchAddress ("akt4_hi_jet_eta",    jet_eta);
 
+      jetTrig = true;
+
       const long nEvts = ppTree->GetEntries ();
       for (long iEvt = 0; iEvt < nEvts; iEvt++) {
         if (nEvts > 100 && iEvt % (nEvts / 100) == 0)
@@ -149,8 +160,11 @@ void NjetNcoll () {
 
         ppTree->GetEntry (iEvt);
 
+        if (iPtJInt == 1 && !jetTrig)
+          continue;
+
         for (short iJet = 0; iJet < jet_n; iJet++) {
-          if (jet_pt[iJet] > minJetPt && std::fabs (jet_eta[iJet]) < 2.0)
+          if (jet_pt[iJet] > minJetPt)// && std::fabs (jet_eta[iJet]) < 2.0)
             jet_counts[iPtJInt][nCentBins] = jet_counts[iPtJInt][nCentBins] + 1;
         }
       }

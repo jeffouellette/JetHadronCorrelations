@@ -25,15 +25,15 @@ using namespace JetHadronCorrelations;
 
 void PeripheralStudy () {
 
-  //TString inFileName = Form ("%s/Trees/MinBias/Nominal/data16_5TeV_iCent0.root", rootPath.Data ());
+  //TString inFileName = Form ("%s/Trees/MinBias/data16_5TeV_iCent0.root", rootPath.Data ());
   //std::cout << "Reading " << inFileName.Data () << std::endl;
   //TFile* inFile = new TFile (inFileName.Data (), "read");
   //TTree* inTree = (TTree*) inFile->Get ("pPbTree");
 
-  TString inFilePattern = Form ("%s/Trees/MinBias/Nominal/data16_5TeV_iCent*.root", rootPath.Data ());
+  TString inFilePattern = Form ("%s/Trees/MinBias/data16_5TeV_iCent*.root", rootPath.Data ());
   std::cout << "Reading " << inFilePattern.Data () << std::endl;
   TChain* inTree = new TChain ("pPbTree", "pPbTree");
-  inTree->Add (Form ("%s/Trees/MinBias/Nominal/data16_5TeV_iCent*.root", rootPath.Data ()));
+  inTree->Add (Form (inFilePattern.Data (), rootPath.Data ()));
   
 
   int jet_n = 0;
@@ -78,7 +78,7 @@ void PeripheralStudy () {
     if (zdc_calibE_Pb > 18.0971) 
       continue;
 
-    bool is0nXn = (zdc_calibE_Pb > 0);
+    bool is0nXn = (zdc_calibE_Pb > 1); // at least 1 TeV of energy
 
     bool has30GeVJet = (leading_jet >= 0 && jet_pt[leading_jet] >= 30);
 
@@ -102,7 +102,7 @@ void PeripheralStudy () {
   }
 
 
-  TString outFileName = Form ("%s/PeripheralStudy/MinBias.root", rootPath.Data ());
+  TString outFileName = Form ("%s/PeripheralStudy.root", rootPath.Data ());
   TFile* outFile = new TFile (outFileName.Data (), "recreate");
 
   h_sumGaps_Pb_0nXn->Write ();

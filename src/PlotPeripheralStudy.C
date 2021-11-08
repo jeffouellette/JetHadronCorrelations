@@ -25,7 +25,7 @@ using namespace JetHadronCorrelations;
 
 void PlotPeripheralStudy () {
 
-  TString inFileName = Form ("%s/PeripheralStudy/MinBias.root", rootPath.Data ());
+  TString inFileName = Form ("%s/PeripheralStudy.root", rootPath.Data ());
   TFile* inFile = new TFile (inFileName.Data (), "read");
 
   TH1D* h_sumGaps_Pb_0nXn = (TH1D*) inFile->Get ("h_sumGaps_Pb_0nXn");
@@ -100,13 +100,13 @@ void PlotPeripheralStudy () {
     myText (0.26, 0.780, kBlack, "#Sigma#it{E}_{ZDC}^{Pb} < 18.0971 TeV (#geq 80%)", 0.030);
     myText (0.33, 0.740, kBlack, "Selection", 0.030);
     myText (0.65, 0.740, kBlack, "Frac. w/ #Sigma#Delta#eta > 2.5", 0.030);
-    myLineText2 (0.33, 0.710, kRed, kFullCircle, "\"0nXn\"", 1.2, 0.030);
-    myLineText2 (0.33, 0.675, kBlue, kFullCircle, "\"0n0n\"", 1.2, 0.030);
-    myLineText2 (0.33, 0.640, kRed, kOpenCircle, "\"0nXn\" + #it{p}_{T}^{lead} > 30 GeV", 1.2, 0.030);
-    myLineText2 (0.33, 0.605, kBlue, kOpenCircle, "\"0n0n\" + #it{p}_{T}^{lead} > 30 GeV", 1.2, 0.030);
+    myLineText2 (0.33, 0.710, kRed, kFullCircle, "#Sigma#it{E}_{ZDC} > 1 TeV", 1.2, 0.030);
+    myLineText2 (0.33, 0.675, kRed, kOpenCircle, " + #it{p}_{T}^{lead} > 30 GeV", 1.2, 0.030);
+    myLineText2 (0.33, 0.640, kBlue, kFullCircle, "#Sigma#it{E}_{ZDC} < 1 TeV", 1.2, 0.030);
+    myLineText2 (0.33, 0.605, kBlue, kOpenCircle, " + #it{p}_{T}^{lead} > 30 GeV", 1.2, 0.030);
     myText (0.65, 0.705, kBlack, Form ("%.2f%%", upcFrac_0nXn*100), 0.030);
-    myText (0.65, 0.670, kBlack, Form ("%.2f%%", upcFrac_0n0n*100), 0.030);
-    myText (0.65, 0.635, kBlack, Form ("%.2f%%", upcFrac_0nXn_30GeVJet*100), 0.030);
+    myText (0.65, 0.670, kBlack, Form ("%.2f%%", upcFrac_0nXn_30GeVJet*100), 0.030);
+    myText (0.65, 0.635, kBlack, Form ("%.2f%%", upcFrac_0n0n*100), 0.030);
     myText (0.65, 0.600, kBlack, Form ("%.2f%%", upcFrac_0n0n_30GeVJet*100), 0.030);
 
     c->SaveAs ("Plots/Peripheral_SumGaps.pdf");
@@ -172,13 +172,13 @@ void PlotPeripheralStudy () {
     myText (0.26, 0.780, kBlack, "#Sigma#it{E}_{ZDC}^{Pb} < 18.0971 TeV (#geq 80%)", 0.030);
     myText (0.33, 0.740, kBlack, "Selection", 0.030);
     myText (0.65, 0.740, kBlack, "Frac. w/ #Sigma#Delta#eta > 2.5", 0.030);
-    myLineText2 (0.33, 0.710, kRed, kFullCircle, "\"0nXn\"", 1.2, 0.030);
-    myLineText2 (0.33, 0.675, kBlue, kFullCircle, "\"0n0n\"", 1.2, 0.030);
-    myLineText2 (0.33, 0.640, kRed, kOpenCircle, "\"0nXn\" + #it{p}_{T}^{lead} > 30 GeV", 1.2, 0.030);
-    myLineText2 (0.33, 0.605, kBlue, kOpenCircle, "\"0n0n\" + #it{p}_{T}^{lead} > 30 GeV", 1.2, 0.030);
+    myLineText2 (0.33, 0.710, kRed, kFullCircle, "#Sigma#it{E}_{ZDC} > 1 TeV", 1.2, 0.030);
+    myLineText2 (0.33, 0.675, kRed, kOpenCircle, " + #it{p}_{T}^{lead} > 30 GeV", 1.2, 0.030);
+    myLineText2 (0.33, 0.640, kBlue, kFullCircle, "#Sigma#it{E}_{ZDC} < 1 TeV", 1.2, 0.030);
+    myLineText2 (0.33, 0.605, kBlue, kOpenCircle, " + #it{p}_{T}^{lead} > 30 GeV", 1.2, 0.030);
     myText (0.65, 0.705, kBlack, Form ("%.2f%%", upcFrac_0nXn*100), 0.030);
-    myText (0.65, 0.670, kBlack, Form ("%.2f%%", upcFrac_0n0n*100), 0.030);
-    myText (0.65, 0.635, kBlack, Form ("%.2f%%", upcFrac_0nXn_30GeVJet*100), 0.030);
+    myText (0.65, 0.670, kBlack, Form ("%.2f%%", upcFrac_0nXn_30GeVJet*100), 0.030);
+    myText (0.65, 0.635, kBlack, Form ("%.2f%%", upcFrac_0n0n*100), 0.030);
     myText (0.65, 0.600, kBlack, Form ("%.2f%%", upcFrac_0n0n_30GeVJet*100), 0.030);
 
     c->SaveAs ("Plots/Peripheral_Cluster_SumGaps.pdf");

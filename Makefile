@@ -36,6 +36,9 @@ ProcessCorrelations : $(libraries) src/ProcessCorrelations.C
 ProcessUnfolding : $(libraries) src/ProcessUnfolding.C
 	$(CXX) $(CXXFLAGS) src/ProcessUnfolding.C $(LDFLAGS) $(libraries:%=-l%) $(algorithms:%=-l%) -o bin/ProcessUnfolding.exe
 
+PlotTrackingPerformance : $(libraries) src/PlotTrackingPerformance.C
+	$(CXX) $(CXXFLAGS) src/PlotTrackingPerformance.C $(LDFLAGS) $(libraries:%=-l%) $(algorithms:%=-l%) -o bin/PlotTrackingPerformance.exe
+
 AnalyzeTrackMomentumResolution : $(libraries) src/AnalyzeTrackMomentumResolution.C
 	$(CXX) $(CXXFLAGS) src/AnalyzeTrackMomentumResolution.C $(LDFLAGS) $(libraries:%=-l%) $(algorithms:%=-l%) -o bin/AnalyzeTrackMomentumResolution.exe
 

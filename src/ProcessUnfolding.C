@@ -56,7 +56,6 @@ short GetJetSpectraNIters (const short iPtJInt, const short iCent) {
 
 
 short GetTrkSpectraNIters (const short iPtJInt, const short iDir, const short iCent) {
-  //return GetJetSpectraNIters (iPtJInt, iCent);
   switch (iPtJInt) {
     case 0: // pTJ > 30 GeV
     switch (iDir) {
@@ -181,17 +180,12 @@ void ProcessUnfolding (const char* inFileTag, const char* outFileTag) {
 
 
   TGAE****  g_jet_trk_pt_ref_sig_syst         = Get3DArray <TGAE*> (nPtJBins, nDir, nVar);
-  TGAE****  g_jet_trk_pt_ref_unf_syst         = Get3DArray <TGAE*> (nPtJBins, nDir, nVar);
 
   TGAE***** g_jet_trk_pt_sig_syst             = Get4DArray <TGAE*> (nPtJBins, nDir, nZdcCentBins+1, nVar);
-  TGAE***** g_jet_trk_pt_unf_syst             = Get4DArray <TGAE*> (nPtJBins, nDir, nZdcCentBins+1, nVar);
-  TGAE***** g_jet_trk_pt_iaa_syst             = Get4DArray <TGAE*> (nPtJBins, nDir, nZdcCentBins+1, nVar);
 
 
-  TGAE****  g_jetInt_trk_pt_ref_sig_syst      = Get3DArray <TGAE*> (2, nDir, nVar);
   TGAE****  g_jetInt_trk_pt_ref_unf_syst      = Get3DArray <TGAE*> (2, nDir, nVar);
 
-  TGAE***** g_jetInt_trk_pt_sig_syst          = Get4DArray <TGAE*> (2, nDir, nZdcCentBins+1, nVar);
   TGAE***** g_jetInt_trk_pt_unf_syst          = Get4DArray <TGAE*> (2, nDir, nZdcCentBins+1, nVar);
   TGAE***** g_jetInt_trk_pt_iaa_syst          = Get4DArray <TGAE*> (2, nDir, nZdcCentBins+1, nVar);
 
@@ -202,17 +196,12 @@ void ProcessUnfolding (const char* inFileTag, const char* outFileTag) {
   TGAE***** g_jetInt_trk_dphi_iaa_syst        = Get4DArray <TGAE*> (2, nPtChSelections, nZdcCentBins+1, nVar);
 
 
-  TGAE****  g_jetInt_trk_pt_ref_sig_systTot   = Get3DArray <TGAE*> (2, nDir, 3);
   TGAE****  g_jetInt_trk_pt_ref_unf_systTot   = Get3DArray <TGAE*> (2, nDir, 3);
 
-  TGAE***** g_jetInt_trk_pt_sig_systTot       = Get4DArray <TGAE*> (2, nDir, nZdcCentBins+1, 3);
   TGAE***** g_jetInt_trk_pt_unf_systTot       = Get4DArray <TGAE*> (2, nDir, nZdcCentBins+1, 3);
   TGAE***** g_jetInt_trk_pt_iaa_systTot       = Get4DArray <TGAE*> (2, nDir, nZdcCentBins+1, 3);
 
  
-  TGAE****  g_jetInt_trk_dphi_ref_sig_systTot = Get3DArray <TGAE*> (2, nPtChSelections, 3);
-
-  TGAE***** g_jetInt_trk_dphi_sig_systTot     = Get4DArray <TGAE*> (2, nPtChSelections, nZdcCentBins+1, 3);
   TGAE***** g_jetInt_trk_dphi_iaa_systTot     = Get4DArray <TGAE*> (2, nPtChSelections, nZdcCentBins+1, 3);
 
 
@@ -230,7 +219,7 @@ void ProcessUnfolding (const char* inFileTag, const char* outFileTag) {
 
     const TString inFileName = Form ("%s/Results/ProcessCorrelations_%s.root", rootPath.Data (), inFileTag);
     std::cout << "Reading " << inFileName.Data () << std::endl;
-    TFile* inFile = new TFile (inFileName.Data (), "read");
+    inFile = new TFile (inFileName.Data (), "read");
 
 
     std::cout << "Reading in lots of histograms & graphs..." << std::endl;
@@ -352,6 +341,35 @@ void ProcessUnfolding (const char* inFileTag, const char* outFileTag) {
       } // end loop over iDir
 
     } // end loop over iPtJ
+
+
+    for (short iPtJInt : {0, 1}) {
+
+      const TString pTJInt = (iPtJInt == 0 ? "30GeV" : "60GeV");
+
+      for (short iPtCh = 0; iPtCh < nPtChSelections; iPtCh++) {
+
+        const TString ptch = pTChSelections[iPtCh].Data ();
+
+        for (short iVar = 0; iVar < nVar; iVar++) {
+
+          const TString var = variations[iVar];
+
+          g_jetInt_trk_dphi_ref_sig_syst[iPtJInt][iPtCh][iVar] = (TGAE*) inFile->Get (Form ("g_jetInt_trk_dphi_%s_ref_sig_syst_%s_%s",  ptch.Data (), pTJInt.Data (), var.Data ()));
+
+          for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
+
+            const TString cent = (iCent == nZdcCentBins ? "allCent" : Form ("iCent%i", iCent));
+
+            g_jetInt_trk_dphi_sig_syst[iPtJInt][iPtCh][iCent][iVar]  = (TGAE*) inFile->Get (Form ("g_jetInt_trk_dphi_%s_sig_syst_%s_%s_%s", ptch.Data (), cent.Data (), pTJInt.Data (), var.Data ()));
+
+          } // end loop over iCent
+
+        } // end loop over iVar
+
+      } // end loop over iPtCh
+
+    } // end loop over iPtJInt
     std::cout << "Done reading in histograms & graphs!" << std::endl;
 
   }
@@ -367,7 +385,7 @@ void ProcessUnfolding (const char* inFileTag, const char* outFileTag) {
   //////////////////////////////////////////////////////////////////////////////////////////////////// 
   std::cout << "Reading in response matrices..." << std::endl;
   {
-    TFile* inFile = new TFile (Form ("%s/MakeResponseMatrix/Nominal/allSamples.root", rootPath.Data ()), "read");
+    inFile = new TFile (Form ("%s/MakeResponseMatrix/Nominal/allSamples.root", rootPath.Data ()), "read");
 
     if (useJetWgts) rooUnfResp_jet_pt_ref = (RooUnfoldResponse*) inFile->Get ("rooUnfResp_jet_pt_ref_mc_wgts");
     else            rooUnfResp_jet_pt_ref = (RooUnfoldResponse*) inFile->Get ("rooUnfResp_jet_pt_ref_mc_fullClosure");
@@ -408,7 +426,7 @@ void ProcessUnfolding (const char* inFileTag, const char* outFileTag) {
   //////////////////////////////////////////////////////////////////////////////////////////////////// 
   std::cout << "Reading in closure study histograms & fit functions..." << std::endl;
   {
-    TFile* inFile = new TFile (Form ("%s/aux/MCClosureHists.root", workPath.Data ()), "read");
+    inFile = new TFile (Form ("%s/aux/MCClosureHists.root", workPath.Data ()), "read");
 
     for (short iPtJInt : {0, 1}) {
 
@@ -746,42 +764,42 @@ void ProcessUnfolding (const char* inFileTag, const char* outFileTag) {
 
 
 
-  //////////////////////////////////////////////////////////////////////////////////////////////////// 
-  // CORRECT HISTOGRAMS BY NON-CLOSURE FITS
-  //////////////////////////////////////////////////////////////////////////////////////////////////// 
-  std::cout << "Correcting by non-closure..." << std::endl;
-  for (short iDType = 0; iDType < 2; iDType++) {
+  ////////////////////////////////////////////////////////////////////////////////////////////////////// 
+  //// CORRECT HISTOGRAMS BY NON-CLOSURE FITS
+  ////////////////////////////////////////////////////////////////////////////////////////////////////// 
+  //std::cout << "Correcting by non-closure..." << std::endl;
+  //for (short iDType = 0; iDType < 2; iDType++) {
 
-    for (short iVar = 0; iVar < nVar; iVar++) {
+  //  for (short iVar = 0; iVar < nVar; iVar++) {
 
-      const TString var = variations[iVar];
+  //    const TString var = variations[iVar];
 
-      if ((variationsWithNoUnfold.count (var) > 0) || (iDType == 0 && dataVariations.count (var) == 0) || (iDType == 1 && mcVariations.count (var) + otherMCVariations.count (var) == 0))
-        continue;
+  //    if ((variationsWithNoUnfold.count (var) > 0) || (iDType == 0 && dataVariations.count (var) == 0) || (iDType == 1 && mcVariations.count (var) + otherMCVariations.count (var) == 0))
+  //      continue;
 
-      const float scaleFactor = (var == "NonClosureVar" ? 1.0 : 0.5); // for non-closure systematic correct by 100% of non-closure; nominal only corrects by 50%
+  //    const float scaleFactor = (var == "NonClosureVar" ? 1.0 : 0.5); // for non-closure systematic correct by 100% of non-closure; nominal only corrects by 50%
 
-      for (short iPtJInt : {0, 1}) {
+  //    for (short iPtJInt : {0, 1}) {
 
-        for (short iDir = 0; iDir < nDir; iDir++) {
+  //      for (short iDir = 0; iDir < nDir; iDir++) {
 
-          DivideByTF1 (h_jetInt_trk_pt_ref_unf[iDType][iPtJInt][iDir][iVar], f_jetInt_trk_pt_ref_unf_closure[iPtJInt][iDir], scaleFactor);
+  //        DivideByTF1 (h_jetInt_trk_pt_ref_unf[iDType][iPtJInt][iDir][iVar], f_jetInt_trk_pt_ref_unf_closure[iPtJInt][iDir], scaleFactor);
 
-          for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
+  //        for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
 
-            DivideByTF1 (h_jetInt_trk_pt_unf[iDType][iPtJInt][iDir][iCent][iVar], f_jetInt_trk_pt_unf_closure[iPtJInt][iDir][iCent], scaleFactor);
-            DivideByTF1 (h_jetInt_trk_pt_iaa[iDType][iPtJInt][iDir][iCent][iVar], f_jetInt_trk_pt_iaa_closure[iPtJInt][iDir][iCent], scaleFactor);
+  //          DivideByTF1 (h_jetInt_trk_pt_unf[iDType][iPtJInt][iDir][iCent][iVar], f_jetInt_trk_pt_unf_closure[iPtJInt][iDir][iCent], scaleFactor);
+  //          DivideByTF1 (h_jetInt_trk_pt_iaa[iDType][iPtJInt][iDir][iCent][iVar], f_jetInt_trk_pt_iaa_closure[iPtJInt][iDir][iCent], scaleFactor);
 
-          } // end loop over iCent
+  //        } // end loop over iCent
 
-        } // end loop over iDir
+  //      } // end loop over iDir
 
-      } // end loop over iPtJInt
+  //    } // end loop over iPtJInt
 
-    } // end loop over iVar
+  //  } // end loop over iVar
 
-  } // end loop over iDType
-  std::cout << "Finished correcting by non-closure!" << std::endl;
+  //} // end loop over iDType
+  //std::cout << "Finished correcting by non-closure!" << std::endl;
 
 
 
@@ -860,15 +878,16 @@ void ProcessUnfolding (const char* inFileTag, const char* outFileTag) {
             // allow some uncertainties to not cancel in the p+Pb / pp ratio by overwriting the current uncertainties
             if (variationsThatDontCancelInRatio.count (var) != 0) {
               ResetTGAEErrors (g_jetInt_trk_pt_iaa_syst[iPtJInt][iDir][iCent][iVar]);
-              AddRelErrorsInQuadrature (g_jetInt_trk_pt_iaa_syst[iPtJInt][iDir][iCent][iVar], g_jetInt_trk_pt_ref_sig_syst[iPtJInt][iDir][iVar], false, false);
-              AddRelErrorsInQuadrature (g_jetInt_trk_pt_iaa_syst[iPtJInt][iDir][iCent][iVar], g_jetInt_trk_pt_sig_syst[iPtJInt][iDir][iCent][iVar], false, false);
+              AddRelErrorsInQuadrature (g_jetInt_trk_pt_iaa_syst[iPtJInt][iDir][iCent][iVar], g_jetInt_trk_pt_ref_unf_syst[iPtJInt][iDir][iVar], false, false);
+              AddRelErrorsInQuadrature (g_jetInt_trk_pt_iaa_syst[iPtJInt][iDir][iCent][iVar], g_jetInt_trk_pt_unf_syst[iPtJInt][iDir][iCent][iVar], false, false);
             }
 
           } // end loop over iCent
 
         } // end loop over iDir
 
-        for (short iPtCh = 0; iPtCh < nPtChSelections; iPtCh++) {
+ 
+       for (short iPtCh = 0; iPtCh < nPtChSelections; iPtCh++) {
 
           for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
 

@@ -23,7 +23,7 @@ class PrimaryFractionFit {
 
   protected:
     int degree = 6; // maximum polynomial degree
-    int nderiv = 1; // number of continuous derivatives at transition to constant
+    int nderiv = 1; // number of continuous derivatives at transition to constant. nderiv=1 means only continuous (first derivative can be noncontinuous)
 
   public:
 

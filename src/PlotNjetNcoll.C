@@ -30,7 +30,7 @@ TLatex* tl = new TLatex ();
 
 void PlotNjetNcoll () {
 
-  TFile* inFile = new TFile (Form ("%s/PeripheralStudy/NjetNcoll.root", rootPath.Data ()), "read");
+  TFile* inFile = new TFile (Form ("%s/NjetNcoll.root", rootPath.Data ()), "read");
 
   TGAE** g_njet_ncoll = new TGAE*[2];
   TGAE** g_njet_ncoll_syst = new TGAE*[2];
@@ -123,12 +123,12 @@ void PlotNjetNcoll () {
     tl->SetTextSize (24);
     tl->DrawLatexNDC (0.55, 0.850, "#it{pp}, #sqrt{s} = 5.02 TeV");
     tl->DrawLatexNDC (0.55, 0.810, "#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV");
-    tl->DrawLatexNDC (0.55, 0.760, "#left|#eta_{CM}#right| < 2.0");
-    tl->DrawLatexNDC (0.55, 0.710, "20% ZDC percentiles");
+    //tl->DrawLatexNDC (0.55, 0.760, "#left|#eta_{CM}#right| < 2.0");
+    tl->DrawLatexNDC (0.55, 0.760, "20% ZDC percentiles");
     //tl->DrawLatexNDC (0.55, 0.710, "FCal percentiles");
 
-    mySimpleMarkerAndBoxAndLineText (0.62, 0.66, 1.4, 1001, systColors[0], 1.0, colors[0], kFullCircle, 1.6, "#it{p}_{T}^{jet} > 30 GeV", 0.028);
-    mySimpleMarkerAndBoxAndLineText (0.62, 0.61, 1.4, 1001, systColors[1], 1.0, colors[1], kFullCircle, 1.6, "#it{p}_{T}^{jet} > 60 GeV", 0.028);
+    mySimpleMarkerAndBoxAndLineText (0.62, 0.71, 1.4, 1001, systColors[0], 1.0, colors[0], kFullCircle, 1.6, "#it{p}_{T}^{jet} > 30 GeV", 0.028);
+    mySimpleMarkerAndBoxAndLineText (0.62, 0.66, 1.4, 1001, systColors[1], 1.0, colors[1], kFullCircle, 1.6, "#it{p}_{T}^{jet} > 60 GeV", 0.028);
 
     c->SaveAs ("Plots/NjetOverNcoll_vs_Ncoll.pdf");
   }
@@ -208,12 +208,12 @@ void PlotNjetNcoll () {
     tl->SetTextSize (24);
     tl->DrawLatexNDC (0.25, 0.850, "#it{pp}, #sqrt{s} = 5.02 TeV");
     tl->DrawLatexNDC (0.25, 0.810, "#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV");
-    tl->DrawLatexNDC (0.25, 0.760, "#left|#eta_{CM}#right| < 2.0");
-    tl->DrawLatexNDC (0.25, 0.710, "20% ZDC percentiles");
+    //tl->DrawLatexNDC (0.25, 0.760, "#left|#eta_{CM}#right| < 2.0");
+    tl->DrawLatexNDC (0.25, 0.760, "20% ZDC percentiles");
     //tl->DrawLatexNDC (0.25, 0.710, "FCal percentiles");
 
-    mySimpleMarkerAndBoxAndLineText (0.32, 0.66, 1.4, 1001, systColors[0], 1.0, colors[0], kFullCircle, 1.6, "#it{p}_{T}^{jet} > 30 GeV", 0.028);
-    mySimpleMarkerAndBoxAndLineText (0.32, 0.61, 1.4, 1001, systColors[1], 1.0, colors[1], kFullCircle, 1.6, "#it{p}_{T}^{jet} > 60 GeV", 0.028);
+    mySimpleMarkerAndBoxAndLineText (0.32, 0.71, 1.4, 1001, systColors[0], 1.0, colors[0], kFullCircle, 1.6, "#it{p}_{T}^{jet} > 30 GeV", 0.028);
+    mySimpleMarkerAndBoxAndLineText (0.32, 0.66, 1.4, 1001, systColors[1], 1.0, colors[1], kFullCircle, 1.6, "#it{p}_{T}^{jet} > 60 GeV", 0.028);
 
     c->SaveAs ("Plots/Njet_vs_Ncoll.pdf");
   }

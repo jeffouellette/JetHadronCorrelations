@@ -20,6 +20,8 @@
 #include "LocalUtilities.h"
 #include "PrimaryFractionFit.h"
 
+#include "AtlasStyle.h"
+
 using namespace JetHadronCorrelations;
 
 // Bin edge definitions: eta, pTch, pp/pPb.
@@ -52,7 +54,7 @@ void InvertRate (TH1* h) {
 
 
 
-TF1* DoPurityFit (TH1D* h, const int degree, const int nderiv) {
+TF1* DoPurityFit (TH1D* h, const int degree, const int nderiv, const float seedConst, const float minRelErr) {
   std::string fname = std::string (h->GetName ());
   fname.replace (fname.begin (), fname.begin () + 1, "f");
 
@@ -61,84 +63,69 @@ TF1* DoPurityFit (TH1D* h, const int degree, const int nderiv) {
 
   const int ndf = pff.NDF ();
 
-  TF1* fit = new TF1 (fname.c_str (), &pff, 0.5, 150, ndf);
+  TF1* fit = new TF1 ("ftemp", &pff, 0.5, 150, ndf);
+
+  TH1D* hf = (TH1D*) h->Clone ("hf");
 
   double mean = 0, den = 0;
-  for (int ix = 1; ix <= h->GetNbinsX (); ix++) {
-    mean += h->GetBinContent (ix);// * h->GetBinWidth (ix);
-    den += 1;//h->GetBinWidth (ix);
+  for (int ix = 1; ix <= hf->GetNbinsX (); ix++) {
+    mean += hf->GetBinContent (ix) * hf->GetBinWidth (ix);
+    den += hf->GetBinWidth (ix);
 
-    if (h->GetBinContent (ix) > 0 && h->GetBinError (ix) / h->GetBinContent (ix) < 0.005)
-      h->SetBinError (ix, 0.005*h->GetBinError (ix));
+    if (hf->GetBinContent (ix) > 0 && hf->GetBinError (ix) < minRelErr * hf->GetBinContent (ix))
+      hf->SetBinError (ix, minRelErr * hf->GetBinContent (ix));
   }
   mean = mean / den;
 
-  fit->SetParameter (0, h->GetBinCenter (h->GetNbinsX ()));
-  fit->SetParameter (1, mean);
+  int bin1 = hf->FindBin (0.5+0.001);
 
+  fit->SetParameter (0, seedConst);//hf->GetBinCenter (hf->GetNbinsX ()));
+  fit->SetParameter (1, mean);//hf->GetBinContent (bin1+1));
   for (int i = 2; i < ndf; i++)
-    fit->SetParameter (i, std::pow (0.1, i-nderiv));
+    fit->SetParameter (i, 0);//std::pow (0.1, i-nderiv));
 
-  h->Fit (fit, "RN0Q");
+  hf->Fit (fit, "RN0Q");
+  SaferDelete (&hf);
+
+  if (fit->GetChisquare () / fit->GetNDF () > 4) {//2.5e-5 * 3*3 * h->GetNbinsX ()) {
+    std::cout << "--> Fit didn't work for " << fname << ", chi2/ndf = " << fit->GetChisquare () << " / " << fit->GetNDF () << std::endl;
+    if (degree < 10) {
+      std::cout << "  |-->   Trying again with a degree-" << degree+1 << " polynomial" << std::endl;
+      SaferDelete (&fit);
+      fit = DoPurityFit (h, degree+1, nderiv, seedConst, minRelErr);
+    }
+    else {
+      std::cout << "  |--> Fit failed, please investigate!" << std::endl;
+    }
+  }
+    
 
   return fit;
 }
 
 
 
-//TF1* DoPurityFit (TH1D* h, double x0, const int nN, const int nD) {
-//  std::string fname = std::string (h->GetName ());
-//  fname.replace (fname.begin (), fname.begin () + 1, "f");
-//
-//  std::string fitParams[nN+1];
-//  fitParams[0] = "[0]";
-//
-//  for (int n = nD+1; n <= nN; n++) {
-//    fitParams[n] = "[" + std::to_string (n-nD) + "]";
-//  }
-//
-//  for (int n = nD; n >= 1; n--) {
-//
-//    if (n == 1)
-//      fitParams[n] = "(-(";
-//    else
-//      fitParams[n] = "(-1/" + std::to_string ((int) factorial (n)) + "*(";
-//
-//    bool needsPlus = false;
-//    for (int np = n+1; np <= nN; np++) {
-//      if (needsPlus)
-//        fitParams[n] = fitParams[n] + "+";
-//      fitParams[n] = fitParams[n] + std::to_string ((int) (factorial (np) / factorial (np-n))) + "*(log(" + std::to_string ((int) x0) + ")^" + std::to_string (np-n) + ")*";
-//      fitParams[n] = fitParams[n] + "(" + fitParams[np] + ")";
-//      needsPlus = true;
-//    }
-//
-//    fitParams[n] += "))";
-//  }
-//
-//  //for (int n = 0; n <= nN; n++) {
-//  //  std::cout << "  --> param " << n << " is " << fitParams[n] << std::endl;
-//  //}
-//
-//  std::string fitStr = fitParams[0];
-//  for (int n = 1; n <= nN; n++) {
-//    fitStr = fitStr + "+" + fitParams[n] + "*(log(x))^" + std::to_string (n);
-//  }
-//
-//  //std::cout << "  --> fit str = " << fitStr << std::endl;
-//
-//  TF1* fit = new TF1 (fname.c_str (), fitStr.c_str (), 0.5, 100);
-//
-//  h->Fit (fit, "RN0Q");
-//
-//  return fit;
-//}
+TGraph* EvalFunction (const TString name, TF1* f, const double xmin, const double xmax, const int npoints = 1000) {
+
+  double* bins = linspace (xmin, xmax, npoints-1);
+
+  TGraph* g = new TGraph ();
+  g->SetName (name.Data ());
+
+  for (int i = 0; i < npoints; i++) {
+    double x = bins[i];
+    double y = f->Eval (x);
+    g->SetPoint (i, x, y);
+  }
+
+  return g;
+}
 
 
 
 void PlotTrackingPerformance () {
 
-  TH1D*** h_truth_matching_prob = Get2DArray <TH1D*> (nSystems, 3);
+  TH1D*** h_truth_matching_prob = Get2DArray <TH1D*> (nSystems+1, 3);
 
   TH2D***** h2_truth_matched_primary_tracks = Get4DArray <TH2D*> (nSystems, nPIDs, trackWPs.size (), nMultBins);
   TH2D****  h2_truth_tracks                 = Get3DArray <TH2D*> (nSystems, nPIDs, nMultBins);
@@ -181,12 +168,31 @@ void PlotTrackingPerformance () {
   TH1D***** h_primary_rate              = Get4DArray <TH1D*> (nSystems, trackWPs.size (), nDRBins, nEtaTrkBins);
   TH1D***** h_primary_rate_fakes_p100   = Get4DArray <TH1D*> (nSystems, trackWPs.size (), nDRBins, nEtaTrkBins);
 
-  TF1***** f_primary_rate               = Get4DArray <TF1*> (nSystems, trackWPs.size (), nDRBins, nEtaTrkBins);
-  TF1***** f_primary_rate_fakes_p100    = Get4DArray <TF1*> (nSystems, trackWPs.size (), nDRBins, nEtaTrkBins);
+  TF1***** f_primary_rate                 = Get4DArray <TF1*> (nSystems, trackWPs.size (), nDRBins, nEtaTrkBins);
+  TF1***** f_primary_rate_fakes_p100      = Get4DArray <TF1*> (nSystems, trackWPs.size (), nDRBins, nEtaTrkBins);
+  TGraph***** gf_primary_rate             = Get4DArray <TGraph*> (nSystems, trackWPs.size (), nDRBins, nEtaTrkBins);
+  TGraph***** gf_primary_rate_fakes_p100  = Get4DArray <TGraph*> (nSystems, trackWPs.size (), nDRBins, nEtaTrkBins);
+
+  // eta-integrated plots to study the fake rate in jets.
+  TH1D**** h_fake_tracks_etaInt         = Get3DArray <TH1D*> (nSystems, trackWPs.size (), nDRBins);
+  TH1D**** h_secondary_tracks_etaInt    = Get3DArray <TH1D*> (nSystems, trackWPs.size (), nDRBins);
+  TH1D**** h_strange_tracks_etaInt      = Get3DArray <TH1D*> (nSystems, trackWPs.size (), nDRBins);
+  TH1D**** h_reco_tracks_etaInt         = Get3DArray <TH1D*> (nSystems, trackWPs.size (), nDRBins);
+  TH1D**** h_primary_tracks_etaInt      = Get3DArray <TH1D*> (nSystems, trackWPs.size (), nDRBins);
+
+  TH1D**** h_fake_rate_etaInt           = Get3DArray <TH1D*> (nSystems, trackWPs.size (), nDRBins);
+  TH1D**** h_secondary_rate_etaInt      = Get3DArray <TH1D*> (nSystems, trackWPs.size (), nDRBins);
+  TH1D**** h_strange_rate_etaInt        = Get3DArray <TH1D*> (nSystems, trackWPs.size (), nDRBins);
+  TH1D**** h_primary_rate_etaInt        = Get3DArray <TH1D*> (nSystems, trackWPs.size (), nDRBins);
 
 
   TFile* inFile = new TFile (Form ("%s/TrackingPerformance/Nominal/outFile.root", rootPath.Data ()), "read");
 
+  for (int iWP = 0; iWP < trackWPs.size (); iWP++) {
+
+    h_truth_matching_prob[nSystems][iWP] = (TH1D*) inFile->Get (Form ("h_truth_matching_prob_pPb_Hijing_%s", trackWPNames[iWP].c_str ()));
+
+  } // end loop over iWP
 
   for (int iSys : systems) {
 
@@ -279,6 +285,20 @@ void PlotTrackingPerformance () {
         h2_primary_tracks_fakes_p100[iSys][iWP][iDR]->Add (h2_fake_tracks[iSys][iWP][iDR], -2); // 100% increase of fake rate for systematics
         h2_primary_tracks_fakes_p100[iSys][iWP][iDR]->Add (h2_secondary_tracks[iSys][iWP][iDR], -1);
 
+        h_fake_tracks_etaInt[iSys][iWP][iDR] = (TH1D*) h2_fake_tracks[iSys][iWP][iDR]->ProjectionY (Form ("h_fake_tracks_etaInt_%s_%s_iDR%i", sys.Data (), trackWPNames[iWP].c_str (), iDR));
+        h_secondary_tracks_etaInt[iSys][iWP][iDR] = (TH1D*) h2_secondary_tracks[iSys][iWP][iDR]->ProjectionY (Form ("h_secondary_tracks_etaInt_%s_%s_iDR%i", sys.Data (), trackWPNames[iWP].c_str (), iDR));
+        h_strange_tracks_etaInt[iSys][iWP][iDR] = (TH1D*) h2_strange_tracks[iSys][iWP][iDR]->ProjectionY (Form ("h_strange_tracks_etaInt_%s_%s_iDR%i", sys.Data (), trackWPNames[iWP].c_str (), iDR));
+        h_reco_tracks_etaInt[iSys][iWP][iDR] = (TH1D*) h2_reco_tracks[iSys][iWP][iDR]->ProjectionY (Form ("h_reco_tracks_etaInt_%s_%s_iDR%i", sys.Data (), trackWPNames[iWP].c_str (), iDR));
+        h_primary_tracks_etaInt[iSys][iWP][iDR] = (TH1D*) h2_primary_tracks[iSys][iWP][iDR]->ProjectionY (Form ("h_primary_tracks_etaInt_%s_%s_iDR%i", sys.Data (), trackWPNames[iWP].c_str (), iDR));
+
+        if (iSys == 0) {
+          h_fake_tracks_etaInt[iSys][iWP][iDR]->Rebin (2);
+          h_secondary_tracks_etaInt[iSys][iWP][iDR]->Rebin (2);
+          h_strange_tracks_etaInt[iSys][iWP][iDR]->Rebin (2);
+          h_reco_tracks_etaInt[iSys][iWP][iDR]->Rebin (2);
+          h_primary_tracks_etaInt[iSys][iWP][iDR]->Rebin (2);
+        }
+
         for (int iEta = 0; iEta < nEtaTrkBins; iEta++) {
 
           h_fake_tracks[iSys][iWP][iDR][iEta] = (TH1D*) inFile->Get (Form ("h_fake_tracks_%s_%s_iDR%i_iEta%i", sys.Data (), trackWPNames[iWP].c_str (), iDR, iEta));
@@ -325,6 +345,12 @@ void PlotTrackingPerformance () {
 
       //for (int iMult = 0; iMult < nMultBins; iMult++) {
       for (int iDR = 0; iDR < nDRBins; iDR++) {
+
+        RebinSomeBins (&(h_fake_tracks_etaInt[1][iWP][iDR]), nCoarserPtchBins, (double*) coarserPtchBins);
+        RebinSomeBins (&(h_secondary_tracks_etaInt[1][iWP][iDR]), nCoarserPtchBins, (double*) coarserPtchBins);
+        RebinSomeBins (&(h_strange_tracks_etaInt[1][iWP][iDR]), nCoarserPtchBins, (double*) coarserPtchBins);
+        RebinSomeBins (&(h_primary_tracks_etaInt[1][iWP][iDR]), nCoarserPtchBins, (double*) coarserPtchBins);
+        RebinSomeBins (&(h_reco_tracks_etaInt[1][iWP][iDR]), nCoarserPtchBins, (double*) coarserPtchBins);
 
         for (int iEta = 0; iEta < nEtaTrkBins; iEta++) {
 
@@ -390,6 +416,18 @@ void PlotTrackingPerformance () {
         h2_primary_rate_fakes_p100[iSys][iWP][iDR] = (TH2D*) h2_primary_tracks_fakes_p100[iSys][iWP][iDR]->Clone (Form ("h2_primary_rate_fakes_p100_%s_%s_iDR%i", sys.Data (), trackWPNames[iWP].c_str (), iDR));
         BinomialDivide (h2_primary_rate_fakes_p100[iSys][iWP][iDR], h2_primary_tracks_fakes_p100[iSys][iWP][iDR], h2_reco_tracks[iSys][iWP][iDR], h2_reco_tracks_wgt2[iSys][iWP][iDR]);
 
+        h_fake_rate_etaInt[iSys][iWP][iDR] = (TH1D*) h_fake_tracks_etaInt[iSys][iWP][iDR]->Clone (Form ("h_fake_rate_etaInt_%s_%s_iDR%i", sys.Data (), trackWPNames[iWP].c_str (), iDR));
+        BinomialDivide (h_fake_rate_etaInt[iSys][iWP][iDR], h_fake_tracks_etaInt[iSys][iWP][iDR], h_reco_tracks_etaInt[iSys][iWP][iDR], h_reco_tracks_etaInt[iSys][iWP][iDR]);
+        InvertRate (h_fake_rate_etaInt[iSys][iWP][iDR]);
+        h_secondary_rate_etaInt[iSys][iWP][iDR] = (TH1D*) h_secondary_tracks_etaInt[iSys][iWP][iDR]->Clone (Form ("h_secondary_rate_etaInt_%s_%s_iDR%i", sys.Data (), trackWPNames[iWP].c_str (), iDR));
+        BinomialDivide (h_secondary_rate_etaInt[iSys][iWP][iDR], h_secondary_tracks_etaInt[iSys][iWP][iDR], h_reco_tracks_etaInt[iSys][iWP][iDR], h_reco_tracks_etaInt[iSys][iWP][iDR]);
+        InvertRate (h_secondary_rate_etaInt[iSys][iWP][iDR]);
+        h_strange_rate_etaInt[iSys][iWP][iDR] = (TH1D*) h_strange_tracks_etaInt[iSys][iWP][iDR]->Clone (Form ("h_strange_rate_etaInt_%s_%s_iDR%i", sys.Data (), trackWPNames[iWP].c_str (), iDR));
+        BinomialDivide (h_strange_rate_etaInt[iSys][iWP][iDR], h_strange_tracks_etaInt[iSys][iWP][iDR], h_reco_tracks_etaInt[iSys][iWP][iDR], h_reco_tracks_etaInt[iSys][iWP][iDR]);
+        InvertRate (h_strange_rate_etaInt[iSys][iWP][iDR]);
+        h_primary_rate_etaInt[iSys][iWP][iDR] = (TH1D*) h_primary_tracks_etaInt[iSys][iWP][iDR]->Clone (Form ("h_primary_rate_etaInt_%s_%s_iDR%i", sys.Data (), trackWPNames[iWP].c_str (), iDR));
+        BinomialDivide (h_primary_rate_etaInt[iSys][iWP][iDR], h_primary_tracks_etaInt[iSys][iWP][iDR], h_reco_tracks_etaInt[iSys][iWP][iDR], h_reco_tracks_etaInt[iSys][iWP][iDR]);
+
         for (int iEta = 0; iEta < nEtaTrkBins; iEta++) {
 
           h_fake_rate[iSys][iWP][iDR][iEta] = (TH1D*) h_fake_tracks[iSys][iWP][iDR][iEta]->Clone (Form ("h_fake_rate_%s_%s_iDR%i_iEta%i", sys.Data (), trackWPNames[iWP].c_str (), iDR, iEta));
@@ -424,12 +462,17 @@ void PlotTrackingPerformance () {
 
       //for (int iMult = 0; iMult < nMultBins; iMult++) {
       //for (int iMult = nMultBins-1; iMult < nMultBins; iMult++) {
-      for (int iDR = 0; iDR < nDRBins; iDR++) {
+      //for (int iDR = 0; iDR < nDRBins; iDR++) {
+      {
+        const int iDR = nDRBins-1;
 
         for (int iEta = 0; iEta < nEtaTrkBins; iEta++) {
 
-          f_primary_rate[iSys][iWP][iDR][iEta] = DoPurityFit (h_primary_rate[iSys][iWP][iDR][iEta], 8, 2);
-          f_primary_rate_fakes_p100[iSys][iWP][iDR][iEta] = DoPurityFit (h_primary_rate_fakes_p100[iSys][iWP][iDR][iEta], 8, 2);
+          f_primary_rate[iSys][iWP][iDR][iEta] = DoPurityFit (h_primary_rate[iSys][iWP][iDR][iEta], iWP > 0 ? 4 : 6, 2, iWP > 0 ? 150 : 20, iWP > 0 ? 0.001 : 0.005);
+          gf_primary_rate[iSys][iWP][iDR][iEta] = EvalFunction (Form ("gf_primary_rate_%s_%s_iDR%i_iEta%i", sys.Data (), trackWPNames[iWP].c_str (), iDR, iEta), f_primary_rate[iSys][iWP][iDR][iEta], 0.4, 150, 10000);
+          
+          f_primary_rate_fakes_p100[iSys][iWP][iDR][iEta] = DoPurityFit (h_primary_rate_fakes_p100[iSys][iWP][iDR][iEta], iWP > 0 ? 4 : 6, 2, iWP > 0 ? 150 : 20, iWP > 0 ? 0.001 : 0.005);
+          gf_primary_rate_fakes_p100[iSys][iWP][iDR][iEta] = EvalFunction (Form ("gf_primary_rate_fakes_p100_%s_%s_iDR%i_iEta%i", sys.Data (), trackWPNames[iWP].c_str (), iDR, iEta), f_primary_rate_fakes_p100[iSys][iWP][iDR][iEta], 0.4, 150, 10000);
 
         } // end loop over iEta
 
@@ -479,12 +522,12 @@ void PlotTrackingPerformance () {
     xax->SetLabelFont (43);
     xax->SetLabelSize (32);
 
-    yax->SetTitle ("Counts of hadrons");
+    yax->SetTitle ("Counts, normalized #geq 0.1");
     yax->SetLabelFont (43);
     yax->SetLabelSize (32);
     yax->SetLabelOffset (1.8 * yax->GetLabelOffset ());
-    const double ymin = 0.5;
-    const double ymax = 1e10;
+    const double ymin = 1e-7;
+    const double ymax = 1e2;
     yax->SetRangeUser (ymin, ymax);
 
     htemp->SetLineWidth (1);
@@ -495,27 +538,34 @@ void PlotTrackingPerformance () {
 
     TH1D* h_pp = (TH1D*) h_truth_matching_prob[0][iWP]->Clone ("h_pp");
     h_pp->Rebin (10);
+    h_pp->Scale (1./h_pp->Integral (h_pp->FindBin (0.1-0.01), h_pp->GetNbinsX ()));
     myDraw (h_pp, kAzure+2, kOpenSquare, 1.4);
 
     TH1D* h_pPb = (TH1D*) h_truth_matching_prob[1][iWP]->Clone ("h_pPb");
     h_pPb->Rebin (10);
+    h_pPb->Scale (1./h_pPb->Integral (h_pPb->FindBin (0.1-0.01), h_pPb->GetNbinsX ()));
     myDraw (h_pPb, kRed+1, kFullCircle, 1.4);
+
+    TH1D* h_pPb_hijing = (TH1D*) h_truth_matching_prob[2][iWP]->Clone ("h_pPb_hijing");
+    h_pPb_hijing->Rebin (10);
+    h_pPb_hijing->Scale (1./h_pPb_hijing->Integral (h_pPb_hijing->FindBin (0.1-0.01), h_pPb_hijing->GetNbinsX ()));
+    myDraw (h_pPb_hijing, kGreen+2, kOpenDiamond, 1.6);
 
     tl->SetTextFont (43);
     tl->SetTextSize (32);
     tl->SetTextColor (kBlack);
     tl->SetTextAlign (11);
 
-    tl->SetTextSize (28);
-    tl->DrawLatexNDC (0.22, 0.88, "#bf{#it{ATLAS}} Simulation Internal");
     tl->SetTextSize (24);
-    myLineText2 (0.26, 0.84, kAzure+2, kOpenSquare, "Pythia8 #it{pp}, #sqrt{s} = 5.02 TeV", 1.4, 0.032, true);
-    myLineText2 (0.26, 0.80, kRed+1, kFullCircle, "Pythia8 + #it{p}+Pb overlay, #sqrt{s_{NN}} = 5.02 TeV", 1.4, 0.032, true);
-    tl->DrawLatexNDC (0.22, 0.75, Form ("%s tracks", trackWPStrs[iWP].c_str ()));
+    tl->DrawLatexNDC (0.26, 0.90, "#bf{#it{ATLAS}} Simulation Internal");
+    myLineText2 (0.31, 0.86, kAzure+2, kOpenSquare, "Pythia8 #it{pp}, #sqrt{s} = 5.02 TeV", 1.4, 0.032, true);
+    myLineText2 (0.31, 0.82, kRed+1, kFullCircle, "Pythia8 + #it{p}+Pb overlay, #sqrt{s_{NN}} = 5.02 TeV", 1.4, 0.032, true);
+    myLineText2 (0.31, 0.78, kGreen+2, kOpenDiamond, "Hijing MinBias #it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV", 1.6, 0.032, true);
+    tl->DrawLatexNDC (0.26, 0.73, Form ("%s tracks", trackWPStrs[iWP].c_str ()));
 
-    TLine* l0p3 = new TLine (0.3, 0.5, 0.3, 1.4e5);
-    TLine* l0p5 = new TLine (0.5, 0.5, 0.5, 1.4e5);
-    TLine* l0p6 = new TLine (0.6, 0.5, 0.6, 1.4e5);
+    TLine* l0p3 = new TLine (0.3, ymin, 0.3, ymin * std::exp (0.52*std::log (ymax/ymin)));
+    TLine* l0p5 = new TLine (0.5, ymin, 0.5, ymin * std::exp (0.52*std::log (ymax/ymin)));
+    TLine* l0p6 = new TLine (0.6, ymin, 0.6, ymin * std::exp (0.52*std::log (ymax/ymin)));
 
     l0p3->SetLineWidth (1);
     l0p3->SetLineStyle (2);
@@ -528,23 +578,33 @@ void PlotTrackingPerformance () {
     l0p5->Draw ("same");
     l0p6->Draw ("same");    
 
-    const float i_pp_0p3 = 100 * h_pp->Integral (h_pp->FindFixBin (0.3), h_pp->FindFixBin (1)) / h_pp->Integral (h_pp->FindFixBin (0), h_pp->FindFixBin (1));
-    const float i_pp_0p5 = 100 * h_pp->Integral (h_pp->FindFixBin (0.5), h_pp->FindFixBin (1)) / h_pp->Integral (h_pp->FindFixBin (0), h_pp->FindFixBin (1));
-    const float i_pp_0p6 = 100 * h_pp->Integral (h_pp->FindFixBin (0.6), h_pp->FindFixBin (1)) / h_pp->Integral (h_pp->FindFixBin (0), h_pp->FindFixBin (1));
-    const float i_pPb_0p3 = 100 * h_pPb->Integral (h_pPb->FindFixBin (0.3), h_pPb->FindFixBin (1)) / h_pPb->Integral (h_pPb->FindFixBin (0), h_pPb->FindFixBin (1));
-    const float i_pPb_0p5 = 100 * h_pPb->Integral (h_pPb->FindFixBin (0.5), h_pPb->FindFixBin (1)) / h_pPb->Integral (h_pPb->FindFixBin (0), h_pPb->FindFixBin (1));
-    const float i_pPb_0p6 = 100 * h_pPb->Integral (h_pPb->FindFixBin (0.6), h_pPb->FindFixBin (1)) / h_pPb->Integral (h_pPb->FindFixBin (0), h_pPb->FindFixBin (1));
+    const float i_pp_0p3 = 100 * h_pp->Integral (h_pp->FindFixBin (0.3+0.01), h_pp->FindFixBin (1-0.01)) / h_pp->Integral (h_pp->FindFixBin (0+0.01), h_pp->FindFixBin (1-0.01));
+    const float i_pp_0p5 = 100 * h_pp->Integral (h_pp->FindFixBin (0.5+0.01), h_pp->FindFixBin (1-0.01)) / h_pp->Integral (h_pp->FindFixBin (0+0.01), h_pp->FindFixBin (1-0.01));
+    const float i_pp_0p6 = 100 * h_pp->Integral (h_pp->FindFixBin (0.6+0.01), h_pp->FindFixBin (1-0.01)) / h_pp->Integral (h_pp->FindFixBin (0+0.01), h_pp->FindFixBin (1-0.01));
+    const float i_pPb_0p3 = 100 * h_pPb->Integral (h_pPb->FindFixBin (0.3+0.01), h_pPb->FindFixBin (1-0.01)) / h_pPb->Integral (h_pPb->FindFixBin (0+0.01), h_pPb->FindFixBin (1-0.01));
+    const float i_pPb_0p5 = 100 * h_pPb->Integral (h_pPb->FindFixBin (0.5+0.01), h_pPb->FindFixBin (1-0.01)) / h_pPb->Integral (h_pPb->FindFixBin (0+0.01), h_pPb->FindFixBin (1-0.01));
+    const float i_pPb_0p6 = 100 * h_pPb->Integral (h_pPb->FindFixBin (0.6+0.01), h_pPb->FindFixBin (1-0.01)) / h_pPb->Integral (h_pPb->FindFixBin (0+0.01), h_pPb->FindFixBin (1-0.01));
+    const float i_pPb_hijing_0p3 = 100 * h_pPb_hijing->Integral (h_pPb_hijing->FindFixBin (0.3+0.01), h_pPb_hijing->FindFixBin (1-0.01)) / h_pPb_hijing->Integral (h_pPb_hijing->FindFixBin (0+0.01), h_pPb_hijing->FindFixBin (1-0.01));
+    const float i_pPb_hijing_0p5 = 100 * h_pPb_hijing->Integral (h_pPb_hijing->FindFixBin (0.5+0.01), h_pPb_hijing->FindFixBin (1-0.01)) / h_pPb_hijing->Integral (h_pPb_hijing->FindFixBin (0+0.01), h_pPb_hijing->FindFixBin (1-0.01));
+    const float i_pPb_hijing_0p6 = 100 * h_pPb_hijing->Integral (h_pPb_hijing->FindFixBin (0.6+0.01), h_pPb_hijing->FindFixBin (1-0.01)) / h_pPb_hijing->Integral (h_pPb_hijing->FindFixBin (0+0.01), h_pPb_hijing->FindFixBin (1-0.01));
 
     myText (0.35, 0.680, kBlack, "f_{ch}(> 0.3)", 0.026);
     myText (0.50, 0.680, kBlack, "f_{ch}(> 0.5)", 0.026);
     myText (0.62, 0.680, kBlack, "f_{ch}(> 0.6)", 0.026);
 
-    myText (0.35, 0.645, kRed+1, Form ("%.3f%%", i_pPb_0p3), 0.026);
-    myText (0.50, 0.645, kRed+1, Form ("%.3f%%", i_pPb_0p5), 0.026);
-    myText (0.62, 0.645, kRed+1, Form ("%.3f%%", i_pPb_0p6), 0.026);
-    myText (0.35, 0.610, kAzure+2, Form ("%.3f%%", i_pp_0p3), 0.026);
-    myText (0.50, 0.610, kAzure+2, Form ("%.3f%%", i_pp_0p5), 0.026);
-    myText (0.62, 0.610, kAzure+2, Form ("%.3f%%", i_pp_0p6), 0.026);
+    myText (0.35, 0.645, kAzure+2, Form ("%.3f%%", i_pp_0p3), 0.026);
+    myText (0.50, 0.645, kAzure+2, Form ("%.3f%%", i_pp_0p5), 0.026);
+    myText (0.62, 0.645, kAzure+2, Form ("%.3f%%", i_pp_0p6), 0.026);
+    myText (0.35, 0.615, kRed+1, Form ("%.3f%%", i_pPb_0p3), 0.026);
+    myText (0.50, 0.615, kRed+1, Form ("%.3f%%", i_pPb_0p5), 0.026);
+    myText (0.62, 0.615, kRed+1, Form ("%.3f%%", i_pPb_0p6), 0.026);
+    myText (0.35, 0.585, kGreen+2, Form ("%.3f%%", i_pPb_hijing_0p3), 0.026);
+    myText (0.50, 0.585, kGreen+2, Form ("%.3f%%", i_pPb_hijing_0p5), 0.026);
+    myText (0.62, 0.585, kGreen+2, Form ("%.3f%%", i_pPb_hijing_0p6), 0.026);
+
+    SaferDelete (&h_pp);
+    SaferDelete (&h_pPb);
+    SaferDelete (&h_pPb_hijing);
 
     c->SaveAs (Form ("%s/Plots/TrackingPerformance/TruthMatchingProb.pdf", workPath.Data ()));
   }
@@ -852,10 +912,109 @@ void PlotTrackingPerformance () {
 
 
 
+  for (int iWPhere = 0; iWPhere < trackWPs.size (); iWPhere++) {
+  //{ const short iWPhere = iWP;
+    for (int iSys : systems) {
+
+      const int iDR = nDRBins-1;
+      const char* cname = Form ("c_pur_sum_%s_%s", iSys == 0 ? "pp" : "pPb", trackWPNames[iWPhere].c_str ());
+
+      TCanvas* c = new TCanvas (cname, "", 800, 800);
+
+      const double lMargin = 0.15;
+      const double rMargin = 0.04;
+      const double bMargin = 0.15;
+      const double tMargin = 0.04;
+
+      c->SetLeftMargin (lMargin);
+      c->SetRightMargin (rMargin);
+      c->SetBottomMargin (bMargin);
+      c->SetTopMargin (tMargin);
+
+      c->SetLogx ();
+
+      TH1D* htemp = new TH1D ("htemp", "", 1, pTchBins[0], pTchBins[nPtchBins]);
+      htemp->SetBinContent (1, 1);
+    
+      TAxis* xax = htemp->GetXaxis ();
+      TAxis* yax = htemp->GetYaxis ();
+
+      xax->SetTitle ("#it{p}_{T}^{ch} [GeV]");
+      xax->SetTitleOffset (0.9 * xax->GetTitleOffset ());
+      xax->SetLabelSize (0);
+
+      yax->SetTitle ("Primary Fraction");
+      yax->SetLabelFont (43);
+      yax->SetLabelSize (32);
+      yax->SetLabelOffset (1.8 * yax->GetLabelOffset ());
+      const double ymin = 0.82;
+      const double ymax = 1.06;
+      yax->SetRangeUser (ymin, ymax);
+
+      htemp->SetLineWidth (1);
+      htemp->SetLineStyle (2);
+
+      htemp->DrawCopy ("hist");
+      SaferDelete (&htemp);
+
+      tl->SetTextFont (43);
+      tl->SetTextSize (32);
+      tl->SetTextAlign (21);
+      
+      const double yoff = ymin - 0.04 * (ymax-ymin) / (1.-tMargin-bMargin);
+      tl->DrawLatex (0.4,  yoff, "0.4");
+      tl->DrawLatex (0.7,  yoff, "0.7");
+      tl->DrawLatex (1,  yoff, "1");
+      tl->DrawLatex (2,  yoff, "2");
+      tl->DrawLatex (3,  yoff, "3");
+      tl->DrawLatex (4,  yoff, "4");
+      tl->DrawLatex (5,  yoff, "5");
+      tl->DrawLatex (6,  yoff, "6");
+      tl->DrawLatex (7,  yoff, "7");
+      tl->DrawLatex (10, yoff, "10");
+      tl->DrawLatex (20, yoff, "20");
+      tl->DrawLatex (30, yoff, "30");
+      tl->DrawLatex (40, yoff, "40");
+      tl->DrawLatex (60, yoff, "60");
+      //tl->DrawLatex (80, yoff, "80");
+      tl->DrawLatex (100, yoff, "100");
+
+      for (int iEta = 0; iEta < nEtaTrkBins; iEta++) {
+        myDraw (h_primary_rate[iSys][iWPhere][iDR][iEta], colors[iEta], kOpenCircle, 0.8);
+        myDraw (gf_primary_rate[iSys][iWPhere][iDR][iEta], colors[iEta], kDot, 1.0, 1, 1, "L");
+        //TF1* f = f_primary_rate[iSys][iWPhere][iDR][iEta];
+        //if (f != nullptr) {
+        //  //f->SetRange (0.4, 150);
+        //  myDraw (f, colors[iEta], 1, 1);
+        //  //SaferDelete (&f);
+        //}
+      }
+
+      tl->SetTextColor (kBlack);
+      tl->SetTextAlign (11);
+
+      tl->SetTextSize (28);
+      tl->DrawLatexNDC (0.22, 0.89, "#bf{#it{ATLAS}} Simulation Internal");
+      tl->SetTextSize (24);
+      tl->DrawLatexNDC (0.22, 0.85, iSys == 0 ? "Pythia8 #it{pp}, #sqrt{s} = 5.02 TeV" : "Hijing #it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV");
+      tl->DrawLatexNDC (0.22, 0.81, Form ("%s tracks", trackWPStrs[iWPhere].c_str ()));
+
+      //tl->SetTextSize (18);
+      //tl->SetTextAlign (21);
+      //tl->DrawLatexNDC (0.705, 0.37, "Primaries");
+      for (int iEta = 0; iEta < nEtaTrkBins; iEta++)
+        myLineText2 (0.74, 0.34-iEta*0.036, colors[iEta], kOpenCircle, Form ("%g < |#eta| < %g", etaTrkBins[iEta], etaTrkBins[iEta+1]), 1.2, 0.026, true);
+
+      c->SaveAs (Form ("%s/Plots/TrackingPerformance/PuritySummary_%s_%s.pdf", workPath.Data (), iSys == 0 ? "pp" : "pPb", trackWPNames[iWPhere].c_str ()));
+    } // end loop over iSys
+  } // end loop over iWPhere
+
+
+
   for (int iSys : systems) {
 
     const int iDR = nDRBins-1;
-    const char* cname = Form ("c_pur_sum_%s", iSys == 0 ? "pp" : "pPb");
+    const char* cname = Form ("c_pur_sum_dr_%s", iSys == 0 ? "pp" : "pPb");
 
     TCanvas* c = new TCanvas (cname, "", 800, 800);
 
@@ -885,8 +1044,8 @@ void PlotTrackingPerformance () {
     yax->SetLabelFont (43);
     yax->SetLabelSize (32);
     yax->SetLabelOffset (1.8 * yax->GetLabelOffset ());
-    const double ymin = 0.82;
-    const double ymax = 1.06;
+    const double ymin = 0.64;
+    const double ymax = 1.12;
     yax->SetRangeUser (ymin, ymax);
 
     htemp->SetLineWidth (1);
@@ -917,15 +1076,27 @@ void PlotTrackingPerformance () {
     //tl->DrawLatex (80, yoff, "80");
     tl->DrawLatex (100, yoff, "100");
 
-    for (int iEta = 0; iEta < nEtaTrkBins; iEta++) {
-      myDraw (h_primary_rate[iSys][iWP][iDR][iEta], colors[iEta], kOpenCircle, 0.8);
-      TF1* f = f_primary_rate[iSys][iWP][iDR][iEta];
-      if (f != nullptr) {
-        f->SetRange (0.4, 150);
-        f->SetLineColor (colors[iEta]);
-        f->SetLineWidth (1);
-        f->Draw ("same");
-      }
+    TGAE* g = nullptr;
+    for (int iDR = 0; iDR < (nDRBins-1); iDR++) {
+      g = make_graph (h_fake_rate_etaInt[iSys][iWP][iDR]); 
+      if      (iDR == 0) TrimGraph (g, 0, 20);
+      else if (iDR == 1) TrimGraph (g, 0, 60);
+      myDraw (g, colorfulColors[iDR], kOpenDiamond, 0.8);
+      SaferDelete (&g);
+    }
+    for (int iDR = 0; iDR < (nDRBins-1); iDR++) {
+      g = make_graph (h_secondary_rate_etaInt[iSys][iWP][iDR]);
+      if      (iDR == 0) TrimGraph (g, 0, 20);
+      else if (iDR == 1) TrimGraph (g, 0, 60);
+      myDraw (g, colorfulColors[iDR], kOpenSquare, 0.8);
+      SaferDelete (&g);
+    }
+    for (int iDR = 0; iDR < (nDRBins-1); iDR++) {
+      g = make_graph (h_primary_rate_etaInt[iSys][iWP][iDR]);
+      if      (iDR == 0) TrimGraph (g, 0, 20);
+      else if (iDR == 1) TrimGraph (g, 0, 60);
+      myDraw (g, colorfulColors[iDR], kOpenCircle, 0.8);
+      SaferDelete (&g);
     }
 
     tl->SetTextColor (kBlack);
@@ -936,14 +1107,21 @@ void PlotTrackingPerformance () {
     tl->SetTextSize (24);
     tl->DrawLatexNDC (0.22, 0.85, iSys == 0 ? "Pythia8 #it{pp}, #sqrt{s} = 5.02 TeV" : "Hijing #it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV");
     tl->DrawLatexNDC (0.22, 0.81, Form ("%s tracks", trackWPStrs[iWP].c_str ()));
+    tl->DrawLatexNDC (0.22, 0.77, "JZ0-3, #it{p}_{T}^{jet} > 15 GeV");
 
     tl->SetTextSize (18);
     tl->SetTextAlign (21);
-    tl->DrawLatexNDC (0.705, 0.37, "Primaries");
-    for (int iEta = 0; iEta < nEtaTrkBins; iEta++)
-      myLineText2 (0.74, 0.34-iEta*0.036, colors[iEta], kOpenCircle, Form ("%g < |#eta| < %g", etaTrkBins[iEta], etaTrkBins[iEta+1]), 1.2, 0.026, true);
+    tl->DrawLatexNDC (0.425, 0.292, "Fakes");
+    tl->DrawLatexNDC (0.545, 0.292, "Secondaries");
+    tl->DrawLatexNDC (0.665, 0.292, "Primaries");
 
-    c->SaveAs (Form ("%s/Plots/TrackingPerformance/PuritySummary_%s.pdf", workPath.Data (), iSys == 0 ? "pp" : "pPb"));
+    for (int iDR = 0; iDR < (nDRBins-1); iDR++) {
+      myLineText2 (0.46, 0.262-iDR*0.036, colorfulColors[iDR], kOpenDiamond, "", 1.4, 0.026, true);
+      myLineText2 (0.58, 0.262-iDR*0.036, colorfulColors[iDR], kOpenSquare,  "", 1.2, 0.026, true);
+      myLineText2 (0.70, 0.262-iDR*0.036, colorfulColors[iDR], kOpenCircle, iDR == 0 ? Form ("#Delta R_{ch,jet} > %g", drBins[nDRBins-iDR-2]) : Form ("%g < #Delta R_{ch, jet} < %g", drBins[nDRBins-iDR-2], drBins[nDRBins-iDR-1]), 1.2, 0.026, true);
+    }
+
+    c->SaveAs (Form ("%s/Plots/TrackingPerformance/PuritySummary_DR_%s.pdf", workPath.Data (), iSys == 0 ? "pp" : "pPb"));
   } // end loop over iSys
 
 
@@ -1322,6 +1500,13 @@ void PlotTrackingPerformance () {
   outFile->Close ();
 
 
+}
+
+
+int main  (int argn, char** argv) {
+  SetAtlasStyle ();
+  PlotTrackingPerformance ();
+  return 0;
 }
 
 #endif
