@@ -104,11 +104,11 @@ TF1* DoPurityFit (TH1D* h, const int degree, const int nderiv, const float seedC
 
 
 
-TGraph* EvalFunction (const TString name, TF1* f, const double xmin, const double xmax, const int npoints = 1000) {
+TGAE* EvalFunction (const TString name, TF1* f, const double xmin, const double xmax, const int npoints = 1000) {
 
   double* bins = linspace (xmin, xmax, npoints-1);
 
-  TGraph* g = new TGraph ();
+  TGAE* g = new TGAE ();
   g->SetName (name.Data ());
 
   for (int i = 0; i < npoints; i++) {
@@ -167,10 +167,14 @@ void PlotTrackingPerformance () {
   TH1D***** h_primary_rate              = Get4DArray <TH1D*> (nSystems+1, trackWPs.size (), nDRBins, nEtaTrkBins); // extra system is the "hybrid" primary rate
   TH1D***** h_primary_rate_fakes_p100   = Get4DArray <TH1D*> (nSystems+1, trackWPs.size (), nDRBins, nEtaTrkBins); // extra system is the "hybrid" primary rate
 
+  TGAE***** g_primary_rate              = Get4DArray <TGAE*> (nSystems+1, trackWPs.size (), nDRBins, nEtaTrkBins); // extra system is the "hybrid" primary rate
+  TGAE***** g_primary_rate_fakes_p100   = Get4DArray <TGAE*> (nSystems+1, trackWPs.size (), nDRBins, nEtaTrkBins); // extra system is the "hybrid" primary rate
+
+  // functions to fit the primary rate + tgraph versions with fine binning for ease of use
   TF1*****    f_primary_rate              = Get4DArray <TF1*> (nSystems, trackWPs.size (), nDRBins, nEtaTrkBins);
   TF1*****    f_primary_rate_fakes_p100   = Get4DArray <TF1*> (nSystems, trackWPs.size (), nDRBins, nEtaTrkBins);
-  TGraph***** gf_primary_rate             = Get4DArray <TGraph*> (nSystems+1, trackWPs.size (), nDRBins, nEtaTrkBins); // extra system is the "hybrid" primary rate
-  TGraph***** gf_primary_rate_fakes_p100  = Get4DArray <TGraph*> (nSystems+1, trackWPs.size (), nDRBins, nEtaTrkBins); // extra system is the "hybrid" primary rate
+  TGAE***** gf_primary_rate             = Get4DArray <TGAE*> (nSystems+1, trackWPs.size (), nDRBins, nEtaTrkBins); // extra system is the "hybrid" primary rate
+  TGAE***** gf_primary_rate_fakes_p100  = Get4DArray <TGAE*> (nSystems+1, trackWPs.size (), nDRBins, nEtaTrkBins); // extra system is the "hybrid" primary rate
 
   // eta-integrated plots to study the fake rate in jets.
   TH1D**** h_fake_tracks_etaInt         = Get3DArray <TH1D*> (nSystems, trackWPs.size (), nDRBins);
@@ -467,10 +471,14 @@ void PlotTrackingPerformance () {
 
         for (int iEta = 0; iEta < nEtaTrkBins; iEta++) {
 
+          g_primary_rate[iSys][iWP][iDR][iEta] = make_graph (h_primary_rate[iSys][iWP][iDR][iEta]);
+          g_primary_rate[iSys][iWP][iDR][iEta]->SetName (Form ("g_primary_rate_%s_%s_iDR%i_iEta%i", sys.Data (), trackWPNames[iWP].c_str (), iDR, iEta));
           TF1* f = DoPurityFit (h_primary_rate[iSys][iWP][iDR][iEta], iWP > 0 ? 4 : 6, iWP > 0 ? 1 : 2, iWP > 0 ? 150 : 20, iWP > 0 ? 0.001 : 0.005);
           gf_primary_rate[iSys][iWP][iDR][iEta] = EvalFunction (Form ("gf_primary_rate_%s_%s_iDR%i_iEta%i", sys.Data (), trackWPNames[iWP].c_str (), iDR, iEta), f, 0.4, 150, 10000);
           f_primary_rate[iSys][iWP][iDR][iEta] = f;
 
+          g_primary_rate_fakes_p100[iSys][iWP][iDR][iEta] = make_graph (h_primary_rate_fakes_p100[iSys][iWP][iDR][iEta]);
+          g_primary_rate_fakes_p100[iSys][iWP][iDR][iEta]->SetName (Form ("g_primary_rate_fakes_p100_%s_%s_iDR%i_iEta%i", sys.Data (), trackWPNames[iWP].c_str (), iDR, iEta));
           f = DoPurityFit (h_primary_rate_fakes_p100[iSys][iWP][iDR][iEta], iWP > 0 ? 4 : 6, iWP > 0 ? 1 : 2, iWP > 0 ? 150 : 20, iWP > 0 ? 0.001 : 0.005);; 
           gf_primary_rate_fakes_p100[iSys][iWP][iDR][iEta] = EvalFunction (Form ("gf_primary_rate_fakes_p100_%s_%s_iDR%i_iEta%i", sys.Data (), trackWPNames[iWP].c_str (), iDR, iEta), f, 0.4, 150, 10000);
           f_primary_rate_fakes_p100[iSys][iWP][iDR][iEta] = f;
@@ -495,44 +503,50 @@ void PlotTrackingPerformance () {
         double x, y_jet, y_mb;
         const float wgt = 0.5; // bias factor towards one rate or the other
 
-        TGraph* g_hybrid = (TGraph*) gf_primary_rate[0][iWP][iDR][iEta]->Clone (Form ("gf_primary_rate_hybrid_%s_iDR%i_iEta%i", trackWPNames[iWP].c_str (), iDR, iEta));
-        TGraph* g_jet = gf_primary_rate[0][iWP][iDR][iEta]; // Pythia primary rate
-        TGraph* g_mb  = gf_primary_rate[1][iWP][iDR][iEta]; // Hijing primary rate
-
+        TGAE* g_hybrid = (TGAE*) gf_primary_rate[0][iWP][iDR][iEta]->Clone (Form ("gf_primary_rate_hybrid_%s_iDR%i_iEta%i", trackWPNames[iWP].c_str (), iDR, iEta));
+        TGAE* g_jet = gf_primary_rate[0][iWP][iDR][iEta]; // Pythia primary rate
+        TGAE* g_mb  = gf_primary_rate[1][iWP][iDR][iEta]; // Hijing primary rate
         for (int i = 0; i < g_hybrid->GetN (); i++) {
           g_jet->GetPoint (i, x, y_jet);
           g_mb->GetPoint (i, x, y_mb);
-
           g_hybrid->SetPoint (i, x, wgt*y_jet + (1.-wgt)*y_mb);
         }
-
         gf_primary_rate[2][iWP][iDR][iEta] = g_hybrid;
 
-        TH1D* h = (TH1D*) h_primary_rate[0][iWP][iDR][iEta]->Clone (Form ("h_primary_rate_hybrid_%s_iDR%i_iEta%i", trackWPNames[iWP].c_str (), iDR, iEta));
-        h->Reset ();
-        h->Add (h_primary_rate[0][iWP][iDR][iEta], wgt);
-        h->Add (h_primary_rate[1][iWP][iDR][iEta], 1.-wgt);
-        h_primary_rate[2][iWP][iDR][iEta] = h;
+
+        g_hybrid = make_graph (h_primary_rate[0][iWP][iDR][iEta]);
+        g_hybrid->SetName (Form ("g_primary_rate_hybrid_%s_iDR%i_iEta%i", trackWPNames[iWP].c_str (), iDR, iEta));
+        g_jet = g_primary_rate[0][iWP][iDR][iEta]; // Pythia primary rate
+        g_mb  = g_primary_rate[1][iWP][iDR][iEta]; // Hijing primary rate
+        for (int i = 0; i < g_hybrid->GetN (); i++) {
+          g_jet->GetPoint (i, x, y_jet);
+          y_mb = g_mb->Eval (x);
+          g_hybrid->SetPoint (i, x, wgt*y_jet + (1.-wgt)*y_mb);
+        }
+        g_primary_rate[2][iWP][iDR][iEta] = g_hybrid;
 
 
-        g_hybrid = (TGraph*) gf_primary_rate_fakes_p100[0][iWP][iDR][iEta]->Clone (Form ("gf_primary_rate_hybrid_fakes_p100_%s_iDR%i_iEta%i", trackWPNames[iWP].c_str (), iDR, iEta));
+        g_hybrid = (TGAE*) gf_primary_rate_fakes_p100[0][iWP][iDR][iEta]->Clone (Form ("gf_primary_rate_hybrid_fakes_p100_%s_iDR%i_iEta%i", trackWPNames[iWP].c_str (), iDR, iEta));
         g_jet = gf_primary_rate_fakes_p100[0][iWP][iDR][iEta]; // Pythia primary rate
         g_mb  = gf_primary_rate_fakes_p100[1][iWP][iDR][iEta]; // Hijing primary rate
-
         for (int i = 0; i < g_hybrid->GetN (); i++) {
           g_jet->GetPoint (i, x, y_jet);
           g_mb->GetPoint (i, x, y_mb);
-
           g_hybrid->SetPoint (i, x, wgt*y_jet + (1.-wgt)*y_mb);
         }
-
         gf_primary_rate_fakes_p100[2][iWP][iDR][iEta] = g_hybrid;
 
-        h = (TH1D*) h_primary_rate_fakes_p100[0][iWP][iDR][iEta]->Clone (Form ("h_primary_rate_hybrid_fakes_p100_%s_iDR%i_iEta%i", trackWPNames[iWP].c_str (), iDR, iEta));
-        h->Reset ();
-        h->Add (h_primary_rate_fakes_p100[0][iWP][iDR][iEta], wgt);
-        h->Add (h_primary_rate_fakes_p100[1][iWP][iDR][iEta], 1.-wgt);
-        h_primary_rate_fakes_p100[2][iWP][iDR][iEta] = h;
+
+        g_hybrid = (TGAE*) make_graph (h_primary_rate_fakes_p100[0][iWP][iDR][iEta]);
+        g_hybrid->SetName (Form ("g_primary_rate_hybrid_fakes_p100_%s_iDR%i_iEta%i", trackWPNames[iWP].c_str (), iDR, iEta));
+        g_jet = g_primary_rate_fakes_p100[0][iWP][iDR][iEta]; // Pythia primary rate
+        g_mb  = g_primary_rate_fakes_p100[1][iWP][iDR][iEta]; // Hijing primary rate
+        for (int i = 0; i < g_hybrid->GetN (); i++) {
+          g_jet->GetPoint (i, x, y_jet);
+          y_mb = g_mb->Eval (x);
+          g_hybrid->SetPoint (i, x, wgt*y_jet + (1.-wgt)*y_mb);
+        }
+        g_primary_rate_fakes_p100[2][iWP][iDR][iEta] = g_hybrid;
 
       } // end loop over iEta
 
@@ -544,7 +558,7 @@ void PlotTrackingPerformance () {
 
 
   TLatex* tl = new TLatex ();
-  TLine* l = new TLine ();
+  //TLine* l = new TLine ();
 
   const short iWP = 0;
 
@@ -739,8 +753,9 @@ void PlotTrackingPerformance () {
       tl->DrawLatex (100, yoff, "100");
 
       for (int iSys : systems)
-        for (int iEta = 0; iEta < nEtaTrkBins; iEta++)
-          myDraw (h_efficiency[iSys][nPIDs-1][iWP][iMult][iEta], colors[iEta], iSys == 0 ? kOpenCircle : kOpenSquare, 1.0);
+        //for (int iEta = 0; iEta < nEtaTrkBins; iEta++)
+        for (int iEta : {0, 3})
+          myDraw (h_efficiency[iSys][nPIDs-1][iWP][iMult][iEta], colors[iEta], iSys == 0 ? kOpenCircle : kOpenSquare, 1.4);
 
       tl->SetTextColor (kBlack);
       tl->SetTextAlign (11);
@@ -760,12 +775,13 @@ void PlotTrackingPerformance () {
     tl->DrawLatexNDC (0.22, 0.76, Form ("%s tracks", trackWPStrs[iWP].c_str ()));
 
     c->cd (3);
-    tl->SetTextSize (20);
-    tl->DrawLatexNDC (0.59, 0.376, "#it{pp}");
-    tl->DrawLatexNDC (0.675, 0.376, "#it{p}+Pb");
-    for (int iEta = 0; iEta < nEtaTrkBins; iEta++) {
-      myLineText2 (0.74, 0.34-iEta*0.036, colors[iEta], kOpenSquare, Form ("%g < |#eta| < %g", etaTrkBins[iEta], etaTrkBins[iEta+1]), 1.2, 0.026, true);
-      myLineText2 (0.64, 0.34-iEta*0.036, colors[iEta], kOpenCircle, "", 1.2, 0.026, true);
+    tl->SetTextSize (28);
+    tl->DrawLatexNDC (0.55, 0.376, "#it{pp}");
+    tl->DrawLatexNDC (0.635, 0.376, "#it{p}+Pb");
+    //for (int iEta = 0; iEta < nEtaTrkBins; iEta++) {
+    for (int iEta : {0, 3}) {
+      myLineText2 (0.70, 0.326-(iEta/3)*0.050, colors[iEta], kOpenSquare, Form ("%g < |#eta| < %g", etaTrkBins[iEta], etaTrkBins[iEta+1]), 1.4, 0.04, true);
+      myLineText2 (0.60, 0.326-(iEta/3)*0.050, colors[iEta], kOpenCircle, "", 1.4, 0.040, true);
     }
 
     //c->SaveAs (Form ("%s/Plots/TrackingPerformance/EfficiencySummary_vsMultiplicity_%s.pdf", workPath.Data (), iSys == 0 ? "pp" : "pPb"));
@@ -894,7 +910,7 @@ void PlotTrackingPerformance () {
         xax->SetTitleOffset (0.9 * xax->GetTitleOffset ());
         xax->SetLabelSize (0);
 
-        yax->SetTitle ("Primary Fraction");
+        yax->SetTitle ("Fraction of tracks");
         yax->SetLabelFont (43);
         yax->SetLabelSize (32);
         yax->SetLabelOffset (1.8 * yax->GetLabelOffset ());
@@ -1035,14 +1051,8 @@ void PlotTrackingPerformance () {
       tl->DrawLatex (100, yoff, "100");
 
       for (int iEta = 0; iEta < nEtaTrkBins; iEta++) {
-        myDraw (h_primary_rate[iSys][iWPhere][iDR][iEta], colors[iEta], kOpenCircle, 0.8);
+        myDraw (g_primary_rate[iSys][iWPhere][iDR][iEta], colors[iEta], kOpenCircle, 0.8);
         myDraw (gf_primary_rate[iSys][iWPhere][iDR][iEta], colors[iEta], kDot, 1.0, 1, 1, "L");
-        //TF1* f = f_primary_rate[iSys][iWPhere][iDR][iEta];
-        //if (f != nullptr) {
-        //  //f->SetRange (0.4, 150);
-        //  myDraw (f, colors[iEta], 1, 1);
-        //  //SaferDelete (&f);
-        //}
       }
 
       tl->SetTextColor (kBlack);
@@ -1133,7 +1143,6 @@ void PlotTrackingPerformance () {
 
     //for (int iEta = 0; iEta < nEtaTrkBins; iEta++) {
     for (int iEta : {0, 2, 4}) {
-      myDraw (h_primary_rate[iSys][iWPhere][iDR][iEta], colors[iEta], kOpenCircle, 0.8);
       myDraw (gf_primary_rate[iSys][iWPhere][iDR][iEta], colors[iEta], kDot, 1.0, 1, 2, "L");
       myDraw (gf_primary_rate[0][iWPhere][iDR][iEta], colors[iEta], kDot, 1.0, 2, 1, "L");
       myDraw (gf_primary_rate[1][iWPhere][iDR][iEta], colors[iEta], kDot, 1.0, 2, 1, "L");
@@ -1188,7 +1197,7 @@ void PlotTrackingPerformance () {
     xax->SetTitleOffset (0.9 * xax->GetTitleOffset ());
     xax->SetLabelSize (0);
 
-    yax->SetTitle ("Primary Fraction");
+    yax->SetTitle ("Fraction of tracks");
     yax->SetLabelFont (43);
     yax->SetLabelSize (32);
     yax->SetLabelOffset (1.8 * yax->GetLabelOffset ());
@@ -1538,6 +1547,91 @@ void PlotTrackingPerformance () {
   } // end loop over iSys
 
 
+  {
+    const char* cname = "c_eff_complete";
+
+    TCanvas* c = new TCanvas (cname, "", 2640, 1600);
+    c->Divide (3, 2);
+
+    const int iPID = nPIDs-1;
+
+    const double lMargin = 0.15;
+    const double rMargin = 0.15;
+    const double bMargin = 0.15;
+    const double tMargin = 0.04;
+
+    for (int iSys : systems) {
+
+      for (int iMult = 0; iMult < nMultBins-1; iMult++) {
+
+        c->cd (3*iSys + iMult + 1);
+
+        gPad->SetLeftMargin (lMargin);
+        gPad->SetRightMargin (rMargin);
+        gPad->SetBottomMargin (bMargin);
+        gPad->SetTopMargin (tMargin);
+
+        gPad->SetLogy ();
+
+        TH2D* h2 = (TH2D*) h2_efficiency[iSys][iPID][iWP][iMult]->Clone ("temp");
+
+        TAxis* xax = h2->GetXaxis ();
+        TAxis* yax = h2->GetYaxis ();
+        TAxis* zax = h2->GetZaxis ();
+
+        xax->SetTitle ("#eta");
+        yax->SetTitle ("#it{p}_{T}^{ch} [GeV]");
+        zax->SetTitle ("Track Reco. Efficiency");
+
+        const double zmin = 0.5;
+        const double zmax = 1;
+
+        h2->SetLineWidth (0);
+
+        yax->SetMoreLogLabels ();
+        zax->SetRangeUser (zmin, zmax);
+
+        xax->SetTitleFont (43);
+        xax->SetTitleSize (32);
+        xax->SetTitleOffset (2.0*xax->GetTitleOffset ());
+        yax->SetTitleFont (43);
+        yax->SetTitleSize (32);
+        yax->SetTitleOffset (2.0*yax->GetTitleOffset ());
+        zax->SetTitleFont (43);
+        zax->SetTitleSize (32);
+        zax->SetTitleOffset (2.2*zax->GetTitleOffset ());
+        xax->SetLabelFont (43);
+        xax->SetLabelSize (32);
+        yax->SetLabelFont (43);
+        yax->SetLabelSize (32);
+        zax->SetLabelFont (43);
+        zax->SetLabelSize (24);
+
+        h2->DrawCopy ("colz");
+        SaferDelete (&h2);
+
+        tl->SetTextColor (kBlack);
+        tl->SetTextAlign (11);
+        tl->SetTextSize (28);
+        tl->DrawLatexNDC (0.22, 0.22, Form ("N_{ch}^{rec} = %i-%i", (int) std::ceil (multBins[iMult]), (int) std::floor (multBins[iMult+1])));
+      } // end loop over iMult
+    } // end loop over iSys
+
+    c->cd (0);
+    myText (0.065, 0.973, kBlack, "#bf{#it{ATLAS}} Internal", 0.027);
+
+    c->cd (1);                                                                 
+    myText (0.2, 0.85, kBlack, "Pythia8 #it{pp} + #it{p}+Pb Overlay, #sqrt{s_{NN}} = 5.02 TeV", 0.04);
+    myText (0.2, 0.79, kBlack, Form ("%s tracks", trackWPStrs[iWP].c_str ()), 0.04);
+
+    c->cd (4);
+    myText (0.2, 0.85, kBlack, "Pythia8 #it{pp}, #sqrt{s} = 5.02 TeV", 0.04);
+    myText (0.2, 0.79, kBlack, Form ("%s tracks", trackWPStrs[iWP].c_str ()), 0.04);
+    
+    c->SaveAs (Form ("%s/Plots/TrackingPerformance/EfficiencyMap_Complete.pdf", workPath.Data ()));
+  } // end loop over iSys
+
+
 
   for (int iSys : systems) {
 
@@ -1618,29 +1712,6 @@ void PlotTrackingPerformance () {
 
       for (int iMult = 0; iMult < nMultBins; iMult++) {
 
-        for (int iEta = 0; iEta < nEtaTrkBins; iEta++) {
-
-          //if (f_primary_rate[iSys][iWP][iMult][iEta])
-          //  f_primary_rate[iSys][iWP][iMult][iEta]->Write ();
-
-          if (gf_primary_rate[iSys][iWP][iMult][iEta])
-            gf_primary_rate[iSys][iWP][iMult][iEta]->Write ();
-
-          //if (f_primary_rate_fakes_p100[iSys][iWP][iMult][iEta])
-          //  f_primary_rate_fakes_p100[iSys][iWP][iMult][iEta]->Write ();
-
-          if (gf_primary_rate_fakes_p100[iSys][iWP][iMult][iEta])
-            gf_primary_rate_fakes_p100[iSys][iWP][iMult][iEta]->Write ();
-
-          if (h_primary_rate[iSys][iWP][iMult][iEta])
-            h_primary_rate[iSys][iWP][iMult][iEta]->Write ();
-
-          if (h_primary_rate_fakes_p100[iSys][iWP][iMult][iEta])
-            h_primary_rate_fakes_p100[iSys][iWP][iMult][iEta]->Write ();
-
-
-        } // end loop over iEta
-
         for (int iPID = 0; iPID < nPIDs; iPID++) {
 
           if (h2_efficiency[iSys][iPID][iWP][iMult])
@@ -1655,8 +1726,7 @@ void PlotTrackingPerformance () {
   } // end loop over iSys
 
 
-  {
-    const short iSys = 2;
+  for (int iSys = 0; iSys < 3; iSys++) {
 
     for (int iWP = 0; iWP < trackWPs.size (); iWP++) {
 
@@ -1664,23 +1734,17 @@ void PlotTrackingPerformance () {
 
         for (int iEta = 0; iEta < nEtaTrkBins; iEta++) {
 
-          //if (f_primary_rate[iSys][iWP][iMult][iEta])
-          //  f_primary_rate[iSys][iWP][iMult][iEta]->Write ();
-
           if (gf_primary_rate[iSys][iWP][iMult][iEta])
             gf_primary_rate[iSys][iWP][iMult][iEta]->Write ();
-
-          //if (f_primary_rate_fakes_p100[iSys][iWP][iMult][iEta])
-          //  f_primary_rate_fakes_p100[iSys][iWP][iMult][iEta]->Write ();
 
           if (gf_primary_rate_fakes_p100[iSys][iWP][iMult][iEta])
             gf_primary_rate_fakes_p100[iSys][iWP][iMult][iEta]->Write ();
 
-          if (h_primary_rate[iSys][iWP][iMult][iEta])
-            h_primary_rate[iSys][iWP][iMult][iEta]->Write ();
+          if (g_primary_rate[iSys][iWP][iMult][iEta])
+            g_primary_rate[iSys][iWP][iMult][iEta]->Write ();
 
-          if (h_primary_rate_fakes_p100[iSys][iWP][iMult][iEta])
-            h_primary_rate_fakes_p100[iSys][iWP][iMult][iEta]->Write ();
+          if (g_primary_rate_fakes_p100[iSys][iWP][iMult][iEta])
+            g_primary_rate_fakes_p100[iSys][iWP][iMult][iEta]->Write ();
 
 
         } // end loop over iEta
@@ -1689,7 +1753,7 @@ void PlotTrackingPerformance () {
 
     } // end loop over iWP
 
-  } // end iSys = 2 scope
+  } // end loop over iSys
 
 
   outFile->Close ();

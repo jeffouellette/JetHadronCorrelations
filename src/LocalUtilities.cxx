@@ -1777,29 +1777,22 @@ TH2D** LoadTrackingEfficiency () {
 
 
 /**
- * Returns the tracking purity histograms.
+ * Returns the tracking purity histograms (stored as TGAEs).
  */
-TH1D** LoadTrackingPurity () {
-  TDirectory* gdir = gDirectory;
-
-  //TString fname = Form ("%s/TrackingPerformance/Nominal/outFile.root", rootPath.Data ());
-  //std::cout << "Trying to resolve tracking performance file in " << fname.Data () << std::endl;
-  //TFile* infile = new TFile (fname, "read");
+TGAE** LoadTrackingPurity () {
   TString fname = Form ("%s/aux/TrackingPerformance.root", workPath.Data ());
   std::cout << "Trying to resolve tracking performance file in " << fname.Data () << std::endl;
   TFile* infile = new TFile (fname, "read");
 
   const std::string wp = (DoHITightVar () ? "trk_HItight" : (DoHILooseVar () ? "trk_HIloose" : "trk_TightPrimary"));
   const int iDR = 3;
-  const std::string sys = Ispp () ? "pp" : "pPb";
-  //const std::string sys = "pp";
+  const std::string sys = (!Ispp () && DoJetPrimFracVar () ? "hybrid" : (Ispp () ? "pp" : "pPb"));
 
-  TH1D** h_trk_pur = Get1DArray <TH1D*> (nEtaTrkBins);
+  TGAE** g_trk_pur = Get1DArray <TGAE*> (nEtaTrkBins);
 
   for (int iEta = 0; iEta < nEtaTrkBins; iEta++) {
-    h_trk_pur[iEta] = (TH1D*) infile->Get (Form ("h_primary_rate_%s_%s_iDR%i_iEta%i", sys.c_str (), wp.c_str (), iDR, iEta))->Clone (Form ("h_primary_rate_iDR%i_iEta%i", iDR, iEta));
-
-    h_trk_pur[iEta]->SetDirectory (gdir);
+    g_trk_pur[iEta] = (TGAE*) infile->Get (Form ("g_primary_rate_%s_%s_iDR%i_iEta%i", sys.c_str (), wp.c_str (), iDR, iEta))->Clone (Form ("g_primary_rate_iDR%i_iEta%i", iDR, iEta));
+    g_trk_pur[iEta]->SetBit (TGraph::kIsSortedX, true); // specifies that x-axis is sorted from low to high; improves Eval function time by allowing binary search
   }
 
   std::cout << "Loaded tracking purities, closing file" << std::endl;
@@ -1807,37 +1800,36 @@ TH1D** LoadTrackingPurity () {
   infile->Close ();
   SaferDelete (&infile);
 
-  return h_trk_pur;
+  return g_trk_pur;
 }
 
 
 
 /**
- * Returns array of functions that fit the tracking purity.
+ * Returns array of TGAEs of fits to the tracking purity.
  */
-TGraph** LoadTrackingPurityFuncs (const bool useHybridFrac) {
+TGAE** LoadTrackingPurityFuncs () {
   TString fname = Form ("%s/aux/TrackingPerformance.root", workPath.Data ());
   std::cout << "Trying to resolve tracking performance file in " << fname.Data () << std::endl;
   TFile* infile = new TFile (fname, "read");
 
   const std::string wp = (DoHITightVar () ? "trk_HItight" : (DoHILooseVar () ? "trk_HIloose" : "trk_TightPrimary"));
-  //const int iMult = nMultBins-1;
   const int iDR = 3;
-  const std::string sys = (useHybridFrac ? "hybrid" : (Ispp () ? "pp" : "pPb"));
+  const std::string sys = (!Ispp () && DoJetPrimFracVar () ? "hybrid" : (Ispp () ? "pp" : "pPb"));
 
-  TGraph** g_trk_pur = Get1DArray <TGraph*> (nEtaTrkBins);
+  TGAE** gf_trk_pur = Get1DArray <TGAE*> (nEtaTrkBins);
 
   for (int iEta = 0; iEta < nEtaTrkBins; iEta++) {
-    g_trk_pur[iEta] = (TGraph*) ((TGraph*) infile->Get (Form ("gf_primary_rate%s_%s_%s_iDR%i_iEta%i", DoFakeRateVar () ? "_fakes_p100" : "", sys.c_str (), wp.c_str (), iDR, iEta)))->Clone (Form ("gf_primary_rate_iDR%i_iEta%i", iDR, iEta));
-    g_trk_pur[iEta]->SetBit (TGraph::kIsSortedX, true); // specifies that x-axis is sorted from low to high; improves Eval function time by allowing binary search
+    gf_trk_pur[iEta] = (TGAE*) ((TGAE*) infile->Get (Form ("gf_primary_rate%s_%s_%s_iDR%i_iEta%i", DoFakeRateVar () ? "_fakes_p100" : "", sys.c_str (), wp.c_str (), iDR, iEta)))->Clone (Form ("gf_primary_rate_iDR%i_iEta%i", iDR, iEta));
+    gf_trk_pur[iEta]->SetBit (TGraph::kIsSortedX, true); // specifies that x-axis is sorted from low to high; improves Eval function time by allowing binary search
   }
 
-  std::cout << "Loaded tracking purity functions" << std::endl;
+  std::cout << "Loaded tracking purity functions, closing file" << std::endl;
 
   infile->Close ();
   SaferDelete (&infile);
 
-  return g_trk_pur;
+  return gf_trk_pur;
 }
 
 

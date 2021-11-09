@@ -193,21 +193,21 @@ std::vector <std::vector <TString>> variationGroups = {
 
 
 std::map <TString, MyStyle> varStyles = {
-  {"HITightVar",        MyStyle (myLiteRed,       4)},
-  {"HILooseVar",        MyStyle (myCyan,          4)},
-  {"TrkEffVar",         MyStyle (myLitePurple,    4)},
-  {"FakeRateVar",       MyStyle (myLiteYellow,    4)},
-  {"PrimFitVar",        MyStyle (myLiteBlue,      4)},
-  {"JetPrimFracVar",    MyStyle (kRed,            4)},
-  {"PartSpcVar",        MyStyle (myLiteGreen,     4)},
+  {"HITightVar",        MyStyle (manyColors[0],  4)},
+  {"HILooseVar",        MyStyle (manyColors[2],  4)},
+  {"TrkEffVar",         MyStyle (manyColors[4],  4)},
+  {"FakeRateVar",       MyStyle (manyColors[6],  4)},
+  {"PrimFitVar",        MyStyle (manyColors[8],  4)},
+  {"JetPrimFracVar",    MyStyle (manyColors[10],  4)},
+  {"PartSpcVar",        MyStyle (manyColors[12],  4)},
 
-  {"FcalCentVar",       MyStyle (kViolet-5,       5)},
-  {"FineFcalCentVar",   MyStyle (kViolet,         5)},
+  {"MixCatVar1",        MyStyle (manyColors[14],  7)},
+  {"MixCatVar2",        MyStyle (manyColors[16],  7)},
+  {"MixCatVar3",        MyStyle (manyColors[18],  7)},
+  {"NonClosureVar",     MyStyle (manyColors[20],  7)},
 
-  {"MixCatVar1",        MyStyle (myRed,           7)},
-  {"MixCatVar2",        MyStyle (myGreen,         7)},
-  {"MixCatVar3",        MyStyle (kViolet-3,       7)},
-  {"NonClosureVar",     MyStyle (myOrange,        7)},
+  {"FcalCentVar",       MyStyle (manyColors[1],   5)},
+  {"FineFcalCentVar",   MyStyle (manyColors[3],   5)},
 
   {"JESVar0",           MyStyle (manyColors[0],   2)},
   {"JESVar1",           MyStyle (manyColors[1],   2)},

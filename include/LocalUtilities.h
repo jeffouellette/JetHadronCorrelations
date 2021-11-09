@@ -547,15 +547,15 @@ TH2D** LoadTrackingEfficiency ();
 
 
 /**
- * Returns the tracking purity histograms.
+ * Returns the tracking purity histograms (stored as TGAEs).
  */
-TH1D** LoadTrackingPurity ();
+TGAE** LoadTrackingPurity ();
 
 
 /**
- * Returns array of functions that fit the tracking purity.
+ * Returns array of TGAEs of fits to the tracking purity.
  */
-TGraph** LoadTrackingPurityFuncs (const bool useHybridFrac);
+TGAE** LoadTrackingPurityFuncs ();
 
 
 /**

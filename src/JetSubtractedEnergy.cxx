@@ -256,8 +256,8 @@ bool JetSubtractedEnergy (const char* directory,
     }
 
 
-    float fcal_et_Pb = 0, fcal_et_p = 0;
-    float zdc_calibE_Pb = 0, zdc_calibE_p = 0;
+    float fcal_et_Pb = 0;//, fcal_et_p = 0;
+    float zdc_calibE_Pb = 0;//, zdc_calibE_p = 0;
     //float edgeGap_Pb = 0, edgeGap_p = 0;
     //bool zdc_Pb_decision = false, zdc_p_decision = false;
 
@@ -307,7 +307,7 @@ bool JetSubtractedEnergy (const char* directory,
           continue;
 
         const float jpt = GetAktHIJetPt (iJ, r0p4);
-        const float jen = GetAktHIJetEn (iJ, r0p4);
+        //const float jen = GetAktHIJetEn (iJ, r0p4);
         if (jpt < 60)
           continue;
 

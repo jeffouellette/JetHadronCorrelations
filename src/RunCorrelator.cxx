@@ -19,6 +19,7 @@
 #include <TF1.h>
 #include <TPRegexp.h>
 #include <TRandom3.h>
+#include <TGraphAsymmErrors.h>
 
 #include <iostream>
 #include <math.h>
@@ -243,12 +244,12 @@ bool Correlator (const char* tag, const char* outFilePattern, TTree* jetsTree, T
 
   // for tracking corections
   TH2D** h2_trk_eff = LoadTrackingEfficiency ();
-  TH1D** h_trk_pur = LoadTrackingPurity ();
-  TGraph** g_trk_pur = LoadTrackingPurityFuncs (Ispp () || DoJetPrimFracVar () ? true : false);
+  TGAE** g_trk_pur = LoadTrackingPurity ();
+  TGAE** gf_trk_pur = LoadTrackingPurityFuncs ();
 
 
-  // for MC reweighting to data
-  TF1** f_jet_wgts = LoadJetPtWeights ();
+  // for MC reweighting to data (not really needed here..)
+  //TF1** f_jet_wgts = LoadJetPtWeights ();
 
 
   // for corrected FCal Et values in data overlay
@@ -380,6 +381,11 @@ bool Correlator (const char* tag, const char* outFilePattern, TTree* jetsTree, T
       event_weight = 1; // optionally set to trigger prescale, but not really necessary
       prescale = jetTrigger->trigPrescale;
     }
+
+
+    // p+Pb data only -- exclude ZDC == 0 events (errors)
+    if (IsCollisions () && IspPb () && ZdcCalibEnergy_A == 0)
+      continue;
 
 
     // vertexing cuts, require no pileup vertices and primary vertex with |vz| < 150mm
@@ -693,7 +699,7 @@ bool Correlator (const char* tag, const char* outFilePattern, TTree* jetsTree, T
 
 
         const float teff = h2_trk_eff[iMult]->GetBinContent (h2_trk_eff[iMult]->FindBin (trk_eta[iTrk], trk_pt[iTrk]));
-        const float tpur = (DoPrimFitVar () ? h_trk_pur[iEta]->GetBinContent (h_trk_pur[iEta]->FindBin (trk_pt[iTrk])) : g_trk_pur[iEta]->Eval (trk_pt[iTrk]));
+        const float tpur = (DoPrimFitVar () ? g_trk_pur[iEta]->Eval (trk_pt[iTrk]) : gf_trk_pur[iEta]->Eval (trk_pt[iTrk]));
         const float twgt = thisjwgt * (UseTruthParticles () ? 1 : (teff > 0. ? tpur / teff : 0.));
 
         for (short iPtCh = 0; iPtCh < nPtChSelections; iPtCh++) {
@@ -786,10 +792,10 @@ bool Correlator (const char* tag, const char* outFilePattern, TTree* jetsTree, T
 
   for (short iEta = 0; iEta < nEtaTrkBins; iEta++) {
     SaferDelete (&g_trk_pur[iEta]);
-    SaferDelete (&h_trk_pur[iEta]);
+    SaferDelete (&gf_trk_pur[iEta]);
   }
   Delete1DArray (g_trk_pur, nEtaTrkBins);
-  Delete1DArray (h_trk_pur, nEtaTrkBins);
+  Delete1DArray (gf_trk_pur, nEtaTrkBins);
 
   //SaferDelete (&h_probs);
 
