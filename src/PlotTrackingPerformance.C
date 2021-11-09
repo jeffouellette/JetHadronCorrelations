@@ -87,7 +87,7 @@ TF1* DoPurityFit (TH1D* h, const int degree, const int nderiv, const float seedC
   hf->Fit (fit, "RN0Q");
   SaferDelete (&hf);
 
-  if (fit->GetChisquare () / fit->GetNDF () > 2) {//2.5e-5 * 3*3 * h->GetNbinsX ()) {
+  if (fit->GetChisquare () / fit->GetNDF () > 4) {//2.5e-5 * 3*3 * h->GetNbinsX ()) {
     std::cout << "--> Fit didn't work for " << fname << ", chi2/ndf = " << fit->GetChisquare () << " / " << fit->GetNDF () << std::endl;
     if (degree < 10) {
       std::cout << "  |-->   Trying again with a degree-" << degree+1 << " polynomial" << std::endl;
@@ -164,13 +164,13 @@ void PlotTrackingPerformance () {
   TH1D***** h_fake_rate                 = Get4DArray <TH1D*> (nSystems, trackWPs.size (), nDRBins, nEtaTrkBins);
   TH1D***** h_secondary_rate            = Get4DArray <TH1D*> (nSystems, trackWPs.size (), nDRBins, nEtaTrkBins);
   TH1D***** h_strange_rate              = Get4DArray <TH1D*> (nSystems, trackWPs.size (), nDRBins, nEtaTrkBins);
-  TH1D***** h_primary_rate              = Get4DArray <TH1D*> (nSystems, trackWPs.size (), nDRBins, nEtaTrkBins);
-  TH1D***** h_primary_rate_fakes_p100   = Get4DArray <TH1D*> (nSystems, trackWPs.size (), nDRBins, nEtaTrkBins);
+  TH1D***** h_primary_rate              = Get4DArray <TH1D*> (nSystems+1, trackWPs.size (), nDRBins, nEtaTrkBins); // extra system is the "hybrid" primary rate
+  TH1D***** h_primary_rate_fakes_p100   = Get4DArray <TH1D*> (nSystems+1, trackWPs.size (), nDRBins, nEtaTrkBins); // extra system is the "hybrid" primary rate
 
-  TF1***** f_primary_rate                 = Get4DArray <TF1*> (nSystems, trackWPs.size (), nDRBins, nEtaTrkBins);
-  TF1***** f_primary_rate_fakes_p100      = Get4DArray <TF1*> (nSystems, trackWPs.size (), nDRBins, nEtaTrkBins);
-  TGraph***** gf_primary_rate             = Get4DArray <TGraph*> (nSystems, trackWPs.size (), nDRBins, nEtaTrkBins);
-  TGraph***** gf_primary_rate_fakes_p100  = Get4DArray <TGraph*> (nSystems, trackWPs.size (), nDRBins, nEtaTrkBins);
+  TF1*****    f_primary_rate              = Get4DArray <TF1*> (nSystems, trackWPs.size (), nDRBins, nEtaTrkBins);
+  TF1*****    f_primary_rate_fakes_p100   = Get4DArray <TF1*> (nSystems, trackWPs.size (), nDRBins, nEtaTrkBins);
+  TGraph***** gf_primary_rate             = Get4DArray <TGraph*> (nSystems+1, trackWPs.size (), nDRBins, nEtaTrkBins); // extra system is the "hybrid" primary rate
+  TGraph***** gf_primary_rate_fakes_p100  = Get4DArray <TGraph*> (nSystems+1, trackWPs.size (), nDRBins, nEtaTrkBins); // extra system is the "hybrid" primary rate
 
   // eta-integrated plots to study the fake rate in jets.
   TH1D**** h_fake_tracks_etaInt         = Get3DArray <TH1D*> (nSystems, trackWPs.size (), nDRBins);
@@ -467,11 +467,11 @@ void PlotTrackingPerformance () {
 
         for (int iEta = 0; iEta < nEtaTrkBins; iEta++) {
 
-          TF1* f = DoPurityFit (h_primary_rate[iSys][iWP][iDR][iEta], iWP > 0 ? 4 : 6, 2, iWP > 0 ? 100 : 20, iWP > 0 ? 0.001 : 0.005);
+          TF1* f = DoPurityFit (h_primary_rate[iSys][iWP][iDR][iEta], iWP > 0 ? 4 : 6, iWP > 0 ? 1 : 2, iWP > 0 ? 150 : 20, iWP > 0 ? 0.001 : 0.005);
           gf_primary_rate[iSys][iWP][iDR][iEta] = EvalFunction (Form ("gf_primary_rate_%s_%s_iDR%i_iEta%i", sys.Data (), trackWPNames[iWP].c_str (), iDR, iEta), f, 0.4, 150, 10000);
           f_primary_rate[iSys][iWP][iDR][iEta] = f;
 
-          f = DoPurityFit (h_primary_rate_fakes_p100[iSys][iWP][iDR][iEta], iWP > 0 ? 4 : 6, 2, iWP > 0 ? 100 : 20, iWP > 0 ? 0.001 : 0.005);; 
+          f = DoPurityFit (h_primary_rate_fakes_p100[iSys][iWP][iDR][iEta], iWP > 0 ? 4 : 6, iWP > 0 ? 1 : 2, iWP > 0 ? 150 : 20, iWP > 0 ? 0.001 : 0.005);; 
           gf_primary_rate_fakes_p100[iSys][iWP][iDR][iEta] = EvalFunction (Form ("gf_primary_rate_fakes_p100_%s_%s_iDR%i_iEta%i", sys.Data (), trackWPNames[iWP].c_str (), iDR, iEta), f, 0.4, 150, 10000);
           f_primary_rate_fakes_p100[iSys][iWP][iDR][iEta] = f;
 
@@ -485,6 +485,63 @@ void PlotTrackingPerformance () {
 
 
 
+  for (int iWP = 0; iWP < trackWPs.size (); iWP++) {
+
+    {
+      const int iDR = nDRBins-1;
+
+      for (int iEta = 0; iEta < nEtaTrkBins; iEta++) {
+
+        double x, y_jet, y_mb;
+        const float wgt = 0.5; // bias factor towards one rate or the other
+
+        TGraph* g_hybrid = (TGraph*) gf_primary_rate[0][iWP][iDR][iEta]->Clone (Form ("gf_primary_rate_hybrid_%s_iDR%i_iEta%i", trackWPNames[iWP].c_str (), iDR, iEta));
+        TGraph* g_jet = gf_primary_rate[0][iWP][iDR][iEta]; // Pythia primary rate
+        TGraph* g_mb  = gf_primary_rate[1][iWP][iDR][iEta]; // Hijing primary rate
+
+        for (int i = 0; i < g_hybrid->GetN (); i++) {
+          g_jet->GetPoint (i, x, y_jet);
+          g_mb->GetPoint (i, x, y_mb);
+
+          g_hybrid->SetPoint (i, x, wgt*y_jet + (1.-wgt)*y_mb);
+        }
+
+        gf_primary_rate[2][iWP][iDR][iEta] = g_hybrid;
+
+        TH1D* h = (TH1D*) h_primary_rate[0][iWP][iDR][iEta]->Clone (Form ("h_primary_rate_hybrid_%s_iDR%i_iEta%i", trackWPNames[iWP].c_str (), iDR, iEta));
+        h->Reset ();
+        h->Add (h_primary_rate[0][iWP][iDR][iEta], wgt);
+        h->Add (h_primary_rate[1][iWP][iDR][iEta], 1.-wgt);
+        h_primary_rate[2][iWP][iDR][iEta] = h;
+
+
+        g_hybrid = (TGraph*) gf_primary_rate_fakes_p100[0][iWP][iDR][iEta]->Clone (Form ("gf_primary_rate_hybrid_fakes_p100_%s_iDR%i_iEta%i", trackWPNames[iWP].c_str (), iDR, iEta));
+        g_jet = gf_primary_rate_fakes_p100[0][iWP][iDR][iEta]; // Pythia primary rate
+        g_mb  = gf_primary_rate_fakes_p100[1][iWP][iDR][iEta]; // Hijing primary rate
+
+        for (int i = 0; i < g_hybrid->GetN (); i++) {
+          g_jet->GetPoint (i, x, y_jet);
+          g_mb->GetPoint (i, x, y_mb);
+
+          g_hybrid->SetPoint (i, x, wgt*y_jet + (1.-wgt)*y_mb);
+        }
+
+        gf_primary_rate_fakes_p100[2][iWP][iDR][iEta] = g_hybrid;
+
+        h = (TH1D*) h_primary_rate_fakes_p100[0][iWP][iDR][iEta]->Clone (Form ("h_primary_rate_hybrid_fakes_p100_%s_iDR%i_iEta%i", trackWPNames[iWP].c_str (), iDR, iEta));
+        h->Reset ();
+        h->Add (h_primary_rate_fakes_p100[0][iWP][iDR][iEta], wgt);
+        h->Add (h_primary_rate_fakes_p100[1][iWP][iDR][iEta], 1.-wgt);
+        h_primary_rate_fakes_p100[2][iWP][iDR][iEta] = h;
+
+      } // end loop over iEta
+
+    } // end loop over iDR
+
+  } // end loop over iWP
+
+
+
 
   TLatex* tl = new TLatex ();
   TLine* l = new TLine ();
@@ -494,8 +551,6 @@ void PlotTrackingPerformance () {
 
 
   for (int iSys : systems) {
-
-    const int iMult = nMultBins-1;
 
     const char* cname = Form ("c_truth_matching_prob_%s", iSys == 0 ? "pp" : "pPb");
 
@@ -914,7 +969,6 @@ void PlotTrackingPerformance () {
 
 
   for (int iWPhere = 0; iWPhere < trackWPs.size (); iWPhere++) {
-  //{ const short iWPhere = iWP;
     for (int iSys : systems) {
 
       const int iDR = nDRBins-1;
@@ -1011,10 +1065,103 @@ void PlotTrackingPerformance () {
   } // end loop over iWPhere
 
 
+  for (int iWPhere = 0; iWPhere < trackWPs.size (); iWPhere++) {
+
+    const int iSys = 2;
+    const int iDR = nDRBins-1;
+    const char* cname = Form ("c_pur_sum_hybrid_%s", trackWPNames[iWPhere].c_str ());
+
+    TCanvas* c = new TCanvas (cname, "", 800, 800);
+
+    const double lMargin = 0.15;
+    const double rMargin = 0.04;
+    const double bMargin = 0.15;
+    const double tMargin = 0.04;
+
+    c->SetLeftMargin (lMargin);
+    c->SetRightMargin (rMargin);
+    c->SetBottomMargin (bMargin);
+    c->SetTopMargin (tMargin);
+
+    c->SetLogx ();
+
+    TH1D* htemp = new TH1D ("htemp", "", 1, pTchBins[0], pTchBins[nPtchBins]);
+    htemp->SetBinContent (1, 1);
+    
+    TAxis* xax = htemp->GetXaxis ();
+    TAxis* yax = htemp->GetYaxis ();
+
+    xax->SetTitle ("#it{p}_{T}^{ch} [GeV]");
+    xax->SetTitleOffset (0.9 * xax->GetTitleOffset ());
+    xax->SetLabelSize (0);
+
+    yax->SetTitle ("Primary Fraction");
+    yax->SetLabelFont (43);
+    yax->SetLabelSize (32);
+    yax->SetLabelOffset (1.8 * yax->GetLabelOffset ());
+    const double ymin = 0.82;
+    const double ymax = 1.06;
+    yax->SetRangeUser (ymin, ymax);
+
+    htemp->SetLineWidth (1);
+    htemp->SetLineStyle (2);
+
+    htemp->DrawCopy ("hist");
+    SaferDelete (&htemp);
+
+    tl->SetTextFont (43);
+    tl->SetTextSize (32);
+    tl->SetTextAlign (21);
+    
+    const double yoff = ymin - 0.04 * (ymax-ymin) / (1.-tMargin-bMargin);
+    tl->DrawLatex (0.4,  yoff, "0.4");
+    tl->DrawLatex (0.7,  yoff, "0.7");
+    tl->DrawLatex (1,  yoff, "1");
+    tl->DrawLatex (2,  yoff, "2");
+    tl->DrawLatex (3,  yoff, "3");
+    tl->DrawLatex (4,  yoff, "4");
+    tl->DrawLatex (5,  yoff, "5");
+    tl->DrawLatex (6,  yoff, "6");
+    tl->DrawLatex (7,  yoff, "7");
+    tl->DrawLatex (10, yoff, "10");
+    tl->DrawLatex (20, yoff, "20");
+    tl->DrawLatex (30, yoff, "30");
+    tl->DrawLatex (40, yoff, "40");
+    tl->DrawLatex (60, yoff, "60");
+    //tl->DrawLatex (80, yoff, "80");
+    tl->DrawLatex (100, yoff, "100");
+
+    //for (int iEta = 0; iEta < nEtaTrkBins; iEta++) {
+    for (int iEta : {0, 2, 4}) {
+      myDraw (h_primary_rate[iSys][iWPhere][iDR][iEta], colors[iEta], kOpenCircle, 0.8);
+      myDraw (gf_primary_rate[iSys][iWPhere][iDR][iEta], colors[iEta], kDot, 1.0, 1, 2, "L");
+      myDraw (gf_primary_rate[0][iWPhere][iDR][iEta], colors[iEta], kDot, 1.0, 2, 1, "L");
+      myDraw (gf_primary_rate[1][iWPhere][iDR][iEta], colors[iEta], kDot, 1.0, 2, 1, "L");
+      myDrawFill (gf_primary_rate[0][iWPhere][iDR][iEta], gf_primary_rate[1][iWPhere][iDR][iEta], colors[iEta], 0.12);
+    }
+
+    tl->SetTextColor (kBlack);
+    tl->SetTextAlign (11);
+
+    tl->SetTextSize (28);
+    tl->DrawLatexNDC (0.22, 0.89, "#bf{#it{ATLAS}} Simulation Internal");
+    tl->SetTextSize (24);
+    tl->DrawLatexNDC (0.22, 0.85, "Pythia8 #it{pp} + Hijing #it{p}+Pb average, #sqrt{s_{NN}} = 5.02 TeV");
+    tl->DrawLatexNDC (0.22, 0.81, Form ("%s tracks", trackWPStrs[iWPhere].c_str ()));
+
+    //tl->SetTextSize (18);
+    //tl->SetTextAlign (21);
+    //tl->DrawLatexNDC (0.705, 0.37, "Primaries");
+    for (int iEta : {0, 2, 4})
+      myLineText2 (0.74, 0.34-(iEta/2)*0.036, colors[iEta], kOpenCircle, Form ("%g < |#eta| < %g", etaTrkBins[iEta], etaTrkBins[iEta+1]), 1.2, 0.026, true);
+
+    c->SaveAs (Form ("%s/Plots/TrackingPerformance/PuritySummary_Hybrid_%s.pdf", workPath.Data (), trackWPNames[iWPhere].c_str ()));
+  } // end loop over iWPhere
+
+
 
   for (int iSys : systems) {
 
-    const int iDR = nDRBins-1;
     const char* cname = Form ("c_pur_sum_dr_%s", iSys == 0 ? "pp" : "pPb");
 
     TCanvas* c = new TCanvas (cname, "", 800, 800);
@@ -1125,103 +1272,6 @@ void PlotTrackingPerformance () {
     c->SaveAs (Form ("%s/Plots/TrackingPerformance/PuritySummary_DR_%s.pdf", workPath.Data (), iSys == 0 ? "pp" : "pPb"));
   } // end loop over iSys
 
-
-  for (int iWPhere = 0; iWPhere < trackWPs.size (); iWPhere++) {
-  //{ const short iWPhere = iWP;
-    for (int iSys : systems) {
-
-      const int iDR = nDRBins-1;
-      const char* cname = Form ("c_pur_sum_%s_%s", iSys == 0 ? "pp" : "pPb", trackWPNames[iWPhere].c_str ());
-
-      TCanvas* c = new TCanvas (cname, "", 800, 800);
-
-      const double lMargin = 0.15;
-      const double rMargin = 0.04;
-      const double bMargin = 0.15;
-      const double tMargin = 0.04;
-
-      c->SetLeftMargin (lMargin);
-      c->SetRightMargin (rMargin);
-      c->SetBottomMargin (bMargin);
-      c->SetTopMargin (tMargin);
-
-      c->SetLogx ();
-
-      TH1D* htemp = new TH1D ("htemp", "", 1, pTchBins[0], pTchBins[nPtchBins]); 
-      htemp->SetBinContent (1, 1);
-
-      TAxis* xax = htemp->GetXaxis ();
-      TAxis* yax = htemp->GetYaxis ();
-
-      xax->SetTitle ("#it{p}_{T}^{ch} [GeV]");
-      xax->SetTitleOffset (0.9 * xax->GetTitleOffset ());
-      xax->SetLabelSize (0);
-
-      yax->SetTitle ("Primary Fraction");
-      yax->SetLabelFont (43);
-      yax->SetLabelSize (32);
-      yax->SetLabelOffset (1.8 * yax->GetLabelOffset ());
-      const double ymin = 0.82;
-      const double ymax = 1.06;
-      yax->SetRangeUser (ymin, ymax);
-
-      htemp->SetLineWidth (1);
-      htemp->SetLineStyle (2);
-
-      htemp->DrawCopy ("hist");
-      SaferDelete (&htemp);
-
-      tl->SetTextFont (43);
-      tl->SetTextSize (32);
-      tl->SetTextAlign (21);
-
-      const double yoff = ymin - 0.04 * (ymax-ymin) / (1.-tMargin-bMargin);      
-      tl->DrawLatex (0.4,  yoff, "0.4");
-      tl->DrawLatex (0.7,  yoff, "0.7");
-      tl->DrawLatex (1,  yoff, "1");
-      tl->DrawLatex (2,  yoff, "2");
-      tl->DrawLatex (3,  yoff, "3");
-      tl->DrawLatex (4,  yoff, "4");
-      tl->DrawLatex (5,  yoff, "5");
-      tl->DrawLatex (6,  yoff, "6");
-      tl->DrawLatex (7,  yoff, "7");
-      tl->DrawLatex (10, yoff, "10");
-      tl->DrawLatex (20, yoff, "20");
-      tl->DrawLatex (30, yoff, "30");
-      tl->DrawLatex (40, yoff, "40");
-      tl->DrawLatex (60, yoff, "60");
-      //tl->DrawLatex (80, yoff, "80");
-      tl->DrawLatex (100, yoff, "100");
-
-      for (int iEta = 0; iEta < nEtaTrkBins; iEta++) {
-        myDraw (h_primary_rate[iSys][iWPhere][iDR][iEta], colors[iEta], kOpenCircle, 0.8);
-        //myDraw (gf_primary_rate[iSys][iWPhere][iDR][iEta], colors[iEta], kDot, 1.0, 1, 1, "L");
-        TF1* f = f_primary_rate[iSys][iWPhere][iDR][iEta];
-        if (f != nullptr) {
-          //f->SetRange (0.4, 150);
-          myDraw (f, colors[iEta], 1, 1);
-          //SaferDelete (&f);
-        }
-      }
-
-      tl->SetTextColor (kBlack);
-      tl->SetTextAlign (11);
-
-      tl->SetTextSize (28);
-      tl->DrawLatexNDC (0.22, 0.89, "#bf{#it{ATLAS}} Simulation Internal");      
-      tl->SetTextSize (24);
-      tl->DrawLatexNDC (0.22, 0.85, iSys == 0 ? "Pythia8 #it{pp}, #sqrt{s} = 5.02 TeV" : "Hijing #it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV");
-      tl->DrawLatexNDC (0.22, 0.81, Form ("%s tracks", trackWPStrs[iWPhere].c_str ()));
-
-      tl->SetTextSize (18);
-      tl->SetTextAlign (21);
-      tl->DrawLatexNDC (0.705, 0.37, "Primaries");
-      for (int iEta = 0; iEta < nEtaTrkBins; iEta++)
-        myLineText2 (0.74, 0.34-iEta*0.036, colors[iEta], kOpenCircle, Form ("%g < |#eta| < %g", etaTrkBins[iEta], etaTrkBins[iEta+1]), 1.2, 0.026, true);
-
-      c->SaveAs (Form ("%s/Plots/TrackingPerformance/PuritySummary_%s_%s.pdf", workPath.Data (), iSys == 0 ? "pp" : "pPb", trackWPNames[iWPhere].c_str ()));
-    } // end loop over iSys
-  } // end loop over iWPhere      
 
 
 
@@ -1570,18 +1620,27 @@ void PlotTrackingPerformance () {
 
         for (int iEta = 0; iEta < nEtaTrkBins; iEta++) {
 
-          if (f_primary_rate[iSys][iWP][iMult][iEta])
-            f_primary_rate[iSys][iWP][iMult][iEta]->Write ();
+          //if (f_primary_rate[iSys][iWP][iMult][iEta])
+          //  f_primary_rate[iSys][iWP][iMult][iEta]->Write ();
 
-          if (f_primary_rate_fakes_p100[iSys][iWP][iMult][iEta])
-            f_primary_rate_fakes_p100[iSys][iWP][iMult][iEta]->Write ();
+          if (gf_primary_rate[iSys][iWP][iMult][iEta])
+            gf_primary_rate[iSys][iWP][iMult][iEta]->Write ();
+
+          //if (f_primary_rate_fakes_p100[iSys][iWP][iMult][iEta])
+          //  f_primary_rate_fakes_p100[iSys][iWP][iMult][iEta]->Write ();
+
+          if (gf_primary_rate_fakes_p100[iSys][iWP][iMult][iEta])
+            gf_primary_rate_fakes_p100[iSys][iWP][iMult][iEta]->Write ();
 
           if (h_primary_rate[iSys][iWP][iMult][iEta])
             h_primary_rate[iSys][iWP][iMult][iEta]->Write ();
 
+          if (h_primary_rate_fakes_p100[iSys][iWP][iMult][iEta])
+            h_primary_rate_fakes_p100[iSys][iWP][iMult][iEta]->Write ();
+
+
         } // end loop over iEta
 
-  
         for (int iPID = 0; iPID < nPIDs; iPID++) {
 
           if (h2_efficiency[iSys][iPID][iWP][iMult])
@@ -1594,6 +1653,43 @@ void PlotTrackingPerformance () {
     } // end loop over iWP
 
   } // end loop over iSys
+
+
+  {
+    const short iSys = 2;
+
+    for (int iWP = 0; iWP < trackWPs.size (); iWP++) {
+
+      for (int iMult = 0; iMult < nMultBins; iMult++) {
+
+        for (int iEta = 0; iEta < nEtaTrkBins; iEta++) {
+
+          //if (f_primary_rate[iSys][iWP][iMult][iEta])
+          //  f_primary_rate[iSys][iWP][iMult][iEta]->Write ();
+
+          if (gf_primary_rate[iSys][iWP][iMult][iEta])
+            gf_primary_rate[iSys][iWP][iMult][iEta]->Write ();
+
+          //if (f_primary_rate_fakes_p100[iSys][iWP][iMult][iEta])
+          //  f_primary_rate_fakes_p100[iSys][iWP][iMult][iEta]->Write ();
+
+          if (gf_primary_rate_fakes_p100[iSys][iWP][iMult][iEta])
+            gf_primary_rate_fakes_p100[iSys][iWP][iMult][iEta]->Write ();
+
+          if (h_primary_rate[iSys][iWP][iMult][iEta])
+            h_primary_rate[iSys][iWP][iMult][iEta]->Write ();
+
+          if (h_primary_rate_fakes_p100[iSys][iWP][iMult][iEta])
+            h_primary_rate_fakes_p100[iSys][iWP][iMult][iEta]->Write ();
+
+
+        } // end loop over iEta
+
+      } // end loop over iMult
+
+    } // end loop over iWP
+
+  } // end iSys = 2 scope
 
 
   outFile->Close ();

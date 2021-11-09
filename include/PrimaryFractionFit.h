@@ -47,7 +47,7 @@ class PrimaryFractionFit {
         polyCoeffs[n] = 0;
         const long den = factorial (n);
         for (int np = n+1; np <= degree; np++) {
-          polyCoeffs[n] -= (ldouble) ((ldouble) factorial (np) / ((ldouble) factorial (np-n) * den)) * polyCoeffs[np] * std::pow (std::log (p[0]), np-n);
+          polyCoeffs[n] = polyCoeffs[n] - (ldouble) ((ldouble) factorial (np) / ((ldouble) factorial (np-n) * den)) * polyCoeffs[np] * std::pow (std::log (p[0]), np-n);
         }
       }
 

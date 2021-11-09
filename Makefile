@@ -4,7 +4,7 @@ LDFLAGS=`root-config --glibs --ldflags` -Llib -L${ROOT_UTILS_PATH}/lib -L${ATLAS
 
 libraries = LocalUtilities
 algorithms = JetHadronSkimmer CentralityAnalysis JetSubtractedEnergy TrackingPerformance TrackMomentumResolution JetEnergyResolution
-binaries = Process AnalyzeTrackMomentumResolution AnalyzeJetEnergyResolution RunCorrelator MakeResponseMatrix ProcessCorrelations ProcessUnfolding
+binaries = Process AnalyzeTrackMomentumResolution AnalyzeJetEnergyResolution RunCorrelator MakeResponseMatrix ProcessCorrelations ProcessUnfolding PlotTrackingPerformance
 
 .PHONY : libs algs bins directories clean
 

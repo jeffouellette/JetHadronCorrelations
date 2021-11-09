@@ -293,7 +293,7 @@ bool MakeResponseMatrix (const char* directory,
   // for tracking corections
   TH2D** h2_trk_eff = LoadTrackingEfficiency ();
   TH1D** h_trk_pur = LoadTrackingPurity ();
-  TF1** f_trk_pur = LoadTrackingPurityFuncs (Ispp () || DoJetPrimFracVar () ? true : false);
+  TGraph** g_trk_pur = LoadTrackingPurityFuncs (Ispp () || DoJetPrimFracVar () ? true : false);
 
 
   // for MC reweighting to data
@@ -652,7 +652,7 @@ bool MakeResponseMatrix (const char* directory,
           continue;
 
         const float teff = h2_trk_eff[iMult]->GetBinContent (h2_trk_eff[iMult]->FindBin (trk_eta[iTrk], trk_pt[iTrk]));
-        const float tpur = (DoPrimFitVar () ? h_trk_pur[iEta]->GetBinContent (h_trk_pur[iEta]->FindBin (trk_pt[iTrk])) : f_trk_pur[iEta]->Eval (trk_pt[iTrk]));
+        const float tpur = (DoPrimFitVar () ? h_trk_pur[iEta]->GetBinContent (h_trk_pur[iEta]->FindBin (trk_pt[iTrk])) : g_trk_pur[iEta]->Eval (trk_pt[iTrk]));
         const float twgt = (teff > 0. ? tpur / teff : 0.);
 
         // fill reco jet FF plots
@@ -685,10 +685,10 @@ bool MakeResponseMatrix (const char* directory,
   Delete1DArray (h2_trk_eff, nMultBins);
 
   for (int iEta = 0; iEta < nEtaTrkBins; iEta++) {
-    SaferDelete (&f_trk_pur[iEta]);
+    SaferDelete (&g_trk_pur[iEta]);
     SaferDelete (&h_trk_pur[iEta]);
   }
-  Delete1DArray (f_trk_pur, nEtaTrkBins);
+  Delete1DArray (g_trk_pur, nEtaTrkBins);
   Delete1DArray (h_trk_pur, nEtaTrkBins);
 
   for (int iFile = 0; iFile < nFiles; iFile++) {

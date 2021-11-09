@@ -555,7 +555,7 @@ TH1D** LoadTrackingPurity ();
 /**
  * Returns array of functions that fit the tracking purity.
  */
-TF1** LoadTrackingPurityFuncs (const bool usePPFrac);
+TGraph** LoadTrackingPurityFuncs (const bool useHybridFrac);
 
 
 /**

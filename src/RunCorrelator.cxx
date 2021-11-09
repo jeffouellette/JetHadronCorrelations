@@ -244,7 +244,7 @@ bool Correlator (const char* tag, const char* outFilePattern, TTree* jetsTree, T
   // for tracking corections
   TH2D** h2_trk_eff = LoadTrackingEfficiency ();
   TH1D** h_trk_pur = LoadTrackingPurity ();
-  TF1** f_trk_pur = LoadTrackingPurityFuncs (Ispp () || DoJetPrimFracVar () ? true : false);
+  TGraph** g_trk_pur = LoadTrackingPurityFuncs (Ispp () || DoJetPrimFracVar () ? true : false);
 
 
   // for MC reweighting to data
@@ -693,7 +693,7 @@ bool Correlator (const char* tag, const char* outFilePattern, TTree* jetsTree, T
 
 
         const float teff = h2_trk_eff[iMult]->GetBinContent (h2_trk_eff[iMult]->FindBin (trk_eta[iTrk], trk_pt[iTrk]));
-        const float tpur = (DoPrimFitVar () ? h_trk_pur[iEta]->GetBinContent (h_trk_pur[iEta]->FindBin (trk_pt[iTrk])) : f_trk_pur[iEta]->Eval (trk_pt[iTrk]));
+        const float tpur = (DoPrimFitVar () ? h_trk_pur[iEta]->GetBinContent (h_trk_pur[iEta]->FindBin (trk_pt[iTrk])) : g_trk_pur[iEta]->Eval (trk_pt[iTrk]));
         const float twgt = thisjwgt * (UseTruthParticles () ? 1 : (teff > 0. ? tpur / teff : 0.));
 
         for (short iPtCh = 0; iPtCh < nPtChSelections; iPtCh++) {
@@ -785,10 +785,10 @@ bool Correlator (const char* tag, const char* outFilePattern, TTree* jetsTree, T
   SaferDelete (&h2_trk_eff);
 
   for (short iEta = 0; iEta < nEtaTrkBins; iEta++) {
-    SaferDelete (&f_trk_pur[iEta]);
+    SaferDelete (&g_trk_pur[iEta]);
     SaferDelete (&h_trk_pur[iEta]);
   }
-  Delete1DArray (f_trk_pur, nEtaTrkBins);
+  Delete1DArray (g_trk_pur, nEtaTrkBins);
   Delete1DArray (h_trk_pur, nEtaTrkBins);
 
   //SaferDelete (&h_probs);

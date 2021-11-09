@@ -17,6 +17,9 @@
 #include <TH2D.h>
 #include <TF1.h>
 #include <TString.h>
+#include <TFitResult.h>
+#include <TLine.h>
+#include <TLatex.h>
 
 #if !(defined(__CINT__) || defined(__CLING__)) || defined(__ACLIC__)
 #include "RooUnfoldResponse.h"
@@ -29,7 +32,38 @@
 
 using namespace JetHadronCorrelations;
 
-PrimaryFractionFit bbbf;
+PrimaryFractionFit polyFunc;
+
+
+TF1* DoClosureFit (const TString name, TH1D* h, const float xmin, const float xmax, short polyDeg = 4, const short maxPolyDeg = 8) {
+  bool succeeded = false;
+  TF1* f = nullptr;
+  while (polyDeg < maxPolyDeg && !succeeded) {
+    polyFunc.SetNDeriv (2);
+    polyFunc.SetDegree (polyDeg);
+    const int ndf = polyFunc.NDF ();
+
+    if (f)
+      delete f;
+    f = new TF1 (name, &polyFunc, xmin, xmax, ndf);
+
+    f->SetParameter (0, 10);
+    for (short param = 1; param <= polyDeg-2; param++) {
+      f->SetParameter (param, 0);
+    }
+
+    TFitResultPtr res = h->Fit (f, "RN0QS");
+    succeeded = (res->IsValid ());
+  }
+
+  if (succeeded)
+    return f;
+  else {
+    delete f;
+    return nullptr;
+  }
+}
+
 
 void PlotResponseMatrix () {
 
@@ -777,10 +811,6 @@ void PlotResponseMatrix () {
     const TString pTJInt = (iPtJInt == 0 ? "30GeV" : "60GeV");
     //const TString funcStr = "[0]+[1]*log(x)+[2]*pow(log(x),2)+[3]*pow(log(x),3)+[4]*pow(log(x),4)";
 
-    bbbf.SetNDeriv (1);
-    bbbf.SetDegree (4);
-    const int ndf = bbbf.NDF ();
-
     for (short iDir = 0; iDir < nDir; iDir++) {
 
       const TString dir = directions[iDir];
@@ -788,13 +818,9 @@ void PlotResponseMatrix () {
       h_jetInt_trk_pt_ref_sig_unf_halfClosure[iPtJInt][iDir] = (TH1D*) h_jetInt_trk_pt_ref_sig_unf[0][iPtJInt][iDir][1]->Clone (Form ("h_jetInt_trk_pt_%s_ref_sig_unf_%s_halfClosure", dir.Data (), pTJInt.Data ()));
       DivideNoErrors (h_jetInt_trk_pt_ref_sig_unf_halfClosure[iPtJInt][iDir], h_jetInt_trk_pt_ref_sig[0][iPtJInt][iDir][1]);
 
-      //f_jetInt_trk_pt_ref_sig_unf_halfClosure[iPtJInt][iDir] = new TF1 (Form ("f_jetInt_trk_pt_%s_ref_sig_unf_%s_halfClosure", dir.Data (), pTJInt.Data ()), funcStr.Data (), pTChBins[1], pTChBins[nPtChBins - (iPtJInt == 0 ? 3 : 1)]);
-      f_jetInt_trk_pt_ref_sig_unf_halfClosure[iPtJInt][iDir] = new TF1 (Form ("f_jetInt_trk_pt_%s_ref_sig_unf_%s_halfClosure", dir.Data (), pTJInt.Data ()), &bbbf, pTChBins[1], pTChBins[nPtChBins - (iPtJInt == 0 ? 3 : 1)], ndf);
-      f_jetInt_trk_pt_ref_sig_unf_halfClosure[iPtJInt][iDir]->SetParameter (0, 10);
-      f_jetInt_trk_pt_ref_sig_unf_halfClosure[iPtJInt][iDir]->SetParameter (1, 0);
-      f_jetInt_trk_pt_ref_sig_unf_halfClosure[iPtJInt][iDir]->SetParameter (2, 0);
-      f_jetInt_trk_pt_ref_sig_unf_halfClosure[iPtJInt][iDir]->SetParameter (3, 0);
-      h_jetInt_trk_pt_ref_sig_unf_halfClosure[iPtJInt][iDir]->Fit (f_jetInt_trk_pt_ref_sig_unf_halfClosure[iPtJInt][iDir], "RN0Q");
+      TF1* f = DoClosureFit (Form ("f_jetInt_trk_pt_%s_ref_sig_unf_%s_halfClosure", dir.Data (), pTJInt.Data ()), h_jetInt_trk_pt_ref_sig_unf_halfClosure[iPtJInt][iDir], pTChBins[1], pTChBins[nPtChBins - (iPtJInt == 0 ? 3 : 1)], 4, 8);
+      if (!f) std::cout << "Fit failed, please investigate! iPtJint = " << iPtJInt << ", iDir = " << iDir << std::endl;
+      f_jetInt_trk_pt_ref_sig_unf_halfClosure[iPtJInt][iDir] = f;
 
 
       for (short iCent = 0; iCent < nFcalCentBins+1; iCent++) {
@@ -804,24 +830,17 @@ void PlotResponseMatrix () {
         h_jetInt_trk_pt_sig_unf_halfClosure[iPtJInt][iDir][iCent] = (TH1D*) h_jetInt_trk_pt_sig_unf[0][iPtJInt][iDir][iCent][1]->Clone (Form ("h_jetInt_trk_pt_%s_%s_sig_unf_%s_halfClosure", dir.Data (), cent, pTJInt.Data ()));
         DivideNoErrors (h_jetInt_trk_pt_sig_unf_halfClosure[iPtJInt][iDir][iCent], h_jetInt_trk_pt_sig[0][iPtJInt][iDir][iCent][1]);
 
-        //f_jetInt_trk_pt_sig_unf_halfClosure[iPtJInt][iDir][iCent] = new TF1 (Form ("f_jetInt_trk_pt_%s_%s_sig_unf_%s_halfClosure", dir.Data (), cent, pTJInt.Data ()), funcStr.Data (), pTChBins[1], pTChBins[nPtChBins - (iPtJInt == 0 ? 3 : 1)]);
-        f_jetInt_trk_pt_sig_unf_halfClosure[iPtJInt][iDir][iCent] = new TF1 (Form ("f_jetInt_trk_pt_%s_%s_sig_unf_%s_halfClosure", dir.Data (), cent, pTJInt.Data ()), &bbbf, pTChBins[1], pTChBins[nPtChBins - (iPtJInt == 0 ? 3 : 1)], ndf);
-        f_jetInt_trk_pt_sig_unf_halfClosure[iPtJInt][iDir][iCent]->SetParameter (0, 10);
-        f_jetInt_trk_pt_sig_unf_halfClosure[iPtJInt][iDir][iCent]->SetParameter (1, 0);
-        f_jetInt_trk_pt_sig_unf_halfClosure[iPtJInt][iDir][iCent]->SetParameter (2, 0);
-        f_jetInt_trk_pt_sig_unf_halfClosure[iPtJInt][iDir][iCent]->SetParameter (3, 0);
-        h_jetInt_trk_pt_sig_unf_halfClosure[iPtJInt][iDir][iCent]->Fit (f_jetInt_trk_pt_sig_unf_halfClosure[iPtJInt][iDir][iCent], "RN0Q");
+        TF1* f = DoClosureFit (Form ("f_jetInt_trk_pt_%s_%s_sig_unf_%s_halfClosure", dir.Data (), cent, pTJInt.Data ()), h_jetInt_trk_pt_sig_unf_halfClosure[iPtJInt][iDir][iCent], pTChBins[1], pTChBins[nPtChBins - (iPtJInt == 0 ? 3 : 1)], 4, 8);
+        if (!f) std::cout << "Fit failed, please investigate! iPtJint = " << iPtJInt << ", iDir = " << iDir << ", iCent = " << iCent << std::endl;
+        f_jetInt_trk_pt_sig_unf_halfClosure[iPtJInt][iDir][iCent] = f;
+
 
         h_jetInt_trk_pt_iaa_unf_halfClosure[iPtJInt][iDir][iCent] = (TH1D*) h_jetInt_trk_pt_iaa_unf[0][iPtJInt][iDir][iCent][1]->Clone (Form ("h_jetInt_trk_pt_%s_%s_iaa_unf_%s_halfClosure", dir.Data (), cent, pTJInt.Data ()));
         DivideNoErrors (h_jetInt_trk_pt_iaa_unf_halfClosure[iPtJInt][iDir][iCent], h_jetInt_trk_pt_iaa[0][iPtJInt][iDir][iCent][1]);
 
-        //f_jetInt_trk_pt_iaa_unf_halfClosure[iPtJInt][iDir][iCent] = new TF1 (Form ("f_jetInt_trk_pt_%s_%s_iaa_unf_%s_halfClosure", dir.Data (), cent, pTJInt.Data ()), funcStr.Data (), pTChBins[1], pTChBins[nPtChBins - (iPtJInt == 0 ? 3 : 1)]);
-        f_jetInt_trk_pt_iaa_unf_halfClosure[iPtJInt][iDir][iCent] = new TF1 (Form ("f_jetInt_trk_pt_%s_%s_iaa_unf_%s_halfClosure", dir.Data (), cent, pTJInt.Data ()), &bbbf, pTChBins[1], pTChBins[nPtChBins - (iPtJInt == 0 ? 3 : 1)], ndf);
-        f_jetInt_trk_pt_iaa_unf_halfClosure[iPtJInt][iDir][iCent]->SetParameter (0, 10);
-        f_jetInt_trk_pt_iaa_unf_halfClosure[iPtJInt][iDir][iCent]->SetParameter (1, 0);
-        f_jetInt_trk_pt_iaa_unf_halfClosure[iPtJInt][iDir][iCent]->SetParameter (2, 0);
-        f_jetInt_trk_pt_iaa_unf_halfClosure[iPtJInt][iDir][iCent]->SetParameter (3, 0);
-        h_jetInt_trk_pt_iaa_unf_halfClosure[iPtJInt][iDir][iCent]->Fit (f_jetInt_trk_pt_iaa_unf_halfClosure[iPtJInt][iDir][iCent], "RN0Q");
+        f = DoClosureFit (Form ("f_jetInt_trk_pt_%s_%s_iaa_unf_%s_halfClosure", dir.Data (), cent, pTJInt.Data ()), h_jetInt_trk_pt_iaa_unf_halfClosure[iPtJInt][iDir][iCent], pTChBins[1], pTChBins[nPtChBins - (iPtJInt == 0 ? 3 : 1)], 4, 8);
+        if (!f) std::cout << "Fit failed, please investigate! iPtJint = " << iPtJInt << ", iDir = " << iDir << ", iCent = " << iCent << std::endl;
+        f_jetInt_trk_pt_iaa_unf_halfClosure[iPtJInt][iDir][iCent] = f;
 
       } // end loop over iCent
  
