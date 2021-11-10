@@ -23,6 +23,7 @@
 #include "TreeVariables.h"
 #include "LocalUtilities.h"
 #include "Variations.h"
+#include "GetComparisons.h"
 
 
 using namespace JetHadronCorrelations;
@@ -152,6 +153,9 @@ void PlotPtCh (const char* inFileTag) {
   TH1D***** h_jetInt_trk_pt_unf_syst      = Get4DArray <TH1D*> (2, nDir, nZdcCentBins+1, nVar);
 
   TH1D***** h_jetInt_trk_pt_iaa_syst      = Get4DArray <TH1D*> (2, nDir, nZdcCentBins+1, nVar);
+
+
+  TGAE** g_R_DpT_pPb = GetATLASJetFF ();
 
 
   {
@@ -1674,6 +1678,92 @@ void PlotPtCh (const char* inFileTag) {
 
       c->SaveAs (Form ("%s/Plots/PtCh/IpPb_Summary_%iGeVJets_%s.pdf", workPath.Data (), iPtJInt == 0 ? 30 : 60, directions[iDir] == "ns" ? "nearside" : (directions[iDir] == "as" ? "awayside" : "perpendicular")));
     } // end loop over iDir
+  } // end loop over iPtJInt
+
+
+
+
+  for (short iPtJInt : {0, 1}) {
+
+    const TString pTJInt = (iPtJInt == 0 ? "30GeV" : "60GeV");
+
+    {
+      const short iDir = 0; // FF should only be compared to near-side.
+      const char* canvasName = Form ("c_jetInt_trk_pt_IpPb_FFComp_iDir%i_%s", iDir, pTJInt.Data ());
+      TCanvas* c = new TCanvas (canvasName, "", 1200, 800);
+      c->Divide (3, 2);
+
+      for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
+        c->cd (nZdcCentBins+1-iCent);
+
+        gPad->SetLogx ();
+
+        TH1D* h = new TH1D ("h", ";#it{p}_{T}^{ch} [GeV];#it{I}_{#it{p}Pb}", 1, pTChBins[1], iDir == 1 ? 10 : pTChBins[nPtChBins-(iPtJInt == 0 ? 3 : 1)]);//pTChBins[nPtChBins]);
+        h->GetXaxis ()->SetMoreLogLabels ();
+        h->GetYaxis ()->SetRangeUser ((iPtJInt == 0 ? 0.61 : 0.74), (iPtJInt == 0 ? 1.7 : 1.45));
+        //h->GetYaxis ()->SetRangeUser (0.0, 3);
+        h->SetBinContent (1, 1);
+        h->SetLineStyle (2);
+        h->SetLineWidth (2);
+        h->SetLineColor (kBlack);
+        h->DrawCopy ("hist ][");
+        SaferDelete (&h);
+
+        TGAE* g = nullptr;
+
+        if (iPtJInt == 0) // draw 45-60GeV plot
+          g = (TGAE*) g_R_DpT_pPb[0]->Clone ("gtemp");
+        else // draw 60-80GeV plot
+          g = (TGAE*) g_R_DpT_pPb[1]->Clone ("gtemp");
+        myDrawSyst (g, kBlack);
+        RecenterGraph (g);
+        ResetTGAEErrors (g);
+        ResetXErrors (g);
+        myDraw (g, kBlack, kFullSquare, 1.4, 1, 2, "P", false);
+        SaferDelete (&g);
+
+        g = (TGAE*) g_jetInt_trk_pt_iaa_syst[iPtJInt][iDir][iCent][0]->Clone ();
+        h = h_jetInt_trk_pt_iaa[0][iPtJInt][iDir][iCent];
+        //h = h_jetInt_trk_pt_iaa_syst[iPtJInt][iDir][iCent][iMCTruthJetsTruthParts];
+        SetCentralValuesKeepRelativeErrors (g, h);
+        //if (strcmp (tag, "30GeVJets") == 0)
+        //  TrimGraph (g, 0, 30);
+        if (iDir == 1)
+          TrimGraph (g, 0, 10);
+        myDrawSystFill (g, colorfulSystColors[nZdcCentBins-iCent], 0.6, 1001);
+        SaferDelete (&g);
+
+        g = make_graph (h);
+        ResetXErrors (g);
+        //if (strcmp (tag, "30GeVJets") == 0)
+        //  TrimGraph (g, 0, 30);
+        if (iDir == 1)
+          TrimGraph (g, 0, 10);
+        myDraw (g, colorfulColors[nZdcCentBins-iCent], kFullCircle, 1.0, 1, 2, "P", false);
+        SaferDelete (&g);
+
+        if (iCent < nZdcCentBins)
+          myText (0.2, 0.865, colorfulColors[nZdcCentBins-iCent], Form ("#bf{ZDC %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.05);
+        else
+          myText (0.2, 0.865, colorfulColors[0], "#bf{All centralities}", 0.05);
+
+      } // end loop over iCent
+
+      c->cd ();
+      myText (0.065, 0.971, kBlack, "#bf{#it{ATLAS}} Internal", 0.027);
+  
+      c->cd (1);
+      myText (0.2, 0.80, kBlack, "#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV", 0.05);
+      myText (0.2, 0.74, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.05);
+      c->cd (2);
+      myText (0.2, 0.80, kBlack, Form ("#it{p}_{T}^{jet} > %i GeV", iPtJInt == 0 ? 30 : 60), 0.05);
+      myText (0.2, 0.74, kBlack, Form ("#Delta#phi_{ch,jet} %s", directions[iDir] == "ns" ? "< #pi/8" : (directions[iDir] == "as" ? "> 7#pi/8" : "#in (#pi/3, 2#pi/3)")), 0.05);
+      c->cd (3);
+      myLineText2 (0.26, 0.80, kBlack, kFullCircle, "This result", 1.2, 0.05);
+      myLineText2 (0.26, 0.73, kBlack, kFullSquare, Form ("#it{R}_{D(#it{p}_{T})}; #it{p}_{T}^{jet} = %i-%i GeV", iPtJInt == 0 ? 45 : 60, iPtJInt == 0 ? 60 : 80), 1.2, 0.05);
+
+      c->SaveAs (Form ("%s/Plots/PtCh/IpPb_FF_Comp_Summary_%iGeVJets_%s.pdf", workPath.Data (), iPtJInt == 0 ? 30 : 60, directions[iDir] == "ns" ? "nearside" : (directions[iDir] == "as" ? "awayside" : "perpendicular")));
+    } // end iDir=0 scope
   } // end loop over iPtJInt
 
 
