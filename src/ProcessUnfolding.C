@@ -888,7 +888,7 @@ void ProcessUnfolding (const char* inFileTag, const char* outFileTag) {
               PiecewisePolynomialConstantFunc ppcf;
               ppcf.SetNDeriv (2);
               ppcf.SetDegree (4);
-              double params[] = {10, 0.1, 0.01};
+              double params[] = {10, -0.1/(2*std::pow (std::log (10), 3)), 0};
 
               TF1* fitFunc = new TF1 ("fitFunc", &ppcf, 0.5, pTChBins[nPtChBins - (iPtJInt == 0 ? 3 : 1)], ppcf.NDF ());
               fitFunc->SetParameters (params);
@@ -913,7 +913,7 @@ void ProcessUnfolding (const char* inFileTag, const char* outFileTag) {
                 PiecewisePolynomialConstantFunc ppcf;
                 ppcf.SetNDeriv (2);
                 ppcf.SetDegree (4);
-                double params[] = {10, 0.1, 0.01};
+                double params[] = {10, -0.1/(2*std::pow (std::log (10), 3)), 0};  // params are constant, polyCoeff[3], polyCoeff[4].
 
                 TF1* fitFunc = new TF1 ("fitFunc", &ppcf, 0.5, pTChBins[nPtChBins - (iPtJInt == 0 ? 3 : 1)], ppcf.NDF ());
                 fitFunc->SetParameters (params);

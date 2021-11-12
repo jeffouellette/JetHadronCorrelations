@@ -1,8 +1,8 @@
 #! /bin/bash
 
-declare -a datavardirs=("FakeRateVar" "MixCatVar4" "MixCatVar5")
+declare -a datavardirs=("MixCatVar2")
 #declare -a datavardirs=("Nominal" "HITightVar" "HILooseVar" "TrkEffVar" "FakeRateVar" "PrimFitVar" "JetPrimFracVar" "PartSpcVar" "MixCatVar1" "MixCatVar2" "MixCatVar3" "MixCatVar4" "MixCatVar5")
-#declare -a datavardirs=("Nominal" "HITightVar" "HILooseVar" "TrkEffVar" "FakeRateVar" "PrimFitVar" "JetPrimFracVar" "PartSpcVar" "MixCatVar1" "MixCatVar3")
+#declare -a datavardirs=("Nominal" "HITightVar" "HILooseVar" "TrkEffVar" "FakeRateVar" "PrimFitVar" "JetPrimFracVar" "PartSpcVar" "MixCatVar1" "MixCatVar3" "MixCatVar4" "MixCatVar5")
 #declare -a datavardirs=("JetPrimFracVar")
 
 

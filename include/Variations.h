@@ -26,7 +26,7 @@ const std::vector <TString> variations = {
   //"FineFcalCentVar",
 
   "MixCatVar1",
-  //"MixCatVar2",
+  "MixCatVar2",
   "MixCatVar3",
 
   "MixCatVar4",

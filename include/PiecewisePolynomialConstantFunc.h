@@ -40,7 +40,7 @@ class PiecewisePolynomialConstantFunc {
       ldouble polyCoeffs[degree+1];
       polyCoeffs[0] = p[1];
       for (int n = nderiv+1; n <= degree; n++) {
-        polyCoeffs[n] = p[n-nderiv+1];
+        polyCoeffs[n] = p[n-nderiv+1]; // e.g. if nderiv = 2 then p[2] becomes polyCoeff[3], p[3] becomes polyCoeff[4], ... up to p[degree-1] becomes polyCoeff[degree].
       }
 
       for (int n = nderiv; n >= 1; n--) {
@@ -61,7 +61,7 @@ class PiecewisePolynomialConstantFunc {
 
     double Eval (double x, double* p) {
       // param 0: transition to constant
-      // param 1-NDF: parameters of polynomial, starting with degree ndf term
+      // param 1-NDF: parameters of polynomial, starting with constant and then degree ndf term
       return polyLogN (std::fmin (x, p[0]), p);
     }
 
