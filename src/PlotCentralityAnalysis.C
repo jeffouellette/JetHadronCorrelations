@@ -1250,75 +1250,126 @@ void PlotCentralityAnalysis () {
     h->Rebin (2);
     h->Scale (0.5);
 
-    //TH1D* h = (TH1D*) h_jet_Pb_fcal_et_sum->Clone ("htemp");
-    h->GetXaxis ()->SetTitle ("#Sigma#it{E}_{T}^{FCal, Pb} [GeV]");
-    h->GetYaxis ()->SetTitle ("A.U.");
+    TGAE* g = make_graph (h);
 
-    h->GetXaxis ()->SetTitleOffset (0.8 * h->GetXaxis ()->GetTitleOffset ());
-    h->GetYaxis ()->SetTitleOffset (1.2 * h->GetYaxis ()->GetTitleOffset ());
+    //TH1D* h = (TH1D*) h_jet_Pb_fcal_et_sum->Clone ("htemp");
+    g->GetXaxis ()->SetTitle ("#Sigma#it{E}_{T}^{FCal, Pb} [GeV]");
+    g->GetYaxis ()->SetTitle ("A.U.");
+
+    g->GetXaxis ()->SetTitleOffset (0.8 * g->GetXaxis ()->GetTitleOffset ());
+    g->GetYaxis ()->SetTitleOffset (1.2 * g->GetYaxis ()->GetTitleOffset ());
 
     //double ymin = 5e-9;
     //double ymax = 1e0;
     double ymin = 0;
     double ymax = 0.038;
 
-    h->SetLineColor (colorfulColors[0]);
+    //g->SetLineColor (manyColors[0]);
+    g->SetLineColor (kBlack);
+    g->SetLineWidth (3);
 
-    h->GetYaxis ()->SetRangeUser (ymin, ymax);
+    g->GetYaxis ()->SetRangeUser (ymin, ymax);
 
-    h->GetXaxis ()->SetTitleFont (43);
-    h->GetXaxis ()->SetTitleSize (26);
-    h->GetYaxis ()->SetTitleFont (43);
-    h->GetYaxis ()->SetTitleSize (26);
-    h->GetXaxis ()->SetLabelFont (43);
-    h->GetXaxis ()->SetLabelSize (24);
-    h->GetYaxis ()->SetLabelFont (43);
-    h->GetYaxis ()->SetLabelSize (24);
+    g->GetXaxis ()->SetTitleFont (43);
+    g->GetXaxis ()->SetTitleSize (26);
+    g->GetYaxis ()->SetTitleFont (43);
+    g->GetYaxis ()->SetTitleSize (26);
+    g->GetXaxis ()->SetLabelFont (43);
+    g->GetXaxis ()->SetLabelSize (24);
+    g->GetYaxis ()->SetLabelFont (43);
+    g->GetYaxis ()->SetLabelSize (24);
 
-    h->DrawCopy ("hist");
+    ((TGAE*) g->Clone ())->Draw ("AC");
+    //h->DrawCopy ("hist");
     SaferDelete (&h);
+    SaferDelete (&g);
+
+    //h = (TH1D*) h_mb_Pb_fcal_et_zdc_0t20->Clone ("htemp");
+    //h->Rebin (2);
+    //h->Scale (0.5);
+    //h->SetLineColor (manyColors[0]);
+    //h->DrawCopy ("hist same");
+    //SaferDelete (&h);
+    //h = (TH1D*) h_mb_Pb_fcal_et_zdc_20t40->Clone ("htemp");
+    //h->Rebin (2);
+    //h->Scale (0.5);
+    //h->SetLineColor (manyColors[2]);
+    //h->DrawCopy ("hist same");
+    //SaferDelete (&h);
+    //h = (TH1D*) h_mb_Pb_fcal_et_zdc_40t60->Clone ("htemp");
+    //h->Rebin (2);
+    //h->Scale (0.5);
+    //h->SetLineColor (manyColors[4]);
+    //h->DrawCopy ("hist same");
+    //SaferDelete (&h);
+    //h = (TH1D*) h_mb_Pb_fcal_et_zdc_60t80->Clone ("htemp");
+    //h->Rebin (2);
+    //h->Scale (0.5);
+    //h->SetLineColor (manyColors[6]);
+    //h->DrawCopy ("hist same");
+    //SaferDelete (&h);
+    //h = (TH1D*) h_mb_Pb_fcal_et_zdc_80t100->Clone ("htemp");
+    //h->Rebin (2);
+    //h->Scale (0.5);
+    //h->SetLineColor (manyColors[8]);
+    //h->DrawCopy ("hist same");
+    //SaferDelete (&h);
 
     h = (TH1D*) h_mb_Pb_fcal_et_zdc_0t20->Clone ("htemp");
     h->Rebin (2);
     h->Scale (0.5);
-    h->SetLineColor (colorfulColors[1]);
-    h->DrawCopy ("hist same");
-    SaferDelete (&h);
+    g = make_graph (h);
+    ResetTGAEErrors (g);
+    ResetXErrors (g);
+    myDraw (g, manyColors[0], kDot, 0, 1, 3, "C");
+    SaferDelete (&g);
+
     h = (TH1D*) h_mb_Pb_fcal_et_zdc_20t40->Clone ("htemp");
     h->Rebin (2);
     h->Scale (0.5);
-    h->SetLineColor (colorfulColors[2]);
-    h->DrawCopy ("hist same");
-    SaferDelete (&h);
+    g = make_graph (h);
+    ResetTGAEErrors (g);
+    ResetXErrors (g);
+    myDraw (g, manyColors[2], kDot, 0, 1, 3, "C");
+    SaferDelete (&g);
+
     h = (TH1D*) h_mb_Pb_fcal_et_zdc_40t60->Clone ("htemp");
     h->Rebin (2);
     h->Scale (0.5);
-    h->SetLineColor (colorfulColors[3]);
-    h->DrawCopy ("hist same");
-    SaferDelete (&h);
+    g = make_graph (h);
+    ResetTGAEErrors (g);
+    ResetXErrors (g);
+    myDraw (g, manyColors[4], kDot, 0, 1, 3, "C");
+    SaferDelete (&g);
+
     h = (TH1D*) h_mb_Pb_fcal_et_zdc_60t80->Clone ("htemp");
     h->Rebin (2);
     h->Scale (0.5);
-    h->SetLineColor (colorfulColors[4]);
-    h->DrawCopy ("hist same");
-    SaferDelete (&h);
+    g = make_graph (h);
+    ResetTGAEErrors (g);
+    ResetXErrors (g);
+    myDraw (g, manyColors[6], kDot, 0, 1, 3, "C");
+    SaferDelete (&g);
+
     h = (TH1D*) h_mb_Pb_fcal_et_zdc_80t100->Clone ("htemp");
     h->Rebin (2);
     h->Scale (0.5);
-    h->SetLineColor (colorfulColors[5]);
-    h->DrawCopy ("hist same");
-    SaferDelete (&h);
+    g = make_graph (h);
+    ResetTGAEErrors (g);
+    ResetXErrors (g);
+    myDraw (g, manyColors[8], kDot, 0, 1, 3, "C");
+    SaferDelete (&g);
 
 
     myText (0.59, 0.900, kBlack, "#bf{#it{ATLAS}} Internal", 0.036);
     myText (0.59, 0.860, kBlack, "#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV", 0.032);
     myText (0.59, 0.820, kBlack, "HLT_mb_sptrk_L1MBTS_1", 0.032);
-    myText (0.56, 0.740, colorfulColors[0], "P(#Sigma#it{E}_{T}^{FCal,Pb})", 0.026);
-    myText (0.56, 0.700, colorfulColors[1], "0.2 #times P(#Sigma#it{E}_{T}^{FCal,Pb} | Zdc 0-20%)", 0.026);
-    myText (0.56, 0.660, colorfulColors[2], "0.2 #times P(#Sigma#it{E}_{T}^{FCal,Pb} | Zdc 20-40%)", 0.026);
-    myText (0.56, 0.620, colorfulColors[3], "0.2 #times P(#Sigma#it{E}_{T}^{FCal,Pb} | Zdc 40-60%)", 0.026);
-    myText (0.56, 0.580, colorfulColors[4], "0.2 #times P(#Sigma#it{E}_{T}^{FCal,Pb} | Zdc 60-80%)", 0.026);
-    myText (0.56, 0.540, colorfulColors[5], "0.2 #times P(#Sigma#it{E}_{T}^{FCal,Pb} | Zdc 80-100%)", 0.026);
+    myText (0.56, 0.740, kBlack,        "#bf{P(#Sigma#it{E}_{T}^{FCal,Pb})}", 0.026);
+    myText (0.56, 0.700, manyColors[0], "#bf{0.2 #times P(#Sigma#it{E}_{T}^{FCal,Pb} | Zdc 0-20%)}", 0.026);
+    myText (0.56, 0.660, manyColors[2], "#bf{0.2 #times P(#Sigma#it{E}_{T}^{FCal,Pb} | Zdc 20-40%)}", 0.026);
+    myText (0.56, 0.620, manyColors[4], "#bf{0.2 #times P(#Sigma#it{E}_{T}^{FCal,Pb} | Zdc 40-60%)}", 0.026);
+    myText (0.56, 0.580, manyColors[6], "#bf{0.2 #times P(#Sigma#it{E}_{T}^{FCal,Pb} | Zdc 60-80%)}", 0.026);
+    myText (0.56, 0.540, manyColors[8], "#bf{0.2 #times P(#Sigma#it{E}_{T}^{FCal,Pb} | Zdc 80-100%)}", 0.026);
 
     c->SaveAs (Form ("%s/Plots/CentralityAnalysis/allruns_fcal_et_zdcBinned.pdf", workPath.Data ()));
   }

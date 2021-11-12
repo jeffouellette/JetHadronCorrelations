@@ -55,11 +55,11 @@ bool MakeResponseMatrix (const char* directory,
 
 
   RooUnfoldResponse**   rooUnfResp_jet_pt_wgts                = Get1DArray <RooUnfoldResponse*> (nFiles);
-  RooUnfoldResponse**   rooUnfResp_jet_pt_nowgts              = Get1DArray <RooUnfoldResponse*> (nFiles);
+  RooUnfoldResponse**   rooUnfResp_jet_pt_altwgts             = Get1DArray <RooUnfoldResponse*> (nFiles);
   RooUnfoldResponse**   rooUnfResp_jet_pt_fullClosure         = Get1DArray <RooUnfoldResponse*> (nFiles);
   RooUnfoldResponse**   rooUnfResp_jet_pt_halfClosure         = Get1DArray <RooUnfoldResponse*> (nFiles);
   RooUnfoldResponse***  rooUnfResp_jet_trk_pt_sig_wgts        = Get2DArray <RooUnfoldResponse*> (nDir, nFiles);
-  RooUnfoldResponse***  rooUnfResp_jet_trk_pt_sig_nowgts      = Get2DArray <RooUnfoldResponse*> (nDir, nFiles);
+  RooUnfoldResponse***  rooUnfResp_jet_trk_pt_sig_altwgts     = Get2DArray <RooUnfoldResponse*> (nDir, nFiles);
   RooUnfoldResponse***  rooUnfResp_jet_trk_pt_sig_fullClosure = Get2DArray <RooUnfoldResponse*> (nDir, nFiles);
   RooUnfoldResponse***  rooUnfResp_jet_trk_pt_sig_halfClosure = Get2DArray <RooUnfoldResponse*> (nDir, nFiles);
 
@@ -119,7 +119,7 @@ bool MakeResponseMatrix (const char* directory,
     const char* cent = (Ispp () ? "ref" : (iFile == nZdcCentBins ? "pPb_allCent" : Form ("pPb_iCent%i", iFile)));
 
     rooUnfResp_jet_pt_wgts[iFile]         = new RooUnfoldResponse (h_jet_pt_fullClosure[iFile][0], h_jet_pt_fullClosure[iFile][1], Form ("rooUnfResp_jet_pt_%s_mc_wgts", cent), "");
-    rooUnfResp_jet_pt_nowgts[iFile]       = new RooUnfoldResponse (h_jet_pt_fullClosure[iFile][0], h_jet_pt_fullClosure[iFile][1], Form ("rooUnfResp_jet_pt_%s_mc_nowgts", cent), "");
+    rooUnfResp_jet_pt_altwgts[iFile]      = new RooUnfoldResponse (h_jet_pt_fullClosure[iFile][0], h_jet_pt_fullClosure[iFile][1], Form ("rooUnfResp_jet_pt_%s_mc_altwgts", cent), "");
     rooUnfResp_jet_pt_fullClosure[iFile]  = new RooUnfoldResponse (h_jet_pt_fullClosure[iFile][0], h_jet_pt_fullClosure[iFile][1], Form ("rooUnfResp_jet_pt_%s_mc_fullClosure", cent), "");
     rooUnfResp_jet_pt_halfClosure[iFile]  = new RooUnfoldResponse (h_jet_pt_halfClosure[iFile][0], h_jet_pt_halfClosure[iFile][1], Form ("rooUnfResp_jet_pt_%s_mc_halfClosure", cent), "");
 
@@ -128,7 +128,7 @@ bool MakeResponseMatrix (const char* directory,
       const TString dir = directions[iDir];
 
       rooUnfResp_jet_trk_pt_sig_wgts[iDir][iFile]         = new RooUnfoldResponse (h2_jet_trk_pt_sig_fullClosure[iDir][iFile][0], h2_jet_trk_pt_sig_fullClosure[iDir][iFile][1], Form ("rooUnfResp_jet_trk_pt_%s_%s_sig_mc_wgts", dir.Data (), cent), "");
-      rooUnfResp_jet_trk_pt_sig_nowgts[iDir][iFile]       = new RooUnfoldResponse (h2_jet_trk_pt_sig_fullClosure[iDir][iFile][0], h2_jet_trk_pt_sig_fullClosure[iDir][iFile][1], Form ("rooUnfResp_jet_trk_pt_%s_%s_sig_mc_nowgts", dir.Data (), cent), "");
+      rooUnfResp_jet_trk_pt_sig_altwgts[iDir][iFile]      = new RooUnfoldResponse (h2_jet_trk_pt_sig_fullClosure[iDir][iFile][0], h2_jet_trk_pt_sig_fullClosure[iDir][iFile][1], Form ("rooUnfResp_jet_trk_pt_%s_%s_sig_mc_altwgts", dir.Data (), cent), "");
       rooUnfResp_jet_trk_pt_sig_fullClosure[iDir][iFile]  = new RooUnfoldResponse (h2_jet_trk_pt_sig_fullClosure[iDir][iFile][0], h2_jet_trk_pt_sig_fullClosure[iDir][iFile][1], Form ("rooUnfResp_jet_trk_pt_%s_%s_sig_mc_fullClosure", dir.Data (), cent), "");
       rooUnfResp_jet_trk_pt_sig_halfClosure[iDir][iFile]  = new RooUnfoldResponse (h2_jet_trk_pt_sig_halfClosure[iDir][iFile][0], h2_jet_trk_pt_sig_halfClosure[iDir][iFile][1], Form ("rooUnfResp_jet_trk_pt_%s_%s_sig_mc_halfClosure", dir.Data (), cent), "");
 
@@ -292,12 +292,13 @@ bool MakeResponseMatrix (const char* directory,
 
   // for tracking corections
   TH2D** h2_trk_eff = LoadTrackingEfficiency ();
-  TGAE** g_trk_pur = LoadTrackingPurity ();
-  TGAE** gf_trk_pur = LoadTrackingPurityFuncs ();
+  TGAE** g_trk_pur = LoadTrackingPurity (!DoJetPrimFracVar ());
+  TGAE** gf_trk_pur = LoadTrackingPurityFuncs (!DoJetPrimFracVar ());
 
 
   // for MC reweighting to data
-  TF1** f_jet_wgts = LoadJetPtWeights ();
+  TF1** f_jet_wgts = LoadJetPtWgtFuncs ();
+  TH1D** h_jet_wgts = LoadJetPtWgtHists ();
 
 
   // for corrected FCal Et values in data overlay
@@ -441,12 +442,15 @@ bool MakeResponseMatrix (const char* directory,
 
       if (isReconstructed) {
         rooUnfResp_jet_pt_wgts[iFile]->Fill (rjpt, tjpt, ewgt*(iRJet < 0 ? 0. : f_jet_wgts[iFile]->Eval (rjpt)));
-        rooUnfResp_jet_pt_nowgts[iFile]->Fill (rjpt, tjpt, ewgt*(iRJet < 0 ? 0. : f_jet_wgts[iFile]->Eval (rjpt)));
+        rooUnfResp_jet_pt_altwgts[iFile]->Fill (rjpt, tjpt, ewgt*(iRJet < 0 ? 0. : h_jet_wgts[iFile]->GetBinContent (h_jet_wgts[iFile]->FindBin (rjpt))));
         rooUnfResp_jet_pt_fullClosure[iFile]->Fill (rjpt, tjpt, ewgt);
         if (iEvt % 2 == 0)
           rooUnfResp_jet_pt_halfClosure[iFile]->Fill (rjpt, tjpt, ewgt);
+
+        // fill centrality-integrated response too
         if (IspPb ()) {
           rooUnfResp_jet_pt_wgts[nFiles-1]->Fill (rjpt, tjpt, ewgt*(iRJet < 0 ? 0. : f_jet_wgts[nFiles-1]->Eval (rjpt)));
+          rooUnfResp_jet_pt_altwgts[nFiles-1]->Fill (rjpt, tjpt, ewgt*(iRJet < 0 ? 0. : h_jet_wgts[nFiles-1]->GetBinContent (h_jet_wgts[nFiles-1]->FindBin (rjpt))));
           rooUnfResp_jet_pt_fullClosure[nFiles-1]->Fill (rjpt, tjpt, ewgt);
           if (iEvt % 2 == 0)
             rooUnfResp_jet_pt_halfClosure[nFiles-1]->Fill (rjpt, tjpt, ewgt);
@@ -488,11 +492,15 @@ bool MakeResponseMatrix (const char* directory,
         
         if (isReconstructed) {
           rooUnfResp_jet_trk_pt_sig_wgts[iDir][iFile]->Fill (trk_pt[iTrk], rjpt, trk_truth_pt[iTrk], tjpt, ewgt*(iRJet < 0 ? 0. : f_jet_wgts[iFile]->Eval (rjpt)));
+          rooUnfResp_jet_trk_pt_sig_altwgts[iDir][iFile]->Fill (trk_pt[iTrk], rjpt, trk_truth_pt[iTrk], tjpt, ewgt*(iRJet < 0 ? 0. : h_jet_wgts[iFile]->GetBinContent (h_jet_wgts[iFile]->FindBin (rjpt))));
           rooUnfResp_jet_trk_pt_sig_fullClosure[iDir][iFile]->Fill (trk_pt[iTrk], rjpt, trk_truth_pt[iTrk], tjpt, ewgt);
           if (iEvt % 2 == 0)
             rooUnfResp_jet_trk_pt_sig_halfClosure[iDir][iFile]->Fill (trk_pt[iTrk], rjpt, trk_truth_pt[iTrk], tjpt, ewgt);
+  
+          // fill centrality-integrated response too
           if (IspPb ()) {
             rooUnfResp_jet_trk_pt_sig_wgts[iDir][nFiles-1]->Fill (trk_pt[iTrk], rjpt, trk_truth_pt[iTrk], tjpt, ewgt*(iRJet < 0 ? 0. : f_jet_wgts[nFiles-1]->Eval (rjpt)));
+            rooUnfResp_jet_trk_pt_sig_altwgts[iDir][nFiles-1]->Fill (trk_pt[iTrk], rjpt, trk_truth_pt[iTrk], tjpt, ewgt*(iRJet < 0 ? 0. : h_jet_wgts[nFiles-1]->GetBinContent (h_jet_wgts[nFiles-1]->FindBin (rjpt))));
             rooUnfResp_jet_trk_pt_sig_fullClosure[iDir][nFiles-1]->Fill (trk_pt[iTrk], rjpt, trk_truth_pt[iTrk], tjpt, ewgt);
             if (iEvt % 2 == 0)
               rooUnfResp_jet_trk_pt_sig_halfClosure[iDir][nFiles-1]->Fill (trk_pt[iTrk], rjpt, trk_truth_pt[iTrk], tjpt, ewgt);
@@ -507,6 +515,7 @@ bool MakeResponseMatrix (const char* directory,
       h_jet_pt_fullClosure[iFile][1]->Fill (tjpt, ewgt);
       if (iEvt % 2 == 1)
         h_jet_pt_halfClosure[iFile][1]->Fill (tjpt, ewgt);
+
       if (IspPb ()) {
         h_jet_pt_wgts[nFiles-1][1]->Fill (tjpt, ewgt*(iRJet < 0 ? 0. : f_jet_wgts[nFiles-1]->Eval (rjpt)));
         h_jet_pt_fullClosure[nFiles-1][1]->Fill (tjpt, ewgt);
@@ -551,6 +560,7 @@ bool MakeResponseMatrix (const char* directory,
         h2_jet_trk_pt_sig_fullClosure[iDir][iFile][1]->Fill (truth_trk_pt[iTTrk], tjpt, ewgt);
         if (iEvt % 2 == 1)
           h2_jet_trk_pt_sig_halfClosure[iDir][iFile][1]->Fill (truth_trk_pt[iTTrk], tjpt, ewgt);
+
         if (IspPb ()) {
           h2_jet_trk_pt_sig_wgts[iDir][nFiles-1][1]->Fill (truth_trk_pt[iTTrk], tjpt, ewgt*(iRJet < 0 ? 0. : f_jet_wgts[nFiles-1]->Eval (rjpt)));
           h2_jet_trk_pt_sig_fullClosure[iDir][nFiles-1][1]->Fill (truth_trk_pt[iTTrk], tjpt, ewgt);
@@ -653,6 +663,7 @@ bool MakeResponseMatrix (const char* directory,
 
         const float teff = h2_trk_eff[iMult]->GetBinContent (h2_trk_eff[iMult]->FindBin (trk_eta[iTrk], trk_pt[iTrk]));
         const float tpur = (DoPrimFitVar () ? g_trk_pur[iEta]->Eval (trk_pt[iTrk]) : gf_trk_pur[iEta]->Eval (trk_pt[iTrk]));
+        //const float tpur = 1;
         const float twgt = (teff > 0. ? tpur / teff : 0.);
 
         // fill reco jet FF plots
@@ -660,6 +671,7 @@ bool MakeResponseMatrix (const char* directory,
         h2_jet_trk_pt_sig_fullClosure[iDir][iFile][0]->Fill (trk_pt[iTrk], rjpt, ewgt*twgt);
         if (iEvt % 2 == 1)
           h2_jet_trk_pt_sig_halfClosure[iDir][iFile][0]->Fill (trk_pt[iTrk], rjpt, ewgt*twgt);
+
         if (IspPb ()) {
           h2_jet_trk_pt_sig_wgts[iDir][nFiles-1][0]->Fill (trk_pt[iTrk], rjpt, ewgt*twgt*(iRJet < 0 ? 0. : f_jet_wgts[nFiles-1]->Eval (rjpt)));
           h2_jet_trk_pt_sig_fullClosure[iDir][nFiles-1][0]->Fill (trk_pt[iTrk], rjpt, ewgt*twgt);
@@ -711,6 +723,7 @@ bool MakeResponseMatrix (const char* directory,
     for (short iFile = 0; iFile < nFiles; iFile++) {
 
       rooUnfResp_jet_pt_wgts[iFile]->Write ();
+      rooUnfResp_jet_pt_altwgts[iFile]->Write ();
       rooUnfResp_jet_pt_fullClosure[iFile]->Write ();
       rooUnfResp_jet_pt_halfClosure[iFile]->Write ();
 
@@ -724,6 +737,7 @@ bool MakeResponseMatrix (const char* directory,
       for (short iDir = 0; iDir < nDir; iDir++) {
   
         rooUnfResp_jet_trk_pt_sig_wgts[iDir][iFile]->Write ();
+        rooUnfResp_jet_trk_pt_sig_altwgts[iDir][iFile]->Write ();
         rooUnfResp_jet_trk_pt_sig_fullClosure[iDir][iFile]->Write ();
         rooUnfResp_jet_trk_pt_sig_halfClosure[iDir][iFile]->Write ();
 

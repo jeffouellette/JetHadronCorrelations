@@ -751,6 +751,10 @@ void ProcessCorrelations (const char* tag, const char* outFileTag) {//, const in
 
           CalcSystematics (g_jet_trk_pt_ref_sig_syst[iPtJ][iDir][iVar], h_jet_trk_pt_ref_sig[iDType][iPtJ][iDir][0],  h_jet_trk_pt_ref_sig[iDType][iPtJ][iDir][iVar]);
 
+          //if (variationsToSmooth.count (var) > 0) {
+          //  SmoothSystematics (g_jet_trk_pt_ref_sig_syst[iPtJ][iDir][iVar], "[0]+[1]*pow(log(x),-1)+[2]*pow(log(x),-2)+[3]*pow(log(x),-3)");
+          //}
+
           // allow some uncertainties to not cancel in the bkgd. subtracted (signal) yield by overwriting the current uncertainties
           if (variationsThatDontCancelInSig.count (var) != 0) {
             TGAE* g_tot = new TGAE ();
@@ -772,6 +776,10 @@ void ProcessCorrelations (const char* tag, const char* outFileTag) {//, const in
             g_jet_trk_pt_sig_syst[iPtJ][iDir][iCent][iVar]  = new TGAE ();
 
             CalcSystematics (g_jet_trk_pt_sig_syst[iPtJ][iDir][iCent][iVar], h_jet_trk_pt_sig[iDType][iPtJ][iDir][iCent][0], h_jet_trk_pt_sig[iDType][iPtJ][iDir][iCent][iVar]);
+
+            //if (variationsToSmooth.count (var) > 0) {
+            //  SmoothSystematics (g_jet_trk_pt_sig_syst[iPtJ][iDir][iCent][iVar], "[0]+[1]*pow(log(x),-1)+[2]*pow(log(x),-2)+[3]*pow(log(x),-3)");
+            //}
 
             // allow some uncertainties to not cancel in the bkgd. subtracted (signal) yield by overwriting the current uncertainties
             if (variationsThatDontCancelInSig.count (var) != 0) {
@@ -812,6 +820,10 @@ void ProcessCorrelations (const char* tag, const char* outFileTag) {//, const in
 
           CalcSystematics (g_jetInt_trk_pt_ref_sig_syst[iPtJInt][iDir][iVar], h_jetInt_trk_pt_ref_sig[iDType][iPtJInt][iDir][0],  h_jetInt_trk_pt_ref_sig[iDType][iPtJInt][iDir][iVar]);
 
+          //if (variationsToSmooth.count (var) > 0) {
+          //  SmoothSystematics (g_jetInt_trk_pt_ref_sig_syst[iPtJInt][iDir][iVar], "[0]+[1]*pow(log(x),-1)+[2]*pow(log(x),-2)+[3]*pow(log(x),-3)");
+          //}
+
           // allow some uncertainties to not cancel in the bkgd. subtracted (signal) yield by overwriting the current uncertainties
           if (variationsThatDontCancelInSig.count (var) != 0) {
             TGAE* g_tot = new TGAE ();
@@ -833,6 +845,10 @@ void ProcessCorrelations (const char* tag, const char* outFileTag) {//, const in
             g_jetInt_trk_pt_sig_syst[iPtJInt][iDir][iCent][iVar] = new TGAE ();
 
             CalcSystematics (g_jetInt_trk_pt_sig_syst[iPtJInt][iDir][iCent][iVar], h_jetInt_trk_pt_sig[iDType][iPtJInt][iDir][iCent][0], h_jetInt_trk_pt_sig[iDType][iPtJInt][iDir][iCent][iVar]);
+
+            //if (variationsToSmooth.count (var) > 0) {
+            //  SmoothSystematics (g_jetInt_trk_pt_sig_syst[iPtJInt][iDir][iCent][iVar], "[0]+[1]*pow(log(x),-1)+[2]*pow(log(x),-2)+[3]*pow(log(x),-3)");
+            //}
 
             // allow some uncertainties to not cancel in the bkgd. subtracted (signal) yield by overwriting the current uncertainties
             if (variationsThatDontCancelInSig.count (var) != 0) {
@@ -922,39 +938,39 @@ void ProcessCorrelations (const char* tag, const char* outFileTag) {//, const in
     if (dataVariations.count (var) > 0 || mcVariations.count (var) == 0)
       continue; // skip variations already evaluated in data or that are not evaluated in MC
 
-    for (short iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
+    //for (short iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
 
-      for (short iDir = 0; iDir < nDir; iDir++) {
+    //  for (short iDir = 0; iDir < nDir; iDir++) {
 
-        SetCentralValuesKeepRelativeErrors (g_jet_trk_pt_ref_sig_syst[iPtJ][iDir][iVar],  h_jet_trk_pt_ref_sig[0][iPtJ][iDir][0]);
+    //    SetCentralValuesKeepRelativeErrors (g_jet_trk_pt_ref_sig_syst[iPtJ][iDir][iVar],  h_jet_trk_pt_ref_sig[0][iPtJ][iDir][0]);
 
-        for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
+    //    for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
 
-          SetCentralValuesKeepRelativeErrors (g_jet_trk_pt_sig_syst[iPtJ][iDir][iCent][iVar], h_jet_trk_pt_sig[0][iPtJ][iDir][iCent][0]);
+    //      SetCentralValuesKeepRelativeErrors (g_jet_trk_pt_sig_syst[iPtJ][iDir][iCent][iVar], h_jet_trk_pt_sig[0][iPtJ][iDir][iCent][0]);
 
-        } // end loop over iCent
+    //    } // end loop over iCent
 
-      } // end loop over iDir
+    //  } // end loop over iDir
 
-    } // end loop over iPtJ
+    //} // end loop over iPtJ
 
     for (short iPtJInt : {0, 1}) {
 
-      for (short iDir = 0; iDir < nDir; iDir++) {
+      //for (short iDir = 0; iDir < nDir; iDir++) {
 
-        //SetCentralValuesKeepRelativeErrors (g_jetInt_trk_pt_ref_syst[iPtJInt][iDir][iVar],      h_jetInt_trk_pt_ref[0][iPtJInt][iDir][0]);
-        //SetCentralValuesKeepRelativeErrors (g_jetInt_trk_pt_ref_bkg_syst[iPtJInt][iDir][iVar],  h_jetInt_trk_pt_ref_bkg[0][iPtJInt][iDir][0]);
-        SetCentralValuesKeepRelativeErrors (g_jetInt_trk_pt_ref_sig_syst[iPtJInt][iDir][iVar],  h_jetInt_trk_pt_ref_sig[0][iPtJInt][iDir][0]);
+      //  //SetCentralValuesKeepRelativeErrors (g_jetInt_trk_pt_ref_syst[iPtJInt][iDir][iVar],      h_jetInt_trk_pt_ref[0][iPtJInt][iDir][0]);
+      //  //SetCentralValuesKeepRelativeErrors (g_jetInt_trk_pt_ref_bkg_syst[iPtJInt][iDir][iVar],  h_jetInt_trk_pt_ref_bkg[0][iPtJInt][iDir][0]);
+      //  SetCentralValuesKeepRelativeErrors (g_jetInt_trk_pt_ref_sig_syst[iPtJInt][iDir][iVar],  h_jetInt_trk_pt_ref_sig[0][iPtJInt][iDir][0]);
 
-        for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
+      //  for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
 
-          //SetCentralValuesKeepRelativeErrors (g_jetInt_trk_pt_syst[iPtJInt][iDir][iCent][iVar],     h_jetInt_trk_pt[0][iPtJInt][iDir][iCent][0]);
-          //SetCentralValuesKeepRelativeErrors (g_jetInt_trk_pt_bkg_syst[iPtJInt][iDir][iCent][iVar], h_jetInt_trk_pt_bkg[0][iPtJInt][iDir][iCent][0]);
-          SetCentralValuesKeepRelativeErrors (g_jetInt_trk_pt_sig_syst[iPtJInt][iDir][iCent][iVar], h_jetInt_trk_pt_sig[0][iPtJInt][iDir][iCent][0]);
+      //    //SetCentralValuesKeepRelativeErrors (g_jetInt_trk_pt_syst[iPtJInt][iDir][iCent][iVar],     h_jetInt_trk_pt[0][iPtJInt][iDir][iCent][0]);
+      //    //SetCentralValuesKeepRelativeErrors (g_jetInt_trk_pt_bkg_syst[iPtJInt][iDir][iCent][iVar], h_jetInt_trk_pt_bkg[0][iPtJInt][iDir][iCent][0]);
+      //    SetCentralValuesKeepRelativeErrors (g_jetInt_trk_pt_sig_syst[iPtJInt][iDir][iCent][iVar], h_jetInt_trk_pt_sig[0][iPtJInt][iDir][iCent][0]);
 
-        } // end loop over iCent
+      //  } // end loop over iCent
 
-      } // end loop over iDir
+      //} // end loop over iDir
 
       for (short iPtCh = 0; iPtCh < nPtChSelections; iPtCh++) {
 
@@ -1034,7 +1050,7 @@ void ProcessCorrelations (const char* tag, const char* outFileTag) {//, const in
 
       std::vector <int> iVars = {};
       for (TString s : vgroup) {
-        const short iVar = GetVariationN (s);
+        const short iVar = GetVarN (s);
         if (0 <= iVar && iVar < nVar)
           iVars.push_back (iVar);
       }
@@ -1045,8 +1061,8 @@ void ProcessCorrelations (const char* tag, const char* outFileTag) {//, const in
       else if (iVars.size () == 1) {
 
         const short iVar = iVars[0];
-        const TString var = variations[iVar];
-        const short iTotVar = (IsJetsVariation (var) ? 2 : (IsTrackingVariation (var) ? 1 : 0));
+        const short iTotVar = GetTotVarN (GetTotVar (variations[iVar]));
+        std::cout << "For var " << variations[iVar] << " assigning to " << totalVariations[iTotVar] << std::endl;
 
         for (short iDir = 0; iDir < nDir; iDir++) {
 
@@ -1084,8 +1100,9 @@ void ProcessCorrelations (const char* tag, const char* outFileTag) {//, const in
 
       else {
 
-        const TString var = variations[iVars[0]];
-        const short iTotVar = (IsJetsVariation (var) ? 2 : (IsTrackingVariation (var) ? 1 : 0));
+        const short iTotVar = GetTotVarN (GetTotVar (variations[iVars[0]]));
+        for (int iVar : iVars)
+          std::cout << "For var " << variations[iVar] << " assigning to " << GetTotVar (variations[iVar]) << std::endl;
 
         for (short iDir = 0; iDir < nDir; iDir++) {
 

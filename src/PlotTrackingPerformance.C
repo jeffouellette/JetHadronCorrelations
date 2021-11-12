@@ -18,7 +18,7 @@
 #include "TreeVariables.h"
 #include "Params.h"
 #include "LocalUtilities.h"
-#include "PrimaryFractionFit.h"
+#include "PiecewisePolynomialConstantFunc.h"
 
 #include "AtlasStyle.h"
 
@@ -41,7 +41,7 @@ const vector <int> systems = {0, 1}; // 0 = pp, 1 = pPb
 const int nSystems = systems.size ();
 
 
-PrimaryFractionFit pff;
+PiecewisePolynomialConstantFunc pff;
 
 
 void InvertRate (TH1* h) {

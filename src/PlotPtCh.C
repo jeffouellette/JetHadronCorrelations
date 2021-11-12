@@ -37,7 +37,7 @@ const bool makeMCClosurePlots = true;
 const bool makeUnfoldingPlots = true;
 
 const float maxDataSyst = 20; // maximum y-axis for data-driven systematics
-const float maxMCSyst = 10; // maximum y-axis for MC-driven systematics
+const float maxMCSyst = 20; // maximum y-axis for MC-driven systematics
 
 
 //void DoOffset (TH1D* h, const char* tag, const short iCent) {
@@ -1578,12 +1578,12 @@ void PlotPtCh (const char* inFileTag) {
       myText (0.56, 0.90, kBlack, "#bf{#it{ATLAS}} Internal", 0.032);
       myText (0.56, 0.86, kBlack, Form ("#it{p}_{T}^{jet} > %i GeV, #Delta#phi_{ch,jet} %s", iPtJInt == 0 ? 30 : 60, directions[iDir] == "ns" ? "< #pi/8" : (directions[iDir] == "as" ? "> 7#pi/8" : "#in (#pi/3, 2#pi/3)")), 0.032);
 
-      myText (0.20, 0.36, kBlack, "#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV", 0.030);
-      myText (0.20, 0.32, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.030);
+      myText (0.18, 0.36, kBlack, "#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV", 0.030);
+      myText (0.18, 0.32, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.030);
 
-      mySimpleMarkerAndBoxAndLineText (0.27, 0.27, 1.4, 1001, colorfulSystColors[0], 1.0, colorfulColors[0], kFullCircle, 1.6, "#it{pp} (#times10^{3})", 0.030);
+      mySimpleMarkerAndBoxAndLineText (0.25, 0.27, 1.4, 1001, colorfulSystColors[0], 1.0, colorfulColors[0], kFullCircle, 1.6, "#it{pp} (#times10^{3})", 0.030);
       for (short iCent = 0; iCent < nZdcCentBins; iCent++) { 
-        mySimpleMarkerAndBoxAndLineText (0.27 + (iCent >= 2 ? 0.4 : 0), 0.27-((iCent+1)%3)*0.040, 1.4, 1001, colorfulSystColors[iCent+1], 1.0, colorfulColors[iCent+1], kFullCircle, 1.6, Form ("ZDC %i-%i%% (#times10^{%i})", zdcCentPercs[iCent+1], zdcCentPercs[iCent], 2-iCent), 0.030);
+        mySimpleMarkerAndBoxAndLineText (0.25 + (iCent >= 2 ? 0.35 : 0), 0.27-((iCent+1)%3)*0.040, 1.4, 1001, colorfulSystColors[iCent+1], 1.0, colorfulColors[iCent+1], kFullCircle, 1.6, Form ("ZDC %i-%i%% (#times10^{%i})", zdcCentPercs[iCent+1], zdcCentPercs[iCent], 2-iCent), 0.030);
       }
       mySimpleMarkerAndBoxAndLineText (0.67, 0.15, 1.4, 1001, colorfulSystColors[nZdcCentBins+1], 1.0, colorfulColors[nZdcCentBins+1], kFullCircle, 1.6, Form ("All cent. (#times10^{%i})", 2-nZdcCentBins), 0.030);
       mySimpleMarkerAndBoxAndLineText (0.27, 0.15, 1.4, 1001, kWhite, 0.0, kBlack, kDot, 0.0, "#it{pp} (#it{scaled to} #it{p}+Pb)", 0.030);
@@ -1700,7 +1700,7 @@ void PlotPtCh (const char* inFileTag) {
 
         TH1D* h = new TH1D ("h", ";#it{p}_{T}^{ch} [GeV];#it{I}_{#it{p}Pb}", 1, pTChBins[1], iDir == 1 ? 10 : pTChBins[nPtChBins-(iPtJInt == 0 ? 3 : 1)]);//pTChBins[nPtChBins]);
         h->GetXaxis ()->SetMoreLogLabels ();
-        h->GetYaxis ()->SetRangeUser ((iPtJInt == 0 ? 0.61 : 0.74), (iPtJInt == 0 ? 1.7 : 1.45));
+        h->GetYaxis ()->SetRangeUser ((iPtJInt == 0 ? 0.61 : 0.74), (iPtJInt == 0 ? 1.6 : 1.45));
         //h->GetYaxis ()->SetRangeUser (0.0, 3);
         h->SetBinContent (1, 1);
         h->SetLineStyle (2);
@@ -1841,9 +1841,15 @@ void PlotPtCh (const char* inFileTag) {
 
 
 
-  for (short iDType : {0, 1}) {
+  for (short iSysType : {0, 1, 2}) {
 
-    const short maxNSys = (iDType == 0 ? 6 : 10);
+    const short iDType = iSysType % 2;
+    const TString sysType = (iSysType == 0 ? "tracking" : (iSysType == 1 ? "jets" : "mixing"));
+
+    const short maxNSys = (iSysType == 1 ? 10 : 6);
+    const float dy = (iSysType == 1 ? 0.022 : 0.04);
+    const float tsize = (iSysType == 1 ? 0.018 : 0.030);
+    const float x0 = (iSysType == 1 ? 0.24 : 0.35);
 
     for (short iDir : {0, 2}) {
 
@@ -1852,7 +1858,7 @@ void PlotPtCh (const char* inFileTag) {
 
       //    const TString pTJInt = (iPtJInt == 0 ? "30GeV" : "60GeV");
 
-      //    const char* canvasName = Form ("c_jetInt_trk_pt_%s_pp_%s_syst_%s", directions[iDir].Data (), iDType == 0 ? "data" : "mc", pTJInt.Data ());
+      //    const char* canvasName = Form ("c_jetInt_trk_pt_%s_pp_%s_syst_%s", directions[iDir].Data (), sysType.Data (), pTJInt.Data ());
       //    TCanvas* c = new TCanvas (canvasName, "", 800, 800);
 
       //    TH1D* h = nullptr;
@@ -1873,16 +1879,9 @@ void PlotPtCh (const char* inFileTag) {
       //    h->DrawCopy ("hist ][");
       //    SaferDelete (&h);
 
-      //    std::vector <short> totVars (0);
-      //    if (iDType == 0) {
-      //      totVars.push_back (0);
-      //      totVars.push_back (1);
-      //    }
-      //    else 
-      //      totVars.push_back (2);
-      //    for (short iTotVar : totVars) {
-      //      const TString totVar = totalVariations[iTotVar];
-      //      g = ConvertErrorsToCentralValues (g_jetInt_trk_pt_ref_systTot[iPtJInt][iDir][iTotVar], true, 100);
+      //    {
+      //      const TString totVar = totalVariations[iSysType];
+      //      g = ConvertErrorsToCentralValues (g_jetInt_trk_pt_ref_systTot[iPtJInt][iDir][iSysType], true, 100);
       //      gup = (TGAE*) g->Clone ();
       //      gdown = (TGAE*) g->Clone ();
       //      FlipTGAE (gdown);
@@ -1916,18 +1915,18 @@ void PlotPtCh (const char* inFileTag) {
       //    short count = 0;
       //    for (short iVar = 1; iVar < nVar; iVar++) {
       //      const TString var = variations[iVar];
-      //      if ((iDType == 0  && dataVariations.count (var) > 0) || (iDType == 1 && mcVariations.count (var) > 0)) {
-      //        myLineColorText (0.35+0.35*(count/maxNSys), 0.41-(count%maxNSys)*0.020, varStyles[var].first, varStyles[var].second, varFullNames[var], 0.5, 0.014);
-      //        count++;
-      //      }
+      //      if ((iSysType == 0  && !IsTrackingVariation (var)) || (iSysType == 1 && !IsJetsVariation (var)) || (iSysType == 2 && !IsMixingVariation (var)))
+      //        continue;
+      //      myLineColorText (x0+0.35*(count/maxNSys), 0.41-(count%maxNSys)*dy, varStyles[var].first, varStyles[var].second, varFullNames[var], 0.5, tsize);
+      //      count++;
       //    }
-      //    for (short iTotVar : totVars) {
-      //      const TString totVar = totalVariations[iTotVar];
-      //      myLineColorText (0.35+0.35*(count/maxNSys), 0.41-(count%maxNSys)*0.020, varStyles[totVar].first, varStyles[totVar].second, varFullNames[totVar], 0.5, 0.014);
+      //    {
+      //      const TString totVar = totalVariations[iSysType];
+      //      myLineColorText (x0+0.35*(count/maxNSys), 0.41-(count%maxNSys)*dy, varStyles[totVar].first, varStyles[totVar].second, varFullNames[totVar], 0.5, tsize);
       //      count++;
       //    }
 
-      //    c->SaveAs (Form ("%s/Plots/Systematics/PtCh/TotalJetTaggedYield_pp_%s_ptch_%iGeVJets_%ssyst.pdf", workPath.Data (), directions[iDir] == "ns" ? "nearside" : "awayside", iPtJInt == 0 ? 30 : 60, iDType == 0 ? "":"mcBased_"));
+      //    c->SaveAs (Form ("%s/Plots/Systematics/PtCh/TotalJetTaggedYield_pp_%s_ptch_%iGeVJets_%s_syst.pdf", workPath.Data (), directions[iDir] == "ns" ? "nearside" : "awayside", iPtJInt == 0 ? 30 : 60, sysType.Data ()));
 
       //  } // end loop over iPtJInt
 
@@ -1938,7 +1937,7 @@ void PlotPtCh (const char* inFileTag) {
 
       //    for (short iCent = 0; iCent < nZdcCentBins; iCent++) {
 
-      //      const char* canvasName = Form ("c_jetInt_trk_pt_%s_%s_pPb_iCent%i_syst_%s", directions[iDir].Data (), iDType == 0 ? "data" : "mc", iCent, pTJInt.Data ());
+      //      const char* canvasName = Form ("c_jetInt_trk_pt_%s_%s_pPb_iCent%i_syst_%s", directions[iDir].Data (), sysType.Data (), iCent, pTJInt.Data ());
       //      TCanvas* c = new TCanvas (canvasName, "", 800, 800);
 
       //      TH1D* h = nullptr;
@@ -1959,16 +1958,9 @@ void PlotPtCh (const char* inFileTag) {
       //      h->DrawCopy ("hist ][");
       //      SaferDelete (&h);
 
-      //      std::vector <short> totVars (0);
-      //      if (iDType == 0) {
-      //        totVars.push_back (0);
-      //        totVars.push_back (1);
-      //      }
-      //      else 
-      //        totVars.push_back (2);
-      //      for (short iTotVar : totVars) {
-      //        const TString totVar = totalVariations[iTotVar];
-      //        g = ConvertErrorsToCentralValues (g_jetInt_trk_pt_systTot[iPtJInt][iDir][iCent][iTotVar], true, 100);
+      //      {
+      //        const TString totVar = totalVariations[iSysType];
+      //        g = ConvertErrorsToCentralValues (g_jetInt_trk_pt_systTot[iPtJInt][iDir][iCent][iSysType], true, 100);
       //        gup = (TGAE*) g->Clone ();
       //        gdown = (TGAE*) g->Clone ();
       //        FlipTGAE (gdown);
@@ -2002,18 +1994,17 @@ void PlotPtCh (const char* inFileTag) {
       //      short count = 0;
       //      for (short iVar = 1; iVar < nVar; iVar++) {
       //        const TString var = variations[iVar];
-      //        if ((iDType == 0  && dataVariations.count (var) > 0) || (iDType == 1 && mcVariations.count (var) > 0)) {
-      //          myLineColorText (0.35+0.35*(count/maxNSys), 0.41-(count%maxNSys)*0.020, varStyles[var].first, varStyles[var].second, varFullNames[var], 0.5, 0.014);
-      //          count++;
-      //        }
+      //        if ((iSysType == 0  && !IsTrackingVariation (var)) || (iSysType == 1 && !IsJetsVariation (var)) || (iSysType == 2 && !IsMixingVariation (var)))
+      //          continue;
+      //        myLineColorText (x0+0.35*(count/maxNSys), 0.41-(count%maxNSys)*dy, varStyles[var].first, varStyles[var].second, varFullNames[var], 0.5, tsize);
+      //        count++;
       //      }
-      //      for (short iTotVar : totVars) {
-      //        const TString totVar = totalVariations[iTotVar];
-      //        myLineColorText (0.35+0.35*(count/maxNSys), 0.41-(count%maxNSys)*0.020, varStyles[totVar].first, varStyles[totVar].second, varFullNames[totVar], 0.5, 0.014);
+      //        const TString totVar = totalVariations[iSysType];
+      //        myLineColorText (x0+0.35*(count/maxNSys), 0.41-(count%maxNSys)*dy, varStyles[totVar].first, varStyles[totVar].second, varFullNames[totVar], 0.5, tsize);
       //        count++;
       //      }
       //      
-      //      c->SaveAs (Form ("%s/Plots/Systematics/PtCh/TotalJetTaggedYield_pPb_%i-%iperc_%s_ptch_%iGeVJets_%ssyst.pdf", workPath.Data (), zdcCentPercs[iCent+1], zdcCentPercs[iCent], directions[iDir] == "ns" ? "nearside" : "awayside", iPtJInt == 0 ? 30 : 60, iDType == 0 ? "":"mcBased_"));
+      //      c->SaveAs (Form ("%s/Plots/Systematics/PtCh/TotalJetTaggedYield_pPb_%i-%iperc_%s_ptch_%iGeVJets_%s_syst.pdf", workPath.Data (), zdcCentPercs[iCent+1], zdcCentPercs[iCent], directions[iDir] == "ns" ? "nearside" : "awayside", iPtJInt == 0 ? 30 : 60, sysType.Data ()));
       //    } // end loop over iCent
 
       //  } // end loop over iPtJInt
@@ -2026,7 +2017,7 @@ void PlotPtCh (const char* inFileTag) {
 
       //    const TString pTJInt = (iPtJInt == 0 ? "30GeV" : "60GeV");
 
-      //    const char* canvasName = Form ("c_jetInt_trk_pt_%s_pp_%s_bkg_syst_%s", directions[iDir].Data (), iDType == 0 ? "data" : "mc", pTJInt.Data ());
+      //    const char* canvasName = Form ("c_jetInt_trk_pt_%s_pp_%s_bkg_syst_%s", directions[iDir].Data (), sysType.Data (), pTJInt.Data ());
       //    TCanvas* c = new TCanvas (canvasName, "", 800, 800);
 
       //    TH1D* h = nullptr;
@@ -2047,16 +2038,9 @@ void PlotPtCh (const char* inFileTag) {
       //    h->DrawCopy ("hist ][");
       //    SaferDelete (&h);
 
-      //    std::vector <short> totVars (0);
-      //    if (iDType == 0) {
-      //      totVars.push_back (0);
-      //      totVars.push_back (1);
-      //    }
-      //    else 
-      //      totVars.push_back (2);
-      //    for (short iTotVar : totVars) {
-      //      const TString totVar = totalVariations[iTotVar];
-      //      g = ConvertErrorsToCentralValues (g_jetInt_trk_pt_ref_bkg_systTot[iPtJInt][iDir][iTotVar], true, 100);
+      //    {
+      //      const TString totVar = totalVariations[iSysType];
+      //      g = ConvertErrorsToCentralValues (g_jetInt_trk_pt_ref_bkg_systTot[iPtJInt][iDir][iSysType], true, 100);
       //      gup = (TGAE*) g->Clone ();
       //      gdown = (TGAE*) g->Clone ();
       //      FlipTGAE (gdown);
@@ -2090,18 +2074,18 @@ void PlotPtCh (const char* inFileTag) {
       //    short count = 0;
       //    for (short iVar = 1; iVar < nVar; iVar++) {
       //      const TString var = variations[iVar];
-      //      if ((iDType == 0  && dataVariations.count (var) > 0) || (iDType == 1 && mcVariations.count (var) > 0)) {
-      //        myLineColorText (0.35+0.35*(count/maxNSys), 0.41-(count%maxNSys)*0.020, varStyles[var].first, varStyles[var].second, varFullNames[var], 0.5, 0.014);
-      //        count++;
-      //      }
+      //      if ((iSysType == 0  && !IsTrackingVariation (var)) || (iSysType == 1 && !IsJetsVariation (var)) || (iSysType == 2 && !IsMixingVariation (var)))
+      //        continue;
+      //      myLineColorText (x0+0.35*(count/maxNSys), 0.41-(count%maxNSys)*dy, varStyles[var].first, varStyles[var].second, varFullNames[var], 0.5, tsize);
+      //      count++;
       //    }
-      //    for (short iTotVar : totVars) {
-      //      const TString totVar = totalVariations[iTotVar];
-      //      myLineColorText (0.35+0.35*(count/maxNSys), 0.41-(count%maxNSys)*0.020, varStyles[totVar].first, varStyles[totVar].second, varFullNames[totVar], 0.5, 0.014);
+      //    {
+      //      const TString totVar = totalVariations[iSysType];
+      //      myLineColorText (x0+0.35*(count/maxNSys), 0.41-(count%maxNSys)*dy, varStyles[totVar].first, varStyles[totVar].second, varFullNames[totVar], 0.5, tsize);
       //      count++;
       //    }
 
-      //    c->SaveAs (Form ("%s/Plots/Systematics/PtCh/BkgdJetTaggedYield_pp_%s_ptch_%iGeVJets_%ssyst.pdf", workPath.Data (), directions[iDir] == "ns" ? "nearside" : "awayside", iPtJInt == 0 ? 30 : 60, iDType == 0 ? "":"mcBased_"));
+      //    c->SaveAs (Form ("%s/Plots/Systematics/PtCh/BkgdJetTaggedYield_pp_%s_ptch_%iGeVJets_%s_syst.pdf", workPath.Data (), directions[iDir] == "ns" ? "nearside" : "awayside", iPtJInt == 0 ? 30 : 60, sysType.Data ()));
 
       //  } // end loop over iPtJInt
 
@@ -2112,7 +2096,7 @@ void PlotPtCh (const char* inFileTag) {
 
       //    for (short iCent = 0; iCent < nZdcCentBins; iCent++) {
 
-      //      const char* canvasName = Form ("c_jetInt_trk_pt_%s_%s_pPb_iCent%i_bkgd_syst_%s", directions[iDir].Data (), iDType == 0 ? "data" : "mc", iCent, pTJInt.Data ());
+      //      const char* canvasName = Form ("c_jetInt_trk_pt_%s_%s_pPb_iCent%i_bkgd_syst_%s", directions[iDir].Data (), sysType.Data (), iCent, pTJInt.Data ());
       //      TCanvas* c = new TCanvas (canvasName, "", 800, 800);
 
       //      TH1D* h = nullptr;
@@ -2133,16 +2117,9 @@ void PlotPtCh (const char* inFileTag) {
       //      h->DrawCopy ("hist ][");
       //      SaferDelete (&h);
 
-      //      std::vector <short> totVars (0);
-      //      if (iDType == 0) {
-      //        totVars.push_back (0);
-      //        totVars.push_back (1);
-      //      }
-      //      else 
-      //        totVars.push_back (2);
-      //      for (short iTotVar : totVars) {
-      //        const TString totVar = totalVariations[iTotVar];
-      //        g = ConvertErrorsToCentralValues (g_jetInt_trk_pt_bkg_systTot[iDir][iPtJInt][iCent][iTotVar], true, 100);
+      //      {
+      //        const TString totVar = totalVariations[iSysType];
+      //        g = ConvertErrorsToCentralValues (g_jetInt_trk_pt_bkg_systTot[iDir][iPtJInt][iCent][iSysType], true, 100);
       //        gup = (TGAE*) g->Clone ();
       //        gdown = (TGAE*) g->Clone ();
       //        FlipTGAE (gdown);
@@ -2176,18 +2153,18 @@ void PlotPtCh (const char* inFileTag) {
       //      short count = 0;
       //      for (short iVar = 1; iVar < nVar; iVar++) {
       //        const TString var = variations[iVar];
-      //        if ((iDType == 0  && dataVariations.count (var) > 0) || (iDType == 1 && mcVariations.count (var) > 0)) {
-      //          myLineColorText (0.35+0.35*(count/maxNSys), 0.41-(count%maxNSys)*0.020, varStyles[var].first, varStyles[var].second, varFullNames[var], 0.5, 0.014);
-      //          count++;
-      //        }
+      //        if ((iSysType == 0  && !IsTrackingVariation (var)) || (iSysType == 1 && !IsJetsVariation (var)) || (iSysType == 2 && !IsMixingVariation (var)))
+      //          continue;
+      //        myLineColorText (x0+0.35*(count/maxNSys), 0.41-(count%maxNSys)*dy, varStyles[var].first, varStyles[var].second, varFullNames[var], 0.5, tsize);
+      //        count++;
       //      }
-      //      for (short iTotVar : totVars) {
-      //        const TString totVar = totalVariations[iTotVar];
-      //        myLineColorText (0.35+0.35*(count/maxNSys), 0.41-(count%maxNSys)*0.020, varStyles[totVar].first, varStyles[totVar].second, varFullNames[totVar], 0.5, 0.014);
+      //      {
+      //        const TString totVar = totalVariations[iSysType];
+      //        myLineColorText (x0+0.35*(count/maxNSys), 0.41-(count%maxNSys)*dy, varStyles[totVar].first, varStyles[totVar].second, varFullNames[totVar], 0.5, tsize);
       //        count++;
       //      }
       //      
-      //      c->SaveAs (Form ("%s/Plots/Systematics/PtCh/BkgdJetTaggedYield_pPb_%i-%iperc_%s_ptch_%iGeVJets_%ssyst.pdf", workPath.Data (), zdcCentPercs[iCent+1], zdcCentPercs[iCent], directions[iDir] == "ns" ? "nearside" : "awayside", iPtJInt == 0 ? 30 : 60, iDType == 0 ? "":"mcBased_"));
+      //      c->SaveAs (Form ("%s/Plots/Systematics/PtCh/BkgdJetTaggedYield_pPb_%i-%iperc_%s_ptch_%iGeVJets_%s_syst.pdf", workPath.Data (), zdcCentPercs[iCent+1], zdcCentPercs[iCent], directions[iDir] == "ns" ? "nearside" : "awayside", iPtJInt == 0 ? 30 : 60, sysType.Data ()));
 
       //    } // end loop over iCent
 
@@ -2201,7 +2178,7 @@ void PlotPtCh (const char* inFileTag) {
 
           const TString pTJInt = (iPtJInt == 0 ? "30GeV" : "60GeV");
 
-          const char* canvasName = Form ("c_jetInt_trk_pt_%s_sig_%s_pp_syst_%s", directions[iDir].Data (), iDType == 0 ? "data" : "mc", pTJInt.Data ());
+          const char* canvasName = Form ("c_jetInt_trk_pt_%s_unf_%s_pp_syst_%s", directions[iDir].Data (), sysType.Data (), pTJInt.Data ());
           TCanvas* c = new TCanvas (canvasName, "", 800, 800);
 
           TH1D* h = nullptr;
@@ -2222,16 +2199,9 @@ void PlotPtCh (const char* inFileTag) {
           h->DrawCopy ("hist ][");
           SaferDelete (&h);
 
-          std::vector <short> totVars (0);
-          if (iDType == 0) {
-            totVars.push_back (0);
-            totVars.push_back (1);
-          }
-          else 
-            totVars.push_back (2);
-          for (short iTotVar : totVars) {
-            const TString totVar = totalVariations[iTotVar];
-            g = ConvertErrorsToCentralValues (g_jetInt_trk_pt_ref_sig_systTot[iPtJInt][iDir][iTotVar], true, 100);
+          {
+            const TString totVar = totalVariations[iSysType];
+            g = ConvertErrorsToCentralValues (g_jetInt_trk_pt_ref_unf_systTot[iPtJInt][iDir][iSysType], true, 100);
             gup = (TGAE*) g->Clone ();
             gdown = (TGAE*) g->Clone ();
             FlipTGAE (gdown);
@@ -2247,11 +2217,11 @@ void PlotPtCh (const char* inFileTag) {
 
           for (short iVar = 1; iVar < nVar; iVar++) {
             const TString var = variations[iVar];
-            if ((iDType == 0  && dataVariations.count (var) == 0) || (iDType == 1 && mcVariations.count (var) == 0))
+            if ((iSysType == 0  && !IsTrackingVariation (var)) || (iSysType == 1 && !IsJetsVariation (var)) || (iSysType == 2 && !IsMixingVariation (var)))
               continue;
 
-            g = (TGAE*) g_jetInt_trk_pt_ref_sig_syst[iPtJInt][iDir][iVar]->Clone ("gtemp");
-            SaveRelativeErrors (g, g, g_jetInt_trk_pt_ref_sig_syst[iPtJInt][iDir][0], 100);
+            g = (TGAE*) g_jetInt_trk_pt_ref_unf_syst[iPtJInt][iDir][iVar]->Clone ("gtemp");
+            SaveRelativeErrors (g, g, g_jetInt_trk_pt_ref_unf_syst[iPtJInt][iDir][0], 100);
             ResetXErrors (g);
             ResetTGAEErrors (g);
             myDraw (g, varStyles[var].first, kDot, 0, varStyles[var].second, 4, "L");
@@ -2268,18 +2238,18 @@ void PlotPtCh (const char* inFileTag) {
           short count = 0;
           for (short iVar = 1; iVar < nVar; iVar++) {
             const TString var = variations[iVar];
-            if ((iDType == 0  && dataVariations.count (var) > 0) || (iDType == 1 && mcVariations.count (var) > 0)) {
-              myLineColorText (0.35+0.35*(count/maxNSys), 0.41-(count%maxNSys)*0.020, varStyles[var].first, varStyles[var].second, varFullNames[var], 0.5, 0.014);
-              count++;
-            }
+            if ((iSysType == 0  && !IsTrackingVariation (var)) || (iSysType == 1 && !IsJetsVariation (var)) || (iSysType == 2 && !IsMixingVariation (var)))
+              continue;
+            myLineColorText (x0+0.35*(count/maxNSys), 0.41-(count%maxNSys)*dy, varStyles[var].first, varStyles[var].second, varFullNames[var], 0.5, tsize);
+            count++;
           }
-          for (short iTotVar : totVars) {
-            const TString totVar = totalVariations[iTotVar];
-            myLineColorText (0.35+0.35*(count/maxNSys), 0.41-(count%maxNSys)*0.020, varStyles[totVar].first, varStyles[totVar].second, varFullNames[totVar], 0.5, 0.014);
+          {
+            const TString totVar = totalVariations[iSysType];
+            myLineColorText (x0+0.35*(count/maxNSys), 0.41-(count%maxNSys)*dy, varStyles[totVar].first, varStyles[totVar].second, varFullNames[totVar], 0.5, tsize);
             count++;
           }
 
-          c->SaveAs (Form ("%s/Plots/Systematics/PtCh/SignalJetTaggedYield_pp_%s_ptch_%iGeVJets_%ssyst.pdf", workPath.Data (), directions[iDir] == "ns" ? "nearside" : "awayside", iPtJInt == 0 ? 30 : 60, iDType == 0 ? "":"mcBased_"));
+          c->SaveAs (Form ("%s/Plots/Systematics/PtCh/SignalJetTaggedYield_pp_%s_ptch_%iGeVJets_%s_syst.pdf", workPath.Data (), directions[iDir] == "ns" ? "nearside" : "awayside", iPtJInt == 0 ? 30 : 60, sysType.Data ()));
 
         } // end loop over iPtJInt
 
@@ -2291,7 +2261,7 @@ void PlotPtCh (const char* inFileTag) {
 
           for (short iCent = 0; iCent < nZdcCentBins; iCent++) {
 
-            const char* canvasName = Form ("c_jetInt_trk_pt_%s_sig_%s_pPb_iCent%i_syst_%s", directions[iDir].Data (), iDType == 0 ? "data" : "mc", iCent, pTJInt.Data ());
+            const char* canvasName = Form ("c_jetInt_trk_pt_%s_unf_%s_pPb_iCent%i_syst_%s", directions[iDir].Data (), sysType.Data (), iCent, pTJInt.Data ());
             TCanvas* c = new TCanvas (canvasName, "", 800, 800);
 
             TH1D* h = nullptr;
@@ -2313,16 +2283,9 @@ void PlotPtCh (const char* inFileTag) {
             h->DrawCopy ("hist ][");
             SaferDelete (&h);
 
-            std::vector <short> totVars (0);
-            if (iDType == 0) {
-              totVars.push_back (0);
-              totVars.push_back (1);
-            }
-            else 
-              totVars.push_back (2);
-            for (short iTotVar : totVars) {
-              const TString totVar = totalVariations[iTotVar];
-              g = ConvertErrorsToCentralValues (g_jetInt_trk_pt_sig_systTot[iPtJInt][iDir][iCent][iTotVar], true, 100);
+            {
+              const TString totVar = totalVariations[iSysType];
+              g = ConvertErrorsToCentralValues (g_jetInt_trk_pt_unf_systTot[iPtJInt][iDir][iCent][iSysType], true, 100);
               gup = (TGAE*) g->Clone ();
               gdown = (TGAE*) g->Clone ();
               FlipTGAE (gdown);
@@ -2338,11 +2301,11 @@ void PlotPtCh (const char* inFileTag) {
 
             for (short iVar = 1; iVar < nVar; iVar++) {
               const TString var = variations[iVar];
-              if ((iDType == 0  && dataVariations.count (var) == 0) || (iDType == 1 && mcVariations.count (var) == 0))
+              if ((iSysType == 0  && !IsTrackingVariation (var)) || (iSysType == 1 && !IsJetsVariation (var)) || (iSysType == 2 && !IsMixingVariation (var)))
                 continue;
 
-              g = (TGAE*) g_jetInt_trk_pt_sig_syst[iPtJInt][iDir][iCent][iVar]->Clone ("gtemp");
-              SaveRelativeErrors (g, g, g_jetInt_trk_pt_sig_syst[iPtJInt][iDir][iCent][0], 100);
+              g = (TGAE*) g_jetInt_trk_pt_unf_syst[iPtJInt][iDir][iCent][iVar]->Clone ("gtemp");
+              SaveRelativeErrors (g, g, g_jetInt_trk_pt_unf_syst[iPtJInt][iDir][iCent][0], 100);
               ResetXErrors (g);
               ResetTGAEErrors (g);
               myDraw (g, varStyles[var].first, kDot, 0, varStyles[var].second, 4, "L");
@@ -2359,18 +2322,18 @@ void PlotPtCh (const char* inFileTag) {
             short count = 0;
             for (short iVar = 1; iVar < nVar; iVar++) {
               const TString var = variations[iVar];
-              if ((iDType == 0  && dataVariations.count (var) > 0) || (iDType == 1 && mcVariations.count (var) > 0)) {
-                myLineColorText (0.35+0.35*(count/maxNSys), 0.41-(count%maxNSys)*0.020, varStyles[var].first, varStyles[var].second, varFullNames[var], 0.5, 0.014);
-                count++;
-              }
+              if ((iSysType == 0  && !IsTrackingVariation (var)) || (iSysType == 1 && !IsJetsVariation (var)) || (iSysType == 2 && !IsMixingVariation (var)))
+                continue;
+              myLineColorText (x0+0.35*(count/maxNSys), 0.41-(count%maxNSys)*dy, varStyles[var].first, varStyles[var].second, varFullNames[var], 0.5, tsize);
+              count++;
             }
-            for (short iTotVar : totVars) {
-              const TString totVar = totalVariations[iTotVar];
-              myLineColorText (0.35+0.35*(count/maxNSys), 0.41-(count%maxNSys)*0.020, varStyles[totVar].first, varStyles[totVar].second, varFullNames[totVar], 0.5, 0.014);
+            {
+              const TString totVar = totalVariations[iSysType];
+              myLineColorText (x0+0.35*(count/maxNSys), 0.41-(count%maxNSys)*dy, varStyles[totVar].first, varStyles[totVar].second, varFullNames[totVar], 0.5, tsize);
               count++;
             }
 
-            c->SaveAs (Form ("%s/Plots/Systematics/PtCh/SignalJetTaggedYield_pPb_%i-%iperc_%s_ptch_%iGeVJets_%ssyst.pdf", workPath.Data (), zdcCentPercs[iCent+1], zdcCentPercs[iCent], directions[iDir] == "ns" ? "nearside" : "awayside", iPtJInt == 0 ? 30 : 60, iDType == 0 ? "":"mcBased_"));
+            c->SaveAs (Form ("%s/Plots/Systematics/PtCh/SignalJetTaggedYield_pPb_%i-%iperc_%s_ptch_%iGeVJets_%s_syst.pdf", workPath.Data (), zdcCentPercs[iCent+1], zdcCentPercs[iCent], directions[iDir] == "ns" ? "nearside" : "awayside", iPtJInt == 0 ? 30 : 60, sysType.Data ()));
           } // end loop over iCent
 
         } // end loop over iPtJInt
@@ -2381,7 +2344,7 @@ void PlotPtCh (const char* inFileTag) {
 
           const TString pTJInt = (iPtJInt == 0 ? "30GeV" : "60GeV");
 
-          const char* canvasName = Form ("c_jetInt_trk_pt_%s_sig_%s_pp_syst_%s", directions[iDir].Data (), iDType == 0 ? "data" : "mc", pTJInt.Data ());
+          const char* canvasName = Form ("c_jetInt_trk_pt_%s_unf_%s_pp_syst_%s", directions[iDir].Data (), sysType.Data (), pTJInt.Data ());
           TCanvas* c = new TCanvas (canvasName, "", 2800, 1400);
           c->Divide (4, 2);
 
@@ -2412,16 +2375,9 @@ void PlotPtCh (const char* inFileTag) {
             h->DrawCopy ("hist ][");
             SaferDelete (&h);
 
-            std::vector <short> totVars (0);
-            if (iDType == 0) {
-              totVars.push_back (0);
-              totVars.push_back (1);
-            }
-            else 
-              totVars.push_back (2);
-            for (short iTotVar : totVars) {
-              const TString totVar = totalVariations[iTotVar];
-              g = ConvertErrorsToCentralValues (g_jetInt_trk_pt_ref_sig_systTot[iPtJInt][iDir][iTotVar], true, 100);
+            {
+              const TString totVar = totalVariations[iSysType];
+              g = ConvertErrorsToCentralValues (g_jetInt_trk_pt_ref_unf_systTot[iPtJInt][iDir][iSysType], true, 100);
               gup = (TGAE*) g->Clone ();
               gdown = (TGAE*) g->Clone ();
               FlipTGAE (gdown);
@@ -2437,11 +2393,11 @@ void PlotPtCh (const char* inFileTag) {
 
             for (short iVar = 1; iVar < nVar; iVar++) {
               const TString var = variations[iVar];
-              if ((iDType == 0  && dataVariations.count (var) == 0) || (iDType == 1 && mcVariations.count (var) == 0))
+              if ((iSysType == 0  && !IsTrackingVariation (var)) || (iSysType == 1 && !IsJetsVariation (var)) || (iSysType == 2 && !IsMixingVariation (var)))
                 continue;
 
-              g = (TGAE*) g_jetInt_trk_pt_ref_sig_syst[iPtJInt][iDir][iVar]->Clone ("gtemp");
-              SaveRelativeErrors (g, g, g_jetInt_trk_pt_ref_sig_syst[iPtJInt][iDir][0], 100);
+              g = (TGAE*) g_jetInt_trk_pt_ref_unf_syst[iPtJInt][iDir][iVar]->Clone ("gtemp");
+              SaveRelativeErrors (g, g, g_jetInt_trk_pt_ref_unf_syst[iPtJInt][iDir][0], 100);
               ResetXErrors (g);
               ResetTGAEErrors (g);
               myDraw (g, varStyles[var].first, kDot, 0, varStyles[var].second, 2, "L");
@@ -2472,9 +2428,9 @@ void PlotPtCh (const char* inFileTag) {
             h->DrawCopy ("hist ][");
             SaferDelete (&h);
 
-            for (short iTotVar : totVars) {
-              const TString totVar = totalVariations[iTotVar];
-              g = ConvertErrorsToCentralValues (g_jetInt_trk_pt_sig_systTot[iPtJInt][iDir][iCent][iTotVar], true, 100);
+            {
+              const TString totVar = totalVariations[iSysType];
+              g = ConvertErrorsToCentralValues (g_jetInt_trk_pt_unf_systTot[iPtJInt][iDir][iCent][iSysType], true, 100);
               gup = (TGAE*) g->Clone ();
               gdown = (TGAE*) g->Clone ();
               FlipTGAE (gdown);
@@ -2490,11 +2446,11 @@ void PlotPtCh (const char* inFileTag) {
 
             for (short iVar = 1; iVar < nVar; iVar++) {
               const TString var = variations[iVar];
-              if ((iDType == 0  && dataVariations.count (var) == 0) || (iDType == 1 && mcVariations.count (var) == 0))
+              if ((iSysType == 0  && !IsTrackingVariation (var)) || (iSysType == 1 && !IsJetsVariation (var)) || (iSysType == 2 && !IsMixingVariation (var)))
                 continue;
 
-              g = (TGAE*) g_jetInt_trk_pt_sig_syst[iPtJInt][iDir][iCent][iVar]->Clone ("gtemp");
-              SaveRelativeErrors (g, g, g_jetInt_trk_pt_sig_syst[iPtJInt][iDir][iCent][0], 100);
+              g = (TGAE*) g_jetInt_trk_pt_unf_syst[iPtJInt][iDir][iCent][iVar]->Clone ("gtemp");
+              SaveRelativeErrors (g, g, g_jetInt_trk_pt_unf_syst[iPtJInt][iDir][iCent][0], 100);
               ResetXErrors (g);
               ResetTGAEErrors (g);
               myDraw (g, varStyles[var].first, kDot, 0, varStyles[var].second, 2, "L");
@@ -2516,18 +2472,18 @@ void PlotPtCh (const char* inFileTag) {
           short count = 0;
           for (short iVar = 1; iVar < nVar; iVar++) {
             const TString var = variations[iVar];
-            if ((iDType == 0  && dataVariations.count (var) > 0) || (iDType == 1 && mcVariations.count (var) > 0)) {
-              myLineColorText (0.00+(iDType == 1 ? 0.60 : 0.50)*(count/maxNSys), 0.72-(count%maxNSys)*0.060, varStyles[var].first, varStyles[var].second, varFullNames[var], 2.0, 0.04);
-              count++;
-            }
+            if ((iSysType == 0  && !IsTrackingVariation (var)) || (iSysType == 1 && !IsJetsVariation (var)) || (iSysType == 2 && !IsMixingVariation (var)))
+              continue;
+            myLineColorText (0.00+(iDType == 1 ? 0.60 : 0.50)*(count/maxNSys), 0.72-(count%maxNSys)*0.060, varStyles[var].first, varStyles[var].second, varFullNames[var], 2.0, 0.04);
+            count++;
           }
-          for (short iTotVar : totVars) {
-            const TString totVar = totalVariations[iTotVar];
+          {
+            const TString totVar = totalVariations[iSysType];
             myLineColorText (0.00+(iDType == 1 ? 0.60 : 0.50)*(count/maxNSys), 0.72-(count%maxNSys)*0.060, varStyles[totVar].first, varStyles[totVar].second, varFullNames[totVar], 2.0, 0.04);
             count++;
           }
 
-          c->SaveAs (Form ("%s/Plots/Systematics/PtCh/SignalJetTaggedYield_%s_ptch_%iGeVJets_%ssyst.pdf", workPath.Data (), directions[iDir] == "ns" ? "nearside" : "awayside", iPtJInt == 0 ? 30 : 60, iDType == 0 ? "":"mcBased_"));
+          c->SaveAs (Form ("%s/Plots/Systematics/PtCh/SignalJetTaggedYield_%s_ptch_%iGeVJets_%s_syst.pdf", workPath.Data (), directions[iDir] == "ns" ? "nearside" : "awayside", iPtJInt == 0 ? 30 : 60, sysType.Data ()));
 
         } // end loop over iPtJInt
       }
@@ -2541,7 +2497,7 @@ void PlotPtCh (const char* inFileTag) {
 
           for (short iCent = 0; iCent < nZdcCentBins; iCent++) {
   
-            const char* canvasName = Form ("c_jetInt_trk_pt_%s_iaa_%s_pPb_iCent%i_syst_%s", directions[iDir].Data (), iDType == 0 ? "data" : "mc", iCent, pTJInt.Data ());
+            const char* canvasName = Form ("c_jetInt_trk_pt_%s_iaa_%s_pPb_iCent%i_syst_%s", directions[iDir].Data (), sysType.Data (), iCent, pTJInt.Data ());
             TCanvas* c = new TCanvas (canvasName, "", 800, 800);
   
             TH1D* h = nullptr;
@@ -2563,16 +2519,9 @@ void PlotPtCh (const char* inFileTag) {
             h->DrawCopy ("hist ][");
             SaferDelete (&h);
   
-            std::vector <short> totVars (0);
-            if (iDType == 0) {
-              totVars.push_back (0);
-              totVars.push_back (1);
-            }
-            else 
-              totVars.push_back (2);
-            for (short iTotVar : totVars) {
-              const TString totVar = totalVariations[iTotVar];
-              g = ConvertErrorsToCentralValues (g_jetInt_trk_pt_iaa_systTot[iPtJInt][iDir][iCent][iTotVar], true, 100);
+            {
+              const TString totVar = totalVariations[iSysType];
+              g = ConvertErrorsToCentralValues (g_jetInt_trk_pt_iaa_systTot[iPtJInt][iDir][iCent][iSysType], true, 100);
               gup = (TGAE*) g->Clone ();
               gdown = (TGAE*) g->Clone ();
               FlipTGAE (gdown);
@@ -2588,7 +2537,7 @@ void PlotPtCh (const char* inFileTag) {
   
             for (short iVar = 1; iVar < nVar; iVar++) {
               const TString var = variations[iVar];
-              if ((iDType == 0  && dataVariations.count (var) == 0) || (iDType == 1 && mcVariations.count (var) == 0))
+              if ((iSysType == 0  && !IsTrackingVariation (var)) || (iSysType == 1 && !IsJetsVariation (var)) || (iSysType == 2 && !IsMixingVariation (var)))
                 continue;
   
               g = (TGAE*) g_jetInt_trk_pt_iaa_syst[iPtJInt][iDir][iCent][iVar]->Clone ("gtemp");
@@ -2610,18 +2559,18 @@ void PlotPtCh (const char* inFileTag) {
             short count = 0;
             for (short iVar = 1; iVar < nVar; iVar++) {
               const TString var = variations[iVar];
-              if ((iDType == 0  && dataVariations.count (var) > 0) || (iDType == 1 && mcVariations.count (var) > 0)) {
-                myLineColorText (0.35+0.35*(count/maxNSys), 0.41-(count%maxNSys)*0.020, varStyles[var].first, varStyles[var].second, varFullNames[var], 0.5, 0.014);
-                count++;
-              }
+              if ((iSysType == 0  && !IsTrackingVariation (var)) || (iSysType == 1 && !IsJetsVariation (var)) || (iSysType == 2 && !IsMixingVariation (var)))
+                continue;
+              myLineColorText (x0+0.35*(count/maxNSys), 0.41-(count%maxNSys)*dy, varStyles[var].first, varStyles[var].second, varFullNames[var], 0.5, tsize);
+              count++;
             }
-            for (short iTotVar : totVars) {
-              const TString totVar = totalVariations[iTotVar];
-              myLineColorText (0.35+0.35*(count/maxNSys), 0.41-(count%maxNSys)*0.020, varStyles[totVar].first, varStyles[totVar].second, varFullNames[totVar], 0.5, 0.014);
+            {
+              const TString totVar = totalVariations[iSysType];
+              myLineColorText (0.35+0.35*(count/maxNSys), 0.41-(count%maxNSys)*dy, varStyles[totVar].first, varStyles[totVar].second, varFullNames[totVar], 0.5, tsize);
               count++;
             }
   
-            c->SaveAs (Form ("%s/Plots/Systematics/PtCh/JetTagged_IpPb_%i-%iperc_%s_ptch_%iGeVJets_%ssyst.pdf", workPath.Data (), zdcCentPercs[iCent+1], zdcCentPercs[iCent], directions[iDir] == "ns" ? "nearside" : "awayside", iPtJInt == 0 ? 30 : 60, iDType == 0 ? "":"mcBased_"));
+            c->SaveAs (Form ("%s/Plots/Systematics/PtCh/JetTagged_IpPb_%i-%iperc_%s_ptch_%iGeVJets_%s_syst.pdf", workPath.Data (), zdcCentPercs[iCent+1], zdcCentPercs[iCent], directions[iDir] == "ns" ? "nearside" : "awayside", iPtJInt == 0 ? 30 : 60, sysType.Data ()));
           } // end loop over iCent
 
         } // end loop over iPtJInt
@@ -2632,7 +2581,7 @@ void PlotPtCh (const char* inFileTag) {
 
           const TString pTJInt = (iPtJInt == 0 ? "30GeV" : "60GeV");
 
-          const char* canvasName = Form ("c_jetInt_trk_pt_%s_iaa_%s_pPb_syst_%s", directions[iDir].Data (), iDType == 0 ? "data" : "mc", pTJInt.Data ());
+          const char* canvasName = Form ("c_jetInt_trk_pt_%s_iaa_%s_pPb_syst_%s", directions[iDir].Data (), sysType.Data (), pTJInt.Data ());
           TCanvas* c = new TCanvas (canvasName, "", 2800, 1400);
           c->Divide (4, 2);
 
@@ -2664,9 +2613,9 @@ void PlotPtCh (const char* inFileTag) {
             h->DrawCopy ("hist ][");
             SaferDelete (&h);
   
-            for (short iTotVar : totVars) {
-              const TString totVar = totalVariations[iTotVar];
-              g = ConvertErrorsToCentralValues (g_jetInt_trk_pt_iaa_systTot[iPtJInt][iDir][iCent][iTotVar], true, 100);
+            {
+              const TString totVar = totalVariations[iSysType];
+              g = ConvertErrorsToCentralValues (g_jetInt_trk_pt_iaa_systTot[iPtJInt][iDir][iCent][iSysType], true, 100);
               gup = (TGAE*) g->Clone ();
               gdown = (TGAE*) g->Clone ();
               FlipTGAE (gdown);
@@ -2682,7 +2631,7 @@ void PlotPtCh (const char* inFileTag) {
   
             for (short iVar = 1; iVar < nVar; iVar++) {
               const TString var = variations[iVar];
-              if ((iDType == 0  && dataVariations.count (var) == 0) || (iDType == 1 && mcVariations.count (var) == 0))
+              if ((iSysType == 0  && !IsTrackingVariation (var)) || (iSysType == 1 && !IsJetsVariation (var)) || (iSysType == 2 && !IsMixingVariation (var)))
                 continue;
   
               g = (TGAE*) g_jetInt_trk_pt_iaa_syst[iPtJInt][iDir][iCent][iVar]->Clone ("gtemp");
@@ -2708,19 +2657,19 @@ void PlotPtCh (const char* inFileTag) {
           short count = 0;
           for (short iVar = 1; iVar < nVar; iVar++) {
             const TString var = variations[iVar];
+            if ((iSysType == 0  && !IsTrackingVariation (var)) || (iSysType == 1 && !IsJetsVariation (var)) || (iSysType == 2 && !IsMixingVariation (var)))
+              continue;
             float xcoord = 0.05;
             float ycoord = 0.72-count*0.07;
             if (count >= 10) {
               c->cd (8);
               ycoord += 0.85;
             }
-            if ((iDType == 0  && dataVariations.count (var) > 0) || (iDType == 1 && mcVariations.count (var) > 0)) {
-              myLineColorText (xcoord, ycoord, varStyles[var].first, varStyles[var].second, varFullNames[var], 2.0, 0.06);
-              count++;
-            }
+            myLineColorText (xcoord, ycoord, varStyles[var].first, varStyles[var].second, varFullNames[var], 2.0, 0.06);
+            count++;
           }
-          for (short iTotVar : totVars) {
-            const TString totVar = totalVariations[iTotVar];
+          {
+            const TString totVar = totalVariations[iSysType];
             float xcoord = 0.05;
             float ycoord = 0.72-count*0.07;
             if (count >= 10) {
@@ -2731,7 +2680,7 @@ void PlotPtCh (const char* inFileTag) {
             count++;
           }
 
-          c->SaveAs (Form ("%s/Plots/Systematics/PtCh/JetTagged_IpPb_%s_ptch_%iGeVJets_%ssyst.pdf", workPath.Data (), directions[iDir] == "ns" ? "nearside" : "awayside", iPtJInt == 0 ? 30 : 60, iDType == 0 ? "":"mcBased_"));
+          c->SaveAs (Form ("%s/Plots/Systematics/PtCh/JetTagged_IpPb_%s_ptch_%iGeVJets_%s_syst.pdf", workPath.Data (), directions[iDir] == "ns" ? "nearside" : "awayside", iPtJInt == 0 ? 30 : 60, sysType.Data ()));
 
         } // end loop over iPtJInt
 
@@ -2753,7 +2702,7 @@ void PlotPtCh (const char* inFileTag) {
 
           const TString pTJInt = (iPtJInt == 0 ? "30GeV" : "60GeV");
 
-          const char* canvasName = Form ("c_jetInt_trk_pt_%s_sig_data_pp_systTot_%s", directions[iDir].Data (), pTJInt.Data ());
+          const char* canvasName = Form ("c_jetInt_trk_pt_%s_unf_data_pp_systTot_%s", directions[iDir].Data (), pTJInt.Data ());
           TCanvas* c = new TCanvas (canvasName, "", 800, 800);
 
           TH1D* h = nullptr;
@@ -2766,7 +2715,7 @@ void PlotPtCh (const char* inFileTag) {
           const float ymin = -maxDataSyst;
           const float ymax =  maxDataSyst;
 
-          h = (TH1D*) h_jetInt_trk_pt_ref_sig[0][iPtJInt][iDir]->Clone ("h");
+          h = (TH1D*) h_jetInt_trk_pt_ref_unf[0][iPtJInt][iDir]->Clone ("h");
           h->Reset ();
           h->GetXaxis ()->SetMoreLogLabels ();
           h->GetYaxis ()->SetRangeUser (ymin, ymax);
@@ -2784,7 +2733,7 @@ void PlotPtCh (const char* inFileTag) {
 
           for (short iTotVar : {0, 1, 2}) {
             const TString totVar = totalVariations[iTotVar];
-            g = ConvertErrorsToCentralValues (g_jetInt_trk_pt_ref_sig_systTot[iPtJInt][iDir][iTotVar], true, 100);
+            g = ConvertErrorsToCentralValues (g_jetInt_trk_pt_ref_unf_systTot[iPtJInt][iDir][iTotVar], true, 100);
             gup = (TGAE*) g->Clone ();
             gdown = (TGAE*) g->Clone ();
             FlipTGAE (gdown);
@@ -2798,7 +2747,7 @@ void PlotPtCh (const char* inFileTag) {
             SaferDelete (&gdown);
           }
 
-          g = ConvertErrorsToCentralValues (g_jetInt_trk_pt_ref_sig_syst[iPtJInt][iDir][0], true, 100);
+          g = ConvertErrorsToCentralValues (g_jetInt_trk_pt_ref_unf_syst[iPtJInt][iDir][0], true, 100);
           myDraw (g, kBlack, kDot, 0, 1, 2, "L");
           FlipTGAE (g);
           myDraw (g, kBlack, kDot, 0, 1, 2, "L");
@@ -2830,7 +2779,7 @@ void PlotPtCh (const char* inFileTag) {
 
           for (short iCent = 0; iCent < nZdcCentBins; iCent++) {
 
-            const char* canvasName = Form ("c_jetInt_trk_pt_%s_sig_data_pPb_iCent%i_systTot_%s", directions[iDir].Data (), iCent, pTJInt.Data ());
+            const char* canvasName = Form ("c_jetInt_trk_pt_%s_unf_data_pPb_iCent%i_systTot_%s", directions[iDir].Data (), iCent, pTJInt.Data ());
             TCanvas* c = new TCanvas (canvasName, "", 800, 800);
 
             TH1D* h = nullptr;
@@ -2854,7 +2803,7 @@ void PlotPtCh (const char* inFileTag) {
 
             for (short iTotVar : {0, 1, 2}) {
               const TString totVar = totalVariations[iTotVar];
-              g = ConvertErrorsToCentralValues (g_jetInt_trk_pt_sig_systTot[iPtJInt][iDir][iCent][iTotVar], true, 100);
+              g = ConvertErrorsToCentralValues (g_jetInt_trk_pt_unf_systTot[iPtJInt][iDir][iCent][iTotVar], true, 100);
               gup = (TGAE*) g->Clone ();
               gdown = (TGAE*) g->Clone ();
               FlipTGAE (gdown);
@@ -2868,7 +2817,7 @@ void PlotPtCh (const char* inFileTag) {
               SaferDelete (&gdown);
             }
 
-            g = ConvertErrorsToCentralValues (g_jetInt_trk_pt_sig_syst[iPtJInt][iDir][iCent][0], true, 100);
+            g = ConvertErrorsToCentralValues (g_jetInt_trk_pt_unf_syst[iPtJInt][iDir][iCent][0], true, 100);
             myDraw (g, kBlack, kDot, 0, 1, 2, "L");
             FlipTGAE (g);
             myDraw (g, kBlack, kDot, 0, 1, 2, "L");
@@ -2884,10 +2833,10 @@ void PlotPtCh (const char* inFileTag) {
             short count = 0;
             for (short iTotVar : {0, 1, 2}) {
               const TString totVar = totalVariations[iTotVar];
-              myLineColorText (0.35+0.35*(count/maxNSys), 0.35-(count%maxNSys)*0.040, varStyles[totVar].first, varStyles[totVar].second, varFullNames[totVar], 1.0, 0.028);
+              myLineColorText (0.35+0.35*(count/maxNSys), 0.35-(count%maxNSys)*0.040, varStyles[totVar].first, varStyles[totVar].second, varFullNames[totVar], 1.0, 0.030);
               count++;
             }
-            myLineColorText (0.35+0.35*(count/maxNSys), 0.35-(count%maxNSys)*0.040, kBlack, 1, "#bf{Total syst. unc.}", 1.0, 0.028);
+            myLineColorText (0.35+0.35*(count/maxNSys), 0.35-(count%maxNSys)*0.040, kBlack, 1, "#bf{Total syst. unc.}", 1.0, 0.030);
 
             c->SaveAs (Form ("%s/Plots/Systematics/PtCh/SignalJetTaggedYield_pPb_%i-%iperc_%s_ptch_%iGeVJets_systTot.pdf", workPath.Data (), zdcCentPercs[iCent+1], zdcCentPercs[iCent], directions[iDir] == "ns" ? "nearside" : "awayside", iPtJInt == 0 ? 30 : 60));
           } // end loop over iCent
@@ -2899,7 +2848,7 @@ void PlotPtCh (const char* inFileTag) {
 
           const TString pTJInt = (iPtJInt == 0 ? "30GeV" : "60GeV");
 
-          const char* canvasName = Form ("c_jetInt_trk_pt_%s_sig_data_systTot_%s", directions[iDir].Data (), pTJInt.Data ());
+          const char* canvasName = Form ("c_jetInt_trk_pt_%s_unf_data_systTot_%s", directions[iDir].Data (), pTJInt.Data ());
           TCanvas* c = new TCanvas (canvasName, "", 2800, 1400);
           c->Divide (4, 2);
           
@@ -2924,9 +2873,26 @@ void PlotPtCh (const char* inFileTag) {
             h->DrawCopy ("hist ][");
             SaferDelete (&h);
 
+            {
+              gup = make_graph (h_jetInt_trk_pt_ref_unf[0][iPtJInt][iDir]);
+              g = ConvertErrorsToCentralValues (gup, true, 100);
+              SaferDelete (&gup);
+
+              gup = (TGAE*) g->Clone ();
+              gdown = (TGAE*) g->Clone ();
+              FlipTGAE (gdown);
+
+              myDraw (gup, kGray+1, kDot, 0, 2, 2, "L");
+              myDraw (gdown, kGray+1, kDot, 0, 2, 2, "L");
+
+              SaferDelete (&g);
+              SaferDelete (&gup);
+              SaferDelete (&gdown);
+            }
+
             for (short iTotVar : {0, 1, 2}) {
               const TString totVar = totalVariations[iTotVar];
-              g = ConvertErrorsToCentralValues (g_jetInt_trk_pt_ref_sig_systTot[iPtJInt][iDir][iTotVar], true, 100);
+              g = ConvertErrorsToCentralValues (g_jetInt_trk_pt_ref_unf_systTot[iPtJInt][iDir][iTotVar], true, 100);
               gup = (TGAE*) g->Clone ();
               gdown = (TGAE*) g->Clone ();
               FlipTGAE (gdown);
@@ -2940,7 +2906,7 @@ void PlotPtCh (const char* inFileTag) {
               SaferDelete (&gdown);
             }
 
-            g = ConvertErrorsToCentralValues (g_jetInt_trk_pt_ref_sig_syst[iPtJInt][iDir][0], true, 100);
+            g = ConvertErrorsToCentralValues (g_jetInt_trk_pt_ref_unf_syst[iPtJInt][iDir][0], true, 100);
             myDraw (g, kBlack, kDot, 0, 1, 2, "L");
             FlipTGAE (g);
             myDraw (g, kBlack, kDot, 0, 1, 2, "L");
@@ -2970,9 +2936,26 @@ void PlotPtCh (const char* inFileTag) {
             h->DrawCopy ("hist ][");
             SaferDelete (&h);
 
+            {
+              gup = make_graph (h_jetInt_trk_pt_unf[0][iPtJInt][iDir][iCent]);
+              g = ConvertErrorsToCentralValues (gup, true, 100);
+              SaferDelete (&gup);
+
+              gup = (TGAE*) g->Clone ();
+              gdown = (TGAE*) g->Clone ();
+              FlipTGAE (gdown);
+
+              myDraw (gup, kGray+1, kDot, 0, 2, 2, "L");
+              myDraw (gdown, kGray+1, kDot, 0, 2, 2, "L");
+
+              SaferDelete (&g);
+              SaferDelete (&gup);
+              SaferDelete (&gdown);
+            }
+
             for (short iTotVar : {0, 1, 2}) {
               const TString totVar = totalVariations[iTotVar];
-              g = ConvertErrorsToCentralValues (g_jetInt_trk_pt_sig_systTot[iPtJInt][iDir][iCent][iTotVar], true, 100);
+              g = ConvertErrorsToCentralValues (g_jetInt_trk_pt_unf_systTot[iPtJInt][iDir][iCent][iTotVar], true, 100);
               gup = (TGAE*) g->Clone ();
               gdown = (TGAE*) g->Clone ();
               FlipTGAE (gdown);
@@ -2986,7 +2969,7 @@ void PlotPtCh (const char* inFileTag) {
               SaferDelete (&gdown);
             }
 
-            g = ConvertErrorsToCentralValues (g_jetInt_trk_pt_sig_syst[iPtJInt][iDir][iCent][0], true, 100);
+            g = ConvertErrorsToCentralValues (g_jetInt_trk_pt_unf_syst[iPtJInt][iDir][iCent][0], true, 100);
             myDraw (g, kBlack, kDot, 0, 1, 2, "L");
             FlipTGAE (g);
             myDraw (g, kBlack, kDot, 0, 1, 2, "L");
@@ -3000,17 +2983,21 @@ void PlotPtCh (const char* inFileTag) {
           } // end loop over iCent
 
           c->cd (8);
-          myText (0.1, 0.89, kBlack, "#bf{#it{ATLAS}} Internal", 0.07);
-          myText (0.1, 0.81, kBlack, Form ("#it{p}_{T}^{jet} > %i GeV", iPtJInt == 0 ? 30 : 60), 0.07);
-          myText (0.1, 0.73, kBlack, Form ("#Delta#phi_{ch,jet} %s", directions[iDir] == "ns" ? "< #pi/8 (near-side)" : "> 7#pi/8 (away-side)"), 0.07);
+          myText (0.1, 0.93, kBlack, "#bf{#it{ATLAS}} Internal", 0.07);
+          myText (0.1, 0.84, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.07);
+          myText (0.1, 0.75, kBlack, "#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV", 0.07);
+          myText (0.1, 0.66, kBlack, Form ("#it{p}_{T}^{jet} > %i GeV", iPtJInt == 0 ? 30 : 60), 0.07);
+          myText (0.1, 0.57, kBlack, Form ("#Delta#phi_{ch,jet} %s", directions[iDir] == "ns" ? "< #pi/8 (near-side)" : "> 7#pi/8 (away-side)"), 0.07);
 
           short count = 0;
+          myLineColorText (0.16, 0.49, kGray+1, 2, "#bf{Total stat. unc.}", 2.0, 0.07);
+          count++;
           for (short iTotVar : {0, 1, 2}) {
             const TString totVar = totalVariations[iTotVar];
-            myLineColorText (0.16+0.35*(count/maxNSys), 0.60-(count%maxNSys)*0.080, varStyles[totVar].first, varStyles[totVar].second, varFullNames[totVar], 1.0, 0.07);
+            myLineColorText (0.16, 0.49-count*0.08, varStyles[totVar].first, varStyles[totVar].second, varFullNames[totVar], 1.0, 0.07);
             count++;
           }
-          myLineColorText (0.16+0.35*(count/maxNSys), 0.60-(count%maxNSys)*0.080, kBlack, 1, "#bf{Total syst. unc.}", 1.0, 0.07);
+          myLineColorText (0.16, 0.49-count*0.080, kBlack, 1, "#bf{Total syst. unc.}", 1.0, 0.07);
 
           c->SaveAs (Form ("%s/Plots/Systematics/PtCh/SignalJetTaggedYield_%s_ptch_%iGeVJets_systTot.pdf", workPath.Data (), directions[iDir] == "ns" ? "nearside" : "awayside", iPtJInt == 0 ? 30 : 60));
 
@@ -3081,7 +3068,7 @@ void PlotPtCh (const char* inFileTag) {
             short count = 0;
             for (short iTotVar : {0, 1, 2}) {
               const TString totVar = totalVariations[iTotVar];
-              myLineColorText (0.35+0.35*(count/maxNSys), 0.35-(count%maxNSys)*0.040, varStyles[totVar].first, varStyles[totVar].second, varFullNames[totVar], 1.0, 0.028);
+              myLineColorText (0.35+0.35*(count/maxNSys), 0.35-(count%maxNSys)*0.040, varStyles[totVar].first, varStyles[totVar].second, varFullNames[totVar], 1.0, 0.030);
               count++;
             }
             myLineColorText (0.35+0.35*(count/maxNSys), 0.35-(count%maxNSys)*0.040, kBlack, 1, "#bf{Total syst. unc.}", 1.0, 0.028);
@@ -3168,44 +3155,21 @@ void PlotPtCh (const char* inFileTag) {
           } // end loop over iCent
 
           c->cd (7);
-          myText (0.1, 0.89, kBlack, "#bf{#it{ATLAS}} Internal", 0.07);
-          myText (0.1, 0.81, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.07);
-          myText (0.1, 0.73, kBlack, "#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV", 0.07);
-          myText (0.1, 0.65, kBlack, Form ("#it{p}_{T}^{jet} > %i GeV", iPtJInt == 0 ? 30 : 60), 0.07);
+          myText (0.1, 0.93, kBlack, "#bf{#it{ATLAS}} Internal", 0.07);
+          myText (0.1, 0.84, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.07);
+          myText (0.1, 0.75, kBlack, "#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV", 0.07);
+          myText (0.1, 0.66, kBlack, Form ("#it{p}_{T}^{jet} > %i GeV", iPtJInt == 0 ? 30 : 60), 0.07);
           myText (0.1, 0.57, kBlack, Form ("#Delta#phi_{ch,jet} %s", directions[iDir] == "ns" ? "< #pi/8 (near-side)" : "> 7#pi/8 (away-side)"), 0.07);
 
           short count = 0;
-          {
-            float xcoord = 0.15;
-            float ycoord = 0.50-count*0.07;
-            if (count >= 8) {
-              c->cd (8);
-              ycoord += 0.85;
-            }
-            myLineColorText (xcoord, ycoord, kGray+1, 2, "#bf{Total stat. unc.}", 2.0, 0.06);
-            count++;
-          }
+          myLineColorText (0.16, 0.49, kGray+1, 2, "#bf{Total stat. unc.}", 2.0, 0.07);
+          count++;
           for (short iTotVar : {0, 1, 2}) {
             const TString totVar = totalVariations[iTotVar];
-            float xcoord = 0.15;
-            float ycoord = 0.50-count*0.07;
-            if (count >= 8) {
-              c->cd (8);
-              ycoord += 0.85;
-            }
-            myLineColorText (xcoord, ycoord, varStyles[totVar].first, varStyles[totVar].second, varFullNames[totVar], 2.0, 0.06);
+            myLineColorText (0.16, 0.49-count*0.08, varStyles[totVar].first, varStyles[totVar].second, varFullNames[totVar], 1.0, 0.07);
             count++;
           }
-          {
-            float xcoord = 0.15;
-            float ycoord = 0.50-count*0.07;
-            if (count >= 8) {
-              c->cd (8);
-              ycoord += 0.85;
-            }
-            myLineColorText (xcoord, ycoord, kBlack, 1, "#bf{Total syst. unc.}", 2.0, 0.06);
-            count++;
-          }
+          myLineColorText (0.16, 0.49-count*0.080, kBlack, 1, "#bf{Total syst. unc.}", 1.0, 0.07);
 
           c->SaveAs (Form ("%s/Plots/Systematics/PtCh/JetTagged_IpPb_%s_ptch_%iGeVJets_systTot.pdf", workPath.Data (), directions[iDir] == "ns" ? "nearside" : "awayside", iPtJInt == 0 ? 30 : 60));
 

@@ -537,7 +537,13 @@ QnVector GetProtonQ2Vec (const bool getMatching = false);
 /**
  * Returns the jet pT weight functions for MC.
  */
-TF1** LoadJetPtWeights ();
+TF1** LoadJetPtWgtFuncs ();
+
+
+/**
+ * Returns the jet pT weight histograms for MC.
+ */
+TH1D** LoadJetPtWgtHists ();
 
 
 /**
@@ -549,13 +555,13 @@ TH2D** LoadTrackingEfficiency ();
 /**
  * Returns the tracking purity histograms (stored as TGAEs).
  */
-TGAE** LoadTrackingPurity ();
+TGAE** LoadTrackingPurity (const bool useHybridPrimFrac);
 
 
 /**
  * Returns array of TGAEs of fits to the tracking purity.
  */
-TGAE** LoadTrackingPurityFuncs ();
+TGAE** LoadTrackingPurityFuncs (const bool useHybridPrimFrac);
 
 
 /**
@@ -611,6 +617,12 @@ void DivideByTF1 (TH1D* h, TF1* f, const float mult = 1.);
  * Divides a histogram by another without propagating uncertainties.
  */
 void DivideNoErrors (TH1D* h, const TH1D* hd);
+
+
+/**
+ * Extension of CalcSystematics (TGAE* sys, TH1D* nom, TH1D* var) for smoothing uncertainties. 
+ */
+void SmoothSystematics (TGAE* sys, TF1* func, TH1D* nom, TH1D* var);
 
 
 } // end namespace

@@ -24,7 +24,7 @@
 #include "LocalUtilities.h"
 #include "Variations.h"
 
-#include "ProcessCorrelations.C" // gets NIter functions for plotting purposes
+#include "ProcessUnfolding.C" // gets NIter functions for plotting purposes
 
 
 using namespace JetHadronCorrelations;
@@ -55,9 +55,6 @@ void PlotNIters (const char* inFileTag) {
 
   TH1D****  h_jetInt_trk_pt_ref_unf_nIters = Get3DArray <TH1D*> (nPtJBins, nDir, nItersMax-nItersMin+2);
   TH1D***** h_jetInt_trk_pt_unf_nIters     = Get4DArray <TH1D*> (nPtJBins, nDir, nZdcCentBins+1, nItersMax-nItersMin+2);
-
-  TH1D***** h_jetInt_trk_pt_iaa           = Get4DArray <TH1D*> (2, 2, nDir, nZdcCentBins+1);
-  TH1D***** h_jetInt_trk_pt_iaaNoUnf      = Get4DArray <TH1D*> (2, 2, nDir, nZdcCentBins+1);
 
   TH1D**    h_jet_pt_ref_unf_nIters       = Get1DArray <TH1D*> (nItersMax-nItersMin+2);
   TH1D***   h_jet_pt_unf_nIters           = Get2DArray <TH1D*> (nZdcCentBins+1, nItersMax-nItersMin+2);
@@ -155,8 +152,6 @@ void PlotNIters (const char* inFileTag) {
 
             h_jetInt_trk_pt_sig[iDType][iPtJInt][iDir][iCent]       = (TH1D*) inFile->Get (Form ("h_jetInt_trk_pt_%s_pPb_sig_%s_%s_%s_Nominal", dir.Data (), cent.Data (), dType.Data (), pTJInt.Data ()));
             h_jetInt_trk_pt_unf[iDType][iPtJInt][iDir][iCent]       = (TH1D*) inFile->Get (Form ("h_jetInt_trk_pt_%s_pPb_unf_%s_%s_%s_Nominal", dir.Data (), cent.Data (), dType.Data (), pTJInt.Data ()));
-            h_jetInt_trk_pt_iaa[iDType][iPtJInt][iDir][iCent]       = (TH1D*) inFile->Get (Form ("h_jetInt_trk_pt_%s_iaa_%s_%s_%s_Nominal",     dir.Data (), cent.Data (), dType.Data (), pTJInt.Data ()));
-            h_jetInt_trk_pt_iaaNoUnf[iDType][iPtJInt][iDir][iCent]  = (TH1D*) inFile->Get (Form ("h_jetInt_trk_pt_%s_iaaNoUnf_%s_%s_%s_Nominal",  dir.Data (), cent.Data (), dType.Data (), pTJInt.Data ()));
 
           } // end loop over iDir
 

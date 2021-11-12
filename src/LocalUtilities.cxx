@@ -1704,7 +1704,7 @@ QnVector GetProtonQ2Vec (const bool getMatching) {
 /**
  * Returns the jet pT weight functions for MC.
  */
-TF1** LoadJetPtWeights () {
+TF1** LoadJetPtWgtFuncs () {
   //TDirectory* gdir = gDirectory;
 
   TString fname = Form ("%s/aux/JetPtWeights.root", workPath.Data ());
@@ -1728,6 +1728,37 @@ TF1** LoadJetPtWeights () {
   SaferDelete (&infile);
 
   return farr;
+}
+
+
+
+/**
+ * Returns the jet pT weight histograms for MC.
+ */
+TH1D** LoadJetPtWgtHists () {
+  TDirectory* gdir = gDirectory;
+
+  TString fname = Form ("%s/aux/JetPtWeights.root", workPath.Data ());
+  std::cout << "Trying to resolve MC jet pT weights file in " << fname.Data () << std::endl;
+  TFile* infile = new TFile (fname, "read");
+
+  const short nBins = (Ispp () ? 1 : nZdcCentBins+1);
+
+  TH1D** harr = new TH1D*[nBins];
+  for (int iBin = 0; iBin < nBins; iBin++) {
+
+    TH1D* h = (TH1D*) infile->Get (Form ("h_jet_pt_datamc_ratio_%s_Nominal", Ispp () ? "ref" : (iBin < nZdcCentBins ? Form ("iCent%i", iBin) : "allCent")))->Clone (Form ("h_jet_pt_weights_%s_Nominal", Ispp () ? "ref" : (iBin < nZdcCentBins ? Form ("iCent%i", iBin) : "allCent")));
+
+    harr[iBin] = h;
+
+    h->SetDirectory (gdir);
+  }
+  std::cout << "Loaded MC jet pT weights, closing file" << std::endl;
+
+  infile->Close ();
+  SaferDelete (&infile);
+
+  return harr;
 }
 
 
@@ -1779,14 +1810,14 @@ TH2D** LoadTrackingEfficiency () {
 /**
  * Returns the tracking purity histograms (stored as TGAEs).
  */
-TGAE** LoadTrackingPurity () {
+TGAE** LoadTrackingPurity (const bool useHybridPrimFrac) {
   TString fname = Form ("%s/aux/TrackingPerformance.root", workPath.Data ());
   std::cout << "Trying to resolve tracking performance file in " << fname.Data () << std::endl;
   TFile* infile = new TFile (fname, "read");
 
   const std::string wp = (DoHITightVar () ? "trk_HItight" : (DoHILooseVar () ? "trk_HIloose" : "trk_TightPrimary"));
   const int iDR = 3;
-  const std::string sys = (!Ispp () && DoJetPrimFracVar () ? "hybrid" : (Ispp () ? "pp" : "pPb"));
+  const std::string sys = (Ispp () ? "pp" : (useHybridPrimFrac ? "hybrid" : "pPb"));
 
   TGAE** g_trk_pur = Get1DArray <TGAE*> (nEtaTrkBins);
 
@@ -1808,19 +1839,23 @@ TGAE** LoadTrackingPurity () {
 /**
  * Returns array of TGAEs of fits to the tracking purity.
  */
-TGAE** LoadTrackingPurityFuncs () {
+TGAE** LoadTrackingPurityFuncs (const bool useHybridPrimFrac) {
   TString fname = Form ("%s/aux/TrackingPerformance.root", workPath.Data ());
   std::cout << "Trying to resolve tracking performance file in " << fname.Data () << std::endl;
   TFile* infile = new TFile (fname, "read");
 
   const std::string wp = (DoHITightVar () ? "trk_HItight" : (DoHILooseVar () ? "trk_HIloose" : "trk_TightPrimary"));
   const int iDR = 3;
-  const std::string sys = (!Ispp () && DoJetPrimFracVar () ? "hybrid" : (Ispp () ? "pp" : "pPb"));
+  const std::string sys = (Ispp () ? "pp" : (useHybridPrimFrac ? "hybrid" : "pPb"));
 
   TGAE** gf_trk_pur = Get1DArray <TGAE*> (nEtaTrkBins);
 
   for (int iEta = 0; iEta < nEtaTrkBins; iEta++) {
-    gf_trk_pur[iEta] = (TGAE*) ((TGAE*) infile->Get (Form ("gf_primary_rate%s_%s_%s_iDR%i_iEta%i", DoFakeRateVar () ? "_fakes_p100" : "", sys.c_str (), wp.c_str (), iDR, iEta)))->Clone (Form ("gf_primary_rate_iDR%i_iEta%i", iDR, iEta));
+    TString name = Form ("gf_primary_rate%s_%s_%s_iDR%i_iEta%i", DoFakeRateVar () ? "_fakes_p100" : "", sys.c_str (), wp.c_str (), iDR, iEta);
+    if (DoFakeRateVar () && sys == std::string ("hybrid"))
+      name = Form ("gf_primary_rate_%s%s_%s_iDR%i_iEta%i", sys.c_str (), DoFakeRateVar () ? "_fakes_p100" : "", wp.c_str (), iDR, iEta); // accidentally switched order of names with hybrid and fake rate plus 100% variation... whoops.
+    gf_trk_pur[iEta] = (TGAE*) ((TGAE*) infile->Get (name.Data ()))->Clone (Form ("gf_primary_rate_iDR%i_iEta%i", iDR, iEta));
+    assert (gf_trk_pur[iEta] != nullptr);
     gf_trk_pur[iEta]->SetBit (TGraph::kIsSortedX, true); // specifies that x-axis is sorted from low to high; improves Eval function time by allowing binary search
   }
 
@@ -1999,6 +2034,47 @@ void DivideNoErrors (TH1D* h, const TH1D* hd) {
   }
   return;
 }
+
+
+/**
+ * Extension of CalcSystematics (TGAE* sys, TH1D* nom, TH1D* var) for smoothing uncertainties. 
+ */
+void SmoothSystematics (TGAE* sys, TF1* func, TH1D* nom, TH1D* var) {
+  TGraphErrors* tg = new TGraphErrors ();
+  double x, y;
+  double xlo = DBL_MAX, xhi = DBL_MIN;
+  for (int i = 0; i < sys->GetN (); i++) {
+    sys->GetPoint (i, x, y);
+    xlo = std::fmin (x, xlo);
+    xhi = std::fmax (x, xhi);
+    if (y != 0) {
+      tg->SetPoint (i, x, (sys->GetErrorYhigh (i) - sys->GetErrorYlow (i)) / y);
+      double yv = var->GetBinContent (i+1);
+      double yve = var->GetBinError (i+1);
+      double yn = nom->GetBinContent (i+1);
+      double yne = nom->GetBinError (i+1);
+      tg->SetPointError (i, 0.5*nom->GetBinWidth (i+1), std::sqrt (std::pow (yv*yne/(yn*yn), 2) + std::pow (yve/yn, 2)));
+    } 
+  } 
+  
+  tg->Fit (func, "RN0Q");
+  
+  for (int i = 0; i < sys->GetN (); i++) {
+    sys->GetPoint (i, x, y);
+    double newErr = func->Eval (x) * y;
+    if (newErr > 0) {
+      sys->SetPointEYhigh (i, std::fabs (newErr));
+      sys->SetPointEYlow (i, 0);
+    } 
+    else {
+      sys->SetPointEYlow (i, std::fabs (newErr));
+      sys->SetPointEYhigh (i, 0);
+    } 
+  } 
+  SaferDelete (&tg);
+  return;
+}
+
 
 
 } // end namespace

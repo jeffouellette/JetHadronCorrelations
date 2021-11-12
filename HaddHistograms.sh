@@ -1,9 +1,9 @@
 #! /bin/bash
 
-#declare -a datavardirs=("Nominal")
+declare -a datavardirs=("FakeRateVar" "MixCatVar4" "MixCatVar5")
 #declare -a datavardirs=("Nominal" "HITightVar" "HILooseVar" "TrkEffVar" "FakeRateVar" "PrimFitVar" "JetPrimFracVar" "PartSpcVar" "MixCatVar1" "MixCatVar2" "MixCatVar3" "MixCatVar4" "MixCatVar5")
-#declare -a datavardirs=("Nominal" "HITightVar" "HILooseVar" "TrkEffVar" "FakeRateVar" "PrimFitVar" "JetPrimFracVar" "PartSpcVar")
-declare -a datavardirs=("JetPrimFracVar")
+#declare -a datavardirs=("Nominal" "HITightVar" "HILooseVar" "TrkEffVar" "FakeRateVar" "PrimFitVar" "JetPrimFracVar" "PartSpcVar" "MixCatVar1" "MixCatVar3")
+#declare -a datavardirs=("JetPrimFracVar")
 
 
 #declare -a mcvardirs=("Nominal" "JESVar0" "JESVar1" "JESVar2" "JESVar3" "JESVar4" "JESVar5" "JESVar6" "JESVar7" "JESVar8" "JESVar9" "JESVar10" "JESVar11" "JESVar12" "JESVar13" "JESVar14" "JESVar15" "JESVar16" "JESVar17" "JESVar18" "JESVar19" "JESVar20") # don't run JESVar16 or JESVar20, they are not applicable
@@ -12,6 +12,7 @@ declare -a mcvardirs=("Nominal" "JESVar0" "JESVar1" "JESVar2" "JESVar3" "JESVar4
 #declare -a mcvardirs=("Nominal" "MCTruthJetsTruthParts")
 #declare -a mcvardirs=("MCRecoJetsTruthMatchedParts")
 
+declare -a mcmixvardirs=("Nominal")
 #declare -a mcmixvardirs=("Nominal" "MixCatVar2" "MixCatVar6")
 
 declare -a sigmixdirs=("JetsHists" "MixedHists")

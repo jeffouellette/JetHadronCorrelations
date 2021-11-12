@@ -1,5 +1,5 @@
-#ifndef __JetHadronCorrelator_ProcessUnfolding_C__
-#define __JetHadronCorrelator_ProcessUnfolding_C__
+#ifndef __JetHadronCorrelator_ProcessNIters_C__
+#define __JetHadronCorrelator_ProcessNIters_C__
 
 #include "CentralityDefs.h"
 #include "Params.h"
@@ -7,7 +7,6 @@
 #include "TreeVariables.h"
 #include "LocalUtilities.h"
 #include "Variations.h"
-#include "PrimaryFractionFit.h"
 
 #include <ArrayTemplates.h>
 #include <Utilities.h>
@@ -26,9 +25,7 @@
 
 using namespace JetHadronCorrelations;
 
-PrimaryFractionFit bbbf;
-
-void ProcessUnfolding (const char* inFileTag, const char* outFileTag, const short nItersMax = 20) {
+void ProcessNIters (const char* inFileTag, const char* outFileTag, const short nItersMax = 20) {
 
   TFile* inFile = nullptr;
 
@@ -37,15 +34,16 @@ void ProcessUnfolding (const char* inFileTag, const char* outFileTag, const shor
 
   const bool useJetWgts = true;
 
-  TH1D***   h_jet_pt_ref                  = Get2DArray <TH1D*> (2, nVar);
-  TH2D***   h2_jet_pt_cov_ref             = Get2DArray <TH2D*> (2, nVar);
-  TH1D****  h_jet_pt                      = Get3DArray <TH1D*> (2, nZdcCentBins+1, nVar);
-  TH2D****  h2_jet_pt_cov                 = Get3DArray <TH2D*> (2, nZdcCentBins+1, nVar);
+  TH1D*     h_jet_pt_ref                  = nullptr;
+  TH1D**    h_jet_pt                      = Get1DArray <TH1D*> (nZdcCentBins+1);
 
-  TH1D*****   h_jet_trk_pt_ref_sig        = Get4DArray <TH1D*> (2, nPtJBins, nDir, nVar);
-  TH1D******  h_jet_trk_pt_sig            = Get5DArray <TH1D*> (2, nPtJBins, nDir, nZdcCentBins+1, nVar);
-  TH1D*****   h_jetInt_trk_pt_ref_sig     = Get4DArray <TH1D*> (2, 2, nDir, nVar);
-  TH1D******  h_jetInt_trk_pt_sig         = Get5DArray <TH1D*> (2, 2, nDir, nZdcCentBins+1, nVar);
+  TH1D**     h_jet_pt_ref_unf             = Get1DArray <TH1D*> (nItersMax-nItersMin+2);
+  TH1D***    h_jet_pt_unf                 = Get2DArray <TH1D*> (nZdcCentBins+1, nItersMax-nItersMin+2);
+
+  TH1D***     h_jet_trk_pt_ref_sig        = Get2DArray <TH1D*> (nPtJBins, nDir);
+  TH1D****    h_jet_trk_pt_sig            = Get3DArray <TH1D*> (nPtJBins, nDir, nZdcCentBins+1);
+  TH1D***     h_jetInt_trk_pt_ref_sig     = Get2DArray <TH1D*> (2, nDir);
+  TH1D****    h_jetInt_trk_pt_sig         = Get3DArray <TH1D*> (2, nDir, nZdcCentBins+1);
 
   TH1D**      h_jet_pt_ref_unf_nIters     = Get1DArray <TH1D*> (nItersMax-nItersMin+2);
   TH1D***     h_jet_pt_unf_nIters         = Get2DArray <TH1D*> (nZdcCentBins+1, nItersMax-nItersMin+2);
@@ -73,7 +71,7 @@ void ProcessUnfolding (const char* inFileTag, const char* outFileTag, const shor
   //////////////////////////////////////////////////////////////////////////////////////////////////// 
   {
 
-    const TString inFileName = Form ("%s/Results/ProcessCorrelations_%s.root", rootPath.Data (), inFileTag.Data ());
+    const TString inFileName = Form ("%s/Results/ProcessCorrelations_%s.root", rootPath.Data (), inFileTag);
     std::cout << "Reading " << inFileName.Data () << std::endl;
     TFile* inFile = new TFile (inFileName.Data (), "read");
 
@@ -363,51 +361,10 @@ void ProcessUnfolding (const char* inFileTag, const char* outFileTag, const shor
 
 
   //////////////////////////////////////////////////////////////////////////////////////////////////// 
-  // CALCULATE IAA RATIOS FOR INTEGRATED JET PT SELECTIONS
-  //////////////////////////////////////////////////////////////////////////////////////////////////// 
-  for (short iPtJInt : {0, 1}) {
-
-    const TString pTJInt = (iPtJInt == 0 ? "30GeV" : "60GeV");
-
-    for (short iDir = 0; iDir < nDir; iDir++) {
-
-      const TString dir = directions[iDir];
-
-      for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
-
-        const TString cent = (iCent == nZdcCentBins ? "allCent" : Form ("iCent%i", iCent));
-
-        h_jetInt_trk_pt_iaa[iDType][iPtJInt][iDir][iCent][iVar] = (TH1D*) h_jetInt_trk_pt_unf[iDType][iPtJInt][iDir][iCent][iVar]->Clone (Form ("h_jetInt_trk_pt_%s_iaa_%s_%s_%s_%s", dir.Data (), cent.Data (), dType.Data (), pTJInt.Data (), var.Data ()));
-        h_jetInt_trk_pt_iaa[iDType][iPtJInt][iDir][iCent][iVar]->Divide (h_jetInt_trk_pt_ref_unf[iDType][iPtJInt][iDir][iVar]);
-
-        h_jetInt_trk_pt_iaaNoUnf[iDType][iPtJInt][iDir][iCent][iVar] = (TH1D*) h_jetInt_trk_pt_sig[iDType][iPtJInt][iDir][iCent][iVar]->Clone (Form ("h_jetInt_trk_pt_%s_iaaNoUnf_%s_%s_%s_%s", dir.Data (), cent.Data (), dType.Data (), pTJInt.Data (), var.Data ()));
-        h_jetInt_trk_pt_iaaNoUnf[iDType][iPtJInt][iDir][iCent][iVar]->Divide (h_jetInt_trk_pt_ref_sig[iDType][iPtJInt][iDir][iVar]);
-
-      } // end loop over iCent
-
-    } // end loop over iDir
-
-  } // end loop over iPtJInt
-
-
-
-
-  //////////////////////////////////////////////////////////////////////////////////////////////////// 
   // FINALLY WRITE OUT EVERYTHING TO A SINGLE ROOT FILE WITH ALL THE RESULTS.
   //////////////////////////////////////////////////////////////////////////////////////////////////// 
   {
     outFile->cd ();
-
-    for (short iPtJInt : {0, 1})
-      h_jet_pt_ref_unf[iPtJInt]->Write ();
-
-    for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
-
-      for (short iPtJInt : {0, 1})
-        h_jet_pt_unf[iPtJInt][iCent]->Write ();
-
-    } // end loop over iCent
-
 
     for (short iPtJInt : {0, 1}) {
 
@@ -463,7 +420,7 @@ void ProcessUnfolding (const char* inFileTag, const char* outFileTag, const shor
 
 int main  (int argn, char** argv) {
   assert (argn >= 4); 
-  ProcessUnfolding (argv[1], argv[2], atoi (argv[3]));
+  ProcessNIters (argv[1], argv[2], atoi (argv[3]));
 }
 
 

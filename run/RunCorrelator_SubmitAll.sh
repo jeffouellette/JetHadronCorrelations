@@ -1,12 +1,12 @@
 #! /bin/bash
 
-declare -a systs=("JetPrimFracVar")
+declare -a systs=("PrimFitVar")
 #declare -a systs=("Nominal" "HITightVar" "HILooseVar" "TrkEffVar" "FakeRateVar" "PrimFitVar" "JetPrimFracVar" "PartSpcVar" "MixCatVar1" "MixCatVar2" "MixCatVar3" "MixCatVar4" "MixCatVar5")
 #declare -a systs=("Nominal" "HITightVar" "HILooseVar" "TrkEffVar" "FakeRateVar" "PrimFitVar" "JetPrimFracVar" "PartSpcVar" "MixCatVar1" "MixCatVar2" "MixCatVar3" "MixCatVar4" "MixCatVar5" "FcalCentVar" "FineFcalCentVar")
 
-declare -a mcsysts=("Nominal")
+#declare -a mcsysts=("Nominal")
 #declare -a mcsysts=("Nominal" "MCRecoJetsTruthParts" "MCTruthJetsTruthParts")
-#declare -a mcsysts=("Nominal" "JESVar0" "JESVar1" "JESVar2" "JESVar3" "JESVar4" "JESVar5" "JESVar6" "JESVar7" "JESVar8" "JESVar9" "JESVar10" "JESVar11" "JESVar12" "JESVar13" "JESVar14" "JESVar15" "JESVar17" "JESVar18" "JESVar19" "MCRecoJetsTruthParts" "MCTruthJetsTruthParts")
+declare -a mcsysts=("Nominal" "JESVar0" "JESVar1" "JESVar2" "JESVar3" "JESVar4" "JESVar5" "JESVar6" "JESVar7" "JESVar8" "JESVar9" "JESVar10" "JESVar11" "JESVar12" "JESVar13" "JESVar14" "JESVar15" "JESVar17" "JESVar18" "JESVar19" "MCRecoJetsTruthParts" "MCTruthJetsTruthParts")
 #declare -a mcsysts=("JESVar0" "JESVar1" "JESVar2" "JESVar3" "JESVar4" "JESVar5" "JESVar6" "JESVar7" "JESVar8" "JESVar9" "JESVar10" "JESVar11" "JESVar12" "JESVar13" "JESVar14" "JESVar15" "JESVar17" "JESVar18" "JESVar19")
 
 declare -a mcmixsysts=("Nominal")
@@ -40,7 +40,7 @@ done
 #for syst in ${mcsysts[@]}; do
 #  condor_submit syst=${syst} RunCorrelator_MC.job
 #done
-
+#
 #for syst in ${mcmixsysts[@]}; do
 #  condor_submit syst=${syst} RunCorrelator_MC_Mixing.job
 #done

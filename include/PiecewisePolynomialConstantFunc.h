@@ -1,5 +1,5 @@
-#ifndef __PrimaryFractionFit_h__
-#define __PrimaryFractionFit_h__
+#ifndef __PiecewisePolynomialConstantFunc_h__
+#define __PiecewisePolynomialConstantFunc_h__
 
 #include <math.h>
 
@@ -19,7 +19,7 @@ long factorial (long i) {
 /**
  * Functor that returns a piecewise n^th order polynomial in log(x) that transitions to a constant above some fitted value.
  */
-class PrimaryFractionFit {
+class PiecewisePolynomialConstantFunc {
 
   protected:
     int degree = 6; // maximum polynomial degree
@@ -61,7 +61,7 @@ class PrimaryFractionFit {
 
     double Eval (double x, double* p) {
       // param 0: transition to constant
-      // param 1-NDF: parameters of polynomial
+      // param 1-NDF: parameters of polynomial, starting with degree ndf term
       return polyLogN (std::fmin (x, p[0]), p);
     }
 

@@ -90,27 +90,27 @@ TGAE** GetATLASJetFF () {
 
 
 
-TGAE*** GetPythiaAngantyr () {
-
-  TFile* inFile = new TFile (Form ("%s/rootFiles/finalHists.root", std::getenv ("PYTHIA_ANGANTYR_STUDY_PATH")), "read");
-
-  TGAE*** g_trk_pt = Get2DArray <TGAE*> (nDir, 2, 5); // direction, spectra vs. ratio, pPb centrality or pp. Note only 4 pPb centralities: 60-100, 40-60, 20-40, & 0-20%.
-
-
-  for (short iDir : {0, 1, 2}) {
-
-    const TString dir = directions[iDir];
-
-    g_trk_pt[iDir][0][nZdcCentBins+2] = make_graph ((TH1D*) inFile->Get (Form ("h_trk_pt_%s_pp", dir)));
-
-    for (short iCent = 0; iCent < 4; iCent++) {
-
-      g_trk_pt[iDir][0][iCent] = make_graph ((TH1D*) inFile->Get (Form ("h_trk_pt_%s_cent%i_pPb", dir, cent)));
-      g_trk_pt[iDir][1][iCent] = make_graph ((TH1D*) inFile->Get (Form ("h_trk_pt_%s_cent%i_pPb", dir, cent)));
-    }
-
-  }
-}
+//TGAE*** GetPythiaAngantyr () {
+//
+//  TFile* inFile = new TFile (Form ("%s/rootFiles/finalHists.root", std::getenv ("PYTHIA_ANGANTYR_STUDY_PATH")), "read");
+//
+//  TGAE*** g_trk_pt = Get2DArray <TGAE*> (nDir, 2, 5); // direction, spectra vs. ratio, pPb centrality or pp. Note only 4 pPb centralities: 60-100, 40-60, 20-40, & 0-20%.
+//
+//
+//  for (short iDir : {0, 1, 2}) {
+//
+//    const TString dir = directions[iDir];
+//
+//    g_trk_pt[iDir][0][nZdcCentBins+2] = make_graph ((TH1D*) inFile->Get (Form ("h_trk_pt_%s_pp", dir)));
+//
+//    for (short iCent = 0; iCent < 4; iCent++) {
+//
+//      g_trk_pt[iDir][0][iCent] = make_graph ((TH1D*) inFile->Get (Form ("h_trk_pt_%s_cent%i_pPb", dir, cent)));
+//      g_trk_pt[iDir][1][iCent] = make_graph ((TH1D*) inFile->Get (Form ("h_trk_pt_%s_cent%i_pPb", dir, cent)));
+//    }
+//
+//  }
+//}
 
 
 } // end namespace

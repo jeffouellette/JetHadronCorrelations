@@ -244,12 +244,12 @@ bool Correlator (const char* tag, const char* outFilePattern, TTree* jetsTree, T
 
   // for tracking corections
   TH2D** h2_trk_eff = LoadTrackingEfficiency ();
-  TGAE** g_trk_pur = LoadTrackingPurity ();
-  TGAE** gf_trk_pur = LoadTrackingPurityFuncs ();
+  TGAE** g_trk_pur = LoadTrackingPurity (!DoJetPrimFracVar () || doMixing);
+  TGAE** gf_trk_pur = LoadTrackingPurityFuncs (!DoJetPrimFracVar () || doMixing);
 
 
   // for MC reweighting to data (not really needed here..)
-  //TF1** f_jet_wgts = LoadJetPtWeights ();
+  //TF1** f_jet_wgts = LoadJetPtWgtFuncs ();
 
 
   // for corrected FCal Et values in data overlay
@@ -567,6 +567,11 @@ bool Correlator (const char* tag, const char* outFilePattern, TTree* jetsTree, T
 
         // triggering cut, require appropriate track selection trigger to have fired
         if (!trackTreeTrigger->trigDecision)
+          continue;
+
+
+        // p+Pb data only -- exclude ZDC == 0 events (errors)
+        if (IsCollisions () && IspPb () && ZdcCalibEnergy_A_matching == 0)
           continue;
 
         // vertexing cuts, require no pileup vertices and primary vertex with |vz| < 150mm

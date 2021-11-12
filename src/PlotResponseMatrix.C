@@ -7,7 +7,7 @@
 #include "LocalUtilities.h"
 #include "Variations.h"
 #include "Process.h"
-#include "PrimaryFractionFit.h"
+#include "PiecewisePolynomialConstantFunc.h"
 
 #include <ArrayTemplates.h>
 #include <Utilities.h>
@@ -32,7 +32,7 @@
 
 using namespace JetHadronCorrelations;
 
-PrimaryFractionFit polyFunc;
+PiecewisePolynomialConstantFunc polyFunc;
 
 
 TF1* DoClosureFit (const TString name, TH1D* h, const float xmin, const float xmax, short polyDeg = 4, const short maxPolyDeg = 8) {
@@ -71,7 +71,8 @@ void PlotResponseMatrix () {
   //const short nPtJBins = sizeof (pTJBins) / sizeof (pTJBins[0]) - 1;
   const Color_t cols[10] = {myCyan, myLiteBlue, myLitePurple, myPurple, myRed, myMaroon, myOrange, myLiteYellow, myLiteGreen, myGreen};
 
-  const short maxIters = 20;
+  const short maxIters = 100;
+  const short max2DIters = std::min ((short)6, maxIters);
 
   // jet yield histograms
   TH1D***       h_jet_pt_ref                      = Get2DArray <TH1D*> (2, 2);
@@ -111,14 +112,19 @@ void PlotResponseMatrix () {
   TH1D***       h_jet_pt_ref_unf                  = Get2DArray <TH1D*> (2, maxIters);
   TH1D****      h_jet_pt_unf                      = Get3DArray <TH1D*> (2, nFcalCentBins+1, maxIters);
 
+  TH1D***       h_njet_ref_unf  = Get2DArray <TH1D*> (2, 2); // iEvFrac, iPtJInt
+  TH1D****      h_njet_unf      = Get3DArray <TH1D*> (2, 2, nFcalCentBins+1); // iEvFrac, iPtJInt, iCent
+  TH1D***       h_ptjet_ref_unf  = Get2DArray <TH1D*> (2, 2); // iEvFrac, iPtJInt
+  TH1D****      h_ptjet_unf      = Get3DArray <TH1D*> (2, 2, nFcalCentBins+1); // iEvFrac, iPtJInt, iCent
+
   // unfolded UE subtracted particle yield histograms
-  TH2D****      h2_jet_trk_pt_ref_sig_unf         = Get3DArray <TH2D*> (2, nDir, maxIters);
-  TH2D*****     h2_jet_trk_pt_sig_unf             = Get4DArray <TH2D*> (2, nDir, nFcalCentBins+1, maxIters);
-  TH1D*****     h_jet_trk_pt_ref_sig_unf          = Get4DArray <TH1D*> (2, nPtJBins, nDir, maxIters);
-  TH1D******    h_jet_trk_pt_sig_unf              = Get5DArray <TH1D*> (2, nPtJBins, nDir, nFcalCentBins+1, maxIters);
-  TH1D*****     h_jetInt_trk_pt_ref_sig_unf       = Get4DArray <TH1D*> (2, 2, nDir, maxIters);
-  TH1D******    h_jetInt_trk_pt_sig_unf           = Get5DArray <TH1D*> (2, 2, nDir, nFcalCentBins+1, maxIters);
-  TH1D******    h_jetInt_trk_pt_iaa_unf           = Get5DArray <TH1D*> (2, 2, nDir, nFcalCentBins+1, maxIters);
+  TH2D****      h2_jet_trk_pt_ref_sig_unf         = Get3DArray <TH2D*> (2, nDir, max2DIters);
+  TH2D*****     h2_jet_trk_pt_sig_unf             = Get4DArray <TH2D*> (2, nDir, nFcalCentBins+1, max2DIters);
+  TH1D*****     h_jet_trk_pt_ref_sig_unf          = Get4DArray <TH1D*> (2, nPtJBins, nDir, max2DIters);
+  TH1D******    h_jet_trk_pt_sig_unf              = Get5DArray <TH1D*> (2, nPtJBins, nDir, nFcalCentBins+1, max2DIters);
+  TH1D*****     h_jetInt_trk_pt_ref_sig_unf       = Get4DArray <TH1D*> (2, 2, nDir, max2DIters);
+  TH1D******    h_jetInt_trk_pt_sig_unf           = Get5DArray <TH1D*> (2, 2, nDir, nFcalCentBins+1, max2DIters);
+  TH1D******    h_jetInt_trk_pt_iaa_unf           = Get5DArray <TH1D*> (2, 2, nDir, nFcalCentBins+1, max2DIters);
 
 
   RooUnfoldResponse**   rooUnfResp_jet_pt_ref         = Get1DArray <RooUnfoldResponse*> (2);
@@ -437,17 +443,63 @@ void PlotResponseMatrix () {
   //////////////////////////////////////////////////////////////////////////////////////////////////// 
   // UNFOLD HALF-CLOSURE HISTOGRAMS
   //////////////////////////////////////////////////////////////////////////////////////////////////// 
-  RooUnfoldBayes* bayesUnf;
+  std::cout << "Unfolding a lot of histograms many times..." << std::endl;
   for (short iEvFrac : {0, 1}) {
+    if (iEvFrac == 0)
+      std::cout << "|--> working on half closure test." << std::endl;
+    else if (iEvFrac == 1)
+      std::cout << "|--> working on full closure test." << std::endl;
 
     const TString evFrac = (iEvFrac == 0 ? "half" : "full");
 
+    RooUnfoldBayes* bayesUnf = nullptr;
+    TH1D* h = nullptr;
+
+    for (short iPtJInt : {0, 1}) {
+
+      const TString pTJInt = (iPtJInt == 0 ? "30GeV" : "60GeV");
+
+      h_njet_ref_unf[iEvFrac][iPtJInt] = new TH1D (Form ("h_njet_ref_unf_%s_%s_mc", evFrac.Data (), pTJInt.Data ()), ";Iterations;N_{jet}^{unfolded} / N_{jet}^{truth}", maxIters, 0.5, maxIters + 0.5);
+      h_njet_ref_unf[iEvFrac][iPtJInt]->Sumw2 ();
+      h_ptjet_ref_unf[iEvFrac][iPtJInt] = new TH1D (Form ("h_ptjet_ref_unf_%s_%s_mc", evFrac.Data (), pTJInt.Data ()), ";Iterations;#LT#it{p}_{T}^{jet}#GT^{unfolded} / #LT#it{p}_{T}^{jet}#GT^{truth}", maxIters, 0.5, maxIters + 0.5);
+      h_ptjet_ref_unf[iEvFrac][iPtJInt]->Sumw2 ();
+
+      for (short iCent = 0; iCent < nFcalCentBins+1; iCent++) {
+
+        const char* cent = (iCent == nFcalCentBins ? "pPb_allCent" : Form ("pPb_iCent%i", iCent));
+        h_njet_unf[iEvFrac][iPtJInt][iCent] = new TH1D (Form ("h_njet_unf_%s_%s_%s_mc", evFrac.Data (), cent, pTJInt.Data ()), ";Iterations;N_{jet}^{unfolded} / N_{jet}^{truth}", maxIters, 0.5, maxIters + 0.5);
+        h_njet_unf[iEvFrac][iPtJInt][iCent]->Sumw2 ();
+        h_ptjet_unf[iEvFrac][iPtJInt][iCent] = new TH1D (Form ("h_ptjet_unf_%s_%s_%s_mc", evFrac.Data (), cent, pTJInt.Data ()), ";Iterations;#LT#it{p}_{T}^{jet}#GT^{unfolded} / #LT#it{p}_{T}^{jet}#GT^{truth}", maxIters, 0.5, maxIters + 0.5);
+        h_ptjet_unf[iEvFrac][iPtJInt][iCent]->Sumw2 ();
+
+      } // end loop over iCent
+
+    } // end loop over iPtJInt
+
     for (short nIter = 0; nIter < maxIters; nIter++) {
+      std::cout << "  |--> on 1D unfold, at niter = " << nIter << "..." << std::endl;
 
       bayesUnf = new RooUnfoldBayes (rooUnfResp_jet_pt_ref[iEvFrac], h_jet_pt_ref[iEvFrac][0], nIter+1);
       bayesUnf->SetVerbose (-1);
-      h_jet_pt_ref_unf[iEvFrac][nIter] = (TH1D*) bayesUnf->Hreco ()->Clone (Form ("h_jet_pt_ref_unf_%s_mc_nIter%i", evFrac.Data (), nIter+1));
+      h = (TH1D*) bayesUnf->Hreco ()->Clone (Form ("h_jet_pt_ref_unf_%s_mc_nIter%i", evFrac.Data (), nIter+1));
+      h_jet_pt_ref_unf[iEvFrac][nIter] = h;
       SaferDelete (&bayesUnf);
+
+      for (short iPtJInt : {0, 1}) {
+        const double minJetPt = (iPtJInt == 0 ? 30. : 60.);
+        const double maxJetPt = 300;
+        TH1D* htemp = (TH1D*) h->Clone ("htemp"); // ensures SetRange doesn't mess anything up later
+        double err = 0;
+        double njet = htemp->IntegralAndError (htemp->FindBin (minJetPt+0.01), htemp->FindBin (maxJetPt-0.01), err);
+        h_njet_ref_unf[iEvFrac][iPtJInt]->SetBinContent (nIter+1, njet);
+        h_njet_ref_unf[iEvFrac][iPtJInt]->SetBinError   (nIter+1, err);
+        htemp->GetXaxis ()->SetRange (iPtJInt == 0  ? 3 : 4, htemp->GetNbinsX () - 2);
+        std::cout << "    |--> N_jet (pp)    = " << njet << std::endl;
+        std::cout << "    |--> <pT^jet> (pp) = " << htemp->GetMean () << " GeV" << std::endl;
+        h_ptjet_ref_unf[iEvFrac][iPtJInt]->SetBinContent (nIter+1, htemp->GetMean ());
+        h_ptjet_ref_unf[iEvFrac][iPtJInt]->SetBinError   (nIter+1, htemp->GetMeanError ());
+        SaferDelete (&htemp);
+      }
 
       for (short iCent = 0; iCent < nFcalCentBins+1; iCent++) {
 
@@ -455,11 +507,30 @@ void PlotResponseMatrix () {
 
         bayesUnf = new RooUnfoldBayes (rooUnfResp_jet_pt[iEvFrac][iCent], h_jet_pt[iEvFrac][iCent][0], nIter+1);
         bayesUnf->SetVerbose (-1);
-        h_jet_pt_unf[iEvFrac][iCent][nIter] = (TH1D*) bayesUnf->Hreco ()->Clone (Form ("h_jet_pt_unf_%s_%s_mc_nIter%i", evFrac.Data (), cent, nIter+1));
+        h = (TH1D*) bayesUnf->Hreco ()->Clone (Form ("h_jet_pt_unf_%s_%s_mc_nIter%i", evFrac.Data (), cent, nIter+1));
+        h_jet_pt_unf[iEvFrac][iCent][nIter] = h;
         SaferDelete (&bayesUnf);
+
+        for (short iPtJInt : {0, 1}) {
+          const double minJetPt = (iPtJInt == 0 ? 30. : 60.);
+          const double maxJetPt = 300;
+          TH1D* htemp = (TH1D*) h->Clone ("htemp"); // ensures SetRange doesn't mess anything up later
+          double err = 0;
+          h_njet_unf[iEvFrac][iPtJInt][iCent]->SetBinContent (nIter+1, htemp->IntegralAndError (htemp->FindBin (minJetPt+0.01), htemp->FindBin (maxJetPt-0.01), err));
+          h_njet_unf[iEvFrac][iPtJInt][iCent]->SetBinError   (nIter+1, err);
+          htemp->GetXaxis ()->SetRange (iPtJInt == 0  ? 3 : 4, htemp->GetNbinsX () - 2);
+          h_ptjet_unf[iEvFrac][iPtJInt][iCent]->SetBinContent (nIter+1, htemp->GetMean ());
+          h_ptjet_unf[iEvFrac][iPtJInt][iCent]->SetBinError   (nIter+1, htemp->GetMeanError ());
+          SaferDelete (&htemp);
+        }
 
       } // end loop over iCent
 
+    } // end loop over nIter
+
+
+    for (short nIter = 0; nIter < max2DIters; nIter++) {
+      std::cout << "  |--> on 2D unfold, at niter = " << nIter << "..." << std::endl;
 
       for (short iDir = 0; iDir < nDir; iDir++) {
 
@@ -486,6 +557,7 @@ void PlotResponseMatrix () {
     } // end loop over nIter
 
   } // end loop over iEvFrac
+  std::cout << "Finished unfolding!" << std::endl;
 
 
 
@@ -493,6 +565,7 @@ void PlotResponseMatrix () {
   //////////////////////////////////////////////////////////////////////////////////////////////////// 
   // SCALE TEST HISTOGRAMS BY NJET AFTER UNFOLDING
   //////////////////////////////////////////////////////////////////////////////////////////////////// 
+  std::cout << "Scaling histograms by N_jet after unfolding..." << std::endl;
   for (short iEvFrac : {0, 1}) {
 
     for (short iVar = 0; iVar < 2; iVar++) {
@@ -547,7 +620,7 @@ void PlotResponseMatrix () {
     } // end loop over iVar
 
 
-    for (short nIter = 0; nIter < maxIters; nIter++) {
+    for (short nIter = 0; nIter < max2DIters; nIter++) {
 
       TH1D* h = h_jet_pt_ref_unf[iEvFrac][1];
 
@@ -585,6 +658,7 @@ void PlotResponseMatrix () {
     } // end loop over nIter
 
   } // end loop over iEvFrac
+  std::cout << "Finished scaling histograms!" << std::endl;
 
 
 
@@ -592,6 +666,7 @@ void PlotResponseMatrix () {
   //////////////////////////////////////////////////////////////////////////////////////////////////// 
   // GET 1D PROJECTIONS OF JET-TAGGED HADRONS
   //////////////////////////////////////////////////////////////////////////////////////////////////// 
+  std::cout << "Taking 1D projections of unfolded histograms..." << std::endl;
   for (short iEvFrac : {0, 1}) {
 
     const TString evFrac = (iEvFrac == 0 ? "half" : "full");
@@ -622,7 +697,7 @@ void PlotResponseMatrix () {
 
       } // end loop over iVar
     
-      for (short nIter = 0; nIter < maxIters; nIter++) {
+      for (short nIter = 0; nIter < max2DIters; nIter++) {
 
         for (short iPtJ = 0; iPtJ < nPtJBins; iPtJ++)
           h_jet_trk_pt_ref_sig_unf[iEvFrac][iPtJ][iDir][nIter] = h2_jet_trk_pt_ref_sig_unf[iEvFrac][iDir][nIter]->ProjectionX (Form ("h_jet_trk_pt_%s_ref_sig_%s_%g-%gGeVJets_mc_nIter%i", dir.Data (), evFrac.Data (), pTJBins[iPtJ], pTJBins[iPtJ+1], nIter+1), iPtJ+1, iPtJ+1);
@@ -641,6 +716,7 @@ void PlotResponseMatrix () {
     } // end loop over iDir
 
   } // end loop over iEvFrac
+  std::cout << "Finished taking 1D projections!" << std::endl;
 
 
 
@@ -648,6 +724,7 @@ void PlotResponseMatrix () {
   //////////////////////////////////////////////////////////////////////////////////////////////////// 
   // CREATE >30 GeV AND >60 GeV HISTOGRAMS
   //////////////////////////////////////////////////////////////////////////////////////////////////// 
+  std::cout << "Integrating over jet pT bins..." << std::endl;
   for (short iEvFrac : {0, 1}) {
 
     const TString evFrac = (iEvFrac == 0 ? "half" : "full");
@@ -702,7 +779,7 @@ void PlotResponseMatrix () {
         } // end loop over iVar
      
      
-        for (short nIter = 0; nIter < maxIters; nIter++) {
+        for (short nIter = 0; nIter < max2DIters; nIter++) {
     
           {
             h_jetInt_trk_pt_ref_sig_unf[iEvFrac][iPtJInt][iDir][nIter] = new TH1D (Form ("h_jetInt_trk_pt_%s_ref_sig_unf_%s_%s_mc_nIter%i", dir.Data (), evFrac.Data (), pTJInt.Data (), nIter+1), "", nPtChBins, pTChBins);
@@ -746,6 +823,7 @@ void PlotResponseMatrix () {
     } // end loop over iPtJInt
 
   } // end loop over iEvFrac
+  std::cout << "Finished integrating over jet pT bins!" << std::endl;
 
 
 
@@ -753,6 +831,7 @@ void PlotResponseMatrix () {
   //////////////////////////////////////////////////////////////////////////////////////////////////// 
   // COMPUTE IAA FOR >30 GeV AND >60 GeV HISTOGRAMS
   //////////////////////////////////////////////////////////////////////////////////////////////////// 
+  std::cout << "Computing I_pPb ratios..." << std::endl;
   for (short iEvFrac : {0, 1}) {
 
     const TString evFrac = (iEvFrac == 0 ? "half" : "full");
@@ -781,7 +860,7 @@ void PlotResponseMatrix () {
         } // end loop over iVar
  
  
-        for (short nIter = 0; nIter < maxIters; nIter++) {
+        for (short nIter = 0; nIter < max2DIters; nIter++) {
 
           for (short iCent = 0; iCent < nFcalCentBins+1; iCent++) {
 
@@ -799,54 +878,60 @@ void PlotResponseMatrix () {
     } // end loop over iPtJInt
 
   } // end loop over iEvFrac
+  std::cout << "Finished computing I_pPb ratios!" << std::endl;
 
 
 
 
-  //////////////////////////////////////////////////////////////////////////////////////////////////// 
-  // COMPUTE CLOSURE HISTOGRAMS -- USE NITER = 2 RESULTS
-  //////////////////////////////////////////////////////////////////////////////////////////////////// 
-  for (short iPtJInt : {0, 1}) {
+  ////////////////////////////////////////////////////////////////////////////////////////////////////// 
+  //// COMPUTE CLOSURE HISTOGRAMS -- USE NITER = 2 RESULTS
+  ////////////////////////////////////////////////////////////////////////////////////////////////////// 
+  //std::cout << "Computing closure of final results..." << std::endl;
+  //for (short iPtJInt : {0, 1}) {
 
-    const TString pTJInt = (iPtJInt == 0 ? "30GeV" : "60GeV");
-    //const TString funcStr = "[0]+[1]*log(x)+[2]*pow(log(x),2)+[3]*pow(log(x),3)+[4]*pow(log(x),4)";
+  //  const TString pTJInt = (iPtJInt == 0 ? "30GeV" : "60GeV");
+  //  //const TString funcStr = "[0]+[1]*log(x)+[2]*pow(log(x),2)+[3]*pow(log(x),3)+[4]*pow(log(x),4)";
+  //  std::cout << "|--> pTJInt = " << pTJInt << std::endl;
 
-    for (short iDir = 0; iDir < nDir; iDir++) {
+  //  for (short iDir = 0; iDir < nDir; iDir++) {
 
-      const TString dir = directions[iDir];
+  //    const TString dir = directions[iDir];
+  //    std::cout << "  |--> dir = " << dir << std::endl;
 
-      h_jetInt_trk_pt_ref_sig_unf_halfClosure[iPtJInt][iDir] = (TH1D*) h_jetInt_trk_pt_ref_sig_unf[0][iPtJInt][iDir][1]->Clone (Form ("h_jetInt_trk_pt_%s_ref_sig_unf_%s_halfClosure", dir.Data (), pTJInt.Data ()));
-      DivideNoErrors (h_jetInt_trk_pt_ref_sig_unf_halfClosure[iPtJInt][iDir], h_jetInt_trk_pt_ref_sig[0][iPtJInt][iDir][1]);
+  //    h_jetInt_trk_pt_ref_sig_unf_halfClosure[iPtJInt][iDir] = (TH1D*) h_jetInt_trk_pt_ref_sig_unf[0][iPtJInt][iDir][1]->Clone (Form ("h_jetInt_trk_pt_%s_ref_sig_unf_%s_halfClosure", dir.Data (), pTJInt.Data ()));
+  //    DivideNoErrors (h_jetInt_trk_pt_ref_sig_unf_halfClosure[iPtJInt][iDir], h_jetInt_trk_pt_ref_sig[0][iPtJInt][iDir][1]);
 
-      TF1* f = DoClosureFit (Form ("f_jetInt_trk_pt_%s_ref_sig_unf_%s_halfClosure", dir.Data (), pTJInt.Data ()), h_jetInt_trk_pt_ref_sig_unf_halfClosure[iPtJInt][iDir], pTChBins[1], pTChBins[nPtChBins - (iPtJInt == 0 ? 3 : 1)], 4, 8);
-      if (!f) std::cout << "Fit failed, please investigate! iPtJint = " << iPtJInt << ", iDir = " << iDir << std::endl;
-      f_jetInt_trk_pt_ref_sig_unf_halfClosure[iPtJInt][iDir] = f;
-
-
-      for (short iCent = 0; iCent < nFcalCentBins+1; iCent++) {
-
-        const char* cent = (iCent == nFcalCentBins ? "pPb_allCent" : Form ("pPb_iCent%i", iCent));
-
-        h_jetInt_trk_pt_sig_unf_halfClosure[iPtJInt][iDir][iCent] = (TH1D*) h_jetInt_trk_pt_sig_unf[0][iPtJInt][iDir][iCent][1]->Clone (Form ("h_jetInt_trk_pt_%s_%s_sig_unf_%s_halfClosure", dir.Data (), cent, pTJInt.Data ()));
-        DivideNoErrors (h_jetInt_trk_pt_sig_unf_halfClosure[iPtJInt][iDir][iCent], h_jetInt_trk_pt_sig[0][iPtJInt][iDir][iCent][1]);
-
-        TF1* f = DoClosureFit (Form ("f_jetInt_trk_pt_%s_%s_sig_unf_%s_halfClosure", dir.Data (), cent, pTJInt.Data ()), h_jetInt_trk_pt_sig_unf_halfClosure[iPtJInt][iDir][iCent], pTChBins[1], pTChBins[nPtChBins - (iPtJInt == 0 ? 3 : 1)], 4, 8);
-        if (!f) std::cout << "Fit failed, please investigate! iPtJint = " << iPtJInt << ", iDir = " << iDir << ", iCent = " << iCent << std::endl;
-        f_jetInt_trk_pt_sig_unf_halfClosure[iPtJInt][iDir][iCent] = f;
+  //    TF1* f = DoClosureFit (Form ("f_jetInt_trk_pt_%s_ref_sig_unf_%s_halfClosure", dir.Data (), pTJInt.Data ()), h_jetInt_trk_pt_ref_sig_unf_halfClosure[iPtJInt][iDir], pTChBins[1], pTChBins[nPtChBins - (iPtJInt == 0 ? 3 : 1)], 4, 8);
+  //    if (!f) std::cout << "Fit failed, please investigate! iPtJint = " << iPtJInt << ", iDir = " << iDir << std::endl;
+  //    f_jetInt_trk_pt_ref_sig_unf_halfClosure[iPtJInt][iDir] = f;
 
 
-        h_jetInt_trk_pt_iaa_unf_halfClosure[iPtJInt][iDir][iCent] = (TH1D*) h_jetInt_trk_pt_iaa_unf[0][iPtJInt][iDir][iCent][1]->Clone (Form ("h_jetInt_trk_pt_%s_%s_iaa_unf_%s_halfClosure", dir.Data (), cent, pTJInt.Data ()));
-        DivideNoErrors (h_jetInt_trk_pt_iaa_unf_halfClosure[iPtJInt][iDir][iCent], h_jetInt_trk_pt_iaa[0][iPtJInt][iDir][iCent][1]);
+  //    for (short iCent = 0; iCent < nFcalCentBins+1; iCent++) {
 
-        f = DoClosureFit (Form ("f_jetInt_trk_pt_%s_%s_iaa_unf_%s_halfClosure", dir.Data (), cent, pTJInt.Data ()), h_jetInt_trk_pt_iaa_unf_halfClosure[iPtJInt][iDir][iCent], pTChBins[1], pTChBins[nPtChBins - (iPtJInt == 0 ? 3 : 1)], 4, 8);
-        if (!f) std::cout << "Fit failed, please investigate! iPtJint = " << iPtJInt << ", iDir = " << iDir << ", iCent = " << iCent << std::endl;
-        f_jetInt_trk_pt_iaa_unf_halfClosure[iPtJInt][iDir][iCent] = f;
+  //      const char* cent = (iCent == nFcalCentBins ? "pPb_allCent" : Form ("pPb_iCent%i", iCent));
+  //      std::cout << "  |--> cent = " << cent << std::endl;
 
-      } // end loop over iCent
+  //      h_jetInt_trk_pt_sig_unf_halfClosure[iPtJInt][iDir][iCent] = (TH1D*) h_jetInt_trk_pt_sig_unf[0][iPtJInt][iDir][iCent][1]->Clone (Form ("h_jetInt_trk_pt_%s_%s_sig_unf_%s_halfClosure", dir.Data (), cent, pTJInt.Data ()));
+  //      DivideNoErrors (h_jetInt_trk_pt_sig_unf_halfClosure[iPtJInt][iDir][iCent], h_jetInt_trk_pt_sig[0][iPtJInt][iDir][iCent][1]);
+
+  //      TF1* f = DoClosureFit (Form ("f_jetInt_trk_pt_%s_%s_sig_unf_%s_halfClosure", dir.Data (), cent, pTJInt.Data ()), h_jetInt_trk_pt_sig_unf_halfClosure[iPtJInt][iDir][iCent], pTChBins[1], pTChBins[nPtChBins - (iPtJInt == 0 ? 3 : 1)], 4, 8);
+  //      if (!f) std::cout << "Fit failed, please investigate! iPtJint = " << iPtJInt << ", iDir = " << iDir << ", iCent = " << iCent << std::endl;
+  //      f_jetInt_trk_pt_sig_unf_halfClosure[iPtJInt][iDir][iCent] = f;
+
+
+  //      h_jetInt_trk_pt_iaa_unf_halfClosure[iPtJInt][iDir][iCent] = (TH1D*) h_jetInt_trk_pt_iaa_unf[0][iPtJInt][iDir][iCent][1]->Clone (Form ("h_jetInt_trk_pt_%s_%s_iaa_unf_%s_halfClosure", dir.Data (), cent, pTJInt.Data ()));
+  //      DivideNoErrors (h_jetInt_trk_pt_iaa_unf_halfClosure[iPtJInt][iDir][iCent], h_jetInt_trk_pt_iaa[0][iPtJInt][iDir][iCent][1]);
+
+  //      f = DoClosureFit (Form ("f_jetInt_trk_pt_%s_%s_iaa_unf_%s_halfClosure", dir.Data (), cent, pTJInt.Data ()), h_jetInt_trk_pt_iaa_unf_halfClosure[iPtJInt][iDir][iCent], pTChBins[1], pTChBins[nPtChBins - (iPtJInt == 0 ? 3 : 1)], 4, 8);
+  //      if (!f) std::cout << "Fit failed, please investigate! iPtJint = " << iPtJInt << ", iDir = " << iDir << ", iCent = " << iCent << std::endl;
+  //      f_jetInt_trk_pt_iaa_unf_halfClosure[iPtJInt][iDir][iCent] = f;
+
+  //    } // end loop over iCent
  
-    } // end loop over iDir
+  //  } // end loop over iDir
 
-  } // end loop over iPtJInt 
+  //} // end loop over iPtJInt 
+  //std::cout << "Finished computing closure of final results!" << std::endl;
 
 
 
@@ -878,6 +963,7 @@ void PlotResponseMatrix () {
 
 
 
+  std::cout << "Finished main computational code, proceeded to plotting routines." << std::endl;
   {
     TLine* l = new TLine ();
     TLatex* tl = new TLatex ();
@@ -888,13 +974,12 @@ void PlotResponseMatrix () {
   
       {
         const char* canvasName = Form ("c_jet_pt_%sClosure", evFrac.Data ());
-        TCanvas* c = new TCanvas (canvasName, "", 1300, 700);
+        TCanvas* c = new TCanvas (canvasName, "", 1600, 800);
         c->Divide (4, 2);
   
         TH1D* h = nullptr;
         TGAE* g = nullptr;
   
-        double x, y;
         {
           c->cd (7);
   
@@ -1031,7 +1116,6 @@ void PlotResponseMatrix () {
           TH1D* h = nullptr;
           TGAE* g = nullptr;
   
-          double x, y;
           {
             gPad->SetLogx ();
   
@@ -1091,6 +1175,196 @@ void PlotResponseMatrix () {
 
       for (short iPtJInt : {0, 1}) {
   
+        const TString pTJInt = (iPtJInt == 0 ? "30GeV" : "60GeV");
+        const int minJetPt = (iPtJInt == 0 ? 30 : 60);
+        const int maxJetPt = 300;
+
+        const char* canvasName = Form ("c_njet_%iGeV_%sClosure", minJetPt, evFrac.Data ());
+        TCanvas* c = new TCanvas (canvasName, "", 1600, 800);
+        c->Divide (4, 2);
+  
+        TH1D* h = nullptr;
+        TGAE* g = nullptr;
+  
+        {
+          c->cd (7);
+
+          h = h_jet_pt_ref[iEvFrac][1];
+          const double njet_truth = h->Integral (h->FindBin (minJetPt+0.01), h->FindBin (maxJetPt-0.01));
+          std::cout << "Truth nJet (pp): " << njet_truth << std::endl;
+  
+          h = new TH1D ("h", ";Iterations;N_{jet}^{unfolded} / N_{jet}^{truth}", 1, 0.5, maxIters+0.5);
+          h->GetYaxis ()->SetRangeUser (0.90, 1.25);
+          h->GetYaxis ()->CenterTitle ();
+          h->SetBinContent (1, 1);
+          h->SetLineStyle (2);
+          h->SetLineWidth (2);
+          h->SetLineColor (kBlack);
+          h->DrawCopy ("hist ][");
+          SaferDelete (&h);
+  
+          l->SetLineWidth (2);
+          l->SetLineColor (kGray+1);
+          l->SetLineStyle (2);
+          l->DrawLine (0.5, 1.05, maxIters+0.5, 1.05);
+          l->DrawLine (0.5, 0.95, maxIters+0.5, 0.95);
+
+          g = make_graph (h_njet_ref_unf[iEvFrac][iPtJInt]);
+          ScaleGraph (g, nullptr, 1./njet_truth);
+          myDraw (g, colorfulColors[0], kFullCircle, 1.0, 1, 2, "P", false);
+          SaferDelete (&g);
+  
+          myText (0.2, 0.84, kBlack, "#bf{#it{pp}}", 0.06);
+        }
+  
+        for (short iCent = 0; iCent < nFcalCentBins+1; iCent++) {
+
+          c->cd (nFcalCentBins+1-iCent);
+
+          h = h_jet_pt[iEvFrac][iCent][1];
+          const double njet_truth = h->Integral (h->FindBin (minJetPt+0.01), h->FindBin (maxJetPt-0.01));
+          std::cout << "Truth nJet (iCent = " << iCent << "): " << njet_truth << std::endl;
+  
+          h = new TH1D ("h", ";Iterations;N_{jet}^{unfolded} / N_{jet}^{truth}", 1, 0.5, maxIters+0.5);
+          h->GetYaxis ()->SetRangeUser (0.90, 1.25);
+          h->GetYaxis ()->CenterTitle ();
+          h->SetBinContent (1, 1);
+          h->SetLineStyle (2);
+          h->SetLineWidth (2);
+          h->SetLineColor (kBlack);
+          h->DrawCopy ("hist ][");
+          SaferDelete (&h);
+  
+          l->SetLineWidth (2);
+          l->SetLineColor (kGray+1);
+          l->SetLineStyle (2);
+          l->DrawLine (0.5, 1.05, maxIters+0.5, 1.05);
+          l->DrawLine (0.5, 0.95, maxIters+0.5, 0.95);
+
+          g = make_graph (h_njet_unf[iEvFrac][iPtJInt][iCent]);
+          ScaleGraph (g, nullptr, 1./njet_truth);
+          myDraw (g, colorfulColors[iCent+1], kFullCircle, 1.0, 1, 2, "P", false);
+          SaferDelete (&g);
+  
+          if (iCent < nFcalCentBins)
+            myText (0.2, 0.84, kBlack, Form ("#bf{FCal %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.06);
+          else
+            myText (0.2, 0.84, kBlack, "#bf{All centralities}", 0.06);
+  
+        } // end loop over iCent
+  
+        c->cd (8);
+        myText (0.1, 0.84, kBlack, "#bf{#it{ATLAS}} Simulation Internal", 0.07);
+        myText (0.1, 0.75, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.07);
+        myText (0.1, 0.66, kBlack, "#it{p}+Pb, #sqrt{s} = 5.02 TeV", 0.07);
+        myText (0.1, 0.57, kBlack, Form ("#it{p}_{T}^{jet} [GeV] #in (%i, %i)", minJetPt, maxJetPt), 0.07);
+  
+        c->SaveAs (Form ("%s/Plots/Unfolding/MC_NJet_%s_%sClosure.pdf", workPath.Data (), pTJInt.Data (), evFrac.Data ()));
+  
+      } // end loop over iPtJInt
+
+
+
+
+      for (short iPtJInt : {0, 1}) {
+  
+        const TString pTJInt = (iPtJInt == 0 ? "30GeV" : "60GeV");
+        const int minJetPt = (iPtJInt == 0 ? 30 : 60);
+        const int maxJetPt = 300;
+
+        const char* canvasName = Form ("c_ptjet_%iGeV_%sClosure", minJetPt, evFrac.Data ());
+        TCanvas* c = new TCanvas (canvasName, "", 1600, 800);
+        c->Divide (4, 2);
+  
+        TH1D* h = nullptr;
+        TGAE* g = nullptr;
+  
+        {
+          c->cd (7);
+
+          h = (TH1D*) h_jet_pt_ref[iEvFrac][1]->Clone ("htemp");
+          h->GetXaxis ()->SetRange (iPtJInt == 0 ? 3 : 4, h->GetNbinsX () - 2);
+          const double ptjet_truth = h->GetMean ();
+          SaferDelete (&h);
+          std::cout << "Truth <pT^jet> (pp): " << ptjet_truth << " GeV" << std::endl;
+  
+          h = new TH1D ("h", ";Iterations;#LT#it{p}_{T}^{jet}#GT^{unfolded} / #LT#it{p}_{T}^{jet}#GT^{truth}", 1, 0.5, maxIters+0.5);
+          h->GetYaxis ()->SetRangeUser (0.90, 1.25);
+          h->GetYaxis ()->CenterTitle ();
+          h->SetBinContent (1, 1);
+          h->SetLineStyle (2);
+          h->SetLineWidth (2);
+          h->SetLineColor (kBlack);
+          h->DrawCopy ("hist ][");
+          SaferDelete (&h);
+  
+          l->SetLineWidth (2);
+          l->SetLineColor (kGray+1);
+          l->SetLineStyle (2);
+          l->DrawLine (0.5, 1.05, maxIters+0.5, 1.05);
+          l->DrawLine (0.5, 0.95, maxIters+0.5, 0.95);
+
+          g = make_graph (h_ptjet_ref_unf[iEvFrac][iPtJInt]);
+          ScaleGraph (g, nullptr, 1./ptjet_truth);
+          myDraw (g, colorfulColors[0], kFullCircle, 1.0, 1, 2, "P", false);
+          SaferDelete (&g);
+  
+          myText (0.2, 0.84, kBlack, "#bf{#it{pp}}", 0.06);
+        }
+  
+        for (short iCent = 0; iCent < nFcalCentBins+1; iCent++) {
+
+          c->cd (nFcalCentBins+1-iCent);
+
+          h = (TH1D*) h_jet_pt[iEvFrac][iCent][1]->Clone ("htemp");
+          h->GetXaxis ()->SetRange (iPtJInt == 0 ? 3 : 4, h->GetNbinsX () - 2);
+          const double ptjet_truth = h->GetMean ();
+          SaferDelete (&h);
+          std::cout << "Truth <pT^jet> (iCent = " << iCent << "): " << ptjet_truth << " GeV" << std::endl;
+  
+          h = new TH1D ("h", ";Iterations;#LT#it{p}_{T}^{jet}#GT^{unfolded} / #LT#it{p}_{T}^{jet}#GT^{truth}", 1, 0.5, maxIters+0.5);
+          h->GetYaxis ()->SetRangeUser (0.90, 1.25);
+          h->GetYaxis ()->CenterTitle ();
+          h->SetBinContent (1, 1);
+          h->SetLineStyle (2);
+          h->SetLineWidth (2);
+          h->SetLineColor (kBlack);
+          h->DrawCopy ("hist ][");
+          SaferDelete (&h);
+  
+          l->SetLineWidth (2);
+          l->SetLineColor (kGray+1);
+          l->SetLineStyle (2);
+          l->DrawLine (0.5, 1.05, maxIters+0.5, 1.05);
+          l->DrawLine (0.5, 0.95, maxIters+0.5, 0.95);
+
+          g = make_graph (h_ptjet_unf[iEvFrac][iPtJInt][iCent]);
+          ScaleGraph (g, nullptr, 1./ptjet_truth);
+          myDraw (g, colorfulColors[iCent+1], kFullCircle, 1.0, 1, 2, "P", false);
+          SaferDelete (&g);
+  
+          if (iCent < nFcalCentBins)
+            myText (0.2, 0.84, kBlack, Form ("#bf{FCal %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.06);
+          else
+            myText (0.2, 0.84, kBlack, "#bf{All centralities}", 0.06);
+  
+        } // end loop over iCent
+  
+        c->cd (8);
+        myText (0.1, 0.84, kBlack, "#bf{#it{ATLAS}} Simulation Internal", 0.07);
+        myText (0.1, 0.75, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.07);
+        myText (0.1, 0.66, kBlack, "#it{p}+Pb, #sqrt{s} = 5.02 TeV", 0.07);
+        myText (0.1, 0.57, kBlack, Form ("#it{p}_{T}^{jet} [GeV] #in (%i, %i)", minJetPt, maxJetPt), 0.07);
+  
+        c->SaveAs (Form ("%s/Plots/Unfolding/MC_AvgPtJet_%s_%sClosure.pdf", workPath.Data (), pTJInt.Data (), evFrac.Data ()));
+  
+      } // end loop over iPtJInt
+
+
+
+
+      for (short iPtJInt : {0, 1}) {
+  
         const int minJetPt = (iPtJInt == 0 ? 30 : 60);
   
         for (short iDir = 0; iDir < 3; iDir++) {
@@ -1098,13 +1372,13 @@ void PlotResponseMatrix () {
           const TString dir = directions[iDir];
   
           const char* canvasName = Form ("c_jet_trk_pt_%s_%iGeVJets_%sClosure", dir.Data (), minJetPt, evFrac.Data ());
-          TCanvas* c = new TCanvas (canvasName, "", 1300, 700);
+          //TCanvas* c = new TCanvas (canvasName, "", 1300, 700);
+          TCanvas* c = new TCanvas (canvasName, "", 1600, 800);
           c->Divide (4, 2);
   
           TH1D* h = nullptr;
           TGAE* g = nullptr;
   
-          double x, y;
           {
             c->cd (7);
   
@@ -1136,8 +1410,8 @@ void PlotResponseMatrix () {
               SaferDelete (&g);
             }
   
-            if (iEvFrac == 0) 
-              myDraw (f_jetInt_trk_pt_ref_sig_unf_halfClosure[iPtJInt][iDir], kBlack, 2, 2);
+            //if (iEvFrac == 0) 
+            //  myDraw (f_jetInt_trk_pt_ref_sig_unf_halfClosure[iPtJInt][iDir], kBlack, 2, 2);
   
             g = make_graph (h_jetInt_trk_pt_ref_sig[iEvFrac][iPtJInt][iDir][0]);
             ScaleGraph (g, h_jetInt_trk_pt_ref_sig[iEvFrac][iPtJInt][iDir][1]);
@@ -1178,8 +1452,8 @@ void PlotResponseMatrix () {
               SaferDelete (&g);
             }
   
-            if (iEvFrac == 0) 
-              myDraw (f_jetInt_trk_pt_sig_unf_halfClosure[iPtJInt][iDir][iCent], kBlack, 2, 2);
+            //if (iEvFrac == 0) 
+            //  myDraw (f_jetInt_trk_pt_sig_unf_halfClosure[iPtJInt][iDir][iCent], kBlack, 2, 2);
   
             g = make_graph (h_jetInt_trk_pt_sig[iEvFrac][iPtJInt][iDir][iCent][0]);
             ScaleGraph (g, h_jetInt_trk_pt_sig[iEvFrac][iPtJInt][iDir][iCent][1]);
@@ -1221,7 +1495,8 @@ void PlotResponseMatrix () {
           const TString dir = directions[iDir];
   
           const char* canvasName = Form ("c_jet_trk_pt_iaa_%s_%iGeVJets_%sClosure", dir.Data (), minJetPt, evFrac.Data ());
-          TCanvas* c = new TCanvas (canvasName, "", 1300, 700);
+          //TCanvas* c = new TCanvas (canvasName, "", 1300, 700);
+          TCanvas* c = new TCanvas (canvasName, "", 1600, 800);
           c->Divide (4, 2);
   
           TH1D* h = nullptr;
@@ -1258,8 +1533,8 @@ void PlotResponseMatrix () {
               SaferDelete (&g);
             }
  
-            if (iEvFrac == 0) 
-              myDraw (f_jetInt_trk_pt_iaa_unf_halfClosure[iPtJInt][iDir][iCent], kBlack, 2, 2);
+            //if (iEvFrac == 0) 
+            //  myDraw (f_jetInt_trk_pt_iaa_unf_halfClosure[iPtJInt][iDir][iCent], kBlack, 2, 2);
   
             g = make_graph (h_jetInt_trk_pt_iaa[iEvFrac][iPtJInt][iDir][iCent][0]);
             ScaleGraph (g, h_jetInt_trk_pt_iaa[iEvFrac][iPtJInt][iDir][iCent][1]);
@@ -1720,7 +1995,6 @@ void PlotResponseMatrix () {
         TH1D* h = nullptr;
         TGAE* g = nullptr;
   
-        double x, y;
         {
           c->cd (7);
   
