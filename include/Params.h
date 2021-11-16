@@ -187,6 +187,7 @@ short GetPtChBin (const float ptch) {
   return iPtCh;
 }
 
+
 } // end namespace
 
 #endif

@@ -392,7 +392,7 @@ void PlotNIters (const char* inFileTag) {
         const double minJetPt = (iPtJInt == 0 ? 30. : 60.);
         const double maxJetPt = 300;
 
-        const double minPtCh = 5;
+        const double minPtCh = 4;
         const double maxPtCh = (iPtJInt == 0 ? 60 : 90);
 
         TH1D* h_unf = h_jetInt_trk_pt_ref_sig[iDType][iPtJInt][iDir];
@@ -504,7 +504,7 @@ void PlotNIters (const char* inFileTag) {
           const double minJetPt = (iPtJInt == 0 ? 30. : 60.);
           const double maxJetPt = 300;
 
-          const double minPtCh = 5;
+          const double minPtCh = 4;
           const double maxPtCh = (iPtJInt == 0 ? 60 : 90);
   
           TH1D* h_unf = h_jetInt_trk_pt_sig[iDType][iPtJInt][iDir][iCent];
@@ -775,9 +775,9 @@ void PlotNIters (const char* inFileTag) {
         g->Draw ("P");
 
         if (iCent < nZdcCentBins)
-          myText (0.2, 0.865, kBlack, Form ("#bf{ZDC %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.05);
+          myText (0.2, 0.865, kBlack, Form ("#bf{#it{p}+Pb, ZDC %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.05);
         else
-          myText (0.2, 0.865, kBlack, "#bf{All centralities}", 0.05);
+          myText (0.2, 0.865, kBlack, "#bf{#it{p}+Pb, 0-100%}", 0.05);
         l->DrawLine (xopt, ymin, xopt, ymax/ymaxSF);
 
         l->SetLineColor (myGreen);
@@ -796,7 +796,7 @@ void PlotNIters (const char* inFileTag) {
       myText (0.1, 0.84, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.07);
       myText (0.1, 0.75, kBlack, "#it{p}+Pb, #sqrt{s} = 5.02 TeV", 0.07);
       myText (0.1, 0.66, kBlack, Form ("#it{p}_{T}^{jet} [GeV] #in (%i, 300)", iPtJInt == 0 ? 30 : 60), 0.065);
-      myText (0.1, 0.57, kBlack, Form ("#it{p}_{T}^{ch} [GeV] #in (5, %i)", iPtJInt == 0 ? 60 : 90), 0.065);
+      myText (0.1, 0.57, kBlack, Form ("#it{p}_{T}^{ch} [GeV] #in (4, %i)", iPtJInt == 0 ? 60 : 90), 0.065);
       myText (0.1, 0.48, kBlack, Form ("#Delta#phi_{ch,jet} %s", directions[iDir] == "ns" ? "< #pi/8" : (directions[iDir] == "as" ? "> 7#pi/8" : "#in (#pi/3, 2#pi/3)")), 0.065);
       myLineText2 (0.15, 0.40, kBlack,        kFullCircle, "#sigma_{stat} #oplus #sigma_{iter}, #alpha = 0", 1.2, 0.06);
       myLineText2 (0.15, 0.31, kBlue,         kOpenCircle, "#sigma_{stat} only, #alpha = 0", 1.2, 0.06);
@@ -963,9 +963,9 @@ void PlotNIters (const char* inFileTag) {
         g->Draw ("P");
 
         if (iCent < nZdcCentBins)
-          myText (0.2, 0.865, kBlack, Form ("#bf{ZDC %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.05);
+          myText (0.2, 0.865, kBlack, Form ("#bf{#it{p}+Pb, ZDC %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.05);
         else
-          myText (0.2, 0.865, kBlack, "#bf{All centralities}", 0.05);
+          myText (0.2, 0.865, kBlack, "#bf{#it{p}+Pb, 0-100%}", 0.05);
         l->DrawLine (xopt, ymin, xopt, ymax/ymaxSF);
 
         l->SetLineColor (myGreen);
@@ -984,7 +984,7 @@ void PlotNIters (const char* inFileTag) {
       myText (0.1, 0.84, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.07);
       myText (0.1, 0.75, kBlack, "#it{p}+Pb, #sqrt{s} = 5.02 TeV", 0.07);
       myText (0.1, 0.66, kBlack, Form ("#it{p}_{T}^{jet} [GeV] #in (%i, 300)", iPtJInt == 0 ? 30 : 60), 0.065);
-      myText (0.1, 0.57, kBlack, Form ("#it{p}_{T}^{ch} [GeV] #in (5, %i)", iPtJInt == 0 ? 60 : 90), 0.065);
+      myText (0.1, 0.57, kBlack, Form ("#it{p}_{T}^{ch} [GeV] #in (4, %i)", iPtJInt == 0 ? 60 : 90), 0.065);
       myText (0.1, 0.48, kBlack, Form ("#Delta#phi_{ch,jet} %s", directions[iDir] == "ns" ? "< #pi/8" : (directions[iDir] == "as" ? "> 7#pi/8" : "#in (#pi/3, 2#pi/3)")), 0.065);
       myLineText2 (0.15, 0.40, kBlack,        kFullCircle, "#sigma_{stat} #oplus #sigma_{iter}, #alpha = 0.5", 1.2, 0.06);
       myLineText2 (0.15, 0.31, kBlue,         kOpenCircle, "#sigma_{stat} only, #alpha = 0.5", 1.2, 0.06);
@@ -1151,9 +1151,9 @@ void PlotNIters (const char* inFileTag) {
         g->Draw ("P");
 
         if (iCent < nZdcCentBins)
-          myText (0.2, 0.865, kBlack, Form ("#bf{ZDC %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.05);
+          myText (0.2, 0.865, kBlack, Form ("#bf{#it{p}+Pb, ZDC %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.05);
         else
-          myText (0.2, 0.865, kBlack, "#bf{All centralities}", 0.05);
+          myText (0.2, 0.865, kBlack, "#bf{#it{p}+Pb, 0-100%}", 0.05);
         l->DrawLine (xopt, ymin, xopt, ymax/ymaxSF);
 
         l->SetLineColor (myGreen);
@@ -1172,7 +1172,7 @@ void PlotNIters (const char* inFileTag) {
       myText (0.1, 0.84, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.07);
       myText (0.1, 0.75, kBlack, "#it{p}+Pb, #sqrt{s} = 5.02 TeV", 0.07);
       myText (0.1, 0.66, kBlack, Form ("#it{p}_{T}^{jet} [GeV] #in (%i, 300)", iPtJInt == 0 ? 30 : 60), 0.065);
-      myText (0.1, 0.57, kBlack, Form ("#it{p}_{T}^{ch} [GeV] #in (5, %i)", iPtJInt == 0 ? 60 : 90), 0.065);
+      myText (0.1, 0.57, kBlack, Form ("#it{p}_{T}^{ch} [GeV] #in (4, %i)", iPtJInt == 0 ? 60 : 90), 0.065);
       myText (0.1, 0.48, kBlack, Form ("#Delta#phi_{ch,jet} %s", directions[iDir] == "ns" ? "< #pi/8" : (directions[iDir] == "as" ? "> 7#pi/8" : "#in (#pi/3, 2#pi/3)")), 0.065);
       myLineText2 (0.15, 0.40, kBlack,        kFullCircle, "#sigma_{stat} #oplus #sigma_{iter}, #alpha = 1", 1.2, 0.06);
       myLineText2 (0.15, 0.31, kBlue,         kOpenCircle, "#sigma_{stat} only, #alpha = 1", 1.2, 0.06);
@@ -1335,9 +1335,9 @@ void PlotNIters (const char* inFileTag) {
       g->Draw ("P");
 
       if (iCent < nZdcCentBins)
-        myText (0.2, 0.865, kBlack, Form ("#bf{ZDC %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.05);
+        myText (0.2, 0.865, kBlack, Form ("#bf{#it{p}+Pb, ZDC %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.05);
       else
-        myText (0.2, 0.865, kBlack, "#bf{All centralities}", 0.05);
+        myText (0.2, 0.865, kBlack, "#bf{#it{p}+Pb, 0-100%}", 0.05);
       l->DrawLine (xopt, ymin, xopt, ymax/ymaxSF);
 
       l->SetLineColor (myGreen);
@@ -1513,9 +1513,9 @@ void PlotNIters (const char* inFileTag) {
       g->Draw ("P");
 
       if (iCent < nZdcCentBins)
-        myText (0.2, 0.865, kBlack, Form ("#bf{ZDC %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.05);
+        myText (0.2, 0.865, kBlack, Form ("#bf{#it{p}+Pb, ZDC %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.05);
       else
-        myText (0.2, 0.865, kBlack, "#bf{All centralities}", 0.05);
+        myText (0.2, 0.865, kBlack, "#bf{#it{p}+Pb, 0-100%}", 0.05);
       l->DrawLine (xopt, ymin, xopt, ymax/ymaxSF);
 
       l->SetLineColor (myGreen);
@@ -1691,9 +1691,9 @@ void PlotNIters (const char* inFileTag) {
       g->Draw ("P");
 
       if (iCent < nZdcCentBins)
-        myText (0.2, 0.865, kBlack, Form ("#bf{ZDC %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.05);
+        myText (0.2, 0.865, kBlack, Form ("#bf{#it{p}+Pb, ZDC %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.05);
       else
-        myText (0.2, 0.865, kBlack, "#bf{All centralities}", 0.05);
+        myText (0.2, 0.865, kBlack, "#bf{#it{p}+Pb, 0-100%}", 0.05);
       l->DrawLine (xopt, ymin, xopt, ymax/ymaxSF);
 
       l->SetLineColor (myGreen);
@@ -1797,9 +1797,9 @@ void PlotNIters (const char* inFileTag) {
       l->DrawLine (300, 0.25, 300, 1.75);
 
       if (iCent < nZdcCentBins)
-        myText (0.2, 0.865, kBlack, Form ("#bf{ZDC %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.05);
+        myText (0.2, 0.865, kBlack, Form ("#bf{#it{p}+Pb, ZDC %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.05);
       else
-        myText (0.2, 0.865, kBlack, "#bf{All centralities}", 0.05);
+        myText (0.2, 0.865, kBlack, "#bf{#it{p}+Pb, 0-100%}", 0.05);
 
     } // end loop over iCent
 
@@ -1894,9 +1894,9 @@ void PlotNIters (const char* inFileTag) {
         }
 
         if (iCent < nZdcCentBins)
-          myText (0.2, 0.865, kBlack, Form ("#bf{ZDC %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.05);
+          myText (0.2, 0.865, kBlack, Form ("#bf{#it{p}+Pb, ZDC %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.05);
         else
-          myText (0.2, 0.865, kBlack, "#bf{All centralities}", 0.05);
+          myText (0.2, 0.865, kBlack, "#bf{#it{p}+Pb, 0-100%}", 0.05);
 
       } // end loop over iCent
 
@@ -2015,9 +2015,9 @@ void PlotNIters (const char* inFileTag) {
         SaferDelete (&gdown);
 
         if (iCent < nZdcCentBins)
-          myText (0.2, 0.865, kBlack, Form ("#bf{ZDC %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.05);
+          myText (0.2, 0.865, kBlack, Form ("#bf{#it{p}+Pb, ZDC %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.05);
         else
-          myText (0.2, 0.865, kBlack, "#bf{All centralities}", 0.05);
+          myText (0.2, 0.865, kBlack, "#bf{#it{p}+Pb, 0-100%}", 0.05);
 
       } // end loop over iCent
 

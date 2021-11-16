@@ -1268,6 +1268,7 @@ void PlotCentralityAnalysis () {
     g->SetLineColor (kBlack);
     g->SetLineWidth (3);
 
+    g->GetXaxis ()->SetRangeUser (-10, 110);
     g->GetYaxis ()->SetRangeUser (ymin, ymax);
 
     g->GetXaxis ()->SetTitleFont (43);

@@ -2076,7 +2076,6 @@ void SmoothSystematics (TGAE* sys, TF1* func, TH1D* nom, TH1D* var) {
 }
 
 
-
 } // end namespace
 
 #endif

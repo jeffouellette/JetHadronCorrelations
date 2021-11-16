@@ -30,9 +30,9 @@ using namespace JetHadronCorrelations;
 
 
 //const bool makeTotalSystPlots = false;
-const bool makeBkgdSystPlots  = false;
-const bool makeSigSystPlots   = false;//true;
-const bool makeIpPbSystPlots  = false;//true;
+//const bool makeBkgdSystPlots  = false;
+const bool makeSigSystPlots   = true;
+const bool makeIpPbSystPlots  = true;
 
 const float maxDataSyst = 20; // maximum y-axis for data-driven systematics
 const float maxMCSyst = 20; // maximum y-axis for MC-driven systematics
@@ -95,6 +95,9 @@ void PlotPtCh (const char* inFileTag) {
   TLatex* tl = new TLatex ();
 
   TFile* inFile = nullptr;
+
+  TH1D***   h_jet_pt_ref_unf          = Get2DArray <TH1D*> (2, 2);
+  TH1D****  h_jet_pt_unf              = Get3DArray <TH1D*> (2, 2, nZdcCentBins+1);
 
   TH1D****  h_jetInt_trk_pt_ref       = Get3DArray <TH1D*> (2, 2, nDir);
   TH1D****  h_jetInt_trk_pt_ref_bkg   = Get3DArray <TH1D*> (2, 2, nDir);
@@ -301,6 +304,8 @@ void PlotPtCh (const char* inFileTag) {
 
         const TString pTJInt = (iPtJInt == 0 ? "30GeV" : "60GeV");
 
+        h_jet_pt_ref_unf[iDType][iPtJInt] = (TH1D*) inFile->Get (Form ("h_jet_pt_ref_unf_%s_%s_Nominal", dType.Data (), pTJInt.Data ()));
+
         for (short iDir = 0; iDir < nDir; iDir++) {
 
           const TString dir = directions[iDir];
@@ -313,6 +318,8 @@ void PlotPtCh (const char* inFileTag) {
         for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
 
           const TString cent = (iCent == nZdcCentBins ? "allCent" : Form ("iCent%i", iCent));
+
+          h_jet_pt_unf[iDType][iPtJInt][iCent] = (TH1D*) inFile->Get (Form ("h_jet_pt_unf_%s_%s_%s_Nominal", dType.Data (), cent.Data (), pTJInt.Data ()));
 
           for (short iDir = 0; iDir < nDir; iDir++) {
 
@@ -398,6 +405,30 @@ void PlotPtCh (const char* inFileTag) {
     } // end loop over iPtJInt
 
   }
+
+
+
+  // print out mean jet pT values
+  for (short iDType = 0; iDType < 2; iDType++) {
+
+    for (short iPtJInt : {0, 1}) {
+
+      const TString pTJInt = (iPtJInt == 0 ? "30 GeV" : "60 GeV");
+
+      std::cout << "---------------" << std::endl << "JETS IN " << (iDType == 0 ? "DATA" : "MC") << " > " << pTJInt << std::endl << "---------------" << std::endl;
+
+      TH1D* h = h_jet_pt_ref_unf[iDType][iPtJInt];
+      h->GetXaxis ()->SetRange (3+2*iPtJInt, h->GetNbinsX () - 2);
+      std::cout << "Average jet pT (pp): " << h->GetMean () << " +/- " << h->GetMeanError () << std::endl;
+      for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
+        h = h_jet_pt_unf[iDType][iPtJInt][iCent];
+        h->GetXaxis ()->SetRange (3+2*iPtJInt, h->GetNbinsX () - 2);
+        std::cout << "Average jet pT (p+Pb, " << zdcCentPercs[iCent+1] << "-" << zdcCentPercs[iCent] << "%): " << h->GetMean () << " +/- " << h->GetMeanError () << std::endl;
+      } // end loop over iCent
+
+    } // end loop over iPtJInt
+
+  } // end loop over iDType
 
 
 
@@ -732,7 +763,7 @@ void PlotPtCh (const char* inFileTag) {
         dlPad->SetLogx ();
 
         ymin = 0.53;
-        ymax = 1.47;//(strcmp (tag, "30GeVJets") == 0 || strcmp (tag, "15GeVJets") == 0 ? 1.45 : 1.17);
+        ymax = 1.47;
 
         h = new TH1D ("h", ";#it{p}_{T}^{ch} [GeV];#it{I}_{#it{p}Pb} = #it{p}+Pb / #it{pp}", 1, pTChBins[1], pTChBins[nPtChBins-(iPtJInt == 0 ? 3 : 1)]);
         h->SetBinContent (1, 1);
@@ -753,7 +784,7 @@ void PlotPtCh (const char* inFileTag) {
         SaferDelete (&h);
 
         //g = (TGAE*) g_jetInt_trk_pt_iaa_syst[iPtJInt][0][iCent][0]->Clone ();
-        h = h_jetInt_trk_pt_iaa[iDType][iPtJInt][0][iCent];
+        h = h_jetInt_trk_pt_iaaNoUnf[iDType][iPtJInt][0][iCent];
         //SetCentralValuesKeepRelativeErrors (g, h);
         //myDrawSyst (g, myRed);
         //SaferDelete (&g);
@@ -767,7 +798,7 @@ void PlotPtCh (const char* inFileTag) {
         drPad->SetLogx ();
 
         ymin = 0.53;
-        ymax = 1.47;//(strcmp (tag, "30GeVJets") == 0 || strcmp (tag, "15GeVJets") == 0 ? 1.45 : 1.17);
+        ymax = 1.47;
 
         h = new TH1D ("h", ";#it{p}_{T}^{ch} [GeV];#it{I}_{#it{p}Pb} = #it{p}+Pb / #it{pp}", 1, pTChBins[1], pTChBins[nPtChBins-(iPtJInt == 0 ? 3 : 1)]);
         h->SetBinContent (1, 1);
@@ -788,7 +819,7 @@ void PlotPtCh (const char* inFileTag) {
         SaferDelete (&h);
 
         //g = (TGAE*) g_jetInt_trk_pt_iaa_syst[iPtJInt][2][iCent][0]->Clone ();
-        h = h_jetInt_trk_pt_iaa[iDType][iPtJInt][2][iCent];
+        h = h_jetInt_trk_pt_iaaNoUnf[iDType][iPtJInt][2][iCent];
         //SetCentralValuesKeepRelativeErrors (g, h);
         //myDrawSyst (g, myRed);
         //SaferDelete (&g);
@@ -1072,7 +1103,7 @@ void PlotPtCh (const char* inFileTag) {
     dlPad->SetLogx ();
 
     ymin = 0.53;
-    ymax = (strcmp (tag, "30GeVJets") == 0 || strcmp (tag, "15GeVJets") == 0 ? 1.45 : 1.17);
+    ymax = 1.45;
 
     h = new TH1D ("h", ";#it{p}_{T}^{ch} [GeV];#it{I}_{#it{p}Pb} = #it{p}+Pb / #it{pp}", 1, pTChBins[1], pTChBins[nPtChBins-(iPtJInt == 0 ? 3 : 1)]);
     h->SetBinContent (1, 1);
@@ -1109,7 +1140,7 @@ void PlotPtCh (const char* inFileTag) {
     drPad->SetLogx ();
 
     ymin = 0.53;
-    ymax = (strcmp (tag, "30GeVJets") == 0 || strcmp (tag, "15GeVJets") == 0 ? 1.45 : 1.17);
+    ymax = 1.45;
 
     h = new TH1D ("h", ";#it{p}_{T}^{ch} [GeV];#it{I}_{#it{p}Pb} = #it{p}+Pb / #it{pp}", 1, pTChBins[1], pTChBins[nPtChBins-(iPtJInt == 0 ? 3 : 1)]);
     h->SetBinContent (1, 1);
@@ -1427,7 +1458,7 @@ void PlotPtCh (const char* inFileTag) {
     dlPad->SetLogx ();
 
     ymin = 0.53;
-    ymax = (strcmp (tag, "30GeVJets") == 0 || strcmp (tag, "15GeVJets") == 0 ? 1.45 : 1.17);
+    ymax = 1.45;
 
     h = new TH1D ("h", ";#it{p}_{T}^{ch} [GeV];#it{I}_{#it{p}Pb} = #it{p}+Pb / #it{pp}", 1, pTChBins[1], pTChBins[nPtChBins-(iPtJInt == 0 ? 3 : 1)]);
     h->SetBinContent (1, 1);
@@ -1463,7 +1494,7 @@ void PlotPtCh (const char* inFileTag) {
     drPad->SetLogx ();
 
     ymin = 0.53;
-    ymax = (strcmp (tag, "30GeVJets") == 0 || strcmp (tag, "15GeVJets") == 0 ? 1.45 : 1.17);
+    ymax = 1.45;
 
     h = new TH1D ("h", ";#it{p}_{T}^{ch} [GeV];#it{I}_{#it{p}Pb} = #it{p}+Pb / #it{pp}", 1, pTChBins[1], pTChBins[nPtChBins-(iPtJInt == 0 ? 3 : 1)]);
     h->SetBinContent (1, 1);
@@ -1586,8 +1617,8 @@ void PlotPtCh (const char* inFileTag) {
       for (short iCent = 0; iCent < nZdcCentBins; iCent++) { 
         mySimpleMarkerAndBoxAndLineText (0.25 + (iCent >= 2 ? 0.35 : 0), 0.27-((iCent+1)%3)*0.040, 1.4, 1001, colorfulSystColors[iCent+1], 1.0, colorfulColors[iCent+1], kFullCircle, 1.6, Form ("ZDC %i-%i%% (#times10^{%i})", zdcCentPercs[iCent+1], zdcCentPercs[iCent], 2-iCent), 0.030);
       }
-      mySimpleMarkerAndBoxAndLineText (0.67, 0.15, 1.4, 1001, colorfulSystColors[nZdcCentBins+1], 1.0, colorfulColors[nZdcCentBins+1], kFullCircle, 1.6, Form ("All cent. (#times10^{%i})", 2-nZdcCentBins), 0.030);
-      mySimpleMarkerAndBoxAndLineText (0.27, 0.15, 1.4, 1001, kWhite, 0.0, kBlack, kDot, 0.0, "#it{pp} (#it{scaled to} #it{p}+Pb)", 0.030);
+      mySimpleMarkerAndBoxAndLineText (0.60, 0.15, 1.4, 1001, colorfulSystColors[nZdcCentBins+1], 1.0, colorfulColors[nZdcCentBins+1], kFullCircle, 1.6, Form ("0-100%% (#times10^{%i})", 2-nZdcCentBins), 0.030);
+      mySimpleMarkerAndBoxAndLineText (0.25, 0.15, 1.4, 1001, kWhite, 0.0, kBlack, kDot, 0.0, "#it{pp} (#it{scaled to} #it{p}+Pb)", 0.030);
 
       c->RedrawAxis();
 
@@ -1631,19 +1662,17 @@ void PlotPtCh (const char* inFileTag) {
         h = h_jetInt_trk_pt_iaa[0][iPtJInt][iDir][iCent];
         //h = h_jetInt_trk_pt_iaa_syst[iPtJInt][iDir][iCent][iMCTruthJetsTruthParts];
         SetCentralValuesKeepRelativeErrors (g, h);
-        //if (strcmp (tag, "30GeVJets") == 0)
-        //  TrimGraph (g, 0, 30);
         if (iDir == 1)
           TrimGraph (g, 0, 10);
+        RecenterGraph (g);
         myDrawSystFill (g, colorfulSystColors[nZdcCentBins-iCent], 0.6, 1001);
         SaferDelete (&g);
 
         g = make_graph (h);
         ResetXErrors (g);
-        //if (strcmp (tag, "30GeVJets") == 0)
-        //  TrimGraph (g, 0, 30);
         if (iDir == 1)
           TrimGraph (g, 0, 10);
+        RecenterGraph (g);
         myDraw (g, colorfulColors[nZdcCentBins-iCent], kFullCircle, 1.0, 1, 2, "P", false);
         SaferDelete (&g);
 
@@ -1653,14 +1682,15 @@ void PlotPtCh (const char* inFileTag) {
         ResetXErrors (g);
         if (iDir == 1)
           TrimGraph (g, 0, 10);
+        RecenterGraph (g);
         myDraw (g, colorfulColors[nZdcCentBins-iCent], kOpenCircle, 1.0, 1, 2, "P", false);
         SaferDelete (&g);
 
 
         if (iCent < nZdcCentBins)
-          myText (0.2, 0.865, colorfulColors[nZdcCentBins-iCent], Form ("#bf{ZDC %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.05);
+          myText (0.2, 0.865, colorfulColors[nZdcCentBins-iCent], Form ("#bf{#it{p}+Pb, ZDC %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.05);
         else
-          myText (0.2, 0.865, colorfulColors[0], "#bf{All centralities}", 0.05);
+          myText (0.2, 0.865, colorfulColors[0], "#bf{#it{p}+Pb, 0-100%}", 0.05);
 
       } // end loop over iCent
 
@@ -1727,26 +1757,20 @@ void PlotPtCh (const char* inFileTag) {
         h = h_jetInt_trk_pt_iaa[0][iPtJInt][iDir][iCent];
         //h = h_jetInt_trk_pt_iaa_syst[iPtJInt][iDir][iCent][iMCTruthJetsTruthParts];
         SetCentralValuesKeepRelativeErrors (g, h);
-        //if (strcmp (tag, "30GeVJets") == 0)
-        //  TrimGraph (g, 0, 30);
-        if (iDir == 1)
-          TrimGraph (g, 0, 10);
+        RecenterGraph (g);
         myDrawSystFill (g, colorfulSystColors[nZdcCentBins-iCent], 0.6, 1001);
         SaferDelete (&g);
 
         g = make_graph (h);
         ResetXErrors (g);
-        //if (strcmp (tag, "30GeVJets") == 0)
-        //  TrimGraph (g, 0, 30);
-        if (iDir == 1)
-          TrimGraph (g, 0, 10);
+        RecenterGraph (g);
         myDraw (g, colorfulColors[nZdcCentBins-iCent], kFullCircle, 1.0, 1, 2, "P", false);
         SaferDelete (&g);
 
         if (iCent < nZdcCentBins)
-          myText (0.2, 0.865, colorfulColors[nZdcCentBins-iCent], Form ("#bf{ZDC %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.05);
+          myText (0.2, 0.865, colorfulColors[nZdcCentBins-iCent], Form ("#bf{#it{p}+Pb, ZDC %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.05);
         else
-          myText (0.2, 0.865, colorfulColors[0], "#bf{All centralities}", 0.05);
+          myText (0.2, 0.865, colorfulColors[0], "#bf{#it{p}+Pb, 0-100%}", 0.05);
 
       } // end loop over iCent
 
@@ -1812,26 +1836,20 @@ void PlotPtCh (const char* inFileTag) {
         h = h_jetInt_trk_pt_iaa[0][iPtJInt][iDir][iCent];
         //h = h_jetInt_trk_pt_iaa_syst[iPtJInt][iDir][iCent][iMCTruthJetsTruthParts];
         SetCentralValuesKeepRelativeErrors (g, h);
-        //if (strcmp (tag, "30GeVJets") == 0)
-        //  TrimGraph (g, 0, 30);
-        if (iDir == 1)
-          TrimGraph (g, 0, 10);
+        RecenterGraph (g);
         myDrawSystFill (g, colorfulSystColors[nZdcCentBins-iCent], 0.6, 1001);
         SaferDelete (&g);
 
         g = make_graph (h);
         ResetXErrors (g);
-        //if (strcmp (tag, "30GeVJets") == 0)
-        //  TrimGraph (g, 0, 30);
-        if (iDir == 1)
-          TrimGraph (g, 0, 10);
+        RecenterGraph (g);
         myDraw (g, colorfulColors[nZdcCentBins-iCent], kFullCircle, 1.0, 1, 2, "P", false);
         SaferDelete (&g);
 
         if (iCent < nZdcCentBins)
-          myText (0.2, 0.865, colorfulColors[nZdcCentBins-iCent], Form ("#bf{ZDC %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.05);
+          myText (0.2, 0.865, colorfulColors[nZdcCentBins-iCent], Form ("#bf{#it{p}+Pb, ZDC %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.05);
         else
-          myText (0.2, 0.865, colorfulColors[0], "#bf{All centralities}", 0.05);
+          myText (0.2, 0.865, colorfulColors[0], "#bf{#it{p}+Pb, 0-100%}", 0.05);
 
       } // end loop over iCent
 
@@ -1897,26 +1915,20 @@ void PlotPtCh (const char* inFileTag) {
         h = h_jetInt_trk_pt_iaa[0][iPtJInt][iDir][iCent];
         //h = h_jetInt_trk_pt_iaa_syst[iPtJInt][iDir][iCent][iMCTruthJetsTruthParts];
         SetCentralValuesKeepRelativeErrors (g, h);
-        //if (strcmp (tag, "30GeVJets") == 0)
-        //  TrimGraph (g, 0, 30);
-        if (iDir == 1)
-          TrimGraph (g, 0, 10);
+        RecenterGraph (g);
         myDrawSystFill (g, colorfulSystColors[nZdcCentBins-iCent], 0.6, 1001);
         SaferDelete (&g);
 
         g = make_graph (h);
         ResetXErrors (g);
-        //if (strcmp (tag, "30GeVJets") == 0)
-        //  TrimGraph (g, 0, 30);
-        if (iDir == 1)
-          TrimGraph (g, 0, 10);
+        RecenterGraph (g);
         myDraw (g, colorfulColors[nZdcCentBins-iCent], kFullCircle, 1.0, 1, 2, "P", false);
         SaferDelete (&g);
 
         if (iCent < nZdcCentBins)
-          myText (0.2, 0.865, colorfulColors[nZdcCentBins-iCent], Form ("#bf{ZDC %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.05);
+          myText (0.2, 0.865, colorfulColors[nZdcCentBins-iCent], Form ("#bf{#it{p}+Pb, ZDC %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.05);
         else
-          myText (0.2, 0.865, colorfulColors[0], "#bf{All centralities}", 0.05);
+          myText (0.2, 0.865, colorfulColors[0], "#bf{#it{p}+Pb, 0-100%}", 0.05);
 
       } // end loop over iCent
 
@@ -1972,51 +1984,48 @@ void PlotPtCh (const char* inFileTag) {
         h = h_jetInt_trk_pt_iaa[0][iPtJInt][iDir][iCent];
         //h = h_jetInt_trk_pt_iaa_syst[iPtJInt][iDir][iCent][iMCTruthJetsTruthParts];
         SetCentralValuesKeepRelativeErrors (g, h);
-        //if (strcmp (tag, "30GeVJets") == 0)
-        //  TrimGraph (g, 0, 30);
-        if (iDir == 1)
-          TrimGraph (g, 0, 10);
+        RecenterGraph (g);
         myDrawSystFill (g, colorfulSystColors[nZdcCentBins-iCent], 0.6, 1001);
         SaferDelete (&g);
 
         g = make_graph (h);
         ResetXErrors (g);
-        //if (strcmp (tag, "30GeVJets") == 0)
-        //  TrimGraph (g, 0, 30);
-        if (iDir == 1)
-          TrimGraph (g, 0, 10);
+        RecenterGraph (g);
         myDraw (g, colorfulColors[nZdcCentBins-iCent], kFullCircle, 1.0, 1, 2, "P", false);
         SaferDelete (&g);
 
-        if (iCent != nZdcCentBins) {
-          g = (TGAE*) g_angantyr_iaa[iDir][iCent][0]->Clone ("gtemp");
-          TrimGraph (g, 4, 70);
-          TGAE* gup = new TGAE ();
-          TGAE* gdown = new TGAE ();
-          MakeGupAndGdown (g, gup, gdown);
-          myDrawFill (gup, gdown, kGray+1, 0.5);
-          myDraw (g, kGray+3, kDot, 0, 1, 2, "L");
-          SaferDelete (&g);
-          SaferDelete (&gup);
-          SaferDelete (&gdown);
+
+        g = (TGAE*) g_angantyr_iaa[iDir][iCent][0]->Clone ("gtemp");
+        TrimGraph (g, 4, 70);
+        TGAE* gup = new TGAE ();
+        TGAE* gdown = new TGAE ();
+        MakeGupAndGdown (g, gup, gdown);
+        myDrawFill (gup, gdown, myLitePurple, 0.7);
+        ResetTGAEErrors (g);
+        ResetXErrors (g);
+        myDraw (g, myViolet, kDot, 0, 2, 2, "L");
+        SaferDelete (&g);
+        SaferDelete (&gup);
+        SaferDelete (&gdown);
 
 
-          g = (TGAE*) g_angantyr_iaa[iDir][iCent][1]->Clone ("gtemp");
-          TrimGraph (g, 4, 70);
-          gup = new TGAE ();
-          gdown = new TGAE ();
-          MakeGupAndGdown (g, gup, gdown);
-          myDrawFill (gup, gdown, kGray+1, 0.5);
-          myDraw (g, kGray+3, kDot, 0, 2, 2, "L");
-          SaferDelete (&g);
-          SaferDelete (&gup);
-          SaferDelete (&gdown);
-        }
+        g = (TGAE*) g_angantyr_iaa[iDir][iCent][1]->Clone ("gtemp");
+        TrimGraph (g, 4, 70);
+        gup = new TGAE ();
+        gdown = new TGAE ();
+        MakeGupAndGdown (g, gup, gdown);
+        myDrawFill (gup, gdown, myLiteBlue, 0.5);
+        ResetTGAEErrors (g);
+        ResetXErrors (g);
+        myDraw (g, myBlue, kDot, 0, 1, 2, "L");
+        SaferDelete (&g);
+        SaferDelete (&gup);
+        SaferDelete (&gdown);
 
         if (iCent < nZdcCentBins)
-          myText (0.2, 0.865, colorfulColors[nZdcCentBins-iCent], Form ("#bf{ZDC %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.05);
+          myText (0.2, 0.865, colorfulColors[nZdcCentBins-iCent], Form ("#bf{#it{p}+Pb, ZDC %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.05);
         else
-          myText (0.2, 0.865, colorfulColors[0], "#bf{All centralities}", 0.05);
+          myText (0.2, 0.865, colorfulColors[0], "#bf{#it{p}+Pb, 0-100%}", 0.05);
 
       } // end loop over iCent
 
@@ -2026,12 +2035,14 @@ void PlotPtCh (const char* inFileTag) {
       c->cd (1);
       myText (0.2, 0.80, kBlack, "#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV", 0.05);
       myText (0.2, 0.74, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.05);
+      myText (0.2, 0.68, kBlack, "Pythia 8.306", 0.05);
       c->cd (2);
       myText (0.2, 0.80, kBlack, "#it{p}_{T}^{jet} > 60 GeV", 0.05);
       myText (0.2, 0.74, kBlack, Form ("#Delta#phi_{ch,jet} %s", directions[iDir] == "ns" ? "< #pi/8" : (directions[iDir] == "as" ? "> 7#pi/8" : "#in (#pi/3, 2#pi/3)")), 0.05);
       c->cd (3);
       myLineText2 (0.26, 0.80, kBlack, kFullCircle, "Data", 1.2, 0.05);
-      myLineText2 (0.26, 0.73, kBlack, kFullSquare, "Angantyr 8.306 w/ EPPS16 (NLO) & isospin", 1.2, 0.05);
+      myLineText (0.26, 0.73, myPurple, 2, "Angantyr, w/ EPPS16 (NLO)", 1.5, 0.05);
+      myLineText (0.26, 0.66, myBlue, 1, "Angantyr, no nPDF", 1.5, 0.05);
 
       c->SaveAs (Form ("%s/Plots/PtCh/IpPb_Angantyr_Comp_Summary_60GeVJets_%s.pdf", workPath.Data (), directions[iDir] == "ns" ? "nearside" : (directions[iDir] == "as" ? "awayside" : "perpendicular")));
     } // end iDir=0 scope
@@ -2118,9 +2129,12 @@ void PlotPtCh (const char* inFileTag) {
     const TString sysType = (iSysType == 0 ? "tracking" : (iSysType == 1 ? "jets" : "mixing"));
 
     const short maxNSys = (iSysType == 1 ? 10 : 6);
-    const float dy = (iSysType == 1 ? 0.022 : 0.04);
-    const float tsize = (iSysType == 1 ? 0.018 : 0.030);
+    const float tsize = (iSysType == 1 ? 0.024 : 0.030);
     const float x0 = (iSysType == 1 ? 0.24 : 0.35);
+    const float dx = (iSysType == 1 ? 0.41 : 0.31);
+    const float y0 = (iSysType == 1 ? 0.44 : 0.41);
+    const float dy = (iSysType == 1 ? 0.028 : 0.04);
+
 
     for (short iDir : {0, 2}) {
 
@@ -2188,12 +2202,12 @@ void PlotPtCh (const char* inFileTag) {
       //      const TString var = variations[iVar];
       //      if ((iSysType == 0  && !IsTrackingVariation (var)) || (iSysType == 1 && !IsJetsVariation (var)) || (iSysType == 2 && !IsMixingVariation (var)))
       //        continue;
-      //      myLineColorText (x0+0.35*(count/maxNSys), 0.41-(count%maxNSys)*dy, varStyles[var].first, varStyles[var].second, varFullNames[var], 0.5, tsize);
+      //      myLineColorText (x0+dx*(count/maxNSys), y0-(count%maxNSys)*dy, varStyles[var].first, varStyles[var].second, varFullNames[var], 0.5, tsize);
       //      count++;
       //    }
       //    {
       //      const TString totVar = totalVariations[iSysType];
-      //      myLineColorText (x0+0.35*(count/maxNSys), 0.41-(count%maxNSys)*dy, varStyles[totVar].first, varStyles[totVar].second, varFullNames[totVar], 0.5, tsize);
+      //      myLineColorText (x0+dx*(count/maxNSys), y0-(count%maxNSys)*dy, varStyles[totVar].first, varStyles[totVar].second, varFullNames[totVar], 0.5, tsize);
       //      count++;
       //    }
 
@@ -2267,11 +2281,11 @@ void PlotPtCh (const char* inFileTag) {
       //        const TString var = variations[iVar];
       //        if ((iSysType == 0  && !IsTrackingVariation (var)) || (iSysType == 1 && !IsJetsVariation (var)) || (iSysType == 2 && !IsMixingVariation (var)))
       //          continue;
-      //        myLineColorText (x0+0.35*(count/maxNSys), 0.41-(count%maxNSys)*dy, varStyles[var].first, varStyles[var].second, varFullNames[var], 0.5, tsize);
+      //        myLineColorText (x0+dx*(count/maxNSys), y0-(count%maxNSys)*dy, varStyles[var].first, varStyles[var].second, varFullNames[var], 0.5, tsize);
       //        count++;
       //      }
       //        const TString totVar = totalVariations[iSysType];
-      //        myLineColorText (x0+0.35*(count/maxNSys), 0.41-(count%maxNSys)*dy, varStyles[totVar].first, varStyles[totVar].second, varFullNames[totVar], 0.5, tsize);
+      //        myLineColorText (x0+dx*(count/maxNSys), y0-(count%maxNSys)*dy, varStyles[totVar].first, varStyles[totVar].second, varFullNames[totVar], 0.5, tsize);
       //        count++;
       //      }
       //      
@@ -2347,12 +2361,12 @@ void PlotPtCh (const char* inFileTag) {
       //      const TString var = variations[iVar];
       //      if ((iSysType == 0  && !IsTrackingVariation (var)) || (iSysType == 1 && !IsJetsVariation (var)) || (iSysType == 2 && !IsMixingVariation (var)))
       //        continue;
-      //      myLineColorText (x0+0.35*(count/maxNSys), 0.41-(count%maxNSys)*dy, varStyles[var].first, varStyles[var].second, varFullNames[var], 0.5, tsize);
+      //      myLineColorText (x0+dx*(count/maxNSys), y0-(count%maxNSys)*dy, varStyles[var].first, varStyles[var].second, varFullNames[var], 0.5, tsize);
       //      count++;
       //    }
       //    {
       //      const TString totVar = totalVariations[iSysType];
-      //      myLineColorText (x0+0.35*(count/maxNSys), 0.41-(count%maxNSys)*dy, varStyles[totVar].first, varStyles[totVar].second, varFullNames[totVar], 0.5, tsize);
+      //      myLineColorText (x0+dx*(count/maxNSys), y0-(count%maxNSys)*dy, varStyles[totVar].first, varStyles[totVar].second, varFullNames[totVar], 0.5, tsize);
       //      count++;
       //    }
 
@@ -2426,12 +2440,12 @@ void PlotPtCh (const char* inFileTag) {
       //        const TString var = variations[iVar];
       //        if ((iSysType == 0  && !IsTrackingVariation (var)) || (iSysType == 1 && !IsJetsVariation (var)) || (iSysType == 2 && !IsMixingVariation (var)))
       //          continue;
-      //        myLineColorText (x0+0.35*(count/maxNSys), 0.41-(count%maxNSys)*dy, varStyles[var].first, varStyles[var].second, varFullNames[var], 0.5, tsize);
+      //        myLineColorText (x0+dx*(count/maxNSys), y0-(count%maxNSys)*dy, varStyles[var].first, varStyles[var].second, varFullNames[var], 0.5, tsize);
       //        count++;
       //      }
       //      {
       //        const TString totVar = totalVariations[iSysType];
-      //        myLineColorText (x0+0.35*(count/maxNSys), 0.41-(count%maxNSys)*dy, varStyles[totVar].first, varStyles[totVar].second, varFullNames[totVar], 0.5, tsize);
+      //        myLineColorText (x0+dx*(count/maxNSys), y0-(count%maxNSys)*dy, varStyles[totVar].first, varStyles[totVar].second, varFullNames[totVar], 0.5, tsize);
       //        count++;
       //      }
       //      
@@ -2511,12 +2525,12 @@ void PlotPtCh (const char* inFileTag) {
             const TString var = variations[iVar];
             if ((iSysType == 0  && !IsTrackingVariation (var)) || (iSysType == 1 && !IsJetsVariation (var)) || (iSysType == 2 && !IsMixingVariation (var)))
               continue;
-            myLineColorText (x0+0.35*(count/maxNSys), 0.41-(count%maxNSys)*dy, varStyles[var].first, varStyles[var].second, varFullNames[var], 0.5, tsize);
+            myLineColorText (x0+dx*(count/maxNSys), y0-(count%maxNSys)*dy, varStyles[var].first, varStyles[var].second, varFullNames[var], 0.5, tsize);
             count++;
           }
           {
             const TString totVar = totalVariations[iSysType];
-            myLineColorText (x0+0.35*(count/maxNSys), 0.41-(count%maxNSys)*dy, varStyles[totVar].first, varStyles[totVar].second, varFullNames[totVar], 0.5, tsize);
+            myLineColorText (x0+dx*(count/maxNSys), y0-(count%maxNSys)*dy, varStyles[totVar].first, varStyles[totVar].second, varFullNames[totVar], 0.5, tsize);
             count++;
           }
 
@@ -2595,12 +2609,12 @@ void PlotPtCh (const char* inFileTag) {
               const TString var = variations[iVar];
               if ((iSysType == 0  && !IsTrackingVariation (var)) || (iSysType == 1 && !IsJetsVariation (var)) || (iSysType == 2 && !IsMixingVariation (var)))
                 continue;
-              myLineColorText (x0+0.35*(count/maxNSys), 0.41-(count%maxNSys)*dy, varStyles[var].first, varStyles[var].second, varFullNames[var], 0.5, tsize);
+              myLineColorText (x0+dx*(count/maxNSys), y0-(count%maxNSys)*dy, varStyles[var].first, varStyles[var].second, varFullNames[var], 0.5, tsize);
               count++;
             }
             {
               const TString totVar = totalVariations[iSysType];
-              myLineColorText (x0+0.35*(count/maxNSys), 0.41-(count%maxNSys)*dy, varStyles[totVar].first, varStyles[totVar].second, varFullNames[totVar], 0.5, tsize);
+              myLineColorText (x0+dx*(count/maxNSys), y0-(count%maxNSys)*dy, varStyles[totVar].first, varStyles[totVar].second, varFullNames[totVar], 0.5, tsize);
               count++;
             }
 
@@ -2731,7 +2745,7 @@ void PlotPtCh (const char* inFileTag) {
             if (iCent < nZdcCentBins)
               myText (0.25, 0.86, kBlack, Form ("#bf{#it{p}+Pb, ZDC %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.06);
             else
-              myText (0.25, 0.86, kBlack, "#bf{#it{p}+Pb, All centralities}", 0.06);
+              myText (0.25, 0.86, kBlack, "#bf{#it{p}+Pb, 0-100%}", 0.06);
 
           } // end loop over iCent
 
@@ -2832,12 +2846,12 @@ void PlotPtCh (const char* inFileTag) {
               const TString var = variations[iVar];
               if ((iSysType == 0  && !IsTrackingVariation (var)) || (iSysType == 1 && !IsJetsVariation (var)) || (iSysType == 2 && !IsMixingVariation (var)))
                 continue;
-              myLineColorText (x0+0.35*(count/maxNSys), 0.41-(count%maxNSys)*dy, varStyles[var].first, varStyles[var].second, varFullNames[var], 0.5, tsize);
+              myLineColorText (x0+dx*(count/maxNSys), y0-(count%maxNSys)*dy, varStyles[var].first, varStyles[var].second, varFullNames[var], 0.5, tsize);
               count++;
             }
             {
               const TString totVar = totalVariations[iSysType];
-              myLineColorText (0.35+0.35*(count/maxNSys), 0.41-(count%maxNSys)*dy, varStyles[totVar].first, varStyles[totVar].second, varFullNames[totVar], 0.5, tsize);
+              myLineColorText (x0+dx*(count/maxNSys), y0-(count%maxNSys)*dy, varStyles[totVar].first, varStyles[totVar].second, varFullNames[totVar], 0.5, tsize);
               count++;
             }
   
@@ -2916,7 +2930,7 @@ void PlotPtCh (const char* inFileTag) {
             if (iCent < nZdcCentBins)
               myText (0.25, 0.86, kBlack, Form ("#bf{#it{p}+Pb, ZDC %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.06);
             else
-              myText (0.25, 0.86, kBlack, "#bf{#it{p}+Pb, All centralities}", 0.06);
+              myText (0.25, 0.86, kBlack, "#bf{#it{p}+Pb, 0-100%}", 0.06);
 
           } // end loop over iCent
 
@@ -3249,7 +3263,7 @@ void PlotPtCh (const char* inFileTag) {
             if (iCent < nZdcCentBins)
               myText (0.25, 0.86, kBlack, Form ("#bf{#it{p}+Pb, ZDC %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.06);
             else
-              myText (0.25, 0.86, kBlack, "#bf{#it{p}+Pb, All centralities}", 0.06);
+              myText (0.25, 0.86, kBlack, "#bf{#it{p}+Pb, 0-100%}", 0.06);
 
           } // end loop over iCent
 
@@ -3421,7 +3435,7 @@ void PlotPtCh (const char* inFileTag) {
             if (iCent < nZdcCentBins)
               myText (0.25, 0.86, kBlack, Form ("#bf{#it{p}+Pb, ZDC %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.06);
             else
-              myText (0.25, 0.86, kBlack, "#bf{#it{p}+Pb, All centralities}", 0.06);
+              myText (0.25, 0.86, kBlack, "#bf{#it{p}+Pb, 0-100%}", 0.06);
 
           } // end loop over iCent
 

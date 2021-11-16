@@ -33,7 +33,7 @@ const std::vector <TString> variations = {
   "MixCatVar5",
 
   "UnfoldingAltWgtsVar",
-  //"NonClosureVar",
+  "NonClosureVar",
 
   "JESVar0",
   "JESVar1",
@@ -53,8 +53,8 @@ const std::vector <TString> variations = {
   "JESVar15",
   //"JESVar16",
   "JESVar17",
+  "JESVar19",
   "JESVar18",
-  "JESVar19"
   //"JESVar20",
 
 
@@ -174,13 +174,13 @@ const std::set <TString> variationsToSmooth {
   "JESVar18",
 };
 const TString hermitePolyFunc = "[0] + [1]*log(x) + [2]*(pow(log(x),2)-1)"; // Hermite polynomials
-std::map <TString, TString> variationSmoothFuncs {
-  {"HITightVar", "ppcf"},
-  {"HILooseVar", "ppcf"},
-  {"JESVar6", hermitePolyFunc},
-  {"JESVar17", hermitePolyFunc},
-  {"JESVar18", hermitePolyFunc},
-};
+//std::map <TString, TString> variationSmoothFuncs {
+//  {"HITightVar", "ppcf"},
+//  {"HILooseVar", "ppcf"},
+//  {"JESVar6", hermitePolyFunc},
+//  {"JESVar17", hermitePolyFunc},
+//  {"JESVar18", hermitePolyFunc},
+//};
   
 //const TString smoothingFunc = "[0] + [1]*(1-log(x)) + [2]*(0.5*(pow(log(x),2)-4*log(x)+2)) + [3]*(-pow(log(x),3)+9*pow(log(x),2)-18*log(x)+6)/6 + [4]*(pow(log(x),4)-16*pow(log(x),3)+72*pow(log(x),2)-96*log(x)+24)/24"; // Laguerre polynomials
 //const TString smoothingFunc = "[0] + [1]*log(x) + [2]*(pow(log(x),2)-1) + [3]*(pow(log(x),3)-log(x)) + [4]*(pow(log(x),4)-6*pow(log(x),2)+3)"; // Hermite polynomials
@@ -229,21 +229,21 @@ const std::vector <std::vector <TString>> variationGroups = {
 
 
 std::map <TString, MyStyle> varStyles = {
-  {"HITightVar",          MyStyle (manyColors[0],  4)},
-  {"HILooseVar",          MyStyle (manyColors[2],  4)},
-  {"TrkEffVar",           MyStyle (manyColors[4],  4)},
-  {"FakeRateVar",         MyStyle (manyColors[6],  4)},
-  {"PrimFitVar",          MyStyle (manyColors[8],  4)},
+  {"HITightVar",          MyStyle (manyColors[0],   4)},
+  {"HILooseVar",          MyStyle (manyColors[2],   4)},
+  {"TrkEffVar",           MyStyle (manyColors[4],   4)},
+  {"FakeRateVar",         MyStyle (manyColors[6],   4)},
+  {"PrimFitVar",          MyStyle (manyColors[8],   4)},
   {"JetPrimFracVar",      MyStyle (manyColors[10],  4)},
   {"PartSpcVar",          MyStyle (manyColors[12],  4)},
 
-  {"MixCatVar1",          MyStyle (manyColors[1],  7)},
-  {"MixCatVar2",          MyStyle (manyColors[3],  7)},
-  {"MixCatVar3",          MyStyle (manyColors[5],  7)},
-  {"MixCatVar4",          MyStyle (manyColors[7],  7)},
-  {"MixCatVar5",          MyStyle (manyColors[9],  7)},
-  {"NonClosureVar",       MyStyle (manyColors[11], 7)},
-  {"UnfoldingAltWgtsVar", MyStyle (manyColors[13],  7)},
+  {"MixCatVar1",          MyStyle (manyColors[1],   7)},
+  {"MixCatVar2",          MyStyle (manyColors[3],   7)},
+  {"MixCatVar3",          MyStyle (manyColors[5],   7)},
+  {"MixCatVar4",          MyStyle (manyColors[7],   7)},
+  {"MixCatVar5",          MyStyle (manyColors[9],   7)},
+  {"UnfoldingAltWgtsVar", MyStyle (manyColors[12],  7)},
+  {"NonClosureVar",       MyStyle (manyColors[13],  7)},
 
   {"FcalCentVar",         MyStyle (manyColors[1],   5)},
   {"FineFcalCentVar",     MyStyle (manyColors[3],   5)},
@@ -267,13 +267,9 @@ std::map <TString, MyStyle> varStyles = {
   {"JESVar15",            MyStyle (manyColors[16],  2)},
   //{"JESVar16",            MyStyle (kWhite,          2)},
   {"JESVar17",            MyStyle (manyColors[17],  2)},
-  {"JESVar18",            MyStyle (manyColors[18],  2)},
-  {"JESVar19",            MyStyle (manyColors[19],  2)},
+  {"JESVar18",            MyStyle (manyColors[19],  2)},
+  {"JESVar19",            MyStyle (manyColors[18],  2)},
   //{"JESVar20",            MyStyle (kWhite,          2)},
-
-  //{"NoFcalMixCatVar",   MyStyle (myLiteRed, 6)},
-  //{"pPbFcalMixCatVar",  MyStyle (myCyan, 6)},
-  //{"ppFcalMixCatVar",   MyStyle (myLitePurple, 6)},
 
   {"Mixing",            MyStyle (myBlue,      1)},
   {"Tracking",          MyStyle (myViolet,    1)},
@@ -294,17 +290,10 @@ std::map <TString, TString> varFullNames = {
   {"FcalCentVar",         "FCal-based centrality"},
   {"FineFcalCentVar",     "Fine FCal centrality"},
 
-  {"MixCatVar1",          "Mixing variation 1"},
-  {"MixCatVar2",          "Mixing variation 2"},
-  {"MixCatVar3",          "Mixing variation 3"},
-  {"NonClosureVar",       "MC non-closure (50\%)"},
-
+  {"NonClosureVar",       "MC non-closure"},
   {"UnfoldingAltWgtsVar", "Unfolding prior"},
 
   {"FcalCentVar",         "FCal 0-20\%"},
-  {"NoFcalMixCatVar",     "No FCal Matching"},
-  {"pPbFcalMixCatVar",    "FCal Matching (#it{p}+Pb only)"},
-  {"ppFcalMixCatVar",     "FCal Matching (#it{pp} only)"},
 
   {"MixCatVar1",          "Mixing variation 1"},
   {"MixCatVar2",          "Mixing variation 2"},

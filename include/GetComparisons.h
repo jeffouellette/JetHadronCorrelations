@@ -197,13 +197,13 @@ TGAE**** GetPythiaAngantyrIpPb () {
   TFile* inFile = new TFile (Form ("%s/rootFiles/finalHists.root", std::getenv ("PYTHIA_ANGANTYR_STUDY_PATH")), "read");
 
 
-  TGAE**** g_trk_pt_ratio = Get3DArray <TGAE*> (nDir, 5, 4);
+  TGAE**** g_trk_pt_ratio = Get3DArray <TGAE*> (nDir, 6, 2);
   for (int iDir = 0; iDir < nDir; iDir++) {
     const TString dir = directions[iDir];
 
-    for (int iCent = 0; iCent < 5; iCent++) {
+    for (int iCent = 0; iCent < 6; iCent++) {
       int iConfig = 0;
-      for (TString config : {"_allowRescatter_withNPDF", "_allowRescatter", "_withNPDF", ""}) {
+      for (TString config : {"_allowRescatter_withNPDF", "_allowRescatter"}) {
         g_trk_pt_ratio[iDir][iCent][iConfig] = make_graph ((TH1D*) inFile->Get (Form ("h_trk_pt_%s_cent%i_ratio%s", dir.Data (), iCent, config.Data ())));
         if (g_trk_pt_ratio[iDir][iCent][iConfig] == nullptr)
           std::cout << "Can't find graph for " << Form ("h_trk_pt_%s_cent%i_ratio%s", dir.Data (), iCent, config.Data ()) << "??? Please check!" << std::endl;

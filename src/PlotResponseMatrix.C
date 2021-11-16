@@ -54,6 +54,7 @@ TF1* DoClosureFit (const TString name, TH1D* h, const float xmin, const float xm
 
     TFitResultPtr res = h->Fit (f, "RN0QS");
     succeeded = (res->IsValid ());
+    polyDeg++;
   }
 
   if (succeeded)
@@ -133,12 +134,15 @@ void PlotResponseMatrix () {
   RooUnfoldResponse**** rooUnfResp_jet_trk_pt_sig     = Get3DArray <RooUnfoldResponse*> (2, nDir, nFcalCentBins+1);
 
 
-  TH1D***   h_jetInt_trk_pt_ref_sig_unf_halfClosure = Get2DArray <TH1D*> (2, nDir);
-  TF1***    f_jetInt_trk_pt_ref_sig_unf_halfClosure = Get2DArray <TF1*>  (2, nDir);
-  TH1D****  h_jetInt_trk_pt_sig_unf_halfClosure     = Get3DArray <TH1D*> (2, nDir, nZdcCentBins+1);
-  TF1****   f_jetInt_trk_pt_sig_unf_halfClosure     = Get3DArray <TF1*>  (2, nDir, nZdcCentBins+1);
-  TH1D****  h_jetInt_trk_pt_iaa_unf_halfClosure     = Get3DArray <TH1D*> (2, nDir, nZdcCentBins+1);
-  TF1****   f_jetInt_trk_pt_iaa_unf_halfClosure     = Get3DArray <TF1*>  (2, nDir, nZdcCentBins+1);
+  TH1D***   h_jetInt_trk_pt_ref_sig_unf_fullClosure = Get2DArray <TH1D*> (2, nDir);
+  TF1***    f_jetInt_trk_pt_ref_sig_unf_fullClosure = Get2DArray <TF1*>  (2, nDir);
+  TH1D****  h_jetInt_trk_pt_sig_unf_fullClosure     = Get3DArray <TH1D*> (2, nDir, nZdcCentBins+1);
+  TF1****   f_jetInt_trk_pt_sig_unf_fullClosure     = Get3DArray <TF1*>  (2, nDir, nZdcCentBins+1);
+  TH1D****  h_jetInt_trk_pt_iaa_unf_fullClosure     = Get3DArray <TH1D*> (2, nDir, nZdcCentBins+1);
+  TF1****   f_jetInt_trk_pt_iaa_unf_fullClosure     = Get3DArray <TF1*>  (2, nDir, nZdcCentBins+1);
+
+  double rebinPtChBins[] = {0.4, 0.5, 0.7, 0.9, 1.2, 1.6, 2, 3, 4, 5, 6, 8, 10, 12, 20, 40, 60, 90, 120};
+  int nRebinPtChBins = sizeof (rebinPtChBins) / sizeof (rebinPtChBins[0]) - 1;
 
 
   {
@@ -563,7 +567,7 @@ void PlotResponseMatrix () {
 
 
   //////////////////////////////////////////////////////////////////////////////////////////////////// 
-  // SCALE TEST HISTOGRAMS BY NJET AFTER UNFOLDING
+  // SCALE TEST HISTOGRAMS BY NJET (AND BIN WIDTH) AFTER UNFOLDING
   //////////////////////////////////////////////////////////////////////////////////////////////////// 
   std::cout << "Scaling histograms by N_jet after unfolding..." << std::endl;
   for (short iEvFrac : {0, 1}) {
@@ -883,82 +887,88 @@ void PlotResponseMatrix () {
 
 
 
-  ////////////////////////////////////////////////////////////////////////////////////////////////////// 
-  //// COMPUTE CLOSURE HISTOGRAMS -- USE NITER = 2 RESULTS
-  ////////////////////////////////////////////////////////////////////////////////////////////////////// 
-  //std::cout << "Computing closure of final results..." << std::endl;
-  //for (short iPtJInt : {0, 1}) {
+  //////////////////////////////////////////////////////////////////////////////////////////////////// 
+  // COMPUTE CLOSURE HISTOGRAMS -- USE NITER = 2 RESULTS
+  //////////////////////////////////////////////////////////////////////////////////////////////////// 
+  std::cout << "Computing closure of final results..." << std::endl;
+  for (short iPtJInt : {0, 1}) {
 
-  //  const TString pTJInt = (iPtJInt == 0 ? "30GeV" : "60GeV");
-  //  //const TString funcStr = "[0]+[1]*log(x)+[2]*pow(log(x),2)+[3]*pow(log(x),3)+[4]*pow(log(x),4)";
-  //  std::cout << "|--> pTJInt = " << pTJInt << std::endl;
+    const TString pTJInt = (iPtJInt == 0 ? "30GeV" : "60GeV");
+    //const TString funcStr = "[0]+[1]*log(x)+[2]*pow(log(x),2)+[3]*pow(log(x),3)+[4]*pow(log(x),4)";
+    std::cout << "|--> pTJInt = " << pTJInt << std::endl;
 
-  //  for (short iDir = 0; iDir < nDir; iDir++) {
+    for (short iDir = 0; iDir < nDir; iDir++) {
 
-  //    const TString dir = directions[iDir];
-  //    std::cout << "  |--> dir = " << dir << std::endl;
+      const TString dir = directions[iDir];
+      std::cout << "  |--> dir = " << dir << std::endl;
 
-  //    h_jetInt_trk_pt_ref_sig_unf_halfClosure[iPtJInt][iDir] = (TH1D*) h_jetInt_trk_pt_ref_sig_unf[0][iPtJInt][iDir][1]->Clone (Form ("h_jetInt_trk_pt_%s_ref_sig_unf_%s_halfClosure", dir.Data (), pTJInt.Data ()));
-  //    DivideNoErrors (h_jetInt_trk_pt_ref_sig_unf_halfClosure[iPtJInt][iDir], h_jetInt_trk_pt_ref_sig[0][iPtJInt][iDir][1]);
+      h_jetInt_trk_pt_ref_sig_unf_fullClosure[iPtJInt][iDir] = (TH1D*) h_jetInt_trk_pt_ref_sig_unf[0][iPtJInt][iDir][1]->Clone (Form ("h_jetInt_trk_pt_%s_ref_sig_unf_%s_fullClosure", dir.Data (), pTJInt.Data ()));
+      DivideNoErrors (h_jetInt_trk_pt_ref_sig_unf_fullClosure[iPtJInt][iDir], h_jetInt_trk_pt_ref_sig[0][iPtJInt][iDir][1]);
 
-  //    TF1* f = DoClosureFit (Form ("f_jetInt_trk_pt_%s_ref_sig_unf_%s_halfClosure", dir.Data (), pTJInt.Data ()), h_jetInt_trk_pt_ref_sig_unf_halfClosure[iPtJInt][iDir], pTChBins[1], pTChBins[nPtChBins - (iPtJInt == 0 ? 3 : 1)], 4, 8);
-  //    if (!f) std::cout << "Fit failed, please investigate! iPtJint = " << iPtJInt << ", iDir = " << iDir << std::endl;
-  //    f_jetInt_trk_pt_ref_sig_unf_halfClosure[iPtJInt][iDir] = f;
+      h_jetInt_trk_pt_ref_sig_unf_fullClosure[iPtJInt][iDir]->Smooth (3);
 
-
-  //    for (short iCent = 0; iCent < nFcalCentBins+1; iCent++) {
-
-  //      const char* cent = (iCent == nFcalCentBins ? "pPb_allCent" : Form ("pPb_iCent%i", iCent));
-  //      std::cout << "  |--> cent = " << cent << std::endl;
-
-  //      h_jetInt_trk_pt_sig_unf_halfClosure[iPtJInt][iDir][iCent] = (TH1D*) h_jetInt_trk_pt_sig_unf[0][iPtJInt][iDir][iCent][1]->Clone (Form ("h_jetInt_trk_pt_%s_%s_sig_unf_%s_halfClosure", dir.Data (), cent, pTJInt.Data ()));
-  //      DivideNoErrors (h_jetInt_trk_pt_sig_unf_halfClosure[iPtJInt][iDir][iCent], h_jetInt_trk_pt_sig[0][iPtJInt][iDir][iCent][1]);
-
-  //      TF1* f = DoClosureFit (Form ("f_jetInt_trk_pt_%s_%s_sig_unf_%s_halfClosure", dir.Data (), cent, pTJInt.Data ()), h_jetInt_trk_pt_sig_unf_halfClosure[iPtJInt][iDir][iCent], pTChBins[1], pTChBins[nPtChBins - (iPtJInt == 0 ? 3 : 1)], 4, 8);
-  //      if (!f) std::cout << "Fit failed, please investigate! iPtJint = " << iPtJInt << ", iDir = " << iDir << ", iCent = " << iCent << std::endl;
-  //      f_jetInt_trk_pt_sig_unf_halfClosure[iPtJInt][iDir][iCent] = f;
+      //TF1* f = DoClosureFit (Form ("f_jetInt_trk_pt_%s_ref_sig_unf_%s_fullClosure", dir.Data (), pTJInt.Data ()), h_jetInt_trk_pt_ref_sig_unf_fullClosure[iPtJInt][iDir], pTChBins[1], pTChBins[nPtChBins - (iPtJInt == 0 ? 3 : 1)], 4, 8);
+      //if (!f) std::cout << "Fit failed, please investigate! iPtJint = " << iPtJInt << ", iDir = " << iDir << std::endl;
+      //f_jetInt_trk_pt_ref_sig_unf_fullClosure[iPtJInt][iDir] = f;
 
 
-  //      h_jetInt_trk_pt_iaa_unf_halfClosure[iPtJInt][iDir][iCent] = (TH1D*) h_jetInt_trk_pt_iaa_unf[0][iPtJInt][iDir][iCent][1]->Clone (Form ("h_jetInt_trk_pt_%s_%s_iaa_unf_%s_halfClosure", dir.Data (), cent, pTJInt.Data ()));
-  //      DivideNoErrors (h_jetInt_trk_pt_iaa_unf_halfClosure[iPtJInt][iDir][iCent], h_jetInt_trk_pt_iaa[0][iPtJInt][iDir][iCent][1]);
+      for (short iCent = 0; iCent < nFcalCentBins+1; iCent++) {
 
-  //      f = DoClosureFit (Form ("f_jetInt_trk_pt_%s_%s_iaa_unf_%s_halfClosure", dir.Data (), cent, pTJInt.Data ()), h_jetInt_trk_pt_iaa_unf_halfClosure[iPtJInt][iDir][iCent], pTChBins[1], pTChBins[nPtChBins - (iPtJInt == 0 ? 3 : 1)], 4, 8);
-  //      if (!f) std::cout << "Fit failed, please investigate! iPtJint = " << iPtJInt << ", iDir = " << iDir << ", iCent = " << iCent << std::endl;
-  //      f_jetInt_trk_pt_iaa_unf_halfClosure[iPtJInt][iDir][iCent] = f;
+        const char* cent = (iCent == nFcalCentBins ? "pPb_allCent" : Form ("pPb_iCent%i", iCent));
+        std::cout << "  |--> cent = " << cent << std::endl;
 
-  //    } // end loop over iCent
+        h_jetInt_trk_pt_sig_unf_fullClosure[iPtJInt][iDir][iCent] = (TH1D*) h_jetInt_trk_pt_sig_unf[0][iPtJInt][iDir][iCent][1]->Clone (Form ("h_jetInt_trk_pt_%s_%s_sig_unf_%s_fullClosure", dir.Data (), cent, pTJInt.Data ()));
+        DivideNoErrors (h_jetInt_trk_pt_sig_unf_fullClosure[iPtJInt][iDir][iCent], h_jetInt_trk_pt_sig[0][iPtJInt][iDir][iCent][1]);
+
+        h_jetInt_trk_pt_sig_unf_fullClosure[iPtJInt][iDir][iCent]->Smooth (3);
+
+        //TF1* f = DoClosureFit (Form ("f_jetInt_trk_pt_%s_%s_sig_unf_%s_fullClosure", dir.Data (), cent, pTJInt.Data ()), h_jetInt_trk_pt_sig_unf_fullClosure[iPtJInt][iDir][iCent], pTChBins[1], pTChBins[nPtChBins - (iPtJInt == 0 ? 3 : 1)], 4, 8);
+        //if (!f) std::cout << "Fit failed, please investigate! iPtJint = " << iPtJInt << ", iDir = " << iDir << ", iCent = " << iCent << std::endl;
+        //f_jetInt_trk_pt_sig_unf_fullClosure[iPtJInt][iDir][iCent] = f;
+
+
+        h_jetInt_trk_pt_iaa_unf_fullClosure[iPtJInt][iDir][iCent] = (TH1D*) h_jetInt_trk_pt_iaa_unf[0][iPtJInt][iDir][iCent][1]->Clone (Form ("h_jetInt_trk_pt_%s_%s_iaa_unf_%s_fullClosure", dir.Data (), cent, pTJInt.Data ()));
+        DivideNoErrors (h_jetInt_trk_pt_iaa_unf_fullClosure[iPtJInt][iDir][iCent], h_jetInt_trk_pt_iaa[0][iPtJInt][iDir][iCent][1]);
+
+        h_jetInt_trk_pt_iaa_unf_fullClosure[iPtJInt][iDir][iCent]->Smooth (3);
+
+        //f = DoClosureFit (Form ("f_jetInt_trk_pt_%s_%s_iaa_unf_%s_fullClosure", dir.Data (), cent, pTJInt.Data ()), h_jetInt_trk_pt_iaa_unf_fullClosure[iPtJInt][iDir][iCent], pTChBins[1], pTChBins[nPtChBins - (iPtJInt == 0 ? 3 : 1)], 4, 8);
+        //if (!f) std::cout << "Fit failed, please investigate! iPtJint = " << iPtJInt << ", iDir = " << iDir << ", iCent = " << iCent << std::endl;
+        //f_jetInt_trk_pt_iaa_unf_fullClosure[iPtJInt][iDir][iCent] = f;
+
+      } // end loop over iCent
  
-  //  } // end loop over iDir
+    } // end loop over iDir
 
-  //} // end loop over iPtJInt 
-  //std::cout << "Finished computing closure of final results!" << std::endl;
+  } // end loop over iPtJInt 
+  std::cout << "Finished computing closure of final results!" << std::endl;
 
 
 
-  //{
-  //  TFile* outFile = new TFile (Form ("%s/aux/MCClosureHists.root", workPath.Data ()), "recreate");
+  {
+    TFile* outFile = new TFile (Form ("%s/aux/MCClosureHists.root", workPath.Data ()), "recreate");
 
-  //  for (short iPtJInt : {0, 1}) {
+    for (short iPtJInt : {0, 1}) {
 
-  //    for (short iDir = 0; iDir < nDir; iDir++) {
+      for (short iDir = 0; iDir < nDir; iDir++) {
 
-  //      h_jetInt_trk_pt_ref_sig_unf_halfClosure[iPtJInt][iDir]->Write ();
-  //      f_jetInt_trk_pt_ref_sig_unf_halfClosure[iPtJInt][iDir]->Write ();
+        h_jetInt_trk_pt_ref_sig_unf_fullClosure[iPtJInt][iDir]->Write ();
+        //f_jetInt_trk_pt_ref_sig_unf_fullClosure[iPtJInt][iDir]->Write ();
 
-  //      for (short iCent = 0; iCent < nFcalCentBins+1; iCent++) {
+        for (short iCent = 0; iCent < nFcalCentBins+1; iCent++) {
 
-  //        h_jetInt_trk_pt_sig_unf_halfClosure[iPtJInt][iDir][iCent]->Write ();
-  //        f_jetInt_trk_pt_sig_unf_halfClosure[iPtJInt][iDir][iCent]->Write ();
-  //    
-  //        h_jetInt_trk_pt_iaa_unf_halfClosure[iPtJInt][iDir][iCent]->Write ();
-  //        f_jetInt_trk_pt_iaa_unf_halfClosure[iPtJInt][iDir][iCent]->Write ();
+          h_jetInt_trk_pt_sig_unf_fullClosure[iPtJInt][iDir][iCent]->Write ();
+          //f_jetInt_trk_pt_sig_unf_fullClosure[iPtJInt][iDir][iCent]->Write ();
+      
+          h_jetInt_trk_pt_iaa_unf_fullClosure[iPtJInt][iDir][iCent]->Write ();
+          //f_jetInt_trk_pt_iaa_unf_fullClosure[iPtJInt][iDir][iCent]->Write ();
 
-  //      } // end loop over iCent
+        } // end loop over iCent
  
-  //    } // end loop over iDir
+      } // end loop over iDir
 
-  //  } // end loop over iPtJInt
-  //}
+    } // end loop over iPtJInt
+  }
 
 
 
@@ -968,7 +978,7 @@ void PlotResponseMatrix () {
     TLine* l = new TLine ();
     TLatex* tl = new TLatex ();
 
-    for (short iEvFrac : {0, 1}) {
+    for (short iEvFrac : {1, 0}) {
   
       const TString evFrac = (iEvFrac == 0 ? "half" : "full");
   
@@ -1074,9 +1084,9 @@ void PlotResponseMatrix () {
           SaferDelete (&g);
   
           if (iCent < nFcalCentBins)
-            myText (0.2, 0.84, kBlack, Form ("#bf{FCal %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.06);
+            myText (0.2, 0.84, kBlack, Form ("#bf{#it{p}+Pb, FCal %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.06);
           else
-            myText (0.2, 0.84, kBlack, "#bf{All centralities}", 0.06);
+            myText (0.2, 0.84, kBlack, "#bf{#it{p}+Pb, 0-100%}", 0.06);
   
         } // end loop over iCent
   
@@ -1119,7 +1129,7 @@ void PlotResponseMatrix () {
           {
             gPad->SetLogx ();
   
-            h = new TH1D ("h", ";#it{p}_{T}^{ch} [GeV];Ratio", 1, pTChBins[1], pTChBins[nPtChBins-(iPtJInt == 0 ? 3 : 1)]);
+            h = new TH1D ("h", ";#it{p}_{T}^{ch} [GeV];Unfolded yield / truth", 1, pTChBins[1], pTChBins[nPtChBins-(iPtJInt == 0 ? 3 : 1)]);
             h->GetXaxis ()->SetMoreLogLabels ();
             h->GetYaxis ()->SetRangeUser (0.9, 1.2);
             h->GetYaxis ()->CenterTitle ();
@@ -1137,34 +1147,122 @@ void PlotResponseMatrix () {
             l->DrawLine (pTChBins[1], 0.95, pTChBins[nPtChBins-(iPtJInt == 0 ? 3 : 1)], 0.95);
   
             const Color_t col = colorfulColors[0];
-            g = make_graph (h_jetInt_trk_pt_ref_sig_unf[iEvFrac][iPtJInt][iDir][5]);
-            ScaleGraph (g, h_jetInt_trk_pt_ref_sig[iEvFrac][iPtJInt][iDir][1]);
-            myDraw (g, col, kOpenCircle, 1.0, 1, 2, "P", false);
+            TH1D* h = (TH1D*) h_jetInt_trk_pt_ref_sig_unf[iEvFrac][iPtJInt][iDir][5]->Clone ("htemp");
+            RebinSomeBins (&h, nRebinPtChBins, rebinPtChBins, true);
+            g = make_graph (h);
+            SaferDelete (&h);
+            h = (TH1D*) h_jetInt_trk_pt_ref_sig[iEvFrac][iPtJInt][iDir][1]->Clone ("htemp");
+            RebinSomeBins (&h, nRebinPtChBins, rebinPtChBins, true);
+            ScaleGraph (g, h);
+            SaferDelete (&h);
+            TrimGraph (g, 0.5, iPtJInt == 0 ? 60 : 90);
+            myDraw (g, col, kOpenCircle, 1.0, 1, 2, "LP", false);
             SaferDelete (&g);
           }
   
           for (short iCent = 0; iCent < nFcalCentBins+1; iCent++) {
             const Color_t col = colorfulColors[iCent+1];
-            g = make_graph (h_jetInt_trk_pt_sig_unf[iEvFrac][iPtJInt][iDir][iCent][5]);
-            ScaleGraph (g, h_jetInt_trk_pt_sig[iEvFrac][iPtJInt][iDir][iCent][1]);
-            myDraw (g, col, kOpenCircle, 1.0, 1, 2, "P", false);
+            TH1D* h = (TH1D*) h_jetInt_trk_pt_sig_unf[iEvFrac][iPtJInt][iDir][iCent][5]->Clone ("htemp");
+            RebinSomeBins (&h, nRebinPtChBins, rebinPtChBins, true);
+            g = make_graph (h);
+            SaferDelete (&h);
+            h = (TH1D*) h_jetInt_trk_pt_sig[iEvFrac][iPtJInt][iDir][iCent][1]->Clone ("htemp");
+            RebinSomeBins (&h, nRebinPtChBins, rebinPtChBins, true);
+            ScaleGraph (g, h);
+            SaferDelete (&h);
+            TrimGraph (g, 0.5, iPtJInt == 0 ? 60 : 90);
+            myDraw (g, col, kOpenCircle, 1.0, 1, 2, "LP", false);
             SaferDelete (&g);
           } // end loop over iCent
   
-          //myText (0.1, 0.84, kBlack, "#bf{#it{ATLAS}} Simulation Internal", 0.07);
-          //myText (0.1, 0.75, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.07);
-          //myText (0.1, 0.66, kBlack, "#it{p}+Pb, #sqrt{s} = 5.02 TeV", 0.07);
-          //myText (0.1, 0.57, kBlack, Form ("#it{p}_{T}^{jet} > %i GeV, %s", minJetPt, (dir == "ns" ? "Near-side" : (dir == "perp" ? "Perpendicular" : "Away-side"))), 0.07);
-          myText (0.65, 0.88, colorfulColors[0], "#bf{#it{pp}}", 0.032);
+          myText (0.58, 0.89, kBlack, "#bf{#it{ATLAS}} Simulation Internal", 0.032);
+          myText (0.58, 0.85, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.032);
+          myText (0.58, 0.81, kBlack, "#it{p}+Pb, #sqrt{s} = 5.02 TeV", 0.032);
+          myText (0.58, 0.77, kBlack, Form ("#it{p}_{T}^{jet} > %i GeV, %s", minJetPt, (dir == "ns" ? "Near-side" : (dir == "perp" ? "Perpendicular" : "Away-side"))), 0.032);
+          myText (0.58, 0.73, kBlack, "6 iterations", 0.032);
 
+          myLineText2 (0.27, 0.25, colorfulColors[0], kOpenCircle, "#bf{#it{pp}}", 1.4, 0.032);
           for (short iCent = 0; iCent < nFcalCentBins+1; iCent++) {
             if (iCent < nFcalCentBins)
-              myText (0.65, 0.88-0.04*(iCent+1), colorfulColors[iCent+1], Form ("#bf{FCal %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.032);
+              myLineText2 (0.27+0.18*((iCent+1)/2), 0.25-0.04*((iCent+1)%2), colorfulColors[iCent+1], kOpenCircle, Form ("#bf{%i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 1.4, 0.032);
             else
-              myText (0.65, 0.88-0.04*(iCent+1), colorfulColors[iCent+1], "#bf{All centralities}", 0.032);
+              myLineText2 (0.27+0.18*((iCent+1)/2), 0.25-0.04*((iCent+1)%2), colorfulColors[iCent+1], kOpenCircle, "#bf{0-100%}", 1.4, 0.032);
           } // end loop over iCent
   
           c->SaveAs (Form ("%s/Plots/Unfolding/MC_Jet_TrkPt_%s_%iGeVJets_%sClosure_6Iters.pdf", workPath.Data (), dir.Data (), minJetPt, evFrac.Data ()));
+  
+        } // end loop over iDir
+  
+      } // end loop over iPtJInt
+
+
+
+
+      for (short iPtJInt : {0, 1}) {
+  
+        const int minJetPt = (iPtJInt == 0 ? 30 : 60);
+  
+        for (short iDir = 0; iDir < 3; iDir++) {
+  
+          const TString dir = directions[iDir];
+  
+          const char* canvasName = Form ("c_jet_trk_pt_iaa_%s_%iGeVJets_%sClosure_6Iters", dir.Data (), minJetPt, evFrac.Data ());
+          TCanvas* c = new TCanvas (canvasName, "", 800, 800);
+  
+          TH1D* h = nullptr;
+          TGAE* g = nullptr;
+  
+          {
+            gPad->SetLogx ();
+  
+            h = new TH1D ("h", ";#it{p}_{T}^{ch} [GeV];Unfolded #it{I}_{#it{p}Pb} / truth", 1, pTChBins[1], pTChBins[nPtChBins-(iPtJInt == 0 ? 3 : 1)]);
+            h->GetXaxis ()->SetMoreLogLabels ();
+            h->GetYaxis ()->SetRangeUser (0.9, 1.2);
+            h->GetYaxis ()->CenterTitle ();
+            h->SetBinContent (1, 1);
+            h->SetLineStyle (2);
+            h->SetLineWidth (2);
+            h->SetLineColor (kBlack);
+            h->DrawCopy ("hist ][");
+            SaferDelete (&h);
+  
+            l->SetLineWidth (2);
+            l->SetLineColor (kGray+1);
+            l->SetLineStyle (2);
+            l->DrawLine (pTChBins[1], 1.05, pTChBins[nPtChBins-(iPtJInt == 0 ? 3 : 1)], 1.05);
+            l->DrawLine (pTChBins[1], 0.95, pTChBins[nPtChBins-(iPtJInt == 0 ? 3 : 1)], 0.95);
+          }
+  
+          for (short iCent = 0; iCent < nFcalCentBins+1; iCent++) {
+            const Color_t col = colorfulColors[iCent+1];
+            TH1D* h = (TH1D*) h_jetInt_trk_pt_iaa_unf[iEvFrac][iPtJInt][iDir][iCent][5]->Clone ("htemp");
+            RebinSomeBins (&h, nRebinPtChBins, rebinPtChBins, true);
+            g = make_graph (h);
+            SaferDelete (&h);
+            h = (TH1D*) h_jetInt_trk_pt_iaa[iEvFrac][iPtJInt][iDir][iCent][1]->Clone ("htemp");
+            RebinSomeBins (&h, nRebinPtChBins, rebinPtChBins, true);
+            ScaleGraph (g, h);
+            SaferDelete (&h);
+            TrimGraph (g, 0.5, iPtJInt == 0 ? 60 : 90);
+            myDraw (g, col, kOpenCircle, 1.0, 1, 2, "LP", false);
+            SaferDelete (&g);
+          } // end loop over iCent
+  
+          myText (0.58, 0.89, kBlack, "#bf{#it{ATLAS}} Simulation Internal", 0.032);
+          myText (0.58, 0.85, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.032);
+          myText (0.58, 0.81, kBlack, "#it{p}+Pb, #sqrt{s} = 5.02 TeV", 0.032);
+          myText (0.58, 0.77, kBlack, Form ("#it{p}_{T}^{jet} > %i GeV, %s", minJetPt, (dir == "ns" ? "Near-side" : (dir == "perp" ? "Perpendicular" : "Away-side"))), 0.032);
+          myText (0.58, 0.73, kBlack, "6 iterations (#it{p}+Pb)", 0.032);
+          myText (0.58, 0.69, kBlack, "4 iterations (#it{pp})", 0.032);
+
+          for (short iCent = 0; iCent < nFcalCentBins+1; iCent++) {
+            if (iCent < nFcalCentBins)
+              myLineText2 (0.27+0.20*((iCent)/2), 0.25-0.04*((iCent)%2), colorfulColors[iCent+1], kOpenCircle, Form ("#bf{%i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 1.4, 0.032);
+            else
+              myLineText2 (0.27+0.20*((iCent)/2), 0.25-0.04*((iCent)%2), colorfulColors[iCent+1], kOpenCircle, "#bf{0-100%}", 1.4, 0.032);
+          } // end loop over iCent
+  
+          c->SaveAs (Form ("%s/Plots/Unfolding/MC_Jet_TrkPt_IAA_%s_%iGeVJets_%sClosure_6Iters.pdf", workPath.Data (), dir.Data (), minJetPt, evFrac.Data ()));
   
         } // end loop over iDir
   
@@ -1247,9 +1345,9 @@ void PlotResponseMatrix () {
           SaferDelete (&g);
   
           if (iCent < nFcalCentBins)
-            myText (0.2, 0.84, kBlack, Form ("#bf{FCal %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.06);
+            myText (0.2, 0.84, kBlack, Form ("#bf{#it{p}+Pb, FCal %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.06);
           else
-            myText (0.2, 0.84, kBlack, "#bf{All centralities}", 0.06);
+            myText (0.2, 0.84, kBlack, "#bf{#it{p}+Pb, 0-100%}", 0.06);
   
         } // end loop over iCent
   
@@ -1344,9 +1442,9 @@ void PlotResponseMatrix () {
           SaferDelete (&g);
   
           if (iCent < nFcalCentBins)
-            myText (0.2, 0.84, kBlack, Form ("#bf{FCal %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.06);
+            myText (0.2, 0.84, kBlack, Form ("#bf{#it{p}+Pb, FCal %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.06);
           else
-            myText (0.2, 0.84, kBlack, "#bf{All centralities}", 0.06);
+            myText (0.2, 0.84, kBlack, "#bf{#it{p}+Pb, 0-100%}", 0.06);
   
         } // end loop over iCent
   
@@ -1410,8 +1508,8 @@ void PlotResponseMatrix () {
               SaferDelete (&g);
             }
   
-            //if (iEvFrac == 0) 
-            //  myDraw (f_jetInt_trk_pt_ref_sig_unf_halfClosure[iPtJInt][iDir], kBlack, 2, 2);
+            //if (iEvFrac == 1) 
+            //  myDraw (f_jetInt_trk_pt_ref_sig_unf_fullClosure[iPtJInt][iDir], kBlack, 2, 2);
   
             g = make_graph (h_jetInt_trk_pt_ref_sig[iEvFrac][iPtJInt][iDir][0]);
             ScaleGraph (g, h_jetInt_trk_pt_ref_sig[iEvFrac][iPtJInt][iDir][1]);
@@ -1452,8 +1550,8 @@ void PlotResponseMatrix () {
               SaferDelete (&g);
             }
   
-            //if (iEvFrac == 0) 
-            //  myDraw (f_jetInt_trk_pt_sig_unf_halfClosure[iPtJInt][iDir][iCent], kBlack, 2, 2);
+            //if (iEvFrac == 1) 
+            //  myDraw (f_jetInt_trk_pt_sig_unf_fullClosure[iPtJInt][iDir][iCent], kBlack, 2, 2);
   
             g = make_graph (h_jetInt_trk_pt_sig[iEvFrac][iPtJInt][iDir][iCent][0]);
             ScaleGraph (g, h_jetInt_trk_pt_sig[iEvFrac][iPtJInt][iDir][iCent][1]);
@@ -1461,9 +1559,9 @@ void PlotResponseMatrix () {
             SaferDelete (&g);
   
             if (iCent < nFcalCentBins)
-              myText (0.2, 0.84, kBlack, Form ("#bf{FCal %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.06);
+              myText (0.2, 0.84, kBlack, Form ("#bf{#it{p}+Pb, FCal %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.06);
             else
-              myText (0.2, 0.84, kBlack, "#bf{All centralities}", 0.06);
+              myText (0.2, 0.84, kBlack, "#bf{#it{p}+Pb, 0-100%}", 0.06);
   
           } // end loop over iCent
   
@@ -1533,8 +1631,8 @@ void PlotResponseMatrix () {
               SaferDelete (&g);
             }
  
-            //if (iEvFrac == 0) 
-            //  myDraw (f_jetInt_trk_pt_iaa_unf_halfClosure[iPtJInt][iDir][iCent], kBlack, 2, 2);
+            //if (iEvFrac == 1)
+            //  myDraw (f_jetInt_trk_pt_iaa_unf_fullClosure[iPtJInt][iDir][iCent], kBlack, 2, 2);
   
             g = make_graph (h_jetInt_trk_pt_iaa[iEvFrac][iPtJInt][iDir][iCent][0]);
             ScaleGraph (g, h_jetInt_trk_pt_iaa[iEvFrac][iPtJInt][iDir][iCent][1]);
@@ -1542,9 +1640,9 @@ void PlotResponseMatrix () {
             SaferDelete (&g);
   
             if (iCent < nFcalCentBins)
-              myText (0.2, 0.84, kBlack, Form ("#bf{FCal %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.06);
+              myText (0.2, 0.84, kBlack, Form ("#bf{#it{p}+Pb, FCal %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.06);
             else
-              myText (0.2, 0.84, kBlack, "#bf{All centralities}", 0.06);
+              myText (0.2, 0.84, kBlack, "#bf{#it{p}+Pb, 0-100%}", 0.06);
   
           } // end loop over iCent
   
@@ -1786,7 +1884,7 @@ void PlotResponseMatrix () {
         tl->SetTextSize (26);
         tl->DrawLatexNDC (0.26, 0.890, "#bf{#it{ATLAS}} Simulation Internal");
         tl->DrawLatexNDC (0.26, 0.850, "Pythia8 #it{pp} + #it{p}+Pb overlay, #sqrt{s} = 5.02 TeV");
-        tl->DrawLatexNDC (0.26, 0.810, iCent == nZdcCentBins ? "All centralities" : Form ("FCal %i-%i%%", zdcCentPercs[iCent+1], zdcCentPercs[iCent]));
+        tl->DrawLatexNDC (0.26, 0.810, iCent == nZdcCentBins ? "0-100%" : Form ("FCal %i-%i%%", zdcCentPercs[iCent+1], zdcCentPercs[iCent]));
         tl->DrawLatexNDC (0.26, 0.770, (dir == "ns" ? "Near-side" : (dir == "perp" ? "Perpendicular" : "Away-side")));
 
         l->SetLineColor (kGreen+2);
@@ -1962,7 +2060,7 @@ void PlotResponseMatrix () {
       tl->SetTextSize (26);
       tl->DrawLatexNDC (0.26, 0.890, "#bf{#it{ATLAS}} Simulation Internal");
       tl->DrawLatexNDC (0.26, 0.850, "Pythia8 #it{pp} + #it{p}+Pb overlay, #sqrt{s} = 5.02 TeV");
-      tl->DrawLatexNDC (0.26, 0.810, iCent == nZdcCentBins ? "All centralities" : Form ("FCal %i-%i%%", zdcCentPercs[iCent+1], zdcCentPercs[iCent]));
+      tl->DrawLatexNDC (0.26, 0.810, iCent == nZdcCentBins ? "0-100%" : Form ("FCal %i-%i%%", zdcCentPercs[iCent+1], zdcCentPercs[iCent]));
 
       l->SetLineColor (kGreen+2);
       l->DrawLine (30, 30, 30, 300);
@@ -2071,7 +2169,7 @@ void PlotResponseMatrix () {
           if (iCent < nFcalCentBins)
             myText (0.2, 0.84, kBlack, Form ("#bf{FCal %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.06);
           else {
-            myText (0.2, 0.84, kBlack, "#bf{All centralities}", 0.06);
+            myText (0.2, 0.84, kBlack, "#bf{0-100%}", 0.06);
             myText (0.2, 0.76, kBlack, "#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV", 0.06);
           }
   
