@@ -511,16 +511,18 @@ bool MakeResponseMatrix (const char* directory,
 
 
       // fill truth jet pT spectrum
-      h_jet_pt_wgts[iFile][1]->Fill (tjpt, ewgt*(iRJet < 0 ? 0. : f_jet_wgts[iFile]->Eval (rjpt)));
-      h_jet_pt_fullClosure[iFile][1]->Fill (tjpt, ewgt);
-      if (iEvt % 2 == 1)
-        h_jet_pt_halfClosure[iFile][1]->Fill (tjpt, ewgt);
-
-      if (IspPb ()) {
-        h_jet_pt_wgts[nFiles-1][1]->Fill (tjpt, ewgt*(iRJet < 0 ? 0. : f_jet_wgts[nFiles-1]->Eval (rjpt)));
-        h_jet_pt_fullClosure[nFiles-1][1]->Fill (tjpt, ewgt);
+      if (isReconstructed) {
+        h_jet_pt_wgts[iFile][1]->Fill (tjpt, ewgt*(iRJet < 0 ? 0. : f_jet_wgts[iFile]->Eval (rjpt)));
+        h_jet_pt_fullClosure[iFile][1]->Fill (tjpt, ewgt);
         if (iEvt % 2 == 1)
-          h_jet_pt_halfClosure[nFiles-1][1]->Fill (tjpt, ewgt);
+          h_jet_pt_halfClosure[iFile][1]->Fill (tjpt, ewgt);
+
+        if (IspPb ()) {
+          h_jet_pt_wgts[nFiles-1][1]->Fill (tjpt, ewgt*(iRJet < 0 ? 0. : f_jet_wgts[nFiles-1]->Eval (rjpt)));
+          h_jet_pt_fullClosure[nFiles-1][1]->Fill (tjpt, ewgt);
+          if (iEvt % 2 == 1)
+            h_jet_pt_halfClosure[nFiles-1][1]->Fill (tjpt, ewgt);
+        }
       }
 
 
@@ -605,6 +607,9 @@ bool MakeResponseMatrix (const char* directory,
       const float tjpt = GetAktTruthJetPt (iTJet, r0p4);
       if (std::fabs (rjpt/tjpt - 1) > 3*0.01*f_jer->Eval (tjpt))
         continue; // cut on jets reconstructed well outside the JER -- these are bad matches in overlay
+
+      if (tjpt < pTJBins[0] || pTJBins[nPtJBins] < tjpt)
+        continue;
 
 
       // fill reco jet spectrum

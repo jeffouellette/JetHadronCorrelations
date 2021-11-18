@@ -1,5 +1,6 @@
-Plots/
+data
 rootFiles
+Plots/
 bin/
 lib/
 obj/

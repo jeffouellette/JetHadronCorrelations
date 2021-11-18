@@ -1,6 +1,6 @@
 #! /bin/bash
 
-declare -a datavardirs=("MixCatVar2")
+declare -a datavardirs=("Nominal")
 #declare -a datavardirs=("Nominal" "HITightVar" "HILooseVar" "TrkEffVar" "FakeRateVar" "PrimFitVar" "JetPrimFracVar" "PartSpcVar" "MixCatVar1" "MixCatVar2" "MixCatVar3" "MixCatVar4" "MixCatVar5")
 #declare -a datavardirs=("Nominal" "HITightVar" "HILooseVar" "TrkEffVar" "FakeRateVar" "PrimFitVar" "JetPrimFracVar" "PartSpcVar" "MixCatVar1" "MixCatVar3" "MixCatVar4" "MixCatVar5")
 #declare -a datavardirs=("JetPrimFracVar")
@@ -29,35 +29,35 @@ for sigmix in ${sigmixdirs[@]}; do
     j50Path=rootFiles/Histograms/J50/${sigmix}/${vardir}
     mbPath=rootFiles/Histograms/MinBias/${sigmix}/${vardir}
   
-    hadd -f ${targetPath}/data17_5TeV_hists.root \
-            ${j50Path}/340644_hists.root \
-            ${j50Path}/340683_hists.root \
-            ${j50Path}/340697_hists.root \
-            ${j50Path}/340718_hists.root \
-            ${j50Path}/340814_hists.root \
-            ${j50Path}/340849_hists.root \
-            ${j50Path}/340850_hists.root \
-            ${j50Path}/340910_hists.root \
-            ${j50Path}/340925_hists.root \
-            ${j50Path}/340973_hists.root \
-            ${j50Path}/341027_hists.root \
-            ${j50Path}/341123_hists.root \
-            ${j50Path}/341184_hists.root \
-            ${mbPath}/340644_hists.root \
-            ${mbPath}/340683_hists.root \
-            ${mbPath}/340697_hists.root \
-            ${mbPath}/340718_hists.root \
-            ${mbPath}/340814_hists.root \
-            ${mbPath}/340849_hists.root \
-            ${mbPath}/340850_hists.root \
-            ${mbPath}/340910_hists.root \
-            ${mbPath}/340925_hists.root \
-            ${mbPath}/340973_hists.root \
-            ${mbPath}/341027_hists.root \
-            ${mbPath}/341123_hists.root \
-            ${mbPath}/341184_hists.root &
+    #hadd -f ${targetPath}/data17_5TeV_hists.root \
+    #        ${j50Path}/340644_hists.root \
+    #        ${j50Path}/340683_hists.root \
+    #        ${j50Path}/340697_hists.root \
+    #        ${j50Path}/340718_hists.root \
+    #        ${j50Path}/340814_hists.root \
+    #        ${j50Path}/340849_hists.root \
+    #        ${j50Path}/340850_hists.root \
+    #        ${j50Path}/340910_hists.root \
+    #        ${j50Path}/340925_hists.root \
+    #        ${j50Path}/340973_hists.root \
+    #        ${j50Path}/341027_hists.root \
+    #        ${j50Path}/341123_hists.root \
+    #        ${j50Path}/341184_hists.root \
+    #        ${mbPath}/340644_hists.root \
+    #        ${mbPath}/340683_hists.root \
+    #        ${mbPath}/340697_hists.root \
+    #        ${mbPath}/340718_hists.root \
+    #        ${mbPath}/340814_hists.root \
+    #        ${mbPath}/340849_hists.root \
+    #        ${mbPath}/340850_hists.root \
+    #        ${mbPath}/340910_hists.root \
+    #        ${mbPath}/340925_hists.root \
+    #        ${mbPath}/340973_hists.root \
+    #        ${mbPath}/341027_hists.root \
+    #        ${mbPath}/341123_hists.root \
+    #        ${mbPath}/341184_hists.root &
 
-    wait
+    #wait
   
     for cent in $(seq 0 4); do   
   

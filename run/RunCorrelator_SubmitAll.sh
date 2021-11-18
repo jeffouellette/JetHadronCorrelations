@@ -1,6 +1,6 @@
 #! /bin/bash
 
-declare -a systs=("PrimFitVar")
+declare -a systs=("Nominal")
 #declare -a systs=("Nominal" "HITightVar" "HILooseVar" "TrkEffVar" "FakeRateVar" "PrimFitVar" "JetPrimFracVar" "PartSpcVar" "MixCatVar1" "MixCatVar2" "MixCatVar3" "MixCatVar4" "MixCatVar5")
 #declare -a systs=("Nominal" "HITightVar" "HILooseVar" "TrkEffVar" "FakeRateVar" "PrimFitVar" "JetPrimFracVar" "PartSpcVar" "MixCatVar1" "MixCatVar2" "MixCatVar3" "MixCatVar4" "MixCatVar5" "FcalCentVar" "FineFcalCentVar")
 
@@ -11,8 +11,8 @@ declare -a mcsysts=("Nominal" "JESVar0" "JESVar1" "JESVar2" "JESVar3" "JESVar4" 
 
 declare -a mcmixsysts=("Nominal")
 
-declare -a trigs=("J50" "MinBias")
-#declare -a trigs=("MinBias")
+#declare -a trigs=("J50" "MinBias")
+declare -a trigs=("J50")
 
 
 for trig in ${trigs[@]}; do
