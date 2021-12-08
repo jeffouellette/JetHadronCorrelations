@@ -295,11 +295,11 @@ void PlotTrackingPerformance () {
         h_primary_tracks_etaInt[iSys][iWP][iDR] = (TH1D*) h2_primary_tracks[iSys][iWP][iDR]->ProjectionY (Form ("h_primary_tracks_etaInt_%s_%s_iDR%i", sys.Data (), trackWPNames[iWP].c_str (), iDR));
 
         if (iSys == 0) {
-          h_fake_tracks_etaInt[iSys][iWP][iDR]->Rebin (2);
-          h_secondary_tracks_etaInt[iSys][iWP][iDR]->Rebin (2);
-          h_strange_tracks_etaInt[iSys][iWP][iDR]->Rebin (2);
-          h_reco_tracks_etaInt[iSys][iWP][iDR]->Rebin (2);
-          h_primary_tracks_etaInt[iSys][iWP][iDR]->Rebin (2);
+          h_fake_tracks_etaInt[iSys][iWP][iDR]->Rebin (4);
+          h_secondary_tracks_etaInt[iSys][iWP][iDR]->Rebin (4);
+          h_strange_tracks_etaInt[iSys][iWP][iDR]->Rebin (4);
+          h_reco_tracks_etaInt[iSys][iWP][iDR]->Rebin (4);
+          h_primary_tracks_etaInt[iSys][iWP][iDR]->Rebin (4);
         }
 
         for (int iEta = 0; iEta < nEtaTrkBins; iEta++) {
@@ -1238,21 +1238,21 @@ void PlotTrackingPerformance () {
       g = make_graph (h_fake_rate_etaInt[iSys][iWP][iDR]); 
       if      (iDR == 0) TrimGraph (g, 0, 20);
       else if (iDR == 1) TrimGraph (g, 0, 60);
-      myDraw (g, colorfulColors[iDR], kOpenDiamond, 0.8);
+      myDraw (g, colorfulColors[iDR], kOpenDiamond, 1.4);
       SaferDelete (&g);
     }
     for (int iDR = 0; iDR < (nDRBins-1); iDR++) {
       g = make_graph (h_secondary_rate_etaInt[iSys][iWP][iDR]);
       if      (iDR == 0) TrimGraph (g, 0, 20);
       else if (iDR == 1) TrimGraph (g, 0, 60);
-      myDraw (g, colorfulColors[iDR], kOpenSquare, 0.8);
+      myDraw (g, colorfulColors[iDR], kOpenSquare, 1.2);
       SaferDelete (&g);
     }
     for (int iDR = 0; iDR < (nDRBins-1); iDR++) {
       g = make_graph (h_primary_rate_etaInt[iSys][iWP][iDR]);
       if      (iDR == 0) TrimGraph (g, 0, 20);
       else if (iDR == 1) TrimGraph (g, 0, 60);
-      myDraw (g, colorfulColors[iDR], kOpenCircle, 0.8);
+      myDraw (g, colorfulColors[iDR], kOpenCircle, 1.2);
       SaferDelete (&g);
     }
 
@@ -1351,9 +1351,21 @@ void PlotTrackingPerformance () {
     //tl->DrawLatex (80, yoff, "80");
     tl->DrawLatex (100, yoff, "100");
 
-    for (int iPID = 0; iPID < nPIDs; iPID++)
-      myDraw (h_efficiency[iSys][iPID][iWP][iMult][iEta], systColors[iPID], kOpenCircle, 0.8);
-    myDraw (h_efficiency[iSys][nPIDs-1][iWP][iMult][iEta], kBlack, kFullCircle, 0.8);
+    for (int iPID = 0; iPID < nPIDs; iPID++) {
+      TGAE* g = make_graph (h_efficiency[iSys][iPID][iWP][iMult][iEta]);
+      TrimGraph (g, 0.4, 130);
+      g->Print ();
+      //for (int i = 0; i < g->GetN(); i++) {
+      //  double x,y;
+      //  g->GetPoint(i,x,y);
+      //  std::cout << "i,x,y = " << i << ", " << x << ", " << y << std::endl;
+      //}
+      myDraw (g, systColors[iPID], kOpenCircle, 0.8);
+    }
+    TGAE* g = make_graph (h_efficiency[iSys][nPIDs-1][iWP][iMult][iEta]);
+    TrimGraph (g, 0.4, 130);
+      g->Print ();
+    myDraw (g, kBlack, kFullCircle, 0.8);
 
     tl->SetTextColor (kBlack);
     tl->SetTextAlign (11);
@@ -1439,16 +1451,16 @@ void PlotTrackingPerformance () {
     tl->DrawLatex (100, yoff, "100");
 
     for (int iEta : {0, 3})
-      myDraw (h_strange_rate[iSys][iWP][iDR][iEta], colors[iEta], kOpenSquare, 1.0);
+      myDraw (h_strange_rate[iSys][iWP][iDR][iEta], colors[iEta], kOpenSquare, 1.2);
 
     for (int iEta : {0, 3})
-      myDraw (h_fake_rate[iSys][iWP][iDR][iEta], colors[iEta], kOpenCrossX, 1.0);
+      myDraw (h_fake_rate[iSys][iWP][iDR][iEta], colors[iEta], kOpenCrossX, 1.2);
 
     for (int iEta : {0, 3})
-      myDraw (h_secondary_rate[iSys][iWP][iDR][iEta], colors[iEta], kOpenCross, 1.0);
+      myDraw (h_secondary_rate[iSys][iWP][iDR][iEta], colors[iEta], kOpenCross, 1.2);
 
     for (int iEta : {0, 3})
-      myDraw (h_primary_rate[iSys][iWP][iDR][iEta], colors[iEta], kOpenCircle, 1.0);
+      myDraw (h_primary_rate[iSys][iWP][iDR][iEta], colors[iEta], kOpenCircle, 1.2);
 
     tl->SetTextColor (kBlack);
     tl->SetTextAlign (11);
@@ -1467,9 +1479,9 @@ void PlotTrackingPerformance () {
     tl->DrawLatexNDC (0.705, 0.262, "Primaries");
 
     for (int iEta : {0, 3}) {
-      myLineText2 (0.38, 0.232-(iEta/3)*0.036, colors[iEta], kOpenCrossX, "", 0.8, 0.026, true);
-      myLineText2 (0.50, 0.232-(iEta/3)*0.036, colors[iEta], kOpenCross, "", 0.8, 0.026, true);
-      myLineText2 (0.62, 0.232-(iEta/3)*0.036, colors[iEta], kOpenSquare, "", 0.8, 0.026, true);
+      myLineText2 (0.38, 0.232-(iEta/3)*0.036, colors[iEta], kOpenCrossX, "", 1.2, 0.026, true);
+      myLineText2 (0.50, 0.232-(iEta/3)*0.036, colors[iEta], kOpenCross, "", 1.2, 0.026, true);
+      myLineText2 (0.62, 0.232-(iEta/3)*0.036, colors[iEta], kOpenSquare, "", 1.2, 0.026, true);
       myLineText2 (0.74, 0.232-(iEta/3)*0.036, colors[iEta], kOpenCircle, Form ("%g < |#eta| < %g", etaTrkBins[iEta], etaTrkBins[iEta+1]), 1.2, 0.026, true);
     }
 
