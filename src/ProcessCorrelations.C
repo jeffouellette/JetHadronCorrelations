@@ -40,34 +40,39 @@ void ProcessCorrelations (const char* tag, const char* outFileTag) {//, const in
   TH1D***** h_jet_counts_bkg              = Get4DArray <TH1D*> (2, nPtJBins, nZdcCentBins+1, nVar);
 
   TH1D***   h_jet_pt_ref                  = Get2DArray <TH1D*> (2, nVar);
-  TH2D***   h2_jet_pt_cov_ref             = Get2DArray <TH2D*> (2, nVar);
+  TH2D**    h2_jet_pt_cov_ref             = Get1DArray <TH2D*> (2);
   TH1D****  h_jet_pt                      = Get3DArray <TH1D*> (2, nZdcCentBins+1, nVar);
-  TH2D****  h2_jet_pt_cov                 = Get3DArray <TH2D*> (2, nZdcCentBins+1, nVar);
+  TH2D***   h2_jet_pt_cov                 = Get2DArray <TH2D*> (2, nZdcCentBins+1);
 
   TH1D***** h_jet_trk_pt_ref              = Get4DArray <TH1D*> (2, nPtJBins, nDir, nVar);
-  TH2D***** h2_jet_trk_pt_cov_ref         = Get4DArray <TH2D*> (2, nPtJBins, nDir, nVar);
+  TH2D****  h2_jet_trk_pt_cov_ref         = Get3DArray <TH2D*> (2, nPtJBins, nDir);
   TH1D***** h_jet_trk_dphi_ref            = Get4DArray <TH1D*> (2, nPtJBins, nPtChSelections, nVar);
-  TH2D***** h2_jet_trk_dphi_cov_ref       = Get4DArray <TH2D*> (2, nPtJBins, nPtChSelections, nVar);
+  TH2D****  h2_jet_trk_dphi_cov_ref       = Get3DArray <TH2D*> (2, nPtJBins, nPtChSelections);
 
   TH1D***** h_jet_trk_pt_ref_bkg          = Get4DArray <TH1D*> (2, nPtJBins, nDir, nVar);
-  TH2D***** h2_jet_trk_pt_cov_ref_bkg     = Get4DArray <TH2D*> (2, nPtJBins, nDir, nVar);
+  TH2D****  h2_jet_trk_pt_cov_ref_bkg     = Get3DArray <TH2D*> (2, nPtJBins, nDir);
   TH1D***** h_jet_trk_dphi_ref_bkg        = Get4DArray <TH1D*> (2, nPtJBins, nPtChSelections, nVar);
-  TH2D***** h2_jet_trk_dphi_cov_ref_bkg   = Get4DArray <TH2D*> (2, nPtJBins, nPtChSelections, nVar);
+  TH2D****  h2_jet_trk_dphi_cov_ref_bkg   = Get3DArray <TH2D*> (2, nPtJBins, nPtChSelections);
 
   TH1D******  h_jet_trk_pt                = Get5DArray <TH1D*> (2, nPtJBins, nDir, nZdcCentBins+1, nVar);
-  TH2D******  h2_jet_trk_pt_cov           = Get5DArray <TH2D*> (2, nPtJBins, nDir, nZdcCentBins+1, nVar);
+  TH2D*****   h2_jet_trk_pt_cov           = Get4DArray <TH2D*> (2, nPtJBins, nDir, nZdcCentBins+1);
   TH1D******  h_jet_trk_dphi              = Get5DArray <TH1D*> (2, nPtJBins, nPtChSelections, nZdcCentBins+1, nVar);
-  TH2D******  h2_jet_trk_dphi_cov         = Get5DArray <TH2D*> (2, nPtJBins, nPtChSelections, nZdcCentBins+1, nVar);
+  TH2D*****   h2_jet_trk_dphi_cov         = Get4DArray <TH2D*> (2, nPtJBins, nPtChSelections, nZdcCentBins+1);
 
   TH1D******  h_jet_trk_pt_bkg            = Get5DArray <TH1D*> (2, nPtJBins, nDir, nZdcCentBins+1, nVar);
-  TH2D******  h2_jet_trk_pt_cov_bkg       = Get5DArray <TH2D*> (2, nPtJBins, nDir, nZdcCentBins+1, nVar);
+  TH2D*****   h2_jet_trk_pt_cov_bkg       = Get4DArray <TH2D*> (2, nPtJBins, nDir, nZdcCentBins+1);
   TH1D******  h_jet_trk_dphi_bkg          = Get5DArray <TH1D*> (2, nPtJBins, nPtChSelections, nZdcCentBins+1, nVar);
-  TH2D******  h2_jet_trk_dphi_cov_bkg     = Get5DArray <TH2D*> (2, nPtJBins, nPtChSelections, nZdcCentBins+1, nVar);
+  TH2D*****   h2_jet_trk_dphi_cov_bkg     = Get4DArray <TH2D*> (2, nPtJBins, nPtChSelections, nZdcCentBins+1);
 
   TH1D*****   h_jet_trk_pt_ref_sig        = Get4DArray <TH1D*> (2, nPtJBins, nDir, nVar);
-  TH1D******  h_jet_trk_pt_sig            = Get5DArray <TH1D*> (2, nPtJBins, nDir, nZdcCentBins+1, nVar);
+  TH2D****    h2_jet_trk_pt_cov_ref_sig   = Get3DArray <TH2D*> (2, nPtJBins, nDir);
   TH1D*****   h_jet_trk_dphi_ref_sig      = Get4DArray <TH1D*> (2, nPtJBins, nPtChSelections, nVar);
+  TH2D****    h2_jet_trk_dphi_cov_ref_sig = Get3DArray <TH2D*> (2, nPtJBins, nPtChSelections);
+
+  TH1D******  h_jet_trk_pt_sig            = Get5DArray <TH1D*> (2, nPtJBins, nDir, nZdcCentBins+1, nVar);
+  TH2D*****   h2_jet_trk_pt_cov_sig       = Get4DArray <TH2D*> (2, nPtJBins, nDir, nZdcCentBins+1);
   TH1D******  h_jet_trk_dphi_sig          = Get5DArray <TH1D*> (2, nPtJBins, nPtChSelections, nZdcCentBins+1, nVar);
+  TH2D*****   h2_jet_trk_dphi_cov_sig     = Get4DArray <TH2D*> (2, nPtJBins, nPtChSelections, nZdcCentBins+1);
 
   // now the pTJet-integrated histograms (e.g. > 30 GeV and > 60 GeV)
   TH1D*****   h_jetInt_trk_pt_ref                 = Get4DArray <TH1D*> (2, 2, nDir, nVar);
@@ -76,6 +81,8 @@ void ProcessCorrelations (const char* tag, const char* outFileTag) {//, const in
   TH1D******  h_jetInt_trk_pt_bkg                 = Get5DArray <TH1D*> (2, 2, nDir, nZdcCentBins+1, nVar);
   TH1D*****   h_jetInt_trk_pt_ref_sig             = Get4DArray <TH1D*> (2, 2, nDir, nVar);
   TH1D******  h_jetInt_trk_pt_sig                 = Get5DArray <TH1D*> (2, 2, nDir, nZdcCentBins+1, nVar);
+  TH2D****    h2_jetInt_trk_pt_cov_ref_sig        = Get3DArray <TH2D*> (2, 2, nDir);
+  TH2D*****   h2_jetInt_trk_pt_cov_sig            = Get4DArray <TH2D*> (2, 2, nDir, nZdcCentBins+1);
 
   TH1D*****   h_jetInt_trk_dphi_ref               = Get4DArray <TH1D*> (2, 2, nPtChSelections, nVar);
   TH1D******  h_jetInt_trk_dphi                   = Get5DArray <TH1D*> (2, 2, nPtChSelections, nZdcCentBins+1, nVar);
@@ -83,6 +90,8 @@ void ProcessCorrelations (const char* tag, const char* outFileTag) {//, const in
   TH1D******  h_jetInt_trk_dphi_bkg               = Get5DArray <TH1D*> (2, 2, nPtChSelections, nZdcCentBins+1, nVar);
   TH1D*****   h_jetInt_trk_dphi_ref_sig           = Get4DArray <TH1D*> (2, 2, nPtChSelections, nVar);
   TH1D******  h_jetInt_trk_dphi_sig               = Get5DArray <TH1D*> (2, 2, nPtChSelections, nZdcCentBins+1, nVar);
+  TH2D****    h2_jetInt_trk_dphi_cov_ref_sig      = Get3DArray <TH2D*> (2, 2, nPtChSelections);
+  TH2D*****   h2_jetInt_trk_dphi_cov_sig          = Get4DArray <TH2D*> (2, 2, nPtChSelections, nZdcCentBins+1);
 
 
   //TGAE****  g_jetInt_trk_pt_ref_syst          = Get3DArray <TGAE*> (2, nDir, nVar);
@@ -142,6 +151,8 @@ void ProcessCorrelations (const char* tag, const char* outFileTag) {//, const in
       if ((iDType == 0 && dataVariations.count (var) == 0) || (iDType == 1 && mcVariations.count (var) + otherMCVariations.count (var) == 0))
         continue;
 
+      TH2D* h2_cov = nullptr;
+
       {
         TString inFileName = Form ("%s/Histograms/%s/JetsHists/%s/%s17_5TeV_hists.root", rootPath.Data (), tag, var.Data (), dType.Data ());
         std::cout << "Reading " << inFileName.Data () << std::endl;
@@ -151,14 +162,18 @@ void ProcessCorrelations (const char* tag, const char* outFileTag) {//, const in
         h_evt_counts_ref[iDType][iVar]  = (TH1D*) inFile->Get (Form ("h_evt_counts_%s17",   dType.Data ()))->Clone (Form ("h_evt_counts_ref_%s_%s",   dType.Data (), var.Data ()));
 
         h_jet_pt_ref[iDType][iVar]      = (TH1D*) inFile->Get (Form ("h_jet_pt_%s17",       dType.Data ()))->Clone (Form ("h_jet_pt_ref_%s_%s",       dType.Data (), var.Data ()));
-        h2_jet_pt_cov_ref[iDType][iVar] = (TH2D*) inFile->Get (Form ("h2_jet_pt_cov_%s17",  dType.Data ()))->Clone (Form ("h2_jet_pt_cov_ref_%s_%s",  dType.Data (), var.Data ()));
+        h2_cov                          = (TH2D*) inFile->Get (Form ("h2_jet_pt_cov_%s17",  dType.Data ()))->Clone (Form ("h2_jet_pt_cov_ref_%s_%s",  dType.Data (), var.Data ()));
 
-        CalcUncertainties (h_jet_pt_ref[iDType][iVar], h2_jet_pt_cov_ref[iDType][iVar], h_evt_counts_ref[iDType][iVar]);
+        CalcUncertainties (h_jet_pt_ref[iDType][iVar], h2_cov, h_evt_counts_ref[iDType][iVar]);
+
+        if (iVar == 0)  h2_jet_pt_cov_ref[iDType] = h2_cov;
+        else            SaferDelete (&h2_cov);
+
         h_jet_pt_ref[iDType][iVar]->Scale (h_evt_counts_ref[iDType][iVar]->GetBinContent (2)); // convert distribution to total number of jets by un-scaling 1/N_evt factor
         UnscaleWidth (h_jet_pt_ref[iDType][iVar]);
 
         SaferDelete (&h_evt_counts_ref[iDType][iVar]);
-        SaferDelete (&h2_jet_pt_cov_ref[iDType][iVar]);
+        //SaferDelete (&h2_jet_pt_cov_ref[iDType]);
 
 
         for (short iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
@@ -171,14 +186,17 @@ void ProcessCorrelations (const char* tag, const char* outFileTag) {//, const in
 
             const TString dir = directions[iDir];
 
-            h_jet_trk_pt_ref[iDType][iPtJ][iDir][iVar]      = (TH1D*) inFile->Get (Form ("h_jet_trk_pt_%s_%s_%s17",       dir.Data (), pTJ.Data (), dType.Data ()))->Clone (Form ("h_jet_trk_pt_%s_ref_%s_%s_%s",       dir.Data (), dType.Data (), pTJ.Data (), var.Data ()));
-            h2_jet_trk_pt_cov_ref[iDType][iPtJ][iDir][iVar] = (TH2D*) inFile->Get (Form ("h2_jet_trk_pt_cov_%s_%s_%s17",  dir.Data (), pTJ.Data (), dType.Data ()))->Clone (Form ("h2_jet_trk_pt_cov_%s_ref_%s_%s_%s",  dir.Data (), dType.Data (), pTJ.Data (), var.Data ()));
+            h_jet_trk_pt_ref[iDType][iPtJ][iDir][iVar]  = (TH1D*) inFile->Get (Form ("h_jet_trk_pt_%s_%s_%s17",       dir.Data (), pTJ.Data (), dType.Data ()))->Clone (Form ("h_jet_trk_pt_%s_ref_%s_%s_%s",       dir.Data (), dType.Data (), pTJ.Data (), var.Data ()));
+            h2_cov                                      = (TH2D*) inFile->Get (Form ("h2_jet_trk_pt_cov_%s_%s_%s17",  dir.Data (), pTJ.Data (), dType.Data ()))->Clone (Form ("h2_jet_trk_pt_cov_%s_ref_%s_%s_%s",  dir.Data (), dType.Data (), pTJ.Data (), var.Data ()));
 
-            CalcUncertainties (h_jet_trk_pt_ref[iDType][iPtJ][iDir][iVar], h2_jet_trk_pt_cov_ref[iDType][iPtJ][iDir][iVar], h_jet_counts_ref[iDType][iPtJ][iVar]);
+            CalcUncertainties (h_jet_trk_pt_ref[iDType][iPtJ][iDir][iVar], h2_cov, h_jet_counts_ref[iDType][iPtJ][iVar]);
+
+            if (iVar == 0)  h2_jet_trk_pt_cov_ref[iDType][iPtJ][iDir] = h2_cov;
+            else            SaferDelete (&h2_cov);
 
             h_jet_trk_pt_ref[iDType][iPtJ][iDir][iVar]->Scale (1., "width");
 
-            SaferDelete (&h2_jet_trk_pt_cov_ref[iDType][iPtJ][iDir][iVar]);
+            //SaferDelete (&h2_jet_trk_pt_cov_ref[iDType][iPtJ][iDir]);
 
           } // end loop over iDir
 
@@ -186,14 +204,17 @@ void ProcessCorrelations (const char* tag, const char* outFileTag) {//, const in
 
             const TString ptch = pTChSelections[iPtCh].Data ();
 
-            h_jet_trk_dphi_ref[iDType][iPtJ][iPtCh][iVar]       = (TH1D*) inFile->Get (Form ("h_jet_trk_dphi_%s_%s_%s17",       ptch.Data (), pTJ.Data (), dType.Data ()))->Clone (Form ("h_jet_trk_dphi_%s_ref_%s_%s_%s",      ptch.Data (), dType.Data (), pTJ.Data (), var.Data ()));
-            h2_jet_trk_dphi_cov_ref[iDType][iPtJ][iPtCh][iVar]  = (TH2D*) inFile->Get (Form ("h2_jet_trk_dphi_cov_%s_%s_%s17",  ptch.Data (), pTJ.Data (), dType.Data ()))->Clone (Form ("h2_jet_trk_dphi_cov_%s_ref_%s_%s_%s", ptch.Data (), dType.Data (), pTJ.Data (), var.Data ()));
+            h_jet_trk_dphi_ref[iDType][iPtJ][iPtCh][iVar] = (TH1D*) inFile->Get (Form ("h_jet_trk_dphi_%s_%s_%s17",       ptch.Data (), pTJ.Data (), dType.Data ()))->Clone (Form ("h_jet_trk_dphi_%s_ref_%s_%s_%s",      ptch.Data (), dType.Data (), pTJ.Data (), var.Data ()));
+            h2_cov                                        = (TH2D*) inFile->Get (Form ("h2_jet_trk_dphi_cov_%s_%s_%s17",  ptch.Data (), pTJ.Data (), dType.Data ()))->Clone (Form ("h2_jet_trk_dphi_cov_%s_ref_%s_%s_%s", ptch.Data (), dType.Data (), pTJ.Data (), var.Data ()));
 
-            CalcUncertainties (h_jet_trk_dphi_ref[iDType][iPtJ][iPtCh][iVar], h2_jet_trk_dphi_cov_ref[iDType][iPtJ][iPtCh][iVar], h_jet_counts_ref[iDType][iPtJ][iVar]);
+            CalcUncertainties (h_jet_trk_dphi_ref[iDType][iPtJ][iPtCh][iVar], h2_cov, h_jet_counts_ref[iDType][iPtJ][iVar]);
+
+            if (iVar == 0)  h2_jet_trk_dphi_cov_ref[iDType][iPtJ][iPtCh] = h2_cov;
+            else            SaferDelete (&h2_cov);
 
             h_jet_trk_dphi_ref[iDType][iPtJ][iPtCh][iVar]->Scale (1., "width");
 
-            SaferDelete (&h2_jet_trk_dphi_cov_ref[iDType][iPtJ][iPtCh][iVar]);
+            //SaferDelete (&h2_jet_trk_dphi_cov_ref[iDType][iPtJ][iPtCh]);
 
           } // end loop over iPtCh
 
@@ -223,14 +244,17 @@ void ProcessCorrelations (const char* tag, const char* outFileTag) {//, const in
 
             const TString dir = directions[iDir];
 
-            h_jet_trk_pt_ref_bkg[iDType][iPtJ][iDir][iVar]      = (TH1D*) inFile->Get (Form ("h_jet_trk_pt_%s_%s_mixed_%s17",       dir.Data (), pTJ.Data (), dType.Data ()))->Clone (Form ("h_jet_trk_pt_%s_ref_bkg_%s_%s_%s",       dir.Data (), dType.Data (), pTJ.Data (), var.Data ()));
-            h2_jet_trk_pt_cov_ref_bkg[iDType][iPtJ][iDir][iVar] = (TH2D*) inFile->Get (Form ("h2_jet_trk_pt_cov_%s_%s_mixed_%s17",  dir.Data (), pTJ.Data (), dType.Data ()))->Clone (Form ("h2_jet_trk_pt_cov_%s_ref_bkg_%s_%s_%s",  dir.Data (), dType.Data (), pTJ.Data (), var.Data ()));
+            h_jet_trk_pt_ref_bkg[iDType][iPtJ][iDir][iVar]  = (TH1D*) inFile->Get (Form ("h_jet_trk_pt_%s_%s_mixed_%s17",       dir.Data (), pTJ.Data (), dType.Data ()))->Clone (Form ("h_jet_trk_pt_%s_ref_bkg_%s_%s_%s",       dir.Data (), dType.Data (), pTJ.Data (), var.Data ()));
+            h2_cov                                          = (TH2D*) inFile->Get (Form ("h2_jet_trk_pt_cov_%s_%s_mixed_%s17",  dir.Data (), pTJ.Data (), dType.Data ()))->Clone (Form ("h2_jet_trk_pt_cov_%s_ref_bkg_%s_%s_%s",  dir.Data (), dType.Data (), pTJ.Data (), var.Data ()));
 
-            CalcUncertainties (h_jet_trk_pt_ref_bkg[iDType][iPtJ][iDir][iVar], h2_jet_trk_pt_cov_ref_bkg[iDType][iPtJ][iDir][iVar], h_jet_counts_ref_bkg[iDType][iPtJ][iVar]);
+            CalcUncertainties (h_jet_trk_pt_ref_bkg[iDType][iPtJ][iDir][iVar], h2_cov, h_jet_counts_ref_bkg[iDType][iPtJ][iVar]);
+
+            if (iVar == 0)  h2_jet_trk_pt_cov_ref_bkg[iDType][iPtJ][iDir] = h2_cov;
+            else            SaferDelete (&h2_cov);
 
             h_jet_trk_pt_ref_bkg[iDType][iPtJ][iDir][iVar]->Scale (1., "width");
 
-            SaferDelete (&h2_jet_trk_pt_cov_ref_bkg[iDType][iPtJ][iDir][iVar]);
+            //SaferDelete (&h2_jet_trk_pt_cov_ref_bkg[iDType][iPtJ][iDir]);
 
           } // end loop over iDir
 
@@ -238,14 +262,17 @@ void ProcessCorrelations (const char* tag, const char* outFileTag) {//, const in
 
             const TString ptch = pTChSelections[iPtCh].Data ();
 
-            h_jet_trk_dphi_ref_bkg[iDType][iPtJ][iPtCh][iVar]       = (TH1D*) inFile->Get (Form ("h_jet_trk_dphi_%s_%s_mixed_%s17",       ptch.Data (), pTJ.Data (), dType.Data ()))->Clone (Form ("h_jet_trk_dphi_%s_ref_bkg_%s_%s_%s",      ptch.Data (), dType.Data (), pTJ.Data (), var.Data ()));
-            h2_jet_trk_dphi_cov_ref_bkg[iDType][iPtJ][iPtCh][iVar]  = (TH2D*) inFile->Get (Form ("h2_jet_trk_dphi_cov_%s_%s_mixed_%s17",  ptch.Data (), pTJ.Data (), dType.Data ()))->Clone (Form ("h2_jet_trk_dphi_cov_%s_ref_bkg_%s_%s_%s", ptch.Data (), dType.Data (), pTJ.Data (), var.Data ()));
+            h_jet_trk_dphi_ref_bkg[iDType][iPtJ][iPtCh][iVar] = (TH1D*) inFile->Get (Form ("h_jet_trk_dphi_%s_%s_mixed_%s17",       ptch.Data (), pTJ.Data (), dType.Data ()))->Clone (Form ("h_jet_trk_dphi_%s_ref_bkg_%s_%s_%s",      ptch.Data (), dType.Data (), pTJ.Data (), var.Data ()));
+            h2_cov                                            = (TH2D*) inFile->Get (Form ("h2_jet_trk_dphi_cov_%s_%s_mixed_%s17",  ptch.Data (), pTJ.Data (), dType.Data ()))->Clone (Form ("h2_jet_trk_dphi_cov_%s_ref_bkg_%s_%s_%s", ptch.Data (), dType.Data (), pTJ.Data (), var.Data ()));
 
-            CalcUncertainties (h_jet_trk_dphi_ref_bkg[iDType][iPtJ][iPtCh][iVar], h2_jet_trk_dphi_cov_ref_bkg[iDType][iPtJ][iPtCh][iVar], h_jet_counts_ref_bkg[iDType][iPtJ][iVar]);
+            CalcUncertainties (h_jet_trk_dphi_ref_bkg[iDType][iPtJ][iPtCh][iVar], h2_cov, h_jet_counts_ref_bkg[iDType][iPtJ][iVar]);
+
+            if (iVar == 0)  h2_jet_trk_dphi_cov_ref_bkg[iDType][iPtJ][iPtCh] = h2_cov;
+            else            SaferDelete (&h2_cov);
 
             h_jet_trk_dphi_ref_bkg[iDType][iPtJ][iPtCh][iVar]->Scale (1., "width");
 
-            SaferDelete (&h2_jet_trk_dphi_cov_ref_bkg[iDType][iPtJ][iPtCh][iVar]);
+            //SaferDelete (&h2_jet_trk_dphi_cov_ref_bkg[iDType][iPtJ][iPtCh]);
 
           } // end loop over iPtCh
 
@@ -281,17 +308,21 @@ void ProcessCorrelations (const char* tag, const char* outFileTag) {//, const in
         inFile = new TFile (inFileName.Data (), "read");
         outFile->cd ();
 
-        h_evt_counts[iDType][iCent][iVar]   = (TH1D*) inFile->Get (Form ("h_evt_counts_%s16",   dType.Data ()))->Clone (Form ("h_evt_counts_pPb_%s_%s_%s",  cent.Data (), dType.Data (), var.Data ()));
+        h_evt_counts[iDType][iCent][iVar] = (TH1D*) inFile->Get (Form ("h_evt_counts_%s16",   dType.Data ()))->Clone (Form ("h_evt_counts_pPb_%s_%s_%s",  cent.Data (), dType.Data (), var.Data ()));
 
-        h_jet_pt[iDType][iCent][iVar]       = (TH1D*) inFile->Get (Form ("h_jet_pt_%s16",       dType.Data ()))->Clone (Form ("h_jet_pt_pPb_%s_%s_%s",      cent.Data (), dType.Data (), var.Data ()));
-        h2_jet_pt_cov[iDType][iCent][iVar]  = (TH2D*) inFile->Get (Form ("h2_jet_pt_cov_%s16",  dType.Data ()))->Clone (Form ("h2_jet_pt_cov_pPb_%s_%s_%s", cent.Data (), dType.Data (), var.Data ()));
+        h_jet_pt[iDType][iCent][iVar]     = (TH1D*) inFile->Get (Form ("h_jet_pt_%s16",       dType.Data ()))->Clone (Form ("h_jet_pt_pPb_%s_%s_%s",      cent.Data (), dType.Data (), var.Data ()));
+        h2_cov                            = (TH2D*) inFile->Get (Form ("h2_jet_pt_cov_%s16",  dType.Data ()))->Clone (Form ("h2_jet_pt_cov_pPb_%s_%s_%s", cent.Data (), dType.Data (), var.Data ()));
 
-        CalcUncertainties (h_jet_pt[iDType][iCent][iVar], h2_jet_pt_cov[iDType][iCent][iVar], h_evt_counts[iDType][iCent][iVar]);
+        CalcUncertainties (h_jet_pt[iDType][iCent][iVar], h2_cov, h_evt_counts[iDType][iCent][iVar]);
+
+        if (iVar == 0)  h2_jet_pt_cov[iDType][iCent] = h2_cov;
+        else            SaferDelete (&h2_cov);
+
         h_jet_pt[iDType][iCent][iVar]->Scale (h_evt_counts[iDType][iCent][iVar]->GetBinContent (2)); // convert distribution to total number of jets by un-scaling 1/N_evt factor
         UnscaleWidth (h_jet_pt[iDType][iCent][iVar]);
 
         SaferDelete (&h_evt_counts[iDType][iCent][iVar]);
-        SaferDelete (&h2_jet_pt_cov[iDType][iCent][iVar]);
+        //SaferDelete (&h2_jet_pt_cov[iDType][iCent]);
 
         for (short iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
 
@@ -303,14 +334,17 @@ void ProcessCorrelations (const char* tag, const char* outFileTag) {//, const in
 
             const TString dir = directions[iDir];
 
-            h_jet_trk_pt[iDType][iPtJ][iDir][iCent][iVar]       = (TH1D*) inFile->Get (Form ("h_jet_trk_pt_%s_%s_%s16",       dir.Data (), pTJ.Data (), dType.Data ()))->Clone (Form ("h_jet_trk_pt_%s_pPb_%s_%s_%s_%s",       dir.Data (), cent.Data (), dType.Data (), pTJ.Data (), var.Data ()));
-            h2_jet_trk_pt_cov[iDType][iPtJ][iDir][iCent][iVar]  = (TH2D*) inFile->Get (Form ("h2_jet_trk_pt_cov_%s_%s_%s16",  dir.Data (), pTJ.Data (), dType.Data ()))->Clone (Form ("h2_jet_trk_pt_cov_%s_pPb_%s_%s_%s_%s",  dir.Data (), cent.Data (), dType.Data (), pTJ.Data (), var.Data ()));
+            h_jet_trk_pt[iDType][iPtJ][iDir][iCent][iVar] = (TH1D*) inFile->Get (Form ("h_jet_trk_pt_%s_%s_%s16",       dir.Data (), pTJ.Data (), dType.Data ()))->Clone (Form ("h_jet_trk_pt_%s_pPb_%s_%s_%s_%s",       dir.Data (), cent.Data (), dType.Data (), pTJ.Data (), var.Data ()));
+            h2_cov                                        = (TH2D*) inFile->Get (Form ("h2_jet_trk_pt_cov_%s_%s_%s16",  dir.Data (), pTJ.Data (), dType.Data ()))->Clone (Form ("h2_jet_trk_pt_cov_%s_pPb_%s_%s_%s_%s",  dir.Data (), cent.Data (), dType.Data (), pTJ.Data (), var.Data ()));
 
-            CalcUncertainties (h_jet_trk_pt[iDType][iPtJ][iDir][iCent][iVar], h2_jet_trk_pt_cov[iDType][iPtJ][iDir][iCent][iVar], h_jet_counts[iDType][iPtJ][iCent][iVar]);
+            CalcUncertainties (h_jet_trk_pt[iDType][iPtJ][iDir][iCent][iVar], h2_cov, h_jet_counts[iDType][iPtJ][iCent][iVar]);
+
+            if (iVar == 0)  h2_jet_trk_pt_cov[iDType][iPtJ][iDir][iCent] = h2_cov;
+            else            SaferDelete (&h2_cov);
 
             h_jet_trk_pt[iDType][iPtJ][iDir][iCent][iVar]->Scale (1., "width");
 
-            SaferDelete (&h2_jet_trk_pt_cov[iDType][iPtJ][iDir][iCent][iVar]);
+            //SaferDelete (&h2_jet_trk_pt_cov[iDType][iPtJ][iDir][iCent]);
 
           } // end loop over iDir
 
@@ -318,14 +352,17 @@ void ProcessCorrelations (const char* tag, const char* outFileTag) {//, const in
 
             const TString ptch = pTChSelections[iPtCh].Data ();
 
-            h_jet_trk_dphi[iDType][iPtJ][iPtCh][iCent][iVar]      = (TH1D*) inFile->Get (Form ("h_jet_trk_dphi_%s_%s_%s16",       ptch.Data (), pTJ.Data (), dType.Data ()))->Clone (Form ("h_jet_trk_dphi_%s_pPb_%s_%s_%s_%s",      ptch.Data (), cent.Data (), dType.Data (), pTJ.Data (), var.Data ()));
-            h2_jet_trk_dphi_cov[iDType][iPtJ][iPtCh][iCent][iVar] = (TH2D*) inFile->Get (Form ("h2_jet_trk_dphi_cov_%s_%s_%s16",  ptch.Data (), pTJ.Data (), dType.Data ()))->Clone (Form ("h2_jet_trk_dphi_cov_%s_pPb_%s_%s_%s_%s", ptch.Data (), cent.Data (), dType.Data (), pTJ.Data (), var.Data ()));
+            h_jet_trk_dphi[iDType][iPtJ][iPtCh][iCent][iVar]  = (TH1D*) inFile->Get (Form ("h_jet_trk_dphi_%s_%s_%s16",       ptch.Data (), pTJ.Data (), dType.Data ()))->Clone (Form ("h_jet_trk_dphi_%s_pPb_%s_%s_%s_%s",      ptch.Data (), cent.Data (), dType.Data (), pTJ.Data (), var.Data ()));
+            h2_cov                                            = (TH2D*) inFile->Get (Form ("h2_jet_trk_dphi_cov_%s_%s_%s16",  ptch.Data (), pTJ.Data (), dType.Data ()))->Clone (Form ("h2_jet_trk_dphi_cov_%s_pPb_%s_%s_%s_%s", ptch.Data (), cent.Data (), dType.Data (), pTJ.Data (), var.Data ()));
 
-            CalcUncertainties (h_jet_trk_dphi[iDType][iPtJ][iPtCh][iCent][iVar], h2_jet_trk_dphi_cov[iDType][iPtJ][iPtCh][iCent][iVar], h_jet_counts[iDType][iPtJ][iCent][iVar]);
+            CalcUncertainties (h_jet_trk_dphi[iDType][iPtJ][iPtCh][iCent][iVar], h2_cov, h_jet_counts[iDType][iPtJ][iCent][iVar]);
+
+            if (iVar == 0)  h2_jet_trk_dphi_cov[iDType][iPtJ][iPtCh][iCent] = h2_cov;
+            else            SaferDelete (&h2_cov);
 
             h_jet_trk_dphi[iDType][iPtJ][iPtCh][iCent][iVar]->Scale (1., "width");
 
-            SaferDelete (&h2_jet_trk_dphi_cov[iDType][iPtJ][iPtCh][iCent][iVar]);
+            //SaferDelete (&h2_jet_trk_dphi_cov[iDType][iPtJ][iPtCh][iCent]);
 
           } // end loop over iPtCh
 
@@ -359,14 +396,17 @@ void ProcessCorrelations (const char* tag, const char* outFileTag) {//, const in
 
               const TString dir = directions[iDir];
 
-              h_jet_trk_pt_bkg[iDType][iPtJ][iDir][iCent][iVar]       = (TH1D*) inFile->Get (Form ("h_jet_trk_pt_%s_%s_mixed_%s16",       dir.Data (), pTJ.Data (), dType.Data ()))->Clone (Form ("h_jet_trk_pt_%s_pPb_bkg_%s_%s_%s_%s",       dir.Data (), cent.Data (), dType.Data (), pTJ.Data (), var.Data ()));
-              h2_jet_trk_pt_cov_bkg[iDType][iPtJ][iDir][iCent][iVar]  = (TH2D*) inFile->Get (Form ("h2_jet_trk_pt_cov_%s_%s_mixed_%s16",  dir.Data (), pTJ.Data (), dType.Data ()))->Clone (Form ("h2_jet_trk_pt_cov_%s_pPb_bkg_%s_%s_%s_%s",  dir.Data (), cent.Data (), dType.Data (), pTJ.Data (), var.Data ()));
+              h_jet_trk_pt_bkg[iDType][iPtJ][iDir][iCent][iVar] = (TH1D*) inFile->Get (Form ("h_jet_trk_pt_%s_%s_mixed_%s16",       dir.Data (), pTJ.Data (), dType.Data ()))->Clone (Form ("h_jet_trk_pt_%s_pPb_bkg_%s_%s_%s_%s",       dir.Data (), cent.Data (), dType.Data (), pTJ.Data (), var.Data ()));
+              h2_cov                                            = (TH2D*) inFile->Get (Form ("h2_jet_trk_pt_cov_%s_%s_mixed_%s16",  dir.Data (), pTJ.Data (), dType.Data ()))->Clone (Form ("h2_jet_trk_pt_cov_%s_pPb_bkg_%s_%s_%s_%s",  dir.Data (), cent.Data (), dType.Data (), pTJ.Data (), var.Data ()));
 
-              CalcUncertainties (h_jet_trk_pt_bkg[iDType][iPtJ][iDir][iCent][iVar], h2_jet_trk_pt_cov_bkg[iDType][iPtJ][iDir][iCent][iVar], h_jet_counts_bkg[iDType][iPtJ][iCent][iVar]);
+              CalcUncertainties (h_jet_trk_pt_bkg[iDType][iPtJ][iDir][iCent][iVar], h2_cov, h_jet_counts_bkg[iDType][iPtJ][iCent][iVar]);
+
+              if (iVar == 0)  h2_jet_trk_pt_cov_bkg[iDType][iPtJ][iDir][iCent] = h2_cov;
+              else            SaferDelete (&h2_cov);
 
               h_jet_trk_pt_bkg[iDType][iPtJ][iDir][iCent][iVar]->Scale (1., "width");
 
-              SaferDelete (&h2_jet_trk_pt_cov_bkg[iDType][iPtJ][iDir][iCent][iVar]);
+              //SaferDelete (&h2_jet_trk_pt_cov_bkg[iDType][iPtJ][iDir][iCent]);
 
             } // end loop over iDir
 
@@ -374,18 +414,21 @@ void ProcessCorrelations (const char* tag, const char* outFileTag) {//, const in
 
               const TString ptch = pTChSelections[iPtCh].Data ();
 
-              h_jet_trk_dphi_bkg[iDType][iPtJ][iPtCh][iCent][iVar]      = (TH1D*) inFile->Get (Form ("h_jet_trk_dphi_%s_%s_mixed_%s16",       ptch.Data (), pTJ.Data (), dType.Data ()))->Clone (Form ("h_jet_trk_dphi_%s_pPb_bkg_%s_%s_%s_%s",      ptch.Data (), cent.Data (), dType.Data (), pTJ.Data (), var.Data ()));
-              h2_jet_trk_dphi_cov_bkg[iDType][iPtJ][iPtCh][iCent][iVar] = (TH2D*) inFile->Get (Form ("h2_jet_trk_dphi_cov_%s_%s_mixed_%s16",  ptch.Data (), pTJ.Data (), dType.Data ()))->Clone (Form ("h2_jet_trk_dphi_cov_%s_pPb_bkg_%s_%s_%s_%s", ptch.Data (), cent.Data (), dType.Data (), pTJ.Data (), var.Data ()));
+              h_jet_trk_dphi_bkg[iDType][iPtJ][iPtCh][iCent][iVar]  = (TH1D*) inFile->Get (Form ("h_jet_trk_dphi_%s_%s_mixed_%s16",       ptch.Data (), pTJ.Data (), dType.Data ()))->Clone (Form ("h_jet_trk_dphi_%s_pPb_bkg_%s_%s_%s_%s",      ptch.Data (), cent.Data (), dType.Data (), pTJ.Data (), var.Data ()));
+              h2_cov                                                = (TH2D*) inFile->Get (Form ("h2_jet_trk_dphi_cov_%s_%s_mixed_%s16",  ptch.Data (), pTJ.Data (), dType.Data ()))->Clone (Form ("h2_jet_trk_dphi_cov_%s_pPb_bkg_%s_%s_%s_%s", ptch.Data (), cent.Data (), dType.Data (), pTJ.Data (), var.Data ()));
 
-              CalcUncertainties (h_jet_trk_dphi_bkg[iDType][iPtJ][iPtCh][iCent][iVar], h2_jet_trk_dphi_cov_bkg[iDType][iPtJ][iPtCh][iCent][iVar], h_jet_counts_bkg[iDType][iPtJ][iCent][iVar]);
+              CalcUncertainties (h_jet_trk_dphi_bkg[iDType][iPtJ][iPtCh][iCent][iVar], h2_cov, h_jet_counts_bkg[iDType][iPtJ][iCent][iVar]);
+
+              if (iVar == 0)  h2_jet_trk_dphi_cov_bkg[iDType][iPtJ][iPtCh][iCent] = h2_cov;
+              else            SaferDelete (&h2_cov);
 
               h_jet_trk_dphi_bkg[iDType][iPtJ][iPtCh][iCent][iVar]->Scale (1., "width");
 
-              SaferDelete (&h2_jet_trk_dphi_cov_bkg[iDType][iPtJ][iPtCh][iCent][iVar]);
+              //SaferDelete (&h2_jet_trk_dphi_cov_bkg[iDType][iPtJ][iPtCh][iCent]);
 
             } // end loop over iPtCh
 
-            SaferDelete (&h_jet_counts_bkg[iDType][iPtJ][iCent][iVar]);
+            //SaferDelete (&h_jet_counts_bkg[iDType][iPtJ][iCent]);
 
           } // end loop over iPtJ
 
@@ -445,6 +488,12 @@ void ProcessCorrelations (const char* tag, const char* outFileTag) {//, const in
           if (hasRefBkg)
             h_jet_trk_pt_ref_sig[iDType][iPtJ][iDir][iVar]->Add (h_jet_trk_pt_ref_bkg[iDType][iPtJ][iDir][iVar], -1);
 
+          if (iVar == 0) {
+            h2_jet_trk_pt_cov_ref_sig[iDType][iPtJ][iDir] = (TH2D*) h2_jet_trk_pt_cov_ref[iDType][iPtJ][iDir]->Clone (Form ("h2_jet_trk_pt_cov_%s_ref_sig_%s_%s", dir.Data (), dType.Data (), pTJ.Data ()));
+            if (hasRefBkg)
+              h2_jet_trk_pt_cov_ref_sig[iDType][iPtJ][iDir]->Add (h2_jet_trk_pt_cov_ref_bkg[iDType][iPtJ][iDir]);
+          }
+
           for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
 
             const TString cent = (iCent == nZdcCentBins ? "allCent" : Form ("iCent%i", iCent));
@@ -452,6 +501,12 @@ void ProcessCorrelations (const char* tag, const char* outFileTag) {//, const in
             h_jet_trk_pt_sig[iDType][iPtJ][iDir][iCent][iVar] = (TH1D*) h_jet_trk_pt[iDType][iPtJ][iDir][iCent][iVar]->Clone (Form ("h_jet_trk_pt_%s_pPb_sig_%s_%s_%s_%s", dir.Data (), cent.Data (), dType.Data (), pTJ.Data (), var.Data ()));
             if (hasBkg)
               h_jet_trk_pt_sig[iDType][iPtJ][iDir][iCent][iVar]->Add (h_jet_trk_pt_bkg[iDType][iPtJ][iDir][iCent][iVar], -1);
+
+            if (iVar == 0) {
+              h2_jet_trk_pt_cov_sig[iDType][iPtJ][iDir][iCent] = (TH2D*) h2_jet_trk_pt_cov[iDType][iPtJ][iDir][iCent]->Clone (Form ("h2_jet_trk_pt_cov_%s_pPb_sig_%s_%s_%s", dir.Data (), cent.Data (), dType.Data (), pTJ.Data ()));
+              if (hasRefBkg)
+                h2_jet_trk_pt_cov_sig[iDType][iPtJ][iDir][iCent]->Add (h2_jet_trk_pt_cov_bkg[iDType][iPtJ][iDir][iCent]);
+            }
 
           } // end loop over iCent
 
@@ -466,6 +521,12 @@ void ProcessCorrelations (const char* tag, const char* outFileTag) {//, const in
           if (hasRefBkg)
             h_jet_trk_dphi_ref_sig[iDType][iPtJ][iPtCh][iVar]->Add (h_jet_trk_dphi_ref_bkg[iDType][iPtJ][iPtCh][iVar], -1);
 
+          if (iVar == 0) {
+            h2_jet_trk_dphi_cov_ref_sig[iDType][iPtJ][iPtCh] = (TH2D*) h2_jet_trk_dphi_cov_ref[iDType][iPtJ][iPtCh]->Clone (Form ("h2_jet_trk_dphi_cov_%s_ref_sig_%s_%s", ptch.Data (), dType.Data (), pTJ.Data ()));
+            if (hasRefBkg)
+              h2_jet_trk_dphi_cov_ref_sig[iDType][iPtJ][iPtCh]->Add (h2_jet_trk_dphi_cov_ref_bkg[iDType][iPtJ][iPtCh]);
+          }
+
           for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
 
             const TString cent = (iCent == nZdcCentBins ? "allCent" : Form ("iCent%i", iCent));
@@ -473,6 +534,12 @@ void ProcessCorrelations (const char* tag, const char* outFileTag) {//, const in
             h_jet_trk_dphi_sig[iDType][iPtJ][iPtCh][iCent][iVar] = (TH1D*) h_jet_trk_dphi[iDType][iPtJ][iPtCh][iCent][iVar]->Clone (Form ("h_jet_trk_dphi_%s_pPb_sig_%s_%s_%s_%s", ptch.Data (), cent.Data (), dType.Data (), pTJ.Data (), var.Data ()));
             if (hasBkg)
               h_jet_trk_dphi_sig[iDType][iPtJ][iPtCh][iCent][iVar]->Add (h_jet_trk_dphi_bkg[iDType][iPtJ][iPtCh][iCent][iVar], -1);
+
+            if (iVar == 0) {
+              h2_jet_trk_dphi_cov_sig[iDType][iPtJ][iPtCh][iCent] = (TH2D*) h2_jet_trk_dphi_cov[iDType][iPtJ][iPtCh][iCent]->Clone (Form ("h2_jet_trk_dphi_cov_%s_pPb_sig_%s_%s_%s", ptch.Data (), cent.Data (), dType.Data (), pTJ.Data ()));
+              if (hasRefBkg)
+                h2_jet_trk_dphi_cov_sig[iDType][iPtJ][iPtCh][iCent]->Add (h2_jet_trk_dphi_cov_bkg[iDType][iPtJ][iPtCh][iCent]);
+            }
 
           } // end loop over iCent
 
@@ -516,6 +583,9 @@ void ProcessCorrelations (const char* tag, const char* outFileTag) {//, const in
             h_jetInt_trk_pt_ref_bkg[iDType][iPtJInt][iDir][iVar] = new TH1D (Form ("h_jetInt_trk_pt_%s_ref_bkg_%s_%s_%s", dir.Data (), dType.Data (), pTJInt.Data (), var.Data ()), "", nPtChBins, pTChBins);
             h_jetInt_trk_pt_ref_sig[iDType][iPtJInt][iDir][iVar] = new TH1D (Form ("h_jetInt_trk_pt_%s_ref_sig_%s_%s_%s", dir.Data (), dType.Data (), pTJInt.Data (), var.Data ()), "", nPtChBins, pTChBins);
 
+            if (iVar == 0)
+              h2_jetInt_trk_pt_cov_ref_sig[iDType][iPtJInt][iDir] = new TH2D (Form ("h2_jetInt_trk_pt_cov_%s_ref_sig_%s_%s", dir.Data (), dType.Data (), pTJInt.Data ()), "", nPtChBins, pTChBins, nPtChBins, pTChBins);
+
             h_jetInt_trk_pt_ref[iDType][iPtJInt][iDir][iVar]->Sumw2 ();
             h_jetInt_trk_pt_ref_bkg[iDType][iPtJInt][iDir][iVar]->Sumw2 ();
             h_jetInt_trk_pt_ref_sig[iDType][iPtJInt][iDir][iVar]->Sumw2 ();
@@ -529,6 +599,10 @@ void ProcessCorrelations (const char* tag, const char* outFileTag) {//, const in
               h_jetInt_trk_pt_ref[iDType][iPtJInt][iDir][iVar]->Add (h_jet_trk_pt_ref[iDType][iPtJ][iDir][iVar], nJets);
               h_jetInt_trk_pt_ref_bkg[iDType][iPtJInt][iDir][iVar]->Add (h_jet_trk_pt_ref_bkg[iDType][iPtJ][iDir][iVar], nJets);
               h_jetInt_trk_pt_ref_sig[iDType][iPtJInt][iDir][iVar]->Add (h_jet_trk_pt_ref_sig[iDType][iPtJ][iDir][iVar], nJets);
+
+              if (iVar == 0)
+                h2_jetInt_trk_pt_cov_ref_sig[iDType][iPtJInt][iDir]->Add (h2_jet_trk_pt_cov_ref_sig[iDType][iPtJ][iDir], nJets*nJets);
+
               totalJets += nJets;
 
             } // end loop over iPtJ
@@ -536,6 +610,9 @@ void ProcessCorrelations (const char* tag, const char* outFileTag) {//, const in
             h_jetInt_trk_pt_ref[iDType][iPtJInt][iDir][iVar]->Scale (1./totalJets);
             h_jetInt_trk_pt_ref_bkg[iDType][iPtJInt][iDir][iVar]->Scale (1./totalJets);
             h_jetInt_trk_pt_ref_sig[iDType][iPtJInt][iDir][iVar]->Scale (1./totalJets);
+
+            if (iVar == 0)
+              h2_jetInt_trk_pt_cov_ref_sig[iDType][iPtJInt][iDir]->Scale (1./(totalJets*totalJets));
           }
 
           for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
@@ -545,6 +622,9 @@ void ProcessCorrelations (const char* tag, const char* outFileTag) {//, const in
             h_jetInt_trk_pt[iDType][iPtJInt][iDir][iCent][iVar]     = new TH1D (Form ("h_jetInt_trk_pt_%s_pPb_%s_%s_%s_%s",     dir.Data (), cent.Data (), dType.Data (), pTJInt.Data (), var.Data ()), "", nPtChBins, pTChBins);
             h_jetInt_trk_pt_bkg[iDType][iPtJInt][iDir][iCent][iVar] = new TH1D (Form ("h_jetInt_trk_pt_%s_pPb_bkg_%s_%s_%s_%s", dir.Data (), cent.Data (), dType.Data (), pTJInt.Data (), var.Data ()), "", nPtChBins, pTChBins);
             h_jetInt_trk_pt_sig[iDType][iPtJInt][iDir][iCent][iVar] = new TH1D (Form ("h_jetInt_trk_pt_%s_pPb_sig_%s_%s_%s_%s", dir.Data (), cent.Data (), dType.Data (), pTJInt.Data (), var.Data ()), "", nPtChBins, pTChBins);
+
+            if (iVar == 0)
+              h2_jetInt_trk_pt_cov_sig[iDType][iPtJInt][iDir][iCent] = new TH2D (Form ("h2_jetInt_trk_pt_cov_%s_pPb_sig_%s_%s_%s", dir.Data (), cent.Data (), dType.Data (), pTJInt.Data ()), "", nPtChBins, pTChBins, nPtChBins, pTChBins);
 
             h_jetInt_trk_pt[iDType][iPtJInt][iDir][iCent][iVar]->Sumw2 ();
             h_jetInt_trk_pt_bkg[iDType][iPtJInt][iDir][iCent][iVar]->Sumw2 ();
@@ -559,6 +639,10 @@ void ProcessCorrelations (const char* tag, const char* outFileTag) {//, const in
               h_jetInt_trk_pt[iDType][iPtJInt][iDir][iCent][iVar]->Add (h_jet_trk_pt[iDType][iPtJ][iDir][iCent][iVar], nJets);
               h_jetInt_trk_pt_bkg[iDType][iPtJInt][iDir][iCent][iVar]->Add (h_jet_trk_pt_bkg[iDType][iPtJ][iDir][iCent][iVar], nJets);
               h_jetInt_trk_pt_sig[iDType][iPtJInt][iDir][iCent][iVar]->Add (h_jet_trk_pt_sig[iDType][iPtJ][iDir][iCent][iVar], nJets);
+
+              if (iVar == 0)
+                h2_jetInt_trk_pt_cov_sig[iDType][iPtJInt][iDir][iCent]->Add (h2_jet_trk_pt_cov_sig[iDType][iPtJ][iDir][iCent], nJets*nJets);
+
               totalJets += nJets;
 
             } // end loop over iPtJ
@@ -566,6 +650,9 @@ void ProcessCorrelations (const char* tag, const char* outFileTag) {//, const in
             h_jetInt_trk_pt[iDType][iPtJInt][iDir][iCent][iVar]->Scale (1./totalJets);
             h_jetInt_trk_pt_bkg[iDType][iPtJInt][iDir][iCent][iVar]->Scale (1./totalJets);
             h_jetInt_trk_pt_sig[iDType][iPtJInt][iDir][iCent][iVar]->Scale (1./totalJets);
+
+            if (iVar == 0)
+              h2_jetInt_trk_pt_cov_sig[iDType][iPtJInt][iDir][iCent]->Scale (1./(totalJets*totalJets));
 
           } // end loop over iCent
 
@@ -581,6 +668,9 @@ void ProcessCorrelations (const char* tag, const char* outFileTag) {//, const in
             h_jetInt_trk_dphi_ref_bkg[iDType][iPtJInt][iPtCh][iVar] = new TH1D (Form ("h_jetInt_trk_dphi_%s_ref_bkg_%s_%s_%s", ptch.Data (), dType.Data (), pTJInt.Data (), var.Data ()), "", nDPhiBins, dPhiBins);
             h_jetInt_trk_dphi_ref_sig[iDType][iPtJInt][iPtCh][iVar] = new TH1D (Form ("h_jetInt_trk_dphi_%s_ref_sig_%s_%s_%s", ptch.Data (), dType.Data (), pTJInt.Data (), var.Data ()), "", nDPhiBins, dPhiBins);
 
+            if (iVar == 0)
+              h2_jetInt_trk_dphi_cov_ref_sig[iDType][iPtJInt][iPtCh] = new TH2D (Form ("h2_jetInt_trk_dphi_cov_%s_ref_sig_%s_%s", ptch.Data (), dType.Data (), pTJInt.Data ()), "", nPtChBins, pTChBins, nPtChBins, pTChBins);
+
             h_jetInt_trk_dphi_ref[iDType][iPtJInt][iPtCh][iVar]->Sumw2 ();
             h_jetInt_trk_dphi_ref_bkg[iDType][iPtJInt][iPtCh][iVar]->Sumw2 ();
             h_jetInt_trk_dphi_ref_sig[iDType][iPtJInt][iPtCh][iVar]->Sumw2 ();
@@ -594,12 +684,19 @@ void ProcessCorrelations (const char* tag, const char* outFileTag) {//, const in
               h_jetInt_trk_dphi_ref[iDType][iPtJInt][iPtCh][iVar]->Add (h_jet_trk_dphi_ref[iDType][iPtJ][iPtCh][iVar], nJets);
               h_jetInt_trk_dphi_ref_bkg[iDType][iPtJInt][iPtCh][iVar]->Add (h_jet_trk_dphi_ref_bkg[iDType][iPtJ][iPtCh][iVar], nJets);
               h_jetInt_trk_dphi_ref_sig[iDType][iPtJInt][iPtCh][iVar]->Add (h_jet_trk_dphi_ref_sig[iDType][iPtJ][iPtCh][iVar], nJets);
+
+              if (iVar == 0)
+                h2_jetInt_trk_dphi_cov_ref_sig[iDType][iPtJInt][iPtCh]->Add (h2_jet_trk_dphi_cov_ref_sig[iDType][iPtJ][iPtCh], nJets*nJets);
+
               totalJets += nJets;
 
             } // end loop over iPtJ
 
             h_jetInt_trk_dphi_ref[iDType][iPtJInt][iPtCh][iVar]->Scale (1./totalJets);
             h_jetInt_trk_dphi_ref_bkg[iDType][iPtJInt][iPtCh][iVar]->Scale (1./totalJets);
+
+            if (iVar == 0)
+              h2_jetInt_trk_dphi_cov_ref_sig[iDType][iPtJInt][iPtCh]->Scale (1./(totalJets*totalJets));
           }
 
           for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
@@ -609,6 +706,9 @@ void ProcessCorrelations (const char* tag, const char* outFileTag) {//, const in
             h_jetInt_trk_dphi[iDType][iPtJInt][iPtCh][iCent][iVar]     = new TH1D (Form ("h_jetInt_trk_dphi_%s_pPb_%s_%s_%s_%s",     ptch.Data (), cent.Data (), dType.Data (), pTJInt.Data (), var.Data ()), "", nDPhiBins, dPhiBins);
             h_jetInt_trk_dphi_bkg[iDType][iPtJInt][iPtCh][iCent][iVar] = new TH1D (Form ("h_jetInt_trk_dphi_%s_pPb_bkg_%s_%s_%s_%s", ptch.Data (), cent.Data (), dType.Data (), pTJInt.Data (), var.Data ()), "", nDPhiBins, dPhiBins);
             h_jetInt_trk_dphi_sig[iDType][iPtJInt][iPtCh][iCent][iVar] = new TH1D (Form ("h_jetInt_trk_dphi_%s_pPb_sig_%s_%s_%s_%s", ptch.Data (), cent.Data (), dType.Data (), pTJInt.Data (), var.Data ()), "", nDPhiBins, dPhiBins);
+
+            if (iVar == 0)
+              h2_jetInt_trk_dphi_cov_sig[iDType][iPtJInt][iPtCh][iCent] = new TH2D (Form ("h2_jetInt_trk_dphi_cov_%s_pPb_sig_%s_%s_%s", ptch.Data (), cent.Data (), dType.Data (), pTJInt.Data ()), "", nPtChBins, pTChBins, nPtChBins, pTChBins);
 
             h_jetInt_trk_dphi[iDType][iPtJInt][iPtCh][iCent][iVar]->Sumw2 ();
             h_jetInt_trk_dphi_bkg[iDType][iPtJInt][iPtCh][iCent][iVar]->Sumw2 ();
@@ -623,6 +723,10 @@ void ProcessCorrelations (const char* tag, const char* outFileTag) {//, const in
               h_jetInt_trk_dphi[iDType][iPtJInt][iPtCh][iCent][iVar]->Add (h_jet_trk_dphi[iDType][iPtJ][iPtCh][iCent][iVar], nJets);
               h_jetInt_trk_dphi_bkg[iDType][iPtJInt][iPtCh][iCent][iVar]->Add (h_jet_trk_dphi_bkg[iDType][iPtJ][iPtCh][iCent][iVar], nJets);
               h_jetInt_trk_dphi_sig[iDType][iPtJInt][iPtCh][iCent][iVar]->Add (h_jet_trk_dphi_sig[iDType][iPtJ][iPtCh][iCent][iVar], nJets);
+
+              if (iVar == 0)
+                h2_jetInt_trk_dphi_cov_sig[iDType][iPtJInt][iPtCh][iCent]->Add (h2_jet_trk_dphi_cov_sig[iDType][iPtJ][iPtCh][iCent], nJets*nJets);
+
               totalJets += nJets;
 
             } // end loop over iPtJ
@@ -630,6 +734,9 @@ void ProcessCorrelations (const char* tag, const char* outFileTag) {//, const in
             h_jetInt_trk_dphi[iDType][iPtJInt][iPtCh][iCent][iVar]->Scale (1./totalJets);
             h_jetInt_trk_dphi_bkg[iDType][iPtJInt][iPtCh][iCent][iVar]->Scale (1./totalJets);
             h_jetInt_trk_dphi_sig[iDType][iPtJInt][iPtCh][iCent][iVar]->Scale (1./totalJets);
+
+            if (iVar == 0)
+              h2_jetInt_trk_dphi_cov_sig[iDType][iPtJInt][iPtCh][iCent]->Scale (1./(totalJets*totalJets));
 
           } // end loop over iCent
 
@@ -1364,11 +1471,17 @@ void ProcessCorrelations (const char* tag, const char* outFileTag) {//, const in
             h_jetInt_trk_pt_ref_bkg[iDType][iPtJInt][iDir][iVar]->Write ();
             h_jetInt_trk_pt_ref_sig[iDType][iPtJInt][iDir][iVar]->Write ();
 
+            if (iVar == 0)
+              h2_jetInt_trk_pt_cov_ref_sig[iDType][iPtJInt][iDir]->Write ();
+
             for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
 
               h_jetInt_trk_pt[iDType][iPtJInt][iDir][iCent][iVar]->Write ();
               h_jetInt_trk_pt_bkg[iDType][iPtJInt][iDir][iCent][iVar]->Write ();
               h_jetInt_trk_pt_sig[iDType][iPtJInt][iDir][iCent][iVar]->Write ();
+
+              if (iVar == 0)
+                h2_jetInt_trk_pt_cov_sig[iDType][iPtJInt][iDir][iCent]->Write ();
 
             } // end loop over iCent
 
@@ -1380,11 +1493,17 @@ void ProcessCorrelations (const char* tag, const char* outFileTag) {//, const in
             h_jetInt_trk_dphi_ref_bkg[iDType][iPtJInt][iPtCh][iVar]->Write ();
             h_jetInt_trk_dphi_ref_sig[iDType][iPtJInt][iPtCh][iVar]->Write ();
 
+            if (iVar == 0)
+              h2_jetInt_trk_dphi_cov_ref_sig[iDType][iPtJInt][iPtCh]->Write ();
+
             for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
 
               h_jetInt_trk_dphi[iDType][iPtJInt][iPtCh][iCent][iVar]->Write ();
               h_jetInt_trk_dphi_bkg[iDType][iPtJInt][iPtCh][iCent][iVar]->Write ();
               h_jetInt_trk_dphi_sig[iDType][iPtJInt][iPtCh][iCent][iVar]->Write ();
+
+              if (iVar == 0)
+                h2_jetInt_trk_dphi_cov_sig[iDType][iPtJInt][iPtCh][iCent]->Write ();
 
             } // end loop over iCent
 

@@ -153,6 +153,9 @@ void ProcessUnfolding (const char* inFileTag, const char* outFileTag) {
   TH1D*****   h_jetInt_trk_dphi_ref_sig           = Get4DArray <TH1D*> (2, 2, nPtChSelections, nVar);
   TH1D******  h_jetInt_trk_dphi_sig               = Get5DArray <TH1D*> (2, 2, nPtChSelections, nZdcCentBins+1, nVar);
 
+  TH2D****    h2_jetInt_trk_pt_cov_ref_sig        = Get3DArray <TH2D*> (2, 2, nDir);
+  TH2D*****   h2_jetInt_trk_pt_cov_sig            = Get4DArray <TH2D*> (2, 2, nDir, nZdcCentBins+1);
+
   TH1D****    h_jet_pt_ref_unf                    = Get3DArray <TH1D*> (2, 2, nVar);          // iDType, iPtJInt, nVar
   TH1D*****   h_jet_pt_unf                        = Get4DArray <TH1D*> (2, 2, nZdcCentBins+1, nVar);
 
@@ -250,12 +253,16 @@ void ProcessUnfolding (const char* inFileTag, const char* outFileTag) {
             const TString dir = directions[iDir];
 
             h_jetInt_trk_pt_ref_sig[iDType][iPtJInt][iDir][iVar]  = (TH1D*) inFile->Get (Form ("h_jetInt_trk_pt_%s_ref_sig_%s_%s_%s",  dir.Data (), dType.Data (), pTJInt.Data (), var.Data ()));
+            if (iVar == 0)
+              h2_jetInt_trk_pt_cov_ref_sig[iDType][iPtJInt][iDir] = (TH2D*) inFile->Get (Form ("h2_jetInt_trk_pt_cov_%s_ref_sig_%s_%s_%s",  dir.Data (), dType.Data (), pTJInt.Data ()));
 
             for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
 
               const TString cent = (iCent == nZdcCentBins ? "allCent" : Form ("iCent%i", iCent));
     
-              h_jetInt_trk_pt_sig[iDType][iPtJInt][iDir][iCent][iVar] = (TH1D*) inFile->Get (Form ("h_jetInt_trk_pt_%s_pPb_sig_%s_%s_%s_%s", dir.Data (), cent.Data (), dType.Data (), pTJInt.Data (), var.Data ()));
+              h_jetInt_trk_pt_sig[iDType][iPtJInt][iDir][iCent][iVar]   = (TH1D*) inFile->Get (Form ("h_jetInt_trk_pt_%s_pPb_sig_%s_%s_%s_%s", dir.Data (), cent.Data (), dType.Data (), pTJInt.Data (), var.Data ()));
+              if (iVar == 0)
+                h2_jetInt_trk_pt_cov_sig[iDType][iPtJInt][iDir][iCent]  = (TH2D*) inFile->Get (Form ("h2_jetInt_trk_pt_cov_%s_pPb_sig_%s_%s_%s", dir.Data (), cent.Data (), dType.Data (), pTJInt.Data ()));
 
             } // end loop over iCent
 
@@ -265,13 +272,17 @@ void ProcessUnfolding (const char* inFileTag, const char* outFileTag) {
 
             const TString ptch = pTChSelections[iPtCh].Data ();
 
-            h_jetInt_trk_dphi_ref_sig[iDType][iPtJInt][iPtCh][iVar]  = (TH1D*) inFile->Get (Form ("h_jetInt_trk_dphi_%s_ref_sig_%s_%s_%s",  ptch.Data (), dType.Data (), pTJInt.Data (), var.Data ()));
+            h_jetInt_trk_dphi_ref_sig[iDType][iPtJInt][iPtCh][iVar]   = (TH1D*) inFile->Get (Form ("h_jetInt_trk_dphi_%s_ref_sig_%s_%s_%s",  ptch.Data (), dType.Data (), pTJInt.Data (), var.Data ()));
+            if (iVar == 0)
+              h2_jetInt_trk_dphi_cov_ref_sig[iDType][iPtJInt][iPtCh]  = (TH2D*) inFile->Get (Form ("h2_jetInt_trk_dphi_cov_%s_ref_sig_%s_%s_%s",  ptch.Data (), dType.Data (), pTJInt.Data ()));
 
             for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
 
               const TString cent = (iCent == nZdcCentBins ? "allCent" : Form ("iCent%i", iCent));
     
-              h_jetInt_trk_dphi_sig[iDType][iPtJInt][iPtCh][iCent][iVar] = (TH1D*) inFile->Get (Form ("h_jetInt_trk_dphi_%s_pPb_sig_%s_%s_%s_%s", ptch.Data (), cent.Data (), dType.Data (), pTJInt.Data (), var.Data ()));
+              h_jetInt_trk_dphi_sig[iDType][iPtJInt][iPtCh][iCent][iVar]  = (TH1D*) inFile->Get (Form ("h_jetInt_trk_dphi_%s_pPb_sig_%s_%s_%s_%s", ptch.Data (), cent.Data (), dType.Data (), pTJInt.Data (), var.Data ()));
+              if (iVar == 0)
+                h2_jetInt_trk_dphi_cov_sig[iDType][iPtJInt][iPtCh][iCent] = (TH2D*) inFile->Get (Form ("h2_jetInt_trk_dphi_cov_%s_pPb_sig_%s_%s_%s", ptch.Data (), cent.Data (), dType.Data (), pTJInt.Data ()));
 
             } // end loop over iCent
 
