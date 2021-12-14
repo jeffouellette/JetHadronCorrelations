@@ -219,6 +219,22 @@ TGAE**** GetPythiaAngantyrIpPb () {
 
 
 
+TH1D*** GetAMPTIpPb () {
+
+  TFile* inFile = new TFile (Form ("%s/aux/ampt-calc.root", workPath.Data ()), "read");
+
+  TH1D*** h_ampt_iaa = Get2DArray <TH1D*> (3, 2); // iDir, iInts (on=1/off=0)
+
+  h_ampt_iaa[0][0] = (TH1D*) inFile->Get ("iaa-near-ampt-noint");
+  h_ampt_iaa[2][0] = (TH1D*) inFile->Get ("iaa-far-ampt-noint");
+  h_ampt_iaa[0][1] = (TH1D*) inFile->Get ("iaa-near-ampt");
+  h_ampt_iaa[2][1] = (TH1D*) inFile->Get ("iaa-far-ampt");
+
+  return h_ampt_iaa;
+}
+
+
+
 } // end namespace
 
 #endif

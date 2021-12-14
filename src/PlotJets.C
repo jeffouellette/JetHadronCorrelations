@@ -155,19 +155,21 @@ void PlotJets (const char* tag, const char* inFileTag) {
 
 
   for (float trigpt : {30., 60.}) {
+
+    float maxpt = (trigpt == 30. ? 60. : 300.);
     float* njet = new float[nZdcCentBins+2];
 
     std::cout << "---------------" << std::endl << "JETS IN DATA > " << trigpt << " GeV" << std::endl << "---------------" << std::endl;
 
     njet[0] = 0;
     for (short iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
-      if (pTJBins[iPtJ] >= trigpt)
+      if (0.5*(pTJBins[iPtJ]+pTJBins[iPtJ+1]) >= trigpt && 0.5*(pTJBins[iPtJ]+pTJBins[iPtJ+1]) < maxpt)
         njet[0] += h_jet_counts_ref[0][iPtJ][0]->GetBinContent (1);
     } // end loop over iPtJ
     for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
       njet[iCent+1] = 0;
       for (short iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
-        if (pTJBins[iPtJ] >= trigpt)
+        if (0.5*(pTJBins[iPtJ]+pTJBins[iPtJ+1]) >= trigpt && 0.5*(pTJBins[iPtJ]+pTJBins[iPtJ+1]) < maxpt)
           njet[iCent+1] += h_jet_counts[0][iPtJ][iCent][0]->GetBinContent (1);
       } // end loop over iPtJ
     } // end loop over iCent
@@ -198,13 +200,13 @@ void PlotJets (const char* tag, const char* inFileTag) {
 
     njet[0] = 0;
     for (short iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
-      if (pTJBins[iPtJ] >= trigpt)
+      if (0.5*(pTJBins[iPtJ]+pTJBins[iPtJ+1]) >= trigpt && 0.5*(pTJBins[iPtJ]+pTJBins[iPtJ+1]) < maxpt)
         njet[0] += h_jet_counts_ref[1][iPtJ][0]->GetBinContent (1);
     } // end loop over iPtJ
     for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
       njet[iCent+1] = 0;
       for (short iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
-        if (pTJBins[iPtJ] >= trigpt)
+        if (0.5*(pTJBins[iPtJ]+pTJBins[iPtJ+1]) >= trigpt && 0.5*(pTJBins[iPtJ]+pTJBins[iPtJ+1]) < maxpt)
           njet[iCent+1] += h_jet_counts[1][iPtJ][iCent][0]->GetBinContent (1);
       } // end loop over iPtJ
     } // end loop over iCent
