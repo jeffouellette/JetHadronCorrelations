@@ -222,7 +222,7 @@ void PlotCentralityAnalysis () {
   //  double ymin = 5e-7;
   //  double ymax = 8e-2;
 
-  //  h->SetLineColor (kBlue+3);
+  //  h->SetLineColor (myBlue);
 
   //  h->Scale (1./h->Integral ());
 
@@ -244,7 +244,7 @@ void PlotCentralityAnalysis () {
 
   //  h->Scale (1./h->Integral ());
 
-  //  h->SetLineColor (kRed+1);
+  //  h->SetLineColor (myRed);
 
   //  double xq[17];
   //  double yq[17];
@@ -286,8 +286,8 @@ void PlotCentralityAnalysis () {
 
   //  myText (0.20, 0.88, kBlack, "#bf{#it{ATLAS}} Internal", 0.036);
   //  myText (0.20, 0.840, kBlack, Form ("Run %i (per. A)", pPbRuns[iRun]), 0.032);
-  //  myText (0.65, 0.550, kBlue+3, "HLT_j50_L1J15", 0.032);
-  //  myText (0.65, 0.510, kRed+1, "HLT_mb_sptrk_L1MBTS_1", 0.032);
+  //  myText (0.65, 0.550, myBlue, "HLT_j50_L1J15", 0.032);
+  //  myText (0.65, 0.510, myRed, "HLT_mb_sptrk_L1MBTS_1", 0.032);
 
   //  TPad* subPad = new TPad ("c3_subPad", "", 0.6, 0.6, 1.-c->GetRightMargin (), 1.-c->GetTopMargin ());
   //  subPad->SetTopMargin (0);
@@ -374,7 +374,7 @@ void PlotCentralityAnalysis () {
 
     TH1D* h = (TH1D*) h_mb_Pb_zdc_calibE_sum->Clone ("htemp");
 
-    h->SetLineColor (kRed+1);
+    h->SetLineColor (myRed);
 
     double plot_xq[101];
     double plot_yq[17];
@@ -437,7 +437,7 @@ void PlotCentralityAnalysis () {
     yax->SetLabelFont (43);
     yax->SetLabelSize (24);
 
-    hjet->SetLineColor (kBlue+3);
+    hjet->SetLineColor (myBlue);
 
     hjet->DrawCopy ("hist");
     SaferDelete (&hjet);
@@ -525,13 +525,13 @@ void PlotCentralityAnalysis () {
 
     //TGAE* g = g_ALICE_zna_calibE;
     TGAE* g = make_graph (h_zna);
-    g->SetMarkerColor (myGreen);
-    g->SetLineColor (myGreen);
+    g->SetMarkerColor (myPurple);
+    g->SetLineColor (myPurple);
     g->SetMarkerStyle (kOpenCircle);
     g->Draw ("P");
 
     TH1D* h_g = h_zna_glau;
-    h_g->SetLineColor (myLiteGreen);
+    h_g->SetLineColor (myLitePurple);
     h_g->SetLineWidth (2);
     h_g->DrawCopy ("same hist");
 
@@ -553,11 +553,11 @@ void PlotCentralityAnalysis () {
 
     myText (0.18, 0.900, kBlack, "#bf{#it{ATLAS}} Internal", 0.036);
     myText (0.18, 0.860, kBlack, "#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV", 0.032);
-    myText (0.18, 0.820, kBlue+3, "HLT_j50_ion_L1J10", 0.032);
-    myText (0.18, 0.780, kRed+1, "HLT_mb_sptrk_L1MBTS_1", 0.032);
+    myText (0.18, 0.820, myBlue, "HLT_j50_ion_L1J10", 0.032);
+    myText (0.18, 0.780, myRed, "HLT_mb_sptrk_L1MBTS_1", 0.032);
     //myText (0.18, 0.740, kGreen+1, "ALICE 8.16 TeV, #Sigma#it{E}^{Pb}_{ZNA} #times 1.57/2.56", 0.032);
-    myText (0.18, 0.740, myGreen, "ALICE, #Sigma#it{E}^{Pb}_{ZNA} (#times 10^{-6})", 0.032);
-    myText (0.18, 0.700, myLiteGreen, "ALICE, SNM #otimes Glauber fit (#times 10^{-6})", 0.032);
+    myText (0.18, 0.740, myPurple, "ALICE, #Sigma#it{E}^{Pb}_{ZNA} (#times 10^{-6})", 0.032);
+    myText (0.18, 0.700, myLitePurple, "ALICE, SNM #otimes Glauber fit (#times 10^{-6})", 0.032);
 
 
     dPad->cd ();
@@ -574,13 +574,13 @@ void PlotCentralityAnalysis () {
     yax = h->GetYaxis ();
 
     xax->SetTitle ("Calibrated #Sigma#it{E}_{ZDC}^{Pb} [TeV]");
-    yax->SetTitle (Form ("#color[%i]{j50} / #color[%i]{mb_sptrk}", kBlue+3, kRed+1));
+    yax->SetTitle (Form ("#color[%i]{j50} / #color[%i]{mb_sptrk}", myBlue, myRed));
 
     xax->SetTitleOffset (2.4 * xax->GetTitleOffset ());
     yax->SetTitleOffset (1.2 * yax->GetTitleOffset ());
     yax->CenterTitle ();
 
-    h->SetLineColor (kBlue+3);
+    h->SetLineColor (myBlue);
 
     yax->SetRangeUser (ymin, ymax);
 
@@ -637,15 +637,15 @@ void PlotCentralityAnalysis () {
 
     h->Scale (1. / h->Integral (h->FindBin (plot_yq[ibin]), h->GetNbinsX ()), "width");
 
-    h->SetLineColor (kBlue+3);
+    h->SetLineColor (myBlue);
 
     h->DrawCopy ("hist same");
     SaferDelete (&h);
 
     //g = g_ALICE_zna_calibE_subpanel;
     g = make_graph (h_zna);
-    g->SetMarkerColor (myGreen);
-    g->SetLineColor (myGreen);
+    g->SetMarkerColor (myPurple);
+    g->SetLineColor (myPurple);
     g->SetMarkerStyle (kOpenCircle);
     g->Draw ("P");
 
@@ -656,7 +656,7 @@ void PlotCentralityAnalysis () {
 
     h->Scale (1. / h->Integral (h->FindBin (plot_yq[ibin]), h->GetNbinsX ()), "width");
 
-    h->SetLineColor (kRed+1);
+    h->SetLineColor (myRed);
 
     h->DrawCopy ("hist same");
 
@@ -710,7 +710,7 @@ void PlotCentralityAnalysis () {
 
     TH1D* h = (TH1D*) h_mb_Pb_fcal_et_sum->Clone ("htemp");
 
-    h->SetLineColor (kRed+1);
+    h->SetLineColor (myRed);
 
     double plot_xq[17];
     double plot_yq[17];
@@ -773,7 +773,7 @@ void PlotCentralityAnalysis () {
     yax->SetLabelFont (43);
     yax->SetLabelSize (24);
 
-    hjet->SetLineColor (kBlue+3);
+    hjet->SetLineColor (myBlue);
 
     hjet->DrawCopy ("hist");
     SaferDelete (&hjet);
@@ -799,8 +799,8 @@ void PlotCentralityAnalysis () {
     myText (0.65, 0.890, kBlack, "#bf{#it{ATLAS}} Internal", 0.036);
     myText (0.65, 0.850, kBlack, "#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV", 0.032);
     myText (0.65, 0.810, kBlack, "All runs", 0.032);
-    myText (0.65, 0.770, kBlue+3, "HLT_j50_ion_L1J10", 0.032);
-    myText (0.65, 0.730, kRed+1, "HLT_mb_sptrk_L1MBTS_1", 0.032);
+    myText (0.65, 0.770, myBlue, "HLT_j50_ion_L1J10", 0.032);
+    myText (0.65, 0.730, myRed, "HLT_mb_sptrk_L1MBTS_1", 0.032);
 
 
     dPad->cd ();
@@ -818,13 +818,13 @@ void PlotCentralityAnalysis () {
     yax = h->GetYaxis ();
 
     xax->SetTitle ("#Sigma#it{E}_{T}^{FCal, Pb} [GeV]");
-    yax->SetTitle (Form ("#color[%i]{j50} / #color[%i]{mb_sptrk}", kBlue+3, kRed+1));
+    yax->SetTitle (Form ("#color[%i]{j50} / #color[%i]{mb_sptrk}", myBlue, myRed));
 
     xax->SetTitleOffset (2.4 * xax->GetTitleOffset ());
     yax->SetTitleOffset (1.2 * yax->GetTitleOffset ());
     yax->CenterTitle ();
 
-    h->SetLineColor (kBlue+3);
+    h->SetLineColor (myBlue);
 
     yax->SetRangeUser (ymin, ymax);
 
@@ -881,7 +881,7 @@ void PlotCentralityAnalysis () {
 
     TH1D* hmb = (TH1D*) h_mb_Pb_fcal_et_sum->Clone ("htemp");
 
-    hmb->SetLineColor (kRed+1);
+    hmb->SetLineColor (myRed);
 
     double plot_xq[17];
     double plot_yq[17];
@@ -935,7 +935,7 @@ void PlotCentralityAnalysis () {
     yax->SetLabelFont (43);
     yax->SetLabelSize (24);
 
-    hjet->SetLineColor (kBlue+3);
+    hjet->SetLineColor (myBlue);
 
     hjet->DrawCopy ("hist");
 
@@ -976,8 +976,8 @@ void PlotCentralityAnalysis () {
     myText (0.65, 0.890, kBlack, "#bf{#it{ATLAS}} Internal", 0.036);
     myText (0.65, 0.850, kBlack, "#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV", 0.032);
     myText (0.65, 0.810, kBlack, "All runs", 0.032);
-    myText (0.65, 0.770, kBlue+3, "HLT_j50_ion_L1J10", 0.032);
-    myText (0.65, 0.730, kRed+1, "HLT_mb_sptrk_L1MBTS_1", 0.032);
+    myText (0.65, 0.770, myBlue, "HLT_j50_ion_L1J10", 0.032);
+    myText (0.65, 0.730, myRed, "HLT_mb_sptrk_L1MBTS_1", 0.032);
     myText (0.65, 0.690, myLiteRed, "Pythia + Overlay", 0.032);
     myText (0.65, 0.650, myLiteBlue, "Overlay only", 0.032);
 
@@ -1003,7 +1003,7 @@ void PlotCentralityAnalysis () {
     yax->SetTitleOffset (1.2 * yax->GetTitleOffset ());
     yax->CenterTitle ();
 
-    hjet_rat->SetLineColor (kBlue+3);
+    hjet_rat->SetLineColor (myBlue);
 
     yax->SetRangeUser (ymin, ymax);
 
@@ -1087,7 +1087,7 @@ void PlotCentralityAnalysis () {
 
     TH1D* h = (TH1D*) h_mb_p_fcal_et_sum->Clone ("htemp");
 
-    h->SetLineColor (kRed+1);
+    h->SetLineColor (myRed);
 
     double plot_xq[17];
     double plot_yq[17];
@@ -1152,7 +1152,7 @@ void PlotCentralityAnalysis () {
     yax->SetLabelFont (43);
     yax->SetLabelSize (24);
 
-    hjet->SetLineColor (kBlue+3);
+    hjet->SetLineColor (myBlue);
 
     hjet->DrawCopy ("hist");
     SaferDelete (&hjet);
@@ -1178,8 +1178,8 @@ void PlotCentralityAnalysis () {
     myText (0.65, 0.890, kBlack, "#bf{#it{ATLAS}} Internal", 0.032);
     myText (0.65, 0.850, kBlack, "#it{pp}, #sqrt{s_{NN}} = 5.02 TeV", 0.032);
     myText (0.65, 0.810, kBlack, "All runs", 0.032);
-    myText (0.65, 0.770, kBlue+3, "HLT_j50_L1J15", 0.032);
-    myText (0.65, 0.730, kRed+1, "HLT_mb_sptrk", 0.032);
+    myText (0.65, 0.770, myBlue, "HLT_j50_L1J15", 0.032);
+    myText (0.65, 0.730, myRed, "HLT_mb_sptrk", 0.032);
 
 
     dPad->cd ();
@@ -1196,13 +1196,13 @@ void PlotCentralityAnalysis () {
     yax = h->GetYaxis ();
 
     xax->SetTitle ("#Sigma#it{E}_{T}^{FCal, A+C} [GeV]");
-    yax->SetTitle (Form ("#color[%i]{j50} / #color[%i]{mb_sptrk}", kBlue+3, kRed+1));
+    yax->SetTitle (Form ("#color[%i]{j50} / #color[%i]{mb_sptrk}", myBlue, myRed));
 
     xax->SetTitleOffset (2.4 * xax->GetTitleOffset ());
     yax->SetTitleOffset (1.2 * yax->GetTitleOffset ());
     yax->CenterTitle ();
 
-    h->SetLineColor (kBlue+3);
+    h->SetLineColor (myBlue);
 
     xax->SetRangeUser (-30, 140);
     yax->SetRangeUser (ymin, ymax);

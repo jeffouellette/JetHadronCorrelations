@@ -136,7 +136,7 @@ void PlotCentralityAnalysis2D () {
   {
     TCanvas* c = new TCanvas ("MB_zdc_fcalet_correlation", "", 1000, 812);
 
-    gPad->SetLogz ();
+    //gPad->SetLogz ();
 
     gPad->SetBottomMargin (0.13);
     gPad->SetLeftMargin (0.13);
@@ -145,7 +145,7 @@ void PlotCentralityAnalysis2D () {
 
     TH2D* h = (TH2D*) h2_mb_Pb_fcal_et_zdc_calibE->Clone ("htemp");
     TProfile* h_px = h->ProfileX ("h_px");
-    TProfile* h_py = h->ProfileX ("h_py");
+    TProfile* h_py = h->ProfileY ("h_py");
     TGAE* g_px = TProfX2TGAE (h_px);
     TGAE* g_py = TProfY2TGAE (h_py);
 

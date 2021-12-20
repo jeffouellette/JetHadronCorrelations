@@ -9,6 +9,7 @@
 #include <TGraphErrors.h>
 #include <TGraphAsymmErrors.h>
 #include <TProfile.h>
+#include <TMatrixD.h>
 
 #include <vector>
 #include <map>
@@ -623,6 +624,13 @@ void DivideNoErrors (TH1D* h, const TH1D* hd);
  * Extension of CalcSystematics (TGAE* sys, TH1D* nom, TH1D* var) for smoothing uncertainties. 
  */
 void SmoothSystematics (TGAE* sys, TF1* func, TH1D* nom, TH1D* var);
+
+
+/**
+ * Returns the covariance matrix contained in inFileName.
+ * Has dimensions (nPtJBins*nPtChBins)^2
+ */
+TMatrixD GetCovarianceMatrix (const TString inFileName);
 
 
 } // end namespace

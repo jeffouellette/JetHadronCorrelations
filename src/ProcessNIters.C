@@ -25,7 +25,9 @@
 
 using namespace JetHadronCorrelations;
 
-void ProcessNIters (const char* inFileTag, const char* outFileTag, const short nItersMax = 20) {
+TH2D* h2_matrix = nullptr;
+
+void ProcessNIters (const char* rawTag, const char* outFileTag, const short nItersMax = 20) {
 
   TFile* inFile = nullptr;
 
@@ -71,7 +73,7 @@ void ProcessNIters (const char* inFileTag, const char* outFileTag, const short n
   //////////////////////////////////////////////////////////////////////////////////////////////////// 
   {
 
-    const TString inFileName = Form ("%s/Results/ProcessCorrelations_%s.root", rootPath.Data (), inFileTag);
+    const TString inFileName = Form ("%s/Results/ProcessCorrelations_%s.root", rootPath.Data (), rawTag);
     std::cout << "Reading " << inFileName.Data () << std::endl;
     TFile* inFile = new TFile (inFileName.Data (), "read");
 
@@ -221,6 +223,8 @@ void ProcessNIters (const char* inFileTag, const char* outFileTag, const short n
 
       const TString dir = directions[iDir];
 
+      std::cout << "Doing 2D unfold for iCent = pp, iDir = " << iDir << std::endl;
+
       TH2D* h2 = new TH2D ("h2_temp", "", nPtChBins, pTChBins, nPtJBins, pTJBins);
       h2->Sumw2 ();
 
@@ -241,10 +245,47 @@ void ProcessNIters (const char* inFileTag, const char* outFileTag, const short n
   
         const short nIters = (short) nItersVals[iIter];
 
-        RooUnfoldBayes* bayesUnf = new RooUnfoldBayes (rooUnfResp_jet_trk_pt_ref_sig[iDir], h2, nIters);
-        bayesUnf->SetVerbose (-1);
-        TH2D* h2_unf = (TH2D*) bayesUnf->Hreco ()->Clone (Form ("h2_unf_%iIters", nIters));
-        SaferDelete (&bayesUnf);
+        //RooUnfoldBayes* bayesUnf2D = new RooUnfoldBayes (rooUnfResp_jet_trk_pt_ref_sig[iDir], h2, nIters);
+        //bayesUnf2D->SetVerbose (-1);
+        //TH2D* h2_unf = (TH2D*) bayesUnf2D->Hreco ()->Clone (Form ("h2_unf_%iIters", nIters));
+        //SaferDelete (&bayesUnf2D);
+
+        RooUnfoldBayes* bayesUnf2D = new RooUnfoldBayes ("test", "test");
+        //rooUnfResp_jet_trk_pt_ref_sig[iDir]->UseOverflow (0);
+        bayesUnf2D->SetResponse (rooUnfResp_jet_trk_pt_ref_sig[iDir]);
+        TMatrixD cov = GetCovarianceMatrix (rootPath + "/Results/ProcessCovarianceMatrices_AllJets/" + TString ("h2_jetAll_trk_pt_cov_") + dir + TString ("_ref_sig_data.txt"));
+        bayesUnf2D->SetMeasured (h2);
+        bayesUnf2D->SetMeasuredCov (cov);
+        bayesUnf2D->SetIterations (nIters);
+        bayesUnf2D->SetSmoothing (false);
+        bayesUnf2D->SetVerbose (-1);
+        TH2D* h2_unf = (TH2D*) bayesUnf2D->Hreco ()->Clone (Form ("h2_unf_%iIters", nIters));
+
+        //TMatrixD m_unf_cov = TMatrixD (bayesUnf2D->Ereco ());
+        //h2_matrix = new TH2D ("h2_matrix","",nPtChBins,pTChBins, nPtChBins,pTChBins);
+        //const float minJetPt=30.;
+        //const float maxJetPt=60;
+        //for (short iPtCh1 = 0; iPtCh1 < nPtChBins; iPtCh1++) {
+        //  for (short iPtCh2 = 0; iPtCh2 < nPtChBins; iPtCh2++) {
+        //    double totalJetsUF = 0;
+        //    for (short iPtJ1 = 0; iPtJ1 < nPtJBins; iPtJ1++) {
+        //      totalJetsUF += h_jet_pt_ref_unf_nIters[iIter]->GetBinContent (iPtJ1+1);
+        //      if (0.5 * (pTJBins[iPtJ1] + pTJBins[iPtJ1+1]) < minJetPt || maxJetPt < 0.5 * (pTJBins[iPtJ1] + pTJBins[iPtJ1+1])) continue;
+        //      for (short iPtJ2 = 0; iPtJ2 < nPtJBins; iPtJ2++) {
+        //        if (0.5 * (pTJBins[iPtJ2] + pTJBins[iPtJ2+1]) < minJetPt || maxJetPt < 0.5 * (pTJBins[iPtJ2] + pTJBins[iPtJ2+1])) continue;
+        //        h2_matrix->SetBinContent (iPtCh1+1, iPtCh2+1, h2_matrix->GetBinContent (iPtCh1+1, iPtCh2+1) + m_unf_cov[iPtJ1*nPtChBins + iPtCh1][iPtJ2*nPtChBins + iPtCh2]);
+        //      } // end loop over iPtJ2
+        //    } // end loop over iPtJ
+        //    //h2_matrix->SetBinContent (iPtCh1+1, iPtCh2+1, h2_matrix->GetBinContent (iPtCh1+1, iPtCh2+1) / (std::pow (totalJetsUF, 2) * h2_matrix->GetXaxis ()->GetBinWidth (iPtCh1+1) * h2_matrix->GetYaxis ()->GetBinWidth (iPtCh2+1)));
+        //    //if (h->GetBinContent (iPtCh1+1) * h->GetBinContent (iPtCh2+1) > 0)
+        //    //  h2_matrix->SetBinContent (iPtCh1+1, iPtCh2+1, h2_matrix->GetBinContent (iPtCh1+1, iPtCh2+1) / (h->GetBinContent (iPtCh1+1) * h->GetBinContent (iPtCh2+1)));
+        //  } // end loop over iPtCh2
+        //} // end loop over iPtCh
+        //return;
+      
+        std::cout << "m_unf_cov dimensions = " << m_unf_cov.GetNcols () << " x " << m_unf_cov.GetNrows () << std::endl;
+        SaferDelete (&bayesUnf2D);
+        std::cout << "m_unf_cov dimensions = " << m_unf_cov.GetNcols () << " x " << m_unf_cov.GetNrows () << std::endl;
 
         for (short iPtJInt : {0, 1}) {
 
@@ -294,6 +335,8 @@ void ProcessNIters (const char* inFileTag, const char* outFileTag, const short n
         TH2D* h2 = new TH2D ("h2_temp", "", nPtChBins, pTChBins, nPtJBins, pTJBins);
         h2->Sumw2 ();
 
+        std::cout << "Doing 2D unfold for iCent = " << iCent << " , iDir = " << iDir << std::endl;
+
         for (short iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
 
           TH1D* h = h_jet_trk_pt_sig[iPtJ][iDir][iCent];
@@ -311,10 +354,22 @@ void ProcessNIters (const char* inFileTag, const char* outFileTag, const short n
 
           const short nIters = (short) nItersVals[iIter];
 
-          RooUnfoldBayes* bayesUnf = new RooUnfoldBayes (rooUnfResp_jet_trk_pt_sig[iDir][iCent], h2, nIters);
-          bayesUnf->SetVerbose (-1);
-          TH2D* h2_unf = (TH2D*) bayesUnf->Hreco ()->Clone (Form ("h2_unf_%iIters", nIters));
-          SaferDelete (&bayesUnf);
+          //RooUnfoldBayes* bayesUnf2D = new RooUnfoldBayes (rooUnfResp_jet_trk_pt_sig[iDir][iCent], h2, nIters);
+          //bayesUnf2D->SetVerbose (-1);
+          //TH2D* h2_unf = (TH2D*) bayesUnf2D->Hreco ()->Clone (Form ("h2_unf_%iIters", nIters));
+          //SaferDelete (&bayesUnf2D);
+
+          RooUnfoldBayes* bayesUnf2D = new RooUnfoldBayes ("test", "test");
+          rooUnfResp_jet_trk_pt_sig[iDir][iCent]->UseOverflow (0);
+          bayesUnf2D->SetResponse (rooUnfResp_jet_trk_pt_sig[iDir][iCent]);
+          TMatrixD cov = GetCovarianceMatrix (rootPath + "/Results/ProcessCovarianceMatrices_AllJets/" + TString ("h2_jetAll_trk_pt_cov_") + dir + TString ("_pPb_sig_") + cent + TString ("_data.txt"));
+          bayesUnf2D->SetMeasured (h2);
+          bayesUnf2D->SetMeasuredCov (cov);
+          bayesUnf2D->SetIterations (nIters);
+          bayesUnf2D->SetSmoothing (false);
+          bayesUnf2D->SetVerbose (-1);
+          TH2D* h2_unf = (TH2D*) bayesUnf2D->Hreco ()->Clone (Form ("h2_unf_%iIters", nIters));
+          SaferDelete (&bayesUnf2D);
 
           for (short iPtJInt : {0, 1}) {
 

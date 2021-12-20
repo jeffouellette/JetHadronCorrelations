@@ -1,5 +1,5 @@
 CXX=g++
-CXXFLAGS=-O3 -g -Wall -fPIC -std=c++1y `root-config --cflags` -Iinclude -I${ROOT_UTILS_PATH}/include -I${ATLAS_PATH}/include -I${ROOUNFOLD_INCLUDE_DIR}
+CXXFLAGS=-O3 -g -Wall -fPIC -std=c++17 `root-config --cflags` -Iinclude -I${ROOT_UTILS_PATH}/include -I${ATLAS_PATH}/include -I${ROOUNFOLD_INCLUDE_DIR}
 LDFLAGS=`root-config --glibs --ldflags` -Llib -L${ROOT_UTILS_PATH}/lib -L${ATLAS_PATH}/lib -L${ROOUNFOLD_LIBRARY} -lUtilities -lAtlasUtils -lAtlasStyle -lRooUnfold
 
 libraries = LocalUtilities

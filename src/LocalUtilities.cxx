@@ -2076,6 +2076,42 @@ void SmoothSystematics (TGAE* sys, TF1* func, TH1D* nom, TH1D* var) {
 }
 
 
+
+/**
+ * Returns the covariance matrix contained in inFileName.
+ * Has dimensions (nPtJBins*nPtChBins)^2
+ */
+TMatrixD GetCovarianceMatrix (const TString inFileName) {
+
+  //const int nBins = (nPtJBins+2)*(nPtChBins+2);
+  const int nBins = (nPtJBins)*(nPtChBins);
+
+  TMatrixD cov (nBins, nBins);
+  ifstream f;
+  f.open (inFileName.Data ());
+  
+  double value;
+  int ix = 0;
+  int iy = 0;
+
+  f >> value;
+  while (f) {
+    if (ix >= nBins*nBins || iy >= nBins*nBins) {
+      std::cout << "problem at " << ix%nBins << ", " << iy/nBins << std::endl;
+      continue;
+    }
+    cov[ix%nBins][iy/nBins] = value;
+    ix++;
+    iy++;
+    f >> value;
+  }
+
+  //cov.Print ();
+    
+  return cov;
+}
+
+
 } // end namespace
 
 #endif

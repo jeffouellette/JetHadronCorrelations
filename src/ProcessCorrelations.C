@@ -191,8 +191,12 @@ void ProcessCorrelations (const char* tag, const char* outFileTag) {//, const in
 
             CalcUncertainties (h_jet_trk_pt_ref[iDType][iPtJ][iDir][iVar], h2_cov, h_jet_counts_ref[iDType][iPtJ][iVar]);
 
-            if (iVar == 0)  h2_jet_trk_pt_cov_ref[iDType][iPtJ][iDir] = h2_cov;
-            else            SaferDelete (&h2_cov);
+            if (iVar == 0)  {
+              h2_jet_trk_pt_cov_ref[iDType][iPtJ][iDir] = h2_cov;
+              h2_cov->Scale (std::pow (h_jet_pt_ref[iDType][iVar]->GetBinContent (iPtJ+1), 2));
+            }
+            else
+              SaferDelete (&h2_cov);
 
             h_jet_trk_pt_ref[iDType][iPtJ][iDir][iVar]->Scale (1., "width");
 
@@ -209,8 +213,12 @@ void ProcessCorrelations (const char* tag, const char* outFileTag) {//, const in
 
             CalcUncertainties (h_jet_trk_dphi_ref[iDType][iPtJ][iPtCh][iVar], h2_cov, h_jet_counts_ref[iDType][iPtJ][iVar]);
 
-            if (iVar == 0)  h2_jet_trk_dphi_cov_ref[iDType][iPtJ][iPtCh] = h2_cov;
-            else            SaferDelete (&h2_cov);
+            if (iVar == 0) {
+              h2_jet_trk_dphi_cov_ref[iDType][iPtJ][iPtCh] = h2_cov;
+              h2_cov->Scale (std::pow (h_jet_pt_ref[iDType][iVar]->GetBinContent (iPtJ+1), 2));
+            }
+            else
+              SaferDelete (&h2_cov);
 
             h_jet_trk_dphi_ref[iDType][iPtJ][iPtCh][iVar]->Scale (1., "width");
 
@@ -249,8 +257,12 @@ void ProcessCorrelations (const char* tag, const char* outFileTag) {//, const in
 
             CalcUncertainties (h_jet_trk_pt_ref_bkg[iDType][iPtJ][iDir][iVar], h2_cov, h_jet_counts_ref_bkg[iDType][iPtJ][iVar]);
 
-            if (iVar == 0)  h2_jet_trk_pt_cov_ref_bkg[iDType][iPtJ][iDir] = h2_cov;
-            else            SaferDelete (&h2_cov);
+            if (iVar == 0) {
+              h2_jet_trk_pt_cov_ref_bkg[iDType][iPtJ][iDir] = h2_cov;
+              h2_cov->Scale (std::pow (h_jet_pt_ref[iDType][iVar]->GetBinContent (iPtJ+1), 2));
+            }
+            else 
+              SaferDelete (&h2_cov);
 
             h_jet_trk_pt_ref_bkg[iDType][iPtJ][iDir][iVar]->Scale (1., "width");
 
@@ -267,8 +279,12 @@ void ProcessCorrelations (const char* tag, const char* outFileTag) {//, const in
 
             CalcUncertainties (h_jet_trk_dphi_ref_bkg[iDType][iPtJ][iPtCh][iVar], h2_cov, h_jet_counts_ref_bkg[iDType][iPtJ][iVar]);
 
-            if (iVar == 0)  h2_jet_trk_dphi_cov_ref_bkg[iDType][iPtJ][iPtCh] = h2_cov;
-            else            SaferDelete (&h2_cov);
+            if (iVar == 0) {
+              h2_jet_trk_dphi_cov_ref_bkg[iDType][iPtJ][iPtCh] = h2_cov;
+              h2_cov->Scale (std::pow (h_jet_pt_ref[iDType][iVar]->GetBinContent (iPtJ+1), 2));
+            }
+            else
+              SaferDelete (&h2_cov);
 
             h_jet_trk_dphi_ref_bkg[iDType][iPtJ][iPtCh][iVar]->Scale (1., "width");
 
@@ -339,8 +355,12 @@ void ProcessCorrelations (const char* tag, const char* outFileTag) {//, const in
 
             CalcUncertainties (h_jet_trk_pt[iDType][iPtJ][iDir][iCent][iVar], h2_cov, h_jet_counts[iDType][iPtJ][iCent][iVar]);
 
-            if (iVar == 0)  h2_jet_trk_pt_cov[iDType][iPtJ][iDir][iCent] = h2_cov;
-            else            SaferDelete (&h2_cov);
+            if (iVar == 0) {
+              h2_jet_trk_pt_cov[iDType][iPtJ][iDir][iCent] = h2_cov;
+              h2_cov->Scale (std::pow (h_jet_pt[iDType][iCent][iVar]->GetBinContent (iPtJ+1), 2));
+            }
+            else
+              SaferDelete (&h2_cov);
 
             h_jet_trk_pt[iDType][iPtJ][iDir][iCent][iVar]->Scale (1., "width");
 
@@ -357,8 +377,12 @@ void ProcessCorrelations (const char* tag, const char* outFileTag) {//, const in
 
             CalcUncertainties (h_jet_trk_dphi[iDType][iPtJ][iPtCh][iCent][iVar], h2_cov, h_jet_counts[iDType][iPtJ][iCent][iVar]);
 
-            if (iVar == 0)  h2_jet_trk_dphi_cov[iDType][iPtJ][iPtCh][iCent] = h2_cov;
-            else            SaferDelete (&h2_cov);
+            if (iVar == 0) {
+              h2_jet_trk_dphi_cov[iDType][iPtJ][iPtCh][iCent] = h2_cov;
+              h2_cov->Scale (std::pow (h_jet_pt[iDType][iCent][iVar]->GetBinContent (iPtJ+1), 2));
+            }
+            else
+              SaferDelete (&h2_cov);
 
             h_jet_trk_dphi[iDType][iPtJ][iPtCh][iCent][iVar]->Scale (1., "width");
 
@@ -401,8 +425,12 @@ void ProcessCorrelations (const char* tag, const char* outFileTag) {//, const in
 
               CalcUncertainties (h_jet_trk_pt_bkg[iDType][iPtJ][iDir][iCent][iVar], h2_cov, h_jet_counts_bkg[iDType][iPtJ][iCent][iVar]);
 
-              if (iVar == 0)  h2_jet_trk_pt_cov_bkg[iDType][iPtJ][iDir][iCent] = h2_cov;
-              else            SaferDelete (&h2_cov);
+              if (iVar == 0) {
+                h2_jet_trk_pt_cov_bkg[iDType][iPtJ][iDir][iCent] = h2_cov;
+                h2_cov->Scale (std::pow (h_jet_pt[iDType][iCent][iVar]->GetBinContent (iPtJ+1), 2));
+              }
+              else
+                SaferDelete (&h2_cov);
 
               h_jet_trk_pt_bkg[iDType][iPtJ][iDir][iCent][iVar]->Scale (1., "width");
 
@@ -419,8 +447,12 @@ void ProcessCorrelations (const char* tag, const char* outFileTag) {//, const in
 
               CalcUncertainties (h_jet_trk_dphi_bkg[iDType][iPtJ][iPtCh][iCent][iVar], h2_cov, h_jet_counts_bkg[iDType][iPtJ][iCent][iVar]);
 
-              if (iVar == 0)  h2_jet_trk_dphi_cov_bkg[iDType][iPtJ][iPtCh][iCent] = h2_cov;
-              else            SaferDelete (&h2_cov);
+              if (iVar == 0) {
+                h2_jet_trk_dphi_cov_bkg[iDType][iPtJ][iPtCh][iCent] = h2_cov;
+                h2_cov->Scale (std::pow (h_jet_pt[iDType][iCent][iVar]->GetBinContent (iPtJ+1), 2));
+              }
+              else
+                SaferDelete (&h2_cov);
 
               h_jet_trk_dphi_bkg[iDType][iPtJ][iPtCh][iCent][iVar]->Scale (1., "width");
 
@@ -669,7 +701,7 @@ void ProcessCorrelations (const char* tag, const char* outFileTag) {//, const in
             h_jetInt_trk_dphi_ref_sig[iDType][iPtJInt][iPtCh][iVar] = new TH1D (Form ("h_jetInt_trk_dphi_%s_ref_sig_%s_%s_%s", ptch.Data (), dType.Data (), pTJInt.Data (), var.Data ()), "", nDPhiBins, dPhiBins);
 
             if (iVar == 0)
-              h2_jetInt_trk_dphi_cov_ref_sig[iDType][iPtJInt][iPtCh] = new TH2D (Form ("h2_jetInt_trk_dphi_cov_%s_ref_sig_%s_%s", ptch.Data (), dType.Data (), pTJInt.Data ()), "", nPtChBins, pTChBins, nPtChBins, pTChBins);
+              h2_jetInt_trk_dphi_cov_ref_sig[iDType][iPtJInt][iPtCh] = new TH2D (Form ("h2_jetInt_trk_dphi_cov_%s_ref_sig_%s_%s", ptch.Data (), dType.Data (), pTJInt.Data ()), "", nDPhiBins, dPhiBins, nDPhiBins, dPhiBins);
 
             h_jetInt_trk_dphi_ref[iDType][iPtJInt][iPtCh][iVar]->Sumw2 ();
             h_jetInt_trk_dphi_ref_bkg[iDType][iPtJInt][iPtCh][iVar]->Sumw2 ();
@@ -694,6 +726,7 @@ void ProcessCorrelations (const char* tag, const char* outFileTag) {//, const in
 
             h_jetInt_trk_dphi_ref[iDType][iPtJInt][iPtCh][iVar]->Scale (1./totalJets);
             h_jetInt_trk_dphi_ref_bkg[iDType][iPtJInt][iPtCh][iVar]->Scale (1./totalJets);
+            h_jetInt_trk_dphi_ref_sig[iDType][iPtJInt][iPtCh][iVar]->Scale (1./totalJets);
 
             if (iVar == 0)
               h2_jetInt_trk_dphi_cov_ref_sig[iDType][iPtJInt][iPtCh]->Scale (1./(totalJets*totalJets));
@@ -708,7 +741,7 @@ void ProcessCorrelations (const char* tag, const char* outFileTag) {//, const in
             h_jetInt_trk_dphi_sig[iDType][iPtJInt][iPtCh][iCent][iVar] = new TH1D (Form ("h_jetInt_trk_dphi_%s_pPb_sig_%s_%s_%s_%s", ptch.Data (), cent.Data (), dType.Data (), pTJInt.Data (), var.Data ()), "", nDPhiBins, dPhiBins);
 
             if (iVar == 0)
-              h2_jetInt_trk_dphi_cov_sig[iDType][iPtJInt][iPtCh][iCent] = new TH2D (Form ("h2_jetInt_trk_dphi_cov_%s_pPb_sig_%s_%s_%s", ptch.Data (), cent.Data (), dType.Data (), pTJInt.Data ()), "", nPtChBins, pTChBins, nPtChBins, pTChBins);
+              h2_jetInt_trk_dphi_cov_sig[iDType][iPtJInt][iPtCh][iCent] = new TH2D (Form ("h2_jetInt_trk_dphi_cov_%s_pPb_sig_%s_%s_%s", ptch.Data (), cent.Data (), dType.Data (), pTJInt.Data ()), "", nDPhiBins, dPhiBins, nDPhiBins, dPhiBins);
 
             h_jetInt_trk_dphi[iDType][iPtJInt][iPtCh][iCent][iVar]->Sumw2 ();
             h_jetInt_trk_dphi_bkg[iDType][iPtJInt][iPtCh][iCent][iVar]->Sumw2 ();
@@ -1523,11 +1556,17 @@ void ProcessCorrelations (const char* tag, const char* outFileTag) {//, const in
             h_jet_trk_pt_ref_bkg[iDType][iPtJ][iDir][iVar]->Write ();
             h_jet_trk_pt_ref_sig[iDType][iPtJ][iDir][iVar]->Write ();
 
+            if (iVar == 0)
+              h2_jet_trk_pt_cov_ref_sig[iDType][iPtJ][iDir]->Write ();
+
             for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
 
               h_jet_trk_pt[iDType][iPtJ][iDir][iCent][iVar]->Write ();
               h_jet_trk_pt_bkg[iDType][iPtJ][iDir][iCent][iVar]->Write ();
               h_jet_trk_pt_sig[iDType][iPtJ][iDir][iCent][iVar]->Write ();
+
+              if (iVar == 0)
+                h2_jet_trk_pt_cov_sig[iDType][iPtJ][iDir][iCent]->Write ();
 
             } // end loop over iCent
 

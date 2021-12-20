@@ -14,6 +14,7 @@
 
 #include <ArrayTemplates.h>
 #include <Utilities.h>
+#include <LinAlg.h>
 #include <MyStyle.h>
 #include <MyColors.h>
 
@@ -89,7 +90,41 @@ const float maxMCSyst = 20; // maximum y-axis for MC-driven systematics
 //}
 
 
-void PlotPtCh (const char* inFileTag) {
+double GetDiagonality (const TH2* h) {
+
+  assert (h->GetNbinsX () == h->GetNbinsY ()); // h should be square
+
+  const int d = h->GetNbinsX ();
+
+  TMatrixD a = GetTMatrixD (h);
+
+  TMatrixD j (d, 1);
+  TMatrixD jt (1, d);
+  TMatrixD r (d, 1);
+  TMatrixD rt (1, d);
+  TMatrixD r2 (d, 1);
+  TMatrixD r2t (1, d);
+  for (int i = 0; i < d; i++) {
+    j[i][0] = 1; // all ones
+    jt[0][i] = 1;
+    r[i][0] = i+1;
+    rt[0][i] = i+1;
+    r2[i][0] = (i+1)*(i+1);
+    r2t[0][i] = (i+1)*(i+1);
+  }
+
+  const double n = (jt * a * j)[0][0];
+  const double sumx = (rt * a * j)[0][0];
+  const double sumy = (jt * a * r)[0][0];
+  const double sumx2 = (r2t * a * j)[0][0];
+  const double sumy2 = (jt * a * r2)[0][0];
+  const double sumxy = (rt * a * r)[0][0];
+
+  return (n*sumxy - sumx*sumy) / (std::sqrt (n*sumx2 - sumx*sumx) * std::sqrt (n*sumy2 - sumy*sumy));
+}
+
+
+void PlotPtCh (const char* rawTag, const char* unfoldTag) {
 
   TLine* l = new TLine ();
   TLatex* tl = new TLatex ();
@@ -109,6 +144,9 @@ void PlotPtCh (const char* inFileTag) {
 
   TH1D****  h_jetInt_trk_pt_ref_unf   = Get3DArray <TH1D*> (2, 2, nDir);
   TH1D***** h_jetInt_trk_pt_unf       = Get4DArray <TH1D*> (2, 2, nDir, nZdcCentBins+1);
+
+  TH2D****    h2_jetInt_trk_pt_cov_ref_unf  = Get3DArray <TH2D*> (2, 2, nDir);
+  TH2D*****   h2_jetInt_trk_pt_cov_unf      = Get4DArray <TH2D*> (2, 2, nDir, nZdcCentBins+1);
 
   TH1D***** h_jetInt_trk_pt_iaa       = Get4DArray <TH1D*> (2, 2, nDir, nZdcCentBins+1);
   TH1D***** h_jetInt_trk_pt_iaaNoUnf  = Get4DArray <TH1D*> (2, 2, nDir, nZdcCentBins+1);
@@ -164,7 +202,7 @@ void PlotPtCh (const char* inFileTag) {
 
 
   {
-    TString inFileName = inFileTag;
+    TString inFileName = rawTag;
     inFileName.ReplaceAll (".root", "");
     inFileName = Form ("%s/Results/ProcessCorrelations_%s.root", rootPath.Data (), inFileName.Data ());
     std::cout << "Reading " << inFileName.Data () << std::endl;
@@ -291,7 +329,7 @@ void PlotPtCh (const char* inFileTag) {
 
 
   {
-    TString inFileName = inFileTag;
+    TString inFileName = unfoldTag;
     inFileName.ReplaceAll (".root", "");
     inFileName = Form ("%s/Results/ProcessUnfolding_%s.root", rootPath.Data (), inFileName.Data ());
     std::cout << "Reading " << inFileName.Data () << std::endl;
@@ -311,7 +349,9 @@ void PlotPtCh (const char* inFileTag) {
 
           const TString dir = directions[iDir];
 
-          h_jetInt_trk_pt_ref_unf[iDType][iPtJInt][iDir]  = (TH1D*) inFile->Get (Form ("h_jetInt_trk_pt_%s_ref_unf_%s_%s_Nominal",  dir.Data (), dType.Data (), pTJInt.Data ()));
+          h_jetInt_trk_pt_ref_unf[iDType][iPtJInt][iDir]      = (TH1D*) inFile->Get (Form ("h_jetInt_trk_pt_%s_ref_unf_%s_%s_Nominal",  dir.Data (), dType.Data (), pTJInt.Data ()));
+
+          h2_jetInt_trk_pt_cov_ref_unf[iDType][iPtJInt][iDir] = (TH2D*) inFile->Get (Form ("h2_jetInt_trk_pt_cov_%s_ref_unf_%s_%s",  dir.Data (), dType.Data (), pTJInt.Data ()));
 
         } // end loop over iDir
 
@@ -327,6 +367,8 @@ void PlotPtCh (const char* inFileTag) {
             const TString dir = directions[iDir];
 
             h_jetInt_trk_pt_unf[iDType][iPtJInt][iDir][iCent]       = (TH1D*) inFile->Get (Form ("h_jetInt_trk_pt_%s_pPb_unf_%s_%s_%s_Nominal", dir.Data (), cent.Data (), dType.Data (), pTJInt.Data ()));
+            h2_jetInt_trk_pt_cov_unf[iDType][iPtJInt][iDir][iCent]  = (TH2D*) inFile->Get (Form ("h2_jetInt_trk_pt_cov_%s_pPb_unf_%s_%s_%s", dir.Data (), cent.Data (), dType.Data (), pTJInt.Data ()));
+
             h_jetInt_trk_pt_iaa[iDType][iPtJInt][iDir][iCent]       = (TH1D*) inFile->Get (Form ("h_jetInt_trk_pt_%s_iaa_%s_%s_%s_Nominal",     dir.Data (), cent.Data (), dType.Data (), pTJInt.Data ()));
             h_jetInt_trk_pt_iaaNoUnf[iDType][iPtJInt][iDir][iCent]  = (TH1D*) inFile->Get (Form ("h_jetInt_trk_pt_%s_iaaNoUnf_%s_%s_%s_Nominal",  dir.Data (), cent.Data (), dType.Data (), pTJInt.Data ()));
 
@@ -1542,6 +1584,214 @@ void PlotPtCh (const char* inFileTag) {
 
     c->SaveAs (Form ("%s/Plots/PtCh/JetTagged_HadronYields_%i-%iperc_FCalMixCatVar_PtCh_%iGeVJets.pdf", workPath.Data (), zdcCentPercs[iCent+1], zdcCentPercs[iCent], iPtJInt == 0 ? 30 : 60)); 
   }*/
+
+
+
+
+  {
+    gStyle->SetPalette (kBlackBody);
+    TColor::InvertPalette();
+
+    const float zmin = 1e-4;
+    const float zmax = 1;
+
+    for (short iPtJInt : {0, 1}) {
+
+      const TString pTJInt = (iPtJInt == 0 ? "30GeV" : "60GeV");
+
+      for (short iDir : {0, 1, 2}) {
+    
+        const char* canvasName = Form ("c_jetInt_trk_pt_cov_ref_%s_%s", directions[iDir].Data (), pTJInt.Data ());
+        TCanvas* c = new TCanvas (canvasName, "", 960, 800);
+
+        const double lMargin = 0.15;
+        const double rMargin = 0.20;
+        const double bMargin = 0.15;
+        const double tMargin = 0.04;
+
+        c->SetLeftMargin (lMargin);
+        c->SetRightMargin (rMargin);
+        c->SetBottomMargin (bMargin);
+        c->SetTopMargin (tMargin);
+
+        c->cd ();
+    
+        c->SetLogx ();
+        c->SetLogy ();
+        c->SetLogz ();
+
+        TH2D* h2 = (TH2D*) h2_jetInt_trk_pt_cov_ref_unf[0][iPtJInt][iDir]->Clone ("htemp");
+        //TH1D* h = h_jetInt_trk_pt_ref_unf[0][iPtJInt][iDir];
+        for (int ix = 1; ix <= h2->GetNbinsX (); ix++) {
+          for (int iy = 1; iy <= h2->GetNbinsY (); iy++) {
+            h2->SetBinContent (ix, iy, h2->GetBinContent (ix, iy) / (std::sqrt (h2->GetBinContent (ix, ix)) * std::sqrt (h2->GetBinContent (iy, iy))));
+            //if (h->GetBinContent (ix) * h->GetBinContent (iy) > 0)
+            //  h2->SetBinContent (ix, iy, h2->GetBinContent (ix, iy) / (h->GetBinContent (ix) * h->GetBinContent (iy)));
+            //const double c = h2->GetBinContent (ix, iy);
+            //h2->SetBinContent (ix, iy, ((c >= 0) - (c < 0)) * std::sqrt (std::fabs (c)));
+          }
+        }
+        const double r = GetDiagonality (h2);
+
+        TAxis* xax = h2->GetXaxis ();
+        TAxis* yax = h2->GetYaxis ();
+        TAxis* zax = h2->GetZaxis ();
+
+        xax->SetTitle ("#it{p}_{T}^{ch, 1} [GeV]");
+        yax->SetTitle ("#it{p}_{T}^{ch, 2} [GeV]");
+        //zax->SetTitle ("cov (dY_{1}, dY_{2}) / dY_{1} dY_{2}");
+        //zax->SetTitle ("cov [dY(#it{p}_{T}^{ch, 1}, dY(#it{p}_{T}^{ch, 2})]");
+        zax->SetTitle ("#rho [dY(#it{p}_{T}^{ch, 1}), dY(#it{p}_{T}^{ch, 2})]");
+
+        xax->SetRangeUser (pTChBins[1], pTChBins[nPtChBins-(iPtJInt == 0 ? 3 : 1)]);
+        yax->SetRangeUser (pTChBins[1], pTChBins[nPtChBins-(iPtJInt == 0 ? 3 : 1)]);
+        zax->SetRangeUser (zmin, zmax);
+
+        xax->SetMoreLogLabels ();
+        yax->SetMoreLogLabels ();
+
+        xax->SetTitleFont (43);
+        xax->SetTitleSize (32);
+        yax->SetTitleFont (43);
+        yax->SetTitleSize (32);
+        zax->SetTitleFont (43);
+        zax->SetTitleSize (32);
+        xax->SetLabelFont (43);
+        xax->SetLabelSize (32);
+        yax->SetLabelFont (43);
+        yax->SetLabelSize (32);
+        zax->SetLabelFont (43);
+        zax->SetLabelSize (32);
+
+        xax->SetTitleOffset (1.5);
+        yax->SetTitleOffset (1.5);
+        zax->SetTitleOffset (1.75);
+
+        h2->DrawCopy ("colz");
+        SaferDelete (&h2);
+
+        TBox* b = new TBox (0.7, 33, iDir == 0 ? 13 : (iDir == 1 ? 26 : 15), 100);
+        b->SetFillColorAlpha (kWhite, 1);
+        b->SetLineColor (kBlack);
+        b->SetLineWidth (1);
+        b->SetLineStyle (1);
+        b->Draw ("l");
+        myText (0.22, 0.90, kBlack, "#bf{#it{ATLAS}} Internal", 0.036);
+        myText (0.22, 0.85, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.036);
+        myText (0.22, 0.80, kBlack, Form ("#it{p}_{T}^{jet} > %i GeV, #Delta#phi_{ch,jet} %s", iPtJInt == 0 ? 30 : 60, directions[iDir] == "ns" ? "< #pi/8" : (directions[iDir] == "as" ? "> 7#pi/8" : "#in (#pi/3, 2#pi/3)")), 0.036);
+        myText (0.22, 0.75, kBlack, Form ("Diagonality = %.2f", r), 0.036);
+
+        c->SaveAs (Form ("%s/Plots/PtCh/Covariance_SignalJetTaggedYield_pp_%iGeVJets_%s.pdf", workPath.Data (), iPtJInt == 0 ? 30 : 60, directions[iDir] == "ns" ? "nearside" : (directions[iDir] == "as" ? "awayside" : "perpendicular")));
+        SaferDelete (&b);
+    
+      } // end loop over iDir
+
+    } // end loop over iPtJInt
+
+
+
+    for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
+
+      const TString cent = (iCent == nZdcCentBins ? "allCent" : Form ("iCent%i", iCent));
+
+      for (short iPtJInt : {0, 1}) {
+
+        const TString pTJInt = (iPtJInt == 0 ? "30GeV" : "60GeV");
+
+        for (short iDir : {0, 1, 2}) {
+      
+          const char* canvasName = Form ("c_jetInt_trk_pt_cov_pPb_%s_%s_%s", directions[iDir].Data (), cent.Data (), pTJInt.Data ());
+          TCanvas* c = new TCanvas (canvasName, "", 960, 800);
+
+          const double lMargin = 0.15;
+          const double rMargin = 0.20;
+          const double bMargin = 0.15;
+          const double tMargin = 0.04;
+
+          c->SetLeftMargin (lMargin);
+          c->SetRightMargin (rMargin);
+          c->SetBottomMargin (bMargin);
+          c->SetTopMargin (tMargin);
+
+          c->cd ();
+      
+          c->SetLogx ();
+          c->SetLogy ();
+          c->SetLogz ();
+
+          TH2D* h2 = (TH2D*) h2_jetInt_trk_pt_cov_unf[0][iPtJInt][iDir][iCent]->Clone ("htemp");
+          //TH1D* h = h_jetInt_trk_pt_unf[0][iPtJInt][iDir][iCent];
+          for (int ix = 1; ix <= h2->GetNbinsX (); ix++) {
+            for (int iy = 1; iy <= h2->GetNbinsY (); iy++) {
+              h2->SetBinContent (ix, iy, h2->GetBinContent (ix, iy) / (std::sqrt (h2->GetBinContent (ix, ix)) * std::sqrt (h2->GetBinContent (iy, iy))));
+              //if (h->GetBinContent (ix) * h->GetBinContent (iy) > 0)
+              //  h2->SetBinContent (ix, iy, h2->GetBinContent (ix, iy) / (h->GetBinContent (ix) * h->GetBinContent (iy)));
+              //const double c = h2->GetBinContent (ix, iy);
+              //h2->SetBinContent (ix, iy, ((c >= 0) - (c < 0)) * std::sqrt (std::fabs (c)));
+            }
+          }
+          const double r = GetDiagonality (h2);
+
+          TAxis* xax = h2->GetXaxis ();
+          TAxis* yax = h2->GetYaxis ();
+          TAxis* zax = h2->GetZaxis ();
+
+          xax->SetTitle ("#it{p}_{T}^{ch, 1} [GeV]");
+          yax->SetTitle ("#it{p}_{T}^{ch, 2} [GeV]");
+          //zax->SetTitle ("cov (dY_{1}, dY_{2}) / dY_{1} dY_{2}");
+          zax->SetTitle ("#rho [dY(#it{p}_{T}^{ch, 1}, dY(#it{p}_{T}^{ch, 2})]");
+
+          xax->SetRangeUser (pTChBins[1], pTChBins[nPtChBins-(iPtJInt == 0 ? 3 : 1)]);
+          yax->SetRangeUser (pTChBins[1], pTChBins[nPtChBins-(iPtJInt == 0 ? 3 : 1)]);
+          zax->SetRangeUser (zmin, zmax);
+
+          xax->SetMoreLogLabels ();
+          yax->SetMoreLogLabels ();
+
+          xax->SetTitleFont (43);
+          xax->SetTitleSize (32);
+          yax->SetTitleFont (43);
+          yax->SetTitleSize (32);
+          zax->SetTitleFont (43);
+          zax->SetTitleSize (32);
+          xax->SetLabelFont (43);
+          xax->SetLabelSize (32);
+          yax->SetLabelFont (43);
+          yax->SetLabelSize (32);
+          zax->SetLabelFont (43);
+          zax->SetLabelSize (32);
+
+          xax->SetTitleOffset (1.5);
+          yax->SetTitleOffset (1.5);
+          zax->SetTitleOffset (1.75);
+
+          h2->DrawCopy ("colz");
+          SaferDelete (&h2);
+
+          TBox* b = new TBox (0.7, 24, iDir == 0 ? 13 : (iDir == 1 ? 26 : 15), 100);
+          b->SetFillColorAlpha (kWhite, 1);
+          b->SetLineColor (kBlack);
+          b->SetLineWidth (1);
+          b->SetLineStyle (1);
+          b->Draw ("l");
+          myText (0.22, 0.90, kBlack, "#bf{#it{ATLAS}} Internal", 0.036);
+          myText (0.22, 0.85, kBlack, "#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV", 0.036);
+          myText (0.22, 0.80, kBlack, Form ("#it{p}_{T}^{jet} > %i GeV, #Delta#phi_{ch,jet} %s", iPtJInt == 0 ? 30 : 60, directions[iDir] == "ns" ? "< #pi/8" : (directions[iDir] == "as" ? "> 7#pi/8" : "#in (#pi/3, 2#pi/3)")), 0.036);
+          if (iCent == nZdcCentBins)
+            myText (0.22, 0.75, kBlack, "ZDC 0-100%", 0.036);
+          else
+            myText (0.22, 0.75, kBlack, Form ("ZDC %i-%i%%", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.036);
+          myText (0.22, 0.70, kBlack, Form ("Diagonality = %.2f", r), 0.036);
+
+          c->SaveAs (Form ("%s/Plots/PtCh/Covariance_SignalJetTaggedYield_pPb_%s_%iGeVJets_%s.pdf", workPath.Data (), cent.Data (), iPtJInt == 0 ? 30 : 60, directions[iDir] == "ns" ? "nearside" : (directions[iDir] == "as" ? "awayside" : "perpendicular")));
+          SaferDelete (&b);
+      
+        } // end loop over iDir
+
+      } // end loop over iPtJInt
+
+    } // end loop over iCent
+  }
 
 
 

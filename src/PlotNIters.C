@@ -30,7 +30,7 @@
 using namespace JetHadronCorrelations;
 
 
-void PlotNIters (const char* inFileTag) {
+void PlotNIters (const char* rawTag, const char* nitersTag) {
 
   TLine* l = new TLine ();
   TLatex* tl = new TLatex ();
@@ -49,9 +49,6 @@ void PlotNIters (const char* inFileTag) {
 
   TH1D****  h_jetInt_trk_pt_ref_sig   = Get3DArray <TH1D*> (2, 2, nDir);
   TH1D***** h_jetInt_trk_pt_sig       = Get4DArray <TH1D*> (2, 2, nDir, nZdcCentBins+1);
-
-  TH1D****  h_jetInt_trk_pt_ref_unf   = Get3DArray <TH1D*> (2, 2, nDir);
-  TH1D***** h_jetInt_trk_pt_unf       = Get4DArray <TH1D*> (2, 2, nDir, nZdcCentBins+1);
 
   TH1D****  h_jetInt_trk_pt_ref_unf_nIters = Get3DArray <TH1D*> (nPtJBins, nDir, nItersMax-nItersMin+2);
   TH1D***** h_jetInt_trk_pt_unf_nIters     = Get4DArray <TH1D*> (nPtJBins, nDir, nZdcCentBins+1, nItersMax-nItersMin+2);
@@ -108,7 +105,7 @@ void PlotNIters (const char* inFileTag) {
 
 
   {
-    TString inFileName = inFileTag;
+    TString inFileName = rawTag;
     inFileName.ReplaceAll (".root", "");
     inFileName = Form ("%s/Results/ProcessCorrelations_%s.root", rootPath.Data (), inFileName.Data ());
     std::cout << "Reading " << inFileName.Data () << std::endl;
@@ -137,7 +134,6 @@ void PlotNIters (const char* inFileTag) {
           const TString dir = directions[iDir];
 
           h_jetInt_trk_pt_ref_sig[iDType][iPtJInt][iDir]  = (TH1D*) inFile->Get (Form ("h_jetInt_trk_pt_%s_ref_sig_%s_%s_Nominal",  dir.Data (), dType.Data (), pTJInt.Data ()));
-          h_jetInt_trk_pt_ref_unf[iDType][iPtJInt][iDir]  = (TH1D*) inFile->Get (Form ("h_jetInt_trk_pt_%s_ref_unf_%s_%s_Nominal",  dir.Data (), dType.Data (), pTJInt.Data ()));
 
         } // end loop over iDir
 
@@ -151,7 +147,52 @@ void PlotNIters (const char* inFileTag) {
             const TString dir = directions[iDir];
 
             h_jetInt_trk_pt_sig[iDType][iPtJInt][iDir][iCent]       = (TH1D*) inFile->Get (Form ("h_jetInt_trk_pt_%s_pPb_sig_%s_%s_%s_Nominal", dir.Data (), cent.Data (), dType.Data (), pTJInt.Data ()));
-            h_jetInt_trk_pt_unf[iDType][iPtJInt][iDir][iCent]       = (TH1D*) inFile->Get (Form ("h_jetInt_trk_pt_%s_pPb_unf_%s_%s_%s_Nominal", dir.Data (), cent.Data (), dType.Data (), pTJInt.Data ()));
+
+          } // end loop over iDir
+
+        } // end loop over iCent
+
+      } // end loop over iPtJInt
+
+    } // end loop over iDType
+
+  }
+
+
+
+  {
+    TString inFileName = nitersTag;
+    inFileName.ReplaceAll (".root", "");
+    inFileName = Form ("%s/Results/ProcessNIters_%s.root", rootPath.Data (), inFileName.Data ());
+    std::cout << "Reading " << inFileName.Data () << std::endl;
+    inFile = new TFile (inFileName, "read");
+
+    for (short iDType = 0; iDType < 2; iDType++) {
+
+      const TString dType = (iDType == 0 ? "data" : "mc");
+
+      for (short iPtJInt : {0, 1}) {
+
+        const TString pTJInt = (iPtJInt == 0 ? "30GeV" : "60GeV");
+
+        for (short iDir = 0; iDir < nDir; iDir++) {
+
+          const TString dir = directions[iDir];
+
+          h_jetInt_trk_pt_ref_sig[iDType][iPtJInt][iDir]  = (TH1D*) inFile->Get (Form ("h_jetInt_trk_pt_%s_ref_sig_%s_%s_Nominal",  dir.Data (), dType.Data (), pTJInt.Data ()));
+
+        } // end loop over iDir
+
+
+        for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
+
+          const TString cent = (iCent == nZdcCentBins ? "allCent" : Form ("iCent%i", iCent));
+
+          for (short iDir = 0; iDir < nDir; iDir++) {
+
+            const TString dir = directions[iDir];
+
+            h_jetInt_trk_pt_sig[iDType][iPtJInt][iDir][iCent]       = (TH1D*) inFile->Get (Form ("h_jetInt_trk_pt_%s_pPb_sig_%s_%s_%s_Nominal", dir.Data (), cent.Data (), dType.Data (), pTJInt.Data ()));
 
           } // end loop over iDir
 
@@ -162,7 +203,7 @@ void PlotNIters (const char* inFileTag) {
     } // end loop over iDType
 
 
-    for (short iIter = 0; iIter < nItersMax-nItersMin+2; iIter++) {
+    for (short iIter = 0; iIter < nItersMax-nItersMin+1; iIter++) {
   
       const short nIters = (short) nItersVals[iIter];
 
@@ -254,7 +295,7 @@ void PlotNIters (const char* inFileTag) {
       }
 
 
-      for (short iIter = 0; iIter < nItersMax-nItersMin+2; iIter++) {
+      for (short iIter = 0; iIter < nItersMax-nItersMin+1; iIter++) {
 
         const short nIters = (short) nItersVals[iIter];
 
@@ -338,7 +379,7 @@ void PlotNIters (const char* inFileTag) {
         }
 
  
-        for (short iIter = 0; iIter < nItersMax-nItersMin+2; iIter++) {
+        for (short iIter = 0; iIter < nItersMax-nItersMin+1; iIter++) {
   
           const short nIters = (short) nItersVals[iIter];
 
@@ -435,7 +476,7 @@ void PlotNIters (const char* inFileTag) {
         }
 
 
-        for (short iIter = 0; iIter < nItersMax-nItersMin+2; iIter++) {
+        for (short iIter = 0; iIter < nItersMax-nItersMin+1; iIter++) {
   
           const short nIters = (short) nItersVals[iIter];
 
@@ -547,7 +588,7 @@ void PlotNIters (const char* inFileTag) {
           }
 
 
-          for (short iIter = 0; iIter < nItersMax-nItersMin+2; iIter++) {
+          for (short iIter = 0; iIter < nItersMax-nItersMin+1; iIter++) {
 
             const short nIters = (short) nItersVals[iIter];
 
@@ -1817,6 +1858,125 @@ void PlotNIters (const char* inFileTag) {
 
     c->SaveAs (Form ("%s/Plots/PtCh/UnfComp_Summary_JetSpectrum.pdf", workPath.Data ()));
   }
+
+
+
+
+  for (short iPtJInt : {0, 1}) {
+  
+    const TString pTJInt = (iPtJInt == 0 ? "30GeV" : "60GeV");
+    const int minJetPt = (iPtJInt == 0 ? 30 : 60);
+    const int maxJetPt = 300;
+
+    const char* canvasName = Form ("c_njet_%iGeV_Converge", minJetPt);
+    TCanvas* c = new TCanvas (canvasName, "", 1400, 700);
+    c->Divide (4, 2);
+  
+    TH1D* h = nullptr;
+    TGAE* g = nullptr;
+
+    {
+      c->cd (7);
+
+      g = new TGAE (nItersMax - nItersMin + 1);
+
+      for (short iIter = 0; iIter < nItersMax-nItersMin+1; iIter++) {
+        double ratio_err = 0;
+        double ratio = h_jet_pt_ref_unf_nIters[iIter]->IntegralAndError (h_jet_pt_ref_unf_nIters[iIter]->FindBin (minJetPt+0.01), h_jet_pt_ref_unf_nIters[iIter]->FindBin (maxJetPt-0.01), ratio_err);
+
+        double den;
+        if (iIter == 0)
+          den = h_jet_pt_ref[0]->Integral (h_jet_pt_ref[0]->FindBin (minJetPt+0.01), h_jet_pt_ref[0]->FindBin (maxJetPt-0.01));
+        else
+          den = h_jet_pt_ref_unf_nIters[iIter-1]->Integral (h_jet_pt_ref_unf_nIters[iIter-1]->FindBin (minJetPt+0.01), h_jet_pt_ref_unf_nIters[iIter-1]->FindBin (maxJetPt-0.01));
+
+        ratio = ratio / den;
+        ratio_err = ratio_err / den;
+
+        g->SetPoint       (iIter, nItersVals[iIter], ratio);
+        g->SetPointEYhigh (iIter, ratio_err);
+        g->SetPointEYlow  (iIter, ratio_err);
+      }
+
+      h = new TH1D ("h", ";Iterations;N_{jet} at N_{iter.} / N_{iter.}-1", 1, 0, 20);
+      h->GetYaxis ()->SetRangeUser (0.80, 1.30);
+      h->SetBinContent (1, 1);
+      h->SetLineStyle (2);
+      h->SetLineWidth (2);
+      h->SetLineColor (kBlack);
+      h->DrawCopy ("hist ][");
+      SaferDelete (&h);
+  
+      l->SetLineWidth (2);
+      l->SetLineColor (kGray+1);
+      l->SetLineStyle (2);
+      l->DrawLine (0, 1.05, 20, 1.05);
+      l->DrawLine (0, 0.95, 20, 0.95);
+
+      myDraw (g, colorfulColors[0], kFullCircle, 1.0, 1, 2, "P", false);
+      SaferDelete (&g);
+  
+      myText (0.2, 0.84, kBlack, "#bf{#it{pp}}", 0.06);
+    }
+  
+    for (short iCent = 0; iCent < nFcalCentBins+1; iCent++) {
+
+      c->cd (nFcalCentBins+1-iCent);
+
+      g = new TGAE (nItersMax - nItersMin + 1);
+
+      for (short iIter = 0; iIter < nItersMax-nItersMin+1; iIter++) {
+        double ratio_err = 0;
+        double ratio = h_jet_pt_unf_nIters[iCent][iIter]->IntegralAndError (h_jet_pt_unf_nIters[iCent][iIter]->FindBin (minJetPt+0.01), h_jet_pt_unf_nIters[iCent][iIter]->FindBin (maxJetPt-0.01), ratio_err);
+
+        double den;
+        if (iIter == 0)
+          den = h_jet_pt[0][iCent]->Integral (h_jet_pt[0][iCent]->FindBin (minJetPt+0.01), h_jet_pt[0][iCent]->FindBin (maxJetPt-0.01));
+        else
+          den = h_jet_pt_unf_nIters[iCent][iIter-1]->Integral (h_jet_pt_unf_nIters[iCent][iIter-1]->FindBin (minJetPt+0.01), h_jet_pt_unf_nIters[iCent][iIter-1]->FindBin (maxJetPt-0.01));
+
+        ratio = ratio / den;
+        ratio_err = ratio_err / den;
+
+        g->SetPoint       (iIter, nItersVals[iIter], ratio);
+        g->SetPointEYhigh (iIter, ratio_err);
+        g->SetPointEYlow  (iIter, ratio_err);
+      }
+  
+      h = new TH1D ("h", ";Iterations;N_{jet} at N_{iter.} / N_{iter.}-1", 1, 0, 20);
+      h->GetYaxis ()->SetRangeUser (0.80, 1.30);
+      h->SetBinContent (1, 1);
+      h->SetLineStyle (2);
+      h->SetLineWidth (2);
+      h->SetLineColor (kBlack);
+      h->DrawCopy ("hist ][");
+      SaferDelete (&h);
+  
+      l->SetLineWidth (2);
+      l->SetLineColor (kGray+1);
+      l->SetLineStyle (2);
+      l->DrawLine (0, 1.05, 20, 1.05);
+      l->DrawLine (0, 0.95, 20, 0.95);
+
+      myDraw (g, colorfulColors[iCent+1], kFullCircle, 1.0, 1, 2, "P", false);
+      SaferDelete (&g);
+  
+      if (iCent < nFcalCentBins)
+        myText (0.2, 0.84, kBlack, Form ("#bf{#it{p}+Pb, FCal %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.06);
+      else
+        myText (0.2, 0.84, kBlack, "#bf{#it{p}+Pb, 0-100%}", 0.06);
+  
+    } // end loop over iCent
+  
+    c->cd (8);
+    myText (0.1, 0.84, kBlack, "#bf{#it{ATLAS}} Simulation Internal", 0.07);
+    myText (0.1, 0.75, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.07);
+    myText (0.1, 0.66, kBlack, "#it{p}+Pb, #sqrt{s} = 5.02 TeV", 0.07);
+    myText (0.1, 0.57, kBlack, Form ("#it{p}_{T}^{jet} [GeV] #in (%i, %i)", minJetPt, maxJetPt), 0.07);
+  
+    c->SaveAs (Form ("%s/Plots/PtCh/UnfConv_NJet_%s.pdf", workPath.Data (), pTJInt.Data ()));
+  
+  } // end loop over iPtJInt
 
 
 
