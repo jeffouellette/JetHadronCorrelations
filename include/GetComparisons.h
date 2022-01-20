@@ -235,6 +235,98 @@ TH1D*** GetAMPTIpPb () {
 
 
 
+TGAE*** GetZHIAA () {
+
+  TGAE*** g_iaa = Get2DArray <TGAE*> (2, 2); // iPtZ, iStat
+
+  TGAE* g = nullptr;
+
+  {
+
+    const double xvals[] = {1, 2, 4, 8, 15, 30};
+    const double yvals[] = {1.83, 0.83, 0.428, 0.361, 0.292};
+    const double ystats[] = {0.68, 0.23, 0.074, 0.056, 0.073};
+    const double ysysts[] = {0.39, 0.13, 0.025, 0.014, 0.016};
+
+    const short n = sizeof (xvals) / sizeof (xvals[0]) - 1;
+
+    g_iaa[0][0] = new TGAE ();
+    g = g_iaa[0][0];
+    for (short i = 0; i < n; i++) {
+
+      double x = 0.5*(xvals[i]+xvals[i+1]);
+      double dx = 0.5*(xvals[i+1]-xvals[i]);
+
+      g->SetPoint (i, x, yvals[i]);
+      g->SetPointEXlow (i, dx);
+      g->SetPointEXhigh (i, dx);
+      g->SetPointEYlow (i, ystats[i]);
+      g->SetPointEYhigh (i, ystats[i]);
+
+    }
+
+    g_iaa[0][1] = new TGAE ();
+    g = g_iaa[0][1];
+    for (short i = 0; i < n; i++) {
+
+      double x = 0.5*(xvals[i]+xvals[i+1]);
+      double dx = 0.5*(xvals[i+1]-xvals[i]);
+
+      g->SetPoint (i, x, yvals[i]);
+      g->SetPointEXlow (i, dx);
+      g->SetPointEXhigh (i, dx);
+      g->SetPointEYlow (i, ysysts[i]);
+      g->SetPointEYhigh (i, ysysts[i]);
+
+    }
+  }
+
+
+  {
+
+    const double xvals[] = {1, 2, 4, 8, 15, 30, 60};
+    const double yvals[] = {2.53, 1.40, 0.601, 0.521, 0.457, 0.497};
+    const double ystats[] = {0.88, 0.29, 0.071, 0.060, 0.068, 0.129};
+    const double ysysts[] = {0.40, 0.13, 0.025, 0.017, 0.017, 0.026};
+
+    const short n = sizeof (xvals) / sizeof (xvals[0]) - 1;
+
+    g_iaa[1][0] = new TGAE ();
+    g = g_iaa[1][0];
+    for (short i = 0; i < n; i++) {
+
+      double x = 0.5*(xvals[i]+xvals[i+1]);
+      double dx = 0.5*(xvals[i+1]-xvals[i]);
+
+      g->SetPoint (i, x, yvals[i]);
+      g->SetPointEXlow (i, dx);
+      g->SetPointEXhigh (i, dx);
+      g->SetPointEYlow (i, ystats[i]);
+      g->SetPointEYhigh (i, ystats[i]);
+
+    }
+
+    g_iaa[1][1] = new TGAE ();
+    g = g_iaa[1][1];
+    for (short i = 0; i < n; i++) {
+
+      double x = 0.5*(xvals[i]+xvals[i+1]);
+      double dx = 0.5*(xvals[i+1]-xvals[i]);
+
+      g->SetPoint (i, x, yvals[i]);
+      g->SetPointEXlow (i, dx);
+      g->SetPointEXhigh (i, dx);
+      g->SetPointEYlow (i, ysysts[i]);
+      g->SetPointEYhigh (i, ysysts[i]);
+
+    }
+  }
+
+  return g_iaa;
+}
+
+
+
 } // end namespace
 
 #endif
