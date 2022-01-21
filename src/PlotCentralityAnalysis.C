@@ -195,6 +195,10 @@ void PlotCentralityAnalysis () {
   h_mb_p_fcal_et_sum_pPb_mc_corr = (TH1D*) inFile->Get ("h_mb_p_fcal_et_corr_run0");
 
 
+  TH1D* h_zna = nullptr;
+  TH1D* h_zna_glau = nullptr;
+
+
   double xq[101];
   double yq[101];
   TString percs[101];
@@ -400,7 +404,7 @@ void PlotCentralityAnalysis () {
     h->GetQuantiles (101, yq, xq);
 
     int ibin = 0;
-    while (ibin < 17 && plot_percs[ibin++] != "20%");
+    while (ibin < 17 && plot_percs[ibin] != "20%") ibin++;
 
     const double mbNorm = h->Integral (h->FindBin (plot_yq[ibin]), h->GetNbinsX ());
     h->Scale (1. / mbNorm, "width");
@@ -443,8 +447,6 @@ void PlotCentralityAnalysis () {
     SaferDelete (&hjet);
   
 
-    TH1D* h_zna = nullptr;
-    TH1D* h_zna_glau = nullptr;
     {
       std::ifstream f_alice (Form ("%s/aux/ALICE_ZNA.txt", workPath.Data ()));
       float xbins[1028] = {};
@@ -672,6 +674,7 @@ void PlotCentralityAnalysis () {
 
 
     c->SaveAs (Form ("%s/Plots/CentralityAnalysis/allruns_zdc.pdf", workPath.Data ()));
+    c->SaveAs (Form ("%s/Plots/CentralityAnalysis/allruns_zdc.C", workPath.Data ()));
   }
 
 
@@ -1373,6 +1376,292 @@ void PlotCentralityAnalysis () {
     myText (0.56, 0.540, manyColors[8], "#bf{0.2 #times P(#Sigma#it{E}_{T}^{FCal,Pb} | Zdc 80-100%)}", 0.026);
 
     c->SaveAs (Form ("%s/Plots/CentralityAnalysis/allruns_fcal_et_zdcBinned.pdf", workPath.Data ()));
+  }
+
+
+
+
+  {
+    TCanvas* c = new TCanvas ("c_pPb_zdc", "", 800, 800);
+
+    const double bMargin = 0.14;
+    const double lMargin = 0.14;
+    const double rMargin = 0.04;
+    const double tMargin = 0.04;
+
+    c->SetBottomMargin (bMargin);
+    c->SetLeftMargin (lMargin);
+    c->SetRightMargin (rMargin);
+    c->SetTopMargin (tMargin);
+
+    c->Draw ();
+
+    c->SetLogx ();
+    c->SetLogy ();
+
+
+    TH1D* h = (TH1D*) h_mb_Pb_zdc_calibE_sum->Clone ("htemp");
+
+    h->SetLineColor (kBlack);
+
+    double plot_xq[6];
+    double plot_yq[6];
+    TString plot_percs[6];
+    plot_xq[0]  = 0.000; plot_percs[0]  = "100%";
+    plot_xq[1]  = 0.200; plot_percs[1]  = "80%";
+    plot_xq[2]  = 0.400; plot_percs[2]  = "60%";
+    plot_xq[3]  = 0.600; plot_percs[3]  = "40%";
+    plot_xq[4]  = 0.800; plot_percs[4]  = "20%";
+    plot_xq[5]  = 1.000; plot_percs[5]  = "0%";
+    h->GetQuantiles (6, plot_yq, plot_xq);
+
+    //double plot_xq[17];
+    //double plot_yq[17];
+    //TString plot_percs[17];
+    //plot_xq[0]  = 0.000; plot_percs[0]  = "100%";
+    //plot_xq[1]  = 0.100; plot_percs[1]  = "90%";
+    //plot_xq[2]  = 0.200; plot_percs[2]  = "80%";
+    //plot_xq[3]  = 0.300; plot_percs[3]  = "70%";
+    //plot_xq[4]  = 0.400; plot_percs[4]  = "60%";
+    //plot_xq[5]  = 0.500; plot_percs[5]  = "50%";
+    //plot_xq[6]  = 0.600; plot_percs[6]  = "40%";
+    //plot_xq[7]  = 0.700; plot_percs[7]  = "30%";
+    //plot_xq[8]  = 0.800; plot_percs[8]  = "20%";
+    //plot_xq[9]  = 0.900; plot_percs[9]  = "10%";
+    //plot_xq[10] = 0.950; plot_percs[10] = "5%";
+    //plot_xq[11] = 0.980; plot_percs[11] = "2%";
+    //plot_xq[12] = 0.990; plot_percs[12] = "1%";
+    //plot_xq[13] = 0.995; plot_percs[13] = "0.5%";
+    //plot_xq[14] = 0.998; plot_percs[14] = "0.2%";
+    //plot_xq[15] = 0.999; plot_percs[15] = "0.1%";
+    //plot_xq[16] = 1.000; plot_percs[16] = "0%";
+    //h->GetQuantiles (17, plot_yq, plot_xq);
+
+    int ibin = 0;
+    while (ibin < 6 && plot_percs[ibin] != "20%") ibin++;
+
+
+    const double mbNorm = h->Integral (h->FindBin (plot_yq[ibin]), h->GetNbinsX ());
+    h->Scale (1. / mbNorm, "width");
+    h->SetLineColor (kBlack);
+    h->SetLineWidth (3);
+
+
+    TH1D* hjet = (TH1D*) h_jet_Pb_zdc_calibE_sum->Clone ("htemp");
+
+    const double j50Norm = hjet->Integral (hjet->FindBin (plot_yq[ibin]), hjet->GetNbinsX ());
+    hjet->Scale (1. / j50Norm, "width");
+    hjet->SetLineColor (myLiteBlue);
+    hjet->SetLineWidth (3);
+
+
+    TGAE* g = make_graph (h_zna);
+
+    TAxis* xax = g->GetXaxis ();
+    TAxis* yax = g->GetYaxis ();
+
+    xax->SetTitle ("#Sigma#it{E}^{ZDC, Pb} [TeV]");
+    yax->SetTitle ("A.U. (normalized in 0-20%)");
+
+    yax->SetTitleOffset (1.2 * yax->GetTitleOffset ());
+
+    double ymin = 4e-6;
+    double ymax = 2e0;
+
+    double xmin = 0;
+    double xmax = 160;
+    {
+      double temp;
+      g->GetPoint (3, xmin, temp);
+      xmin = xmin + g->GetErrorXhigh (3);
+    }
+
+    xax->SetMoreLogLabels ();
+
+    xax->SetRangeUser (xmin, xmax);
+    yax->SetRangeUser (ymin, ymax);
+
+    xax->SetTitleFont (43);
+    xax->SetTitleSize (32);
+    yax->SetTitleFont (43);
+    yax->SetTitleSize (32);
+    xax->SetLabelFont (43);
+    xax->SetLabelSize (32);
+    yax->SetLabelFont (43);
+    yax->SetLabelSize (32);
+    yax->SetTitleOffset (1.5);
+
+
+    g->SetMarkerColor (myRed);
+    g->SetLineColor (myRed);
+    g->SetLineWidth (2);
+    g->SetMarkerStyle (53);
+    g->SetMarkerSize (1.5);
+    g->Draw ("AP");
+
+
+    TH1D* h_g = h_zna_glau;
+    //h_g->SetLineColor (myLitePurple);
+    h_g->SetLineColor (colorfulColors[1]);
+    h_g->SetLineWidth (3);
+    h_g->DrawCopy ("same hist ][");
+
+
+    hjet->DrawCopy ("same hist ][");
+    SaferDelete (&hjet);
+
+
+    h->DrawCopy ("hist same ][");
+
+
+    TLine* divs = new TLine ();
+    TLatex* tl = new TLatex ();
+    tl->SetTextAngle (-90);
+    tl->SetTextAlign (11);
+    tl->SetTextFont (43);
+    tl->SetTextSize (18);
+    divs->SetLineStyle (2);
+    //for (int i = 1; i < 16; i++) {
+    for (int i = 1; i < 5; i++) {
+      divs->DrawLine (plot_yq[i], ymin, plot_yq[i], h->GetBinContent (h->FindBin (plot_yq[i])));
+      tl->DrawLatex (plot_yq[i]*1.03, std::exp (0.1*std::log (ymax/ymin)) * ymin, plot_percs[i].Data ());
+    }
+
+
+    SaferDelete (&h);
+
+
+    myText (0.59, 0.900, kBlack, "#bf{#it{ATLAS}} Internal", 0.036);
+    myText (0.59, 0.860, kBlack, "#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV", 0.032);
+    myMarkerText (0.26, 0.330,  kBlack,             kDot, "HLT_mb_sptrk_L1MBTS_1",                           0.0, 0.028);
+    myMarkerText (0.26, 0.290,  myLiteBlue,             kDot, "HLT_j50_ion_L1J10",                               0.0, 0.028);
+    myMarkerText (0.26, 0.250,  colorfulColors[1],  kDot, "ALICE, SNM #otimes Glauber fit (#times 10^{-6})", 0.0, 0.028);
+    myMarkerText (0.26, 0.210,  myRed,              53,   "ALICE, #Sigma#it{E}^{Pb}_{ZNA} (#times 10^{-6})", 1.5, 0.028);
+
+    c->SaveAs (Form ("%s/Plots/CentralityAnalysis/pPb_zdc.pdf", workPath.Data ()));
+  }
+
+
+
+
+  {
+    TCanvas* c = new TCanvas ("c_pPb_fcal", "", 800, 800);
+
+    const double bMargin = 0.14;
+    const double lMargin = 0.14;
+    const double rMargin = 0.04;
+    const double tMargin = 0.04;
+
+    c->SetBottomMargin (bMargin);
+    c->SetLeftMargin (lMargin);
+    c->SetRightMargin (rMargin);
+    c->SetTopMargin (tMargin);
+
+    c->Draw ();
+
+    //c->SetLogx ();
+    c->SetLogy ();
+
+
+    TH1D* h = (TH1D*) h_mb_Pb_fcal_et_sum->Clone ("htemp");
+
+    h->SetLineColor (kBlack);
+
+    double plot_xq[14];
+    double plot_yq[14];
+    TString plot_percs[14];
+    plot_xq[0]  = 0.000; plot_percs[0]  = "100%";
+    plot_xq[1]  = 0.200; plot_percs[1]  = "80%";
+    plot_xq[2]  = 0.400; plot_percs[2]  = "60%";
+    plot_xq[3]  = 0.600; plot_percs[3]  = "40%";
+    plot_xq[4]  = 0.700; plot_percs[4]  = "30%";
+    plot_xq[5]  = 0.800; plot_percs[5]  = "20%";
+    plot_xq[6]  = 0.900; plot_percs[6]  = "10%";
+    plot_xq[7] = 0.950; plot_percs[7] = "5%";
+    plot_xq[8] = 0.980; plot_percs[8] = "2%";
+    plot_xq[9] = 0.990; plot_percs[9] = "1%";
+    plot_xq[10] = 0.995; plot_percs[10] = "0.5%";
+    plot_xq[11] = 0.998; plot_percs[11] = "0.2%";
+    plot_xq[12] = 0.999; plot_percs[12] = "0.1%";
+    plot_xq[13] = 1.000; plot_percs[13] = "0%";
+    h->GetQuantiles (14, plot_yq, plot_xq);
+
+    int ibin = 0;
+    while (ibin < 14 && plot_percs[ibin] != "20%") ibin++;
+
+
+    const double mbNorm = h->Integral (h->FindBin (plot_yq[ibin]), h->GetNbinsX ());
+    h->Scale (1. / mbNorm, "width");
+    h->SetLineColor (kBlack);
+    h->SetLineWidth (3);
+
+
+    TH1D* hjet = (TH1D*) h_jet_Pb_fcal_et_sum->Clone ("htemp");
+
+    const double j50Norm = hjet->Integral (hjet->FindBin (plot_yq[ibin]), hjet->GetNbinsX ());
+    hjet->Scale (1. / j50Norm, "width");
+    hjet->SetLineColor (myLiteBlue);
+    hjet->SetLineWidth (3);
+
+
+    TAxis* xax = hjet->GetXaxis ();
+    TAxis* yax = hjet->GetYaxis ();
+
+    xax->SetTitle ("#Sigma#it{E}_{T}^{FCal, Pb} [GeV]");
+    yax->SetTitle ("A.U. (normalized in 0-20%)");
+
+    yax->SetTitleOffset (1.2 * yax->GetTitleOffset ());
+
+    double ymin = 4e-6;
+    double ymax = 2e0;
+
+    //xax->SetMoreLogLabels ();
+
+    //xax->SetRangeUser (xmin, xmax);
+    yax->SetRangeUser (ymin, ymax);
+
+    xax->SetTitleFont (43);
+    xax->SetTitleSize (32);
+    yax->SetTitleFont (43);
+    yax->SetTitleSize (32);
+    xax->SetLabelFont (43);
+    xax->SetLabelSize (32);
+    yax->SetLabelFont (43);
+    yax->SetLabelSize (32);
+    yax->SetTitleOffset (1.5);
+
+
+    hjet->DrawCopy ("hist ][");
+    SaferDelete (&hjet);
+
+
+    h->DrawCopy ("hist same ][");
+
+
+    TLine* divs = new TLine ();
+    TLatex* tl = new TLatex ();
+    tl->SetTextAngle (-90);
+    tl->SetTextAlign (11);
+    tl->SetTextFont (43);
+    tl->SetTextSize (18);
+    divs->SetLineStyle (2);
+    for (int i = 1; i < 13; i++) {
+      divs->DrawLine (plot_yq[i], ymin, plot_yq[i], h->GetBinContent (h->FindBin (plot_yq[i])));
+      tl->DrawLatex (plot_yq[i]+1.00, std::exp (0.1*std::log (ymax/ymin)) * ymin, plot_percs[i].Data ());
+    }
+
+
+    SaferDelete (&h);
+
+
+    myText (0.59, 0.900, kBlack, "#bf{#it{ATLAS}} Internal", 0.036);
+    myText (0.59, 0.860, kBlack, "#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV", 0.032);
+    myMarkerText (0.59, 0.820,  kBlack,             kDot, "HLT_mb_sptrk_L1MBTS_1",                           0.0, 0.028);
+    myMarkerText (0.59, 0.780,  myLiteBlue,         kDot, "HLT_j50_ion_L1J10",                               0.0, 0.028);
+    //myMarkerText (0.26, 0.250,  colorfulColors[1],  kDot, "ALICE, SNM #otimes Glauber fit (#times 10^{-6})", 0.0, 0.028);
+    //myMarkerText (0.26, 0.210,  myRed,              53,   "ALICE, #Sigma#it{E}^{Pb}_{ZNA} (#times 10^{-6})", 1.5, 0.028);
+
+    c->SaveAs (Form ("%s/Plots/CentralityAnalysis/pPb_fcal_et.pdf", workPath.Data ()));
   }
 
 
