@@ -693,7 +693,7 @@ bool Correlator (const char* tag, const char* outFilePattern, TTree* jetsTree, T
 
         const float dphi = DeltaPhi (jphi, trk_phi[iTrk]);
         const short iDPhi = GetDPhiBin (dphi);
-        if (iDPhi < 0 || nDPhiBins < iDPhi)
+        if (iDPhi < 0 || nDPhiBins <= iDPhi)
           continue; // sanity check to avoid under/over-flow
 
         short iEta = 0;
@@ -708,7 +708,8 @@ bool Correlator (const char* tag, const char* outFilePattern, TTree* jetsTree, T
         const float twgt = thisjwgt * (UseTruthParticles () ? 1 : (teff > 0. ? tpur / teff : 0.));
 
         for (short iPtCh = 0; iPtCh < nPtChSelections; iPtCh++) {
-          if (pTChStrCuts[iPtCh].first < trk_pt[iTrk] && trk_pt[iTrk] < pTChStrCuts[iPtCh].second) {
+          const TString pTChStr = pTChSelections[iPtCh];
+          if (pTChStrCuts[pTChStr].first < trk_pt[iTrk] && trk_pt[iTrk] < pTChStrCuts[pTChStr].second) {
             jet_trk_dphi_counts[iPtJ][iPtCh][iDPhi] += twgt;
             break;
           }
