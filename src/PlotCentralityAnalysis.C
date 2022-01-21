@@ -1667,6 +1667,157 @@ void PlotCentralityAnalysis () {
 
 
 
+  {
+    TCanvas* c = new TCanvas ("c_pPb_zdc_paper", "", 1000, 800);
+
+    const double bMargin = 0.14;
+    const double lMargin = 0.14;
+    const double rMargin = 0.04;
+    const double tMargin = 0.04;
+
+    c->SetBottomMargin (bMargin);
+    c->SetLeftMargin (lMargin);
+    c->SetRightMargin (rMargin);
+    c->SetTopMargin (tMargin);
+
+    c->Draw ();
+
+    c->SetLogx ();
+    c->SetLogy ();
+
+
+    TH1D* h = (TH1D*) h_mb_Pb_zdc_calibE_sum->Clone ("htemp");
+
+    h->SetLineColor (kBlack);
+
+    double plot_xq[11];
+    double plot_yq[11];
+    TString plot_percs[11];
+    plot_xq[0]  = 0.000; plot_percs[0]  = "100%";
+    plot_xq[1]  = 0.100; plot_percs[1]  = "90%";
+    plot_xq[2]  = 0.200; plot_percs[2]  = "80%";
+    plot_xq[3]  = 0.300; plot_percs[3]  = "70%";
+    plot_xq[4]  = 0.400; plot_percs[4]  = "60%";
+    plot_xq[5]  = 0.500; plot_percs[5]  = "50%";
+    plot_xq[6]  = 0.600; plot_percs[6]  = "40%";
+    plot_xq[7]  = 0.700; plot_percs[7]  = "30%";
+    plot_xq[8]  = 0.800; plot_percs[8]  = "20%";
+    plot_xq[9]  = 0.900; plot_percs[9]  = "10%";
+    plot_xq[10]  = 1.000; plot_percs[10]  = "0%";
+    h->GetQuantiles (11, plot_yq, plot_xq);
+
+    //double plot_xq[17];
+    //double plot_yq[17];
+    //TString plot_percs[17];
+    //plot_xq[0]  = 0.000; plot_percs[0]  = "100%";
+    //plot_xq[1]  = 0.100; plot_percs[1]  = "90%";
+    //plot_xq[2]  = 0.200; plot_percs[2]  = "80%";
+    //plot_xq[3]  = 0.300; plot_percs[3]  = "70%";
+    //plot_xq[4]  = 0.400; plot_percs[4]  = "60%";
+    //plot_xq[5]  = 0.500; plot_percs[5]  = "50%";
+    //plot_xq[6]  = 0.600; plot_percs[6]  = "40%";
+    //plot_xq[7]  = 0.700; plot_percs[7]  = "30%";
+    //plot_xq[8]  = 0.800; plot_percs[8]  = "20%";
+    //plot_xq[9]  = 0.900; plot_percs[9]  = "10%";
+    //plot_xq[10] = 0.950; plot_percs[10] = "5%";
+    //plot_xq[11] = 0.980; plot_percs[11] = "2%";
+    //plot_xq[12] = 0.990; plot_percs[12] = "1%";
+    //plot_xq[13] = 0.995; plot_percs[13] = "0.5%";
+    //plot_xq[14] = 0.998; plot_percs[14] = "0.2%";
+    //plot_xq[15] = 0.999; plot_percs[15] = "0.1%";
+    //plot_xq[16] = 1.000; plot_percs[16] = "0%";
+    //h->GetQuantiles (17, plot_yq, plot_xq);
+
+    int ibin = 0;
+    while (ibin < 11 && plot_percs[ibin] != "20%") ibin++;
+
+
+    const double mbNorm = h->Integral (h->FindBin (plot_yq[ibin]), h->GetNbinsX ());
+    h->Scale (1. / mbNorm, "width");
+    h->SetLineColor (kBlack);
+    h->SetLineWidth (3);
+
+
+    //TH1D* hjet = (TH1D*) h_jet_Pb_zdc_calibE_sum->Clone ("htemp");
+
+    //const double j50Norm = hjet->Integral (hjet->FindBin (plot_yq[ibin]), hjet->GetNbinsX ());
+    //hjet->Scale (1. / j50Norm, "width");
+    //hjet->SetLineColor (myLiteBlue);
+    //hjet->SetLineWidth (3);
+
+
+    //TGAE* g = make_graph (h_zna);
+    TGAE* g = make_graph (h);
+
+    TAxis* xax = g->GetXaxis ();
+    TAxis* yax = g->GetYaxis ();
+
+    xax->SetTitle ("#it{E}_{ZN} [TeV]");
+    yax->SetTitle ("dN / d#it{E}_{ZN} [TeV^{-1}]");
+
+    yax->SetTitleOffset (1.2 * yax->GetTitleOffset ());
+
+    double ymin = 1.1e-4;
+    double ymax = 1e0;
+
+    double xmin = 0;
+    double xmax = 160;
+    {
+      double temp;
+      g->GetPoint (3, xmin, temp);
+      xmin = xmin + g->GetErrorXhigh (3);
+    }
+
+    //xax->SetMoreLogLabels ();
+
+    xax->SetRangeUser (xmin, xmax);
+    yax->SetRangeUser (ymin, ymax);
+
+    xax->SetTitleFont (43);
+    xax->SetTitleSize (32);
+    yax->SetTitleFont (43);
+    yax->SetTitleSize (32);
+    xax->SetLabelFont (43);
+    xax->SetLabelSize (32);
+    yax->SetLabelFont (43);
+    yax->SetLabelSize (32);
+    yax->SetTitleOffset (1.5);
+
+
+    g->SetMarkerColor (kBlack);
+    g->SetLineColor (myRed);
+    g->SetLineWidth (2);
+    g->SetMarkerStyle (kFullCircle);
+    g->SetMarkerSize (0.5);
+    g->Draw ("AP");
+
+
+    TLine* divs = new TLine ();
+    TLatex* tl = new TLatex ();
+    tl->SetTextAngle (-90);
+    tl->SetTextAlign (11);
+    tl->SetTextFont (43);
+    tl->SetTextSize (17);
+    divs->SetLineStyle (2);
+    //for (int i = 1; i < 16; i++) {
+    for (int i = 1; i < 10; i++) {
+      divs->DrawLine (plot_yq[i], ymin, plot_yq[i], h->GetBinContent (h->FindBin (plot_yq[i])));
+      tl->DrawLatex (plot_yq[i]*1.02, std::exp (0.1*std::log (ymax/ymin)) * ymin, plot_percs[i].Data ());
+    }
+
+
+    SaferDelete (&h);
+
+
+    myText (0.59, 0.900, kBlack, "#bf{#it{ATLAS}} Internal", 0.036);
+    myText (0.59, 0.860, kBlack, "#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV, 25 #mub^{-1}", 0.032);
+
+    c->SaveAs (Form ("%s/Plots/CentralityAnalysis/pPb_zdc_paper.pdf", workPath.Data ()));
+  }
+
+
+
+
 }
 
 #endif

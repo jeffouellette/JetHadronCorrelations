@@ -62,13 +62,13 @@ short GetTrkSpectraNIters (const short iPtJInt, const short iDir, const short iC
     switch (iDir) {
       case 0: // near-side
       switch (iCent) {
-        case 5:  return 11; // all centralities
-        case 4:  return 9; // 0-20%
-        case 3:  return 9; // 20-40%...
-        case 2:  return 9;
-        case 1:  return 7;
-        case 0:  return 7; // ... 80-100%
-        case -1: return 7; // pp
+        case 5:  return 10;//11; // all centralities
+        case 4:  return 7;//9; // 0-20%
+        case 3:  return 8;//9; // 20-40%...
+        case 2:  return 7;//9;
+        case 1:  return 6;//7;
+        case 0:  return 5;//7; // ... 80-100%
+        case -1: return 6;//7; // pp
         default: return 0;
       }
       case 1: // perpendicular
@@ -84,13 +84,13 @@ short GetTrkSpectraNIters (const short iPtJInt, const short iDir, const short iC
       }
       case 2: // away-side
       switch (iCent) {
-        case 5:  return 9; // all centralities
-        case 4:  return 9; // 0-20%
-        case 3:  return 9; // 20-40%...
-        case 2:  return 7;
-        case 1:  return 7;
-        case 0:  return 7; // ... 80-100%
-        case -1: return 7; // pp
+        case 5:  return 7;//9; // all centralities
+        case 4:  return 6;//9; // 0-20%
+        case 3:  return 6;//9; // 20-40%...
+        case 2:  return 6;//7;
+        case 1:  return 5;//7;
+        case 0:  return 4;//7; // ... 80-100%
+        case -1: return 5;//7; // pp
         default: return 0;
       }
       default: return 0;
@@ -99,13 +99,13 @@ short GetTrkSpectraNIters (const short iPtJInt, const short iDir, const short iC
     switch (iDir) {
       case 0: // near-side
       switch (iCent) {
-        case 5:  return 17; // all centralities
-        case 4:  return 15; // 0-20%
-        case 3:  return 15; // 20-40%...
-        case 2:  return 13;
-        case 1:  return 11;
-        case 0:  return 9;  // ... 80-100%
-        case -1: return 15; // pp
+        case 5:  return 14;//17; // all centralities
+        case 4:  return 11;//15; // 0-20%
+        case 3:  return 11;//15; // 20-40%...
+        case 2:  return 10;//13;
+        case 1:  return 8;//11;
+        case 0:  return 7;//9;  // ... 80-100%
+        case -1: return 14;//15; // pp
         default: return 0;
       }
       case 1: // perpendicular
@@ -121,14 +121,13 @@ short GetTrkSpectraNIters (const short iPtJInt, const short iDir, const short iC
       }
       case 2: // away-side
       switch (iCent) {
-        case 5:  return 15; // all centralities
-        case 4:  return 13; // 0-20%
-        case 3:  return 13; // 20-40%...
-        case 2:  return 11;
-        case 1:  return 11; // "nominal" version
-        //case 1:  return 9; //TODO DEBUGGING -- remove me
-        case 0:  return 9;  // ... 80-100%
-        case -1: return 15; // pp
+        case 5:  return 12;//15; // all centralities
+        case 4:  return 10;//13; // 0-20%
+        case 3:  return 10;//13; // 20-40%...
+        case 2:  return 8;//11;
+        case 1:  return 7;//11; // "nominal" version
+        case 0:  return 6;//9;  // ... 80-100%
+        case -1: return 12;//15; // pp
         default: return 0;
       }
       default: return 0;

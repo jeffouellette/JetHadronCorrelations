@@ -282,10 +282,9 @@ void ProcessNIters (const char* rawTag, const char* outFileTag, const short nIte
         //  } // end loop over iPtCh2
         //} // end loop over iPtCh
         //return;
-      
-        std::cout << "m_unf_cov dimensions = " << m_unf_cov.GetNcols () << " x " << m_unf_cov.GetNrows () << std::endl;
+        //std::cout << "m_unf_cov dimensions = " << m_unf_cov.GetNcols () << " x " << m_unf_cov.GetNrows () << std::endl;
+
         SaferDelete (&bayesUnf2D);
-        std::cout << "m_unf_cov dimensions = " << m_unf_cov.GetNcols () << " x " << m_unf_cov.GetNrows () << std::endl;
 
         for (short iPtJInt : {0, 1}) {
 

@@ -192,22 +192,53 @@ TGAE** GetCMSRpPb () {
 
 
 
-TGAE**** GetPythiaAngantyrIpPb () {
+TGAE***** GetPythiaAngantyrIpPb () {
 
-  TFile* inFile = new TFile (Form ("%s/rootFiles/finalHists.root", std::getenv ("PYTHIA_ANGANTYR_STUDY_PATH")), "read");
+  TGAE***** g_trk_pt_ratio = Get4DArray <TGAE*> (2, nDir, 6, 2); // pTHat, direction, centrality, config
+
+  {
+    TFile* inFile = new TFile (Form ("%s/rootFiles/finalHists-pTHat20.root", std::getenv ("PYTHIA_ANGANTYR_STUDY_PATH")), "read");
+    int iPtHat = 0;
+    const short pTHat = (iPtHat == 0 ? 20 : 50);
+    for (int iDir = 0; iDir < nDir; iDir++) {
+      const TString dir = directions[iDir];
+
+      for (int iCent = 0; iCent < 6; iCent++) {
+        int iConfig = 0;
+        for (TString config : {"_allowRescatter_withNPDF", "_allowRescatter"}) {
+
+          const TString name = Form ("h_trk_pt_%s_cent%i_ratio%s", dir.Data (), iCent, config.Data ());
+          TH1D* h = (TH1D*) inFile->Get (name.Data());
+          if (h == nullptr)
+            std::cout << "Can't find histogram " << name.Data () << "??? Please check!" << std::endl;
+          else
+            g_trk_pt_ratio[iPtHat][iDir][iCent][iConfig] = make_graph (h);
+          iConfig++;
+        }
+      }
+    }
+  }
 
 
-  TGAE**** g_trk_pt_ratio = Get3DArray <TGAE*> (nDir, 6, 2);
-  for (int iDir = 0; iDir < nDir; iDir++) {
-    const TString dir = directions[iDir];
+  {
+    TFile* inFile = new TFile (Form ("%s/rootFiles/finalHists-pTHat50.root", std::getenv ("PYTHIA_ANGANTYR_STUDY_PATH")), "read");
+    int iPtHat = 1;
+    const short pTHat = (iPtHat == 0 ? 20 : 50);
+    for (int iDir = 0; iDir < nDir; iDir++) {
+      const TString dir = directions[iDir];
 
-    for (int iCent = 0; iCent < 6; iCent++) {
-      int iConfig = 0;
-      for (TString config : {"_allowRescatter_withNPDF", "_allowRescatter"}) {
-        g_trk_pt_ratio[iDir][iCent][iConfig] = make_graph ((TH1D*) inFile->Get (Form ("h_trk_pt_%s_cent%i_ratio%s", dir.Data (), iCent, config.Data ())));
-        if (g_trk_pt_ratio[iDir][iCent][iConfig] == nullptr)
-          std::cout << "Can't find graph for " << Form ("h_trk_pt_%s_cent%i_ratio%s", dir.Data (), iCent, config.Data ()) << "??? Please check!" << std::endl;
-        iConfig++;
+      for (int iCent = 0; iCent < 6; iCent++) {
+        int iConfig = 0;
+        for (TString config : {"_allowRescatter_withNPDF", "_allowRescatter"}) {
+
+          const TString name = Form ("h_trk_pt_%s_cent%i_ratio%s", dir.Data (), iCent, config.Data ());
+          TH1D* h = (TH1D*) inFile->Get (name.Data());
+          if (h == nullptr)
+            std::cout << "Can't find histogram " << name.Data () << "??? Please check!" << std::endl;
+          else
+            g_trk_pt_ratio[iPtHat][iDir][iCent][iConfig] = make_graph (h);
+          iConfig++;
+        }
       }
     }
   }

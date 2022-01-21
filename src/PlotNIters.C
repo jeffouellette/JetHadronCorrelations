@@ -701,11 +701,10 @@ void PlotNIters (const char* rawTag, const char* nitersTag) {
           g_jetInt_trk_pt_ref_unfStatUnc[iPtJInt][iDir]->GetPoint (i, x, y);
           double ydum = y;
           g_jetInt_trk_pt_ref_unfIterUnc[iPtJInt][iDir]->GetPoint (i, x, y);
-          if ((xopt == -1 && ydum > y) || i == g_jetInt_trk_pt_ref_unfIterUnc[iPtJInt][iDir]->GetN () - 1)
+          if ((xopt == -1 && ydum > y))// || i == g_jetInt_trk_pt_ref_unfIterUnc[iPtJInt][iDir]->GetN () - 1)
             xopt = x;
           else if (ydum < y)
             xopt = -1;
-          i++;
         }
 
         if (doLogY) ymin *= 0.2;
@@ -771,24 +770,22 @@ void PlotNIters (const char* rawTag, const char* nitersTag) {
           g->GetPoint (i, x, y);
           if (x != 0 && y < ymin && y > 0) ymin = y;
         }
-        short i = 0;
-        while (xopt == -1 && i < g_jetInt_trk_pt_unfIterUnc[iPtJInt][iDir][iCent]->GetN ()) {
-          g_jetInt_trk_pt_unfStatUnc[iPtJInt][iDir][iCent]->GetPoint (i, x, y);
-          double ydum = y;
-          g_jetInt_trk_pt_unfIterUnc[iPtJInt][iDir][iCent]->GetPoint (i, x, y);
-          if (ydum > y)
-            xopt = x;
-          i++;
-        }
+        //while (xopt == -1 && i < g_jetInt_trk_pt_unfIterUnc[iPtJInt][iDir][iCent]->GetN ()) {
+        //  g_jetInt_trk_pt_unfStatUnc[iPtJInt][iDir][iCent]->GetPoint (i, x, y);
+        //  double ydum = y;
+        //  g_jetInt_trk_pt_unfIterUnc[iPtJInt][iDir][iCent]->GetPoint (i, x, y);
+        //  if (ydum > y)
+        //    xopt = x;
+        //  i++;
+        //}
         for (short i = 0; i < g_jetInt_trk_pt_unfIterUnc[iPtJInt][iDir][iCent]->GetN (); i++) {
           g_jetInt_trk_pt_unfStatUnc[iPtJInt][iDir][iCent]->GetPoint (i, x, y);
           double ydum = y;
           g_jetInt_trk_pt_unfIterUnc[iPtJInt][iDir][iCent]->GetPoint (i, x, y);
-          if ((xopt == -1 && ydum > y) || i == g_jetInt_trk_pt_unfIterUnc[iPtJInt][iDir][iCent]->GetN () - 1)
+          if ((xopt == -1 && ydum > y))// || i == g_jetInt_trk_pt_unfIterUnc[iPtJInt][iDir][iCent]->GetN () - 1)
             xopt = x;
           else if (ydum < y)
             xopt = -1;
-          i++;
         }
 
         if (doLogY) ymin *= 0.2;
@@ -898,11 +895,10 @@ void PlotNIters (const char* rawTag, const char* nitersTag) {
           g_jetInt_trk_pt_ref_unfStatHybUnc[iPtJInt][iDir]->GetPoint (i, x, y);
           double ydum = y;
           g_jetInt_trk_pt_ref_unfIterHybUnc[iPtJInt][iDir]->GetPoint (i, x, y);
-          if ((xopt == -1 && ydum > y) || i == g_jetInt_trk_pt_ref_unfIterHybUnc[iPtJInt][iDir]->GetN () - 1)
+          if ((xopt == -1 && ydum > y))// || i == g_jetInt_trk_pt_ref_unfIterHybUnc[iPtJInt][iDir]->GetN () - 1)
             xopt = x;
           else if (ydum < y)
             xopt = -1;
-          i++;
         }
 
         if (doLogY) ymin *= 0.2;
@@ -972,11 +968,10 @@ void PlotNIters (const char* rawTag, const char* nitersTag) {
           g_jetInt_trk_pt_unfStatHybUnc[iPtJInt][iDir][iCent]->GetPoint (i, x, y);
           double ydum = y;
           g_jetInt_trk_pt_unfIterHybUnc[iPtJInt][iDir][iCent]->GetPoint (i, x, y);
-          if ((xopt == -1 && ydum > y) || i == g_jetInt_trk_pt_unfIterHybUnc[iPtJInt][iDir][iCent]->GetN () - 1)
+          if ((xopt == -1 && ydum > y))// || i == g_jetInt_trk_pt_unfIterHybUnc[iPtJInt][iDir][iCent]->GetN () - 1)
             xopt = x;
           else if (ydum < y)
             xopt = -1;
-          i++;
         }
 
         if (doLogY) ymin *= 0.2;
@@ -1086,11 +1081,10 @@ void PlotNIters (const char* rawTag, const char* nitersTag) {
           g_jetInt_trk_pt_ref_unfStatRelUnc[iPtJInt][iDir]->GetPoint (i, x, y);
           double ydum = y;
           g_jetInt_trk_pt_ref_unfIterRelUnc[iPtJInt][iDir]->GetPoint (i, x, y);
-          if ((xopt == -1 && ydum > y) || i == g_jetInt_trk_pt_ref_unfIterRelUnc[iPtJInt][iDir]->GetN () - 1)
+          if ((xopt == -1 && ydum > y))// || i == g_jetInt_trk_pt_ref_unfIterRelUnc[iPtJInt][iDir]->GetN () - 1)
             xopt = x;
           else if (ydum < y)
             xopt = -1;
-          i++;
         }
 
         if (doLogY) ymin *= 0.2;
@@ -1160,11 +1154,10 @@ void PlotNIters (const char* rawTag, const char* nitersTag) {
           g_jetInt_trk_pt_unfStatRelUnc[iPtJInt][iDir][iCent]->GetPoint (i, x, y);
           double ydum = y;
           g_jetInt_trk_pt_unfIterRelUnc[iPtJInt][iDir][iCent]->GetPoint (i, x, y);
-          if ((xopt == -1 && ydum > y) || i == g_jetInt_trk_pt_unfIterRelUnc[iPtJInt][iDir][iCent]->GetN () - 1)
+          if ((xopt == -1 && ydum > y))// || i == g_jetInt_trk_pt_unfIterRelUnc[iPtJInt][iDir][iCent]->GetN () - 1)
             xopt = x;
           else if (ydum < y)
             xopt = -1;
-          i++;
         }
 
         if (doLogY) ymin *= 0.2;
@@ -1272,11 +1265,10 @@ void PlotNIters (const char* rawTag, const char* nitersTag) {
         g_jet_pt_ref_unfStatUnc[iPtJInt]->GetPoint (i, x, y);
         double ydum = y;
         g_jet_pt_ref_unfIterUnc[iPtJInt]->GetPoint (i, x, y);
-        if ((xopt == -1 && ydum > y) || i == g_jet_pt_ref_unfIterUnc[iPtJInt]->GetN () - 1)
+        if ((xopt == -1 && ydum > y))// || i == g_jet_pt_ref_unfIterUnc[iPtJInt]->GetN () - 1)
           xopt = x;
         else if (ydum < y)
           xopt = -1;
-        i++;
       }
 
       if (doLogY) ymin *= 0.2;
@@ -1344,11 +1336,10 @@ void PlotNIters (const char* rawTag, const char* nitersTag) {
         g_jet_pt_unfStatUnc[iPtJInt][iCent]->GetPoint (i, x, y);
         double ydum = y;
         g_jet_pt_unfIterUnc[iPtJInt][iCent]->GetPoint (i, x, y);
-        if ((xopt == -1 && ydum > y) || i == g_jet_pt_unfIterUnc[iPtJInt][iCent]->GetN () - 1)
+        if ((xopt == -1 && ydum > y))// || i == g_jet_pt_unfIterUnc[iPtJInt][iCent]->GetN () - 1)
           xopt = x;
         else if (ydum < y)
           xopt = -1;
-        i++;
       }
 
       if (doLogY) ymin *= 0.2;
@@ -1450,11 +1441,10 @@ void PlotNIters (const char* rawTag, const char* nitersTag) {
         g_jet_pt_ref_unfStatHybUnc[iPtJInt]->GetPoint (i, x, y);
         double ydum = y;
         g_jet_pt_ref_unfIterHybUnc[iPtJInt]->GetPoint (i, x, y);
-        if ((xopt == -1 && ydum > y) || i == g_jet_pt_ref_unfIterHybUnc[iPtJInt]->GetN () - 1)
+        if ((xopt == -1 && ydum > y))// || i == g_jet_pt_ref_unfIterHybUnc[iPtJInt]->GetN () - 1)
           xopt = x;
         else if (ydum < y)
           xopt = -1;
-        i++;
       }
 
       if (doLogY) ymin *= 0.2;
@@ -1522,11 +1512,10 @@ void PlotNIters (const char* rawTag, const char* nitersTag) {
         g_jet_pt_unfStatHybUnc[iPtJInt][iCent]->GetPoint (i, x, y);
         double ydum = y;
         g_jet_pt_unfIterHybUnc[iPtJInt][iCent]->GetPoint (i, x, y);
-        if ((xopt == -1 && ydum > y) || i == g_jet_pt_unfIterHybUnc[iPtJInt][iCent]->GetN () - 1)
+        if ((xopt == -1 && ydum > y))// || i == g_jet_pt_unfIterHybUnc[iPtJInt][iCent]->GetN () - 1)
           xopt = x;
         else if (ydum < y)
           xopt = -1;
-        i++;
       }
 
       if (doLogY) ymin *= 0.2;
@@ -1628,11 +1617,10 @@ void PlotNIters (const char* rawTag, const char* nitersTag) {
         g_jet_pt_ref_unfStatRelUnc[iPtJInt]->GetPoint (i, x, y);
         double ydum = y;
         g_jet_pt_ref_unfIterRelUnc[iPtJInt]->GetPoint (i, x, y);
-        if ((xopt == -1 && ydum > y) || i == g_jet_pt_ref_unfIterRelUnc[iPtJInt]->GetN () - 1)
+        if ((xopt == -1 && ydum > y))// || i == g_jet_pt_ref_unfIterRelUnc[iPtJInt]->GetN () - 1)
           xopt = x;
         else if (ydum < y)
           xopt = -1;
-        i++;
       }
 
       if (doLogY) ymin *= 0.2;
@@ -1700,11 +1688,10 @@ void PlotNIters (const char* rawTag, const char* nitersTag) {
         g_jet_pt_unfStatRelUnc[iPtJInt][iCent]->GetPoint (i, x, y);
         double ydum = y;
         g_jet_pt_unfIterRelUnc[iPtJInt][iCent]->GetPoint (i, x, y);
-        if ((xopt == -1 && ydum > y) || i == g_jet_pt_unfIterRelUnc[iPtJInt][iCent]->GetN () - 1)
+        if ((xopt == -1 && ydum > y))// || i == g_jet_pt_unfIterRelUnc[iPtJInt][iCent]->GetN () - 1)
           xopt = x;
         else if (ydum < y)
           xopt = -1;
-        i++;
       }
 
       if (doLogY) ymin *= 0.2;

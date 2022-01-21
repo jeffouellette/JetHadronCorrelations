@@ -287,6 +287,7 @@ void PlotJets (const char* tag, const char* inFileTag) {
     h = h_jet_pt_ref[iDType][0];
    
     g = make_graph (h);
+    RecenterGraph (g);
     ScaleGraph (g, nullptr, std::pow (10, 3));
     myDraw (g, colorfulColors[0], kFullCircle, 1.4, 1, 3, "P", false);
     SaferDelete (&g);
@@ -302,6 +303,7 @@ void PlotJets (const char* tag, const char* inFileTag) {
 
       g = make_graph (h);
       ScaleGraph (g, nullptr, std::pow (10, 2-iCent));
+      RecenterGraph (g);
       myDraw (g, colorfulColors[iCent+1], kFullCircle, 1.4, 1, 3, "P", false);
       SaferDelete (&g);
 
@@ -381,7 +383,8 @@ void PlotJets (const char* tag, const char* inFileTag) {
 
       TH1D* h = new TH1D ("h", ";#it{p}_{T}^{jet} [GeV];Data / MC", 1, pTJBins[0], pTJBins[nPtJBins]);
       h->GetXaxis ()->SetMoreLogLabels ();
-      h->GetYaxis ()->SetRangeUser (0.00, 2.5);
+      h->GetYaxis ()->SetRangeUser (0.00, 1.8);
+      //h->GetYaxis ()->SetRangeUser (0.10, 0.4);
       h->SetBinContent (1, 1);
       h->SetLineStyle (2);
       h->SetLineWidth (2);
@@ -402,7 +405,8 @@ void PlotJets (const char* tag, const char* inFileTag) {
 
       TH1D* h = new TH1D ("h", ";#it{p}_{T}^{jet} [GeV];Data / MC", 1, pTJBins[0], pTJBins[nPtJBins]);
       h->GetXaxis ()->SetMoreLogLabels ();
-      h->GetYaxis ()->SetRangeUser (0.00, 2.5);
+      h->GetYaxis ()->SetRangeUser (0.00, 1.8);
+      //h->GetYaxis ()->SetRangeUser (0.10, 0.4);
       h->SetBinContent (1, 1);
       h->SetLineStyle (2);
       h->SetLineWidth (2);
@@ -424,6 +428,7 @@ void PlotJets (const char* tag, const char* inFileTag) {
     myText (0.1, 0.84, kBlack, "#bf{#it{ATLAS}} Simulation Internal", 0.07);
     myText (0.1, 0.75, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.07);
     myText (0.1, 0.66, kBlack, "#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV", 0.07);
+    myText (0.1, 0.57, kBlack, "Pythia8 JZ0-3", 0.07);
 
     c->SaveAs (Form ("%s/Plots/JetDistributions/JetPtSpectrum_DataMC_RatioSummary.pdf", workPath.Data ()));
   }

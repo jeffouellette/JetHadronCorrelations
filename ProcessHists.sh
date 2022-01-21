@@ -2,16 +2,16 @@
 #python src/ProcessCovarianceMatrices.py AllJets AllJets
 #./bin/ProcessUnfolding.exe AllJets AllJets
 
-#root -l -b -q 'src/ProcessNIters.C("AllJets", "AllJets_NIters20", 20)'
+root -l -b -q 'src/ProcessNIters.C("AllJets", "AllJets_NIters20", 20)'
 
 #root -l -b -q 'src/ProcessJets.C("All", "AllJets")'
 
 #root -l -b -q 'src/PlotJets.C("All", "AllJets")'
 
-#root -l -b -q 'src/PlotNIters.C("AllJets_NIters20")'
+root -l -b -q 'src/PlotNIters.C("AllJets_NIters20", "AllJets_NIters20")'
 
 #root -l -b -q 'src/PlotPtCh.C("AllJets", "AllJets")'
-root -l -b -q 'src/PlotDPhi.C("AllJets", "AllJets")'
+#root -l -b -q 'src/PlotDPhi.C("AllJets", "AllJets")'
 
 
 #./bin/ProcessCorrelations.exe All AllJets_Test
