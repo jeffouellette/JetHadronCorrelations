@@ -191,7 +191,7 @@ void PlotTrackingPerformance () {
 
   TFile* inFile = new TFile (Form ("%s/TrackingPerformance/Nominal/outFile.root", rootPath.Data ()), "read");
 
-  for (int iWP = 0; iWP < trackWPs.size (); iWP++) {
+  for (int iWP = 0; iWP < (int)trackWPs.size (); iWP++) {
 
     h_truth_matching_prob[nSystems][iWP] = (TH1D*) inFile->Get (Form ("h_truth_matching_prob_pPb_Hijing_%s", trackWPNames[iWP].c_str ()));
 
@@ -236,7 +236,7 @@ void PlotTrackingPerformance () {
       } // end loop over iMult
 
 
-      for (int iWP = 0; iWP < trackWPs.size (); iWP++) {
+      for (int iWP = 0; iWP < (int)trackWPs.size (); iWP++) {
 
         for (int iMult = 0; iMult < nMultBins; iMult++) {
 
@@ -265,7 +265,7 @@ void PlotTrackingPerformance () {
     } // end loop over iPID
 
 
-    for (int iWP = 0; iWP < trackWPs.size (); iWP++) {
+    for (int iWP = 0; iWP < (int)trackWPs.size (); iWP++) {
 
       h_truth_matching_prob[iSys][iWP] = (TH1D*) inFile->Get (Form ("h_truth_matching_prob_%s_%s", sys.Data (), trackWPNames[iWP].c_str ()));
 
@@ -344,7 +344,7 @@ void PlotTrackingPerformance () {
     double coarserPtchBins[] = {0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2, 2.25, 2.5, 2.75, 3, 3.25, 3.5, 4, 4.5, 5, 6, 8, 12, 150};
     int nCoarserPtchBins = sizeof (coarserPtchBins) / sizeof (coarserPtchBins[0]) - 1;
 
-    for (int iWP = 0; iWP < trackWPs.size (); iWP++) {
+    for (int iWP = 0; iWP < (int)trackWPs.size (); iWP++) {
 
       //for (int iMult = 0; iMult < nMultBins; iMult++) {
       for (int iDR = 0; iDR < nDRBins; iDR++) {
@@ -379,7 +379,7 @@ void PlotTrackingPerformance () {
 
     for (int iPID = 0; iPID < nPIDs; iPID++) {
 
-      for (int iWP = 0; iWP < trackWPs.size (); iWP++) {
+      for (int iWP = 0; iWP < (int)trackWPs.size (); iWP++) {
 
         for (int iMult = 0; iMult < nMultBins; iMult++) {
 
@@ -400,7 +400,7 @@ void PlotTrackingPerformance () {
     } // end loop over iPID
 
 
-    for (int iWP = 0; iWP < trackWPs.size (); iWP++) {
+    for (int iWP = 0; iWP < (int)trackWPs.size (); iWP++) {
 
       //for (int iMult = 0; iMult < nMultBins; iMult++) {
       for (int iDR = 0; iDR < nDRBins; iDR++) {
@@ -461,7 +461,7 @@ void PlotTrackingPerformance () {
 
     const TString sys = (iSys == 0 ? "pp" : "pPb");
 
-    for (int iWP = 0; iWP < trackWPs.size (); iWP++) {
+    for (int iWP = 0; iWP < (int)trackWPs.size (); iWP++) {
 
       //for (int iMult = 0; iMult < nMultBins; iMult++) {
       //for (int iMult = nMultBins-1; iMult < nMultBins; iMult++) {
@@ -493,7 +493,7 @@ void PlotTrackingPerformance () {
 
 
 
-  for (int iWP = 0; iWP < trackWPs.size (); iWP++) {
+  for (int iWP = 0; iWP < (int)trackWPs.size (); iWP++) {
 
     {
       const int iDR = nDRBins-1;
@@ -984,7 +984,7 @@ void PlotTrackingPerformance () {
 
 
 
-  for (int iWPhere = 0; iWPhere < trackWPs.size (); iWPhere++) {
+  for (int iWPhere = 0; iWPhere < (int)trackWPs.size (); iWPhere++) {
     for (int iSys : systems) {
 
       const int iDR = nDRBins-1;
@@ -1075,7 +1075,7 @@ void PlotTrackingPerformance () {
   } // end loop over iWPhere
 
 
-  for (int iWPhere = 0; iWPhere < trackWPs.size (); iWPhere++) {
+  for (int iWPhere = 0; iWPhere < (int)trackWPs.size (); iWPhere++) {
 
     const int iSys = 2;
     const int iDR = nDRBins-1;
@@ -1720,7 +1720,7 @@ void PlotTrackingPerformance () {
 
   for (int iSys : systems) {
 
-    for (int iWP = 0; iWP < trackWPs.size (); iWP++) {
+    for (int iWP = 0; iWP < (int)trackWPs.size (); iWP++) {
 
       for (int iMult = 0; iMult < nMultBins; iMult++) {
 
@@ -1740,7 +1740,7 @@ void PlotTrackingPerformance () {
 
   for (int iSys = 0; iSys < 3; iSys++) {
 
-    for (int iWP = 0; iWP < trackWPs.size (); iWP++) {
+    for (int iWP = 0; iWP < (int)trackWPs.size (); iWP++) {
 
       for (int iMult = 0; iMult < nMultBins; iMult++) {
 

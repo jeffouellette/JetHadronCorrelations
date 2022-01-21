@@ -851,7 +851,7 @@ bool GetMCWeights (const TString& fname) {
  */
 float GetJZXR04MinPt (const TString& fname) {
   if (!IsCollisions ()) {
-    if (TString (fname).Contains ("JZ0"))      return 0;
+    if (TString (fname).Contains ("JZ0") || TString (fname).Contains ("Hijing"))      return 0;
     else if (TString (fname).Contains ("JZ1")) return 20;
     else if (TString (fname).Contains ("JZ2")) return 60;
     else if (TString (fname).Contains ("JZ3")) return 160;
@@ -868,7 +868,7 @@ float GetJZXR04MinPt (const TString& fname) {
  */
 float GetJZXR04MaxPt (const TString& fname) {
   if (!IsCollisions ()) {
-    if (TString (fname).Contains ("JZ0"))      return 20;
+    if (TString (fname).Contains ("JZ0") || TString (fname).Contains ("Hijing"))      return 20;
     else if (TString (fname).Contains ("JZ1")) return 60;
     else if (TString (fname).Contains ("JZ2")) return 160;
     else if (TString (fname).Contains ("JZ3")) return 400;
@@ -1881,6 +1881,9 @@ TF1* LoadJetEnergyResFunction () {
   const short iAllEta = 10;
 
   TF1* f_jer = (TF1*) ((TF1*) infile->Get (Form ("f_r4_avg_jer_%s_iEta%i", sys.c_str (), iAllEta)))->Clone ("f_r4_avg_jer");
+  double xmin, xmax;
+  f_jer->GetRange (xmin, xmax);
+  f_jer->SetRange (0.001, xmax);
 
   std::cout << "Loaded JER function" << std::endl;
 

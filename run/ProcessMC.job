@@ -11,7 +11,7 @@ accounting_group = group_atlas.boulder
 swVersion=21.2.169
 
 # grid pass version
-gridPass=090
+gridPass=100
 
 # JetHadronSkimmer, JetEnergyResolution, TrackMomentumResolution, TrackingPerformance, or MakeResponseMatrix
 #alg = TrackMomentumResolution
@@ -92,6 +92,12 @@ Queue 1
 
 
 # p+Pb data overlay dijet MC
+Arguments = $(alg) mc_$(gridPass) 0 pPb16_5TeV MCDataOverlay None $(syst) user.jeouelle.$(swVersion).hadrons.$(gridPass).mc16_5TeV.pPb.420010.JZ0R04.merge.AOD.e8362_d1667_r12722_r11932_Tree.root
+Error = errors/$(alg)_Pythia8_pPb_JZ0R04.err
+Log = /tmp/jeff/logs/$(alg)_Pythia8_pPb_JZ0R04.log
+Output = outputs/$(alg)_Pythia8_pPb_JZ0R04.out
+Queue 1
+
 Arguments = $(alg) mc_$(gridPass) 0 pPb16_5TeV MCDataOverlay None $(syst) user.jeouelle.$(swVersion).hadrons.$(gridPass).mc16_5TeV.pPb.420011.JZ1R04.merge.AOD.e8362_d1667_r12722_r11932_Tree.root
 Error = errors/$(alg)_Pythia8_pPb_JZ1R04.err
 Log = /tmp/jeff/logs/$(alg)_Pythia8_pPb_JZ1R04.log
@@ -111,12 +117,12 @@ Output = outputs/$(alg)_Pythia8_pPb_JZ3R04.out
 Queue 1
 
 
-# p+Pb Hijing MC
-Arguments = $(alg) mc_$(gridPass) 0 pPb16_5TeV MCHijing None $(syst) user.jeouelle.$(swVersion).hadrons.$(gridPass).mc16_5TeV.pPb.Hijing_MinBias_Flow.420118.recon.AOD.e7285_s3699_r12713_Tree.root
-Error = errors/$(alg)_Hijing_pPb.err
-Log = /tmp/jeff/logs/$(algs)_Hijing_pPb.log
-Output = outputs/$(alg)_Hijing_pPb.out
-Queue 1
+## p+Pb Hijing MC
+#Arguments = $(alg) mc_$(gridPass) 0 pPb16_5TeV MCHijing None $(syst) user.jeouelle.$(swVersion).hadrons.$(gridPass).mc16_5TeV.pPb.Hijing_MinBias_Flow.420118.recon.AOD.e7285_s3699_r12713_Tree.root
+#Error = errors/$(alg)_Hijing_pPb.err
+#Log = /tmp/jeff/logs/$(algs)_Hijing_pPb.log
+#Output = outputs/$(alg)_Hijing_pPb.out
+#Queue 1
 
 
 ## p+Pb signal-only dijet MC
