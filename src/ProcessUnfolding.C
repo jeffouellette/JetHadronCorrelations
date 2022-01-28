@@ -27,48 +27,19 @@
 using namespace JetHadronCorrelations;
 
 
-short GetJetSpectraNIters (const short iPtJInt, const short iCent) {
-  switch (iPtJInt) {
-    case 0: // pTJ > 30 GeV
-    switch (iCent) {
-      case 5:  return 13; // all centralities
-      case 4:  return 13; // 0-20%
-      case 3:  return 11; // 20-40%...
-      case 2:  return 11;
-      case 1:  return 9;
-      case 0:  return 9;  // ... 80-100%
-      case -1: return 15; // pp
-      default: return 0;
-    }
-    case 1: // pTJ > 60 GeV
-    switch (iCent) {
-      case 5:  return 17; // all centralities
-      case 4:  return 15; // 0-20%
-      case 3:  return 13; // 20-40% ...
-      case 2:  return 13;
-      case 1:  return 11;
-      case 0:  return 9;  // ... 80-100%
-      case -1: return 15; // pp
-      default: return 0;
-    }
-    default: return 0;
-  }
-}
-
-
 short GetTrkSpectraNIters (const short iPtJInt, const short iDir, const short iCent) {
   switch (iPtJInt) {
     case 0: // pTJ > 30 GeV
     switch (iDir) {
       case 0: // near-side
       switch (iCent) {
-        case 5:  return 10;//11; // all centralities
-        case 4:  return 7;//9; // 0-20%
-        case 3:  return 8;//9; // 20-40%...
-        case 2:  return 7;//9;
-        case 1:  return 6;//7;
-        case 0:  return 5;//7; // ... 80-100%
-        case -1: return 6;//7; // pp
+        case 5:  return 3;//33;//11; // all centralities
+        case 4:  return 4;//25;//9; // 0-20%
+        case 3:  return 4;//26;//9; // 20-40%...
+        case 2:  return 4;//19;//9;
+        case 1:  return 3;//16;//7;
+        case 0:  return 4;//13;//7; // ... 80-100%
+        case -1: return 3;//15;//7; // pp
         default: return 0;
       }
       case 1: // perpendicular
@@ -84,13 +55,13 @@ short GetTrkSpectraNIters (const short iPtJInt, const short iDir, const short iC
       }
       case 2: // away-side
       switch (iCent) {
-        case 5:  return 7;//9; // all centralities
-        case 4:  return 6;//9; // 0-20%
-        case 3:  return 6;//9; // 20-40%...
-        case 2:  return 6;//7;
-        case 1:  return 5;//7;
-        case 0:  return 4;//7; // ... 80-100%
-        case -1: return 5;//7; // pp
+        case 5:  return 3;//23;//9; // all centralities
+        case 4:  return 3;//17;//9; // 0-20%
+        case 3:  return 3;//14;//9; // 20-40%...
+        case 2:  return 4;//15;//7;
+        case 1:  return 3;//11;//7;
+        case 0:  return 3;//3;//7; // ... 80-100%
+        case -1: return 3;//8;//7; // pp
         default: return 0;
       }
       default: return 0;
@@ -99,13 +70,13 @@ short GetTrkSpectraNIters (const short iPtJInt, const short iDir, const short iC
     switch (iDir) {
       case 0: // near-side
       switch (iCent) {
-        case 5:  return 14;//17; // all centralities
-        case 4:  return 11;//15; // 0-20%
-        case 3:  return 11;//15; // 20-40%...
-        case 2:  return 10;//13;
-        case 1:  return 8;//11;
-        case 0:  return 7;//9;  // ... 80-100%
-        case -1: return 14;//15; // pp
+        case 5:  return 31;//17; // all centralities
+        case 4:  return 26;//15; // 0-20%
+        case 3:  return 24;//15; // 20-40%...
+        case 2:  return 19;//13;
+        case 1:  return 9;//11;
+        case 0:  return 9;//9;  // ... 80-100%
+        case -1: return 10;//15; // pp
         default: return 0;
       }
       case 1: // perpendicular
@@ -116,20 +87,52 @@ short GetTrkSpectraNIters (const short iPtJInt, const short iDir, const short iC
         case 2:  return 1;
         case 1:  return 1;
         case 0:  return 1;
-        case -1: return 3;
+        case -1: return 1;
         default: return 0;
       }
       case 2: // away-side
       switch (iCent) {
-        case 5:  return 12;//15; // all centralities
-        case 4:  return 10;//13; // 0-20%
-        case 3:  return 10;//13; // 20-40%...
-        case 2:  return 8;//11;
-        case 1:  return 7;//11; // "nominal" version
-        case 0:  return 6;//9;  // ... 80-100%
-        case -1: return 12;//15; // pp
+        case 5:  return 29;//15; // all centralities
+        case 4:  return 23;//13; // 0-20%
+        case 3:  return 20;//13; // 20-40%...
+        case 2:  return 10;//11;
+        case 1:  return 8;//11; // "nominal" version
+        case 0:  return 8;//9;  // ... 80-100%
+        case -1: return 9;//15; // pp
         default: return 0;
       }
+      default: return 0;
+    }
+    default: return 0;
+  }
+}
+
+
+
+short GetJetSpectraNIters (const short iPtJInt, const short iCent) {
+  switch (iPtJInt) {
+    case 0: // pTJ > 30 GeV
+    //return std::max (GetTrkSpectraNIters (iPtJInt, 0, iCent), GetTrkSpectraNIters (iPtJInt, 1, iCent));
+    switch (iCent) {
+      case 5:  return 48;//13; // all centralities
+      case 4:  return 43;//13; // 0-20%
+      case 3:  return 45;//11; // 20-40%...
+      case 2:  return 40;//11;
+      case 1:  return 39;//9;
+      case 0:  return 37;//9;  // ... 80-100%
+      case -1: return 47;//15; // pp
+      default: return 0;
+    }
+    case 1: // pTJ > 60 GeV
+    //return std::max (GetTrkSpectraNIters (iPtJInt, 0, iCent), GetTrkSpectraNIters (iPtJInt, 1, iCent));
+    switch (iCent) {
+      case 5:  return 3;//17; // all centralities
+      case 4:  return 3;//15; // 0-20%
+      case 3:  return 3;//13; // 20-40% ...
+      case 2:  return 3;//13;
+      case 1:  return 3;//11;
+      case 0:  return 3;//9;  // ... 80-100%
+      case -1: return 3;//15; // pp
       default: return 0;
     }
     default: return 0;
@@ -500,6 +503,7 @@ void ProcessUnfolding (const char* inFileTag, const char* outFileTag) {
           const TString pTJInt = (iPtJInt == 0 ? "30GeV" : "60GeV");
 
           {
+            rooUnfResp_jet_pt_ref[jetWgtsType]->UseOverflow (0);
             RooUnfoldBayes* bayesUnf = new RooUnfoldBayes (rooUnfResp_jet_pt_ref[jetWgtsType], h_jet_pt_ref[iDType][iVar], GetJetSpectraNIters (iPtJInt, -1));
             bayesUnf->SetVerbose (-1);
             h_jet_pt_ref_unf[iDType][iPtJInt][iVar] = (TH1D*) bayesUnf->Hreco ()->Clone (Form ("h_jet_pt_ref_unf_%s_%s_%s", dType.Data (), pTJInt.Data (), var.Data ()));
@@ -509,8 +513,10 @@ void ProcessUnfolding (const char* inFileTag, const char* outFileTag) {
           for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
   
             const TString cent = (iCent == nZdcCentBins ? "allCent" : Form ("iCent%i", iCent));
+            const short iUnfCent = iCent;
   
-            RooUnfoldBayes* bayesUnf = new RooUnfoldBayes (rooUnfResp_jet_pt[jetWgtsType][iCent], h_jet_pt[iDType][iCent][iVar], GetJetSpectraNIters (iPtJInt, iCent));
+            rooUnfResp_jet_pt[jetWgtsType][iUnfCent]->UseOverflow (0);
+            RooUnfoldBayes* bayesUnf = new RooUnfoldBayes (rooUnfResp_jet_pt[jetWgtsType][iUnfCent], h_jet_pt[iDType][iCent][iVar], GetJetSpectraNIters (iPtJInt, iCent));
             bayesUnf->SetVerbose (-1);
             h_jet_pt_unf[iDType][iPtJInt][iCent][iVar] = (TH1D*) bayesUnf->Hreco ()->Clone (Form ("h_jet_pt_unf_%s_%s_%s_%s", dType.Data (), cent.Data (), pTJInt.Data (), var.Data ()));
             SaferDelete (&bayesUnf);
@@ -552,14 +558,14 @@ void ProcessUnfolding (const char* inFileTag, const char* outFileTag) {
 
             TGAE* g = g_jet_trk_pt_ref_sig_syst[iPtJ][iDir][iVar];
             TH1D* h = h_jet_trk_pt_ref_sig[iDType][iPtJ][iDir][0];
-            const float nJet = h_jet_pt_ref[iDType][iVar]->GetBinContent (iPtJ+1);
+            //const float nJet = h_jet_pt_ref[iDType][iVar]->GetBinContent (iPtJ+1);
 
             for (short iPtCh = 0; iPtCh < nPtChBins; iPtCh++) {
               if (g != nullptr && g->GetErrorYhigh (iPtCh) * g->GetErrorYlow (iPtCh) != 0)
                 std::cout << "--> nonzero error in both x & y for iDType = " << iDType << ", var = " << var << ", iPtJ = " << iPtJ << ", iDir = " << iDir << ", iPtCh = " << iPtCh << std::endl;
               const float shift = (g == nullptr ? 1. : g->GetErrorYhigh (iPtCh) - g->GetErrorYlow (iPtCh)); // only one of these is nonzero, so this picks up the correct sign!
-              h2->SetBinContent (iPtCh+1, iPtJ+1, nJet * (h->GetBinContent (iPtCh+1) + shift) * h->GetBinWidth (iPtCh+1));
-              h2->SetBinError   (iPtCh+1, iPtJ+1, nJet * h->GetBinError   (iPtCh+1) * h->GetBinWidth (iPtCh+1)); // assumes no additional statistical uncertainty from variation... probably ok
+              h2->SetBinContent (iPtCh+1, iPtJ+1, /*nJet * */(h->GetBinContent (iPtCh+1) + shift) * h->GetBinWidth (iPtCh+1));
+              h2->SetBinError   (iPtCh+1, iPtJ+1, /*nJet * */h->GetBinError   (iPtCh+1) * h->GetBinWidth (iPtCh+1)); // assumes no additional statistical uncertainty from variation... probably ok
             } // end loop over iPtCh
 
           } // end loop over iPtJ
@@ -573,10 +579,10 @@ void ProcessUnfolding (const char* inFileTag, const char* outFileTag) {
 
             const short nIters = GetTrkSpectraNIters (iPtJInt, iDir, -1);
 
+            rooUnfResp_jet_trk_pt_ref_sig[jetWgtsType][iDir]->UseOverflow (0);
             RooUnfoldBayes* bayesUnf2D = nullptr;
             if (var == "Nominal") {
               bayesUnf2D = new RooUnfoldBayes ("test", "test");
-              rooUnfResp_jet_trk_pt_ref_sig[jetWgtsType][iDir]->UseOverflow (0);
               bayesUnf2D->SetResponse (rooUnfResp_jet_trk_pt_ref_sig[jetWgtsType][iDir]);
               bayesUnf2D->SetMeasured (h2);
               bayesUnf2D->SetMeasuredCov (GetCovarianceMatrix (rootPath + "/Results/ProcessCovarianceMatrices_AllJets/" + TString ("h2_jetAll_trk_pt_cov_") + dir + TString ("_ref_sig_") + dType + TString (".txt")));
@@ -665,6 +671,7 @@ void ProcessUnfolding (const char* inFileTag, const char* outFileTag) {
         for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
 
           const TString cent = (iCent == nZdcCentBins ? "allCent" : Form ("iCent%i", iCent)); 
+          const short iUnfCent = iCent;
 
           for (short iDir = 0; iDir < nDir; iDir++) {
 
@@ -679,14 +686,14 @@ void ProcessUnfolding (const char* inFileTag, const char* outFileTag) {
 
               TGAE* g = g_jet_trk_pt_sig_syst[iPtJ][iDir][iCent][iVar];
               TH1D* h = h_jet_trk_pt_sig[iDType][iPtJ][iDir][iCent][0];
-              const float nJet = h_jet_pt[iDType][iCent][iVar]->GetBinContent (iPtJ+1);
+              //const float nJet = h_jet_pt[iDType][iCent][iVar]->GetBinContent (iPtJ+1);
 
               for (short iPtCh = 0; iPtCh < nPtChBins; iPtCh++) {
                 if (g != nullptr && g->GetErrorYhigh (iPtCh) * g->GetErrorYlow (iPtCh) != 0)
                   std::cout << "--> nonzero error in both x & y for iDType = " << iDType << ", var = " << var << ", iCent = " << iCent << ", iPtJ = " << iPtJ << ", iDir = " << iDir << ", iPtCh = " << iPtCh << std::endl;
                 const float shift = (g == nullptr ? 1. : g->GetErrorYhigh (iPtCh) - g->GetErrorYlow (iPtCh)); // only one of these is nonzero, so this picks up the correct sign!
-                h2->SetBinContent (iPtCh+1, iPtJ+1, nJet * (h->GetBinContent (iPtCh+1) + shift) * h->GetBinWidth (iPtCh+1));
-                h2->SetBinError   (iPtCh+1, iPtJ+1, nJet * h->GetBinError   (iPtCh+1) * h->GetBinWidth (iPtCh+1)); // assumes no additional statistical uncertainty from variation... probably ok
+                h2->SetBinContent (iPtCh+1, iPtJ+1, /*nJet * */(h->GetBinContent (iPtCh+1) + shift) * h->GetBinWidth (iPtCh+1));
+                h2->SetBinError   (iPtCh+1, iPtJ+1, /*nJet * */h->GetBinError   (iPtCh+1) * h->GetBinWidth (iPtCh+1)); // assumes no additional statistical uncertainty from variation... probably ok
               } // end loop over iPtCh
 
             } // end loop over iPtJ
@@ -700,18 +707,18 @@ void ProcessUnfolding (const char* inFileTag, const char* outFileTag) {
 
               const short nIters = GetTrkSpectraNIters (iPtJInt, iDir, iCent);
   
+              rooUnfResp_jet_trk_pt_sig[jetWgtsType][iDir][iUnfCent]->UseOverflow (0);
               RooUnfoldBayes* bayesUnf2D = nullptr;
               if (var == "Nominal") {
                 bayesUnf2D = new RooUnfoldBayes ("test", "test");
-                rooUnfResp_jet_trk_pt_sig[jetWgtsType][iDir][iCent]->UseOverflow (0);
-                bayesUnf2D->SetResponse (rooUnfResp_jet_trk_pt_sig[jetWgtsType][iDir][iCent]);
+                bayesUnf2D->SetResponse (rooUnfResp_jet_trk_pt_sig[jetWgtsType][iDir][iUnfCent]);
                 bayesUnf2D->SetMeasured (h2);
                 bayesUnf2D->SetMeasuredCov (GetCovarianceMatrix (rootPath + "/Results/ProcessCovarianceMatrices_AllJets/" + TString ("h2_jetAll_trk_pt_cov_") + dir + TString ("_pPb_sig_") + cent + TString ("_") + dType + TString (".txt")));
                 bayesUnf2D->SetIterations (nIters);
                 bayesUnf2D->SetSmoothing (false);
               }
               else {
-                bayesUnf2D = new RooUnfoldBayes (rooUnfResp_jet_trk_pt_sig[jetWgtsType][iDir][iCent], h2, nIters);
+                bayesUnf2D = new RooUnfoldBayes (rooUnfResp_jet_trk_pt_sig[jetWgtsType][iDir][iUnfCent], h2, nIters);
               }
 
               bayesUnf2D->SetVerbose (-1);
@@ -843,10 +850,10 @@ void ProcessUnfolding (const char* inFileTag, const char* outFileTag) {
 
         for (short iDir = 0; iDir < nDir; iDir++) {
 
-          ////UnscaleWidth (h_jetInt_trk_pt_ref_unf[iDType][iPtJInt][iDir][iVar]);
-          ////h_jetInt_trk_pt_ref_unf[iDType][iPtJInt][iDir][iVar]->Rebin (2);
+          //UnscaleWidth (h_jetInt_trk_pt_ref_unf[iDType][iPtJInt][iDir][iVar]);
+          //h_jetInt_trk_pt_ref_unf[iDType][iPtJInt][iDir][iVar]->Rebin (2);
           RebinSomeBins (&(h_jetInt_trk_pt_ref_unf[iDType][iPtJInt][iDir][iVar]), nRebinPtChBins, rebinPtChBins, true);
-          ////ScaleWidth (h_jetInt_trk_pt_ref_unf[iDType][iPtJInt][iDir][iVar]);
+          //ScaleWidth (h_jetInt_trk_pt_ref_unf[iDType][iPtJInt][iDir][iVar]);
           if (iVar == 0)
             RebinSomeBins2D (&(h2_jetInt_trk_pt_cov_ref_unf[iDType][iPtJInt][iDir]), nRebinPtChBins, rebinPtChBins, true);
 

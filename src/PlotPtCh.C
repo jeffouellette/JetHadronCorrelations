@@ -32,9 +32,10 @@ using namespace JetHadronCorrelations;
 
 //const bool makeTotalSystPlots   = false;
 //const bool makeBkgdSystPlots    = false;
-const bool makeSigSystPlots     = false;
-const bool makeIpPbSystPlots    = false;
+const bool makeSigSystPlots     = true;
+const bool makeIpPbSystPlots    = true;
 const bool makeCovariancePlots  = false;
+const bool DrawNoUnfold         = true;
 
 const float maxDataSyst = 20; // maximum y-axis for data-driven systematics
 const float maxMCSyst = 20; // maximum y-axis for MC-driven systematics
@@ -1943,14 +1944,16 @@ void PlotPtCh (const char* rawTag, const char* unfoldTag) {
         SaferDelete (&g);
 
 
-        //h = h_jetInt_trk_pt_iaaNoUnf[0][iPtJInt][iDir][iCent];
-        //g = make_graph (h);
-        //ResetXErrors (g);
-        //if (iDir == 1)
-        //  TrimGraph (g, 0, 10);
-        //RecenterGraph (g);
-        //myDraw (g, colorfulColors[nZdcCentBins-iCent], kOpenCircle, 1.0, 1, 2, "P", false);
-        //SaferDelete (&g);
+        if (DrawNoUnfold) {
+          h = h_jetInt_trk_pt_iaaNoUnf[0][iPtJInt][iDir][iCent];
+          g = make_graph (h);
+          ResetXErrors (g);
+          if (iDir == 1)
+            TrimGraph (g, 0, 10);
+          RecenterGraph (g);
+          myDraw (g, colorfulColors[nZdcCentBins-iCent], kOpenCircle, 1.0, 1, 2, "P", false);
+          SaferDelete (&g);
+        }
 
 
         if (iCent < nZdcCentBins)
@@ -1969,9 +1972,12 @@ void PlotPtCh (const char* rawTag, const char* unfoldTag) {
       c->cd (2);
       myText (0.2, 0.80, kBlack, Form ("#it{p}_{T}^{jet} > %i GeV", iPtJInt == 0 ? 30 : 60), 0.05);
       myText (0.2, 0.74, kBlack, Form ("#Delta#phi_{ch,jet} %s", directions[iDir] == "ns" ? "< #pi/8" : (directions[iDir] == "as" ? "> 7#pi/8" : "#in (#pi/3, 2#pi/3)")), 0.05);
-      //c->cd (3);
-      //myLineText2 (0.26, 0.80, kBlack, kFullCircle, "Unfolded", 1.2, 0.05);
-      //myLineText2 (0.26, 0.74, kBlack, kOpenCircle, "No unfold", 1.2, 0.05);
+
+      if (DrawNoUnfold) {
+        c->cd (3);
+        myLineText2 (0.26, 0.80, kBlack, kFullCircle, "Unfolded", 1.2, 0.05);
+        myLineText2 (0.26, 0.74, kBlack, kOpenCircle, "No unfold", 1.2, 0.05);
+      }
 
       c->SaveAs (Form ("%s/Plots/PtCh/IpPb_Summary_%iGeVJets_%s.pdf", workPath.Data (), iPtJInt == 0 ? 30 : 60, directions[iDir] == "ns" ? "nearside" : (directions[iDir] == "as" ? "awayside" : "perpendicular")));
     } // end loop over iDir
@@ -2374,6 +2380,34 @@ void PlotPtCh (const char* rawTag, const char* unfoldTag) {
         SaferDelete (&gup);
         SaferDelete (&gdown);
 
+
+        //g = (TGAE*) g_angantyr_iaa[iPtJInt][iDir][iCent][2]->Clone ("gtemp");
+        //TrimGraph (g, 4, iPtJInt == 0 ? 30 : 70);
+        //gup = new TGAE ();
+        //gdown = new TGAE ();
+        //MakeGupAndGdown (g, gup, gdown);
+        //myDrawFill (gup, gdown, myCyan, 0.7);
+        //ResetTGAEErrors (g);
+        //ResetXErrors (g);
+        //myDraw (g, myCyan, kDot, 0, 3, 2, "L");
+        //SaferDelete (&g);
+        //SaferDelete (&gup);
+        //SaferDelete (&gdown);
+
+
+        //g = (TGAE*) g_angantyr_iaa[iPtJInt][iDir][iCent][3]->Clone ("gtemp");
+        //TrimGraph (g, 4, iPtJInt == 0 ? 30 : 70);
+        //gup = new TGAE ();
+        //gdown = new TGAE ();
+        //MakeGupAndGdown (g, gup, gdown);
+        //myDrawFill (gup, gdown, myGreen, 0.5);
+        //ResetTGAEErrors (g);
+        //ResetXErrors (g);
+        //myDraw (g, myGreen, kDot, 0, 4, 2, "L");
+        //SaferDelete (&g);
+        //SaferDelete (&gup);
+        //SaferDelete (&gdown);
+
         if (iCent < nZdcCentBins)
           myText (0.2, 0.865, colorfulColors[nZdcCentBins-iCent], Form ("#bf{#it{p}+Pb, ZDC %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.05);
         else
@@ -2393,8 +2427,10 @@ void PlotPtCh (const char* rawTag, const char* unfoldTag) {
       myText (0.2, 0.74, kBlack, Form ("#Delta#phi_{ch,jet} %s", directions[iDir] == "ns" ? "< #pi/8" : (directions[iDir] == "as" ? "> 7#pi/8" : "#in (#pi/3, 2#pi/3)")), 0.05);
       c->cd (3);
       myLineText2 (0.26, 0.80, kBlack, kFullCircle, "Data", 1.2, 0.05);
-      myLineText (0.26, 0.73, myPurple, 2, "Angantyr, w/ EPPS16 (NLO)", 1.5, 0.05);
-      myLineText (0.26, 0.66, myBlue, 1, "Angantyr, no nPDF", 1.5, 0.05);
+      myLineText (0.26, 0.73, myPurple, 2, "#scale[0.8]{#bf{ANGANTYR}}, w/ EPPS16 (NLO)", 1.5, 0.05);
+      myLineText (0.26, 0.66, myBlue, 1, "#scale[0.8]{#bf{ANGANTYR}}, no nPDF", 1.5, 0.05);
+      //myLineText (0.26, 0.59, myCyan, 3, "#scale[0.8]{#bf{ANGANTYR}}, no rescatter, w/ nPDF", 1.5, 0.05);
+      //myLineText (0.26, 0.52, myGreen, 4, "#scale[0.8]{#bf{ANGANTYR}}, no rescatter, no nPDF", 1.5, 0.05);
 
       c->SaveAs (Form ("%s/Plots/PtCh/IpPb_Angantyr_Comp_Summary_%sJets_%s.pdf", workPath.Data (), pTJInt.Data (), directions[iDir] == "ns" ? "nearside" : (directions[iDir] == "as" ? "awayside" : "perpendicular")));
     } // end iDir=0 scope
@@ -2475,14 +2511,44 @@ void PlotPtCh (const char* rawTag, const char* unfoldTag) {
       SaferDelete (&gup);
       SaferDelete (&gdown);
 
+
+      //g = (TGAE*) g_angantyr_iaa[iPtJInt][iDir][iCent][2]->Clone ("gtemp");
+      //TrimGraph (g, 4, iPtJInt == 0 ? 30 : 70);
+      //gup = new TGAE ();
+      //gdown = new TGAE ();
+      //MakeGupAndGdown (g, gup, gdown);
+      //myDrawFill (gup, gdown, myCyan, 0.7);
+      //ResetTGAEErrors (g);
+      //ResetXErrors (g);
+      //myDraw (g, myCyan, kDot, 0, 3, 2, "L");
+      //SaferDelete (&g);
+      //SaferDelete (&gup);
+      //SaferDelete (&gdown);
+
+
+      //g = (TGAE*) g_angantyr_iaa[iPtJInt][iDir][iCent][3]->Clone ("gtemp");
+      //TrimGraph (g, 4, iPtJInt == 0 ? 30 : 70);
+      //gup = new TGAE ();
+      //gdown = new TGAE ();
+      //MakeGupAndGdown (g, gup, gdown);
+      //myDrawFill (gup, gdown, myGreen, 0.5);
+      //ResetTGAEErrors (g);
+      //ResetXErrors (g);
+      //myDraw (g, myGreen, kDot, 0, 4, 2, "L");
+      //SaferDelete (&g);
+      //SaferDelete (&gup);
+      //SaferDelete (&gdown);
+
       myText (0.24, 0.890, kBlack, "#bf{#it{ATLAS}} Internal", 0.034);
       myText (0.24, 0.850, kBlack, "#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV, ZDC 0-20%", 0.034);
       myText (0.24, 0.810, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.034);
       myText (0.24, 0.770, kBlack, Form ("#it{p}_{T}^{jet} > %i GeV, #Delta#phi_{ch,jet} %s", iPtJInt == 0 ? 30 : 60, directions[iDir] == "ns" ? "< #pi/8" : (directions[iDir] == "as" ? "> 7#pi/8" : "#in (#pi/3, 2#pi/3)")), 0.034);
       mySimpleMarkerAndBoxAndLineText (0.32, 0.725, 1.5, 1001, kBlack, 0.0, kBlack, 53, 1.8, "Data", 0.034);
 
-      mySimpleMarkerAndBoxAndLineText (0.32, 0.685, 1.5, 1001, myLitePurple, 0.7, myViolet, kDot, 0.0, "Angantyr, w/ EPPS16 (NLO)", 0.034, 2);
-      mySimpleMarkerAndBoxAndLineText (0.32, 0.645, 1.5, 1001, myLiteBlue, 0.5, myBlue, kDot, 0.0, "Angantyr, no nPDF", 0.034, 1);
+      mySimpleMarkerAndBoxAndLineText (0.32, 0.685, 1.5, 1001, myLitePurple, 0.7, myViolet, kDot, 0.0, "#scale[0.8]{#bf{ANGANTYR}}, w/ EPPS16 (NLO)", 0.034, 2);
+      mySimpleMarkerAndBoxAndLineText (0.32, 0.645, 1.5, 1001, myLiteBlue, 0.5, myBlue, kDot, 0.0, "#scale[0.8]{#bf{ANGANTYR}}, no nPDF", 0.034, 1);
+      //mySimpleMarkerAndBoxAndLineText (0.32, 0.615, 1.5, 1001, myCyan, 0.7, myCyan, kDot, 0.0, "#scale[0.8]{#bf{ANGANTYR}}, no rescatter, w/ EPPS16 (NLO)", 0.034, 3);
+      //mySimpleMarkerAndBoxAndLineText (0.32, 0.580, 1.5, 1001, myGreen, 0.5, myGreen, kDot, 0.0, "#scale[0.8]{#bf{ANGANTYR}}, no rescatter, no nPDF", 0.034, 4);
 
       c->SaveAs (Form ("%s/Plots/PtCh/IpPb_Angantyr_Comp_0-20perc_%sJets_%s.pdf", workPath.Data (), pTJInt.Data (), directions[iDir] == "ns" ? "nearside" : (directions[iDir] == "as" ? "awayside" : "perpendicular")));
     } // end iDir=0 scope

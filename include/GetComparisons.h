@@ -194,10 +194,10 @@ TGAE** GetCMSRpPb () {
 
 TGAE***** GetPythiaAngantyrIpPb () {
 
-  TGAE***** g_trk_pt_ratio = Get4DArray <TGAE*> (2, nDir, 6, 2); // pTHat, direction, centrality, config
+  TGAE***** g_trk_pt_ratio = Get4DArray <TGAE*> (2, nDir, 6, 4); // pTHat, direction, centrality, config
 
   {
-    TFile* inFile = new TFile (Form ("%s/rootFiles/finalHists-pTHat20.root", std::getenv ("PYTHIA_ANGANTYR_STUDY_PATH")), "read");
+    TFile* inFile = new TFile (Form ("%s/rootFiles/finalHists-pTHat20-ext.root", std::getenv ("PYTHIA_ANGANTYR_STUDY_PATH")), "read");
     int iPtHat = 0;
     const short pTHat = (iPtHat == 0 ? 20 : 50);
     for (int iDir = 0; iDir < nDir; iDir++) {
@@ -205,6 +205,30 @@ TGAE***** GetPythiaAngantyrIpPb () {
 
       for (int iCent = 0; iCent < 6; iCent++) {
         int iConfig = 0;
+        for (TString config : {"_allowRescatter_withNPDF", "_allowRescatter"}) {
+
+          const TString name = Form ("h_trk_pt_%s_cent%i_ratio%s", dir.Data (), iCent, config.Data ());
+          TH1D* h = (TH1D*) inFile->Get (name.Data());
+          if (h == nullptr)
+            std::cout << "Can't find histogram " << name.Data () << "??? Please check!" << std::endl;
+          else
+            g_trk_pt_ratio[iPtHat][iDir][iCent][iConfig] = make_graph (h);
+          iConfig++;
+        }
+      }
+    }
+  }
+
+
+  {
+    TFile* inFile = new TFile (Form ("%s/rootFiles/finalHists-pTHat20-noRescatter.root", std::getenv ("PYTHIA_ANGANTYR_STUDY_PATH")), "read");
+    int iPtHat = 0;
+    const short pTHat = (iPtHat == 0 ? 20 : 50);
+    for (int iDir = 0; iDir < nDir; iDir++) {
+      const TString dir = directions[iDir];
+
+      for (int iCent = 0; iCent < 6; iCent++) {
+        int iConfig = 2;
         for (TString config : {"_allowRescatter_withNPDF", "_allowRescatter"}) {
 
           const TString name = Form ("h_trk_pt_%s_cent%i_ratio%s", dir.Data (), iCent, config.Data ());
@@ -229,6 +253,30 @@ TGAE***** GetPythiaAngantyrIpPb () {
 
       for (int iCent = 0; iCent < 6; iCent++) {
         int iConfig = 0;
+        for (TString config : {"_allowRescatter_withNPDF", "_allowRescatter"}) {
+
+          const TString name = Form ("h_trk_pt_%s_cent%i_ratio%s", dir.Data (), iCent, config.Data ());
+          TH1D* h = (TH1D*) inFile->Get (name.Data());
+          if (h == nullptr)
+            std::cout << "Can't find histogram " << name.Data () << "??? Please check!" << std::endl;
+          else
+            g_trk_pt_ratio[iPtHat][iDir][iCent][iConfig] = make_graph (h);
+          iConfig++;
+        }
+      }
+    }
+  }
+
+
+  {
+    TFile* inFile = new TFile (Form ("%s/rootFiles/finalHists-pTHat50-noRescatter.root", std::getenv ("PYTHIA_ANGANTYR_STUDY_PATH")), "read");
+    int iPtHat = 1;
+    const short pTHat = (iPtHat == 0 ? 20 : 50);
+    for (int iDir = 0; iDir < nDir; iDir++) {
+      const TString dir = directions[iDir];
+
+      for (int iCent = 0; iCent < 6; iCent++) {
+        int iConfig = 2;
         for (TString config : {"_allowRescatter_withNPDF", "_allowRescatter"}) {
 
           const TString name = Form ("h_trk_pt_%s_cent%i_ratio%s", dir.Data (), iCent, config.Data ());

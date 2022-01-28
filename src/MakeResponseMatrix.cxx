@@ -431,8 +431,8 @@ bool MakeResponseMatrix (const char* directory,
         continue; // sanity check
 
 
-      if (std::fabs (rjpt/tjpt - 1) > 3*0.01*f_jer->Eval (tjpt))
-        continue; // cut on jets reconstructed well outside the JER -- these are bad matches in overlay
+      //if (std::fabs (rjpt/tjpt - 1) > 3*0.01*f_jer->Eval (tjpt))
+      //  continue; // cut on jets reconstructed well outside the JER -- these are bad matches in overlay
 
 
       bool isReconstructed = (iRJet >= 0);
@@ -604,8 +604,8 @@ bool MakeResponseMatrix (const char* directory,
       if (iTJet == -1)
         continue; // in case of no truth jet match
       const float tjpt = GetAktTruthJetPt (iTJet, r0p4);
-      if (std::fabs (rjpt/tjpt - 1) > 3*0.01*f_jer->Eval (tjpt))
-        continue; // cut on jets reconstructed well outside the JER -- these are bad matches in overlay
+      //if (std::fabs (rjpt/tjpt - 1) > 3*0.01*f_jer->Eval (tjpt))
+      //  continue; // cut on jets reconstructed well outside the JER -- these are bad matches in overlay
 
       if (tjpt < pTJBins[0] || pTJBins[nPtJBins] < tjpt)
         continue;

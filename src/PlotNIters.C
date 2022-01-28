@@ -30,7 +30,23 @@
 using namespace JetHadronCorrelations;
 
 
-void PlotNIters (const char* rawTag, const char* nitersTag) {
+double GetMinPtCh (short iPtJInt) {
+  switch (iPtJInt) {
+  case 0: return 4;
+  case 1: return 1;
+  }
+  return 0.4;
+}
+double GetMaxPtCh (short iPtJInt) {
+  switch (iPtJInt) {
+  case 0: return 60;
+  case 1: return 90;
+  }
+  return 120;
+}
+
+
+void PlotNIters (const char* rawTag, const char* nitersTag, const short nItersMax = 20, const short nIters1DMax = 100) {
 
   TLine* l = new TLine ();
   TLatex* tl = new TLatex ();
@@ -38,8 +54,9 @@ void PlotNIters (const char* rawTag, const char* nitersTag) {
   TFile* inFile = nullptr;
 
   const short nItersMin = 1;
-  const short nItersMax = 20;
   const double* nItersVals = linspace (nItersMin, nItersMax, nItersMax-nItersMin);
+  const short nIters1DMin = 1;
+  const double* nIters1DVals = linspace (nIters1DMin, nIters1DMax, nIters1DMax-nIters1DMin);
 
   const bool doLogY = true;
   const float ymaxSF = (doLogY ? 5 : 1.2);
@@ -53,8 +70,8 @@ void PlotNIters (const char* rawTag, const char* nitersTag) {
   TH1D****  h_jetInt_trk_pt_ref_unf_nIters = Get3DArray <TH1D*> (nPtJBins, nDir, nItersMax-nItersMin+2);
   TH1D***** h_jetInt_trk_pt_unf_nIters     = Get4DArray <TH1D*> (nPtJBins, nDir, nZdcCentBins+1, nItersMax-nItersMin+2);
 
-  TH1D**    h_jet_pt_ref_unf_nIters       = Get1DArray <TH1D*> (nItersMax-nItersMin+2);
-  TH1D***   h_jet_pt_unf_nIters           = Get2DArray <TH1D*> (nZdcCentBins+1, nItersMax-nItersMin+2);
+  TH1D**    h_jet_pt_ref_unf_nIters       = Get1DArray <TH1D*> (nIters1DMax-nIters1DMin+2);
+  TH1D***   h_jet_pt_unf_nIters           = Get2DArray <TH1D*> (nZdcCentBins+1, nIters1DMax-nIters1DMin+2);
 
   TGraph**    g_jet_pt_ref_unfIterUnc     = Get1DArray <TGraph*> (2);                 // sums of iterations uncertainties as a function of nIter -- data only
   TGraph***   g_jet_pt_unfIterUnc         = Get2DArray <TGraph*> (2, nZdcCentBins+1); // sums of iterations uncertainties as a function of nIter -- data only
@@ -203,9 +220,9 @@ void PlotNIters (const char* rawTag, const char* nitersTag) {
     } // end loop over iDType
 
 
-    for (short iIter = 0; iIter < nItersMax-nItersMin+1; iIter++) {
+    for (short iIter = 0; iIter < nIters1DMax-nIters1DMin+1; iIter++) {
   
-      const short nIters = (short) nItersVals[iIter];
+      const short nIters = (short) nIters1DVals[iIter];
 
       h_jet_pt_ref_unf_nIters[iIter] = (TH1D*) inFile->Get (Form ("h_jet_pt_ref_unf_data_Nominal_nIters%i", nIters));
 
@@ -214,7 +231,15 @@ void PlotNIters (const char* rawTag, const char* nitersTag) {
         const TString cent = (iCent == nZdcCentBins ? "allCent" : Form ("iCent%i", iCent));
 
         h_jet_pt_unf_nIters[iCent][iIter] = (TH1D*) inFile-> Get (Form ("h_jet_pt_unf_data_%s_Nominal_nIters%i", cent.Data (), nIters));
+
       } // end loop over iCent
+
+    } // end loop over iIter
+
+
+    for (short iIter = 0; iIter < nItersMax-nItersMin+1; iIter++) {
+  
+      const short nIters = (short) nItersVals[iIter];
 
       for (short iPtJInt : {0, 1}) {
 
@@ -228,14 +253,14 @@ void PlotNIters (const char* rawTag, const char* nitersTag) {
           const TString dir = directions[iDir];
 
           h_jetInt_trk_pt_ref_unf_nIters[iPtJInt][iDir][iIter] = (TH1D*) inFile->Get (Form ("h_jetInt_trk_pt_%s_ref_unf_data_%s_Nominal_nIters%i", dir.Data (), pTJInt.Data (), nIters));
-          h_jetInt_trk_pt_ref_unf_nIters[iPtJInt][iDir][iIter]->Scale (h_jet_pt_ref_unf_nIters[iIter]->Integral (h_jet_pt_ref_unf_nIters[iIter]->FindBin (minJetPt+0.01), h_jet_pt_ref_unf_nIters[iIter]->FindBin (maxJetPt-0.01)));
+          //h_jetInt_trk_pt_ref_unf_nIters[iPtJInt][iDir][iIter]->Scale (h_jet_pt_ref_unf_nIters[iIter]->Integral (h_jet_pt_ref_unf_nIters[iIter]->FindBin (minJetPt+0.01), h_jet_pt_ref_unf_nIters[iIter]->FindBin (maxJetPt-0.01)));
 
           for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
 
             const TString cent = (iCent == nZdcCentBins ? "allCent" : Form ("iCent%i", iCent));
   
             h_jetInt_trk_pt_unf_nIters[iPtJInt][iDir][iCent][iIter] = (TH1D*) inFile->Get (Form ("h_jetInt_trk_pt_%s_pPb_unf_%s_data_%s_Nominal_nIters%i", dir.Data (), cent.Data (), pTJInt.Data (), nIters));
-            h_jetInt_trk_pt_unf_nIters[iPtJInt][iDir][iCent][iIter]->Scale (h_jet_pt_unf_nIters[iCent][iIter]->Integral (h_jet_pt_unf_nIters[iCent][iIter]->FindBin (minJetPt+0.01), h_jet_pt_unf_nIters[iCent][iIter]->FindBin (maxJetPt-0.01)));
+            //h_jetInt_trk_pt_unf_nIters[iPtJInt][iDir][iCent][iIter]->Scale (h_jet_pt_unf_nIters[iCent][iIter]->Integral (h_jet_pt_unf_nIters[iCent][iIter]->FindBin (minJetPt+0.01), h_jet_pt_unf_nIters[iCent][iIter]->FindBin (maxJetPt-0.01)));
   
           } // end loop over iCent
 
@@ -265,15 +290,15 @@ void PlotNIters (const char* rawTag, const char* nitersTag) {
       TH1D* h_unf = h_jet_pt_ref[iDType];
       TH1D* h_unf_prev = h_jet_pt_ref[iDType];
 
-      g_jet_pt_ref_unfStatUnc[iPtJInt]     = new TGraph (nItersMax - nItersMin + 1);
-      g_jet_pt_ref_unfIterUnc[iPtJInt]     = new TGraph (nItersMax - nItersMin + 1);
-      g_jet_pt_ref_unfTotUnc[iPtJInt]      = new TGraph (nItersMax - nItersMin + 1);
-      g_jet_pt_ref_unfStatHybUnc[iPtJInt]  = new TGraph (nItersMax - nItersMin + 1);
-      g_jet_pt_ref_unfIterHybUnc[iPtJInt]  = new TGraph (nItersMax - nItersMin + 1);
-      g_jet_pt_ref_unfTotHybUnc[iPtJInt]   = new TGraph (nItersMax - nItersMin + 1);
-      g_jet_pt_ref_unfStatRelUnc[iPtJInt]  = new TGraph (nItersMax - nItersMin + 1);
-      g_jet_pt_ref_unfIterRelUnc[iPtJInt]  = new TGraph (nItersMax - nItersMin + 1);
-      g_jet_pt_ref_unfTotRelUnc[iPtJInt]   = new TGraph (nItersMax - nItersMin + 1);
+      g_jet_pt_ref_unfStatUnc[iPtJInt]     = new TGraph (nIters1DMax - nIters1DMin + 1);
+      g_jet_pt_ref_unfIterUnc[iPtJInt]     = new TGraph (nIters1DMax - nIters1DMin + 1);
+      g_jet_pt_ref_unfTotUnc[iPtJInt]      = new TGraph (nIters1DMax - nIters1DMin + 1);
+      g_jet_pt_ref_unfStatHybUnc[iPtJInt]  = new TGraph (nIters1DMax - nIters1DMin + 1);
+      g_jet_pt_ref_unfIterHybUnc[iPtJInt]  = new TGraph (nIters1DMax - nIters1DMin + 1);
+      g_jet_pt_ref_unfTotHybUnc[iPtJInt]   = new TGraph (nIters1DMax - nIters1DMin + 1);
+      g_jet_pt_ref_unfStatRelUnc[iPtJInt]  = new TGraph (nIters1DMax - nIters1DMin + 1);
+      g_jet_pt_ref_unfIterRelUnc[iPtJInt]  = new TGraph (nIters1DMax - nIters1DMin + 1);
+      g_jet_pt_ref_unfTotRelUnc[iPtJInt]   = new TGraph (nIters1DMax - nIters1DMin + 1);
 
 
       {
@@ -295,9 +320,9 @@ void PlotNIters (const char* rawTag, const char* nitersTag) {
       }
 
 
-      for (short iIter = 0; iIter < nItersMax-nItersMin+1; iIter++) {
+      for (short iIter = 0; iIter < nIters1DMax-nIters1DMin+1; iIter++) {
 
-        const short nIters = (short) nItersVals[iIter];
+        const short nIters = (short) nIters1DVals[iIter];
 
         h_unf = h_jet_pt_ref_unf_nIters[iIter];
 
@@ -321,15 +346,15 @@ void PlotNIters (const char* rawTag, const char* nitersTag) {
         iterHybVar *= iterHybVar;
         iterRelVar *= iterRelVar;
 
-        g_jet_pt_ref_unfStatUnc[iPtJInt]->SetPoint    (nIters - nItersMin, nIters, std::sqrt (totVar));
-        g_jet_pt_ref_unfIterUnc[iPtJInt]->SetPoint    (nIters - nItersMin, nIters, std::sqrt (iterVar));
-        g_jet_pt_ref_unfTotUnc[iPtJInt]->SetPoint     (nIters - nItersMin, nIters, std::sqrt (totVar + iterVar));
-        g_jet_pt_ref_unfStatHybUnc[iPtJInt]->SetPoint (nIters - nItersMin, nIters, std::sqrt (totHybVar));
-        g_jet_pt_ref_unfIterHybUnc[iPtJInt]->SetPoint (nIters - nItersMin, nIters, std::sqrt (iterHybVar));
-        g_jet_pt_ref_unfTotHybUnc[iPtJInt]->SetPoint  (nIters - nItersMin, nIters, std::sqrt (totHybVar + iterHybVar));
-        g_jet_pt_ref_unfStatRelUnc[iPtJInt]->SetPoint (nIters - nItersMin, nIters, std::sqrt (totRelVar));
-        g_jet_pt_ref_unfIterRelUnc[iPtJInt]->SetPoint (nIters - nItersMin, nIters, std::sqrt (iterRelVar));
-        g_jet_pt_ref_unfTotRelUnc[iPtJInt]->SetPoint  (nIters - nItersMin, nIters, std::sqrt (totRelVar + iterRelVar));
+        g_jet_pt_ref_unfStatUnc[iPtJInt]->SetPoint    (nIters - nIters1DMin, nIters, std::sqrt (totVar));
+        g_jet_pt_ref_unfIterUnc[iPtJInt]->SetPoint    (nIters - nIters1DMin, nIters, std::sqrt (iterVar));
+        g_jet_pt_ref_unfTotUnc[iPtJInt]->SetPoint     (nIters - nIters1DMin, nIters, std::sqrt (totVar + iterVar));
+        g_jet_pt_ref_unfStatHybUnc[iPtJInt]->SetPoint (nIters - nIters1DMin, nIters, std::sqrt (totHybVar));
+        g_jet_pt_ref_unfIterHybUnc[iPtJInt]->SetPoint (nIters - nIters1DMin, nIters, std::sqrt (iterHybVar));
+        g_jet_pt_ref_unfTotHybUnc[iPtJInt]->SetPoint  (nIters - nIters1DMin, nIters, std::sqrt (totHybVar + iterHybVar));
+        g_jet_pt_ref_unfStatRelUnc[iPtJInt]->SetPoint (nIters - nIters1DMin, nIters, std::sqrt (totRelVar));
+        g_jet_pt_ref_unfIterRelUnc[iPtJInt]->SetPoint (nIters - nIters1DMin, nIters, std::sqrt (iterRelVar));
+        g_jet_pt_ref_unfTotRelUnc[iPtJInt]->SetPoint  (nIters - nIters1DMin, nIters, std::sqrt (totRelVar + iterRelVar));
 
         h_unf_prev = h_unf;
       } // end loop over iIter
@@ -349,15 +374,15 @@ void PlotNIters (const char* rawTag, const char* nitersTag) {
         TH1D* h_unf = h_jet_pt[iDType][iCent];
         TH1D* h_unf_prev = h_jet_pt[iDType][iCent];
 
-        g_jet_pt_unfStatUnc[iPtJInt][iCent]     = new TGraph (nItersMax - nItersMin + 1);
-        g_jet_pt_unfIterUnc[iPtJInt][iCent]     = new TGraph (nItersMax - nItersMin + 1);
-        g_jet_pt_unfTotUnc[iPtJInt][iCent]      = new TGraph (nItersMax - nItersMin + 1);
-        g_jet_pt_unfStatHybUnc[iPtJInt][iCent]  = new TGraph (nItersMax - nItersMin + 1);
-        g_jet_pt_unfIterHybUnc[iPtJInt][iCent]  = new TGraph (nItersMax - nItersMin + 1);
-        g_jet_pt_unfTotHybUnc[iPtJInt][iCent]   = new TGraph (nItersMax - nItersMin + 1);
-        g_jet_pt_unfStatRelUnc[iPtJInt][iCent]  = new TGraph (nItersMax - nItersMin + 1);
-        g_jet_pt_unfIterRelUnc[iPtJInt][iCent]  = new TGraph (nItersMax - nItersMin + 1);
-        g_jet_pt_unfTotRelUnc[iPtJInt][iCent]   = new TGraph (nItersMax - nItersMin + 1);
+        g_jet_pt_unfStatUnc[iPtJInt][iCent]     = new TGraph (nIters1DMax - nIters1DMin + 1);
+        g_jet_pt_unfIterUnc[iPtJInt][iCent]     = new TGraph (nIters1DMax - nIters1DMin + 1);
+        g_jet_pt_unfTotUnc[iPtJInt][iCent]      = new TGraph (nIters1DMax - nIters1DMin + 1);
+        g_jet_pt_unfStatHybUnc[iPtJInt][iCent]  = new TGraph (nIters1DMax - nIters1DMin + 1);
+        g_jet_pt_unfIterHybUnc[iPtJInt][iCent]  = new TGraph (nIters1DMax - nIters1DMin + 1);
+        g_jet_pt_unfTotHybUnc[iPtJInt][iCent]   = new TGraph (nIters1DMax - nIters1DMin + 1);
+        g_jet_pt_unfStatRelUnc[iPtJInt][iCent]  = new TGraph (nIters1DMax - nIters1DMin + 1);
+        g_jet_pt_unfIterRelUnc[iPtJInt][iCent]  = new TGraph (nIters1DMax - nIters1DMin + 1);
+        g_jet_pt_unfTotRelUnc[iPtJInt][iCent]   = new TGraph (nIters1DMax - nIters1DMin + 1);
 
 
         {
@@ -379,9 +404,9 @@ void PlotNIters (const char* rawTag, const char* nitersTag) {
         }
 
  
-        for (short iIter = 0; iIter < nItersMax-nItersMin+1; iIter++) {
+        for (short iIter = 0; iIter < nIters1DMax-nIters1DMin+1; iIter++) {
   
-          const short nIters = (short) nItersVals[iIter];
+          const short nIters = (short) nIters1DVals[iIter];
 
           h_unf = h_jet_pt_unf_nIters[iCent][iIter];
 
@@ -405,15 +430,15 @@ void PlotNIters (const char* rawTag, const char* nitersTag) {
           iterHybVar *= iterHybVar;
           iterRelVar *= iterRelVar;
 
-          g_jet_pt_unfStatUnc[iPtJInt][iCent]->SetPoint     (nIters - nItersMin, nIters, std::sqrt (totVar));
-          g_jet_pt_unfIterUnc[iPtJInt][iCent]->SetPoint     (nIters - nItersMin, nIters, std::sqrt (iterVar));
-          g_jet_pt_unfTotUnc[iPtJInt][iCent]->SetPoint      (nIters - nItersMin, nIters, std::sqrt (totVar + iterVar));
-          g_jet_pt_unfStatHybUnc[iPtJInt][iCent]->SetPoint  (nIters - nItersMin, nIters, std::sqrt (totHybVar));
-          g_jet_pt_unfIterHybUnc[iPtJInt][iCent]->SetPoint  (nIters - nItersMin, nIters, std::sqrt (iterHybVar));
-          g_jet_pt_unfTotHybUnc[iPtJInt][iCent]->SetPoint   (nIters - nItersMin, nIters, std::sqrt (totHybVar + iterHybVar));
-          g_jet_pt_unfStatRelUnc[iPtJInt][iCent]->SetPoint  (nIters - nItersMin, nIters, std::sqrt (totRelVar));
-          g_jet_pt_unfIterRelUnc[iPtJInt][iCent]->SetPoint  (nIters - nItersMin, nIters, std::sqrt (iterRelVar));
-          g_jet_pt_unfTotRelUnc[iPtJInt][iCent]->SetPoint   (nIters - nItersMin, nIters, std::sqrt (totRelVar + iterRelVar));
+          g_jet_pt_unfStatUnc[iPtJInt][iCent]->SetPoint     (nIters - nIters1DMin, nIters, std::sqrt (totVar));
+          g_jet_pt_unfIterUnc[iPtJInt][iCent]->SetPoint     (nIters - nIters1DMin, nIters, std::sqrt (iterVar));
+          g_jet_pt_unfTotUnc[iPtJInt][iCent]->SetPoint      (nIters - nIters1DMin, nIters, std::sqrt (totVar + iterVar));
+          g_jet_pt_unfStatHybUnc[iPtJInt][iCent]->SetPoint  (nIters - nIters1DMin, nIters, std::sqrt (totHybVar));
+          g_jet_pt_unfIterHybUnc[iPtJInt][iCent]->SetPoint  (nIters - nIters1DMin, nIters, std::sqrt (iterHybVar));
+          g_jet_pt_unfTotHybUnc[iPtJInt][iCent]->SetPoint   (nIters - nIters1DMin, nIters, std::sqrt (totHybVar + iterHybVar));
+          g_jet_pt_unfStatRelUnc[iPtJInt][iCent]->SetPoint  (nIters - nIters1DMin, nIters, std::sqrt (totRelVar));
+          g_jet_pt_unfIterRelUnc[iPtJInt][iCent]->SetPoint  (nIters - nIters1DMin, nIters, std::sqrt (iterRelVar));
+          g_jet_pt_unfTotRelUnc[iPtJInt][iCent]->SetPoint   (nIters - nIters1DMin, nIters, std::sqrt (totRelVar + iterRelVar));
 
           h_unf_prev = h_unf;
 
@@ -433,8 +458,8 @@ void PlotNIters (const char* rawTag, const char* nitersTag) {
         const double minJetPt = (iPtJInt == 0 ? 30. : 60.);
         const double maxJetPt = 300;
 
-        const double minPtCh = 4;
-        const double maxPtCh = (iPtJInt == 0 ? 60 : 90);
+        const double minPtCh = GetMinPtCh (iPtJInt);
+        const double maxPtCh = GetMaxPtCh (iPtJInt);
 
         TH1D* h_unf = h_jetInt_trk_pt_ref_sig[iDType][iPtJInt][iDir];
         TH1D* h_unf_prev = h_unf;
@@ -453,7 +478,7 @@ void PlotNIters (const char* rawTag, const char* nitersTag) {
 
 
         {
-          const double nJets = 1;//h_j_unf->Integral (h_j_unf->FindBin (minJetPt+0.01), h_j_unf->FindBin (maxJetPt-0.01));
+          const double nJets = h_j_unf->Integral (h_j_unf->FindBin (minJetPt+0.01), h_j_unf->FindBin (maxJetPt-0.01));
 
           double tot = 0, totVar = 0, totHybVar = 0, totRelVar = 0;
           for (short iX = 1; iX <= h_unf->GetNbinsX (); iX++) {
@@ -483,8 +508,9 @@ void PlotNIters (const char* rawTag, const char* nitersTag) {
           h_unf = h_jetInt_trk_pt_ref_unf_nIters[iPtJInt][iDir][iIter];
 
           h_j_unf = h_jet_pt_ref_unf_nIters[iIter];
-          const double nJets = 1;//h_j_unf->Integral (h_j_unf->FindBin (minJetPt+0.01), h_j_unf->FindBin (maxJetPt-0.01));
-          const double nJets_prev = (iIter == 0 ? h_j_unf_prev->Integral (h_j_unf_prev->FindBin (minJetPt+0.01), h_j_unf_prev->FindBin (maxJetPt-0.01)) : 1);
+          const double nJets = h_j_unf->Integral (h_j_unf->FindBin (minJetPt+0.01), h_j_unf->FindBin (maxJetPt-0.01));
+          //const double nJets_prev = (iIter == 0 ? h_j_unf_prev->Integral (h_j_unf_prev->FindBin (minJetPt+0.01), h_j_unf_prev->FindBin (maxJetPt-0.01)) : 1);
+          const double nJets_prev = h_j_unf_prev->Integral (h_j_unf_prev->FindBin (minJetPt+0.01), h_j_unf_prev->FindBin (maxJetPt-0.01));
           h_j_unf_prev = h_j_unf;
 
           double tot = 0, totVar = 0, totHybVar = 0, totRelVar = 0;
@@ -545,8 +571,8 @@ void PlotNIters (const char* rawTag, const char* nitersTag) {
           const double minJetPt = (iPtJInt == 0 ? 30. : 60.);
           const double maxJetPt = 300;
 
-          const double minPtCh = 4;
-          const double maxPtCh = (iPtJInt == 0 ? 60 : 90);
+          const double minPtCh = GetMinPtCh (iPtJInt);
+          const double maxPtCh = GetMaxPtCh (iPtJInt);
   
           TH1D* h_unf = h_jetInt_trk_pt_sig[iDType][iPtJInt][iDir][iCent];
           TH1D* h_unf_prev = h_unf;
@@ -565,7 +591,7 @@ void PlotNIters (const char* rawTag, const char* nitersTag) {
 
 
           {
-            const double nJets = 1;//h_j_unf->Integral (h_j_unf->FindBin (minJetPt+0.01), h_j_unf->FindBin (maxJetPt-0.01));
+            const double nJets = h_j_unf->Integral (h_j_unf->FindBin (minJetPt+0.01), h_j_unf->FindBin (maxJetPt-0.01));
 
             double tot = 0, totVar = 0, totHybVar = 0, totRelVar = 0;
             for (short iX = 1; iX <= h_unf->GetNbinsX (); iX++) {
@@ -595,8 +621,9 @@ void PlotNIters (const char* rawTag, const char* nitersTag) {
             h_unf = h_jetInt_trk_pt_unf_nIters[iPtJInt][iDir][iCent][iIter];
 
             h_j_unf = h_jet_pt_unf_nIters[iCent][iIter];
-            const double nJets = 1;//h_j_unf->Integral (h_j_unf->FindBin (minJetPt+0.01), h_j_unf->FindBin (maxJetPt-0.01));
-            const double nJets_prev = (iIter == 0 ? h_j_unf_prev->Integral (h_j_unf_prev->FindBin (minJetPt+0.01), h_j_unf_prev->FindBin (maxJetPt-0.01)) : 1);
+            const double nJets = h_j_unf->Integral (h_j_unf->FindBin (minJetPt+0.01), h_j_unf->FindBin (maxJetPt-0.01));
+            //const double nJets_prev = (iIter == 0 ? h_j_unf_prev->Integral (h_j_unf_prev->FindBin (minJetPt+0.01), h_j_unf_prev->FindBin (maxJetPt-0.01)) : 1);
+            const double nJets_prev = h_j_unf_prev->Integral (h_j_unf_prev->FindBin (minJetPt+0.01), h_j_unf_prev->FindBin (maxJetPt-0.01));
             h_j_unf_prev = h_j_unf;
 
             double tot = 0, totVar = 0, totHybVar = 0, totRelVar = 0;
@@ -701,7 +728,7 @@ void PlotNIters (const char* rawTag, const char* nitersTag) {
           g_jetInt_trk_pt_ref_unfStatUnc[iPtJInt][iDir]->GetPoint (i, x, y);
           double ydum = y;
           g_jetInt_trk_pt_ref_unfIterUnc[iPtJInt][iDir]->GetPoint (i, x, y);
-          if ((xopt == -1 && ydum > y))// || i == g_jetInt_trk_pt_ref_unfIterUnc[iPtJInt][iDir]->GetN () - 1)
+          if (xopt == -1 && (ydum > y || i == g_jetInt_trk_pt_ref_unfIterUnc[iPtJInt][iDir]->GetN () - 1))
             xopt = x;
           else if (ydum < y)
             xopt = -1;
@@ -710,7 +737,7 @@ void PlotNIters (const char* rawTag, const char* nitersTag) {
         if (doLogY) ymin *= 0.2;
         else        ymin = 0;
 
-        TH1D* h = new TH1D ("h", ";Iterations;#sqrt{#Sigma #sigma_{N}^{2}}", 1, 0, 20);
+        TH1D* h = new TH1D ("h", ";Iterations;#sqrt{#Sigma #sigma_{N}^{2}}", 1, 0, nItersMax);
         h->GetYaxis ()->SetRangeUser (ymin, ymax);
         h->SetLineWidth (0);
         h->DrawCopy ("hist ][");
@@ -770,19 +797,11 @@ void PlotNIters (const char* rawTag, const char* nitersTag) {
           g->GetPoint (i, x, y);
           if (x != 0 && y < ymin && y > 0) ymin = y;
         }
-        //while (xopt == -1 && i < g_jetInt_trk_pt_unfIterUnc[iPtJInt][iDir][iCent]->GetN ()) {
-        //  g_jetInt_trk_pt_unfStatUnc[iPtJInt][iDir][iCent]->GetPoint (i, x, y);
-        //  double ydum = y;
-        //  g_jetInt_trk_pt_unfIterUnc[iPtJInt][iDir][iCent]->GetPoint (i, x, y);
-        //  if (ydum > y)
-        //    xopt = x;
-        //  i++;
-        //}
         for (short i = 0; i < g_jetInt_trk_pt_unfIterUnc[iPtJInt][iDir][iCent]->GetN (); i++) {
           g_jetInt_trk_pt_unfStatUnc[iPtJInt][iDir][iCent]->GetPoint (i, x, y);
           double ydum = y;
           g_jetInt_trk_pt_unfIterUnc[iPtJInt][iDir][iCent]->GetPoint (i, x, y);
-          if ((xopt == -1 && ydum > y))// || i == g_jetInt_trk_pt_unfIterUnc[iPtJInt][iDir][iCent]->GetN () - 1)
+          if (xopt == -1 && (ydum > y || i == g_jetInt_trk_pt_unfIterUnc[iPtJInt][iDir][iCent]->GetN () - 1))
             xopt = x;
           else if (ydum < y)
             xopt = -1;
@@ -791,7 +810,7 @@ void PlotNIters (const char* rawTag, const char* nitersTag) {
         if (doLogY) ymin *= 0.2;
         else        ymin = 0;
 
-        TH1D* h = new TH1D ("h", ";Iterations;#sqrt{#Sigma #sigma_{N}^{2}}", 1, 0, 20);
+        TH1D* h = new TH1D ("h", ";Iterations;#sqrt{#Sigma #sigma_{N}^{2}}", 1, 0, nItersMax);
         h->GetYaxis ()->SetRangeUser (ymin, ymax);
         h->SetLineWidth (0);
         h->DrawCopy ("hist ][");
@@ -834,7 +853,7 @@ void PlotNIters (const char* rawTag, const char* nitersTag) {
       myText (0.1, 0.84, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.07);
       myText (0.1, 0.75, kBlack, "#it{p}+Pb, #sqrt{s} = 5.02 TeV", 0.07);
       myText (0.1, 0.66, kBlack, Form ("#it{p}_{T}^{jet} [GeV] #in (%i, 300)", iPtJInt == 0 ? 30 : 60), 0.065);
-      myText (0.1, 0.57, kBlack, Form ("#it{p}_{T}^{ch} [GeV] #in (4, %i)", iPtJInt == 0 ? 60 : 90), 0.065);
+      myText (0.1, 0.57, kBlack, Form ("#it{p}_{T}^{ch} [GeV] #in (%g, %g)", GetMinPtCh (iPtJInt), GetMaxPtCh (iPtJInt)), 0.065);
       myText (0.1, 0.48, kBlack, Form ("#Delta#phi_{ch,jet} %s", directions[iDir] == "ns" ? "< #pi/8" : (directions[iDir] == "as" ? "> 7#pi/8" : "#in (#pi/3, 2#pi/3)")), 0.065);
       myLineText2 (0.15, 0.40, kBlack,        kFullCircle, "#sigma_{stat} #oplus #sigma_{iter}, #alpha = 0", 1.2, 0.06);
       myLineText2 (0.15, 0.31, kBlue,         kOpenCircle, "#sigma_{stat} only, #alpha = 0", 1.2, 0.06);
@@ -895,7 +914,7 @@ void PlotNIters (const char* rawTag, const char* nitersTag) {
           g_jetInt_trk_pt_ref_unfStatHybUnc[iPtJInt][iDir]->GetPoint (i, x, y);
           double ydum = y;
           g_jetInt_trk_pt_ref_unfIterHybUnc[iPtJInt][iDir]->GetPoint (i, x, y);
-          if ((xopt == -1 && ydum > y))// || i == g_jetInt_trk_pt_ref_unfIterHybUnc[iPtJInt][iDir]->GetN () - 1)
+          if (xopt == -1 && (ydum > y || i == g_jetInt_trk_pt_ref_unfIterHybUnc[iPtJInt][iDir]->GetN () - 1))
             xopt = x;
           else if (ydum < y)
             xopt = -1;
@@ -904,7 +923,7 @@ void PlotNIters (const char* rawTag, const char* nitersTag) {
         if (doLogY) ymin *= 0.2;
         else        ymin = 0;
 
-        TH1D* h = new TH1D ("h", ";Iterations;#sqrt{#Sigma #sigma_{N}^{2} / N}", 1, 0, 20);
+        TH1D* h = new TH1D ("h", ";Iterations;#sqrt{#Sigma #sigma_{N}^{2} / N}", 1, 0, nItersMax);
         h->GetYaxis ()->SetRangeUser (ymin, ymax);
         h->SetLineWidth (0);
         h->DrawCopy ("hist ][");
@@ -968,7 +987,7 @@ void PlotNIters (const char* rawTag, const char* nitersTag) {
           g_jetInt_trk_pt_unfStatHybUnc[iPtJInt][iDir][iCent]->GetPoint (i, x, y);
           double ydum = y;
           g_jetInt_trk_pt_unfIterHybUnc[iPtJInt][iDir][iCent]->GetPoint (i, x, y);
-          if ((xopt == -1 && ydum > y))// || i == g_jetInt_trk_pt_unfIterHybUnc[iPtJInt][iDir][iCent]->GetN () - 1)
+          if (xopt == -1 && (ydum > y || i == g_jetInt_trk_pt_unfIterHybUnc[iPtJInt][iDir][iCent]->GetN () - 1))
             xopt = x;
           else if (ydum < y)
             xopt = -1;
@@ -977,7 +996,7 @@ void PlotNIters (const char* rawTag, const char* nitersTag) {
         if (doLogY) ymin *= 0.2;
         else        ymin = 0;
 
-        TH1D* h = new TH1D ("h", ";Iterations;#sqrt{#Sigma #sigma_{N}^{2} / N}", 1, 0, 20);
+        TH1D* h = new TH1D ("h", ";Iterations;#sqrt{#Sigma #sigma_{N}^{2} / N}", 1, 0, nItersMax);
         h->GetYaxis ()->SetRangeUser (ymin, ymax);
         h->SetLineWidth (0);
         h->DrawCopy ("hist ][");
@@ -1020,7 +1039,7 @@ void PlotNIters (const char* rawTag, const char* nitersTag) {
       myText (0.1, 0.84, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.07);
       myText (0.1, 0.75, kBlack, "#it{p}+Pb, #sqrt{s} = 5.02 TeV", 0.07);
       myText (0.1, 0.66, kBlack, Form ("#it{p}_{T}^{jet} [GeV] #in (%i, 300)", iPtJInt == 0 ? 30 : 60), 0.065);
-      myText (0.1, 0.57, kBlack, Form ("#it{p}_{T}^{ch} [GeV] #in (4, %i)", iPtJInt == 0 ? 60 : 90), 0.065);
+      myText (0.1, 0.57, kBlack, Form ("#it{p}_{T}^{ch} [GeV] #in (%g, %g)", GetMinPtCh (iPtJInt), GetMaxPtCh (iPtJInt)), 0.065);
       myText (0.1, 0.48, kBlack, Form ("#Delta#phi_{ch,jet} %s", directions[iDir] == "ns" ? "< #pi/8" : (directions[iDir] == "as" ? "> 7#pi/8" : "#in (#pi/3, 2#pi/3)")), 0.065);
       myLineText2 (0.15, 0.40, kBlack,        kFullCircle, "#sigma_{stat} #oplus #sigma_{iter}, #alpha = 0.5", 1.2, 0.06);
       myLineText2 (0.15, 0.31, kBlue,         kOpenCircle, "#sigma_{stat} only, #alpha = 0.5", 1.2, 0.06);
@@ -1081,7 +1100,7 @@ void PlotNIters (const char* rawTag, const char* nitersTag) {
           g_jetInt_trk_pt_ref_unfStatRelUnc[iPtJInt][iDir]->GetPoint (i, x, y);
           double ydum = y;
           g_jetInt_trk_pt_ref_unfIterRelUnc[iPtJInt][iDir]->GetPoint (i, x, y);
-          if ((xopt == -1 && ydum > y))// || i == g_jetInt_trk_pt_ref_unfIterRelUnc[iPtJInt][iDir]->GetN () - 1)
+          if (xopt == -1 && (ydum > y || i == g_jetInt_trk_pt_ref_unfIterRelUnc[iPtJInt][iDir]->GetN () - 1))
             xopt = x;
           else if (ydum < y)
             xopt = -1;
@@ -1090,7 +1109,7 @@ void PlotNIters (const char* rawTag, const char* nitersTag) {
         if (doLogY) ymin *= 0.2;
         else        ymin = 0;
 
-        TH1D* h = new TH1D ("h", ";Iterations;#sqrt{#Sigma #sigma_{N}^{2} / N^{2}}", 1, 0, 20);
+        TH1D* h = new TH1D ("h", ";Iterations;#sqrt{#Sigma #sigma_{N}^{2} / N^{2}}", 1, 0, nItersMax);
         h->GetYaxis ()->SetRangeUser (ymin, ymax);
         h->SetLineWidth (0);
         h->DrawCopy ("hist ][");
@@ -1154,7 +1173,7 @@ void PlotNIters (const char* rawTag, const char* nitersTag) {
           g_jetInt_trk_pt_unfStatRelUnc[iPtJInt][iDir][iCent]->GetPoint (i, x, y);
           double ydum = y;
           g_jetInt_trk_pt_unfIterRelUnc[iPtJInt][iDir][iCent]->GetPoint (i, x, y);
-          if ((xopt == -1 && ydum > y))// || i == g_jetInt_trk_pt_unfIterRelUnc[iPtJInt][iDir][iCent]->GetN () - 1)
+          if (xopt == -1 && (ydum > y || i == g_jetInt_trk_pt_unfIterRelUnc[iPtJInt][iDir][iCent]->GetN () - 1))
             xopt = x;
           else if (ydum < y)
             xopt = -1;
@@ -1163,7 +1182,7 @@ void PlotNIters (const char* rawTag, const char* nitersTag) {
         if (doLogY) ymin *= 0.2;
         else        ymin = 0;
 
-        TH1D* h = new TH1D ("h", ";Iterations;#sqrt{#Sigma #sigma_{N}^{2} / N^{2}}", 1, 0, 20);
+        TH1D* h = new TH1D ("h", ";Iterations;#sqrt{#Sigma #sigma_{N}^{2} / N^{2}}", 1, 0, nItersMax);
         h->GetYaxis ()->SetRangeUser (ymin, ymax);
         h->SetLineWidth (0);
         h->DrawCopy ("hist ][");
@@ -1206,7 +1225,7 @@ void PlotNIters (const char* rawTag, const char* nitersTag) {
       myText (0.1, 0.84, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.07);
       myText (0.1, 0.75, kBlack, "#it{p}+Pb, #sqrt{s} = 5.02 TeV", 0.07);
       myText (0.1, 0.66, kBlack, Form ("#it{p}_{T}^{jet} [GeV] #in (%i, 300)", iPtJInt == 0 ? 30 : 60), 0.065);
-      myText (0.1, 0.57, kBlack, Form ("#it{p}_{T}^{ch} [GeV] #in (4, %i)", iPtJInt == 0 ? 60 : 90), 0.065);
+      myText (0.1, 0.57, kBlack, Form ("#it{p}_{T}^{ch} [GeV] #in (%g, %g)", GetMinPtCh (iPtJInt), GetMaxPtCh (iPtJInt)), 0.065);
       myText (0.1, 0.48, kBlack, Form ("#Delta#phi_{ch,jet} %s", directions[iDir] == "ns" ? "< #pi/8" : (directions[iDir] == "as" ? "> 7#pi/8" : "#in (#pi/3, 2#pi/3)")), 0.065);
       myLineText2 (0.15, 0.40, kBlack,        kFullCircle, "#sigma_{stat} #oplus #sigma_{iter}, #alpha = 1", 1.2, 0.06);
       myLineText2 (0.15, 0.31, kBlue,         kOpenCircle, "#sigma_{stat} only, #alpha = 1", 1.2, 0.06);
@@ -1265,7 +1284,7 @@ void PlotNIters (const char* rawTag, const char* nitersTag) {
         g_jet_pt_ref_unfStatUnc[iPtJInt]->GetPoint (i, x, y);
         double ydum = y;
         g_jet_pt_ref_unfIterUnc[iPtJInt]->GetPoint (i, x, y);
-        if ((xopt == -1 && ydum > y))// || i == g_jet_pt_ref_unfIterUnc[iPtJInt]->GetN () - 1)
+        if (xopt == -1 && (ydum > y || i == g_jet_pt_ref_unfIterUnc[iPtJInt]->GetN () - 1))
           xopt = x;
         else if (ydum < y)
           xopt = -1;
@@ -1274,7 +1293,7 @@ void PlotNIters (const char* rawTag, const char* nitersTag) {
       if (doLogY) ymin *= 0.2;
       else        ymin = 0;
 
-      TH1D* h = new TH1D ("h", ";Iterations;#sqrt{#Sigma #sigma_{n}^{2}}", 1, 0, 20);
+      TH1D* h = new TH1D ("h", ";Iterations;#sqrt{#Sigma #sigma_{n}^{2}}", 1, 0, nIters1DMax);
       h->GetYaxis ()->SetRangeUser (ymin, ymax);
       h->SetLineWidth (0);
       h->DrawCopy ("hist ][");
@@ -1336,7 +1355,7 @@ void PlotNIters (const char* rawTag, const char* nitersTag) {
         g_jet_pt_unfStatUnc[iPtJInt][iCent]->GetPoint (i, x, y);
         double ydum = y;
         g_jet_pt_unfIterUnc[iPtJInt][iCent]->GetPoint (i, x, y);
-        if ((xopt == -1 && ydum > y))// || i == g_jet_pt_unfIterUnc[iPtJInt][iCent]->GetN () - 1)
+        if (xopt == -1 && (ydum > y || i == g_jet_pt_unfIterUnc[iPtJInt][iCent]->GetN () - 1))
           xopt = x;
         else if (ydum < y)
           xopt = -1;
@@ -1345,7 +1364,7 @@ void PlotNIters (const char* rawTag, const char* nitersTag) {
       if (doLogY) ymin *= 0.2;
       else        ymin = 0;
 
-      TH1D* h = new TH1D ("h", ";Iterations;#sqrt{#Sigma #sigma_{n}^{2}}", 1, 0, 20);
+      TH1D* h = new TH1D ("h", ";Iterations;#sqrt{#Sigma #sigma_{n}^{2}}", 1, 0, nIters1DMax);
       h->GetYaxis ()->SetRangeUser (ymin, ymax);
       h->SetLineWidth (0);
       h->DrawCopy ("hist ][");
@@ -1441,7 +1460,7 @@ void PlotNIters (const char* rawTag, const char* nitersTag) {
         g_jet_pt_ref_unfStatHybUnc[iPtJInt]->GetPoint (i, x, y);
         double ydum = y;
         g_jet_pt_ref_unfIterHybUnc[iPtJInt]->GetPoint (i, x, y);
-        if ((xopt == -1 && ydum > y))// || i == g_jet_pt_ref_unfIterHybUnc[iPtJInt]->GetN () - 1)
+        if (xopt == -1 && (ydum > y || i == g_jet_pt_ref_unfIterHybUnc[iPtJInt]->GetN () - 1))
           xopt = x;
         else if (ydum < y)
           xopt = -1;
@@ -1450,7 +1469,7 @@ void PlotNIters (const char* rawTag, const char* nitersTag) {
       if (doLogY) ymin *= 0.2;
       else        ymin = 0;
 
-      TH1D* h = new TH1D ("h", ";Iterations;#sqrt{#Sigma #sigma_{n}^{2} / n}", 1, 0, 20);
+      TH1D* h = new TH1D ("h", ";Iterations;#sqrt{#Sigma #sigma_{n}^{2} / n}", 1, 0, nIters1DMax);
       h->GetYaxis ()->SetRangeUser (ymin, ymax);
       h->SetLineWidth (0);
       h->DrawCopy ("hist ][");
@@ -1512,7 +1531,7 @@ void PlotNIters (const char* rawTag, const char* nitersTag) {
         g_jet_pt_unfStatHybUnc[iPtJInt][iCent]->GetPoint (i, x, y);
         double ydum = y;
         g_jet_pt_unfIterHybUnc[iPtJInt][iCent]->GetPoint (i, x, y);
-        if ((xopt == -1 && ydum > y))// || i == g_jet_pt_unfIterHybUnc[iPtJInt][iCent]->GetN () - 1)
+        if (xopt == -1 && (ydum > y || i == g_jet_pt_unfIterHybUnc[iPtJInt][iCent]->GetN () - 1))
           xopt = x;
         else if (ydum < y)
           xopt = -1;
@@ -1521,7 +1540,7 @@ void PlotNIters (const char* rawTag, const char* nitersTag) {
       if (doLogY) ymin *= 0.2;
       else        ymin = 0;
 
-      TH1D* h = new TH1D ("h", ";Iterations;#sqrt{#Sigma #sigma_{n}^{2} / n}", 1, 0, 20);
+      TH1D* h = new TH1D ("h", ";Iterations;#sqrt{#Sigma #sigma_{n}^{2} / n}", 1, 0, nIters1DMax);
       h->GetYaxis ()->SetRangeUser (ymin, ymax);
       h->SetLineWidth (0);
       h->DrawCopy ("hist ][");
@@ -1617,7 +1636,7 @@ void PlotNIters (const char* rawTag, const char* nitersTag) {
         g_jet_pt_ref_unfStatRelUnc[iPtJInt]->GetPoint (i, x, y);
         double ydum = y;
         g_jet_pt_ref_unfIterRelUnc[iPtJInt]->GetPoint (i, x, y);
-        if ((xopt == -1 && ydum > y))// || i == g_jet_pt_ref_unfIterRelUnc[iPtJInt]->GetN () - 1)
+        if (xopt == -1 && (ydum > y || i == g_jet_pt_ref_unfIterRelUnc[iPtJInt]->GetN () - 1))
           xopt = x;
         else if (ydum < y)
           xopt = -1;
@@ -1626,7 +1645,7 @@ void PlotNIters (const char* rawTag, const char* nitersTag) {
       if (doLogY) ymin *= 0.2;
       else        ymin = 0;
 
-      TH1D* h = new TH1D ("h", ";Iterations;#sqrt{#Sigma #sigma_{n}^{2} / n^{2}}", 1, 0, 20);
+      TH1D* h = new TH1D ("h", ";Iterations;#sqrt{#Sigma #sigma_{n}^{2} / n^{2}}", 1, 0, nIters1DMax);
       h->GetYaxis ()->SetRangeUser (ymin, ymax);
       h->SetLineWidth (0);
       h->DrawCopy ("hist ][");
@@ -1688,7 +1707,7 @@ void PlotNIters (const char* rawTag, const char* nitersTag) {
         g_jet_pt_unfStatRelUnc[iPtJInt][iCent]->GetPoint (i, x, y);
         double ydum = y;
         g_jet_pt_unfIterRelUnc[iPtJInt][iCent]->GetPoint (i, x, y);
-        if ((xopt == -1 && ydum > y))// || i == g_jet_pt_unfIterRelUnc[iPtJInt][iCent]->GetN () - 1)
+        if (xopt == -1 && (ydum > y || i == g_jet_pt_unfIterRelUnc[iPtJInt][iCent]->GetN () - 1))
           xopt = x;
         else if (ydum < y)
           xopt = -1;
@@ -1697,7 +1716,7 @@ void PlotNIters (const char* rawTag, const char* nitersTag) {
       if (doLogY) ymin *= 0.2;
       else        ymin = 0;
 
-      TH1D* h = new TH1D ("h", ";Iterations;#sqrt{#Sigma #sigma_{n}^{2} / n^{2}}", 1, 0, 20);
+      TH1D* h = new TH1D ("h", ";Iterations;#sqrt{#Sigma #sigma_{n}^{2} / n^{2}}", 1, 0, nIters1DMax);
       h->GetYaxis ()->SetRangeUser (ymin, ymax);
       h->SetLineWidth (0);
       h->DrawCopy ("hist ][");
@@ -1862,14 +1881,25 @@ void PlotNIters (const char* rawTag, const char* nitersTag) {
     TH1D* h = nullptr;
     TGAE* g = nullptr;
 
+    const float ymin = 0.66;//0.95;
+    const float ymax = 1.17;//1.075;
+
     {
       c->cd (7);
+      gPad->SetLogx();
 
-      g = new TGAE (nItersMax - nItersMin + 1);
+      g = new TGAE (nIters1DMax - nIters1DMin + 1);
 
-      for (short iIter = 0; iIter < nItersMax-nItersMin+1; iIter++) {
-        double ratio_err = 0;
-        double ratio = h_jet_pt_ref_unf_nIters[iIter]->IntegralAndError (h_jet_pt_ref_unf_nIters[iIter]->FindBin (minJetPt+0.01), h_jet_pt_ref_unf_nIters[iIter]->FindBin (maxJetPt-0.01), ratio_err);
+      int nIter1p = -1;
+
+      for (short iIter = 0; iIter < nIters1DMax-nIters1DMin+1; iIter++) {
+        double ratio = 0, ratio_err = 0;
+        for (short iX = h_jet_pt_ref_unf_nIters[iIter]->FindBin (minJetPt+0.01); iX <= h_jet_pt_ref_unf_nIters[iIter]->FindBin (maxJetPt-0.01); iX++) {
+          ratio += h_jet_pt_ref_unf_nIters[iIter]->GetBinContent (iX);
+          ratio_err += std::pow (h_jet_pt_ref_unf_nIters[iIter]->GetBinError (iX), 2); 
+        }
+        ratio_err = std::sqrt (ratio_err);
+        //double ratio = h_jet_pt_ref_unf_nIters[iIter]->IntegralAndError (h_jet_pt_ref_unf_nIters[iIter]->FindBin (minJetPt+0.01), h_jet_pt_ref_unf_nIters[iIter]->FindBin (maxJetPt-0.01), ratio_err);
 
         double den;
         if (iIter == 0)
@@ -1880,13 +1910,23 @@ void PlotNIters (const char* rawTag, const char* nitersTag) {
         ratio = ratio / den;
         ratio_err = ratio_err / den;
 
-        g->SetPoint       (iIter, nItersVals[iIter], ratio);
+        if (nIter1p == -1) {
+          if (std::fabs (ratio - 1) < 0.01)
+          //if (ratio - ratio_err < 1 && ratio + ratio_err > 1)
+            nIter1p = nIters1DVals[iIter];
+        }
+        //else if (ratio - ratio_err > 1 || ratio + ratio_err < 1)
+        else if (std::fabs (ratio - 1) > 0.01)
+          nIter1p = -1;
+
+        g->SetPoint       (iIter, nIters1DVals[iIter], ratio);
         g->SetPointEYhigh (iIter, ratio_err);
         g->SetPointEYlow  (iIter, ratio_err);
       }
+      std::cout << "For minJetPt = " << minJetPt << ", pp, opt nIter = " << nIter1p << std::endl;
 
-      h = new TH1D ("h", ";Iterations;N_{jet} at N_{iter.} / N_{iter.}-1", 1, 0, 20);
-      h->GetYaxis ()->SetRangeUser (0.80, 1.30);
+      h = new TH1D ("h", ";Iterations;N_{jet} at N_{iter.} / N_{iter.}-1", 1, 0, nIters1DMax);
+      h->GetYaxis ()->SetRangeUser (ymin, ymax);
       h->SetBinContent (1, 1);
       h->SetLineStyle (2);
       h->SetLineWidth (2);
@@ -1897,11 +1937,29 @@ void PlotNIters (const char* rawTag, const char* nitersTag) {
       l->SetLineWidth (2);
       l->SetLineColor (kGray+1);
       l->SetLineStyle (2);
-      l->DrawLine (0, 1.05, 20, 1.05);
-      l->DrawLine (0, 0.95, 20, 0.95);
+      l->DrawLine (0, 1.01, nIters1DMax, 1.01);
+      l->DrawLine (0, 0.99, nIters1DMax, 0.99);
 
-      myDraw (g, colorfulColors[0], kFullCircle, 1.0, 1, 2, "P", false);
+      TGAE* gup = new TGAE ();
+      TGAE* gdown = new TGAE ();
+      MakeGupAndGdown (g, gup, gdown);
+      myDrawFill (gup, gdown, colorfulSystColors[0], 0.7);
+      ResetTGAEErrors (g);
+      ResetXErrors (g);
+      myDraw (g, colorfulColors[0], kDot, 0, 1, 2, "L");
       SaferDelete (&g);
+      SaferDelete (&gup);
+      SaferDelete (&gdown);
+
+      //myDraw (g, colorfulColors[0], kFullCircle, 1.0, 1, 2, "P", false);
+      //SaferDelete (&g);
+
+      l->SetLineColor (myGreen);
+      l->SetLineStyle (3);
+      l->DrawLine (GetJetSpectraNIters (iPtJInt, -1), ymin, GetJetSpectraNIters (iPtJInt, -1), ymax);
+      l->SetLineColor (kBlack);
+      l->SetLineStyle (2);
+      l->DrawLine (nIter1p, ymin, nIter1p, ymax);
   
       myText (0.2, 0.84, kBlack, "#bf{#it{pp}}", 0.06);
     }
@@ -1909,12 +1967,20 @@ void PlotNIters (const char* rawTag, const char* nitersTag) {
     for (short iCent = 0; iCent < nFcalCentBins+1; iCent++) {
 
       c->cd (nFcalCentBins+1-iCent);
+      gPad->SetLogx();
 
-      g = new TGAE (nItersMax - nItersMin + 1);
+      g = new TGAE (nIters1DMax - nIters1DMin + 1);
 
-      for (short iIter = 0; iIter < nItersMax-nItersMin+1; iIter++) {
-        double ratio_err = 0;
-        double ratio = h_jet_pt_unf_nIters[iCent][iIter]->IntegralAndError (h_jet_pt_unf_nIters[iCent][iIter]->FindBin (minJetPt+0.01), h_jet_pt_unf_nIters[iCent][iIter]->FindBin (maxJetPt-0.01), ratio_err);
+      int nIter1p = -1;
+
+      for (short iIter = 0; iIter < nIters1DMax-nIters1DMin+1; iIter++) {
+        double ratio = 0, ratio_err = 0;
+        for (short iX = h_jet_pt_unf_nIters[iCent][iIter]->FindBin (minJetPt+0.01); iX <= h_jet_pt_unf_nIters[iCent][iIter]->FindBin (maxJetPt-0.01); iX++) {
+          ratio += h_jet_pt_unf_nIters[iCent][iIter]->GetBinContent (iX);
+          ratio_err += std::pow (h_jet_pt_unf_nIters[iCent][iIter]->GetBinError (iX), 2); 
+        }
+        ratio_err = std::sqrt (ratio_err);
+        //double ratio = h_jet_pt_unf_nIters[iCent][iIter]->IntegralAndError (h_jet_pt_unf_nIters[iCent][iIter]->FindBin (minJetPt+0.01), h_jet_pt_unf_nIters[iCent][iIter]->FindBin (maxJetPt-0.01), ratio_err);
 
         double den;
         if (iIter == 0)
@@ -1925,13 +1991,23 @@ void PlotNIters (const char* rawTag, const char* nitersTag) {
         ratio = ratio / den;
         ratio_err = ratio_err / den;
 
-        g->SetPoint       (iIter, nItersVals[iIter], ratio);
+        if (nIter1p == -1) {
+          if (std::fabs (ratio - 1) < 0.01)
+          //if (ratio - ratio_err < 1 && ratio + ratio_err > 1)
+            nIter1p = nIters1DVals[iIter];
+        }
+        //else if (ratio - ratio_err > 1 || ratio + ratio_err < 1)
+        else if (std::fabs (ratio - 1) > 0.01)
+          nIter1p = -1;
+
+        g->SetPoint       (iIter, nIters1DVals[iIter], ratio);
         g->SetPointEYhigh (iIter, ratio_err);
         g->SetPointEYlow  (iIter, ratio_err);
       }
+      std::cout << "For minJetPt = " << minJetPt << ", " << zdcCentPercs[iCent+1] << "-" << zdcCentPercs[iCent] << "% central p+Pb, opt nIter = " << nIter1p << std::endl;
   
-      h = new TH1D ("h", ";Iterations;N_{jet} at N_{iter.} / N_{iter.}-1", 1, 0, 20);
-      h->GetYaxis ()->SetRangeUser (0.80, 1.30);
+      h = new TH1D ("h", ";Iterations;N_{jet} at N_{iter.} / N_{iter.}-1", 1, 0, nIters1DMax);
+      h->GetYaxis ()->SetRangeUser (ymin, ymax);
       h->SetBinContent (1, 1);
       h->SetLineStyle (2);
       h->SetLineWidth (2);
@@ -1942,23 +2018,239 @@ void PlotNIters (const char* rawTag, const char* nitersTag) {
       l->SetLineWidth (2);
       l->SetLineColor (kGray+1);
       l->SetLineStyle (2);
-      l->DrawLine (0, 1.05, 20, 1.05);
-      l->DrawLine (0, 0.95, 20, 0.95);
+      l->DrawLine (0, 1.01, nIters1DMax, 1.01);
+      l->DrawLine (0, 0.99, nIters1DMax, 0.99);
 
-      myDraw (g, colorfulColors[iCent+1], kFullCircle, 1.0, 1, 2, "P", false);
+      TGAE* gup = new TGAE ();
+      TGAE* gdown = new TGAE ();
+      MakeGupAndGdown (g, gup, gdown);
+      myDrawFill (gup, gdown, colorfulSystColors[iCent+1], 0.7);
+      ResetTGAEErrors (g);
+      ResetXErrors (g);
+      myDraw (g, colorfulColors[iCent+1], kDot, 0, 1, 2, "L");
       SaferDelete (&g);
+      SaferDelete (&gup);
+      SaferDelete (&gdown);
+
+      //myDraw (g, colorfulColors[iCent+1], kFullCircle, 1.0, 1, 2, "P", false);
+      //SaferDelete (&g);
+
+      l->SetLineColor (myGreen);
+      l->SetLineStyle (3);
+      l->DrawLine (GetJetSpectraNIters (iPtJInt, iCent), ymin, GetJetSpectraNIters (iPtJInt, iCent), ymax);
+      l->SetLineColor (kBlack);
+      l->SetLineStyle (2);
+      l->DrawLine (nIter1p, ymin, nIter1p, ymax);
   
       if (iCent < nFcalCentBins)
-        myText (0.2, 0.84, kBlack, Form ("#bf{#it{p}+Pb, FCal %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.06);
+        myText (0.2, 0.84, kBlack, Form ("#bf{#it{p}+Pb, ZDC %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.06);
       else
         myText (0.2, 0.84, kBlack, "#bf{#it{p}+Pb, 0-100%}", 0.06);
   
     } // end loop over iCent
   
     c->cd (8);
-    myText (0.1, 0.84, kBlack, "#bf{#it{ATLAS}} Simulation Internal", 0.07);
+    myText (0.1, 0.84, kBlack, "#bf{#it{ATLAS}} Internal", 0.07);
     myText (0.1, 0.75, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.07);
-    myText (0.1, 0.66, kBlack, "#it{p}+Pb, #sqrt{s} = 5.02 TeV", 0.07);
+    myText (0.1, 0.66, kBlack, "#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV", 0.07);
+    myText (0.1, 0.57, kBlack, Form ("#it{p}_{T}^{jet} [GeV] #in (%i, %i)", minJetPt, maxJetPt), 0.07);
+  
+    c->SaveAs (Form ("%s/Plots/PtCh/UnfRatioTest_NJet_%s.pdf", workPath.Data (), pTJInt.Data ()));
+  
+  } // end loop over iPtJInt
+
+
+
+
+  for (short iPtJInt : {0, 1}) {
+  
+    const TString pTJInt = (iPtJInt == 0 ? "30GeV" : "60GeV");
+    const int minJetPt = (iPtJInt == 0 ? 30 : 60);
+    const int maxJetPt = 300;
+
+    const char* canvasName = Form ("c_njet_%iGeV_Converge", minJetPt);
+    TCanvas* c = new TCanvas (canvasName, "", 1400, 700);
+    c->Divide (4, 2);
+  
+    TH1D* h = nullptr;
+    TGAE* g = nullptr;
+
+    const float ymin = 0.66;//0.95;
+    const float ymax = 1.17;//1.075;
+
+    {
+      c->cd (7);
+      gPad->SetLogx();
+
+      g = new TGAE (nIters1DMax - nIters1DMin + 1);
+
+      int nIter1p = -1;
+
+      double den = h_jet_pt_ref_unf_nIters[nIters1DMax-1]->Integral (h_jet_pt_ref_unf_nIters[nIters1DMax-1]->FindBin (minJetPt+0.01), h_jet_pt_ref_unf_nIters[nIters1DMax-1]->FindBin (maxJetPt-0.01));
+      for (short iIter = 0; iIter < nIters1DMax-nIters1DMin+1; iIter++) {
+        double ratio = 0, ratio_err = 0;
+        for (short iX = h_jet_pt_ref_unf_nIters[iIter]->FindBin (minJetPt+0.01); iX <= h_jet_pt_ref_unf_nIters[iIter]->FindBin (maxJetPt-0.01); iX++) {
+          ratio += h_jet_pt_ref_unf_nIters[iIter]->GetBinContent (iX);
+          ratio_err += std::pow (h_jet_pt_ref_unf_nIters[iIter]->GetBinError (iX), 2); 
+        }
+        ratio_err = std::sqrt (ratio_err);
+        //double ratio = h_jet_pt_ref_unf_nIters[iIter]->IntegralAndError (h_jet_pt_ref_unf_nIters[iIter]->FindBin (minJetPt+0.01), h_jet_pt_ref_unf_nIters[iIter]->FindBin (maxJetPt-0.01), ratio_err);
+
+        //double den;
+        //if (iIter == 0)
+        //  den = h_jet_pt_ref[0]->Integral (h_jet_pt_ref[0]->FindBin (minJetPt+0.01), h_jet_pt_ref[0]->FindBin (maxJetPt-0.01));
+        //else
+        //  den = h_jet_pt_ref_unf_nIters[iIter-1]->Integral (h_jet_pt_ref_unf_nIters[iIter-1]->FindBin (minJetPt+0.01), h_jet_pt_ref_unf_nIters[iIter-1]->FindBin (maxJetPt-0.01));
+
+        ratio = ratio / den;
+        ratio_err = ratio_err / den;
+
+        if (nIter1p == -1) {
+          if (std::fabs (ratio - 1) < 0.01)
+          //if (ratio - ratio_err < 1 && ratio + ratio_err > 1)
+            nIter1p = nIters1DVals[iIter];
+        }
+        //else if (ratio - ratio_err > 1 || ratio + ratio_err < 1)
+        else if (std::fabs (ratio - 1) > 0.01)
+          nIter1p = -1;
+
+        g->SetPoint       (iIter, nIters1DVals[iIter], ratio);
+        g->SetPointEYhigh (iIter, ratio_err);
+        g->SetPointEYlow  (iIter, ratio_err);
+      }
+      std::cout << "For minJetPt = " << minJetPt << ", pp, opt nIter = " << nIter1p << std::endl;
+
+      //h = new TH1D ("h", ";Iterations;N_{jet} at N_{iter.} / N_{iter.}-1", 1, 0, nIters1DMax);
+      h = new TH1D ("h", Form (";Iterations;N_{jet} at N_{iter.} / %i iters.", nIters1DMax), 1, 0, nIters1DMax);
+      h->GetYaxis ()->SetRangeUser (ymin, ymax);
+      h->SetBinContent (1, 1);
+      h->SetLineStyle (2);
+      h->SetLineWidth (2);
+      h->SetLineColor (kBlack);
+      h->DrawCopy ("hist ][");
+      SaferDelete (&h);
+  
+      l->SetLineWidth (2);
+      l->SetLineColor (kGray+1);
+      l->SetLineStyle (2);
+      l->DrawLine (0, 1.01, nIters1DMax, 1.01);
+      l->DrawLine (0, 0.99, nIters1DMax, 0.99);
+
+      TGAE* gup = new TGAE ();
+      TGAE* gdown = new TGAE ();
+      MakeGupAndGdown (g, gup, gdown);
+      myDrawFill (gup, gdown, colorfulSystColors[0], 0.7);
+      ResetTGAEErrors (g);
+      ResetXErrors (g);
+      myDraw (g, colorfulColors[0], kDot, 0, 1, 2, "L");
+      SaferDelete (&g);
+      SaferDelete (&gup);
+      SaferDelete (&gdown);
+
+      //myDraw (g, colorfulColors[0], kFullCircle, 1.0, 1, 2, "P", false);
+      //SaferDelete (&g);
+
+      l->SetLineColor (myGreen);
+      l->SetLineStyle (3);
+      l->DrawLine (GetJetSpectraNIters (iPtJInt, -1), ymin, GetJetSpectraNIters (iPtJInt, -1), ymax);
+      l->SetLineColor (kBlack);
+      l->SetLineStyle (2);
+      l->DrawLine (nIter1p, ymin, nIter1p, ymax);
+  
+      myText (0.2, 0.84, kBlack, "#bf{#it{pp}}", 0.06);
+    }
+  
+    for (short iCent = 0; iCent < nFcalCentBins+1; iCent++) {
+
+      c->cd (nFcalCentBins+1-iCent);
+      gPad->SetLogx();
+
+      g = new TGAE (nIters1DMax - nIters1DMin + 1);
+
+      int nIter1p = -1;
+
+      double den = h_jet_pt_unf_nIters[iCent][nIters1DMax-1]->Integral (h_jet_pt_unf_nIters[iCent][nIters1DMax-1]->FindBin (minJetPt+0.01), h_jet_pt_unf_nIters[iCent][nIters1DMax-1]->FindBin (maxJetPt-0.01));
+      for (short iIter = 0; iIter < nIters1DMax-nIters1DMin+1; iIter++) {
+        double ratio = 0, ratio_err = 0;
+        for (short iX = h_jet_pt_unf_nIters[iCent][iIter]->FindBin (minJetPt+0.01); iX <= h_jet_pt_unf_nIters[iCent][iIter]->FindBin (maxJetPt-0.01); iX++) {
+          ratio += h_jet_pt_unf_nIters[iCent][iIter]->GetBinContent (iX);
+          ratio_err += std::pow (h_jet_pt_unf_nIters[iCent][iIter]->GetBinError (iX), 2); 
+        }
+        ratio_err = std::sqrt (ratio_err);
+        //double ratio = h_jet_pt_unf_nIters[iCent][iIter]->IntegralAndError (h_jet_pt_unf_nIters[iCent][iIter]->FindBin (minJetPt+0.01), h_jet_pt_unf_nIters[iCent][iIter]->FindBin (maxJetPt-0.01), ratio_err);
+
+        //double den;
+        //if (iIter == 0)
+        //  den = h_jet_pt[0][iCent]->Integral (h_jet_pt[0][iCent]->FindBin (minJetPt+0.01), h_jet_pt[0][iCent]->FindBin (maxJetPt-0.01));
+        //else
+        //  den = h_jet_pt_unf_nIters[iCent][iIter-1]->Integral (h_jet_pt_unf_nIters[iCent][iIter-1]->FindBin (minJetPt+0.01), h_jet_pt_unf_nIters[iCent][iIter-1]->FindBin (maxJetPt-0.01));
+
+        ratio = ratio / den;
+        ratio_err = ratio_err / den;
+
+        if (nIter1p == -1) {
+          if (std::fabs (ratio - 1) < 0.01)
+          //if (ratio - ratio_err < 1 && ratio + ratio_err > 1)
+            nIter1p = nIters1DVals[iIter];
+        }
+        //else if (ratio - ratio_err > 1 || ratio + ratio_err < 1)
+        else if (std::fabs (ratio - 1) > 0.01)
+          nIter1p = -1;
+
+        g->SetPoint       (iIter, nIters1DVals[iIter], ratio);
+        g->SetPointEYhigh (iIter, ratio_err);
+        g->SetPointEYlow  (iIter, ratio_err);
+      }
+      std::cout << "For minJetPt = " << minJetPt << ", " << zdcCentPercs[iCent+1] << "-" << zdcCentPercs[iCent] << "% central p+Pb, opt nIter = " << nIter1p << std::endl;
+  
+      //h = new TH1D ("h", ";Iterations;N_{jet} at N_{iter.} / N_{iter.}-1", 1, 0, nIters1DMax);
+      h = new TH1D ("h", Form (";Iterations;N_{jet} at N_{iter.} / %i iters.", nIters1DMax), 1, 0, nIters1DMax);
+      h->GetYaxis ()->SetRangeUser (ymin, ymax);
+      h->SetBinContent (1, 1);
+      h->SetLineStyle (2);
+      h->SetLineWidth (2);
+      h->SetLineColor (kBlack);
+      h->DrawCopy ("hist ][");
+      SaferDelete (&h);
+  
+      l->SetLineWidth (2);
+      l->SetLineColor (kGray+1);
+      l->SetLineStyle (2);
+      l->DrawLine (0, 1.01, nIters1DMax, 1.01);
+      l->DrawLine (0, 0.99, nIters1DMax, 0.99);
+
+      TGAE* gup = new TGAE ();
+      TGAE* gdown = new TGAE ();
+      MakeGupAndGdown (g, gup, gdown);
+      myDrawFill (gup, gdown, colorfulSystColors[iCent+1], 0.7);
+      ResetTGAEErrors (g);
+      ResetXErrors (g);
+      myDraw (g, colorfulColors[iCent+1], kDot, 0, 1, 2, "L");
+      SaferDelete (&g);
+      SaferDelete (&gup);
+      SaferDelete (&gdown);
+
+      //myDraw (g, colorfulColors[iCent+1], kFullCircle, 1.0, 1, 2, "P", false);
+      //SaferDelete (&g);
+
+      l->SetLineColor (myGreen);
+      l->SetLineStyle (3);
+      l->DrawLine (GetJetSpectraNIters (iPtJInt, iCent), ymin, GetJetSpectraNIters (iPtJInt, iCent), ymax);
+      l->SetLineColor (kBlack);
+      l->SetLineStyle (2);
+      l->DrawLine (nIter1p, ymin, nIter1p, ymax);
+  
+      if (iCent < nFcalCentBins)
+        myText (0.2, 0.84, kBlack, Form ("#bf{#it{p}+Pb, ZDC %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.06);
+      else
+        myText (0.2, 0.84, kBlack, "#bf{#it{p}+Pb, 0-100%}", 0.06);
+  
+    } // end loop over iCent
+  
+    c->cd (8);
+    myText (0.1, 0.84, kBlack, "#bf{#it{ATLAS}} Internal", 0.07);
+    myText (0.1, 0.75, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.07);
+    myText (0.1, 0.66, kBlack, "#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV", 0.07);
     myText (0.1, 0.57, kBlack, Form ("#it{p}_{T}^{jet} [GeV] #in (%i, %i)", minJetPt, maxJetPt), 0.07);
   
     c->SaveAs (Form ("%s/Plots/PtCh/UnfConv_NJet_%s.pdf", workPath.Data (), pTJInt.Data ()));
@@ -2003,7 +2295,15 @@ void PlotNIters (const char* rawTag, const char* nitersTag) {
         for (short iIter : {11, 9, 7, 5, 3, 2, 1, 0}) {
           h = h_jetInt_trk_pt_ref_unf_nIters[iPtJInt][iDir][iIter];
           g = make_graph (h);
-          ScaleGraph (g, (iIter == 0 ? h_jetInt_trk_pt_ref_sig[0][iPtJInt][iDir] : h_jetInt_trk_pt_ref_unf_nIters[iPtJInt][iDir][iIter-1]), iIter == 0 ? 1. / h_jet_pt_ref[0]->Integral (h_jet_pt_ref[0]->FindBin (minJetPt+0.01), h_jet_pt_ref[0]->FindBin (maxJetPt-0.01)) : 1);
+
+          TH1D* hprev = (iIter == 0 ? h_jetInt_trk_pt_ref_sig[0][iPtJInt][iDir] : h_jetInt_trk_pt_ref_unf_nIters[iPtJInt][iDir][iIter-1]);
+          TH1D* hjetiter = h_jet_pt_ref_unf_nIters[iIter];
+          TH1D* hjetprev = (iIter == 0 ? h_jet_pt_ref[0] : h_jet_pt_ref_unf_nIters[iIter-1]);
+
+          const double nJetsIter = hjetiter->Integral (hjetiter->FindBin (minJetPt+0.01), hjetiter->FindBin (maxJetPt-0.01));
+          const double nJetsPrev = hjetprev->Integral (hjetprev->FindBin (minJetPt+0.01), hjetprev->FindBin (maxJetPt-0.01));
+
+          ScaleGraph (g, hprev, nJetsIter / nJetsPrev);
           ResetXErrors (g);
           if (iDir == 1) TrimGraph (g, 0, 10);
           myDraw (g, colorfulColors[iCol--], kOpenCircle, 1.0, 1, 2, "P", false);
@@ -2033,7 +2333,15 @@ void PlotNIters (const char* rawTag, const char* nitersTag) {
         for (short iIter : {11, 9, 7, 5, 3, 2, 1, 0}) {
           h = h_jetInt_trk_pt_unf_nIters[iPtJInt][iDir][iCent][iIter];
           g = make_graph (h);
-          ScaleGraph (g, (iIter == 0 ? h_jetInt_trk_pt_sig[0][iPtJInt][iDir][iCent] : h_jetInt_trk_pt_unf_nIters[iPtJInt][iDir][iCent][iIter-1]), iIter == 0 ? 1. / h_jet_pt[0][iCent]->Integral (h_jet_pt[0][iCent]->FindBin (minJetPt+0.01), h_jet_pt[0][iCent]->FindBin (maxJetPt-0.01)) : 1);
+
+          TH1D* hprev = (iIter == 0 ? h_jetInt_trk_pt_sig[0][iPtJInt][iDir][iCent] : h_jetInt_trk_pt_unf_nIters[iPtJInt][iDir][iCent][iIter-1]);
+          TH1D* hjetiter = h_jet_pt_unf_nIters[iCent][iIter];
+          TH1D* hjetprev = (iIter == 0 ? h_jet_pt[0][iCent] : h_jet_pt_unf_nIters[iCent][iIter-1]);
+
+          const double nJetsIter = hjetiter->Integral (hjetiter->FindBin (minJetPt+0.01), hjetiter->FindBin (maxJetPt-0.01));
+          const double nJetsPrev = hjetprev->Integral (hjetprev->FindBin (minJetPt+0.01), hjetprev->FindBin (maxJetPt-0.01));
+
+          ScaleGraph (g, hprev, nJetsIter / nJetsPrev);
           ResetXErrors (g);
           if (iDir == 1) TrimGraph (g, 0, 10);
           myDraw (g, colorfulColors[iCol--], kOpenCircle, 1.0, 1, 2, "P", false);
@@ -2074,6 +2382,9 @@ void PlotNIters (const char* rawTag, const char* nitersTag) {
 
     const TString pTJInt = (iPtJInt == 0 ? "30GeV" : "60GeV");
 
+    const double minJetPt = (iPtJInt == 0 ? 30. : 60.);
+    const double maxJetPt = 300;
+
     for (short iDir : {0, 1, 2}) {
 
       const char* canvasName = Form ("c_jetInt_trk_pt_sigVsUnf_Summary_iDir%i_%s", iDir, pTJInt.Data ());
@@ -2090,6 +2401,10 @@ void PlotNIters (const char* rawTag, const char* nitersTag) {
         const short nIterOpt = GetTrkSpectraNIters (iPtJInt, iDir, -1);//jetInt_trk_pt_ref_niter_opt[iPtJInt][iDir][iPtJInt == 0 ? 1 : 0];
         const short nIterVar = nIterOpt + 1;//jetInt_trk_pt_ref_niter_opt[iPtJInt][iDir][0];
 
+        short iIterOpt = 0;
+        while (iIterOpt < nItersMax-nItersMin+2 && nItersVals[iIterOpt] != nIterOpt) iIterOpt++;
+        short iIterVar = iIterOpt+1;
+
         TH1D* h = new TH1D ("h", Form (";#it{p}_{T}^{ch} [GeV];%i vs. %i iterations", nIterOpt, nIterVar), 1, pTChBins[1], iDir == 1 ? 10 : pTChBins[nPtChBins-(iPtJInt == 0 ? 3 : 1)]);//pTChBins[nPtChBins]);
         h->GetXaxis ()->SetMoreLogLabels ();
         h->GetYaxis ()->SetRangeUser (0.97, 1.03);
@@ -2100,15 +2415,23 @@ void PlotNIters (const char* rawTag, const char* nitersTag) {
         h->DrawCopy ("hist ][");
         SaferDelete (&h);
 
+        const double nJetsOpt = h_jet_pt_ref_unf_nIters[iIterOpt]->Integral (h_jet_pt_ref_unf_nIters[iIterOpt]->FindBin (minJetPt+0.01), h_jet_pt_ref_unf_nIters[iIterOpt]->FindBin (maxJetPt-0.01));
+        const double nJetsVar = h_jet_pt_ref_unf_nIters[iIterVar]->Integral (h_jet_pt_ref_unf_nIters[iIterVar]->FindBin (minJetPt+0.01), h_jet_pt_ref_unf_nIters[iIterVar]->FindBin (maxJetPt-0.01));
 
-        h = h_jetInt_trk_pt_ref_unf_nIters[iPtJInt][iDir][nIterOpt];
-        //h->Add (h_jetInt_trk_pt_ref_unf_nIters[iPtJInt][iDir][nIterVar], -1);
-        g = make_graph (h);
+        TH1D* hopt = (TH1D*) h_jetInt_trk_pt_ref_unf_nIters[iPtJInt][iDir][iIterOpt]->Clone ("hden");
+        hopt->Scale (nJetsOpt);
+        TH1D* hvar = (TH1D*) h_jetInt_trk_pt_ref_unf_nIters[iPtJInt][iDir][iIterVar]->Clone ("hnum");
+        hvar->Scale (nJetsVar);
+
+        g = make_graph (hvar);
         ResetTGAEErrors (g);
         ResetXErrors (g);
-        CalcSystematics (g, h_jetInt_trk_pt_ref_unf_nIters[iPtJInt][iDir][nIterVar], false);
-        ScaleGraph (g, h_jetInt_trk_pt_ref_unf_nIters[iPtJInt][iDir][nIterOpt]);
+        CalcSystematics (g, hopt, false);
+        ScaleGraph (g, hopt);
         if (iDir == 1) TrimGraph (g, 0, 10);
+
+        SaferDelete (&hopt);
+        SaferDelete (&hvar);
 
         TGAE* gup = new TGAE ();
         TGAE* gdown = new TGAE ();
@@ -2132,6 +2455,10 @@ void PlotNIters (const char* rawTag, const char* nitersTag) {
         const short nIterOpt = GetTrkSpectraNIters (iPtJInt, iDir, iCent);//jetInt_trk_pt_niter_opt[iPtJInt][iDir][iCent][iPtJInt == 0 ? 1 : 0];
         const short nIterVar = nIterOpt + 1;//jetInt_trk_pt_niter_opt[iPtJInt][iDir][iCent][0];
 
+        short iIterOpt = 0;
+        while (iIterOpt < nItersMax-nItersMin+2 && nItersVals[iIterOpt] != nIterOpt) iIterOpt++;
+        short iIterVar = iIterOpt+1;
+
         TH1D* h = new TH1D ("h", Form (";#it{p}_{T}^{ch} [GeV];%i vs. %i iterations", nIterOpt, nIterVar), 1, pTChBins[1], iDir == 1 ? 10 : pTChBins[nPtChBins-(iPtJInt == 0 ? 3 : 1)]);//pTChBins[nPtChBins]);
         h->GetXaxis ()->SetMoreLogLabels ();
         h->GetYaxis ()->SetRangeUser (0.97, 1.03);
@@ -2142,14 +2469,24 @@ void PlotNIters (const char* rawTag, const char* nitersTag) {
         h->DrawCopy ("hist ][");
         SaferDelete (&h);
 
+        const double nJetsOpt = h_jet_pt_unf_nIters[iCent][iIterOpt]->Integral (h_jet_pt_unf_nIters[iCent][iIterOpt]->FindBin (minJetPt+0.01), h_jet_pt_unf_nIters[iCent][iIterOpt]->FindBin (maxJetPt-0.01));
+        const double nJetsVar = h_jet_pt_unf_nIters[iCent][iIterVar]->Integral (h_jet_pt_unf_nIters[iCent][iIterVar]->FindBin (minJetPt+0.01), h_jet_pt_unf_nIters[iCent][iIterVar]->FindBin (maxJetPt-0.01));
+
         // for Niter / Niter-1 ratio plot
-        h = h_jetInt_trk_pt_unf_nIters[iPtJInt][iDir][iCent][nIterOpt];
-        g = make_graph (h);
+        TH1D* hopt = (TH1D*) h_jetInt_trk_pt_unf_nIters[iPtJInt][iDir][iCent][iIterOpt]->Clone ("hden");
+        hopt->Scale (nJetsOpt);
+        TH1D* hvar = (TH1D*) h_jetInt_trk_pt_unf_nIters[iPtJInt][iDir][iCent][iIterVar]->Clone ("hnum");
+        hvar->Scale (nJetsVar);
+
+        g = make_graph (hvar);
         ResetTGAEErrors (g);
         ResetXErrors (g);
-        CalcSystematics (g, h_jetInt_trk_pt_unf_nIters[iPtJInt][iDir][iCent][nIterVar], false);
-        ScaleGraph (g, h_jetInt_trk_pt_unf_nIters[iPtJInt][iDir][iCent][nIterOpt]);
+        CalcSystematics (g, hopt, false);
+        ScaleGraph (g, hopt);
         if (iDir == 1) TrimGraph (g, 0, 10);
+
+        SaferDelete (&hopt);
+        SaferDelete (&hvar);
 
         TGAE* gup = new TGAE ();
         TGAE* gdown = new TGAE ();

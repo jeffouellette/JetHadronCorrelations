@@ -509,7 +509,9 @@ void PlotResponseMatrix () {
 
         const char* cent = (iCent == nFcalCentBins ? "pPb_allCent" : Form ("pPb_iCent%i", iCent));
 
-        bayesUnf = new RooUnfoldBayes (rooUnfResp_jet_pt[iEvFrac][iCent], h_jet_pt[iEvFrac][iCent][0], nIter+1);
+        const short iUnfCent = iCent;//nZdcCentBins;
+
+        bayesUnf = new RooUnfoldBayes (rooUnfResp_jet_pt[iEvFrac][iUnfCent], h_jet_pt[iEvFrac][iCent][0], nIter+1);
         bayesUnf->SetVerbose (-1);
         h = (TH1D*) bayesUnf->Hreco ()->Clone (Form ("h_jet_pt_unf_%s_%s_mc_nIter%i", evFrac.Data (), cent, nIter+1));
         h_jet_pt_unf[iEvFrac][iCent][nIter] = h;
@@ -549,7 +551,9 @@ void PlotResponseMatrix () {
     
           const char* cent = (iCent == nFcalCentBins ? "pPb_allCent" : Form ("pPb_iCent%i", iCent));
 
-          bayesUnf = new RooUnfoldBayes (rooUnfResp_jet_trk_pt_sig[iEvFrac][iDir][iCent], h2_jet_trk_pt_sig[iEvFrac][iDir][iCent][0], nIter+1);
+          const short iUnfCent = iCent;//nZdcCentBins;
+
+          bayesUnf = new RooUnfoldBayes (rooUnfResp_jet_trk_pt_sig[iEvFrac][iDir][iUnfCent], h2_jet_trk_pt_sig[iEvFrac][iDir][iCent][0], nIter+1);
           bayesUnf->SetVerbose (-1);
           h2_jet_trk_pt_sig_unf[iEvFrac][iDir][iCent][nIter] = (TH2D*) bayesUnf->Hreco ()->Clone (Form ("h2_jet_trk_pt_%s_%s_sig_unf_%s_mc_nIter%i", dir.Data (), cent, evFrac.Data (), nIter+1));
           SaferDelete (&bayesUnf);
