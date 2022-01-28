@@ -360,6 +360,11 @@ bool Correlator (const char* tag, const char* outFilePattern, TTree* jetsTree, T
   const JetRadius r0p4 = JetRadius::R0p4;
 
 
+  // Load histograms with flavour-related uncertainties. (Only actually used if nJESVar = 18 or 19.)
+  TH2D* h2_flavourFracUnc = GetFlavorFractionUnc (r0p4);
+  TH2D* h2_flavourRespUnc = GetFlavorResponseUnc (r0p4);
+
+
 
   ////////////////////////////////////////////////////////////////////////////////////////////////////  
   // Main loop over events
@@ -477,9 +482,14 @@ bool Correlator (const char* tag, const char* outFilePattern, TTree* jetsTree, T
     const short jn = UseTruthJets () ? GetAktTruthJetN (r0p4) :  GetAktHIJetN (r0p4);
     for (short iJet = 0; iJet < jn; iJet++) {
 
-      const float jpt  = (UseTruthJets () ? GetAktTruthJetPt  (iJet, r0p4) : GetAktHIJetPt  (iJet, r0p4, nJESVar));
+      float jpt  = (UseTruthJets () ? GetAktTruthJetPt  (iJet, r0p4) : GetAktHIJetPt  (iJet, r0p4, nJESVar));
       const float jeta = (UseTruthJets () ? GetAktTruthJetEta (iJet, r0p4) : GetAktHIJetEta (iJet, r0p4, nJESVar));
       const float jphi = (UseTruthJets () ? GetAktTruthJetPhi (iJet, r0p4) : GetAktHIJetPhi (iJet, r0p4, nJESVar));
+
+      if (nJESVar == 18) // Flavour-dependent response unc.
+        jpt = jpt * (h2_flavourRespUnc->GetBinContent (h2_flavourRespUnc->GetXaxis ()->FindBin (jpt), h2_flavourRespUnc->GetYaxis ()->FindBin (IspPb () ? jeta : std::fabs (jeta))));
+      else if (nJESVar == 19) // Flavour fraction unc.
+        jpt = jpt * (h2_flavourFracUnc->GetBinContent (h2_flavourFracUnc->GetXaxis ()->FindBin (jpt), h2_flavourFracUnc->GetYaxis ()->FindBin (IspPb () ? jeta : std::fabs (jeta))));
 
       if (!MeetsJetAcceptanceCuts (iJet, r0p4, nJESVar))
         continue; // jet eta/phi & timing cuts
@@ -645,9 +655,14 @@ bool Correlator (const char* tag, const char* outFilePattern, TTree* jetsTree, T
     // loop over all jets again in the event but now correlate tracks
     for (short iJet = 0; iJet < jn; iJet++) {
 
-      const float jpt  = (UseTruthJets () ? GetAktTruthJetPt  (iJet, r0p4) : GetAktHIJetPt  (iJet, r0p4, nJESVar));
+      float jpt  = (UseTruthJets () ? GetAktTruthJetPt  (iJet, r0p4) : GetAktHIJetPt  (iJet, r0p4, nJESVar));
       const float jeta = (UseTruthJets () ? GetAktTruthJetEta (iJet, r0p4) : GetAktHIJetEta (iJet, r0p4, nJESVar));
       const float jphi = (UseTruthJets () ? GetAktTruthJetPhi (iJet, r0p4) : GetAktHIJetPhi (iJet, r0p4, nJESVar));
+
+      if (nJESVar == 18) // Flavour-dependent response unc.
+        jpt = jpt * (h2_flavourRespUnc->GetBinContent (h2_flavourRespUnc->GetXaxis ()->FindBin (jpt), h2_flavourRespUnc->GetYaxis ()->FindBin (IspPb () ? jeta : std::fabs (jeta))));
+      else if (nJESVar == 19) // Flavour fraction unc.
+        jpt = jpt * (h2_flavourFracUnc->GetBinContent (h2_flavourFracUnc->GetXaxis ()->FindBin (jpt), h2_flavourFracUnc->GetYaxis ()->FindBin (IspPb () ? jeta : std::fabs (jeta))));
 
       if (!MeetsJetAcceptanceCuts (iJet, r0p4, nJESVar))
         continue; // jet eta/phi & timing cuts

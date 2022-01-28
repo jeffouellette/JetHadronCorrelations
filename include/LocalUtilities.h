@@ -633,6 +633,18 @@ void SmoothSystematics (TGAE* sys, TF1* func, TH1D* nom, TH1D* var);
 TMatrixD GetCovarianceMatrix (const TString inFileName);
 
 
+/**
+ * Returns 2D histogram with relative uncertainty on the flavour fraction.
+ */
+TH2D* GetFlavorFractionUnc (const JetRadius& r);
+
+
+/**
+ * Returns 2D histogram with relative uncertainty on the flavour response.
+ */
+TH2D* GetFlavorResponseUnc (const JetRadius& r);
+
+
 } // end namespace
 
 #endif

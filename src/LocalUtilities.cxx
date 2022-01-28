@@ -1466,7 +1466,7 @@ float GetAktHIJetPt (const int iJ, const JetRadius& radius, const int nJESVar, c
   assert (scale >= -1 && scale <= 2);
   switch (radius) {
   case JetRadius::R0p4: {
-    const float jesVar = 1. + (nJESVar == -1 ? 0 : akt4_hi_jet_pt_sys_JES_ALL[nJESVar][iJ]);
+    const float jesVar = 1. + ((nJESVar == -1 || nJESVar == 18 || nJESVar == 19) ? 0 : akt4_hi_jet_pt_sys_JES_ALL[nJESVar][iJ]); // default to no variation, or if flavour uncertainty evaluate in-loop
     if (IsCollisions () || scale == 0)                  return akt4_hi_jet_pt_xcalib[iJ] * jesVar;
     if (!IsDataOverlay () || scale == 1)                return akt4_hi_jet_pt_etajes[iJ] * jesVar;
     if (scale == 2)                                     return akt4_hi_jet_pt_precalib[iJ] * jesVar;
@@ -2113,6 +2113,39 @@ TMatrixD GetCovarianceMatrix (const TString inFileName) {
     
   return cov;
 }
+
+
+
+/**
+ * Returns 2D histogram with relative uncertainty on the flavour fraction.
+ */
+TH2D* GetFlavorFractionUnc (const JetRadius& r) {
+  TFile* inFile = new TFile (Form ("%s/aux/FlavorJESUncertainty_%s%s.root", workPath.Data (), r == JetRadius::R0p4 ? "R0p4" : "R0p2", IspPb () ? "_pPb" : ""), "read");
+
+  TH2D* h2 = (TH2D*) inFile->Get (IspPb () ? "term2" : "termAbs2")->Clone ("h2_flavourFracUnc");
+  h2->SetDirectory (0);
+
+  inFile->Close ();
+  SaferDelete (&inFile);
+  return h2;
+}
+
+
+
+/**
+ * Returns 2D histogram with relative uncertainty on the flavour response.
+ */
+TH2D* GetFlavorResponseUnc (const JetRadius& r) {
+  TFile* inFile = new TFile (Form ("%s/aux/FlavorJESUncertainty_%s%s.root", workPath.Data (), r == JetRadius::R0p4 ? "R0p4" : "R0p2", IspPb () ? "_pPb" : ""), "read");
+
+  TH2D* h2 = (TH2D*) inFile->Get (IspPb () ? "term1" : "termAbs1")->Clone ("h2_flavourRespUnc");
+  h2->SetDirectory (0);
+
+  inFile->Close ();
+  SaferDelete (&inFile);
+  return h2;
+}
+
 
 
 } // end namespace

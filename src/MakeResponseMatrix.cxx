@@ -437,7 +437,6 @@ bool MakeResponseMatrix (const char* directory,
 
       bool isReconstructed = (iRJet >= 0);
       isReconstructed &= MeetsJetAcceptanceCuts (iRJet, r0p4, nJESVar); // reco jet must be accepted too
-      //isReconstructed &= std::fabs (rjpt/tjpt - 1) < 3*0.01*f_jer->Eval (tjpt); // cut on jets reconstructed well outside the JER
       isReconstructed &= (pTJBins[0] < rjpt && rjpt < pTJBins[nPtJBins]);
 
       if (isReconstructed) {
