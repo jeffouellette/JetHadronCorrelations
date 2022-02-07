@@ -911,12 +911,9 @@ void PlotCentralityAnalysis () {
     int ibin = 0;
     while (ibin < 17 && plot_percs[ibin++] != "20%");
 
-    const double mbNorm = hmb->Integral (hmb->FindBin (plot_yq[ibin]), hmb->GetNbinsX ());
-    hmb->Scale (1. / mbNorm, "width");
-
 
     TH1D* hjet = (TH1D*) h_jet_Pb_fcal_et_sum->Clone ("htemp");
-
+    hjet->Rebin (10);
     const double j50Norm = hjet->Integral (hjet->FindBin (plot_yq[ibin]), hjet->GetNbinsX ());
     hjet->Scale (1. / j50Norm, "width");
 
@@ -938,75 +935,51 @@ void PlotCentralityAnalysis () {
     yax->SetLabelFont (43);
     yax->SetLabelSize (24);
 
-    hjet->SetLineColor (myBlue);
+    hjet->SetLineColor (kBlack);
 
     hjet->DrawCopy ("hist");
 
 
-    TH1D* hmcc = (TH1D*) h_mb_Pb_fcal_et_sum_pPb_mc_corr->Clone ("hmc");
-    const double mccNorm = hmcc->Integral (hmcc->FindBin (plot_yq[ibin]), hmcc->GetNbinsX ());
-    hmcc->Scale (1. / mccNorm, "width");
-
-    hmcc->SetLineColor (myLiteBlue);
-
-    hmcc->DrawCopy ("hist same");
-
-
     TH1D* hmc = (TH1D*) h_mb_Pb_fcal_et_sum_pPb_mc->Clone ("hmc");
+    hmc->Rebin (10);
     const double mcNorm = hmc->Integral (hmc->FindBin (plot_yq[ibin]), hmc->GetNbinsX ());
     hmc->Scale (1. / mcNorm, "width");
 
-    hmc->SetLineColor (myLiteRed);
+    hmc->SetLineColor (myRed);
 
     hmc->DrawCopy ("hist same");
-
-
-    hmb->DrawCopy ("hist same");
-
-    TLine* divs = new TLine ();
-    TLatex* tl = new TLatex ();
-    tl->SetTextAngle (-90);
-    tl->SetTextAlign (11);
-    tl->SetTextFont (43);
-    tl->SetTextSize (14);
-    divs->SetLineStyle (2);
-    for (int i = 1; i < 16; i++) {
-      divs->DrawLine (plot_yq[i], ymin, plot_yq[i], hmb->GetBinContent (hmb->FindBin (plot_yq[i])));
-      tl->DrawLatex (plot_yq[i]+0.20, std::exp (0.1*std::log (ymax/ymin)) * ymin, plot_percs[i].Data ());
-    }
 
 
     myText (0.65, 0.890, kBlack, "#bf{#it{ATLAS}} Internal", 0.036);
     myText (0.65, 0.850, kBlack, "#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV", 0.032);
     myText (0.65, 0.810, kBlack, "All runs", 0.032);
-    myText (0.65, 0.770, myBlue, "HLT_j50_ion_L1J10", 0.032);
-    myText (0.65, 0.730, myRed, "HLT_mb_sptrk_L1MBTS_1", 0.032);
-    myText (0.65, 0.690, myLiteRed, "Pythia + Overlay", 0.032);
-    myText (0.65, 0.650, myLiteBlue, "Overlay only", 0.032);
+    myText (0.65, 0.770, kBlack, "#bf{Data (j50 trigger)}", 0.032);
+    myText (0.65, 0.730, myRed,  "#bf{Pythia + Overlay}", 0.032);
 
 
     dPad->cd ();
-    dPad->SetLogy ();
+    //dPad->SetLogy ();
 
-    ymin = 7e-2;
-    ymax = 2e1;
+    ymin = 0.0;//7e-2;
+    ymax = 2.0;//2e1;
 
 
-    TH1D* hjet_rat = (TH1D*) hjet->Clone ("hjet_ratio");  
-    hjet_rat->Divide (hmc);
+    TH1D* h_rat = (TH1D*) hjet->Clone ("h_rat");
+    h_rat->Divide (hmc);
     
 
-    xax = hjet_rat->GetXaxis ();
-    yax = hjet_rat->GetYaxis ();
+    xax = h_rat->GetXaxis ();
+    yax = h_rat->GetYaxis ();
 
     xax->SetTitle ("#Sigma#it{E}_{T}^{FCal, Pb} [GeV]");
-    yax->SetTitle (Form ("Ratio to #color[%i]{MC+Overlay}", myLiteRed));
+    //yax->SetTitle (Form ("Ratio to #color[%i]{MC+Overlay}", myLiteRed));
+    yax->SetTitle ("Data / MC");
 
     xax->SetTitleOffset (2.4 * xax->GetTitleOffset ());
     yax->SetTitleOffset (1.2 * yax->GetTitleOffset ());
     yax->CenterTitle ();
 
-    hjet_rat->SetLineColor (myBlue);
+    h_rat->SetLineColor (kBlack);
 
     yax->SetRangeUser (ymin, ymax);
 
@@ -1019,36 +992,18 @@ void PlotCentralityAnalysis () {
     yax->SetLabelFont (43);
     yax->SetLabelSize (24);
 
-    hjet_rat->DrawCopy ("hist");
-
-    TH1D* hmb_rat = (TH1D*) hmb->Clone ("hmb_ratio");
-    hmb_rat->Divide (hmc);
-
-    hmb_rat->DrawCopy ("hist same");
-
-    TH1D* hmcc_rat = (TH1D*) hmcc->Clone ("hmcc_rat");
-    hmcc_rat->Divide (hmc);
-
-    hmcc_rat->DrawCopy ("hist same");
+    h_rat->DrawCopy ("hist");
     
 
-    //TFile* mcResampleFile = new TFile (Form ("%s/aux/MCResampling.root", workPath.Data ()), "recreate");
-    //double a_mb = 0, a_jet = 0;
-    //for (int iX = 1; iX <= hmb_rat->GetNbinsX (); iX++) {
-    //  if (hmb_rat->GetBinCenter (iX) > 0 && hmb_rat->GetBinCenter (iX) < 150)
-    //    a_mb = std::fmax (a_mb, hmb_rat->GetBinContent (iX));
-    //}
-    //for (int iX = 1; iX <= hjet_rat->GetNbinsX (); iX++) {
-    //  if (hjet_rat->GetBinCenter (iX) > 0 && hjet_rat->GetBinCenter (iX) < 150)
-    //    a_jet = std::fmax (a_jet, hjet_rat->GetBinContent (iX));
-    //}
-    //hmb_rat->Scale (1./a_mb);
-    //hjet_rat->Scale (1./a_jet);
-    //hmb_rat->Write ();
-    //hjet_rat->Write ();
-    //mcResampleFile->Write ();
-    //mcResampleFile->Close ();
+    TFile* mcFCalWeightsFile = new TFile (Form ("%s/aux/MCFCalWeights.root", workPath.Data ()), "recreate");
+    h_rat->Write ();
+    mcFCalWeightsFile->Write ();
+    mcFCalWeightsFile->Close ();
 
+
+    TLine* divs = new TLine ();
+    divs->SetLineStyle (2);
+    divs->SetLineWidth (2);
     divs->DrawLine (-30, 1, 220, 1);
 
     c->SaveAs (Form ("%s/Plots/CentralityAnalysis/pPb_fcal_et_dataMC.pdf", workPath.Data ()));
