@@ -101,7 +101,8 @@ void ProcessJets (const char* tag, const char* outFileTag) {
 
     const TString dType = (iDType == 0 ? "data" : "mc");
 
-    for (int iVar = 0; iVar < nVar; iVar++) {
+    //for (int iVar = 0; iVar < nVar; iVar++) {
+    for (int iVar : {0}) {
 
       const TString var = variations[iVar];
 
@@ -269,7 +270,8 @@ void ProcessJets (const char* tag, const char* outFileTag) {
     //const TString funcStr = "[0] * exp([1]*x) + [2] * pow (x, [3])";
     const TString funcStr = "[0]+exp([1]+[2]*log(x))";
 
-    for (int iVar = 0; iVar < nVar; iVar++) {
+    //for (int iVar = 0; iVar < nVar; iVar++) {
+    for (int iVar : {0}) {
 
       const TString var = variations[iVar];
 
@@ -320,98 +322,98 @@ void ProcessJets (const char* tag, const char* outFileTag) {
 
 
 
-  //////////////////////////////////////////////////////////////////////////////////////////////////// 
-  // CREATE GRAPHS THAT WILL STORE SYSTEMATIC UNCERTAINTIES FROM EACH SOURCE SEPARATELY.
-  // THEN CALCULATES SYSTEMATIC UNCERTAINTIES FROM EACH SOURCE BY TAKING DIFFERENCES
-  //////////////////////////////////////////////////////////////////////////////////////////////////// 
-  for (int iDType = 0; iDType < 2; iDType++) {
+  ////////////////////////////////////////////////////////////////////////////////////////////////////// 
+  //// CREATE GRAPHS THAT WILL STORE SYSTEMATIC UNCERTAINTIES FROM EACH SOURCE SEPARATELY.
+  //// THEN CALCULATES SYSTEMATIC UNCERTAINTIES FROM EACH SOURCE BY TAKING DIFFERENCES
+  ////////////////////////////////////////////////////////////////////////////////////////////////////// 
+  //for (int iDType = 0; iDType < 2; iDType++) {
 
-    for (int iVar = 1; iVar < nVar; iVar++) {
+  //  for (int iVar = 1; iVar < nVar; iVar++) {
 
-      const TString var = variations[iVar];
+  //    const TString var = variations[iVar];
 
-      if ((iDType == 0 && dataVariations.count (var) == 0) || (iDType == 1 && mcVariations.count (var) == 0))
-        continue;
+  //    if ((iDType == 0 && dataVariations.count (var) == 0) || (iDType == 1 && mcVariations.count (var) == 0))
+  //      continue;
 
-      g_jet_pt_ref_syst[iVar] = new TGAE ();
+  //    g_jet_pt_ref_syst[iVar] = new TGAE ();
 
-      CalcSystematics (g_jet_pt_ref_syst[iVar], h_jet_pt_ref[iDType][0], h_jet_pt_ref[iDType][iVar]);
+  //    CalcSystematics (g_jet_pt_ref_syst[iVar], h_jet_pt_ref[iDType][0], h_jet_pt_ref[iDType][iVar]);
 
-      for (int iCent = 0; iCent < nZdcCentBins+1; iCent++) {
+  //    for (int iCent = 0; iCent < nZdcCentBins+1; iCent++) {
 
-        g_jet_pt_syst[iCent][iVar] = new TGAE ();
-        g_jet_pt_ratio_syst[iCent][iVar] = new TGAE ();
+  //      g_jet_pt_syst[iCent][iVar] = new TGAE ();
+  //      g_jet_pt_ratio_syst[iCent][iVar] = new TGAE ();
 
-        CalcSystematics (g_jet_pt_syst[iCent][iVar],        h_jet_pt[iDType][iCent][0],       h_jet_pt[iDType][iCent][iVar]);
-        CalcSystematics (g_jet_pt_ratio_syst[iCent][iVar],  h_jet_pt_ratio[iDType][iCent][0], h_jet_pt_ratio[iDType][iCent][iVar]);
+  //      CalcSystematics (g_jet_pt_syst[iCent][iVar],        h_jet_pt[iDType][iCent][0],       h_jet_pt[iDType][iCent][iVar]);
+  //      CalcSystematics (g_jet_pt_ratio_syst[iCent][iVar],  h_jet_pt_ratio[iDType][iCent][0], h_jet_pt_ratio[iDType][iCent][iVar]);
 
-        // allow some uncertainties to not cancel in the p+Pb / pp ratio by overwriting the current uncertainties
-        if (variationsThatDontCancelInRatio.count (var) != 0) {
-          ResetTGAEErrors (g_jet_pt_ratio_syst[iCent][iVar]);
-          AddRelErrorsInQuadrature (g_jet_pt_ratio_syst[iCent][iVar], g_jet_pt_ref_syst[iVar], false, true);
-          AddRelErrorsInQuadrature (g_jet_pt_ratio_syst[iCent][iVar], g_jet_pt_syst[iCent][iVar], false, true);
-        }
+  //      // allow some uncertainties to not cancel in the p+Pb / pp ratio by overwriting the current uncertainties
+  //      if (variationsThatDontCancelInRatio.count (var) != 0) {
+  //        ResetTGAEErrors (g_jet_pt_ratio_syst[iCent][iVar]);
+  //        AddRelErrorsInQuadrature (g_jet_pt_ratio_syst[iCent][iVar], g_jet_pt_ref_syst[iVar], false, true);
+  //        AddRelErrorsInQuadrature (g_jet_pt_ratio_syst[iCent][iVar], g_jet_pt_syst[iCent][iVar], false, true);
+  //      }
 
-      } // end loop over iCent
+  //    } // end loop over iCent
 
-    } // end loop over iVar
+  //  } // end loop over iVar
 
-  } // end loop over iDType
-
-
-  //////////////////////////////////////////////////////////////////////////////////////////////////// 
-  // SYSTEMATIC UNCERTAINTIES DERIVED IN MC MUST HAVE CENTRAL VALUES SET BY CENTRAL VALUES IN DATA
-  // THE FINAL UNCERTAINTY IS ASSIGNED TO MATCH THE FRACTIONAL UNCERTAINTY IN MC
-  //////////////////////////////////////////////////////////////////////////////////////////////////// 
-  for (int iVar = 1; iVar < nVar; iVar++) {
-
-    const TString var = variations[iVar];
-
-    if (dataVariations.count (var) > 0 || mcVariations.count (var) == 0)
-      continue; // skip variations already evaluated in data or that are not evaluated in MC
-
-    for (int iDir = 0; iDir < nDir; iDir++) {
-
-      SetCentralValuesKeepRelativeErrors (g_jet_pt_ref_syst[iVar], h_jet_pt_ref[0][0]);
-
-      for (int iCent = 0; iCent < nZdcCentBins+1; iCent++) {
-
-        SetCentralValuesKeepRelativeErrors (g_jet_pt_syst[iCent][iVar],       h_jet_pt[0][iCent][0]);
-        SetCentralValuesKeepRelativeErrors (g_jet_pt_ratio_syst[iCent][iVar], h_jet_pt_ratio[0][iCent][0]);
-
-      } // end loop over iCent
-
-    } // end loop over iDir
-
-  } // end loop over iVar
+  //} // end loop over iDType
 
 
+  ////////////////////////////////////////////////////////////////////////////////////////////////////// 
+  //// SYSTEMATIC UNCERTAINTIES DERIVED IN MC MUST HAVE CENTRAL VALUES SET BY CENTRAL VALUES IN DATA
+  //// THE FINAL UNCERTAINTY IS ASSIGNED TO MATCH THE FRACTIONAL UNCERTAINTY IN MC
+  ////////////////////////////////////////////////////////////////////////////////////////////////////// 
+  //for (int iVar = 1; iVar < nVar; iVar++) {
 
-  //////////////////////////////////////////////////////////////////////////////////////////////////// 
-  // ADD SYSTEMATIC UNCERTAINTIES FROM ALL SOURCES IN QUADRATURE, STORING RESULTS IN A SINGLE GRAPH
-  //////////////////////////////////////////////////////////////////////////////////////////////////// 
-  for (int iVar = 1; iVar < nVar; iVar++) {
+  //  const TString var = variations[iVar];
 
-    const TString var = variations[iVar];
+  //  if (dataVariations.count (var) > 0 || mcVariations.count (var) == 0)
+  //    continue; // skip variations already evaluated in data or that are not evaluated in MC
 
-    //if (dataVariations.count (var) == 0 && mcVariations.count (var) == 0)
-    if (mcVariations.count (var) == 0)
-      continue;
+  //  for (int iDir = 0; iDir < nDir; iDir++) {
 
-    for (int iDir = 0; iDir < nDir; iDir++) {
-  
-      AddErrorsInQuadrature (g_jet_pt_ref_syst[0], g_jet_pt_ref_syst[iVar], false, true);
-  
-      for (int iCent = 0; iCent < nZdcCentBins+1; iCent++) {
-  
-        AddErrorsInQuadrature (g_jet_pt_syst[iCent][0],       g_jet_pt_syst[iCent][iVar], false, true);
-        AddErrorsInQuadrature (g_jet_pt_ratio_syst[iCent][0], g_jet_pt_ratio_syst[iCent][iVar], false, true);
-  
-      } // end loop over iCent
-  
-    } // end loop over iDir
+  //    SetCentralValuesKeepRelativeErrors (g_jet_pt_ref_syst[iVar], h_jet_pt_ref[0][0]);
 
-  } // end loop over iVar
+  //    for (int iCent = 0; iCent < nZdcCentBins+1; iCent++) {
+
+  //      SetCentralValuesKeepRelativeErrors (g_jet_pt_syst[iCent][iVar],       h_jet_pt[0][iCent][0]);
+  //      SetCentralValuesKeepRelativeErrors (g_jet_pt_ratio_syst[iCent][iVar], h_jet_pt_ratio[0][iCent][0]);
+
+  //    } // end loop over iCent
+
+  //  } // end loop over iDir
+
+  //} // end loop over iVar
+
+
+
+  ////////////////////////////////////////////////////////////////////////////////////////////////////// 
+  //// ADD SYSTEMATIC UNCERTAINTIES FROM ALL SOURCES IN QUADRATURE, STORING RESULTS IN A SINGLE GRAPH
+  ////////////////////////////////////////////////////////////////////////////////////////////////////// 
+  //for (int iVar = 1; iVar < nVar; iVar++) {
+
+  //  const TString var = variations[iVar];
+
+  //  //if (dataVariations.count (var) == 0 && mcVariations.count (var) == 0)
+  //  if (mcVariations.count (var) == 0)
+  //    continue;
+
+  //  for (int iDir = 0; iDir < nDir; iDir++) {
+  //
+  //    AddErrorsInQuadrature (g_jet_pt_ref_syst[0], g_jet_pt_ref_syst[iVar], false, true);
+  //
+  //    for (int iCent = 0; iCent < nZdcCentBins+1; iCent++) {
+  //
+  //      AddErrorsInQuadrature (g_jet_pt_syst[iCent][0],       g_jet_pt_syst[iCent][iVar], false, true);
+  //      AddErrorsInQuadrature (g_jet_pt_ratio_syst[iCent][0], g_jet_pt_ratio_syst[iCent][iVar], false, true);
+  //
+  //    } // end loop over iCent
+  //
+  //  } // end loop over iDir
+
+  //} // end loop over iVar
   
 
 
@@ -419,7 +421,8 @@ void ProcessJets (const char* tag, const char* outFileTag) {
     outFile->cd ();
 
 
-    for (int iVar = 0; iVar < nVar; iVar++) {
+    //for (int iVar = 0; iVar < nVar; iVar++) {
+    for (int iVar : {0}) {
 
       const TString var = variations[iVar];
 
@@ -443,7 +446,8 @@ void ProcessJets (const char* tag, const char* outFileTag) {
 
     for (int iDType = 0; iDType < 2; iDType++) {
 
-      for (int iVar = 0; iVar < nVar; iVar++) {
+      //for (int iVar = 0; iVar < nVar; iVar++) {
+      for (int iVar : {0}) {
 
         const TString var = variations[iVar];
 
@@ -484,7 +488,8 @@ void ProcessJets (const char* tag, const char* outFileTag) {
     } // end loop over iDType
 
 
-    for (int iVar = 0; iVar < nVar; iVar++) {
+    //for (int iVar = 0; iVar < nVar; iVar++) {
+    for (int iVar : {0}) {
 
       h_jet_pt_datamc_ratio_ref[iVar]->Write ();
       f_jet_pt_datamc_ratio_ref[iVar]->Write ();
@@ -503,7 +508,8 @@ void ProcessJets (const char* tag, const char* outFileTag) {
     TFile* wgtsFile = new TFile (Form ("%s/aux/JetPtWeights.root", workPath.Data ()), "recreate");
     wgtsFile->cd ();
 
-    for (int iVar = 0; iVar < nVar; iVar++) {
+    //for (int iVar = 0; iVar < nVar; iVar++) {
+    for (int iVar : {0}) {
 
       h_jet_pt_datamc_ratio_ref[iVar]->Write ();
       f_jet_pt_datamc_ratio_ref[iVar]->Write ();
