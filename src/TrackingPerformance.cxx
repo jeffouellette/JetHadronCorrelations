@@ -86,6 +86,9 @@ bool TrackingPerformance (const char* directory,
   }
 
 
+  TH1D* mcWgtsHist = GetMCFCalWeights ();
+
+
   // variables for filtering MC truth
   const float truth_jet_min_pt = GetJZXR04MinPt (TString (inFileName));
   const float truth_jet_max_pt = GetJZXR04MaxPt (TString (inFileName));
@@ -371,7 +374,7 @@ bool TrackingPerformance (const char* directory,
       continue;
 
 
-    const double eventWeight = 1;
+    const double eventWeight = (UseMCFCalWeights () ? mcWgtsHist->GetBinContent (mcWgtsHist->FindBin (fcalA_et)) : 1);
     //const double eventWeight = (IsHijing () ? 1 : mcEventWeights->at (0) * crossSectionPicoBarns * mcFilterEfficiency * GetJetLuminosity () / mcNumberEvents); // sigma * f * L_int
 
     // minimum and maximum barcodes, 0 < barcode < 10000 in Pythia and 10000 < barcode < 200000 in Hijing

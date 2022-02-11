@@ -60,7 +60,6 @@ const std::vector <TString> variations = {
 */
 
 
-
   //"MCTruthJetsTruthParts",     // Truth-level jets and truth-level charged particles
   //"MCRecoJetsTruthParts",       // Reco-level jets and truth-level charged particles
   //"MCRecoJetsTruthMatchedParts",  // Reco-level jets and reco-level, truth-matched charged particles

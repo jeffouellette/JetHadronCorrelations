@@ -129,6 +129,7 @@ TString ToTString (const SystFlag& sFlag) {
     case SystFlag::MCTruthJetsTruthParts:       return TString ("MCTruthJetsTruthParts");
     case SystFlag::MCRecoJetsTruthParts:        return TString ("MCRecoJetsTruthParts");
     case SystFlag::MCRecoJetsTruthMatchedParts: return TString ("MCRecoJetsTruthMatchedParts");
+    case SystFlag::MCFCalWeighted:              return TString ("MCFCalWeighted");
     default:                                    return TString ("???");
   }
 }
@@ -499,6 +500,12 @@ bool DoMCRecoJetsTruthMatchedParts (const SystFlag& sFlag) {
 
 
 
+bool DoMCFCalWeights (const SystFlag& sFlag) {
+  return sFlag == SystFlag::MCFCalWeighted;
+}
+
+
+
 bool IsIons () {
   return IsIons (collisionSystem);
 }
@@ -769,6 +776,12 @@ bool DoMCRecoJetsTruthMatchedParts () {
 
 
 
+bool DoMCFCalWeights () {
+  return DoMCFCalWeights (systFlag);
+}
+
+
+
 bool UseTruthJets () {
   return DoMCTruthJetsTruthParts ();
 }
@@ -783,6 +796,12 @@ bool UseTruthParticles () {
 
 bool UseTruthMatchedParticles () {
   return DoMCRecoJetsTruthMatchedParts ();
+}
+
+
+
+bool UseMCFCalWeights () {
+  return DoMCFCalWeights () && IsDataOverlay ();
 }
 
 
@@ -910,6 +929,23 @@ TH1D* GetFCalResamplingProbs () {
   probsFile->Close ();
   SaferDelete (&probsFile);
   return h_probs;
+}
+
+
+
+/**
+ * Returns a copy of the histogram with data/MC ratios of the FCal Et distribution
+ */
+TH1D* GetMCFCalWeights () {
+  if (!IsDataOverlay () || !IspPb ())
+    return nullptr;
+
+  TFile* wgtsFile = new TFile (Form ("%s/aux/MCFCalWeights.root", workPath.Data ()), "read");
+  TH1D* h_wgts = (TH1D*) ((TH1D*) wgtsFile->Get ("h_rat")->Clone ("h_MCFCalWeights"));
+  h_wgts->SetDirectory (0);
+  wgtsFile->Close ();
+  SaferDelete (&wgtsFile);
+  return h_wgts;
 }
 
 

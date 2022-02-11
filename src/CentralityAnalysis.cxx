@@ -490,7 +490,7 @@ bool CentralityAnalysis (const char* directory,
       //if (sumGap_A > 2.5)
       //  continue;
 
-      if (zdc_calibE_Pb == 0)
+      if (IsCollisions () && zdc_calibE_Pb == 0)
         continue;
     }
 
@@ -511,7 +511,7 @@ bool CentralityAnalysis (const char* directory,
     }
 
 
-    if ((minbiasTrigger && minbiasTrigger->trigDecision) || !IsCollisions ()) {
+    if (!IsCollisions () || (minbiasTrigger && minbiasTrigger->trigDecision)) {
       h_mb_instMu->Fill (actualInteractionsPerCrossing);
       h_mb_avgMu->Fill (averageInteractionsPerCrossing);
 
@@ -538,7 +538,7 @@ bool CentralityAnalysis (const char* directory,
       h3_mb_Pb_fcal_et_p_q4_Pb_zdc_calibE->Fill (fcal_et_Pb, q4_p, zdc_calibE_Pb);
     }
 
-    if ((jetTrigger && jetTrigger->trigDecision) || !IsCollisions ()) {
+    if (!IsCollisions () || (jetTrigger && jetTrigger->trigDecision)) {
 
       // Require Pb-going ZDC to fire, reducing UPC background contamination
       if (!IspPb () || zdc_Pb_decision) {

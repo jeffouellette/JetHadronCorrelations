@@ -85,6 +85,7 @@ enum class SystFlag {
   MCTruthJetsTruthParts,  // does the analysis completely at the MC-truth level
   MCRecoJetsTruthParts,    // selects truth charged particles with reco jets for bin-by-bin unfolding factors (numerator). Denominator is in MCTruthJetsTruthParts
   MCRecoJetsTruthMatchedParts, // does the nominal analysis but only with truth-matched particles (so no background component).
+  MCFCalWeighted, // applies MC sum FCal Et weights
 };
 static const std::vector <SystFlag> AllSystFlag = {
   SystFlag::Nominal,
@@ -138,6 +139,7 @@ static const std::vector <SystFlag> AllSystFlag = {
   SystFlag::MCTruthJetsTruthParts,
   SystFlag::MCRecoJetsTruthParts,
   SystFlag::MCRecoJetsTruthMatchedParts,
+  SystFlag::MCFCalWeighted,
 };
 
 enum class JetRadius { R0p2, R0p3, R0p4, R0p6, R0p8, R1p0, Invalid };
@@ -206,6 +208,7 @@ int GetNJERVar (const SystFlag& sFlag);
 bool DoMCTruthJetsTruthParts (const SystFlag& sFlag);
 bool DoMCRecoJetsTruthParts (const SystFlag& sFlag);
 bool DoMCRecoJetsTruthMatchedParts (const SystFlag& sFlag);
+bool DoMCFCalWeights (const SystFlag& sFlag);
 
 
 
@@ -259,10 +262,12 @@ int GetNJERVar ();
 bool DoMCTruthJetsTruthParts ();
 bool DoMCRecoJetsTruthParts ();
 bool DoMCRecoJetsTruthMatchedParts ();
+bool DoMCFCalWeights ();
 
 bool UseTruthJets ();
 bool UseTruthParticles ();
 bool UseTruthMatchedParticles ();
+bool UseMCFCalWeights ();
 
 
 /**
@@ -305,6 +310,12 @@ TH1D* GetZdcCuts ();
  * Returns a copy of the histogram detailing the probability of sampling a given MC event.
  */
 TH1D* GetFCalResamplingProbs ();
+
+
+/**
+ * Returns a copy of the histogram with data/MC ratios of the FCal Et distribution
+ */
+TH1D* GetMCFCalWeights ();
 
 
 /**
