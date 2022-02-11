@@ -8,10 +8,10 @@
 #root -l -b -q 'src/ProcessNIters.C("AllJets", "AllJets_NIters20", 20)'
 #root -l -b -q 'src/ProcessNIters.C("AllJets", "AllJets_NIters50", 50)'
 
-#root -l -b -q 'src/PlotNIters.C("AllJets", "AllJets_NIters20", 20)'
+#root -l -b -q 'src/PlotNIters.C("AllJets", "AllJets_NIters20", 20, 20)'
 #root -l -b -q 'src/PlotNIters.C("AllJets", "AllJets_NIters50", 50)'
 
-#root -l -b -q 'src/PlotPtCh.C("AllJets", "AllJets")'
+root -l -b -q 'src/PlotPtCh.C("AllJets", "AllJets")'
 #root -l -b -q 'src/PlotDPhi.C("AllJets", "AllJets")'
 
 

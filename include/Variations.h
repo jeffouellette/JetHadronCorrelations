@@ -14,7 +14,7 @@
 const std::vector <TString> variations = {
   "Nominal",
 
-/*
+
   "HITightVar",
   "HILooseVar",
   "TrkEffVar",
@@ -35,6 +35,8 @@ const std::vector <TString> variations = {
 
   "UnfoldingAltWgtsVar",
   "NonClosureVar",
+  "RefoldingVar",
+
 
   "JESVar0",
   "JESVar1",
@@ -50,14 +52,13 @@ const std::vector <TString> variations = {
   "JESVar11",
   "JESVar12",
   "JESVar13",
-  "JESVar14",
+  //"JESVar14",
   "JESVar15",
-  //"JESVar16",
+  "JESVar16",
   "JESVar17",
   "JESVar19",
   "JESVar18",
   //"JESVar20",
-*/
 
 
   //"MCTruthJetsTruthParts",     // Truth-level jets and truth-level charged particles
@@ -94,9 +95,9 @@ const std::set <TString> mcVariations = {
   "JESVar11",
   "JESVar12",
   "JESVar13",
-  "JESVar14",
+  //"JESVar14",
   "JESVar15",
-  //"JESVar16",
+  "JESVar16",
   "JESVar17",
   "JESVar18",
   "JESVar19",
@@ -124,6 +125,7 @@ const std::set <TString> dataVariations = {
 
   "NonClosureVar",
   "UnfoldingAltWgtsVar",
+  "RefoldingVar",
 };
 
 
@@ -174,6 +176,23 @@ const std::set <TString> variationsToSmooth {
   "JESVar6",
   "JESVar17",
   "JESVar18",
+
+  "JESVar0",
+  "JESVar1",
+  "JESVar2",
+  "JESVar3",
+  "JESVar4",
+  "JESVar5",
+  "JESVar7",
+  "JESVar8",
+  "JESVar9",
+  "JESVar10",
+  "JESVar11",
+  "JESVar12",
+  "JESVar13",
+  "JESVar14",
+  "JESVar15",
+  "JESVar16",
 };
 const TString hermitePolyFunc = "[0] + [1]*log(x) + [2]*(pow(log(x),2)-1)"; // Hermite polynomials
 //std::map <TString, TString> variationSmoothFuncs {
@@ -204,6 +223,7 @@ const std::vector <std::vector <TString>> variationGroups = {
   {"MixCatVar4"},
   {"MixCatVar5"},
   {"NonClosureVar"},
+  {"RefoldingVar"},
   {"UnfoldingAltWgtsVar"},
 
   {"JESVar0"},
@@ -220,9 +240,9 @@ const std::vector <std::vector <TString>> variationGroups = {
   {"JESVar11"},
   {"JESVar12"},
   {"JESVar13"},
-  {"JESVar14"},
+  //{"JESVar14"},
   {"JESVar15"},
-  //{"JESVar16"},
+  {"JESVar16"},
   {"JESVar17"},
   {"JESVar18"},
   {"JESVar19"},
@@ -246,6 +266,7 @@ std::map <TString, MyStyle> varStyles = {
   {"MixCatVar5",          MyStyle (manyColors[9],   7)},
   {"UnfoldingAltWgtsVar", MyStyle (manyColors[12],  7)},
   {"NonClosureVar",       MyStyle (manyColors[13],  7)},
+  {"RefoldingVar",        MyStyle (manyColors[15],  7)},
 
   {"FcalCentVar",         MyStyle (manyColors[1],   5)},
   {"FineFcalCentVar",     MyStyle (manyColors[3],   5)},
@@ -265,9 +286,9 @@ std::map <TString, MyStyle> varStyles = {
   {"JESVar11",            MyStyle (manyColors[12],  2)},
   {"JESVar12",            MyStyle (manyColors[13],  2)},
   {"JESVar13",            MyStyle (manyColors[14],  2)},
-  {"JESVar14",            MyStyle (manyColors[15],  2)},
-  {"JESVar15",            MyStyle (manyColors[16],  2)},
-  //{"JESVar16",            MyStyle (kWhite,          2)},
+  //{"JESVar14",            MyStyle (kWhite,  2)},
+  {"JESVar15",            MyStyle (manyColors[15],  2)},
+  {"JESVar16",            MyStyle (manyColors[16],  2)},
   {"JESVar17",            MyStyle (manyColors[17],  2)},
   {"JESVar18",            MyStyle (manyColors[19],  2)},
   {"JESVar19",            MyStyle (manyColors[18],  2)},
@@ -294,6 +315,7 @@ std::map <TString, TString> varFullNames = {
 
   {"NonClosureVar",       "MC non-closure"},
   {"UnfoldingAltWgtsVar", "Unfolding prior"},
+  {"RefoldingVar",        "Refolding non-closure"},
 
   {"FcalCentVar",         "FCal 0-20\%"},
 
@@ -317,9 +339,9 @@ std::map <TString, TString> varFullNames = {
   {"JESVar11",            "EffectiveNP_6"},
   {"JESVar12",            "EffectiveNP_7"},
   {"JESVar13",            "EffectiveNP_8restTerm"},
-  {"JESVar14",            "SingleParticle_HighPt"},
-  {"JESVar15",            "RelativeNonClosure_MC16"},
-  //{"JESVar16",            "EtaIntercalibration_NonClosure_2018data"},
+  //{"JESVar14",            "Cross-calibration"},
+  {"JESVar15",            "SingleParticle_HighPt"},
+  {"JESVar16",            "BJES_Response"},
   {"JESVar17",            "Cross-calibration"},
   {"JESVar18",            "Flavor-dep. response"},
   {"JESVar19",            "Flavor fraction"},
@@ -333,7 +355,7 @@ std::map <TString, TString> varFullNames = {
 
 
 bool IsMixingVariation (const TString& s) {
-  return (s.Contains ("Mix") || s.Contains ("NonClosureVar") || s.Contains ("UnfoldingAltWgtsVar"));
+  return (s.Contains ("Mix") || s.Contains ("NonClosureVar") || s.Contains ("RefoldingVar") || s.Contains ("UnfoldingAltWgtsVar"));
 }
 
 
@@ -374,26 +396,26 @@ TString GetTotVar (const TString& s) {
 
 
 TString GetVarBkg (const TString& s) {
-  if (s == "JESVar0" ||
-      s == "JESVar1" ||
-      s == "JESVar2" ||
-      s == "JESVar3" ||
-      s == "JESVar4" ||
-      s == "JESVar5" ||
-      s == "JESVar6" ||
-      s == "JESVar7" ||
-      s == "JESVar8" ||
-      s == "JESVar9" ||
-      s == "JESVar10" ||
-      s == "JESVar11" ||
-      s == "JESVar12" ||
-      s == "JESVar13" ||
-      s == "JESVar14" ||
-      s == "JESVar15" ||
-      s == "JESVar16" ||
-      s == "JESVar17" ||
-      s == "JESVar18" ||
-      s == "JESVar19" ||
+  if (//s == "JESVar0" ||
+      //s == "JESVar1" ||
+      //s == "JESVar2" ||
+      //s == "JESVar3" ||
+      //s == "JESVar4" ||
+      //s == "JESVar5" ||
+      //s == "JESVar6" ||
+      //s == "JESVar7" ||
+      //s == "JESVar8" ||
+      //s == "JESVar9" ||
+      //s == "JESVar10" ||
+      //s == "JESVar11" ||
+      //s == "JESVar12" ||
+      //s == "JESVar13" ||
+      //s == "JESVar14" ||
+      //s == "JESVar15" ||
+      //s == "JESVar16" ||
+      //s == "JESVar17" ||
+      //s == "JESVar18" ||
+      //s == "JESVar19" ||
       s == "JetPrimFracVar" ||
       s == "UnfoldingAltWgtsVar") {
     return "Nominal";

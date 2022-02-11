@@ -32,15 +32,15 @@ using namespace JetHadronCorrelations;
 
 double GetMinPtCh (short iPtJInt) {
   switch (iPtJInt) {
-  case 0: return 4;
-  case 1: return 1;
+  case 0: return 8;
+  case 1: return 8;
   }
   return 0.4;
 }
 double GetMaxPtCh (short iPtJInt) {
   switch (iPtJInt) {
-  case 0: return 60;
-  case 1: return 90;
+  case 0: return 30;
+  case 1: return 60;
   }
   return 120;
 }
@@ -67,11 +67,16 @@ void PlotNIters (const char* rawTag, const char* nitersTag, const short nItersMa
   TH1D****  h_jetInt_trk_pt_ref_sig   = Get3DArray <TH1D*> (2, 2, nDir);
   TH1D***** h_jetInt_trk_pt_sig       = Get4DArray <TH1D*> (2, 2, nDir, nZdcCentBins+1);
 
-  TH1D****  h_jetInt_trk_pt_ref_unf_nIters = Get3DArray <TH1D*> (nPtJBins, nDir, nItersMax-nItersMin+2);
-  TH1D***** h_jetInt_trk_pt_unf_nIters     = Get4DArray <TH1D*> (nPtJBins, nDir, nZdcCentBins+1, nItersMax-nItersMin+2);
+  TH1D****  h_jetInt_trk_pt_ref_unf_nIters  = Get3DArray <TH1D*> (nPtJBins, nDir, nItersMax-nItersMin+2);
+  TH1D***** h_jetInt_trk_pt_unf_nIters      = Get4DArray <TH1D*> (nPtJBins, nDir, nZdcCentBins+1, nItersMax-nItersMin+2);
+
+  TH1D****  h_jetInt_trk_pt_ref_rfld_nIters = Get3DArray <TH1D*> (nPtJBins, nDir, nItersMax-nItersMin+2);
+  TH1D***** h_jetInt_trk_pt_rfld_nIters     = Get4DArray <TH1D*> (nPtJBins, nDir, nZdcCentBins+1, nItersMax-nItersMin+2);
 
   TH1D**    h_jet_pt_ref_unf_nIters       = Get1DArray <TH1D*> (nIters1DMax-nIters1DMin+2);
+  TH1D**    h_jet_pt_ref_rfld_nIters      = Get1DArray <TH1D*> (nIters1DMax-nIters1DMin+2);
   TH1D***   h_jet_pt_unf_nIters           = Get2DArray <TH1D*> (nZdcCentBins+1, nIters1DMax-nIters1DMin+2);
+  TH1D***   h_jet_pt_rfld_nIters          = Get2DArray <TH1D*> (nZdcCentBins+1, nIters1DMax-nIters1DMin+2);
 
   TGraph**    g_jet_pt_ref_unfIterUnc     = Get1DArray <TGraph*> (2);                 // sums of iterations uncertainties as a function of nIter -- data only
   TGraph***   g_jet_pt_unfIterUnc         = Get2DArray <TGraph*> (2, nZdcCentBins+1); // sums of iterations uncertainties as a function of nIter -- data only
@@ -146,7 +151,8 @@ void PlotNIters (const char* rawTag, const char* nitersTag, const short nItersMa
 
         const TString pTJInt = (iPtJInt == 0 ? "30GeV" : "60GeV");
 
-        for (short iDir = 0; iDir < nDir; iDir++) {
+        //for (short iDir = 0; iDir < nDir; iDir++) {
+        for (short iDir : {0, 2}) {
 
           const TString dir = directions[iDir];
 
@@ -159,7 +165,8 @@ void PlotNIters (const char* rawTag, const char* nitersTag, const short nItersMa
 
           const TString cent = (iCent == nZdcCentBins ? "allCent" : Form ("iCent%i", iCent));
 
-          for (short iDir = 0; iDir < nDir; iDir++) {
+          //for (short iDir = 0; iDir < nDir; iDir++) {
+          for (short iDir : {0, 2}) {
 
             const TString dir = directions[iDir];
 
@@ -192,7 +199,8 @@ void PlotNIters (const char* rawTag, const char* nitersTag, const short nItersMa
 
         const TString pTJInt = (iPtJInt == 0 ? "30GeV" : "60GeV");
 
-        for (short iDir = 0; iDir < nDir; iDir++) {
+        //for (short iDir = 0; iDir < nDir; iDir++) {
+        for (short iDir : {0, 2}) {
 
           const TString dir = directions[iDir];
 
@@ -205,7 +213,8 @@ void PlotNIters (const char* rawTag, const char* nitersTag, const short nItersMa
 
           const TString cent = (iCent == nZdcCentBins ? "allCent" : Form ("iCent%i", iCent));
 
-          for (short iDir = 0; iDir < nDir; iDir++) {
+          //for (short iDir = 0; iDir < nDir; iDir++) {
+          for (short iDir : {0, 2}) {
 
             const TString dir = directions[iDir];
 
@@ -225,12 +234,14 @@ void PlotNIters (const char* rawTag, const char* nitersTag, const short nItersMa
       const short nIters = (short) nIters1DVals[iIter];
 
       h_jet_pt_ref_unf_nIters[iIter] = (TH1D*) inFile->Get (Form ("h_jet_pt_ref_unf_data_Nominal_nIters%i", nIters));
+      h_jet_pt_ref_rfld_nIters[iIter] = (TH1D*) inFile->Get (Form ("h_jet_pt_ref_rfld_data_Nominal_nIters%i", nIters));
 
       for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
 
         const TString cent = (iCent == nZdcCentBins ? "allCent" : Form ("iCent%i", iCent));
 
         h_jet_pt_unf_nIters[iCent][iIter] = (TH1D*) inFile-> Get (Form ("h_jet_pt_unf_data_%s_Nominal_nIters%i", cent.Data (), nIters));
+        h_jet_pt_rfld_nIters[iCent][iIter] = (TH1D*) inFile-> Get (Form ("h_jet_pt_rfld_data_%s_Nominal_nIters%i", cent.Data (), nIters));
 
       } // end loop over iCent
 
@@ -248,11 +259,13 @@ void PlotNIters (const char* rawTag, const char* nitersTag, const short nItersMa
         const double minJetPt = (iPtJInt == 0 ? 30. : 60.);
         const double maxJetPt = 300;
 
-        for (short iDir = 0; iDir < nDir; iDir++) {
+        //for (short iDir = 0; iDir < nDir; iDir++) {
+        for (short iDir : {0, 2}) {
 
           const TString dir = directions[iDir];
 
           h_jetInt_trk_pt_ref_unf_nIters[iPtJInt][iDir][iIter] = (TH1D*) inFile->Get (Form ("h_jetInt_trk_pt_%s_ref_unf_data_%s_Nominal_nIters%i", dir.Data (), pTJInt.Data (), nIters));
+          h_jetInt_trk_pt_ref_rfld_nIters[iPtJInt][iDir][iIter] = (TH1D*) inFile->Get (Form ("h_jetInt_trk_pt_%s_ref_rfld_data_%s_Nominal_nIters%i", dir.Data (), pTJInt.Data (), nIters));
           //h_jetInt_trk_pt_ref_unf_nIters[iPtJInt][iDir][iIter]->Scale (h_jet_pt_ref_unf_nIters[iIter]->Integral (h_jet_pt_ref_unf_nIters[iIter]->FindBin (minJetPt+0.01), h_jet_pt_ref_unf_nIters[iIter]->FindBin (maxJetPt-0.01)));
 
           for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
@@ -260,6 +273,7 @@ void PlotNIters (const char* rawTag, const char* nitersTag, const short nItersMa
             const TString cent = (iCent == nZdcCentBins ? "allCent" : Form ("iCent%i", iCent));
   
             h_jetInt_trk_pt_unf_nIters[iPtJInt][iDir][iCent][iIter] = (TH1D*) inFile->Get (Form ("h_jetInt_trk_pt_%s_pPb_unf_%s_data_%s_Nominal_nIters%i", dir.Data (), cent.Data (), pTJInt.Data (), nIters));
+            h_jetInt_trk_pt_rfld_nIters[iPtJInt][iDir][iCent][iIter] = (TH1D*) inFile->Get (Form ("h_jetInt_trk_pt_%s_pPb_rfld_%s_data_%s_Nominal_nIters%i", dir.Data (), cent.Data (), pTJInt.Data (), nIters));
             //h_jetInt_trk_pt_unf_nIters[iPtJInt][iDir][iCent][iIter]->Scale (h_jet_pt_unf_nIters[iCent][iIter]->Integral (h_jet_pt_unf_nIters[iCent][iIter]->FindBin (minJetPt+0.01), h_jet_pt_unf_nIters[iCent][iIter]->FindBin (maxJetPt-0.01)));
   
           } // end loop over iCent
@@ -449,7 +463,8 @@ void PlotNIters (const char* rawTag, const char* nitersTag, const short nItersMa
     } // end loop over iCent
 
 
-    for (short iDir = 0; iDir < nDir; iDir++) {
+    //for (short iDir = 0; iDir < nDir; iDir++) {
+    for (short iDir : {0, 2}) {
 
       const TString dir = directions[iDir];
 
@@ -562,7 +577,8 @@ void PlotNIters (const char* rawTag, const char* nitersTag, const short nItersMa
 
       const TString cent = (iCent == nZdcCentBins ? "allCent" : Form ("iCent%i", iCent)); 
 
-      for (short iDir = 0; iDir < nDir; iDir++) {
+      //for (short iDir = 0; iDir < nDir; iDir++) {
+      for (short iDir : {0, 2}) {
 
         const TString dir = directions[iDir];
 
@@ -686,7 +702,8 @@ void PlotNIters (const char* rawTag, const char* nitersTag, const short nItersMa
 
     const TString pTJInt = (iPtJInt == 0 ? "30GeV" : "60GeV");
 
-    for (short iDir : {0, 1, 2}) {
+    //for (short iDir : {0, 1, 2}) {
+    for (short iDir : {0, 2}) {
 
       const char* canvasName = Form ("c_jetInt_trk_pt_unfUncs_iDir%i_%s", iDir, pTJInt.Data ());
       TCanvas* c = new TCanvas (canvasName, "", 1400, 700);
@@ -763,7 +780,7 @@ void PlotNIters (const char* rawTag, const char* nitersTag, const short nItersMa
 
         l->SetLineColor (myGreen);
         l->SetLineStyle (3);
-        const int xopt_2d = GetTrkSpectraNIters (iPtJInt, iDir, -1);
+        const int xopt_2d = GetTrkSpectraNIters (false, iPtJInt, iDir, -1);
         l->DrawLine (xopt_2d, ymin, xopt_2d, ymax/ymaxSF);
         l->SetLineColor (kBlack);
         l->SetLineStyle (2);
@@ -839,7 +856,7 @@ void PlotNIters (const char* rawTag, const char* nitersTag, const short nItersMa
 
         l->SetLineColor (myGreen);
         l->SetLineStyle (3);
-        const int xopt_2d = GetTrkSpectraNIters (iPtJInt, iDir, iCent);
+        const int xopt_2d = GetTrkSpectraNIters (false, iPtJInt, iDir, iCent);
         l->DrawLine (xopt_2d, ymin, xopt_2d, ymax/ymaxSF);
         l->SetLineColor (kBlack);
         l->SetLineStyle (2);
@@ -872,7 +889,8 @@ void PlotNIters (const char* rawTag, const char* nitersTag, const short nItersMa
 
     const TString pTJInt = (iPtJInt == 0 ? "30GeV" : "60GeV");
 
-    for (short iDir : {0, 1, 2}) {
+    //for (short iDir : {0, 1, 2}) {
+    for (short iDir : {0, 2}) {
 
       const char* canvasName = Form ("c_jetInt_trk_pt_unfHybUncs_iDir%i_%s", iDir, pTJInt.Data ());
       TCanvas* c = new TCanvas (canvasName, "", 1400, 700);
@@ -949,7 +967,7 @@ void PlotNIters (const char* rawTag, const char* nitersTag, const short nItersMa
 
         l->SetLineColor (myGreen);
         l->SetLineStyle (3);
-        const int xopt_2d = GetTrkSpectraNIters (iPtJInt, iDir, -1);
+        const int xopt_2d = GetTrkSpectraNIters (false, iPtJInt, iDir, -1);
         l->DrawLine (xopt_2d, ymin, xopt_2d, ymax/ymaxSF);
         l->SetLineColor (kBlack);
         l->SetLineStyle (2);
@@ -1025,7 +1043,7 @@ void PlotNIters (const char* rawTag, const char* nitersTag, const short nItersMa
 
         l->SetLineColor (myGreen);
         l->SetLineStyle (3);
-        const int xopt_2d = GetTrkSpectraNIters (iPtJInt, iDir, iCent);
+        const int xopt_2d = GetTrkSpectraNIters (false, iPtJInt, iDir, iCent);
         l->DrawLine (xopt_2d, ymin, xopt_2d, ymax/ymaxSF);
         l->SetLineColor (kBlack);
         l->SetLineStyle (2);
@@ -1058,7 +1076,8 @@ void PlotNIters (const char* rawTag, const char* nitersTag, const short nItersMa
 
     const TString pTJInt = (iPtJInt == 0 ? "30GeV" : "60GeV");
 
-    for (short iDir : {0, 1, 2}) {
+    //for (short iDir : {0, 1, 2}) {
+    for (short iDir : {0, 2}) {
 
       const char* canvasName = Form ("c_jetInt_trk_pt_unfRelUncs_iDir%i_%s", iDir, pTJInt.Data ());
       TCanvas* c = new TCanvas (canvasName, "", 1400, 700);
@@ -1135,7 +1154,7 @@ void PlotNIters (const char* rawTag, const char* nitersTag, const short nItersMa
 
         l->SetLineColor (myGreen);
         l->SetLineStyle (3);
-        const int xopt_2d = GetTrkSpectraNIters (iPtJInt, iDir, -1);
+        const int xopt_2d = GetTrkSpectraNIters (false, iPtJInt, iDir, -1);
         l->DrawLine (xopt_2d, ymin, xopt_2d, ymax/ymaxSF);
         l->SetLineColor (kBlack);
         l->SetLineStyle (2);
@@ -1211,7 +1230,7 @@ void PlotNIters (const char* rawTag, const char* nitersTag, const short nItersMa
 
         l->SetLineColor (myGreen);
         l->SetLineStyle (3);
-        const int xopt_2d = GetTrkSpectraNIters (iPtJInt, iDir, iCent);
+        const int xopt_2d = GetTrkSpectraNIters (false, iPtJInt, iDir, iCent);
         l->DrawLine (xopt_2d, ymin, xopt_2d, ymax/ymaxSF);
         l->SetLineColor (kBlack);
         l->SetLineStyle (2);
@@ -1319,7 +1338,7 @@ void PlotNIters (const char* rawTag, const char* nitersTag, const short nItersMa
 
       l->SetLineColor (myGreen);
       l->SetLineStyle (3);
-      const int xopt_2d = GetJetSpectraNIters (iPtJInt, -1);
+      const int xopt_2d = GetJetSpectraNIters (false, iPtJInt, -1);
       l->DrawLine (xopt_2d, ymin, xopt_2d, ymax/ymaxSF);
       l->SetLineColor (kBlack);
       l->SetLineStyle (2);
@@ -1393,7 +1412,7 @@ void PlotNIters (const char* rawTag, const char* nitersTag, const short nItersMa
 
       l->SetLineColor (myGreen);
       l->SetLineStyle (3);
-      const int xopt_2d = GetJetSpectraNIters (iPtJInt, iCent);
+      const int xopt_2d = GetJetSpectraNIters (false, iPtJInt, iCent);
       l->DrawLine (xopt_2d, ymin, xopt_2d, ymax/ymaxSF);
       l->SetLineColor (kBlack);
       l->SetLineStyle (2);
@@ -1495,7 +1514,7 @@ void PlotNIters (const char* rawTag, const char* nitersTag, const short nItersMa
 
       l->SetLineColor (myGreen);
       l->SetLineStyle (3);
-      const int xopt_2d = GetJetSpectraNIters (iPtJInt, -1);
+      const int xopt_2d = GetJetSpectraNIters (false, iPtJInt, -1);
       l->DrawLine (xopt_2d, ymin, xopt_2d, ymax/ymaxSF);
       l->SetLineColor (kBlack);
       l->SetLineStyle (2);
@@ -1569,7 +1588,7 @@ void PlotNIters (const char* rawTag, const char* nitersTag, const short nItersMa
 
       l->SetLineColor (myGreen);
       l->SetLineStyle (3);
-      const int xopt_2d = GetJetSpectraNIters (iPtJInt, iCent);
+      const int xopt_2d = GetJetSpectraNIters (false, iPtJInt, iCent);
       l->DrawLine (xopt_2d, ymin, xopt_2d, ymax/ymaxSF);
       l->SetLineColor (kBlack);
       l->SetLineStyle (2);
@@ -1671,7 +1690,7 @@ void PlotNIters (const char* rawTag, const char* nitersTag, const short nItersMa
 
       l->SetLineColor (myGreen);
       l->SetLineStyle (3);
-      const int xopt_2d = GetJetSpectraNIters (iPtJInt, -1);
+      const int xopt_2d = GetJetSpectraNIters (false, iPtJInt, -1);
       l->DrawLine (xopt_2d, ymin, xopt_2d, ymax/ymaxSF);
       l->SetLineColor (kBlack);
       l->SetLineStyle (2);
@@ -1745,7 +1764,7 @@ void PlotNIters (const char* rawTag, const char* nitersTag, const short nItersMa
 
       l->SetLineColor (myGreen);
       l->SetLineStyle (3);
-      const int xopt_2d = GetJetSpectraNIters (iPtJInt, iCent);
+      const int xopt_2d = GetJetSpectraNIters (false, iPtJInt, iCent);
       l->DrawLine (xopt_2d, ymin, xopt_2d, ymax/ymaxSF);
       l->SetLineColor (kBlack);
       l->SetLineStyle (2);
@@ -1956,7 +1975,7 @@ void PlotNIters (const char* rawTag, const char* nitersTag, const short nItersMa
 
       l->SetLineColor (myGreen);
       l->SetLineStyle (3);
-      l->DrawLine (GetJetSpectraNIters (iPtJInt, -1), ymin, GetJetSpectraNIters (iPtJInt, -1), ymax);
+      l->DrawLine (GetJetSpectraNIters (false, iPtJInt, -1), ymin, GetJetSpectraNIters (false, iPtJInt, -1), ymax);
       l->SetLineColor (kBlack);
       l->SetLineStyle (2);
       l->DrawLine (nIter1p, ymin, nIter1p, ymax);
@@ -2037,7 +2056,7 @@ void PlotNIters (const char* rawTag, const char* nitersTag, const short nItersMa
 
       l->SetLineColor (myGreen);
       l->SetLineStyle (3);
-      l->DrawLine (GetJetSpectraNIters (iPtJInt, iCent), ymin, GetJetSpectraNIters (iPtJInt, iCent), ymax);
+      l->DrawLine (GetJetSpectraNIters (false, iPtJInt, iCent), ymin, GetJetSpectraNIters (false, iPtJInt, iCent), ymax);
       l->SetLineColor (kBlack);
       l->SetLineStyle (2);
       l->DrawLine (nIter1p, ymin, nIter1p, ymax);
@@ -2075,8 +2094,8 @@ void PlotNIters (const char* rawTag, const char* nitersTag, const short nItersMa
     TH1D* h = nullptr;
     TGAE* g = nullptr;
 
-    const float ymin = 0.66;//0.95;
-    const float ymax = 1.17;//1.075;
+    const float ymin = (iPtJInt == 0 ? 0.30 : 0.66);//0.95;
+    const float ymax = (iPtJInt == 0 ? 1.35 : 1.17);//1.075;
 
     {
       c->cd (7);
@@ -2152,7 +2171,7 @@ void PlotNIters (const char* rawTag, const char* nitersTag, const short nItersMa
 
       l->SetLineColor (myGreen);
       l->SetLineStyle (3);
-      l->DrawLine (GetJetSpectraNIters (iPtJInt, -1), ymin, GetJetSpectraNIters (iPtJInt, -1), ymax);
+      l->DrawLine (GetJetSpectraNIters (false, iPtJInt, -1), ymin, GetJetSpectraNIters (false, iPtJInt, -1), ymax);
       l->SetLineColor (kBlack);
       l->SetLineStyle (2);
       l->DrawLine (nIter1p, ymin, nIter1p, ymax);
@@ -2235,7 +2254,7 @@ void PlotNIters (const char* rawTag, const char* nitersTag, const short nItersMa
 
       l->SetLineColor (myGreen);
       l->SetLineStyle (3);
-      l->DrawLine (GetJetSpectraNIters (iPtJInt, iCent), ymin, GetJetSpectraNIters (iPtJInt, iCent), ymax);
+      l->DrawLine (GetJetSpectraNIters (false, iPtJInt, iCent), ymin, GetJetSpectraNIters (false, iPtJInt, iCent), ymax);
       l->SetLineColor (kBlack);
       l->SetLineStyle (2);
       l->DrawLine (nIter1p, ymin, nIter1p, ymax);
@@ -2259,6 +2278,175 @@ void PlotNIters (const char* rawTag, const char* nitersTag, const short nItersMa
 
 
 
+  for (short iPtJInt : {0, 1}) {
+  
+    const TString pTJInt = (iPtJInt == 0 ? "30GeV" : "60GeV");
+    const int minJetPt = (iPtJInt == 0 ? 30 : 60);
+    const int maxJetPt = 300;
+
+    const char* canvasName = Form ("c_njet_%iGeV_RefoldingComp", minJetPt);
+    TCanvas* c = new TCanvas (canvasName, "", 1400, 700);
+    c->Divide (4, 2);
+  
+    TH1D* h = nullptr;
+    TGAE* g = nullptr;
+
+    const float ymin = 0.78;//0.95;
+    const float ymax = 1.17;//1.075;
+
+    {
+      c->cd (7);
+      gPad->SetLogx();
+
+      g = new TGAE (nIters1DMax - nIters1DMin + 1);
+
+      int nIter1p = -1;
+
+      double den = h_jet_pt_ref[0]->Integral (h_jet_pt_ref[0]->FindBin (minJetPt+0.01), h_jet_pt_ref[0]->FindBin (maxJetPt-0.01));
+      for (short iIter = 0; iIter < nIters1DMax-nIters1DMin+1; iIter++) {
+        double ratio = 0, ratio_err = 0;
+        ratio = h_jet_pt_ref_rfld_nIters[iIter]->IntegralAndError (h_jet_pt_ref_rfld_nIters[iIter]->FindBin (minJetPt+0.01), h_jet_pt_ref_rfld_nIters[iIter]->FindBin (maxJetPt-0.01), ratio_err);
+
+        ratio = ratio / den;
+        ratio_err = ratio_err / den;
+
+        if (nIter1p == -1) {
+          if (std::fabs (ratio - 1) < 0.01)
+            nIter1p = nIters1DVals[iIter];
+        }
+        else if (std::fabs (ratio - 1) > 0.01)
+          nIter1p = -1;
+
+        g->SetPoint       (iIter, nIters1DVals[iIter], ratio);
+        g->SetPointEYhigh (iIter, ratio_err);
+        g->SetPointEYlow  (iIter, ratio_err);
+      }
+      std::cout << "For minJetPt = " << minJetPt << ", pp, opt nIter = " << nIter1p << std::endl;
+
+      h = new TH1D ("h", ";Iterations;Refolded N_{jet} / No unfold", 1, 0, nIters1DMax);
+      h->GetYaxis ()->SetRangeUser (ymin, ymax);
+      h->SetBinContent (1, 1);
+      h->SetLineStyle (2);
+      h->SetLineWidth (2);
+      h->SetLineColor (kBlack);
+      h->DrawCopy ("hist ][");
+      SaferDelete (&h);
+  
+      l->SetLineWidth (2);
+      l->SetLineColor (kGray+1);
+      l->SetLineStyle (2);
+      l->DrawLine (0, 1.01, nIters1DMax, 1.01);
+      l->DrawLine (0, 0.99, nIters1DMax, 0.99);
+
+      TGAE* gup = new TGAE ();
+      TGAE* gdown = new TGAE ();
+      MakeGupAndGdown (g, gup, gdown);
+      myDrawFill (gup, gdown, colorfulSystColors[0], 0.7);
+      ResetTGAEErrors (g);
+      ResetXErrors (g);
+      myDraw (g, colorfulColors[0], kDot, 0, 1, 2, "L");
+      SaferDelete (&g);
+      SaferDelete (&gup);
+      SaferDelete (&gdown);
+
+      //myDraw (g, colorfulColors[0], kFullCircle, 1.0, 1, 2, "P", false);
+      //SaferDelete (&g);
+
+      l->SetLineColor (myGreen);
+      l->SetLineStyle (3);
+      l->DrawLine (GetJetSpectraNIters (false, iPtJInt, -1), ymin, GetJetSpectraNIters (false, iPtJInt, -1), ymax);
+      l->SetLineColor (kBlack);
+      l->SetLineStyle (2);
+      l->DrawLine (nIter1p, ymin, nIter1p, ymax);
+  
+      myText (0.2, 0.84, kBlack, "#bf{#it{pp}}", 0.06);
+    }
+  
+    for (short iCent = 0; iCent < nFcalCentBins+1; iCent++) {
+
+      c->cd (nFcalCentBins+1-iCent);
+      gPad->SetLogx();
+
+      g = new TGAE (nIters1DMax - nIters1DMin + 1);
+
+      int nIter1p = -1;
+
+      double den = h_jet_pt[0][iCent]->Integral (h_jet_pt[0][iCent]->FindBin (minJetPt+0.01), h_jet_pt[0][iCent]->FindBin (maxJetPt-0.01));
+      for (short iIter = 0; iIter < nIters1DMax-nIters1DMin+1; iIter++) {
+        double ratio = 0, ratio_err = 0;
+        ratio = h_jet_pt_rfld_nIters[iCent][iIter]->IntegralAndError (h_jet_pt_rfld_nIters[iCent][iIter]->FindBin (minJetPt+0.01), h_jet_pt_rfld_nIters[iCent][iIter]->FindBin (maxJetPt-0.01), ratio_err);
+
+        ratio = ratio / den;
+        ratio_err = ratio_err / den;
+
+        if (nIter1p == -1) {
+          if (std::fabs (ratio - 1) < 0.01)
+            nIter1p = nIters1DVals[iIter];
+        }
+        else if (std::fabs (ratio - 1) > 0.01)
+          nIter1p = -1;
+
+        g->SetPoint       (iIter, nIters1DVals[iIter], ratio);
+        g->SetPointEYhigh (iIter, ratio_err);
+        g->SetPointEYlow  (iIter, ratio_err);
+      }
+      std::cout << "For minJetPt = " << minJetPt << ", " << zdcCentPercs[iCent+1] << "-" << zdcCentPercs[iCent] << "% central p+Pb, opt nIter = " << nIter1p << std::endl;
+  
+      h = new TH1D ("h", ";Iterations;Refolded N_{jet} / No unfold", 1, 0, nIters1DMax);
+      h->GetYaxis ()->SetRangeUser (ymin, ymax);
+      h->SetBinContent (1, 1);
+      h->SetLineStyle (2);
+      h->SetLineWidth (2);
+      h->SetLineColor (kBlack);
+      h->DrawCopy ("hist ][");
+      SaferDelete (&h);
+  
+      l->SetLineWidth (2);
+      l->SetLineColor (kGray+1);
+      l->SetLineStyle (2);
+      l->DrawLine (0, 1.01, nIters1DMax, 1.01);
+      l->DrawLine (0, 0.99, nIters1DMax, 0.99);
+
+      TGAE* gup = new TGAE ();
+      TGAE* gdown = new TGAE ();
+      MakeGupAndGdown (g, gup, gdown);
+      myDrawFill (gup, gdown, colorfulSystColors[iCent+1], 0.7);
+      ResetTGAEErrors (g);
+      ResetXErrors (g);
+      myDraw (g, colorfulColors[iCent+1], kDot, 0, 1, 2, "L");
+      SaferDelete (&g);
+      SaferDelete (&gup);
+      SaferDelete (&gdown);
+
+      //myDraw (g, colorfulColors[iCent+1], kFullCircle, 1.0, 1, 2, "P", false);
+      //SaferDelete (&g);
+
+      l->SetLineColor (myGreen);
+      l->SetLineStyle (3);
+      l->DrawLine (GetJetSpectraNIters (false, iPtJInt, iCent), ymin, GetJetSpectraNIters (false, iPtJInt, iCent), ymax);
+      l->SetLineColor (kBlack);
+      l->SetLineStyle (2);
+      l->DrawLine (nIter1p, ymin, nIter1p, ymax);
+  
+      if (iCent < nFcalCentBins)
+        myText (0.2, 0.84, kBlack, Form ("#bf{#it{p}+Pb, ZDC %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.06);
+      else
+        myText (0.2, 0.84, kBlack, "#bf{#it{p}+Pb, 0-100%}", 0.06);
+  
+    } // end loop over iCent
+  
+    c->cd (8);
+    myText (0.1, 0.84, kBlack, "#bf{#it{ATLAS}} Internal", 0.07);
+    myText (0.1, 0.75, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.07);
+    myText (0.1, 0.66, kBlack, "#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV", 0.07);
+    myText (0.1, 0.57, kBlack, Form ("#it{p}_{T}^{jet} [GeV] #in (%i, %i)", minJetPt, maxJetPt), 0.07);
+  
+    c->SaveAs (Form ("%s/Plots/PtCh/Refolded_NJet_%s.pdf", workPath.Data (), pTJInt.Data ()));
+  
+  } // end loop over iPtJInt
+
+
+
 
   for (short iPtJInt : {0, 1}) {
 
@@ -2267,7 +2455,8 @@ void PlotNIters (const char* rawTag, const char* nitersTag, const short nItersMa
     const double minJetPt = (iPtJInt == 0 ? 30. : 60.);
     const double maxJetPt = 300;
 
-    for (short iDir : {0, 1, 2}) {
+    //for (short iDir : {0, 1, 2}) {
+    for (short iDir : {0, 2}) {
 
       const char* canvasName = Form ("c_jetInt_trk_pt_sigVsUnf_iDir%i_%s", iDir, pTJInt.Data ());
       TCanvas* c = new TCanvas (canvasName, "", 1400, 700);
@@ -2282,7 +2471,7 @@ void PlotNIters (const char* rawTag, const char* nitersTag, const short nItersMa
 
         TH1D* h = new TH1D ("h", ";#it{p}_{T}^{ch} [GeV];N_{iter} iterations / N_{iter}-1 iterations", 1, pTChBins[1], iDir == 1 ? 10 : pTChBins[nPtChBins-(iPtJInt == 0 ? 3 : 1)]);//pTChBins[nPtChBins]);
         h->GetXaxis ()->SetMoreLogLabels ();
-        h->GetYaxis ()->SetRangeUser (0.72, 1.44);
+        h->GetYaxis ()->SetRangeUser (0.86, 1.22);
         h->SetBinContent (1, 1);
         h->SetLineStyle (2);
         h->SetLineWidth (2);
@@ -2321,7 +2510,7 @@ void PlotNIters (const char* rawTag, const char* nitersTag, const short nItersMa
 
         TH1D* h = new TH1D ("h", ";#it{p}_{T}^{ch} [GeV];N_{iter} iterations / N_{iter}-1 iterations", 1, pTChBins[1], iDir == 1 ? 10 : pTChBins[nPtChBins-(iPtJInt == 0 ? 3 : 1)]);//pTChBins[nPtChBins]);
         h->GetXaxis ()->SetMoreLogLabels ();
-        h->GetYaxis ()->SetRangeUser (0.72, 1.44);
+        h->GetYaxis ()->SetRangeUser (0.86, 1.22);
         h->SetBinContent (1, 1);
         h->SetLineStyle (2);
         h->SetLineWidth (2);
@@ -2377,6 +2566,126 @@ void PlotNIters (const char* rawTag, const char* nitersTag, const short nItersMa
 
 
 
+  for (short iPtJInt : {0, 1}) {
+
+    const TString pTJInt = (iPtJInt == 0 ? "30GeV" : "60GeV");
+
+    const double minJetPt = (iPtJInt == 0 ? 30. : 60.);
+    const double maxJetPt = 300;
+
+    //for (short iDir : {0, 1, 2}) {
+    for (short iDir : {0, 2}) {
+
+      const char* canvasName = Form ("c_jetInt_trk_pt_sigVsRfld_iDir%i_%s", iDir, pTJInt.Data ());
+      TCanvas* c = new TCanvas (canvasName, "", 1400, 700);
+      c->Divide (4, 2);
+
+      TGAE* g = nullptr;
+
+      {
+        c->cd (7);
+
+        gPad->SetLogx ();
+
+        TH1D* h = new TH1D ("h", ";#it{p}_{T}^{ch} [GeV];Refolded N_{iter} iterations / No unfold", 1, pTChBins[1], iDir == 1 ? 10 : pTChBins[nPtChBins-(iPtJInt == 0 ? 3 : 1)]);//pTChBins[nPtChBins]);
+        h->GetXaxis ()->SetMoreLogLabels ();
+        h->GetYaxis ()->SetRangeUser (0.86, 1.22);
+        h->SetBinContent (1, 1);
+        h->SetLineStyle (2);
+        h->SetLineWidth (2);
+        h->SetLineColor (kBlack);
+        h->DrawCopy ("hist ][");
+        SaferDelete (&h);
+
+
+        short iCol = 7;
+        for (short iIter : {11, 9, 7, 5, 3, 2, 1, 0}) {
+          //if (iIter > GetTrkSpectraNIters (false, iPtJInt, iDir, -1)) {
+          //  iCol--;
+          //  continue;
+          //}
+
+          h = (TH1D*) h_jetInt_trk_pt_ref_rfld_nIters[iPtJInt][iDir][iIter]->Clone ("h");
+          TH1D* hprev = h_jetInt_trk_pt_ref_sig[0][iPtJInt][iDir];
+
+          h->Divide (hprev);
+          g = make_graph (h);
+          SaferDelete (&h);
+
+          ResetXErrors (g);
+          if (iDir == 1) TrimGraph (g, 0, 10);
+          myDraw (g, colorfulColors[iCol--], kOpenCircle, 1.0, 1, 2, "P", false);
+          SaferDelete (&g);
+        }
+
+        myText (0.2, 0.865, kBlack, "#bf{#it{pp}}", 0.05);
+      }
+
+
+      for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
+        c->cd (nZdcCentBins+1-iCent);
+
+        gPad->SetLogx ();
+
+        TH1D* h = new TH1D ("h", ";#it{p}_{T}^{ch} [GeV];Refolded N_{iter} iterations / No unfold", 1, pTChBins[1], iDir == 1 ? 10 : pTChBins[nPtChBins-(iPtJInt == 0 ? 3 : 1)]);//pTChBins[nPtChBins]);
+        h->GetXaxis ()->SetMoreLogLabels ();
+        h->GetYaxis ()->SetRangeUser (0.86, 1.22);
+        h->SetBinContent (1, 1);
+        h->SetLineStyle (2);
+        h->SetLineWidth (2);
+        h->SetLineColor (kBlack);
+        h->DrawCopy ("hist ][");
+        SaferDelete (&h);
+
+        short iCol = 7;
+        for (short iIter : {11, 9, 7, 5, 3, 2, 1, 0}) {
+          //if (iIter > GetTrkSpectraNIters (false, iPtJInt, iDir, iCent)) {
+          //  iCol--;
+          //  continue;
+          //}
+
+          h = (TH1D*) h_jetInt_trk_pt_rfld_nIters[iPtJInt][iDir][iCent][iIter]->Clone ("h");
+          TH1D* hprev = h_jetInt_trk_pt_sig[0][iPtJInt][iDir][iCent];
+
+          h->Divide (hprev);
+          g = make_graph (h);
+          SaferDelete (&h);
+
+          ResetXErrors (g);
+          if (iDir == 1) TrimGraph (g, 0, 10);
+          myDraw (g, colorfulColors[iCol--], kOpenCircle, 1.0, 1, 2, "P", false);
+          SaferDelete (&g);
+        }
+
+        if (iCent < nZdcCentBins)
+          myText (0.2, 0.865, kBlack, Form ("#bf{#it{p}+Pb, ZDC %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.05);
+        else
+          myText (0.2, 0.865, kBlack, "#bf{#it{p}+Pb, 0-100%}", 0.05);
+
+      } // end loop over iCent
+
+      c->cd (8);
+      myText (0.1, 0.93, kBlack, "#bf{#it{ATLAS}} Internal", 0.07);
+      myText (0.1, 0.84, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.07);
+      myText (0.1, 0.75, kBlack, "#it{p}+Pb, #sqrt{s} = 5.02 TeV", 0.07);
+      myText (0.1, 0.66, kBlack, Form ("#it{p}_{T}^{jet} [GeV] #in (%i, 300)", iPtJInt == 0 ? 30 : 60), 0.065);
+      myText (0.1, 0.57, kBlack, Form ("#Delta#phi_{ch,jet} %s", directions[iDir] == "ns" ? "< #pi/8" : (directions[iDir] == "as" ? "> 7#pi/8" : "#in (#pi/3, 2#pi/3)")), 0.065);
+      short iCol = 7;
+      for (short iIter : {11, 9, 7, 5}) {
+        myLineText2 (0.55, 0.48-0.07*(iCol-4), colorfulColors[iCol], kOpenCircle, Form ("%i iterations", iIter+1), 1.2, 0.055); iCol--;
+      }
+      for (short iIter : {3, 2, 1, 0}) {
+        myLineText2 (0.15, 0.48-0.07*(iCol), colorfulColors[iCol], kOpenCircle, Form ("%i iterations", iIter+1), 1.2, 0.055); iCol--;
+      }
+
+      c->SaveAs (Form ("%s/Plots/PtCh/Refolded_All_%iGeVJets_%s.pdf", workPath.Data (), iPtJInt == 0 ? 30 : 60, directions[iDir] == "ns" ? "nearside" : (directions[iDir] == "as" ? "awayside" : "perpendicular")));
+
+    } // end loop over iDir
+
+  } // end loop over iPtJInt
+
+
+
 
   for (short iPtJInt : {0, 1}) {
 
@@ -2385,7 +2694,8 @@ void PlotNIters (const char* rawTag, const char* nitersTag, const short nItersMa
     const double minJetPt = (iPtJInt == 0 ? 30. : 60.);
     const double maxJetPt = 300;
 
-    for (short iDir : {0, 1, 2}) {
+    //for (short iDir : {0, 1, 2}) {
+    for (short iDir : {0, 2}) {
 
       const char* canvasName = Form ("c_jetInt_trk_pt_sigVsUnf_Summary_iDir%i_%s", iDir, pTJInt.Data ());
       TCanvas* c = new TCanvas (canvasName, "", 1400, 700);
@@ -2398,7 +2708,7 @@ void PlotNIters (const char* rawTag, const char* nitersTag, const short nItersMa
 
         gPad->SetLogx ();
 
-        const short nIterOpt = GetTrkSpectraNIters (iPtJInt, iDir, -1);//jetInt_trk_pt_ref_niter_opt[iPtJInt][iDir][iPtJInt == 0 ? 1 : 0];
+        const short nIterOpt = GetTrkSpectraNIters (false, iPtJInt, iDir, -1);//jetInt_trk_pt_ref_niter_opt[iPtJInt][iDir][iPtJInt == 0 ? 1 : 0];
         const short nIterVar = nIterOpt + 1;//jetInt_trk_pt_ref_niter_opt[iPtJInt][iDir][0];
 
         short iIterOpt = 0;
@@ -2452,7 +2762,7 @@ void PlotNIters (const char* rawTag, const char* nitersTag, const short nItersMa
 
         gPad->SetLogx ();
 
-        const short nIterOpt = GetTrkSpectraNIters (iPtJInt, iDir, iCent);//jetInt_trk_pt_niter_opt[iPtJInt][iDir][iCent][iPtJInt == 0 ? 1 : 0];
+        const short nIterOpt = GetTrkSpectraNIters (false, iPtJInt, iDir, iCent);//jetInt_trk_pt_niter_opt[iPtJInt][iDir][iCent][iPtJInt == 0 ? 1 : 0];
         const short nIterVar = nIterOpt + 1;//jetInt_trk_pt_niter_opt[iPtJInt][iDir][iCent][0];
 
         short iIterOpt = 0;

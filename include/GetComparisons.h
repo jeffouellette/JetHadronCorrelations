@@ -406,6 +406,95 @@ TGAE*** GetZHIAA () {
 
 
 
+TGAE*** GetJhRefYieldGAM () {
+
+  TGAE*** g = Get2DArray <TGAE*> (2, nDir);
+
+  TFile* inFile = new TFile (Form ("%s/aux/ProcessUnfolding_AllJets_GAM.root", workPath.Data ()), "read");
+
+  for (short iPtJInt : {0, 1}) {
+
+    for (short iDir : {0, 2}) {
+
+      g[iPtJInt][iDir] = make_graph ((TH1D*) inFile->Get (Form ("h_jetInt_trk_pt_%s_ref_unf_data_%iGeV_Nominal", iDir == 0 ? "ns" : (iDir == 1 ? "perp" : "as"), iPtJInt == 0 ? 30 : 60)));
+
+    } // end loop over iDir
+
+  } // end loop over iPtJInt
+
+  inFile->Close ();
+  SaferDelete (&inFile);
+
+  return g;
+
+}
+
+
+
+
+TGAE**** GetJhpPbYieldGAM () {
+
+  TGAE**** g = Get3DArray <TGAE*> (2, nDir, nZdcCentBins+1);
+
+  TFile* inFile = new TFile (Form ("%s/aux/ProcessUnfolding_AllJets_GAM.root", workPath.Data ()), "read");
+
+  for (short iPtJInt : {0, 1}) {
+
+    for (short iDir : {0, 2}) {
+
+      for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
+
+        const TString cent = (iCent == nZdcCentBins ? "allCent" : Form ("iCent%i", iCent));
+
+        g[iPtJInt][iDir][iCent] = make_graph ((TH1D*) inFile->Get (Form ("h_jetInt_trk_pt_%s_pPb_unf_%s_data_%iGeV_Nominal", iDir == 0 ? "ns" : (iDir == 1 ? "perp" : "as"), cent.Data (), iPtJInt == 0 ? 30 : 60)));
+
+      } // end loop over iCent
+
+    } // end loop over iDir
+
+  } // end loop over iPtJInt
+
+  inFile->Close ();
+  SaferDelete (&inFile);
+
+  return g;
+
+}
+
+
+
+
+TGAE**** GetJhIAAGAM () {
+
+  TGAE**** g = Get3DArray <TGAE*> (2, nDir, nZdcCentBins+1);
+
+  TFile* inFile = new TFile (Form ("%s/aux/ProcessUnfolding_AllJets_GAM.root", workPath.Data ()), "read");
+
+  for (short iPtJInt : {0, 1}) {
+
+    for (short iDir : {0, 2}) {
+
+      for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
+
+        const TString cent = (iCent == nZdcCentBins ? "allCent" : Form ("iCent%i", iCent));
+
+        g[iPtJInt][iDir][iCent] = make_graph ((TH1D*) inFile->Get (Form ("h_jetInt_trk_pt_%s_iaa_%s_data_%iGeV_Nominal", iDir == 0 ? "ns" : (iDir == 1 ? "perp" : "as"), cent.Data (), iPtJInt == 0 ? 30 : 60)));
+
+      } // end loop over iCent
+
+    } // end loop over iDir
+
+  } // end loop over iPtJInt
+
+  inFile->Close ();
+  SaferDelete (&inFile);
+
+  return g;
+
+}
+
+
+
 } // end namespace
 
 #endif

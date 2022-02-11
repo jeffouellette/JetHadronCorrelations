@@ -36,6 +36,8 @@ const bool makeSigSystPlots     = true;
 const bool makeIpPbSystPlots    = true;
 const bool makeCovariancePlots  = false;
 const bool DrawNoUnfold         = true;
+const bool DrawConstFit         = false;
+
 
 const float maxDataSyst = 20; // maximum y-axis for data-driven systematics
 const float maxMCSyst = 20; // maximum y-axis for MC-driven systematics
@@ -202,6 +204,11 @@ void PlotPtCh (const char* rawTag, const char* unfoldTag) {
   TGAE***** g_angantyr_iaa = GetPythiaAngantyrIpPb ();
   TH1D*** h_ampt_iaa = GetAMPTIpPb ();
   TGAE*** g_Zh_iaa = GetZHIAA ();
+
+
+  TGAE**** g_jh_iaa_GAM = GetJhIAAGAM ();
+  TGAE**** g_jh_pPb_unf_GAM = GetJhpPbYieldGAM ();
+  TGAE***  g_jh_ref_unf_GAM = GetJhRefYieldGAM ();
 
 
   {
@@ -373,6 +380,7 @@ void PlotPtCh (const char* rawTag, const char* unfoldTag) {
             h2_jetInt_trk_pt_cov_unf[iDType][iPtJInt][iDir][iCent]  = (TH2D*) inFile->Get (Form ("h2_jetInt_trk_pt_cov_%s_pPb_unf_%s_%s_%s", dir.Data (), cent.Data (), dType.Data (), pTJInt.Data ()));
 
             h_jetInt_trk_pt_iaa[iDType][iPtJInt][iDir][iCent]       = (TH1D*) inFile->Get (Form ("h_jetInt_trk_pt_%s_iaa_%s_%s_%s_Nominal",     dir.Data (), cent.Data (), dType.Data (), pTJInt.Data ()));
+
             h_jetInt_trk_pt_iaaNoUnf[iDType][iPtJInt][iDir][iCent]  = (TH1D*) inFile->Get (Form ("h_jetInt_trk_pt_%s_iaaNoUnf_%s_%s_%s_Nominal",  dir.Data (), cent.Data (), dType.Data (), pTJInt.Data ()));
 
           } // end loop over iDir
@@ -501,6 +509,9 @@ void PlotPtCh (const char* rawTag, const char* unfoldTag) {
 
       const TString pTJInt = (iPtJInt == 0 ? "30GeV" : "60GeV");
 
+      const bool hasRefBkg = (iDType != 1 && variationsWithNoppBkgd.count ("Nominal") == 0);
+      const bool hasBkg = (variationsWithNopPbBkgd.count ("Nominal") == 0);
+
       for (short iCent = 0; iCent < nZdcCentBins; iCent++) {
 
         const char* canvasName = Form ("c_jetInt_trk_pt_%s_iCent%i_%s", dType.Data (), iCent, pTJInt.Data ());
@@ -581,15 +592,17 @@ void PlotPtCh (const char* rawTag, const char* unfoldTag) {
         myDraw (g, myBlue, kFullCircle, 1.2);
         SaferDelete (&g);
 
-        //g = (TGAE*) g_jetInt_trk_pt_ref_bkg_syst[iPtJInt][0][0]->Clone ();
-        h = h_jetInt_trk_pt_ref_bkg[iDType][iPtJInt][0];
-        //SetCentralValuesKeepRelativeErrors (g, h);
-        //myDrawSyst (g, myPurple);
-        //SaferDelete (&g);
-        g = make_graph (h);
-        ResetXErrors (g);
-        myDraw (g, myPurple, kOpenCircle, 1.2);
-        SaferDelete (&g);
+        if (hasRefBkg) {
+          //g = (TGAE*) g_jetInt_trk_pt_ref_bkg_syst[iPtJInt][0][0]->Clone ();
+          h = h_jetInt_trk_pt_ref_bkg[iDType][iPtJInt][0];
+          //SetCentralValuesKeepRelativeErrors (g, h);
+          //myDrawSyst (g, myPurple);
+          //SaferDelete (&g);
+          g = make_graph (h);
+          ResetXErrors (g);
+          myDraw (g, myPurple, kOpenCircle, 1.2);
+          SaferDelete (&g);
+        }
 
         //g = (TGAE*) g_jetInt_trk_pt_syst[iPtJInt][0][iCent][0]->Clone ();
         h = h_jetInt_trk_pt[iDType][iPtJInt][0][iCent];
@@ -601,15 +614,17 @@ void PlotPtCh (const char* rawTag, const char* unfoldTag) {
         myDraw (g, myRed, kFullCircle, 1.2);
         SaferDelete (&g);
 
-        //g = (TGAE*) g_jetInt_trk_pt_bkg_syst[iPtJInt][0][iCent][0]->Clone ();
-        h = h_jetInt_trk_pt_bkg[iDType][iPtJInt][0][iCent];
-        //SetCentralValuesKeepRelativeErrors (g, h);
-        //myDrawSyst (g, myGreen);
-        //SaferDelete (&g);
-        g = make_graph (h);
-        ResetXErrors (g);
-        myDraw (g, myGreen, kOpenCircle, 1.2);
-        SaferDelete (&g);
+        if (hasBkg) {
+          //g = (TGAE*) g_jetInt_trk_pt_bkg_syst[iPtJInt][0][iCent][0]->Clone ();
+          h = h_jetInt_trk_pt_bkg[iDType][iPtJInt][0][iCent];
+          //SetCentralValuesKeepRelativeErrors (g, h);
+          //myDrawSyst (g, myGreen);
+          //SaferDelete (&g);
+          g = make_graph (h);
+          ResetXErrors (g);
+          myDraw (g, myGreen, kOpenCircle, 1.2);
+          SaferDelete (&g);
+        }
 
         myText (0.24, 0.12, kBlack, Form ("#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV, #bf{%s %i-%i%%}", iDType == 0 ? "ZDC" : "FCal", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.020/fuPad);
         myText (0.24, 0.06, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.020/fuPad);
@@ -647,15 +662,17 @@ void PlotPtCh (const char* rawTag, const char* unfoldTag) {
         myDraw (g, myBlue, kFullCircle, 1.2);
         SaferDelete (&g);
 
-        //g = (TGAE*) g_jetInt_trk_pt_ref_bkg_syst[iPtJInt][2][0]->Clone ();
-        h = h_jetInt_trk_pt_ref_bkg[iDType][iPtJInt][2];
-        //SetCentralValuesKeepRelativeErrors (g, h);
-        //myDrawSyst (g, myPurple);
-        //SaferDelete (&g);
-        g = make_graph (h);
-        ResetXErrors (g);
-        myDraw (g, myPurple, kOpenCircle, 1.2);
-        SaferDelete (&g);
+        if (hasRefBkg) {
+          //g = (TGAE*) g_jetInt_trk_pt_ref_bkg_syst[iPtJInt][2][0]->Clone ();
+          h = h_jetInt_trk_pt_ref_bkg[iDType][iPtJInt][2];
+          //SetCentralValuesKeepRelativeErrors (g, h);
+          //myDrawSyst (g, myPurple);
+          //SaferDelete (&g);
+          g = make_graph (h);
+          ResetXErrors (g);
+          myDraw (g, myPurple, kOpenCircle, 1.2);
+          SaferDelete (&g);
+        }
 
         //g = (TGAE*) g_jetInt_trk_pt_syst[iPtJInt][2][iCent][0]->Clone ();
         h = h_jetInt_trk_pt[iDType][iPtJInt][2][iCent];
@@ -667,15 +684,17 @@ void PlotPtCh (const char* rawTag, const char* unfoldTag) {
         myDraw (g, myRed, kFullCircle, 1.2);
         SaferDelete (&g);
 
-        //g = (TGAE*) g_jetInt_trk_pt_bkg_syst[iPtJInt][2][iCent][0]->Clone ();
-        h = h_jetInt_trk_pt_bkg[iDType][iPtJInt][2][iCent];
-        //SetCentralValuesKeepRelativeErrors (g, h);
-        //myDrawSyst (g, myGreen);
-        //SaferDelete (&g);
-        g = make_graph (h);
-        ResetXErrors (g);
-        myDraw (g, myGreen, kOpenCircle, 1.2);
-        SaferDelete (&g);
+        if (hasBkg) {
+          //g = (TGAE*) g_jetInt_trk_pt_bkg_syst[iPtJInt][2][iCent][0]->Clone ();
+          h = h_jetInt_trk_pt_bkg[iDType][iPtJInt][2][iCent];
+          //SetCentralValuesKeepRelativeErrors (g, h);
+          //myDrawSyst (g, myGreen);
+          //SaferDelete (&g);
+          g = make_graph (h);
+          ResetXErrors (g);
+          myDraw (g, myGreen, kOpenCircle, 1.2);
+          SaferDelete (&g);
+        }
 
         if (iDType == 0) myText (0.58, 0.78, kBlack, "#bf{#it{ATLAS}} Internal", 0.022/fuPad);
         else {
@@ -1855,7 +1874,8 @@ void PlotPtCh (const char* rawTag, const char* unfoldTag) {
 
         h = (TH1D*) h_jetInt_trk_pt_ref_unf[0][iPtJInt][iDir]->Clone ("htemp");
         h->Scale (std::pow (10, 2-iCent));
-        myDrawHist (h, kBlack, 1, 3);
+        //myDrawHist (h, kBlack, 1, 3);
+        myDraw (h, kBlack, kDot, 0, 1, 3);
         SaferDelete (&h);
 
         g = (TGAE*) g_jetInt_trk_pt_unf_syst[iPtJInt][iDir][iCent][0]->Clone ();
@@ -1932,7 +1952,8 @@ void PlotPtCh (const char* rawTag, const char* unfoldTag) {
         if (iDir == 1)
           TrimGraph (g, 0, 10);
         RecenterGraph (g);
-        myDrawSystFill (g, colorfulSystColors[nZdcCentBins-iCent], 0.8, 1001);
+        //TGAE* gstat = (TGAE*) g->Clone ("gstat");
+        myDrawSystFill (g, colorfulSystColors[nZdcCentBins-iCent], 0.6, 1001);
         SaferDelete (&g);
 
         g = make_graph (h);
@@ -1942,6 +1963,20 @@ void PlotPtCh (const char* rawTag, const char* unfoldTag) {
         ResetXErrors (g);
         myDraw (g, colorfulColors[nZdcCentBins-iCent], kFullCircle, 1.0, 1, 2, "P", false);
         SaferDelete (&g);
+
+        TF1* cfit = nullptr;
+        if (DrawConstFit) {
+          TF1* cfit = new TF1 ("cfit", "[0]", 6, iPtJInt == 0 ? 30 : 60);
+          cfit->SetParameter (0, 1);
+          h_jetInt_trk_pt_iaa[0][iPtJInt][iDir][iCent]->Fit (cfit, "RN0Q");
+          cfit->SetLineColor (colorfulColors[nZdcCentBins-iCent]);
+          cfit->SetLineStyle (2);
+          cfit->SetLineWidth (2);
+          ((TF1*) cfit->Clone ())->Draw ("same");
+          myText (0.56, 0.22, colorfulColors[nZdcCentBins-iCent], Form ("#chi^{2}/dof = %.2f / %i", cfit->GetChisquare (), cfit->GetNDF ()), 0.05); 
+          //SaferDelete (&cfit);
+        }
+        //SaferDelete (&gstat);
 
 
         if (DrawNoUnfold) {
@@ -1985,6 +2020,300 @@ void PlotPtCh (const char* rawTag, const char* unfoldTag) {
 
 
 
+
+  for (short iPtJInt : {0, 1}) {
+ 
+    const TString pTJInt = (iPtJInt == 0 ? "30GeV" : "60GeV");
+
+    //for (short iDir : {0, 1, 2}) {
+    for (short iDir : {0, 2}) {
+
+      const char* canvasName = Form ("c_jetInt_trk_pt_yield_GAM_comp_iDir%i_%s", iDir, pTJInt.Data ());
+      TCanvas* c = new TCanvas (canvasName, "", 1400, 700);
+      c->Divide (4, 2);
+
+      TGAE* g = nullptr;
+      TH1D* h = nullptr;
+
+      l->SetLineStyle (2);
+      l->SetLineWidth (2);
+      l->SetLineColor (kBlack);
+
+      {
+        c->cd (7);
+
+        gPad->SetLogx();
+
+        TH1D* h = new TH1D ("h", ";#it{p}_{T}^{ch} [GeV];Y(#it{p}_{T}^{ch}) Now / at GAM", 1, pTChBins[1], iDir == 1 ? 10 : pTChBins[nPtChBins-(iPtJInt == 0 ? 3 : 1)]);//pTChBins[nPtChBins]);
+        h->GetXaxis ()->SetMoreLogLabels ();
+        h->GetYaxis ()->SetRangeUser ((iPtJInt == 0 ? 0.61 : 0.74), (iPtJInt == 0 ? 1.6 : 1.45));
+        //h->GetYaxis ()->SetRangeUser (0.0, 3);
+        h->SetBinContent (1, 1);
+        h->SetLineStyle (2);
+        h->SetLineWidth (2);
+        h->SetLineColor (kBlack);
+        h->DrawCopy ("hist ][");
+        SaferDelete (&h);
+
+        TGAE* g = (TGAE*) g_jetInt_trk_pt_ref_unf_syst[iPtJInt][iDir][0]->Clone ();
+        h = h_jetInt_trk_pt_ref_unf[0][iPtJInt][iDir];
+        SetCentralValuesKeepRelativeErrors (g, h);
+        ScaleByGraph (g, g_jh_ref_unf_GAM[iPtJInt][iDir]);
+        if (iDir == 1)
+          TrimGraph (g, 0, 10);
+        RecenterGraph (g);
+        myDrawSystFill (g, colorfulSystColors[nZdcCentBins+1], 0.6, 1001);
+        SaferDelete (&g);
+
+        g = make_graph (h);
+        ScaleByGraph (g, g_jh_ref_unf_GAM[iPtJInt][iDir]);
+        if (iDir == 1)
+          TrimGraph (g, 0, 10);
+        RecenterGraph (g);
+        ResetXErrors (g);
+        myDraw (g, colorfulColors[nZdcCentBins+1], kFullCircle, 1.0, 1, 2, "P", false);
+        SaferDelete (&g);
+
+        myText (0.2, 0.865, colorfulColors[nZdcCentBins+1], "#bf{#it{pp}}", 0.05);
+      }
+
+
+      for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
+        c->cd (nZdcCentBins+1-iCent);
+
+        gPad->SetLogx();
+
+        TH1D* h = new TH1D ("h", ";#it{p}_{T}^{ch} [GeV];Y(#it{p}_{T}^{ch}) Now / at GAM", 1, pTChBins[1], iDir == 1 ? 10 : pTChBins[nPtChBins-(iPtJInt == 0 ? 3 : 1)]);//pTChBins[nPtChBins]);
+        h->GetXaxis ()->SetMoreLogLabels ();
+        h->GetYaxis ()->SetRangeUser ((iPtJInt == 0 ? 0.61 : 0.74), (iPtJInt == 0 ? 1.6 : 1.45));
+        //h->GetYaxis ()->SetRangeUser (0.0, 3);
+        h->SetBinContent (1, 1);
+        h->SetLineStyle (2);
+        h->SetLineWidth (2);
+        h->SetLineColor (kBlack);
+        h->DrawCopy ("hist ][");
+        SaferDelete (&h);
+
+        TGAE* g = (TGAE*) g_jetInt_trk_pt_unf_syst[iPtJInt][iDir][iCent][0]->Clone ();
+        h = h_jetInt_trk_pt_unf[0][iPtJInt][iDir][iCent];
+        SetCentralValuesKeepRelativeErrors (g, h);
+        ScaleByGraph (g, g_jh_pPb_unf_GAM[iPtJInt][iDir][iCent]);
+        if (iDir == 1)
+          TrimGraph (g, 0, 10);
+        RecenterGraph (g);
+        myDrawSystFill (g, colorfulSystColors[nZdcCentBins-iCent], 0.6, 1001);
+        SaferDelete (&g);
+
+        g = make_graph (h);
+        ScaleByGraph (g, g_jh_pPb_unf_GAM[iPtJInt][iDir][iCent]);
+        if (iDir == 1)
+          TrimGraph (g, 0, 10);
+        RecenterGraph (g);
+        ResetXErrors (g);
+        myDraw (g, colorfulColors[nZdcCentBins-iCent], kFullCircle, 1.0, 1, 2, "P", false);
+        SaferDelete (&g);
+
+        if (iCent < nZdcCentBins)
+          myText (0.2, 0.865, colorfulColors[nZdcCentBins-iCent], Form ("#bf{#it{p}+Pb, ZDC %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.05);
+        else
+          myText (0.2, 0.865, colorfulColors[0], "#bf{#it{p}+Pb, 0-100%}", 0.05);
+
+      } // end loop over iCent
+
+      c->cd (8);
+      myText (0.1, 0.93, kBlack, "#bf{#it{ATLAS}} Internal", 0.07);
+      myText (0.1, 0.84, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.07);
+      myText (0.1, 0.75, kBlack, "#it{p}+Pb, #sqrt{s} = 5.02 TeV", 0.07);
+      myText (0.1, 0.66, kBlack, Form ("#it{p}_{T}^{jet} > %i GeV", iPtJInt == 0 ? 30 : 60), 0.07);
+      myText (0.1, 0.57, kBlack, Form ("#Delta#phi_{ch,jet} %s", directions[iDir] == "ns" ? "< #pi/8" : (directions[iDir] == "as" ? "> 7#pi/8" : "#in (#pi/3, 2#pi/3)")), 0.07);
+
+      c->SaveAs (Form ("%s/Plots/PtCh/Yield_GAM_Comparison_%iGeVJets_%s.pdf", workPath.Data (), iPtJInt == 0 ? 30 : 60, directions[iDir] == "ns" ? "nearside" : (directions[iDir] == "as" ? "awayside" : "perpendicular")));
+
+    } // end loop over iDir
+
+  } // end loop over iPtJInt
+
+
+
+
+  for (short iPtJInt : {0, 1}) {
+
+    const TString pTJInt = (iPtJInt == 0 ? "30GeV" : "60GeV");
+
+    for (short iDir : {0, 2}) {
+      const char* canvasName = Form ("c_jetInt_trk_pt_IpPb_GAM_Ratio_iDir%i_%s", iDir, pTJInt.Data ());
+      TCanvas* c = new TCanvas (canvasName, "", 1200, 800);
+      c->Divide (3, 2);
+
+      for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
+        c->cd (nZdcCentBins+1-iCent);
+
+        gPad->SetLogx ();
+
+        TH1D* h = new TH1D ("h", ";#it{p}_{T}^{ch} [GeV];#it{I}_{#it{p}Pb} Now / at GAM", 1, pTChBins[1], iDir == 1 ? 10 : pTChBins[nPtChBins-(iPtJInt == 0 ? 3 : 1)]);//pTChBins[nPtChBins]);
+        h->GetXaxis ()->SetMoreLogLabels ();
+        h->GetYaxis ()->SetRangeUser (0.74, 1.4);
+        //h->GetYaxis ()->SetRangeUser (0.0, 3);
+        h->SetBinContent (1, 1);
+        h->SetLineStyle (2);
+        h->SetLineWidth (2);
+        h->SetLineColor (kBlack);
+        h->DrawCopy ("hist ][");
+        SaferDelete (&h);
+
+        double x, y;
+
+        TGAE* g = (TGAE*) g_jetInt_trk_pt_iaa_syst[iPtJInt][iDir][iCent][0]->Clone ();
+        h = h_jetInt_trk_pt_iaa[0][iPtJInt][iDir][iCent];
+        //h = h_jetInt_trk_pt_iaa_syst[iPtJInt][iDir][iCent][iMCTruthJetsTruthParts];
+        SetCentralValuesKeepRelativeErrors (g, h);
+        ScaleByGraph (g, g_jh_iaa_GAM[iPtJInt][iDir][iCent]);
+        if (iDir == 1)
+          TrimGraph (g, 0, 10);
+        RecenterGraph (g);
+        //TGAE* gstat = (TGAE*) g->Clone ("gstat");
+        myDrawSystFill (g, colorfulSystColors[nZdcCentBins-iCent], 0.6, 1001);
+        SaferDelete (&g);
+
+        g = make_graph (h);
+        ScaleByGraph (g, g_jh_iaa_GAM[iPtJInt][iDir][iCent]);
+        if (iDir == 1)
+          TrimGraph (g, 0, 10);
+        RecenterGraph (g);
+        ResetXErrors (g);
+        myDraw (g, colorfulColors[nZdcCentBins-iCent], kFullCircle, 1.0, 1, 2, "P", false);
+        SaferDelete (&g);
+
+        //g = g_jh_iaa_GAM[iPtJInt][iDir][iCent];
+        //ResetXErrors (g);
+        //if (iDir == 1)
+        //  TrimGraph (g, 0, 10);
+        //RecenterGraph (g);
+        //myDraw (g, colorfulColors[nZdcCentBins-iCent], kOpenCircle, 1.0, 1, 2, "P", false);
+        //SaferDelete (&g);
+
+        if (iCent < nZdcCentBins)
+          myText (0.2, 0.865, colorfulColors[nZdcCentBins-iCent], Form ("#bf{#it{p}+Pb, ZDC %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.05);
+        else
+          myText (0.2, 0.865, colorfulColors[0], "#bf{#it{p}+Pb, 0-100%}", 0.05);
+
+      } // end loop over iCent
+
+      c->cd ();
+      myText (0.065, 0.971, kBlack, "#bf{#it{ATLAS}} Internal", 0.027);
+  
+      c->cd (1);
+      myText (0.2, 0.80, kBlack, "#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV", 0.05);
+      myText (0.2, 0.74, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.05);
+      c->cd (2);
+      myText (0.2, 0.80, kBlack, Form ("#it{p}_{T}^{jet} > %i GeV", iPtJInt == 0 ? 30 : 60), 0.05);
+      myText (0.2, 0.74, kBlack, Form ("#Delta#phi_{ch,jet} %s", directions[iDir] == "ns" ? "< #pi/8" : (directions[iDir] == "as" ? "> 7#pi/8" : "#in (#pi/3, 2#pi/3)")), 0.05);
+
+      //if (DrawNoUnfold) {
+      //  c->cd (3);
+      //  myLineText2 (0.26, 0.80, kBlack, kFullCircle, "Current", 1.2, 0.05);
+      //  myLineText2 (0.26, 0.74, kBlack, kOpenCircle, "GAM", 1.2, 0.05);
+      //}
+
+      c->SaveAs (Form ("%s/Plots/PtCh/IpPb_GAM_Ratio_%iGeVJets_%s.pdf", workPath.Data (), iPtJInt == 0 ? 30 : 60, directions[iDir] == "ns" ? "nearside" : (directions[iDir] == "as" ? "awayside" : "perpendicular")));
+    } // end loop over iDir
+  } // end loop over iPtJInt
+
+
+
+
+  for (short iPtJInt : {0, 1}) {
+
+    const TString pTJInt = (iPtJInt == 0 ? "30GeV" : "60GeV");
+
+    for (short iDir : {0, 2}) {
+      const char* canvasName = Form ("c_jetInt_trk_pt_IpPb_GAM_Comparison_iDir%i_%s", iDir, pTJInt.Data ());
+      TCanvas* c = new TCanvas (canvasName, "", 1200, 800);
+      c->Divide (3, 2);
+
+      for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
+        c->cd (nZdcCentBins+1-iCent);
+
+        gPad->SetLogx ();
+
+        TH1D* h = new TH1D ("h", ";#it{p}_{T}^{ch} [GeV];#it{I}_{#it{p}Pb}", 1, pTChBins[1], iDir == 1 ? 10 : pTChBins[nPtChBins-(iPtJInt == 0 ? 3 : 1)]);//pTChBins[nPtChBins]);
+        h->GetXaxis ()->SetMoreLogLabels ();
+        h->GetYaxis ()->SetRangeUser (0.74, 1.4);
+        //h->GetYaxis ()->SetRangeUser (0.0, 3);
+        h->SetBinContent (1, 1);
+        h->SetLineStyle (2);
+        h->SetLineWidth (2);
+        h->SetLineColor (kBlack);
+        h->DrawCopy ("hist ][");
+        SaferDelete (&h);
+
+        double x, y;
+
+        TGAE* g = (TGAE*) g_jetInt_trk_pt_iaa_syst[iPtJInt][iDir][iCent][0]->Clone ();
+        h = h_jetInt_trk_pt_iaa[0][iPtJInt][iDir][iCent];
+        //h = h_jetInt_trk_pt_iaa_syst[iPtJInt][iDir][iCent][iMCTruthJetsTruthParts];
+        SetCentralValuesKeepRelativeErrors (g, h);
+        if (iDir == 1)
+          TrimGraph (g, 0, 10);
+        RecenterGraph (g);
+        //TGAE* gstat = (TGAE*) g->Clone ("gstat");
+        myDrawSystFill (g, colorfulSystColors[nZdcCentBins-iCent], 0.6, 1001);
+        SaferDelete (&g);
+
+        g = make_graph (h);
+        if (iDir == 1)
+          TrimGraph (g, 0, 10);
+        RecenterGraph (g);
+        ResetXErrors (g);
+        myDraw (g, colorfulColors[nZdcCentBins-iCent], kFullCircle, 1.0, 1, 2, "P", false);
+        SaferDelete (&g);
+
+        g = g_jh_iaa_GAM[iPtJInt][iDir][iCent];
+        ResetXErrors (g);
+        if (iDir == 1)
+          TrimGraph (g, 0, 10);
+        RecenterGraph (g);
+        myDraw (g, colorfulColors[nZdcCentBins-iCent], kOpenCircle, 1.0, 1, 2, "P", false);
+        SaferDelete (&g);
+
+        h = h_jetInt_trk_pt_iaaNoUnf[0][iPtJInt][iDir][iCent];
+        g = make_graph (h);
+        ResetXErrors (g);
+        if (iDir == 1)
+          TrimGraph (g, 0, 10);
+        RecenterGraph (g);
+        myDraw (g, colorfulColors[nZdcCentBins-iCent], kOpenTriangleUp, 1.0, 1, 2, "P", false);
+        SaferDelete (&g);
+
+        if (iCent < nZdcCentBins)
+          myText (0.2, 0.865, colorfulColors[nZdcCentBins-iCent], Form ("#bf{#it{p}+Pb, ZDC %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.05);
+        else
+          myText (0.2, 0.865, colorfulColors[0], "#bf{#it{p}+Pb, 0-100%}", 0.05);
+
+      } // end loop over iCent
+
+      c->cd ();
+      myText (0.065, 0.971, kBlack, "#bf{#it{ATLAS}} Internal", 0.027);
+  
+      c->cd (1);
+      myText (0.2, 0.80, kBlack, "#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV", 0.05);
+      myText (0.2, 0.74, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.05);
+      c->cd (2);
+      myText (0.2, 0.80, kBlack, Form ("#it{p}_{T}^{jet} > %i GeV", iPtJInt == 0 ? 30 : 60), 0.05);
+      myText (0.2, 0.74, kBlack, Form ("#Delta#phi_{ch,jet} %s", directions[iDir] == "ns" ? "< #pi/8" : (directions[iDir] == "as" ? "> 7#pi/8" : "#in (#pi/3, 2#pi/3)")), 0.05);
+
+      c->cd (3);
+      myLineText2 (0.26, 0.80, kBlack, kFullCircle, "Current", 1.2, 0.05);
+      myLineText2 (0.26, 0.74, kBlack, kOpenCircle, "GAM", 1.2, 0.05);
+      myLineText2 (0.26, 0.68, kBlack, kOpenTriangleUp, "Current, no unfold", 1.2, 0.05);
+
+      c->SaveAs (Form ("%s/Plots/PtCh/IpPb_GAM_Comparison_%iGeVJets_%s.pdf", workPath.Data (), iPtJInt == 0 ? 30 : 60, directions[iDir] == "ns" ? "nearside" : (directions[iDir] == "as" ? "awayside" : "perpendicular")));
+    } // end loop over iDir
+  } // end loop over iPtJInt
+
+
+
+
   for (short iPtJInt : {0, 1}) {
   //{
     //const short iPtJInt = 1;
@@ -2022,7 +2351,7 @@ void PlotPtCh (const char* rawTag, const char* unfoldTag) {
         if (iDir == 1)
           TrimGraph (g, 0, 10);
         RecenterGraph (g);
-        myDrawSystFill (g, colorfulSystColors[nZdcCentBins-iCent], 0.8, 1001);
+        myDrawSystFill (g, colorfulSystColors[nZdcCentBins-iCent], 0.6, 1001);
         SaferDelete (&g);
 
         g = make_graph (h);
@@ -2115,7 +2444,7 @@ void PlotPtCh (const char* rawTag, const char* unfoldTag) {
         //h = h_jetInt_trk_pt_iaa_syst[iPtJInt][iDir][iCent][iMCTruthJetsTruthParts];
         SetCentralValuesKeepRelativeErrors (g, h);
         RecenterGraph (g);
-        myDrawSystFill (g, colorfulSystColors[nZdcCentBins-iCent], 0.8, 1001);
+        myDrawSystFill (g, colorfulSystColors[nZdcCentBins-iCent], 0.6, 1001);
         SaferDelete (&g);
 
         g = make_graph (h);
@@ -2194,7 +2523,7 @@ void PlotPtCh (const char* rawTag, const char* unfoldTag) {
         //h = h_jetInt_trk_pt_iaa_syst[iPtJInt][iDir][iCent][iMCTruthJetsTruthParts];
         SetCentralValuesKeepRelativeErrors (g, h);
         RecenterGraph (g);
-        myDrawSystFill (g, colorfulSystColors[nZdcCentBins-iCent], 0.8, 1001);
+        myDrawSystFill (g, colorfulSystColors[nZdcCentBins-iCent], 0.6, 1001);
         SaferDelete (&g);
 
         g = make_graph (h);
@@ -2273,7 +2602,7 @@ void PlotPtCh (const char* rawTag, const char* unfoldTag) {
         //h = h_jetInt_trk_pt_iaa_syst[iPtJInt][iDir][iCent][iMCTruthJetsTruthParts];
         SetCentralValuesKeepRelativeErrors (g, h);
         RecenterGraph (g);
-        myDrawSystFill (g, colorfulSystColors[nZdcCentBins-iCent], 0.8, 1001);
+        myDrawSystFill (g, colorfulSystColors[nZdcCentBins-iCent], 0.6, 1001);
         SaferDelete (&g);
 
         g = make_graph (h);
@@ -2342,7 +2671,7 @@ void PlotPtCh (const char* rawTag, const char* unfoldTag) {
         SetCentralValuesKeepRelativeErrors (g, h);
         TrimGraph (g, 4, 90);
         RecenterGraph (g);
-        myDrawSystFill (g, colorfulSystColors[nZdcCentBins-iCent], 0.8, 1001);
+        myDrawSystFill (g, colorfulSystColors[nZdcCentBins-iCent], 0.6, 1001);
         SaferDelete (&g);
 
         g = make_graph (h);

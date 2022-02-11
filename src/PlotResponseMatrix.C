@@ -66,7 +66,7 @@ TF1* DoClosureFit (const TString name, TH1D* h, const float xmin, const float xm
 }
 
 
-void PlotResponseMatrix () {
+void PlotResponseMatrix (const bool doPrimTracksOnly = false) {
 
   //const double pTJBins[] = {20, 30, 45, 60, 80, 100, 130, 160, 200, 240, 320};
   //const short nPtJBins = sizeof (pTJBins) / sizeof (pTJBins[0]) - 1;
@@ -120,18 +120,25 @@ void PlotResponseMatrix () {
 
   // unfolded UE subtracted particle yield histograms
   TH2D****      h2_jet_trk_pt_ref_sig_unf         = Get3DArray <TH2D*> (2, nDir, max2DIters);
+  TH2D****      h2_jet_trk_pt_ref_sig_rfld        = Get3DArray <TH2D*> (2, nDir, max2DIters);
   TH2D*****     h2_jet_trk_pt_sig_unf             = Get4DArray <TH2D*> (2, nDir, nFcalCentBins+1, max2DIters);
+  TH2D*****     h2_jet_trk_pt_sig_rfld            = Get4DArray <TH2D*> (2, nDir, nFcalCentBins+1, max2DIters);
+
   TH1D*****     h_jet_trk_pt_ref_sig_unf          = Get4DArray <TH1D*> (2, nPtJBins, nDir, max2DIters);
   TH1D******    h_jet_trk_pt_sig_unf              = Get5DArray <TH1D*> (2, nPtJBins, nDir, nFcalCentBins+1, max2DIters);
+
   TH1D*****     h_jetInt_trk_pt_ref_sig_unf       = Get4DArray <TH1D*> (2, 2, nDir, max2DIters);
+  TH1D*****     h_jetInt_trk_pt_ref_sig_rfld      = Get4DArray <TH1D*> (2, 2, nDir, max2DIters);
   TH1D******    h_jetInt_trk_pt_sig_unf           = Get5DArray <TH1D*> (2, 2, nDir, nFcalCentBins+1, max2DIters);
+  TH1D******    h_jetInt_trk_pt_sig_rfld          = Get5DArray <TH1D*> (2, 2, nDir, nFcalCentBins+1, max2DIters);
   TH1D******    h_jetInt_trk_pt_iaa_unf           = Get5DArray <TH1D*> (2, 2, nDir, nFcalCentBins+1, max2DIters);
+  TH1D******    h_jetInt_trk_pt_iaa_rfld          = Get5DArray <TH1D*> (2, 2, nDir, nFcalCentBins+1, max2DIters);
 
 
-  RooUnfoldResponse**   rooUnfResp_jet_pt_ref         = Get1DArray <RooUnfoldResponse*> (2);
-  RooUnfoldResponse***  rooUnfResp_jet_pt             = Get2DArray <RooUnfoldResponse*> (2, nFcalCentBins+1);
-  RooUnfoldResponse***  rooUnfResp_jet_trk_pt_ref_sig = Get2DArray <RooUnfoldResponse*> (2, nDir);
-  RooUnfoldResponse**** rooUnfResp_jet_trk_pt_sig     = Get3DArray <RooUnfoldResponse*> (2, nDir, nFcalCentBins+1);
+  RooUnfoldResponse**   rooUnfResp_jet_pt_ref         = Get1DArray <RooUnfoldResponse*> (3);
+  RooUnfoldResponse***  rooUnfResp_jet_pt             = Get2DArray <RooUnfoldResponse*> (3, nFcalCentBins+1);
+  RooUnfoldResponse***  rooUnfResp_jet_trk_pt_ref_sig = Get2DArray <RooUnfoldResponse*> (3, nDir);
+  RooUnfoldResponse**** rooUnfResp_jet_trk_pt_sig     = Get3DArray <RooUnfoldResponse*> (3, nDir, nFcalCentBins+1);
 
 
   TH1D***   h_jetInt_trk_pt_ref_sig_unf_fullClosure = Get2DArray <TH1D*> (2, nDir);
@@ -146,8 +153,7 @@ void PlotResponseMatrix () {
 
 
   {
-    TFile* inFile = new TFile (Form ("%s/MakeResponseMatrix/Nominal/allSamples.root", rootPath.Data ()), "read");
-    //TFile* inFile = new TFile (Form ("%s/MakeResponseMatrix/Nominal/allSamples_primTracksOnly.root", rootPath.Data ()), "read");
+    TFile* inFile = new TFile (Form ("%s/MakeResponseMatrix/%s/allSamples.root", rootPath.Data (), doPrimTracksOnly ? "MCRecoJetsTruthMatchedParts" : "Nominal"), "read");
 
     
     //////////////////////////////////////////////////////////////////////////////////////////////////// 
@@ -225,17 +231,18 @@ void PlotResponseMatrix () {
     //////////////////////////////////////////////////////////////////////////////////////////////////// 
     // LOAD HALF-CLOSURE RESPONSE MATRICES
     //////////////////////////////////////////////////////////////////////////////////////////////////// 
-    for (short iEvFrac : {0, 1}) {
+    for (short iEvFrac : {0, 1, 2}) {
 
-      const TString evFrac = (iEvFrac == 0 ? "half" : "full");
+      const TString evFrac = (iEvFrac == 0 ? "halfClosure" : (iEvFrac == 1 ? "fullClosure" : "wgts"));
 
-      rooUnfResp_jet_pt_ref[iEvFrac] = (RooUnfoldResponse*) inFile->Get (Form ("rooUnfResp_jet_pt_ref_mc_%sClosure", evFrac.Data ()));
+      rooUnfResp_jet_pt_ref[iEvFrac] = (RooUnfoldResponse*) inFile->Get (Form ("rooUnfResp_jet_pt_ref_mc_%s", evFrac.Data ()));
 
       for (short iDir = 0; iDir < nDir; iDir++) {
 
         const TString dir = directions[iDir];
 
-        rooUnfResp_jet_trk_pt_ref_sig[iEvFrac][iDir] = (RooUnfoldResponse*) inFile->Get (Form ("rooUnfResp_jet_trk_pt_%s_ref_sig_mc_%sClosure", dir.Data (), evFrac.Data ()));
+        rooUnfResp_jet_trk_pt_ref_sig[iEvFrac][iDir] = (RooUnfoldResponse*) inFile->Get (Form ("rooUnfResp_jet_trk_pt_%s_ref_sig_mc_%s", dir.Data (), evFrac.Data ()));
+        //rooUnfResp_jet_trk_pt_ref_sig[iEvFrac][iDir] = (RooUnfoldResponse*) inFile->Get (Form ("rooUnfResp_jet_trk_pt_%s_ref_sig_mc_wgts", dir.Data ()));
 
       } // end loop over iDir
 
@@ -243,13 +250,14 @@ void PlotResponseMatrix () {
 
         const char* cent = (iCent == nFcalCentBins ? "pPb_allCent" : Form ("pPb_iCent%i", iCent));
 
-        rooUnfResp_jet_pt[iEvFrac][iCent] = (RooUnfoldResponse*) inFile->Get (Form ("rooUnfResp_jet_pt_%s_mc_%sClosure", cent, evFrac.Data ()));
+        rooUnfResp_jet_pt[iEvFrac][iCent] = (RooUnfoldResponse*) inFile->Get (Form ("rooUnfResp_jet_pt_%s_mc_%s", cent, evFrac.Data ()));
 
         for (short iDir = 0; iDir < nDir; iDir++) {
 
           const TString dir = directions[iDir];
 
-          rooUnfResp_jet_trk_pt_sig[iEvFrac][iDir][iCent] = (RooUnfoldResponse*) inFile->Get (Form ("rooUnfResp_jet_trk_pt_%s_%s_sig_mc_%sClosure", dir.Data (), cent, evFrac.Data ()));
+          rooUnfResp_jet_trk_pt_sig[iEvFrac][iDir][iCent] = (RooUnfoldResponse*) inFile->Get (Form ("rooUnfResp_jet_trk_pt_%s_%s_sig_mc_%s", dir.Data (), cent, evFrac.Data ()));
+          //rooUnfResp_jet_trk_pt_sig[iEvFrac][iDir][iCent] = (RooUnfoldResponse*) inFile->Get (Form ("rooUnfResp_jet_trk_pt_%s_%s_sig_mc_wgts", dir.Data (), cent));
 
         } // end loop over iFile
 
@@ -424,10 +432,13 @@ void PlotResponseMatrix () {
     
             for (short iPtChX = 1; iPtChX <= nPtChBins; iPtChX++) {
 
-              //h2sig->SetBinContent (iPtChX, iPtJY, h2tot->GetBinContent (iPtChX, iPtJY));
-              //h2sig->SetBinError   (iPtChX, iPtJY, h2tot->GetBinError (iPtChX, iPtJY));
-              h2sig->SetBinContent (iPtChX, iPtJY, h2tot->GetBinContent (iPtChX, iPtJY) - (iVar == 0 ? nJetSF * hbkg->GetBinContent (iPtChX) * hbkg->GetBinWidth (iPtChX) : 0));
-              h2sig->SetBinError   (iPtChX, iPtJY, std::hypot (h2tot->GetBinError (iPtChX, iPtJY), (iVar == 0 ? nJetSF * hbkg->GetBinError (iPtChX) * hbkg->GetBinWidth (iPtChX) : 0)));
+              if (doPrimTracksOnly) {
+                h2sig->SetBinContent (iPtChX, iPtJY, h2tot->GetBinContent (iPtChX, iPtJY));
+                h2sig->SetBinError   (iPtChX, iPtJY, h2tot->GetBinError (iPtChX, iPtJY));
+              } else {
+                h2sig->SetBinContent (iPtChX, iPtJY, h2tot->GetBinContent (iPtChX, iPtJY) - (iVar == 0 ? nJetSF * hbkg->GetBinContent (iPtChX) * hbkg->GetBinWidth (iPtChX) : 0));
+                h2sig->SetBinError   (iPtChX, iPtJY, std::hypot (h2tot->GetBinError (iPtChX, iPtJY), (iVar == 0 ? nJetSF * hbkg->GetBinError (iPtChX) * hbkg->GetBinWidth (iPtChX) : 0)));
+              }
     
             } // end loop over iPtChY
     
@@ -509,7 +520,7 @@ void PlotResponseMatrix () {
 
         const char* cent = (iCent == nFcalCentBins ? "pPb_allCent" : Form ("pPb_iCent%i", iCent));
 
-        const short iUnfCent = iCent;//nZdcCentBins;
+        const short iUnfCent = iCent;
 
         bayesUnf = new RooUnfoldBayes (rooUnfResp_jet_pt[iEvFrac][iUnfCent], h_jet_pt[iEvFrac][iCent][0], nIter+1);
         bayesUnf->SetVerbose (-1);
@@ -551,7 +562,7 @@ void PlotResponseMatrix () {
     
           const char* cent = (iCent == nFcalCentBins ? "pPb_allCent" : Form ("pPb_iCent%i", iCent));
 
-          const short iUnfCent = iCent;//nZdcCentBins;
+          const short iUnfCent = iCent;
 
           bayesUnf = new RooUnfoldBayes (rooUnfResp_jet_trk_pt_sig[iEvFrac][iDir][iUnfCent], h2_jet_trk_pt_sig[iEvFrac][iDir][iCent][0], nIter+1);
           bayesUnf->SetVerbose (-1);
@@ -1690,7 +1701,7 @@ void PlotResponseMatrix () {
 
       c->SetLogz ();
 
-      TH2D* h2 = (TH2D*) rooUnfResp_jet_trk_pt_ref_sig[1][iDir]->HresponseNoOverflow ()->Clone ("htemp");
+      TH2D* h2 = (TH2D*) rooUnfResp_jet_trk_pt_ref_sig[2][iDir]->HresponseNoOverflow ()->Clone ("htemp");
 
       TAxis* xax = h2->GetXaxis ();
       TAxis* yax = h2->GetYaxis ();
@@ -1811,7 +1822,7 @@ void PlotResponseMatrix () {
 
         c->SetLogz ();
 
-        TH2D* h2 = (TH2D*) rooUnfResp_jet_trk_pt_sig[1][iDir][iCent]->HresponseNoOverflow ()->Clone ("htemp");
+        TH2D* h2 = (TH2D*) rooUnfResp_jet_trk_pt_sig[2][iDir][iCent]->HresponseNoOverflow ()->Clone ("htemp");
 
         TAxis* xax = h2->GetXaxis ();
         TAxis* yax = h2->GetYaxis ();
@@ -1931,7 +1942,7 @@ void PlotResponseMatrix () {
       c->SetLogy ();
       c->SetLogz ();
 
-      TH2D* h2 = (TH2D*) rooUnfResp_jet_pt_ref[1]->HresponseNoOverflow ()->Clone ("htemp");
+      TH2D* h2 = (TH2D*) rooUnfResp_jet_pt_ref[2]->HresponseNoOverflow ()->Clone ("htemp");
 
       TAxis* xax = h2->GetXaxis ();
       TAxis* yax = h2->GetYaxis ();
@@ -2018,7 +2029,7 @@ void PlotResponseMatrix () {
       c->SetLogy ();
       c->SetLogz ();
 
-      TH2D* h2 = (TH2D*) rooUnfResp_jet_pt[1][iCent]->HresponseNoOverflow ()->Clone ("htemp");
+      TH2D* h2 = (TH2D*) rooUnfResp_jet_pt[2][iCent]->HresponseNoOverflow ()->Clone ("htemp");
 
       TAxis* xax = h2->GetXaxis ();
       TAxis* yax = h2->GetYaxis ();
