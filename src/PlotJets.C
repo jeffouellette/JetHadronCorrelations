@@ -40,9 +40,9 @@ void PlotJets (const char* tag, const char* inFileTag) {
   TFile* inFile = nullptr;
 
   TH1D***  h_evt_counts_ref     = Get2DArray <TH1D*> (2, nVar);
-  TH1D****  h_jet_counts_ref     = Get3DArray <TH1D*> (2, nPtJBins, nVar);
+  //TH1D****  h_jet_counts_ref     = Get3DArray <TH1D*> (2, nPtJBins, nVar);
   TH1D**** h_evt_counts         = Get3DArray <TH1D*> (2, nZdcCentBins+1, nVar);
-  TH1D***** h_jet_counts         = Get4DArray <TH1D*> (2, nPtJBins, nZdcCentBins+1, nVar);
+  //TH1D***** h_jet_counts         = Get4DArray <TH1D*> (2, nPtJBins, nZdcCentBins+1, nVar);
 
   TH1D*** h_jet_pt_ref          = Get2DArray <TH1D*> (2, nVar);
   TH2D*** h2_jet_pt_cov_ref     = Get2DArray <TH2D*> (2, nVar);
@@ -58,8 +58,8 @@ void PlotJets (const char* tag, const char* inFileTag) {
   TF1**     f_jet_pt_datamc_ratio_ref  = Get1DArray <TF1*> (nVar);
   TF1***    f_jet_pt_datamc_ratio      = Get2DArray <TF1*> (nZdcCentBins+1, nVar);
 
-  TH2D****  h2_jet_eta_phi_ref   = Get3DArray <TH2D*> (2, nPtJBins, nVar);
-  TH2D***** h2_jet_eta_phi       = Get4DArray <TH2D*> (2, nPtJBins, nZdcCentBins+1, nVar);
+  //TH2D****  h2_jet_eta_phi_ref   = Get3DArray <TH2D*> (2, nPtJBins, nVar);
+  //TH2D***** h2_jet_eta_phi       = Get4DArray <TH2D*> (2, nPtJBins, nZdcCentBins+1, nVar);
 
   TGAE**  g_jet_pt_ref_syst     = Get1DArray <TGAE*> (nVar);
   TGAE*** g_jet_pt_syst         = Get2DArray <TGAE*> (nZdcCentBins+1, nVar);
@@ -78,7 +78,9 @@ void PlotJets (const char* tag, const char* inFileTag) {
 
       const TString dType = (iDType == 0 ? "data" : "mc");
 
-      for (short iVar = 0; iVar < nVar; iVar++) {
+      //for (short iVar = 0; iVar < nVar; iVar++) {
+      {
+        const short iVar = 0;
   
         const TString var = variations[iVar];
   
@@ -87,15 +89,15 @@ void PlotJets (const char* tag, const char* inFileTag) {
   
         h_evt_counts_ref[iDType][iVar]    = (TH1D*) inFile->Get (Form ("h_evt_counts_ref_%s_%s",    dType.Data (), var.Data ()));
 
-        for (short iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
+        //for (short iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
 
-          const TString pTJ = Form ("%g-%gGeVJets", pTJBins[iPtJ], pTJBins[iPtJ+1]);
+        //  const TString pTJ = Form ("%g-%gGeVJets", pTJBins[iPtJ], pTJBins[iPtJ+1]);
 
-          h_jet_counts_ref[iDType][iPtJ][iVar]    = (TH1D*) inFile->Get (Form ("h_jet_counts_ref_%s_%s_%s",  dType.Data (), pTJ.Data (), var.Data ()));
+        //  h_jet_counts_ref[iDType][iPtJ][iVar]    = (TH1D*) inFile->Get (Form ("h_jet_counts_ref_%s_%s_%s",  dType.Data (), pTJ.Data (), var.Data ()));
 
-          h2_jet_eta_phi_ref[iDType][iPtJ][iVar]  = (TH2D*) inFile->Get (Form ("h2_jet_eta_phi_ref_%s_%s", dType.Data (), var.Data ()));
+        //  h2_jet_eta_phi_ref[iDType][iPtJ][iVar]  = (TH2D*) inFile->Get (Form ("h2_jet_eta_phi_ref_%s_%s", dType.Data (), var.Data ()));
 
-        } // end loop over iPtJ
+        //} // end loop over iPtJ
 
   
         h_jet_pt_ref[iDType][iVar]        = (TH1D*) inFile->Get (Form ("h_jet_pt_ref_%s_%s",        dType.Data (), var.Data ()));
@@ -107,15 +109,15 @@ void PlotJets (const char* tag, const char* inFileTag) {
   
           h_evt_counts[iDType][iCent][iVar]   = (TH1D*) inFile->Get (Form ("h_evt_counts_pPb_%s_%s_%s",   cent.Data (), dType.Data (), var.Data ()));
 
-          for (short iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
+          //for (short iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
 
-            const TString pTJ = Form ("%g-%gGeVJets", pTJBins[iPtJ], pTJBins[iPtJ+1]);
+          //  const TString pTJ = Form ("%g-%gGeVJets", pTJBins[iPtJ], pTJBins[iPtJ+1]);
 
-            h_jet_counts[iDType][iPtJ][iCent][iVar]   = (TH1D*) inFile->Get (Form ("h_jet_counts_pPb_%s_%s_%s_%s", cent.Data (), dType.Data (), pTJ.Data (), var.Data ()));
+          //  h_jet_counts[iDType][iPtJ][iCent][iVar]   = (TH1D*) inFile->Get (Form ("h_jet_counts_pPb_%s_%s_%s_%s", cent.Data (), dType.Data (), pTJ.Data (), var.Data ()));
 
-            h2_jet_eta_phi[iDType][iPtJ][iCent][iVar]  = (TH2D*) inFile->Get (Form ("h2_jet_eta_phi_pPb_%s_%s_%s_%s", cent.Data (), dType.Data (), pTJ.Data (), var.Data ()));
+          //  h2_jet_eta_phi[iDType][iPtJ][iCent][iVar]  = (TH2D*) inFile->Get (Form ("h2_jet_eta_phi_pPb_%s_%s_%s_%s", cent.Data (), dType.Data (), pTJ.Data (), var.Data ()));
 
-          } // end loop over iPtJ
+          //} // end loop over iPtJ
   
           h_jet_pt[iDType][iCent][iVar]       = (TH1D*) inFile->Get (Form ("h_jet_pt_pPb_%s_%s_%s",       cent.Data (), dType.Data (), var.Data ()));
           h_jet_pt_ratio[iDType][iCent][iVar] = (TH1D*) inFile->Get (Form ("h_jet_pt_ratio_%s_%s_%s",     cent.Data (), dType.Data (), var.Data ()));
@@ -154,86 +156,86 @@ void PlotJets (const char* tag, const char* inFileTag) {
 
 
 
-  for (float trigpt : {30., 60.}) {
+  //for (float trigpt : {30., 60.}) {
 
-    float maxpt = (trigpt == 30. ? 60. : 300.);
-    float* njet = new float[nZdcCentBins+2];
+  //  float maxpt = (trigpt == 30. ? 60. : 300.);
+  //  float* njet = new float[nZdcCentBins+2];
 
-    std::cout << "---------------" << std::endl << "JETS IN DATA > " << trigpt << " GeV" << std::endl << "---------------" << std::endl;
+  //  std::cout << "---------------" << std::endl << "JETS IN DATA > " << trigpt << " GeV" << std::endl << "---------------" << std::endl;
 
-    njet[0] = 0;
-    for (short iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
-      if (0.5*(pTJBins[iPtJ]+pTJBins[iPtJ+1]) >= trigpt && 0.5*(pTJBins[iPtJ]+pTJBins[iPtJ+1]) < maxpt)
-        njet[0] += h_jet_counts_ref[0][iPtJ][0]->GetBinContent (1);
-    } // end loop over iPtJ
-    for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
-      njet[iCent+1] = 0;
-      for (short iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
-        if (0.5*(pTJBins[iPtJ]+pTJBins[iPtJ+1]) >= trigpt && 0.5*(pTJBins[iPtJ]+pTJBins[iPtJ+1]) < maxpt)
-          njet[iCent+1] += h_jet_counts[0][iPtJ][iCent][0]->GetBinContent (1);
-      } // end loop over iPtJ
-    } // end loop over iCent
+  //  njet[0] = 0;
+  //  for (short iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
+  //    if (0.5*(pTJBins[iPtJ]+pTJBins[iPtJ+1]) >= trigpt && 0.5*(pTJBins[iPtJ]+pTJBins[iPtJ+1]) < maxpt)
+  //      njet[0] += h_jet_counts_ref[0][iPtJ][0]->GetBinContent (1);
+  //  } // end loop over iPtJ
+  //  for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
+  //    njet[iCent+1] = 0;
+  //    for (short iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
+  //      if (0.5*(pTJBins[iPtJ]+pTJBins[iPtJ+1]) >= trigpt && 0.5*(pTJBins[iPtJ]+pTJBins[iPtJ+1]) < maxpt)
+  //        njet[iCent+1] += h_jet_counts[0][iPtJ][iCent][0]->GetBinContent (1);
+  //    } // end loop over iPtJ
+  //  } // end loop over iCent
 
-    std::cout << "Number of pp jets: " << njet[0] << std::endl;
-    for (short iCent = 0; iCent < nZdcCentBins+1; iCent++)
-      std::cout << "Number of p+Pb " << zdcCentPercs[iCent+1] << "\%-" << zdcCentPercs[iCent] << "\% jets: " << njet[iCent+1] << std::endl;
+  //  std::cout << "Number of pp jets: " << njet[0] << std::endl;
+  //  for (short iCent = 0; iCent < nZdcCentBins+1; iCent++)
+  //    std::cout << "Number of p+Pb " << zdcCentPercs[iCent+1] << "\%-" << zdcCentPercs[iCent] << "\% jets: " << njet[iCent+1] << std::endl;
 
-    std::cout << "Formatted for latex:" << std::endl;
-    std::cout << (int) njet[0];
-    for (short iCent = 0; iCent < nZdcCentBins+1; iCent++)
-      std::cout << " & " << (int) njet[iCent+1];
-    std::cout << std::endl << std::endl;
-
-
-    float integral = 0;
-    for (short iX = h_jet_pt_ref[0][0]->FindBin (trigpt); iX <= h_jet_pt_ref[0][0]->GetNbinsX (); iX++)
-      integral += h_jet_pt_ref[0][0]->GetBinContent (iX) * h_jet_pt_ref[0][0]->GetBinWidth (iX);
-    std::cout << "Average number of jets per trigger jet in pp: " << integral << std::endl;
-    integral = 0;
-    for (short iX = h_jet_pt[0][nZdcCentBins][0]->FindBin (trigpt); iX <= h_jet_pt[0][nZdcCentBins][0]->GetNbinsX (); iX++)
-      integral += h_jet_pt[0][nZdcCentBins][0]->GetBinContent (iX) * h_jet_pt[0][nZdcCentBins][0]->GetBinWidth (iX);
-    std::cout << "Average number of jets per trigger jet in p+Pb: " << integral << std::endl;
-    std::cout << std::endl << std::endl;
+  //  std::cout << "Formatted for latex:" << std::endl;
+  //  std::cout << (int) njet[0];
+  //  for (short iCent = 0; iCent < nZdcCentBins+1; iCent++)
+  //    std::cout << " & " << (int) njet[iCent+1];
+  //  std::cout << std::endl << std::endl;
 
 
-    std::cout << "---------------" << std::endl << "JETS IN MC > " << trigpt << " GeV" << std::endl << "---------------" << std::endl;
-
-    njet[0] = 0;
-    for (short iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
-      if (0.5*(pTJBins[iPtJ]+pTJBins[iPtJ+1]) >= trigpt && 0.5*(pTJBins[iPtJ]+pTJBins[iPtJ+1]) < maxpt)
-        njet[0] += h_jet_counts_ref[1][iPtJ][0]->GetBinContent (1);
-    } // end loop over iPtJ
-    for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
-      njet[iCent+1] = 0;
-      for (short iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
-        if (0.5*(pTJBins[iPtJ]+pTJBins[iPtJ+1]) >= trigpt && 0.5*(pTJBins[iPtJ]+pTJBins[iPtJ+1]) < maxpt)
-          njet[iCent+1] += h_jet_counts[1][iPtJ][iCent][0]->GetBinContent (1);
-      } // end loop over iPtJ
-    } // end loop over iCent
-
-    std::cout << "Number of pp jets: " << njet[0] << std::endl;
-    for (short iCent = 0; iCent < nZdcCentBins+1; iCent++)
-      std::cout << "Number of p+Pb " << zdcCentPercs[iCent+1] << "\%-" << zdcCentPercs[iCent] << "\% jets: " << njet[iCent+1] << std::endl;
-
-    std::cout << "Formatted for latex:" << std::endl;
-    std::cout << (int) njet[0];
-    for (short iCent = 0; iCent < nZdcCentBins+1; iCent++)
-      std::cout << " & " << (int) njet[iCent+1];
-    std::cout << std::endl;
+  //  float integral = 0;
+  //  for (short iX = h_jet_pt_ref[0][0]->FindBin (trigpt); iX <= h_jet_pt_ref[0][0]->GetNbinsX (); iX++)
+  //    integral += h_jet_pt_ref[0][0]->GetBinContent (iX) * h_jet_pt_ref[0][0]->GetBinWidth (iX);
+  //  std::cout << "Average number of jets per trigger jet in pp: " << integral << std::endl;
+  //  integral = 0;
+  //  for (short iX = h_jet_pt[0][nZdcCentBins][0]->FindBin (trigpt); iX <= h_jet_pt[0][nZdcCentBins][0]->GetNbinsX (); iX++)
+  //    integral += h_jet_pt[0][nZdcCentBins][0]->GetBinContent (iX) * h_jet_pt[0][nZdcCentBins][0]->GetBinWidth (iX);
+  //  std::cout << "Average number of jets per trigger jet in p+Pb: " << integral << std::endl;
+  //  std::cout << std::endl << std::endl;
 
 
-    integral = 0;
-    for (short iX = h_jet_pt_ref[1][0]->FindBin (trigpt); iX <= h_jet_pt_ref[1][0]->GetNbinsX (); iX++)
-      integral += h_jet_pt_ref[1][0]->GetBinContent (iX) * h_jet_pt_ref[1][0]->GetBinWidth (iX);
-    std::cout << "Average number of jets per trigger jet in pp: " << integral << std::endl;
-    integral = 0;
-    for (short iX = h_jet_pt[1][nZdcCentBins][0]->FindBin (trigpt); iX <= h_jet_pt[1][nZdcCentBins][0]->GetNbinsX (); iX++)
-      integral += h_jet_pt[1][nZdcCentBins][0]->GetBinContent (iX) * h_jet_pt[1][nZdcCentBins][0]->GetBinWidth (iX);
-    std::cout << "Average number of jets per trigger jet in p+Pb: " << integral << std::endl;
-    std::cout << std::endl << std::endl;
+  //  std::cout << "---------------" << std::endl << "JETS IN MC > " << trigpt << " GeV" << std::endl << "---------------" << std::endl;
 
-    delete[] njet;
-  }
+  //  njet[0] = 0;
+  //  for (short iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
+  //    if (0.5*(pTJBins[iPtJ]+pTJBins[iPtJ+1]) >= trigpt && 0.5*(pTJBins[iPtJ]+pTJBins[iPtJ+1]) < maxpt)
+  //      njet[0] += h_jet_counts_ref[1][iPtJ][0]->GetBinContent (1);
+  //  } // end loop over iPtJ
+  //  for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
+  //    njet[iCent+1] = 0;
+  //    for (short iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
+  //      if (0.5*(pTJBins[iPtJ]+pTJBins[iPtJ+1]) >= trigpt && 0.5*(pTJBins[iPtJ]+pTJBins[iPtJ+1]) < maxpt)
+  //        njet[iCent+1] += h_jet_counts[1][iPtJ][iCent][0]->GetBinContent (1);
+  //    } // end loop over iPtJ
+  //  } // end loop over iCent
+
+  //  std::cout << "Number of pp jets: " << njet[0] << std::endl;
+  //  for (short iCent = 0; iCent < nZdcCentBins+1; iCent++)
+  //    std::cout << "Number of p+Pb " << zdcCentPercs[iCent+1] << "\%-" << zdcCentPercs[iCent] << "\% jets: " << njet[iCent+1] << std::endl;
+
+  //  std::cout << "Formatted for latex:" << std::endl;
+  //  std::cout << (int) njet[0];
+  //  for (short iCent = 0; iCent < nZdcCentBins+1; iCent++)
+  //    std::cout << " & " << (int) njet[iCent+1];
+  //  std::cout << std::endl;
+
+
+  //  integral = 0;
+  //  for (short iX = h_jet_pt_ref[1][0]->FindBin (trigpt); iX <= h_jet_pt_ref[1][0]->GetNbinsX (); iX++)
+  //    integral += h_jet_pt_ref[1][0]->GetBinContent (iX) * h_jet_pt_ref[1][0]->GetBinWidth (iX);
+  //  std::cout << "Average number of jets per trigger jet in pp: " << integral << std::endl;
+  //  integral = 0;
+  //  for (short iX = h_jet_pt[1][nZdcCentBins][0]->FindBin (trigpt); iX <= h_jet_pt[1][nZdcCentBins][0]->GetNbinsX (); iX++)
+  //    integral += h_jet_pt[1][nZdcCentBins][0]->GetBinContent (iX) * h_jet_pt[1][nZdcCentBins][0]->GetBinWidth (iX);
+  //  std::cout << "Average number of jets per trigger jet in p+Pb: " << integral << std::endl;
+  //  std::cout << std::endl << std::endl;
+
+  //  delete[] njet;
+  //}
 
 
 
