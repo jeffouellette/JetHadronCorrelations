@@ -7,6 +7,7 @@
 #include "TrackingPerformance.h"
 #include "TrackMomentumResolution.h"
 #include "JetEnergyResolution.h"
+#include "JetPtWeights.h"
 #include "Params.h"
 #include "CentralityDefs.h"
 #include "Process.h"
@@ -95,6 +96,10 @@ int main (int argc, char** argv) {
   else if (alg == "JetEnergyResolution") {
     std::cout << "Info: In Process.cxx: Running JetEnergyResolution algorithm..." << std::endl;
     success = JetHadronCorrelations::JetEnergyResolution (subdir, dataSet, inFileName);
+  }
+  else if (alg == "JetPtWeights") {
+    std::cout << "Info: In Process.cxx: Running JetPtWeights algorithm..." << std::endl;
+    success = JetHadronCorrelations::JetPtWeights (subdir, dataSet, inFileName);
   }
   else {
     std::cout << "Error: In Process.cxx: Failed to recognize algorithm! Quitting." << std::endl;
