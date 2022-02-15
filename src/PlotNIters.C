@@ -32,15 +32,15 @@ using namespace JetHadronCorrelations;
 
 double GetMinPtCh (short iPtJInt) {
   switch (iPtJInt) {
-  case 0: return 8;
-  case 1: return 8;
+  case 0: return 4;//8;
+  case 1: return 4;//8;
   }
   return 0.4;
 }
 double GetMaxPtCh (short iPtJInt) {
   switch (iPtJInt) {
-  case 0: return 30;
-  case 1: return 60;
+  case 0: return 60;//30;
+  case 1: return 90;//60;
   }
   return 120;
 }
@@ -2582,6 +2582,18 @@ void PlotNIters (const char* rawTag, const char* nitersTag, const short nItersMa
 
       TGAE* g = nullptr;
 
+      //std::vector <int> iIters = {
+      //  iPtJInt == 0 ? 19 : 11,
+      //  iPtJInt == 0 ? 16 : 9,
+      //  iPtJInt == 0 ? 12 : 7,
+      //  iPtJInt == 0 ? 9 : 5,
+      //  iPtJInt == 0 ? 6 : 3,
+      //  iPtJInt == 0 ? 4 : 2,
+      //  iPtJInt == 0 ? 2 : 1,
+      //  0
+      //};
+      std::vector <int> iIters = {11, 9, 7, 5, 3, 2, 1, 0};
+
       {
         c->cd (7);
 
@@ -2599,7 +2611,7 @@ void PlotNIters (const char* rawTag, const char* nitersTag, const short nItersMa
 
 
         short iCol = 7;
-        for (short iIter : {11, 9, 7, 5, 3, 2, 1, 0}) {
+        for (short iIter : iIters) {
           //if (iIter > GetTrkSpectraNIters (false, iPtJInt, iDir, -1)) {
           //  iCol--;
           //  continue;
@@ -2638,7 +2650,7 @@ void PlotNIters (const char* rawTag, const char* nitersTag, const short nItersMa
         SaferDelete (&h);
 
         short iCol = 7;
-        for (short iIter : {11, 9, 7, 5, 3, 2, 1, 0}) {
+        for (short iIter : iIters) {
           //if (iIter > GetTrkSpectraNIters (false, iPtJInt, iDir, iCent)) {
           //  iCol--;
           //  continue;
@@ -2671,11 +2683,8 @@ void PlotNIters (const char* rawTag, const char* nitersTag, const short nItersMa
       myText (0.1, 0.66, kBlack, Form ("#it{p}_{T}^{jet} [GeV] #in (%i, 300)", iPtJInt == 0 ? 30 : 60), 0.065);
       myText (0.1, 0.57, kBlack, Form ("#Delta#phi_{ch,jet} %s", directions[iDir] == "ns" ? "< #pi/8" : (directions[iDir] == "as" ? "> 7#pi/8" : "#in (#pi/3, 2#pi/3)")), 0.065);
       short iCol = 7;
-      for (short iIter : {11, 9, 7, 5}) {
-        myLineText2 (0.55, 0.48-0.07*(iCol-4), colorfulColors[iCol], kOpenCircle, Form ("%i iterations", iIter+1), 1.2, 0.055); iCol--;
-      }
-      for (short iIter : {3, 2, 1, 0}) {
-        myLineText2 (0.15, 0.48-0.07*(iCol), colorfulColors[iCol], kOpenCircle, Form ("%i iterations", iIter+1), 1.2, 0.055); iCol--;
+      for (short iIter : iIters) {
+        myLineText2 (0.15+0.4*(iCol / 4), 0.48-0.07*(iCol%4), colorfulColors[iCol], kOpenCircle, Form ("%i iterations", iIter+1), 1.2, 0.055); iCol--;
       }
 
       c->SaveAs (Form ("%s/Plots/PtCh/Refolded_All_%iGeVJets_%s.pdf", workPath.Data (), iPtJInt == 0 ? 30 : 60, directions[iDir] == "ns" ? "nearside" : (directions[iDir] == "as" ? "awayside" : "perpendicular")));

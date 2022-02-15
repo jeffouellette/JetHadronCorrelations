@@ -173,8 +173,7 @@ void ProcessCorrelations (const char* tag, const char* outFileTag) {//, const in
         else            SaferDelete (&h2_cov);
 
         h_jet_pt_ref[iDType][iVar]->Scale (h_evt_counts_ref[iDType][iVar]->GetBinContent (2)); // convert distribution to total number of jets by un-scaling 1/N_evt factor
-        if (iVar == 0)
-          h2_jet_pt_cov_ref[iDType]->Scale (std::pow (h_evt_counts_ref[iDType][iVar]->GetBinContent (2), 2));
+        if (iVar == 0) h2_jet_pt_cov_ref[iDType]->Scale (std::pow (h_evt_counts_ref[iDType][iVar]->GetBinContent (2), 2));
         //UnscaleWidth (h_jet_pt_ref[iDType][iVar]);
 
         SaferDelete (&h_evt_counts_ref[iDType][iVar]);

@@ -1752,7 +1752,7 @@ TF1** LoadJetPtWgtFuncs () {
   TF1** farr = new TF1*[nBins];
   for (int iBin = 0; iBin < nBins; iBin++) {
 
-    TF1* f = (TF1*) infile->Get (Form ("f_jet_pt_datamc_ratio_%s_Nominal", Ispp () ? "ref" : (iBin < nZdcCentBins ? Form ("iCent%i", iBin) : "allCent")))->Clone (Form ("f_jet_pt_weights_%s_Nominal", Ispp () ? "ref" : (iBin < nZdcCentBins ? Form ("iCent%i", iBin) : "allCent")));
+    TF1* f = (TF1*) infile->Get (Form ("f_jet_pt_datamcScaled_ratio_%s_Nominal", Ispp () ? "ref" : (iBin < nZdcCentBins ? Form ("iCent%i", iBin) : "allCent")))->Clone (Form ("f_jet_pt_weights_%s_Nominal", Ispp () ? "ref" : (iBin < nZdcCentBins ? Form ("iCent%i", iBin) : "allCent")));
 
     farr[iBin] = f;
 
@@ -1783,7 +1783,7 @@ TH1D** LoadJetPtWgtHists () {
   TH1D** harr = new TH1D*[nBins];
   for (int iBin = 0; iBin < nBins; iBin++) {
 
-    TH1D* h = (TH1D*) infile->Get (Form ("h_jet_pt_datamc_ratio_%s_Nominal", Ispp () ? "ref" : (iBin < nZdcCentBins ? Form ("iCent%i", iBin) : "allCent")))->Clone (Form ("h_jet_pt_weights_%s_Nominal", Ispp () ? "ref" : (iBin < nZdcCentBins ? Form ("iCent%i", iBin) : "allCent")));
+    TH1D* h = (TH1D*) infile->Get (Form ("h_jet_pt_datamcScaled_ratio_%s_Nominal", Ispp () ? "ref" : (iBin < nZdcCentBins ? Form ("iCent%i", iBin) : "allCent")))->Clone (Form ("h_jet_pt_weights_%s_Nominal", Ispp () ? "ref" : (iBin < nZdcCentBins ? Form ("iCent%i", iBin) : "allCent")));
 
     harr[iBin] = h;
 

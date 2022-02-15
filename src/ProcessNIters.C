@@ -47,7 +47,8 @@ void ProcessNIters (const char* rawTag, const char* outFileTag, const short nIte
   const short nIters1DMin = nItersMin;
   const double* nIters1DVals = linspace (nIters1DMin, nIters1DMax, nIters1DMax-nIters1DMin);
 
-  const bool useJetWgts = true;
+  const bool useJetWgts = false;
+  const bool useCentDiffUnf = true;
 
   TH1D*     h_jet_pt_ref                  = nullptr;
   TH1D**    h_jet_pt                      = Get1DArray <TH1D*> (nZdcCentBins+1);
@@ -174,7 +175,7 @@ void ProcessNIters (const char* rawTag, const char* outFileTag, const short nIte
   {
     TFile* inFile = new TFile (Form ("%s/MakeResponseMatrix/Nominal/allSamples.root", rootPath.Data ()), "read");
 
-    if (useJetWgts) rooUnfResp_jet_pt_ref = (RooUnfoldResponse*) inFile->Get ("rooUnfResp_jet_pt_ref_mc_wgts");
+    if (useJetWgts) rooUnfResp_jet_pt_ref = (RooUnfoldResponse*) inFile->Get ("rooUnfResp_jet_pt_ref_mc_altwgts");
     else            rooUnfResp_jet_pt_ref = (RooUnfoldResponse*) inFile->Get ("rooUnfResp_jet_pt_ref_mc_fullClosure");
 
     //for (short iDir = 0; iDir < nDir; iDir++) {
@@ -182,7 +183,7 @@ void ProcessNIters (const char* rawTag, const char* outFileTag, const short nIte
 
       const TString dir = directions[iDir];
 
-      if (useJetWgts) rooUnfResp_jet_trk_pt_ref_sig[iDir] = (RooUnfoldResponse*) inFile->Get (Form ("rooUnfResp_jet_trk_pt_%s_ref_sig_mc_wgts", dir.Data ()));
+      if (useJetWgts) rooUnfResp_jet_trk_pt_ref_sig[iDir] = (RooUnfoldResponse*) inFile->Get (Form ("rooUnfResp_jet_trk_pt_%s_ref_sig_mc_altwgts", dir.Data ()));
       else            rooUnfResp_jet_trk_pt_ref_sig[iDir] = (RooUnfoldResponse*) inFile->Get (Form ("rooUnfResp_jet_trk_pt_%s_ref_sig_mc_fullClosure", dir.Data ()));
 
     } // end loop over iDir
@@ -191,7 +192,7 @@ void ProcessNIters (const char* rawTag, const char* outFileTag, const short nIte
 
       const char* cent = (iCent == nFcalCentBins ? "pPb_allCent" : Form ("pPb_iCent%i", iCent));
 
-      if (useJetWgts) rooUnfResp_jet_pt[iCent] = (RooUnfoldResponse*) inFile->Get (Form ("rooUnfResp_jet_pt_%s_mc_wgts", cent));
+      if (useJetWgts) rooUnfResp_jet_pt[iCent] = (RooUnfoldResponse*) inFile->Get (Form ("rooUnfResp_jet_pt_%s_mc_altwgts", cent));
       else            rooUnfResp_jet_pt[iCent] = (RooUnfoldResponse*) inFile->Get (Form ("rooUnfResp_jet_pt_%s_mc_fullClosure", cent));
 
       //for (short iDir = 0; iDir < nDir; iDir++) {
@@ -199,7 +200,7 @@ void ProcessNIters (const char* rawTag, const char* outFileTag, const short nIte
 
         const TString dir = directions[iDir];
 
-        if (useJetWgts) rooUnfResp_jet_trk_pt_sig[iDir][iCent] = (RooUnfoldResponse*) inFile->Get (Form ("rooUnfResp_jet_trk_pt_%s_%s_sig_mc_wgts", dir.Data (), cent));
+        if (useJetWgts) rooUnfResp_jet_trk_pt_sig[iDir][iCent] = (RooUnfoldResponse*) inFile->Get (Form ("rooUnfResp_jet_trk_pt_%s_%s_sig_mc_altwgts", dir.Data (), cent));
         else            rooUnfResp_jet_trk_pt_sig[iDir][iCent] = (RooUnfoldResponse*) inFile->Get (Form ("rooUnfResp_jet_trk_pt_%s_%s_sig_mc_fullClosure", dir.Data (), cent));
 
       } // end loop over iFile
@@ -224,7 +225,7 @@ void ProcessNIters (const char* rawTag, const char* outFileTag, const short nIte
         resp->UseOverflow (0);
         RooUnfoldBayes* bayesUnf = new RooUnfoldBayes (resp, h_jet_pt_ref, nIters);
         bayesUnf->SetVerbose (-1);
-        bayesUnf->SetMeasuredCov (TMatrixD (nPtJBins, nPtJBins, h2_jet_pt_ref_cov->GetArray ()));
+        //bayesUnf->SetMeasuredCov (TMatrixD (nPtJBins, nPtJBins, h2_jet_pt_ref_cov->GetArray ()));
         TH1D* h_unf = (TH1D*) bayesUnf->Hreco ()->Clone (Form ("h_jet_pt_ref_unf_data_Nominal_nIters%i", nIters));
         TH1D* h_rfld = (TH1D*) resp->ApplyToTruth (h_unf)->Clone (Form ("h_jet_pt_ref_rfld_data_Nominal_nIters%i", nIters));
         SaferDelete (&bayesUnf);
@@ -239,7 +240,7 @@ void ProcessNIters (const char* rawTag, const char* outFileTag, const short nIte
     for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
 
       const TString cent = (iCent == nZdcCentBins ? "allCent" : Form ("iCent%i", iCent));
-      const short iUnfCent = iCent;
+      const short iUnfCent = (useCentDiffUnf ? iCent : nZdcCentBins);
 
       for (short iIter = 0; iIter < nIters1DMax-nIters1DMin+2; iIter++) {
   
@@ -249,7 +250,7 @@ void ProcessNIters (const char* rawTag, const char* outFileTag, const short nIte
         resp->UseOverflow (0);
         RooUnfoldBayes* bayesUnf = new RooUnfoldBayes (resp, h_jet_pt[iCent], nIters);
         bayesUnf->SetVerbose (-1);
-        bayesUnf->SetMeasuredCov (TMatrixD (nPtJBins, nPtJBins, h2_jet_pt_cov[iCent]->GetArray ()));
+        //bayesUnf->SetMeasuredCov (TMatrixD (nPtJBins, nPtJBins, h2_jet_pt_cov[iCent]->GetArray ()));
         TH1D* h_unf = (TH1D*) bayesUnf->Hreco ()->Clone (Form ("h_jet_pt_unf_data_%s_Nominal_nIters%i", cent.Data (), nIters));
         TH1D* h_rfld = (TH1D*) resp->ApplyToTruth (h_unf)->Clone (Form ("h_jet_pt_rfld_data_%s_Nominal_nIters%i", cent.Data (), nIters));
         SaferDelete (&bayesUnf);
@@ -363,7 +364,7 @@ void ProcessNIters (const char* rawTag, const char* outFileTag, const short nIte
     for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
 
       const TString cent = (iCent == nZdcCentBins ? "allCent" : Form ("iCent%i", iCent)); 
-      const short iUnfCent = iCent;
+      const short iUnfCent = (useCentDiffUnf ? iCent : nZdcCentBins);
 
       //for (short iDir = 0; iDir < nDir; iDir++) {
       for (short iDir : {0, 2}) {

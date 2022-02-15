@@ -66,7 +66,7 @@ short GetTrkSpectraNIters (const bool isMC, const short iPtJInt, const short iDi
           case 2:  return 2;//7;
           case 1:  return 2;//7;
           case 0:  return 2;//7; // ... 80-100%
-          case -1: return 1;//7; // pp
+          case -1: return 2;//7; // pp
           default: return 0;
         }
         default: return 0;
@@ -75,24 +75,24 @@ short GetTrkSpectraNIters (const bool isMC, const short iPtJInt, const short iDi
       switch (iDir) {
         case 0: // near-side
         switch (iCent) {
-          case 5:  return 8;//31;//17; // all centralities
-          case 4:  return 6;//26;//15; // 0-20%
-          case 3:  return 6;//24;//15; // 20-40%...
-          case 2:  return 7;//19;//13;
-          case 1:  return 4;//9;//11;
-          case 0:  return 4;//9;//9;  // ... 80-100%
-          case -1: return 7;//10;//15; // pp
+          case 5:  return 10;//31;//17; // all centralities
+          case 4:  return 10;//26;//15; // 0-20%
+          case 3:  return 9;//24;//15; // 20-40%...
+          case 2:  return 9;//19;//13;
+          case 1:  return 6;//9;//11;
+          case 0:  return 6;//9;//9;  // ... 80-100%
+          case -1: return 9;//10;//15; // pp
           default: return 0;
         }
         case 2: // away-side
         switch (iCent) {
-          case 5:  return 6;//29;//15; // all centralities
-          case 4:  return 2;//23;//13; // 0-20%
-          case 3:  return 5;//20;//13; // 20-40%...
-          case 2:  return 3;//10;//11;
-          case 1:  return 2;//8;//11; // "nominal" version
-          case 0:  return 3;//8;//9;  // ... 80-100%
-          case -1: return 6;//9;//15; // pp
+          case 5:  return 9;//29;//15; // all centralities
+          case 4:  return 8;//23;//13; // 0-20%
+          case 3:  return 7;//20;//13; // 20-40%...
+          case 2:  return 8;//10;//11;
+          case 1:  return 3;//8;//11; // "nominal" version
+          case 0:  return 4;//8;//9;  // ... 80-100%
+          case -1: return 8;//9;//15; // pp
           default: return 0;
         }
         default: return 0;
@@ -124,13 +124,13 @@ short GetJetSpectraNIters (const bool isMC, const short iPtJInt, const short iCe
       case 1: // pTJ > 60 GeV
       //return std::max (GetTrkSpectraNIters (iPtJInt, 0, iCent), GetTrkSpectraNIters (iPtJInt, 1, iCent));
       switch (iCent) {
-        case 5:  return 42;//4;//17; // all centralities
-        case 4:  return 44;//4;//15; // 0-20%
-        case 3:  return 39;//4;//13; // 20-40% ...
-        case 2:  return 40;//4;//13;
-        case 1:  return 45;//4;//11;
-        case 0:  return 44;//3;//9;  // ... 80-100%
-        case -1: return 42;//4;//15; // pp
+        case 5:  return 2;//4;//17; // all centralities
+        case 4:  return 2;//4;//15; // 0-20%
+        case 3:  return 2;//4;//13; // 20-40% ...
+        case 2:  return 2;//4;//13;
+        case 1:  return 2;//4;//11;
+        case 0:  return 2;//3;//9;  // ... 80-100%
+        case -1: return 2;//4;//15; // pp
         default: return 0;
       }
       default: return 0;
@@ -143,6 +143,8 @@ short GetJetSpectraNIters (const bool isMC, const short iPtJInt, const short iCe
 void ProcessUnfolding (const char* inFileTag, const char* outFileTag) {
 
   TFile* inFile = nullptr;
+
+  const bool useCentDiffUnf = false;
 
   TH1D***   h_jet_pt_ref                          = Get2DArray <TH1D*> (2, nVar);
   TH1D****  h_jet_pt                              = Get3DArray <TH1D*> (2, nZdcCentBins+1, nVar);
@@ -511,7 +513,7 @@ void ProcessUnfolding (const char* inFileTag, const char* outFileTag) {
       const short iUnfVar = 0;//(mcVariations.count (var) == 0 ? 0 : iVar);
 
       const bool doUnfold = (variationsWithNoUnfold.count (var) == 0);
-      const short jetWgtsType = (iDType == 1 ? 2 : ((variationsWithUnwgtdRespMatrix.count (var) == 0) ? 1 : 0));
+      const short jetWgtsType = (iDType == 1 ? 2 : ((variationsWithUnwgtdRespMatrix.count (var) == 0) ? 1 : 0)); // MC uses no weights, nominal data (which is not included in "variationsWithUnwgtdRespMatrix" set) uses histogram weights ("altwgts" at index = 0), and syst. uncertainty uses func. weights ("wgts" at index = 1)
 
       const bool doRefoldSF = (var == "RefoldingVar");
       const bool calcRefold = (var == "Nominal" && iDType == 0);
@@ -540,7 +542,7 @@ void ProcessUnfolding (const char* inFileTag, const char* outFileTag) {
           for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
   
             const TString cent = (iCent == nZdcCentBins ? "allCent" : Form ("iCent%i", iCent));
-            const short iUnfCent = nZdcCentBins;//iCent;
+            const short iUnfCent = (useCentDiffUnf ? iCent : nZdcCentBins);
 
             RooUnfoldResponse* resp = rooUnfResp_jet_pt[jetWgtsType][iUnfCent][iUnfVar];
             resp->UseOverflow (0);
@@ -752,7 +754,7 @@ void ProcessUnfolding (const char* inFileTag, const char* outFileTag) {
         for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
 
           const TString cent = (iCent == nZdcCentBins ? "allCent" : Form ("iCent%i", iCent)); 
-          const short iUnfCent = nZdcCentBins;//iCent;
+          const short iUnfCent = (useCentDiffUnf ? iCent : nZdcCentBins);
 
           for (short iDir = 0; iDir < nDir; iDir++) {
 

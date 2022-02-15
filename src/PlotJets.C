@@ -32,39 +32,47 @@ TLine* l = new TLine ();
 TLatex* tl = new TLatex ();
 
 
-const bool makeMCClosurePlots = true;
+TString GetSamp (const short iDType, const short iSamp) {
+  if (iDType == 0)
+    return "AllTrigs";
+  switch (iSamp) {
+    case 0: return "JZ0";
+    case 1: return "JZ1";
+    case 2: return "JZ2";
+    case 3: return "JZ3";
+    case 4: return "JZ123";
+    case 5: return "JZ0123";
+  }
+  return "???";
+}
+
 
 
 void PlotJets (const char* tag, const char* inFileTag) {
 
+  const TString var = variations[0];
+
+  const short nSamps = 6; // JZ0, 1, 2, 3, JZ1-3, JZ0-3
+
   TFile* inFile = nullptr;
 
-  TH1D***  h_evt_counts_ref     = Get2DArray <TH1D*> (2, nVar);
-  //TH1D****  h_jet_counts_ref     = Get3DArray <TH1D*> (2, nPtJBins, nVar);
-  TH1D**** h_evt_counts         = Get3DArray <TH1D*> (2, nZdcCentBins+1, nVar);
-  //TH1D***** h_jet_counts         = Get4DArray <TH1D*> (2, nPtJBins, nZdcCentBins+1, nVar);
+  TH1D***  h_evt_counts_ref     = Get2DArray <TH1D*> (2, nSamps);
+  TH1D**** h_evt_counts         = Get3DArray <TH1D*> (2, nZdcCentBins+1, nSamps);
 
-  TH1D*** h_jet_pt_ref          = Get2DArray <TH1D*> (2, nVar);
-  TH2D*** h2_jet_pt_cov_ref     = Get2DArray <TH2D*> (2, nVar);
+  TH1D*** h_jet_pt_ref          = Get2DArray <TH1D*> (3, nSamps);
 
-  TH1D**** h_jet_pt             = Get3DArray <TH1D*> (2, nZdcCentBins+1, nVar);
-  TH2D**** h2_jet_pt_cov        = Get3DArray <TH2D*> (2, nZdcCentBins+1, nVar);
+  TH1D**** h_jet_pt             = Get3DArray <TH1D*> (3, nZdcCentBins+1, nSamps);
 
-  TH1D**** h_jet_pt_ratio       = Get3DArray <TH1D*> (2, nZdcCentBins+1, nVar);
+  TH1D**** h_jet_pt_ratio       = Get3DArray <TH1D*> (2, nZdcCentBins+1, nSamps);
 
-  TH1D**    h_jet_pt_datamc_ratio_ref  = Get1DArray <TH1D*> (nVar);
-  TH1D***   h_jet_pt_datamc_ratio      = Get2DArray <TH1D*> (nZdcCentBins+1, nVar);
+  TH1D***   h_jet_pt_datamc_ratio_ref  = Get2DArray <TH1D*> (2, nSamps);
+  TH1D****  h_jet_pt_datamc_ratio      = Get3DArray <TH1D*> (2, nZdcCentBins+1, nSamps);
 
-  TF1**     f_jet_pt_datamc_ratio_ref  = Get1DArray <TF1*> (nVar);
-  TF1***    f_jet_pt_datamc_ratio      = Get2DArray <TF1*> (nZdcCentBins+1, nVar);
+  TF1***    f_jet_pt_datamc_ratio_ref  = Get2DArray <TF1*> (2, nSamps);
+  TF1****   f_jet_pt_datamc_ratio      = Get3DArray <TF1*> (2, nZdcCentBins+1, nSamps);
 
-  //TH2D****  h2_jet_eta_phi_ref   = Get3DArray <TH2D*> (2, nPtJBins, nVar);
-  //TH2D***** h2_jet_eta_phi       = Get4DArray <TH2D*> (2, nPtJBins, nZdcCentBins+1, nVar);
-
-  TGAE**  g_jet_pt_ref_syst     = Get1DArray <TGAE*> (nVar);
-  TGAE*** g_jet_pt_syst         = Get2DArray <TGAE*> (nZdcCentBins+1, nVar);
-
-  TGAE*** g_jet_pt_ratio_syst   = Get2DArray <TGAE*> (nZdcCentBins+1, nVar);
+  //TH2D****  h2_jet_eta_phi_ref   = Get3DArray <TH2D*> (2, nPtJBins, nSamps);
+  //TH2D***** h2_jet_eta_phi       = Get4DArray <TH2D*> (2, nPtJBins, nZdcCentBins+1, nSamps);
 
 
   {
@@ -78,87 +86,83 @@ void PlotJets (const char* tag, const char* inFileTag) {
 
       const TString dType = (iDType == 0 ? "data" : "mc");
 
-      //for (short iVar = 0; iVar < nVar; iVar++) {
-      {
-        const short iVar = 0;
-  
-        const TString var = variations[iVar];
-  
-        if ((iDType == 0 && dataVariations.count (var) == 0) || (iDType == 1 && mcVariations.count (var) + otherMCVariations.count (var) == 0))
+      for (short iSamp = 0; iSamp < nSamps; iSamp++) {
+
+        if (iDType == 0 && iSamp > 0)
           continue;
-  
-        h_evt_counts_ref[iDType][iVar]    = (TH1D*) inFile->Get (Form ("h_evt_counts_ref_%s_%s",    dType.Data (), var.Data ()));
+
+        const TString samp = GetSamp (iDType, iSamp);
+
+        h_evt_counts_ref[iDType][iSamp] = (TH1D*) inFile->Get (Form ("h_evt_counts_ref_%s_%s",    dType.Data (), samp.Data ()));
+
+        h_jet_pt_ref[iDType][iSamp]     = (TH1D*) inFile->Get (Form ("h_jet_pt_ref_%s_%s",        dType.Data (), samp.Data ()));
 
         //for (short iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
 
         //  const TString pTJ = Form ("%g-%gGeVJets", pTJBins[iPtJ], pTJBins[iPtJ+1]);
 
-        //  h_jet_counts_ref[iDType][iPtJ][iVar]    = (TH1D*) inFile->Get (Form ("h_jet_counts_ref_%s_%s_%s",  dType.Data (), pTJ.Data (), var.Data ()));
-
-        //  h2_jet_eta_phi_ref[iDType][iPtJ][iVar]  = (TH2D*) inFile->Get (Form ("h2_jet_eta_phi_ref_%s_%s", dType.Data (), var.Data ()));
+        //  h2_jet_eta_phi_ref[iDType][iPtJ][iSamp]  = (TH2D*) inFile->Get (Form ("h2_jet_eta_phi_ref_%s_%s", dType.Data (), samp.Data ()));
 
         //} // end loop over iPtJ
-
-  
-        h_jet_pt_ref[iDType][iVar]        = (TH1D*) inFile->Get (Form ("h_jet_pt_ref_%s_%s",        dType.Data (), var.Data ()));
   
 
         for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
 
           const TString cent = (iCent == nZdcCentBins ? "allCent" : Form ("iCent%i", iCent));
   
-          h_evt_counts[iDType][iCent][iVar]   = (TH1D*) inFile->Get (Form ("h_evt_counts_pPb_%s_%s_%s",   cent.Data (), dType.Data (), var.Data ()));
+          h_evt_counts[iDType][iCent][iSamp]    = (TH1D*) inFile->Get (Form ("h_evt_counts_pPb_%s_%s_%s",   cent.Data (), dType.Data (), samp.Data ()));
+
+          h_jet_pt[iDType][iCent][iSamp]        = (TH1D*) inFile->Get (Form ("h_jet_pt_pPb_%s_%s_%s",       cent.Data (), dType.Data (), samp.Data ()));
+          h_jet_pt_ratio[iDType][iCent][iSamp]  = (TH1D*) inFile->Get (Form ("h_jet_pt_ratio_%s_%s_%s",     cent.Data (), dType.Data (), samp.Data ()));
 
           //for (short iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
 
           //  const TString pTJ = Form ("%g-%gGeVJets", pTJBins[iPtJ], pTJBins[iPtJ+1]);
 
-          //  h_jet_counts[iDType][iPtJ][iCent][iVar]   = (TH1D*) inFile->Get (Form ("h_jet_counts_pPb_%s_%s_%s_%s", cent.Data (), dType.Data (), pTJ.Data (), var.Data ()));
-
-          //  h2_jet_eta_phi[iDType][iPtJ][iCent][iVar]  = (TH2D*) inFile->Get (Form ("h2_jet_eta_phi_pPb_%s_%s_%s_%s", cent.Data (), dType.Data (), pTJ.Data (), var.Data ()));
+          //  h2_jet_eta_phi[iDType][iPtJ][iCent][iSamp]  = (TH2D*) inFile->Get (Form ("h2_jet_eta_phi_pPb_%s_%s_%s_%s", cent.Data (), dType.Data (), pTJ.Data (), samp.Data ()));
 
           //} // end loop over iPtJ
   
-          h_jet_pt[iDType][iCent][iVar]       = (TH1D*) inFile->Get (Form ("h_jet_pt_pPb_%s_%s_%s",       cent.Data (), dType.Data (), var.Data ()));
-          h_jet_pt_ratio[iDType][iCent][iVar] = (TH1D*) inFile->Get (Form ("h_jet_pt_ratio_%s_%s_%s",     cent.Data (), dType.Data (), var.Data ()));
-  
         } // end loop over iCent
 
-      } // end loop over iVar
+      } // end loop over iSamp
 
     } // end loop over iDType
 
 
-    for (short iVar = 0; iVar < nVar; iVar++) {
+    for (short iSamp = 0; iSamp < nSamps; iSamp++) {
 
-      const TString var = variations[iVar];
+      const TString samp = GetSamp (1, iSamp);
 
-      h_jet_pt_datamc_ratio_ref[iVar] = (TH1D*) inFile->Get (Form ("h_jet_pt_datamc_ratio_ref_%s", var.Data ()));
-      f_jet_pt_datamc_ratio_ref[iVar] = (TF1*)  inFile->Get (Form ("f_jet_pt_datamc_ratio_ref_%s", var.Data ()));
+      h_jet_pt_ref[2][iSamp]              = (TH1D*) inFile->Get (Form ("h_jet_pt_ref_mcScaled_%s",            samp.Data ()));
 
-      g_jet_pt_ref_syst[iVar] = (TGAE*) inFile->Get (Form ("g_jet_pt_ref_syst_%s", var.Data ()));
+      h_jet_pt_datamc_ratio_ref[0][iSamp] = (TH1D*) inFile->Get (Form ("h_jet_pt_datamc_ratio_ref_%s",        samp.Data ()));
+      f_jet_pt_datamc_ratio_ref[0][iSamp] = (TF1*)  inFile->Get (Form ("f_jet_pt_datamc_ratio_ref_%s",        samp.Data ()));
+
+      h_jet_pt_datamc_ratio_ref[1][iSamp] = (TH1D*) inFile->Get (Form ("h_jet_pt_datamcScaled_ratio_ref_%s",  samp.Data ()));
+      f_jet_pt_datamc_ratio_ref[1][iSamp] = (TF1*)  inFile->Get (Form ("f_jet_pt_datamcScaled_ratio_ref_%s",  samp.Data ()));
 
       for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
 
         const TString cent = (iCent == nZdcCentBins ? "allCent" : Form ("iCent%i", iCent));
 
-        h_jet_pt_datamc_ratio[iCent][iVar] = (TH1D*) inFile->Get (Form ("h_jet_pt_datamc_ratio_%s_%s", cent.Data (), var.Data ()));
-        f_jet_pt_datamc_ratio[iCent][iVar] = (TF1*)  inFile->Get (Form ("f_jet_pt_datamc_ratio_%s_%s", cent.Data (), var.Data ()));
+        h_jet_pt[2][iCent][iSamp]               = (TH1D*) inFile->Get (Form ("h_jet_pt_pPb_%s_mcScaled_%s",       cent.Data (), samp.Data ()));
 
-        g_jet_pt_syst[iCent][iVar]        = (TGAE*) inFile->Get (Form ("g_jet_pt_syst_pPb_%s_%s",   cent.Data (), var.Data ()));
-        g_jet_pt_ratio_syst[iCent][iVar]  = (TGAE*) inFile->Get (Form ("g_jet_pt_ratio_syst_%s_%s", cent.Data (), var.Data ()));
+        h_jet_pt_datamc_ratio[0][iCent][iSamp]  = (TH1D*) inFile->Get (Form ("h_jet_pt_datamc_ratio_%s_%s",       cent.Data (), samp.Data ()));
+        f_jet_pt_datamc_ratio[0][iCent][iSamp]  = (TF1*)  inFile->Get (Form ("f_jet_pt_datamc_ratio_%s_%s",       cent.Data (), samp.Data ()));
+
+        h_jet_pt_datamc_ratio[1][iCent][iSamp]  = (TH1D*) inFile->Get (Form ("h_jet_pt_datamcScaled_ratio_%s_%s", cent.Data (), samp.Data ()));
+        f_jet_pt_datamc_ratio[1][iCent][iSamp]  = (TF1*)  inFile->Get (Form ("f_jet_pt_datamcScaled_ratio_%s_%s", cent.Data (), samp.Data ()));
 
       } // end loop over iCent
 
-    } // end loop over iVar
+    } // end loop over iSamp
 
   }
 
 
-
   //for (float trigpt : {30., 60.}) {
-
-  //  float maxpt = (trigpt == 30. ? 60. : 300.);
+//  float maxpt = (trigpt == 30. ? 60. : 300.);
   //  float* njet = new float[nZdcCentBins+2];
 
   //  std::cout << "---------------" << std::endl << "JETS IN DATA > " << trigpt << " GeV" << std::endl << "---------------" << std::endl;
@@ -249,6 +253,8 @@ void PlotJets (const char* tag, const char* inFileTag) {
 
     const char* canvasName = Form ("c_jet_pt");
 
+    const short iSamp = (iDType == 1 ? nSamps-1 : 0);
+
     TCanvas* c = new TCanvas (canvasName, "", 800, 1000);
     c->cd ();
 
@@ -260,8 +266,8 @@ void PlotJets (const char* tag, const char* inFileTag) {
     TH1D* h = nullptr;
     TGAE* g = nullptr;
 
-    double ymin=2e-11;
-    double ymax=1e4;
+    double ymin=2e-13;
+    double ymax=1e3;
 
     c->SetLogx();
     c->SetLogy ();
@@ -281,27 +287,29 @@ void PlotJets (const char* tag, const char* inFileTag) {
     h->DrawCopy ("hist ][");
     SaferDelete (&h);
 
-    h = (TH1D*) h_jet_pt_ref[iDType][0]->Clone ("htemp");
-    h->Scale (std::pow (10, 3));
-    myDrawHist (h, kBlack, 1, 2);
-    SaferDelete (&h);
+    {
+      h = (TH1D*) h_jet_pt_ref[2*iDType][iSamp]->Clone ("htemp");
+      h->Scale (std::pow (10, 3));
+      myDrawHist (h, kBlack, 1, 2);
+      SaferDelete (&h);
 
-    h = h_jet_pt_ref[iDType][0];
+      h = h_jet_pt_ref[2*iDType][iSamp];
    
-    g = make_graph (h);
-    RecenterGraph (g);
-    ScaleGraph (g, nullptr, std::pow (10, 3));
-    myDraw (g, colorfulColors[0], kFullCircle, 1.4, 1, 3, "P", false);
-    SaferDelete (&g);
+      g = make_graph (h);
+      RecenterGraph (g);
+      ScaleGraph (g, nullptr, std::pow (10, 3));
+      myDraw (g, colorfulColors[0], kFullCircle, 1.4, 1, 3, "P", false);
+      SaferDelete (&g);
+    }
 
     for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
 
-      h = (TH1D*) h_jet_pt_ref[iDType][0]->Clone ("htemp");
+      h = (TH1D*) h_jet_pt_ref[2*iDType][iSamp]->Clone ("htemp");
       h->Scale (std::pow (10, 2-iCent));
       myDrawHist (h, kBlack, 1, 2);
       SaferDelete (&h);
 
-      h = h_jet_pt[iDType][iCent][0];
+      h = h_jet_pt[2*iDType][iCent][iSamp];
 
       g = make_graph (h);
       ScaleGraph (g, nullptr, std::pow (10, 2-iCent));
@@ -394,8 +402,9 @@ void PlotJets (const char* tag, const char* inFileTag) {
       h->DrawCopy ("hist ][");
       SaferDelete (&h);
 
-      myDraw (h_jet_pt_datamc_ratio_ref[0], colorfulColors[0], kFullCircle, 1.0, 1, 2, false);
-      myDraw (f_jet_pt_datamc_ratio_ref[0], colorfulColors[0], 1, 2);
+      myDraw (h_jet_pt_datamc_ratio_ref[0][0], colorfulColors[0], kOpenCircle, 1.0, 1, 2, false);
+      myDraw (h_jet_pt_datamc_ratio_ref[1][0], colorfulColors[0], kFullCircle, 1.0, 1, 2, false);
+      myDraw (f_jet_pt_datamc_ratio_ref[1][0], colorfulColors[0], 1, 2);
 
       myText (0.24, 0.865, kBlack, "#bf{#it{pp}}", 0.05);
     }
@@ -416,8 +425,9 @@ void PlotJets (const char* tag, const char* inFileTag) {
       h->DrawCopy ("hist ][");
       SaferDelete (&h);
 
-      myDraw (h_jet_pt_datamc_ratio[iCent][0], colorfulColors[iCent+1], kFullCircle, 1.0, 1, 2, false);
-      myDraw (f_jet_pt_datamc_ratio[iCent][0], colorfulColors[iCent+1], 1, 2);
+      myDraw (h_jet_pt_datamc_ratio[0][iCent][0], colorfulColors[iCent+1], kOpenCircle, 1.0, 1, 2, false);
+      myDraw (h_jet_pt_datamc_ratio[1][iCent][0], colorfulColors[iCent+1], kFullCircle, 1.0, 1, 2, false);
+      myDraw (f_jet_pt_datamc_ratio[1][iCent][0], colorfulColors[iCent+1], 1, 2);
 
       if (iCent < nZdcCentBins)
         myText (0.24, 0.865, kBlack, Form ("#bf{#it{p}+Pb, ZDC %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.05);

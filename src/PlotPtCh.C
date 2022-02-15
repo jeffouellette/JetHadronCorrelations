@@ -2039,6 +2039,9 @@ void PlotPtCh (const char* rawTag, const char* unfoldTag) {
       l->SetLineWidth (2);
       l->SetLineColor (kBlack);
 
+      const float ymin = (iPtJInt == 0 ? 0.60 : 0.70);
+      const float ymax = (iPtJInt == 0 ? 1.50 : 1.30);
+
       {
         c->cd (7);
 
@@ -2046,7 +2049,7 @@ void PlotPtCh (const char* rawTag, const char* unfoldTag) {
 
         TH1D* h = new TH1D ("h", ";#it{p}_{T}^{ch} [GeV];Y(#it{p}_{T}^{ch}) Now / at GAM", 1, pTChBins[1], iDir == 1 ? 10 : pTChBins[nPtChBins-(iPtJInt == 0 ? 3 : 1)]);//pTChBins[nPtChBins]);
         h->GetXaxis ()->SetMoreLogLabels ();
-        h->GetYaxis ()->SetRangeUser ((iPtJInt == 0 ? 0.61 : 0.74), (iPtJInt == 0 ? 1.6 : 1.45));
+        h->GetYaxis ()->SetRangeUser (ymin, ymax);
         //h->GetYaxis ()->SetRangeUser (0.0, 3);
         h->SetBinContent (1, 1);
         h->SetLineStyle (2);
@@ -2085,7 +2088,7 @@ void PlotPtCh (const char* rawTag, const char* unfoldTag) {
 
         TH1D* h = new TH1D ("h", ";#it{p}_{T}^{ch} [GeV];Y(#it{p}_{T}^{ch}) Now / at GAM", 1, pTChBins[1], iDir == 1 ? 10 : pTChBins[nPtChBins-(iPtJInt == 0 ? 3 : 1)]);//pTChBins[nPtChBins]);
         h->GetXaxis ()->SetMoreLogLabels ();
-        h->GetYaxis ()->SetRangeUser ((iPtJInt == 0 ? 0.61 : 0.74), (iPtJInt == 0 ? 1.6 : 1.45));
+        h->GetYaxis ()->SetRangeUser (ymin, ymax);
         //h->GetYaxis ()->SetRangeUser (0.0, 3);
         h->SetBinContent (1, 1);
         h->SetLineStyle (2);
