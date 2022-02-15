@@ -15,54 +15,55 @@ gridPass=100
 
 # JetHadronSkimmer, JetEnergyResolution, TrackMomentumResolution, TrackingPerformance, or MakeResponseMatrix
 #alg = TrackMomentumResolution
-alg = TrackingPerformance
+#alg = TrackingPerformance
 #alg = JetEnergyResolution
 #alg = CentralityAnalysis
 #alg = MakeResponseMatrix
+alg = JetPtWeights
 
 # Systematic config; Nominal, JESVar0, JESVar1,..., JESVar15, (don't run 16 or 20), JESVar17, JESVar18, JESVar19, MixVar1, MixVar2, MixVar3, MCTruthJetsTruthParts, MCRecoJetsTruthParts, FcalCentVar (at the moment)
-#syst=Nominal
+syst=Nominal
 
 
-## pp dijet MC (low pThat)
-#Arguments = $(alg) mc_$(gridPass) 0 pp17_5TeV MCSignal None $(syst) user.jeouelle.$(swVersion).hadrons.$(gridPass).mc16_5TeV.pp.420010.JZ0R04.recon.AOD.e4108_s3238_r11199_Tree.root
-#Error = errors/$(alg)_Pythia8_pp_JZ0R04.err
-#Log = /tmp/jeff/logs/$(alg)_Pythia8_pp_JZ0R04.log
-#Output = outputs/$(alg)_Pythia8_pp_JZ0R04.out
-#Queue 1
-#
-#Arguments = $(alg) mc_$(gridPass) 0 pp17_5TeV MCSignal None $(syst) user.jeouelle.$(swVersion).hadrons.$(gridPass).mc16_5TeV.pp.420011.JZ1R04.recon.AOD.e4108_s3238_r11199_Tree.root
-#Error = errors/$(alg)_Pythia8_pp_JZ1R04_a.err
-#Log = /tmp/jeff/logs/$(alg)_Pythia8_pp_JZ1R04_a.log
-#Output = outputs/$(alg)_Pythia8_pp_JZ1R04_a.out
-#Queue 1
-#Arguments = $(alg) mc_$(gridPass) 0 pp17_5TeV MCSignal None $(syst) user.jeouelle.$(swVersion).hadrons.$(gridPass).mc16_5TeV.pp.420011.JZ1R04.recon.AOD.e6608_s3238_r11199_Tree.root
-#Error = errors/$(alg)_Pythia8_pp_JZ1R04_b.err
-#Log = /tmp/jeff/logs/$(alg)_Pythia8_pp_JZ1R04_b.log
-#Output = outputs/$(alg)_Pythia8_pp_JZ1R04_b.out
-#Queue 1
-#
-#Arguments = $(alg) mc_$(gridPass) 0 pp17_5TeV MCSignal None $(syst) user.jeouelle.$(swVersion).hadrons.$(gridPass).mc16_5TeV.pp.420012.JZ2R04.recon.AOD.e4108_s3238_r11199_Tree.root
-#Error = errors/$(alg)_Pythia8_pp_JZ2R04_a.err
-#Log = /tmp/jeff/logs/$(alg)_Pythia8_pp_JZ2R04_a.log
-#Output = outputs/$(alg)_Pythia8_pp_JZ2R04_a.out
-#Queue 1
-#Arguments = $(alg) mc_$(gridPass) 0 pp17_5TeV MCSignal None $(syst) user.jeouelle.$(swVersion).hadrons.$(gridPass).mc16_5TeV.pp.420012.JZ2R04.recon.AOD.e6608_s3238_r11199_Tree.root
-#Error = errors/$(alg)_Pythia8_pp_JZ2R04_b.err
-#Log = /tmp/jeff/logs/$(alg)_Pythia8_pp_JZ2R04_b.log
-#Output = outputs/$(alg)_Pythia8_pp_JZ2R04_b.out
-#Queue 1
-#
-#Arguments = $(alg) mc_$(gridPass) 0 pp17_5TeV MCSignal None $(syst) user.jeouelle.$(swVersion).hadrons.$(gridPass).mc16_5TeV.pp.420013.JZ3R04.recon.AOD.e4108_s3238_r11199_Tree.root
-#Error = errors/$(alg)_Pythia8_pp_JZ3R04_a.err
-#Log = /tmp/jeff/logs/$(alg)_Pythia8_pp_JZ3R04_a.log
-#Output = outputs/$(alg)_Pythia8_pp_JZ3R04_a.out
-#Queue 1
-#Arguments = $(alg) mc_$(gridPass) 0 pp17_5TeV MCSignal None $(syst) user.jeouelle.$(swVersion).hadrons.$(gridPass).mc16_5TeV.pp.420013.JZ3R04.recon.AOD.e6608_s3238_r11199_Tree.root
-#Error = errors/$(alg)_Pythia8_pp_JZ3R04_b.err
-#Log = /tmp/jeff/logs/$(alg)_Pythia8_pp_JZ3R04_b.log
-#Output = outputs/$(alg)_Pythia8_pp_JZ3R04_b.out
-#Queue 1
+# pp dijet MC (low pThat)
+Arguments = $(alg) mc_$(gridPass) 0 pp17_5TeV MCSignal None $(syst) user.jeouelle.$(swVersion).hadrons.$(gridPass).mc16_5TeV.pp.420010.JZ0R04.recon.AOD.e4108_s3238_r11199_Tree.root
+Error = errors/$(alg)_Pythia8_pp_JZ0R04.err
+Log = /tmp/jeff/logs/$(alg)_Pythia8_pp_JZ0R04.log
+Output = outputs/$(alg)_Pythia8_pp_JZ0R04.out
+Queue 1
+
+Arguments = $(alg) mc_$(gridPass) 0 pp17_5TeV MCSignal None $(syst) user.jeouelle.$(swVersion).hadrons.$(gridPass).mc16_5TeV.pp.420011.JZ1R04.recon.AOD.e4108_s3238_r11199_Tree.root
+Error = errors/$(alg)_Pythia8_pp_JZ1R04_a.err
+Log = /tmp/jeff/logs/$(alg)_Pythia8_pp_JZ1R04_a.log
+Output = outputs/$(alg)_Pythia8_pp_JZ1R04_a.out
+Queue 1
+Arguments = $(alg) mc_$(gridPass) 0 pp17_5TeV MCSignal None $(syst) user.jeouelle.$(swVersion).hadrons.$(gridPass).mc16_5TeV.pp.420011.JZ1R04.recon.AOD.e6608_s3238_r11199_Tree.root
+Error = errors/$(alg)_Pythia8_pp_JZ1R04_b.err
+Log = /tmp/jeff/logs/$(alg)_Pythia8_pp_JZ1R04_b.log
+Output = outputs/$(alg)_Pythia8_pp_JZ1R04_b.out
+Queue 1
+
+Arguments = $(alg) mc_$(gridPass) 0 pp17_5TeV MCSignal None $(syst) user.jeouelle.$(swVersion).hadrons.$(gridPass).mc16_5TeV.pp.420012.JZ2R04.recon.AOD.e4108_s3238_r11199_Tree.root
+Error = errors/$(alg)_Pythia8_pp_JZ2R04_a.err
+Log = /tmp/jeff/logs/$(alg)_Pythia8_pp_JZ2R04_a.log
+Output = outputs/$(alg)_Pythia8_pp_JZ2R04_a.out
+Queue 1
+Arguments = $(alg) mc_$(gridPass) 0 pp17_5TeV MCSignal None $(syst) user.jeouelle.$(swVersion).hadrons.$(gridPass).mc16_5TeV.pp.420012.JZ2R04.recon.AOD.e6608_s3238_r11199_Tree.root
+Error = errors/$(alg)_Pythia8_pp_JZ2R04_b.err
+Log = /tmp/jeff/logs/$(alg)_Pythia8_pp_JZ2R04_b.log
+Output = outputs/$(alg)_Pythia8_pp_JZ2R04_b.out
+Queue 1
+
+Arguments = $(alg) mc_$(gridPass) 0 pp17_5TeV MCSignal None $(syst) user.jeouelle.$(swVersion).hadrons.$(gridPass).mc16_5TeV.pp.420013.JZ3R04.recon.AOD.e4108_s3238_r11199_Tree.root
+Error = errors/$(alg)_Pythia8_pp_JZ3R04_a.err
+Log = /tmp/jeff/logs/$(alg)_Pythia8_pp_JZ3R04_a.log
+Output = outputs/$(alg)_Pythia8_pp_JZ3R04_a.out
+Queue 1
+Arguments = $(alg) mc_$(gridPass) 0 pp17_5TeV MCSignal None $(syst) user.jeouelle.$(swVersion).hadrons.$(gridPass).mc16_5TeV.pp.420013.JZ3R04.recon.AOD.e6608_s3238_r11199_Tree.root
+Error = errors/$(alg)_Pythia8_pp_JZ3R04_b.err
+Log = /tmp/jeff/logs/$(alg)_Pythia8_pp_JZ3R04_b.log
+Output = outputs/$(alg)_Pythia8_pp_JZ3R04_b.out
+Queue 1
 
 
 ## pp dijet MC (high pThat)

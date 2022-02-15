@@ -11,7 +11,7 @@ accounting_group = group_atlas.boulder
 gridPass=090
 
 # alg values: JetHadronSkimmer, JetSubtractedEnergy
-alg=JetHadronSkimmer
+alg=JetPtWeights
 
 # Trigger config; MinBias, J50, J100
 #trig=J50

@@ -443,52 +443,45 @@ bool MakeResponseMatrix (const char* directory,
 
 
       const bool meetsJERCut = (std::fabs (rjpt/tjpt - 1) < 3*0.01*f_jer->Eval (tjpt));
-      if (!meetsJERCut)
-        continue; // cut on jets reconstructed well outside the JER -- these are bad matches in overlay
+      //if (!meetsJERCut)
+      //  continue; // cut on jets reconstructed well outside the JER -- these are bad matches in overlay
 
 
       bool isReconstructed = (iRJet >= 0);
       isReconstructed &= MeetsJetAcceptanceCuts (iRJet, r0p4, nJESVar); // reco jet must be accepted too
       isReconstructed &= (pTJBins[0] < rjpt && rjpt < pTJBins[nPtJBins]);
+      isReconstructed &= meetsJERCut;
 
       if (isReconstructed) {
         rooUnfResp_jet_pt_wgts[iFile]->Fill (rjpt, tjpt, ewgt*(iRJet < 0 ? 0. : f_jet_wgts[iFile]->Eval (tjpt)));
-        rooUnfResp_jet_pt_altwgts[iFile]->Fill (rjpt, tjpt, ewgt*(iRJet < 0 ? 0. : h_jet_wgts[iFile]->GetBinContent (h_jet_wgts[iFile]->FindBin (rjpt))));
-        if (meetsJERCut) {
-          rooUnfResp_jet_pt_fullClosure[iFile]->Fill (rjpt, tjpt, ewgt);
-          if (iEvt % 2 == 0)
-            rooUnfResp_jet_pt_halfClosure[iFile]->Fill (rjpt, tjpt, ewgt);
-        }
+        rooUnfResp_jet_pt_altwgts[iFile]->Fill (rjpt, tjpt, ewgt*(iRJet < 0 ? 0. : h_jet_wgts[iFile]->GetBinContent (h_jet_wgts[iFile]->FindBin (tjpt))));
+        rooUnfResp_jet_pt_fullClosure[iFile]->Fill (rjpt, tjpt, ewgt);
+        if (iEvt % 2 == 0)
+          rooUnfResp_jet_pt_halfClosure[iFile]->Fill (rjpt, tjpt, ewgt);
 
         // fill centrality-integrated response too
         if (IspPb ()) {
           rooUnfResp_jet_pt_wgts[nFiles-1]->Fill (rjpt, tjpt, ewgt*(iRJet < 0 ? 0. : f_jet_wgts[nFiles-1]->Eval (tjpt)));
-          rooUnfResp_jet_pt_altwgts[nFiles-1]->Fill (rjpt, tjpt, ewgt*(iRJet < 0 ? 0. : h_jet_wgts[nFiles-1]->GetBinContent (h_jet_wgts[nFiles-1]->FindBin (rjpt))));
-          if (meetsJERCut) {
-            rooUnfResp_jet_pt_fullClosure[nFiles-1]->Fill (rjpt, tjpt, ewgt);
-            if (iEvt % 2 == 0)
-              rooUnfResp_jet_pt_halfClosure[nFiles-1]->Fill (rjpt, tjpt, ewgt);
-          }
+          rooUnfResp_jet_pt_altwgts[nFiles-1]->Fill (rjpt, tjpt, ewgt*(iRJet < 0 ? 0. : h_jet_wgts[nFiles-1]->GetBinContent (h_jet_wgts[nFiles-1]->FindBin (tjpt))));
+          rooUnfResp_jet_pt_fullClosure[nFiles-1]->Fill (rjpt, tjpt, ewgt);
+          if (iEvt % 2 == 0)
+            rooUnfResp_jet_pt_halfClosure[nFiles-1]->Fill (rjpt, tjpt, ewgt);
         }
       }
       else {
         rooUnfResp_jet_pt_wgts[iFile]->Miss (tjpt, ewgt*(iRJet < 0 ? 0. : f_jet_wgts[iFile]->Eval (tjpt)));
-        rooUnfResp_jet_pt_altwgts[iFile]->Miss (tjpt, ewgt*(iRJet < 0 ? 0. : h_jet_wgts[iFile]->GetBinContent (h_jet_wgts[iFile]->FindBin (rjpt))));
-        if (meetsJERCut) {
-          rooUnfResp_jet_pt_fullClosure[iFile]->Miss (tjpt, ewgt);
-          if (iEvt % 2 == 0)
-            rooUnfResp_jet_pt_halfClosure[iFile]->Miss (tjpt, ewgt);
-        }
+        rooUnfResp_jet_pt_altwgts[iFile]->Miss (tjpt, ewgt*(iRJet < 0 ? 0. : h_jet_wgts[iFile]->GetBinContent (h_jet_wgts[iFile]->FindBin (tjpt))));
+        rooUnfResp_jet_pt_fullClosure[iFile]->Miss (tjpt, ewgt);
+        if (iEvt % 2 == 0)
+          rooUnfResp_jet_pt_halfClosure[iFile]->Miss (tjpt, ewgt);
 
         // fill centrality-integrated response too
         if (IspPb ()) {
           rooUnfResp_jet_pt_wgts[nFiles-1]->Miss (tjpt, ewgt*(iRJet < 0 ? 0. : f_jet_wgts[nFiles-1]->Eval (tjpt)));
-          rooUnfResp_jet_pt_altwgts[nFiles-1]->Miss (tjpt, ewgt*(iRJet < 0 ? 0. : h_jet_wgts[nFiles-1]->GetBinContent (h_jet_wgts[nFiles-1]->FindBin (rjpt))));
-          if (meetsJERCut) {
-            rooUnfResp_jet_pt_fullClosure[nFiles-1]->Miss (tjpt, ewgt);
-            if (iEvt % 2 == 0)
-              rooUnfResp_jet_pt_halfClosure[nFiles-1]->Miss (tjpt, ewgt);
-          }
+          rooUnfResp_jet_pt_altwgts[nFiles-1]->Miss (tjpt, ewgt*(iRJet < 0 ? 0. : h_jet_wgts[nFiles-1]->GetBinContent (h_jet_wgts[nFiles-1]->FindBin (tjpt))));
+          rooUnfResp_jet_pt_fullClosure[nFiles-1]->Miss (tjpt, ewgt);
+          if (iEvt % 2 == 0)
+            rooUnfResp_jet_pt_halfClosure[nFiles-1]->Miss (tjpt, ewgt);
         }
       }
 
@@ -529,41 +522,34 @@ bool MakeResponseMatrix (const char* directory,
         
         if (isReconstructed) {
           rooUnfResp_jet_trk_pt_sig_wgts[iDir][iFile]->Fill (trk_pt[iTrk], rjpt, trk_truth_pt[iTrk], tjpt, ewgt*(iRJet < 0 ? 0. : f_jet_wgts[iFile]->Eval (tjpt)));
-          rooUnfResp_jet_trk_pt_sig_altwgts[iDir][iFile]->Fill (trk_pt[iTrk], rjpt, trk_truth_pt[iTrk], tjpt, ewgt*(iRJet < 0 ? 0. : h_jet_wgts[iFile]->GetBinContent (h_jet_wgts[iFile]->FindBin (rjpt))));
-          if (meetsJERCut) {
-            rooUnfResp_jet_trk_pt_sig_fullClosure[iDir][iFile]->Fill (trk_pt[iTrk], rjpt, trk_truth_pt[iTrk], tjpt, ewgt);
-            if (iEvt % 2 == 0)
-              rooUnfResp_jet_trk_pt_sig_halfClosure[iDir][iFile]->Fill (trk_pt[iTrk], rjpt, trk_truth_pt[iTrk], tjpt, ewgt);
-          }
+          rooUnfResp_jet_trk_pt_sig_altwgts[iDir][iFile]->Fill (trk_pt[iTrk], rjpt, trk_truth_pt[iTrk], tjpt, ewgt*(iRJet < 0 ? 0. : h_jet_wgts[iFile]->GetBinContent (h_jet_wgts[iFile]->FindBin (tjpt))));
+          rooUnfResp_jet_trk_pt_sig_fullClosure[iDir][iFile]->Fill (trk_pt[iTrk], rjpt, trk_truth_pt[iTrk], tjpt, ewgt);
+          if (iEvt % 2 == 0)
+            rooUnfResp_jet_trk_pt_sig_halfClosure[iDir][iFile]->Fill (trk_pt[iTrk], rjpt, trk_truth_pt[iTrk], tjpt, ewgt);
   
           // fill centrality-integrated response too
           if (IspPb ()) {
             rooUnfResp_jet_trk_pt_sig_wgts[iDir][nFiles-1]->Fill (trk_pt[iTrk], rjpt, trk_truth_pt[iTrk], tjpt, ewgt*(iRJet < 0 ? 0. : f_jet_wgts[nFiles-1]->Eval (tjpt)));
-            rooUnfResp_jet_trk_pt_sig_altwgts[iDir][nFiles-1]->Fill (trk_pt[iTrk], rjpt, trk_truth_pt[iTrk], tjpt, ewgt*(iRJet < 0 ? 0. : h_jet_wgts[nFiles-1]->GetBinContent (h_jet_wgts[nFiles-1]->FindBin (rjpt))));
-            if (meetsJERCut) {
-              rooUnfResp_jet_trk_pt_sig_fullClosure[iDir][nFiles-1]->Fill (trk_pt[iTrk], rjpt, trk_truth_pt[iTrk], tjpt, ewgt);
-              if (iEvt % 2 == 0)
-                rooUnfResp_jet_trk_pt_sig_halfClosure[iDir][nFiles-1]->Fill (trk_pt[iTrk], rjpt, trk_truth_pt[iTrk], tjpt, ewgt);
-            }
-          }
-        } else {
-          rooUnfResp_jet_trk_pt_sig_wgts[iDir][iFile]->Miss (trk_truth_pt[iTrk], tjpt, ewgt*(iRJet < 0 ? 0. : f_jet_wgts[iFile]->Eval (tjpt)));
-          rooUnfResp_jet_trk_pt_sig_altwgts[iDir][iFile]->Miss (trk_truth_pt[iTrk], tjpt, ewgt*(iRJet < 0 ? 0. : h_jet_wgts[iFile]->GetBinContent (h_jet_wgts[iFile]->FindBin (rjpt))));
-          if (meetsJERCut) {
-            rooUnfResp_jet_trk_pt_sig_fullClosure[iDir][iFile]->Miss (trk_truth_pt[iTrk], tjpt, ewgt);
+            rooUnfResp_jet_trk_pt_sig_altwgts[iDir][nFiles-1]->Fill (trk_pt[iTrk], rjpt, trk_truth_pt[iTrk], tjpt, ewgt*(iRJet < 0 ? 0. : h_jet_wgts[nFiles-1]->GetBinContent (h_jet_wgts[nFiles-1]->FindBin (tjpt))));
+            rooUnfResp_jet_trk_pt_sig_fullClosure[iDir][nFiles-1]->Fill (trk_pt[iTrk], rjpt, trk_truth_pt[iTrk], tjpt, ewgt);
             if (iEvt % 2 == 0)
-              rooUnfResp_jet_trk_pt_sig_halfClosure[iDir][iFile]->Miss (trk_truth_pt[iTrk], tjpt, ewgt);
+              rooUnfResp_jet_trk_pt_sig_halfClosure[iDir][nFiles-1]->Fill (trk_pt[iTrk], rjpt, trk_truth_pt[iTrk], tjpt, ewgt);
           }
+        }
+        else {
+          rooUnfResp_jet_trk_pt_sig_wgts[iDir][iFile]->Miss (trk_truth_pt[iTrk], tjpt, ewgt*(iRJet < 0 ? 0. : f_jet_wgts[iFile]->Eval (tjpt)));
+          rooUnfResp_jet_trk_pt_sig_altwgts[iDir][iFile]->Miss (trk_truth_pt[iTrk], tjpt, ewgt*(iRJet < 0 ? 0. : h_jet_wgts[iFile]->GetBinContent (h_jet_wgts[iFile]->FindBin (tjpt))));
+          rooUnfResp_jet_trk_pt_sig_fullClosure[iDir][iFile]->Miss (trk_truth_pt[iTrk], tjpt, ewgt);
+          if (iEvt % 2 == 0)
+            rooUnfResp_jet_trk_pt_sig_halfClosure[iDir][iFile]->Miss (trk_truth_pt[iTrk], tjpt, ewgt);
   
           // fill centrality-integrated response too
           if (IspPb ()) {
             rooUnfResp_jet_trk_pt_sig_wgts[iDir][nFiles-1]->Miss (trk_truth_pt[iTrk], tjpt, ewgt*(iRJet < 0 ? 0. : f_jet_wgts[nFiles-1]->Eval (tjpt)));
-            rooUnfResp_jet_trk_pt_sig_altwgts[iDir][nFiles-1]->Miss (trk_truth_pt[iTrk], tjpt, ewgt*(iRJet < 0 ? 0. : h_jet_wgts[nFiles-1]->GetBinContent (h_jet_wgts[nFiles-1]->FindBin (rjpt))));
-            if (meetsJERCut) {
-              rooUnfResp_jet_trk_pt_sig_fullClosure[iDir][nFiles-1]->Miss (trk_truth_pt[iTrk], tjpt, ewgt);
-              if (iEvt % 2 == 0)
-                rooUnfResp_jet_trk_pt_sig_halfClosure[iDir][nFiles-1]->Miss (trk_truth_pt[iTrk], tjpt, ewgt);
-            }
+            rooUnfResp_jet_trk_pt_sig_altwgts[iDir][nFiles-1]->Miss (trk_truth_pt[iTrk], tjpt, ewgt*(iRJet < 0 ? 0. : h_jet_wgts[nFiles-1]->GetBinContent (h_jet_wgts[nFiles-1]->FindBin (tjpt))));
+            rooUnfResp_jet_trk_pt_sig_fullClosure[iDir][nFiles-1]->Miss (trk_truth_pt[iTrk], tjpt, ewgt);
+            if (iEvt % 2 == 0)
+              rooUnfResp_jet_trk_pt_sig_halfClosure[iDir][nFiles-1]->Miss (trk_truth_pt[iTrk], tjpt, ewgt);
           }
         }
 
@@ -571,22 +557,16 @@ bool MakeResponseMatrix (const char* directory,
 
 
       // fill truth jet pT spectrum
-      if (isReconstructed) {
-        h_jet_pt_wgts[iFile][1]->Fill (tjpt, ewgt*(iRJet < 0 ? 0. : f_jet_wgts[iFile]->Eval (tjpt)));
-        if (meetsJERCut) {
-          h_jet_pt_fullClosure[iFile][1]->Fill (tjpt, ewgt);
-          if (iEvt % 2 == 1)
-            h_jet_pt_halfClosure[iFile][1]->Fill (tjpt, ewgt);
-        }
+      h_jet_pt_wgts[iFile][1]->Fill (tjpt, ewgt*(iRJet < 0 ? 0. : f_jet_wgts[iFile]->Eval (tjpt)));
+      h_jet_pt_fullClosure[iFile][1]->Fill (tjpt, ewgt);
+      if (iEvt % 2 == 1)
+        h_jet_pt_halfClosure[iFile][1]->Fill (tjpt, ewgt);
 
-        if (IspPb ()) {
-          h_jet_pt_wgts[nFiles-1][1]->Fill (tjpt, ewgt*(iRJet < 0 ? 0. : f_jet_wgts[nFiles-1]->Eval (tjpt)));
-          if (meetsJERCut) {
-            h_jet_pt_fullClosure[nFiles-1][1]->Fill (tjpt, ewgt);
-            if (iEvt % 2 == 1)
-              h_jet_pt_halfClosure[nFiles-1][1]->Fill (tjpt, ewgt);
-          }
-        }
+      if (IspPb ()) {
+        h_jet_pt_wgts[nFiles-1][1]->Fill (tjpt, ewgt*(iRJet < 0 ? 0. : f_jet_wgts[nFiles-1]->Eval (tjpt)));
+        h_jet_pt_fullClosure[nFiles-1][1]->Fill (tjpt, ewgt);
+        if (iEvt % 2 == 1)
+          h_jet_pt_halfClosure[nFiles-1][1]->Fill (tjpt, ewgt);
       }
 
 
@@ -623,19 +603,15 @@ bool MakeResponseMatrix (const char* directory,
 
         // fill truth jet FF plots
         h2_jet_trk_pt_sig_wgts[iDir][iFile][1]->Fill (truth_trk_pt[iTTrk], tjpt, ewgt*(iRJet < 0 ? 0. : f_jet_wgts[iFile]->Eval (tjpt)));
-        if (meetsJERCut) {
-          h2_jet_trk_pt_sig_fullClosure[iDir][iFile][1]->Fill (truth_trk_pt[iTTrk], tjpt, ewgt);
-          if (iEvt % 2 == 1)
-            h2_jet_trk_pt_sig_halfClosure[iDir][iFile][1]->Fill (truth_trk_pt[iTTrk], tjpt, ewgt);
-        }
+        h2_jet_trk_pt_sig_fullClosure[iDir][iFile][1]->Fill (truth_trk_pt[iTTrk], tjpt, ewgt);
+        if (iEvt % 2 == 1)
+          h2_jet_trk_pt_sig_halfClosure[iDir][iFile][1]->Fill (truth_trk_pt[iTTrk], tjpt, ewgt);
 
         if (IspPb ()) {
           h2_jet_trk_pt_sig_wgts[iDir][nFiles-1][1]->Fill (truth_trk_pt[iTTrk], tjpt, ewgt*(iRJet < 0 ? 0. : f_jet_wgts[nFiles-1]->Eval (tjpt)));
-          if (meetsJERCut) {
-            h2_jet_trk_pt_sig_fullClosure[iDir][nFiles-1][1]->Fill (truth_trk_pt[iTTrk], tjpt, ewgt);
-            if (iEvt % 2 == 1)
-              h2_jet_trk_pt_sig_halfClosure[iDir][nFiles-1][1]->Fill (truth_trk_pt[iTTrk], tjpt, ewgt);
-          }
+          h2_jet_trk_pt_sig_fullClosure[iDir][nFiles-1][1]->Fill (truth_trk_pt[iTTrk], tjpt, ewgt);
+          if (iEvt % 2 == 1)
+            h2_jet_trk_pt_sig_halfClosure[iDir][nFiles-1][1]->Fill (truth_trk_pt[iTTrk], tjpt, ewgt);
         }
 
       } // end loop over truth tracks
@@ -688,18 +664,14 @@ bool MakeResponseMatrix (const char* directory,
 
       // fill reco jet spectrum
       h_jet_pt_wgts[iFile][0]->Fill (rjpt, ewgt*(iRJet < 0 ? 0. : f_jet_wgts[iFile]->Eval (tjpt)));
-      if (meetsJERCut) {
-        h_jet_pt_fullClosure[iFile][0]->Fill (rjpt, ewgt);
-        if (iEvt % 2 == 1)
-          h_jet_pt_halfClosure[iFile][0]->Fill (rjpt, ewgt);
-      }
+      h_jet_pt_fullClosure[iFile][0]->Fill (rjpt, ewgt);
+      if (iEvt % 2 == 1)
+        h_jet_pt_halfClosure[iFile][0]->Fill (rjpt, ewgt);
       if (IspPb ()) {
         h_jet_pt_wgts[nFiles-1][0]->Fill (rjpt, ewgt*(iRJet < 0 ? 0. : f_jet_wgts[nFiles-1]->Eval (tjpt)));
-        if (meetsJERCut) {
-          h_jet_pt_fullClosure[nFiles-1][0]->Fill (rjpt, ewgt);
-          if (iEvt % 2 == 1)
-            h_jet_pt_halfClosure[nFiles-1][0]->Fill (rjpt, ewgt);
-        }
+        h_jet_pt_fullClosure[nFiles-1][0]->Fill (rjpt, ewgt);
+        if (iEvt % 2 == 1)
+          h_jet_pt_halfClosure[nFiles-1][0]->Fill (rjpt, ewgt);
       }
 
 
@@ -753,19 +725,15 @@ bool MakeResponseMatrix (const char* directory,
 
         // fill reco jet FF plots
         h2_jet_trk_pt_sig_wgts[iDir][iFile][0]->Fill (trk_pt[iTrk], rjpt, ewgt*twgt*(iRJet < 0 ? 0. : f_jet_wgts[iFile]->Eval (tjpt)));
-        if (meetsJERCut) {
-          h2_jet_trk_pt_sig_fullClosure[iDir][iFile][0]->Fill (trk_pt[iTrk], rjpt, ewgt*twgt);
-          if (iEvt % 2 == 1)
-            h2_jet_trk_pt_sig_halfClosure[iDir][iFile][0]->Fill (trk_pt[iTrk], rjpt, ewgt*twgt);
-        }
+        h2_jet_trk_pt_sig_fullClosure[iDir][iFile][0]->Fill (trk_pt[iTrk], rjpt, ewgt*twgt);
+        if (iEvt % 2 == 1)
+          h2_jet_trk_pt_sig_halfClosure[iDir][iFile][0]->Fill (trk_pt[iTrk], rjpt, ewgt*twgt);
 
         if (IspPb ()) {
           h2_jet_trk_pt_sig_wgts[iDir][nFiles-1][0]->Fill (trk_pt[iTrk], rjpt, ewgt*twgt*(iRJet < 0 ? 0. : f_jet_wgts[nFiles-1]->Eval (tjpt)));
-          if (meetsJERCut) {
-            h2_jet_trk_pt_sig_fullClosure[iDir][nFiles-1][0]->Fill (trk_pt[iTrk], rjpt, ewgt*twgt);
-            if (iEvt % 2 == 1)
-              h2_jet_trk_pt_sig_halfClosure[iDir][nFiles-1][0]->Fill (trk_pt[iTrk], rjpt, ewgt*twgt);
-          }
+          h2_jet_trk_pt_sig_fullClosure[iDir][nFiles-1][0]->Fill (trk_pt[iTrk], rjpt, ewgt*twgt);
+          if (iEvt % 2 == 1)
+            h2_jet_trk_pt_sig_halfClosure[iDir][nFiles-1][0]->Fill (trk_pt[iTrk], rjpt, ewgt*twgt);
         }
 
       } // end loop over tracks
