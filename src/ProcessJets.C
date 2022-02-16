@@ -11,6 +11,11 @@
 #include <ArrayTemplates.h>
 #include <Utilities.h>
 
+#if !(defined(__CINT__) || defined(__CLING__)) || defined(__ACLIC__)
+#include "RooUnfoldResponse.h"
+#include "RooUnfoldBayes.h"
+#endif
+
 #include <TH1D.h>
 #include <TH2D.h>
 
@@ -43,66 +48,62 @@ void ProcessJets (const char* tag, const char* outFileTag) {
   const TString var = variations[0];
   const short nSamps = 6; // JZ0, 1, 2, 3, JZ1-3, JZ0-3
 
+
+  const short nIters1DMax = 20;
+  const short nIters1DMin = 1;
+  const double* nIters1DVals = linspace (nIters1DMin, nIters1DMax, nIters1DMax-nIters1DMin);
+
+
+  const bool useJetWgts = true;
+  const bool useCentDiffUnf = true;
+
+
   TFile* inFile = nullptr;
 
-  TH1D***   h_evt_counts_ref     = Get2DArray <TH1D*> (2, nSamps);
-  TH1D****  h_evt_counts         = Get3DArray <TH1D*> (2, nZdcCentBins+1, nSamps);
+  TH1D***   h_evt_counts_ref                = Get2DArray <TH1D*> (2, nSamps);
+  TH1D****  h_evt_counts                    = Get3DArray <TH1D*> (2, nZdcCentBins+1, nSamps);
 
-  TH1D***   h_jet_pt_ref          = Get2DArray <TH1D*> (3, nSamps);
-  TH2D***   h2_jet_pt_cov_ref     = Get2DArray <TH2D*> (2, nSamps);
+  TH1D***   h_jet_pt_ref                    = Get2DArray <TH1D*> (3, nSamps);
+  TH2D***   h2_jet_pt_cov_ref               = Get2DArray <TH2D*> (2, nSamps);
 
-  TH1D****  h_jet_pt             = Get3DArray <TH1D*> (3, nZdcCentBins+1, nSamps);
-  TH2D****  h2_jet_pt_cov        = Get3DArray <TH2D*> (2, nZdcCentBins+1, nSamps);
+  TH1D****  h_jet_pt                        = Get3DArray <TH1D*> (3, nZdcCentBins+1, nSamps);
+  TH2D****  h2_jet_pt_cov                   = Get3DArray <TH2D*> (2, nZdcCentBins+1, nSamps);
 
-  TH1D****  h_jet_pt_ratio       = Get3DArray <TH1D*> (2, nZdcCentBins+1, nSamps);
+  TH1D****  h_jet_pt_ratio                  = Get3DArray <TH1D*> (2, nZdcCentBins+1, nSamps);
 
-  TH1D***   h_jet_pt_datamc_ratio_ref  = Get2DArray <TH1D*> (2, nSamps);
-  TH1D****  h_jet_pt_datamc_ratio      = Get3DArray <TH1D*> (2, nZdcCentBins+1, nSamps);
+  TH1D***   h_jet_pt_datamc_ratio_ref       = Get2DArray <TH1D*> (2, nSamps);
+  TH1D****  h_jet_pt_datamc_ratio           = Get3DArray <TH1D*> (2, nZdcCentBins+1, nSamps);
 
-  TF1***    f_jet_pt_datamc_ratio_ref  = Get2DArray <TF1*> (2, nSamps);
-  TF1****   f_jet_pt_datamc_ratio      = Get3DArray <TF1*> (2, nZdcCentBins+1, nSamps);
+  TF1***    f_jet_pt_datamc_ratio_ref       = Get2DArray <TF1*> (2, nSamps);
+  TF1****   f_jet_pt_datamc_ratio           = Get3DArray <TF1*> (2, nZdcCentBins+1, nSamps);
 
-  //TH2D****  h2_jet_eta_phi_ref   = Get3DArray <TH2D*> (2, nPtJBins, nSamps);
-  //TH2D***** h2_jet_eta_phi       = Get4DArray <TH2D*> (2, nPtJBins, nZdcCentBins+1, nSamps);
 
-  //const int nAltPtJBins = (strcmp (tag, "30GeVJets") == 0 ? 13 : 16);
-  //double* altPtJBins = new double[nAltPtJBins+1];
-  //if (strcmp (tag, "30GeVJets") == 0) {
-  //  altPtJBins[0] = pTJBins[0];
-  //  altPtJBins[1] = pTJBins[2];
-  //  altPtJBins[2] = pTJBins[4];
-  //  altPtJBins[3] = pTJBins[6];
-  //  altPtJBins[4] = pTJBins[8];
-  //  altPtJBins[5] = pTJBins[10];
-  //  altPtJBins[6] = pTJBins[12];
-  //  altPtJBins[7] = pTJBins[14];
-  //  altPtJBins[8] = pTJBins[18];
-  //  altPtJBins[9] = pTJBins[24];
-  //  altPtJBins[10] = pTJBins[30];
-  //  altPtJBins[11] = pTJBins[40];
-  //  altPtJBins[12] = pTJBins[50];
-  //  altPtJBins[13] = pTJBins[60];
-  //}
-  //else {
-  //  altPtJBins[0] = pTJBins[0];
-  //  altPtJBins[1] = pTJBins[3];
-  //  altPtJBins[2] = pTJBins[6];
-  //  altPtJBins[3] = pTJBins[9];
-  //  altPtJBins[4] = pTJBins[12];
-  //  altPtJBins[5] = pTJBins[15];
-  //  altPtJBins[6] = pTJBins[18];
-  //  altPtJBins[7] = pTJBins[21];
-  //  altPtJBins[8] = pTJBins[24];
-  //  altPtJBins[9] = pTJBins[27];
-  //  altPtJBins[10] = pTJBins[30];
-  //  altPtJBins[11] = pTJBins[33];
-  //  altPtJBins[12] = pTJBins[36];
-  //  altPtJBins[13] = pTJBins[42];
-  //  altPtJBins[14] = pTJBins[48];
-  //  altPtJBins[15] = pTJBins[54];
-  //  altPtJBins[16] = pTJBins[60];
-  //}
-  
+  // unfolded jet spectra
+  TH1D**    h_jet_pt_ref_unf_nIters         = Get1DArray <TH1D*> (nIters1DMax-nIters1DMin+2);
+  TH1D***   h_jet_pt_unf_nIters             = Get2DArray <TH1D*> (nZdcCentBins+1, nIters1DMax-nIters1DMin+2);
+
+  // refolded jet spectra
+  TH1D**    h_jet_pt_ref_rfld_nIters        = Get1DArray <TH1D*> (nIters1DMax-nIters1DMin+2);
+  TH1D***   h_jet_pt_rfld_nIters            = Get2DArray <TH1D*> (nZdcCentBins+1, nIters1DMax-nIters1DMin+2);
+
+
+  TH2D****  h2_jet_eta_phi_ref              = Get3DArray <TH2D*> (2, nPtJBins, nSamps);
+  TH2D***** h2_jet_eta_phi                  = Get4DArray <TH2D*> (2, nPtJBins, nZdcCentBins+1, nSamps);
+
+
+  TH2D***   h2_jet_pt_eta_jer_frac_num_ref  = Get2DArray <TH2D*> (2, nSamps);
+  TH2D****  h2_jet_pt_eta_jer_frac_num      = Get3DArray <TH2D*> (2, nZdcCentBins+1, nSamps);
+
+  TH2D***   h2_jet_pt_eta_jer_frac_den_ref  = Get2DArray <TH2D*> (2, nSamps);
+  TH2D****  h2_jet_pt_eta_jer_frac_den      = Get3DArray <TH2D*> (2, nZdcCentBins+1, nSamps);
+
+  TH2D***   h2_jet_pt_eta_jer_frac_ref      = Get2DArray <TH2D*> (2, nSamps);
+  TH2D****  h2_jet_pt_eta_jer_frac          = Get3DArray <TH2D*> (2, nZdcCentBins+1, nSamps);
+
+
+  RooUnfoldResponse*    rooUnfResp_jet_pt_ref                     = nullptr;
+  RooUnfoldResponse**   rooUnfResp_jet_pt                         = Get1DArray <RooUnfoldResponse*> (nFcalCentBins+1);
+
 
 
   TString outFileName = outFileTag;
@@ -141,6 +142,12 @@ void ProcessJets (const char* tag, const char* outFileTag) {
         //  h2_jet_eta_phi_ref[iDType][iPtJ][iSamp]  = (TH2D*) inFile->Get (Form ("h2_jet_eta_phi_%s_%s17", pTJ.Data (), dType.Data ()))->Clone (Form ("h2_jet_eta_phi_ref_%s_%s", dType.Data (), samp.Data ()));
 
         //} // end loop over iPtJ
+
+        h2_jet_pt_eta_jer_frac_num_ref[iDType][iSamp] = (TH2D*) inFile->Get ("h2_jet_pt_eta_jer_frac_num")->Clone     (Form ("h2_jet_pt_eta_jer_frac_num_ref_%s_%s",  dType.Data (), samp.Data ()));
+        h2_jet_pt_eta_jer_frac_den_ref[iDType][iSamp] = (TH2D*) inFile->Get ("h2_jet_pt_eta_jer_frac_den")->Clone     (Form ("h2_jet_pt_eta_jer_frac_den_ref_%s_%s",  dType.Data (), samp.Data ()));
+        h2_jet_pt_eta_jer_frac_ref[iDType][iSamp]     = (TH2D*) h2_jet_pt_eta_jer_frac_num_ref[iDType][iSamp]->Clone  (Form ("h2_jet_pt_eta_jer_frac_ref_%s_%s",      dType.Data (), samp.Data ()));
+        if (iDType == 1) // for iDType == 0 (i.e. data) this quantity is not defined, and calling divide will result in divide by zero
+          h2_jet_pt_eta_jer_frac_ref[iDType][iSamp]->Divide (h2_jet_pt_eta_jer_frac_den_ref[iDType][iSamp]);
 
         inFile->Close ();
 
@@ -192,9 +199,9 @@ void ProcessJets (const char* tag, const char* outFileTag) {
         inFile = new TFile (inFileName.Data (), "read");
         outFile->cd ();
 
-        h_evt_counts[iDType][iCent][iSamp]   = (TH1D*) inFile->Get ("h_evt_counts")->Clone (Form ("h_evt_counts_pPb_%s_%s_%s", cent.Data(), dType.Data (), samp.Data ()));
+        h_evt_counts[iDType][iCent][iSamp]   = (TH1D*) inFile->Get ("h_evt_counts")->Clone (Form ("h_evt_counts_pPb_%s_%s_%s",    cent.Data(), dType.Data (), samp.Data ()));
 
-        h_jet_pt[iDType][iCent][iSamp]       = (TH1D*) inFile->Get ("h_jet_pt")->Clone (Form ("h_jet_pt_pPb_%s_%s_%s",       cent.Data (), dType.Data (), samp.Data ()));
+        h_jet_pt[iDType][iCent][iSamp]       = (TH1D*) inFile->Get ("h_jet_pt")->Clone (Form ("h_jet_pt_pPb_%s_%s_%s",            cent.Data (), dType.Data (), samp.Data ()));
         h2_jet_pt_cov[iDType][iCent][iSamp]  = (TH2D*) inFile->Get ("h2_jet_pt_cov")->Clone (Form ("h2_jet_pt_cov_pPb_%s_%s_%s",  cent.Data (), dType.Data (), samp.Data ()));
 
         //for (short iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
@@ -204,6 +211,12 @@ void ProcessJets (const char* tag, const char* outFileTag) {
         //  h2_jet_eta_phi[iDType][iPtJ][iCent][iSamp]  = (TH2D*) inFile->Get (Form ("h2_jet_eta_phi_%s_%s16", pTJ.Data (), dType.Data ()))->Clone (Form ("h2_jet_eta_phi_pPb_%s_%s_%s_%s", cent.Data (), dType.Data (), pTJ.Data (), samp.Data ()));
 
         //} // end loop over iPtJ
+
+        h2_jet_pt_eta_jer_frac_num[iDType][iCent][iSamp] = (TH2D*) inFile->Get ("h2_jet_pt_eta_jer_frac_num")->Clone        (Form ("h2_jet_pt_eta_jer_frac_num_%s_%s_%s", cent.Data (), dType.Data (), samp.Data ()));
+        h2_jet_pt_eta_jer_frac_den[iDType][iCent][iSamp] = (TH2D*) inFile->Get ("h2_jet_pt_eta_jer_frac_den")->Clone        (Form ("h2_jet_pt_eta_jer_frac_den_%s_%s_%s", cent.Data (), dType.Data (), samp.Data ()));
+        h2_jet_pt_eta_jer_frac[iDType][iCent][iSamp]     = (TH2D*) h2_jet_pt_eta_jer_frac_num[iDType][iCent][iSamp]->Clone  (Form ("h2_jet_pt_eta_jer_frac_%s_%s_%s",     cent.Data (), dType.Data (), samp.Data ()));
+        if (iDType == 1) // for iDType == 0 (i.e. data) this quantity is not defined, and calling divide will result in divide by zero
+          h2_jet_pt_eta_jer_frac[iDType][iCent][iSamp]->Divide (h2_jet_pt_eta_jer_frac_den[iDType][iCent][iSamp]);
 
         inFile->Close ();
       
@@ -258,6 +271,28 @@ void ProcessJets (const char* tag, const char* outFileTag) {
     } // end loop over iSamp
 
   } // end loop over iDType
+
+
+
+
+  //////////////////////////////////////////////////////////////////////////////////////////////////// 
+  // READ IN RESPONSE MATRICES
+  //////////////////////////////////////////////////////////////////////////////////////////////////// 
+  {
+    TFile* inFile = new TFile (Form ("%s/MakeResponseMatrix/Nominal/allSamples_finePtJBins.root", rootPath.Data ()), "read");
+
+    if (useJetWgts) rooUnfResp_jet_pt_ref = (RooUnfoldResponse*) inFile->Get ("rooUnfResp_jet_pt_ref_mc_altwgts");
+    else            rooUnfResp_jet_pt_ref = (RooUnfoldResponse*) inFile->Get ("rooUnfResp_jet_pt_ref_mc_fullClosure");
+
+    for (short iCent = 0; iCent < nFcalCentBins+1; iCent++) {
+
+      const char* cent = (iCent == nFcalCentBins ? "pPb_allCent" : Form ("pPb_iCent%i", iCent));
+
+      if (useJetWgts) rooUnfResp_jet_pt[iCent] = (RooUnfoldResponse*) inFile->Get (Form ("rooUnfResp_jet_pt_%s_mc_altwgts", cent));
+      else            rooUnfResp_jet_pt[iCent] = (RooUnfoldResponse*) inFile->Get (Form ("rooUnfResp_jet_pt_%s_mc_fullClosure", cent));
+
+    } // end loop over iCent
+  }
 
 
 
@@ -374,6 +409,62 @@ void ProcessJets (const char* tag, const char* outFileTag) {
 
 
 
+  //////////////////////////////////////////////////////////////////////////////////////////////////// 
+  // DO UNFOLD STUDIES VS NUMBER OF ITERATIONS
+  //////////////////////////////////////////////////////////////////////////////////////////////////// 
+  {
+    {
+      for (short iIter = 0; iIter < nIters1DMax-nIters1DMin+2; iIter++) {
+
+        const short nIters = (short) nIters1DVals[iIter];
+        std::cout << "|--> Doing 1D unfold in pp at " << nIters << " iterations... " << std::endl;
+
+        RooUnfoldResponse* resp = rooUnfResp_jet_pt_ref;
+        resp->UseOverflow (0);
+        RooUnfoldBayes* bayesUnf = new RooUnfoldBayes (resp, h_jet_pt_ref[0][0], nIters);
+        bayesUnf->SetVerbose (-1);
+        //bayesUnf->SetMeasuredCov (TMatrixD (nPtJBins, nPtJBins, h2_jet_pt_ref_cov->GetArray ()));
+        TH1D* h_unf = (TH1D*) bayesUnf->Hreco ()->Clone (Form ("h_jet_pt_ref_unf_data_nIters%i", nIters));
+        TH1D* h_rfld = (TH1D*) resp->ApplyToTruth (h_unf)->Clone (Form ("h_jet_pt_ref_rfld_data_nIters%i", nIters));
+        SaferDelete (&bayesUnf);
+
+        h_jet_pt_ref_unf_nIters[iIter] = h_unf;
+        h_jet_pt_ref_rfld_nIters[iIter] = h_rfld;
+
+      } // end loop over iIter
+    }
+
+
+    for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
+
+      const TString cent = (iCent == nZdcCentBins ? "allCent" : Form ("iCent%i", iCent));
+      const short iUnfCent = (useCentDiffUnf ? iCent : nZdcCentBins);
+
+      for (short iIter = 0; iIter < nIters1DMax-nIters1DMin+2; iIter++) {
+  
+        const short nIters = (short) nIters1DVals[iIter];
+        std::cout << "|--> Doing 1D unfold in p+Pb (" << cent.Data () << ") at " << nIters << " iterations... " << std::endl;
+
+        RooUnfoldResponse* resp = rooUnfResp_jet_pt[iUnfCent];
+        resp->UseOverflow (0);
+        RooUnfoldBayes* bayesUnf = new RooUnfoldBayes (resp, h_jet_pt[0][iCent][0], nIters);
+        bayesUnf->SetVerbose (-1);
+        //bayesUnf->SetMeasuredCov (TMatrixD (nPtJBins, nPtJBins, h2_jet_pt_cov[iCent]->GetArray ()));
+        TH1D* h_unf = (TH1D*) bayesUnf->Hreco ()->Clone (Form ("h_jet_pt_unf_data_%s_nIters%i", cent.Data (), nIters));
+        TH1D* h_rfld = (TH1D*) resp->ApplyToTruth (h_unf)->Clone (Form ("h_jet_pt_rfld_data_%s_nIters%i", cent.Data (), nIters));
+        SaferDelete (&bayesUnf);
+
+        h_jet_pt_unf_nIters[iCent][iIter] = h_unf;
+        h_jet_pt_rfld_nIters[iCent][iIter] = h_rfld;
+
+      } // end loop over iIter
+
+    } // end loop over iCent
+  }
+
+
+
+
   {
     outFile->cd ();
 
@@ -397,6 +488,18 @@ void ProcessJets (const char* tag, const char* outFileTag) {
 
         } // end loop over iCent
 
+        h2_jet_pt_eta_jer_frac_num_ref[iDType][iSamp]->Write ();
+        h2_jet_pt_eta_jer_frac_den_ref[iDType][iSamp]->Write ();
+        h2_jet_pt_eta_jer_frac_ref[iDType][iSamp]->Write ();
+
+        for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
+
+          h2_jet_pt_eta_jer_frac_num[iDType][iCent][iSamp]->Write ();
+          h2_jet_pt_eta_jer_frac_den[iDType][iCent][iSamp]->Write ();
+          h2_jet_pt_eta_jer_frac[iDType][iCent][iSamp]->Write ();
+
+        } // end loop over iCent
+
         //for (short iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
 
         //  h2_jet_eta_phi_ref[iDType][iPtJ][iSamp]->Write ();
@@ -412,6 +515,21 @@ void ProcessJets (const char* tag, const char* outFileTag) {
       } // end loop over iSamp
 
     } // end loop over iDType
+
+
+    for (short iIter = 0; iIter < nIters1DMax-nIters1DMin+2; iIter++) {
+
+      h_jet_pt_ref_unf_nIters[iIter]->Write ();
+      h_jet_pt_ref_rfld_nIters[iIter]->Write ();
+
+      for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
+  
+        h_jet_pt_unf_nIters[iCent][iIter]->Write ();
+        h_jet_pt_rfld_nIters[iCent][iIter]->Write ();
+  
+      } // end loop over iCent
+
+    }
 
 
     for (short iSamp = 0; iSamp < nSamps; iSamp++) {
