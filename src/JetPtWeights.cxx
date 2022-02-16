@@ -430,6 +430,8 @@ bool JetPtWeights (const char* directory,
         const float tjpt = GetAktTruthJetPt (iTJet, r0p4);
         if (std::fabs (jpt/tjpt - 1) > 3*0.01*f_jer->Eval (tjpt))
           continue; // cut on jets reconstructed well outside the JER
+        //if (jpt < truth_jet_min_pt || jpt > truth_jet_max_pt)
+        //  continue; // cut on jets outside truth range. Ensures that only one sample fills each pT region.
       }
 
 
