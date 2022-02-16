@@ -426,6 +426,9 @@ bool MakeResponseMatrix (const char* directory,
       const float tjeta = GetAktTruthJetEta (iTJet, r0p4);
       const float tjphi = GetAktTruthJetPhi (iTJet, r0p4);
 
+      if (tjpt < pTJBins[0])
+        continue; // minimum truth jet pT cut.
+
 
       const int iRJet = GetAktHIJetMatch (iTJet, r0p4, nJESVar);
       float rjpt        = (iRJet < 0 ? 0. : GetAktHIJetPt  (iRJet, r0p4, nJESVar));

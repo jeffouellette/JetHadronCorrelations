@@ -244,7 +244,7 @@ bool JetPtWeights (const char* directory,
   else if (IspPb ())  sys = "pPb";
   else                sys = "???";
 
-  const double finePtJBins[] = {15, 15.5, 16, 16.5, 17, 17.5, 18, 18.5, 19, 19.5, 20, 20.5, 21, 21.5, 22, 22.5, 23, 23.5, 24, 24.5, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 47.5, 50, 52.5, 55, 57.5, 60, 62.5, 65, 67.5, 70, 72.5, 75, 80, 85, 90, 95, 100, 105, 110, 115, 120, 125, 130, 140, 150, 160, 170, 180, 190, 200, 210, 220, 240, 260, 280, 300, 325, 350, 375, 400};
+  const double finePtJBins[] = {7.5, 8, 8.5, 9, 9.5, 10, 10.5, 11, 11.5, 12, 12.5, 13, 13.5, 14, 14.5, 15, 15.5, 16, 16.5, 17, 17.5, 18, 18.5, 19, 19.5, 20, 20.5, 21, 21.5, 22, 22.5, 23, 23.5, 24, 24.5, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 47.5, 50, 52.5, 55, 57.5, 60, 62.5, 65, 67.5, 70, 72.5, 75, 80, 85, 90, 95, 100, 105, 110, 115, 120, 125, 130, 140, 150, 160, 170, 180, 190, 200, 210, 220, 240, 260, 280, 300, 325, 350, 375, 400};
   const int nFinePtJBins = sizeof (finePtJBins) / sizeof (finePtJBins[0]) - 1;
 
 
@@ -430,10 +430,6 @@ bool JetPtWeights (const char* directory,
         const float tjpt = GetAktTruthJetPt (iTJet, r0p4);
         if (std::fabs (jpt/tjpt - 1) > 3*0.01*f_jer->Eval (tjpt))
           continue; // cut on jets reconstructed well outside the JER
-
-        if (jpt < truth_jet_min_pt || jpt > truth_jet_max_pt)
-          continue; // cut on jets outside truth range. Ensures that only one sample fills each pT region.
-          
       }
 
 
