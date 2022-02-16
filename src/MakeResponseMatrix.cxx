@@ -265,6 +265,7 @@ bool MakeResponseMatrix (const char* directory,
   tree->SetBranchAddress ("akt4_hi_jet_e_etajes",   &akt4_hi_jet_e_etajes);
   tree->SetBranchAddress ("akt4_hi_jet_e_xcalib",   &akt4_hi_jet_e_xcalib);
   tree->SetBranchAddress ("akt4_hi_jet_timing",     &akt4_hi_jet_timing);
+  tree->SetBranchAddress ("akt4_hi_jet_LooseBad",   &akt4_hi_jet_LooseBad);
 
   tree->SetBranchAddress ("akt4_truth_jet_n",       &akt4_truth_jet_n);
   tree->SetBranchAddress ("akt4_truth_jet_pt",      &akt4_truth_jet_pt);
@@ -656,8 +657,9 @@ bool MakeResponseMatrix (const char* directory,
         continue; // in case of no truth jet match
       const float tjpt = GetAktTruthJetPt (iTJet, r0p4);
       const bool meetsJERCut = (std::fabs (rjpt/tjpt - 1) < 3*0.01*f_jer->Eval (tjpt));
-      if (!meetsJERCut)
+      if (!meetsJERCut) {
         continue; // cut on jets reconstructed well outside the JER -- these are bad matches in overlay
+      }
 
       if (tjpt < pTJBins[0] || pTJBins[nPtJBins] < tjpt)
         continue;

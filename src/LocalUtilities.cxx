@@ -1172,6 +1172,8 @@ bool MeetsJetAcceptanceCuts (int iJ, const JetRadius& radius, const int nJESVar)
     return false; // cut out jets in the disabled HEC
   if (IsCollisions () && Ispp () && UseMinBiasTriggers () && GetAktHIJetTiming (iJ, radius) > 10)
     return false; // cut out jets with bad timing in pp if using MinBias trigger
+  if (!GetAktHIJetCleaning (iJ, radius))
+    return false; // cut on jets not meeting jet cleaning cut
   return true;
 }
 
@@ -1671,6 +1673,21 @@ float GetAktHIJetTiming (const int iJ, const JetRadius& radius) {
   case JetRadius::R0p2: return akt2_hi_jet_timing[iJ];
   default:              return std::nan ("");
   } // end switch
+}
+
+
+
+/**
+ * Checks the jet cleaning boolean for this jet.
+ * Returns false if radius was not recognized.
+ */
+bool GetAktHIJetCleaning (const int iJ, const JetRadius& radius) {
+  assert (GetAktHIJetN (radius) > iJ);
+  switch (radius) {
+  case JetRadius::R0p4: return akt4_hi_jet_LooseBad[iJ];
+  case JetRadius::R0p2: return akt2_hi_jet_LooseBad[iJ];
+  default:              return false;
+  }
 }
 
 

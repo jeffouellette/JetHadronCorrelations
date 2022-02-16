@@ -524,6 +524,13 @@ float GetAktHIJetTiming (const int iJ, const JetRadius& radius);
 
 
 /**
+ * Checks the jet cleaning boolean for this jet.
+ * Returns false if radius was not recognized.
+ */
+bool GetAktHIJetCleaning (const int iJ, const JetRadius& radius);
+
+
+/**
  * Returns the appropriate per-jet reweighting factor. Takes in coordinates for an anti-kT HI jet (pT, eta, & phi).
  * Returns 0 if the jet is outside the acceptance.
  */
