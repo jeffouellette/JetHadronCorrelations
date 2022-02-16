@@ -603,13 +603,13 @@ bool MakeResponseMatrix (const char* directory,
           continue;
 
         // fill truth jet FF plots
-        h2_jet_trk_pt_sig_wgts[iDir][iFile][1]->Fill (truth_trk_pt[iTTrk], tjpt, ewgt*(iRJet < 0 ? 0. : f_jet_wgts[iFile]->Eval (tjpt)));
+        h2_jet_trk_pt_sig_wgts[iDir][iFile][1]->Fill (truth_trk_pt[iTTrk], tjpt, ewgt*(f_jet_wgts[iFile]->Eval (tjpt)));
         h2_jet_trk_pt_sig_fullClosure[iDir][iFile][1]->Fill (truth_trk_pt[iTTrk], tjpt, ewgt);
         if (iEvt % 2 == 1)
           h2_jet_trk_pt_sig_halfClosure[iDir][iFile][1]->Fill (truth_trk_pt[iTTrk], tjpt, ewgt);
 
         if (IspPb ()) {
-          h2_jet_trk_pt_sig_wgts[iDir][nFiles-1][1]->Fill (truth_trk_pt[iTTrk], tjpt, ewgt*(iRJet < 0 ? 0. : f_jet_wgts[nFiles-1]->Eval (tjpt)));
+          h2_jet_trk_pt_sig_wgts[iDir][nFiles-1][1]->Fill (truth_trk_pt[iTTrk], tjpt, ewgt*(f_jet_wgts[nFiles-1]->Eval (tjpt)));
           h2_jet_trk_pt_sig_fullClosure[iDir][nFiles-1][1]->Fill (truth_trk_pt[iTTrk], tjpt, ewgt);
           if (iEvt % 2 == 1)
             h2_jet_trk_pt_sig_halfClosure[iDir][nFiles-1][1]->Fill (truth_trk_pt[iTTrk], tjpt, ewgt);
@@ -664,12 +664,12 @@ bool MakeResponseMatrix (const char* directory,
 
 
       // fill reco jet spectrum
-      h_jet_pt_wgts[iFile][0]->Fill (rjpt, ewgt*(iRJet < 0 ? 0. : f_jet_wgts[iFile]->Eval (tjpt)));
+      h_jet_pt_wgts[iFile][0]->Fill (rjpt, ewgt*(f_jet_wgts[iFile]->Eval (tjpt)));
       h_jet_pt_fullClosure[iFile][0]->Fill (rjpt, ewgt);
       if (iEvt % 2 == 1)
         h_jet_pt_halfClosure[iFile][0]->Fill (rjpt, ewgt);
       if (IspPb ()) {
-        h_jet_pt_wgts[nFiles-1][0]->Fill (rjpt, ewgt*(iRJet < 0 ? 0. : f_jet_wgts[nFiles-1]->Eval (tjpt)));
+        h_jet_pt_wgts[nFiles-1][0]->Fill (rjpt, ewgt*(f_jet_wgts[nFiles-1]->Eval (tjpt)));
         h_jet_pt_fullClosure[nFiles-1][0]->Fill (rjpt, ewgt);
         if (iEvt % 2 == 1)
           h_jet_pt_halfClosure[nFiles-1][0]->Fill (rjpt, ewgt);
