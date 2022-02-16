@@ -43,9 +43,6 @@ bool MakeResponseMatrix (const char* directory,
 
   const int nFiles = (Ispp () ? 1 : nFcalCentBins+1);
 
-  //const double pTJBins[] = {20, 30, 45, 60, 80, 100, 130, 160, 200, 240, 320};
-  //const short nPtJBins = sizeof (pTJBins) / sizeof (pTJBins[0]) - 1;
-
   TH1D***    h_jet_pt_wgts                  = Get2DArray <TH1D*> (nFiles, 2);
   TH1D***    h_jet_pt_fullClosure           = Get2DArray <TH1D*> (nFiles, 2);
   TH1D***    h_jet_pt_halfClosure           = Get2DArray <TH1D*> (nFiles, 2);
@@ -426,8 +423,9 @@ bool MakeResponseMatrix (const char* directory,
       const float tjeta = GetAktTruthJetEta (iTJet, r0p4);
       const float tjphi = GetAktTruthJetPhi (iTJet, r0p4);
 
-      if (tjpt < pTJBins[0])
-        continue; // minimum truth jet pT cut.
+
+      if (tjpt < pTJBins[0] || pTJBins[nPtJBins] < tjpt)
+        continue; // minimum and maximum truth jet pT cut.
 
 
       const int iRJet = GetAktHIJetMatch (iTJet, r0p4, nJESVar);
