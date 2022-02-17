@@ -213,7 +213,7 @@ bool JetEnergyResolution (const char* directory,
   const int nEtaRespBins = 80;
   const double* etaRespBins = linspace (-0.2, 0.2, nEtaRespBins);
 
-  const double pTJBins[] = {12, 16, 20, 25, 30, 35, 40, 45, 50, 55, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 190, 220, 250, 280, 310, 340, 370, 400, 450, 500, 550, 600, 650, 700, 750, 800, 900, 1000, 1100, 1200, 1300};
+  const double pTJBins[] = {8, 10, 12, 16, 20, 25, 30, 35, 40, 45, 50, 55, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 190, 220, 250, 280, 310, 340, 370, 400, 450, 500, 550, 600, 650, 700, 750, 800, 900, 1000, 1100, 1200, 1300};
   const int nPtJBins = sizeof (pTJBins) / sizeof (pTJBins[0]) - 1;
 
   const std::vector <JetRadius> radii = {JetRadius::R0p2, JetRadius::R0p4};
@@ -360,9 +360,9 @@ bool JetEnergyResolution (const char* directory,
         }
 
         if (iPtJ >= 0 && iPtJ < nPtJBins && iEta >= 0 && iEta < nFinerEtaBins) {
-          h_jpts[iR][iPtJ][iEta]->Fill (jpt / tjpt);
-          h_jes[iR][iPtJ][iEta]->Fill (jen / tjen);
-          h_jetacorr[iR][iPtJ][iEta]->Fill (jeta - tjeta);
+          h_jpts[iR][iPtJ][iEta]->Fill (jpt / tjpt, eventWeight);
+          h_jes[iR][iPtJ][iEta]->Fill (jen / tjen, eventWeight);
+          h_jetacorr[iR][iPtJ][iEta]->Fill (jeta - tjeta, eventWeight);
         }
 
       } // end loop over jets
