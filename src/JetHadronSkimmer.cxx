@@ -269,6 +269,7 @@ bool JetHadronSkimmer (const char* directory,
   tree->SetBranchAddress ("akt4_hi_jet_e_xcalib",     &akt4_hi_jet_e_xcalib);
   //tree->SetBranchAddress ("akt4_hi_jet_sub_et",       &akt4_hi_jet_sub_et);
   //tree->SetBranchAddress ("akt4_hi_jet_sub_e",        &akt4_hi_jet_sub_e);
+  tree->SetBranchAddress ("akt4_hi_jet_LooseBad",     &akt4_hi_jet_LooseBad);
 
   const short nJESVar = GetNJESVar ();
   if (!IsCollisions () && nJESVar != -1) {

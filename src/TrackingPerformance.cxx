@@ -181,6 +181,7 @@ bool TrackingPerformance (const char* directory,
   tree->SetBranchAddress ("akt4_hi_jet_e_etajes",     &akt4_hi_jet_e_etajes);
   tree->SetBranchAddress ("akt4_hi_jet_e_xcalib",     &akt4_hi_jet_e_xcalib);
   tree->SetBranchAddress ("akt4_hi_jet_timing",       &akt4_hi_jet_timing);
+  tree->SetBranchAddress ("akt4_hi_jet_LooseBad",     &akt4_hi_jet_LooseBad);
 
 
   tree->SetBranchAddress ("akt4_truth_jet_n",     &akt4_truth_jet_n);

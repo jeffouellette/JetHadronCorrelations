@@ -212,6 +212,7 @@ bool JetPtWeights (const char* directory,
   tree->SetBranchAddress ("akt4_hi_jet_e_xcalib",     &akt4_hi_jet_e_xcalib);
   tree->SetBranchAddress ("akt4_hi_jet_sub_et",       &akt4_hi_jet_sub_et);
   tree->SetBranchAddress ("akt4_hi_jet_sub_e",        &akt4_hi_jet_sub_e);
+  tree->SetBranchAddress ("akt4_hi_jet_LooseBad",   &akt4_hi_jet_LooseBad);
 
 
   const short nJESVar = GetNJESVar ();
@@ -328,7 +329,7 @@ bool JetPtWeights (const char* directory,
         if (!MeetsJetAcceptanceCuts (iJet, r0p4, nJESVar))
           continue; // jet eta/phi & timing cuts
 
-        ljpt = std::fmax (ljpt, (UseTruthJets () ? GetAktTruthJetPt  (iJet, r0p4) : GetAktHIJetPt  (iJet, r0p4, nJESVar)));
+        ljpt = std::fmax (ljpt, GetAktHIJetPt  (iJet, r0p4, nJESVar));
 
       } // end loop over iJet
 

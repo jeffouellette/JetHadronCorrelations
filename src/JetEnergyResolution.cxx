@@ -170,6 +170,7 @@ bool JetEnergyResolution (const char* directory,
   tree->SetBranchAddress ("akt2_hi_jet_e_xcalib",     &akt2_hi_jet_e_xcalib);
   tree->SetBranchAddress ("akt2_hi_jet_sub_et",       &akt2_hi_jet_sub_et);
   tree->SetBranchAddress ("akt2_hi_jet_sub_e",        &akt2_hi_jet_sub_e);
+  tree->SetBranchAddress ("akt2_hi_jet_LooseBad",     &akt2_hi_jet_LooseBad);
 
 
   tree->SetBranchAddress ("akt4_truth_jet_n",     &akt4_truth_jet_n);
@@ -192,6 +193,7 @@ bool JetEnergyResolution (const char* directory,
   tree->SetBranchAddress ("akt4_hi_jet_e_xcalib",     &akt4_hi_jet_e_xcalib);
   tree->SetBranchAddress ("akt4_hi_jet_sub_et",       &akt4_hi_jet_sub_et);
   tree->SetBranchAddress ("akt4_hi_jet_sub_e",        &akt4_hi_jet_sub_e);
+  tree->SetBranchAddress ("akt4_hi_jet_LooseBad",     &akt4_hi_jet_LooseBad);
 
 
   std::cout << "Info : In JetEnergyResolution.cxx: Saving histograms to " << Form ("%s/%s.root", rootPath.Data (), identifier.Data ()) << std::endl;

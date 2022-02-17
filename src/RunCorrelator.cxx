@@ -216,6 +216,7 @@ bool Correlator (const char* tag, const char* outFilePattern, TTree* jetsTree, T
   jetsTree->SetBranchAddress ("akt4_hi_jet_e_etajes",     &akt4_hi_jet_e_etajes);
   jetsTree->SetBranchAddress ("akt4_hi_jet_e_xcalib",     &akt4_hi_jet_e_xcalib);
   jetsTree->SetBranchAddress ("akt4_hi_jet_timing",       &akt4_hi_jet_timing);
+  jetsTree->SetBranchAddress ("akt4_hi_jet_LooseBad",     &akt4_hi_jet_LooseBad);
 
 
   const short nJESVar = GetNJESVar ();
