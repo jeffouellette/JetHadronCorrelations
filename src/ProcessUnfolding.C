@@ -112,25 +112,25 @@ short GetJetSpectraNIters (const bool isMC, const short iPtJInt, const short iCe
       case 0: // pTJ > 30 GeV
       //return std::max (GetTrkSpectraNIters (iPtJInt, 0, iCent), GetTrkSpectraNIters (iPtJInt, 1, iCent));
       switch (iCent) {
-        case 5:  return 2;//48;//13; // all centralities
-        case 4:  return 2;//43;//13; // 0-20%
-        case 3:  return 2;//45;//11; // 20-40%...
-        case 2:  return 2;//40;//11;
-        case 1:  return 2;//39;//9;
-        case 0:  return 2;//37;//9;  // ... 80-100%
-        case -1: return 2;//47;//15; // pp
+        case 5:  return 5;//13; // all centralities
+        case 4:  return 5;//13; // 0-20%
+        case 3:  return 4;//11; // 20-40%...
+        case 2:  return 3;//11;
+        case 1:  return 4;//9;
+        case 0:  return 4;//9;  // ... 80-100%
+        case -1: return 3;//15; // pp
         default: return 0;
       }
       case 1: // pTJ > 60 GeV
       //return std::max (GetTrkSpectraNIters (iPtJInt, 0, iCent), GetTrkSpectraNIters (iPtJInt, 1, iCent));
       switch (iCent) {
-        case 5:  return 2;//4;//17; // all centralities
-        case 4:  return 2;//4;//15; // 0-20%
-        case 3:  return 2;//4;//13; // 20-40% ...
-        case 2:  return 2;//4;//13;
-        case 1:  return 2;//4;//11;
-        case 0:  return 2;//3;//9;  // ... 80-100%
-        case -1: return 2;//4;//15; // pp
+        case 5:  return 4;//17; // all centralities
+        case 4:  return 3;//15; // 0-20%
+        case 3:  return 3;//13; // 20-40% ...
+        case 2:  return 2;//13;
+        case 1:  return 2;//11;
+        case 0:  return 2;//9;  // ... 80-100%
+        case -1: return 3;//15; // pp
         default: return 0;
       }
       default: return 0;
@@ -419,7 +419,8 @@ void ProcessUnfolding (const char* inFileTag, const char* outFileTag) {
     rooUnfResp_jet_pt_ref[1][iVar] = (RooUnfoldResponse*) inFile->Get ("rooUnfResp_jet_pt_ref_mc_wgts");
     rooUnfResp_jet_pt_ref[0][iVar] = (RooUnfoldResponse*) inFile->Get ("rooUnfResp_jet_pt_ref_mc_altwgts");
 
-    for (short iDir = 0; iDir < nDir; iDir++) {
+    //for (short iDir = 0; iDir < nDir; iDir++) {
+    for (short iDir : {0, 2}) {
 
       const TString dir = directions[iDir];
 
@@ -437,7 +438,8 @@ void ProcessUnfolding (const char* inFileTag, const char* outFileTag) {
       rooUnfResp_jet_pt[1][iCent][iVar] = (RooUnfoldResponse*) inFile->Get (Form ("rooUnfResp_jet_pt_%s_mc_wgts", cent));
       rooUnfResp_jet_pt[0][iCent][iVar] = (RooUnfoldResponse*) inFile->Get (Form ("rooUnfResp_jet_pt_%s_mc_altwgts", cent));
 
-      for (short iDir = 0; iDir < nDir; iDir++) {
+      //for (short iDir = 0; iDir < nDir; iDir++) {
+      for (short iDir : {0, 2}) {
 
         const TString dir = directions[iDir];
 
@@ -464,7 +466,8 @@ void ProcessUnfolding (const char* inFileTag, const char* outFileTag) {
 
       const TString pTJInt = (iPtJInt == 0 ? "30GeV" : "60GeV");
 
-      for (short iDir = 0; iDir < nDir; iDir++) {
+      //for (short iDir = 0; iDir < nDir; iDir++) {
+      for (short iDir : {0, 2}) {
 
         const TString dir = directions[iDir];
 
@@ -513,7 +516,7 @@ void ProcessUnfolding (const char* inFileTag, const char* outFileTag) {
       const short iUnfVar = 0;//(mcVariations.count (var) == 0 ? 0 : iVar);
 
       const bool doUnfold = (variationsWithNoUnfold.count (var) == 0);
-      const short jetWgtsType = (iDType == 1 ? 2 : ((variationsWithUnwgtdRespMatrix.count (var) == 0) ? 1 : 0)); // MC uses no weights, nominal data (which is not included in "variationsWithUnwgtdRespMatrix" set) uses histogram weights ("altwgts" at index = 0), and syst. uncertainty uses func. weights ("wgts" at index = 1)
+      const short jetWgtsType = (iDType == 1 ? 2 : ((variationsWithUnwgtdRespMatrix.count (var) == 0) ? 1 : 0)); // MC uses no weights, nominal data (which is not included in "variationsWithUnwgtdRespMatrix" set) uses functional weights ("wgts" at index = 1), and syst. uncertainty uses histogram weights ("altwgts" at index = 0)
 
       const bool doRefoldSF = (var == "RefoldingVar");
       const bool calcRefold = (var == "Nominal" && iDType == 0);
@@ -581,7 +584,8 @@ void ProcessUnfolding (const char* inFileTag, const char* outFileTag) {
 
       if (doUnfold) {
 
-        for (short iDir = 0; iDir < nDir; iDir++) {
+        //for (short iDir = 0; iDir < nDir; iDir++) {
+        for (short iDir : {0, 2}) {
 
           const TString dir = directions[iDir];
 
@@ -756,7 +760,8 @@ void ProcessUnfolding (const char* inFileTag, const char* outFileTag) {
           const TString cent = (iCent == nZdcCentBins ? "allCent" : Form ("iCent%i", iCent)); 
           const short iUnfCent = (useCentDiffUnf ? iCent : nZdcCentBins);
 
-          for (short iDir = 0; iDir < nDir; iDir++) {
+          //for (short iDir = 0; iDir < nDir; iDir++) {
+          for (short iDir : {0, 2}) {
 
             const TString dir = directions[iDir];
 
@@ -933,7 +938,8 @@ void ProcessUnfolding (const char* inFileTag, const char* outFileTag) {
 
           const TString pTJInt = (iPtJInt == 0 ? "30GeV" : "60GeV");
 
-          for (short iDir = 0; iDir < nDir; iDir++) {
+          //for (short iDir = 0; iDir < nDir; iDir++) {
+          for (short iDir : {0, 2}) {
 
             const TString dir = directions[iDir];
 
@@ -978,7 +984,8 @@ void ProcessUnfolding (const char* inFileTag, const char* outFileTag) {
 
       for (short iPtJInt : {0, 1}) {
 
-        for (short iDir = 0; iDir < nDir; iDir++) {
+        //for (short iDir = 0; iDir < nDir; iDir++) {
+        for (short iDir : {0, 2}) {
 
           //UnscaleWidth (h_jetInt_trk_pt_ref_unf[iDType][iPtJInt][iDir][iVar]);
           //h_jetInt_trk_pt_ref_unf[iDType][iPtJInt][iDir][iVar]->Rebin (2);
@@ -1030,7 +1037,8 @@ void ProcessUnfolding (const char* inFileTag, const char* outFileTag) {
 
         const TString pTJInt = (iPtJInt == 0 ? "30GeV" : "60GeV");
 
-        for (short iDir = 0; iDir < nDir; iDir++) {
+        //for (short iDir = 0; iDir < nDir; iDir++) {
+        for (short iDir : {0, 2}) {
 
           const TString dir = directions[iDir];
 
@@ -1116,7 +1124,8 @@ void ProcessUnfolding (const char* inFileTag, const char* outFileTag) {
 
       for (short iPtJInt : {0, 1}) {
 
-        for (short iDir = 0; iDir < nDir; iDir++) {
+        //for (short iDir = 0; iDir < nDir; iDir++) {
+        for (short iDir : {0, 2}) {
 
           //DivideByTF1 (h_jetInt_trk_pt_ref_unf[iDType][iPtJInt][iDir][iVar], f_jetInt_trk_pt_ref_unf_closure[iPtJInt][iDir], scaleFactor);
           TH1D* h = h_jetInt_trk_pt_ref_unf[iDType][iPtJInt][iDir][iVar];
@@ -1167,7 +1176,8 @@ void ProcessUnfolding (const char* inFileTag, const char* outFileTag) {
   std::cout << "Computing systematic uncertainties..." << std::endl;
   for (short iPtJInt : {0, 1}) {
 
-    for (short iDir = 0; iDir < nDir; iDir++) {
+    //for (short iDir = 0; iDir < nDir; iDir++) {
+    for (short iDir : {0, 2}) {
 
       g_jetInt_trk_pt_ref_unf_syst[iPtJInt][iDir][0] = make_graph (h_jetInt_trk_pt_ref_unf[0][iPtJInt][iDir][0]);
 
@@ -1218,7 +1228,8 @@ void ProcessUnfolding (const char* inFileTag, const char* outFileTag) {
         if ((iDType == 0 && dataVariations.count (var) == 0) || (iDType == 1 && mcVariations.count (var) == 0))
           continue;
 
-        for (short iDir = 0; iDir < nDir; iDir++) {
+        //for (short iDir = 0; iDir < nDir; iDir++) {
+        for (short iDir : {0, 2}) {
 
           g_jetInt_trk_pt_ref_unf_syst[iPtJInt][iDir][iVar] = new TGAE ();
 
@@ -1335,7 +1346,8 @@ void ProcessUnfolding (const char* inFileTag, const char* outFileTag) {
 
     for (short iPtJInt : {0, 1}) {
 
-      for (short iDir = 0; iDir < nDir; iDir++) {
+      //for (short iDir = 0; iDir < nDir; iDir++) {
+      for (short iDir : {0, 2}) {
 
         SetCentralValuesKeepRelativeErrors (g_jetInt_trk_pt_ref_unf_syst[iPtJInt][iDir][iVar],  h_jetInt_trk_pt_ref_unf[0][iPtJInt][iDir][0]);
 
@@ -1373,7 +1385,8 @@ void ProcessUnfolding (const char* inFileTag, const char* outFileTag) {
 
     for (short iTotVar = 0; iTotVar < 3; iTotVar++) {
 
-      for (short iDir = 0; iDir < nDir; iDir++) {
+      //for (short iDir = 0; iDir < nDir; iDir++) {
+      for (short iDir : {0, 2}) {
 
         g_jetInt_trk_pt_ref_unf_systTot[iPtJInt][iDir][iTotVar] = (TGAE*) g_jetInt_trk_pt_ref_unf_syst[iPtJInt][iDir][0]->Clone ();
 
@@ -1426,7 +1439,8 @@ void ProcessUnfolding (const char* inFileTag, const char* outFileTag) {
         const short iTotVar = GetTotVarN (GetTotVar (variations[iVar]));
         std::cout << "For var " << variations[iVar] << " assigning to " << totalVariations[iTotVar] << std::endl;
 
-        for (short iDir = 0; iDir < nDir; iDir++) {
+        //for (short iDir = 0; iDir < nDir; iDir++) {
+        for (short iDir : {0, 2}) {
 
           AddErrorsInQuadrature (g_jetInt_trk_pt_ref_unf_systTot[iPtJInt][iDir][iTotVar],  g_jetInt_trk_pt_ref_unf_syst[iPtJInt][iDir][iVar], false, true);
 
@@ -1457,7 +1471,8 @@ void ProcessUnfolding (const char* inFileTag, const char* outFileTag) {
         for (int iVar : iVars)
           std::cout << "For var " << variations[iVar] << " assigning to " << GetTotVar (variations[iVar]) << std::endl;
 
-        for (short iDir = 0; iDir < nDir; iDir++) {
+        //for (short iDir = 0; iDir < nDir; iDir++) {
+        for (short iDir : {0, 2}) {
 
           AddErrorsInQuadrature (g_jetInt_trk_pt_ref_unf_systTot[iPtJInt][iDir][iTotVar],  g_jetInt_trk_pt_ref_unf_syst[iPtJInt][iDir], &iVars, true);
 
@@ -1497,7 +1512,8 @@ void ProcessUnfolding (const char* inFileTag, const char* outFileTag) {
 
     for (short iTotVar = 0; iTotVar < 3; iTotVar++) {
 
-      for (short iDir = 0; iDir < nDir; iDir++) {
+      //for (short iDir = 0; iDir < nDir; iDir++) {
+      for (short iDir : {0, 2}) {
     
         AddErrorsInQuadrature (g_jetInt_trk_pt_ref_unf_syst[iPtJInt][iDir][0],  g_jetInt_trk_pt_ref_unf_systTot[iPtJInt][iDir][iTotVar]);
     
@@ -1545,7 +1561,8 @@ void ProcessUnfolding (const char* inFileTag, const char* outFileTag) {
 
         const TString pTJInt = (iPtJInt == 0 ? "30GeV" : "60GeV");
 
-        for (short iDir = 0; iDir < nDir; iDir++) {
+        //for (short iDir = 0; iDir < nDir; iDir++) {
+        for (short iDir : {0, 2}) {
 
           const TString dir = directions[iDir];
 
@@ -1589,7 +1606,8 @@ void ProcessUnfolding (const char* inFileTag, const char* outFileTag) {
 
         const TString totVar = totalVariations[iTotVar];
 
-        for (short iDir = 0; iDir < nDir; iDir++) {
+        //for (short iDir = 0; iDir < nDir; iDir++) {
+        for (short iDir : {0, 2}) {
 
           const TString dir = directions[iDir];
 
@@ -1648,7 +1666,8 @@ void ProcessUnfolding (const char* inFileTag, const char* outFileTag) {
       } // end loop over iVar
 
 
-      for (short iDir = 0; iDir < nDir; iDir++) {
+      //for (short iDir = 0; iDir < nDir; iDir++) {
+      for (short iDir : {0, 2}) {
 
         h2_jet_trk_pt_ref_sig[iDType][iDir]->Write ();
 
@@ -1670,7 +1689,8 @@ void ProcessUnfolding (const char* inFileTag, const char* outFileTag) {
           if ((iDType == 0 && dataVariations.count (var) == 0) || (iDType == 1 && mcVariations.count (var) + otherMCVariations.count (var) == 0))
             continue;
 
-          for (short iDir = 0; iDir < nDir; iDir++) {
+          //for (short iDir = 0; iDir < nDir; iDir++) {
+          for (short iDir : {0, 2}) {
 
             h_jetInt_trk_pt_ref_unf[iDType][iPtJInt][iDir][iVar]->Write ();
 
@@ -1699,7 +1719,8 @@ void ProcessUnfolding (const char* inFileTag, const char* outFileTag) {
         } // end loop over iVar
 
 
-        for (short iDir = 0; iDir < nDir; iDir++) {
+        //for (short iDir = 0; iDir < nDir; iDir++) {
+        for (short iDir : {0, 2}) {
 
           h2_jetInt_trk_pt_cov_ref_unf[iDType][iPtJInt][iDir]->Write ();
 

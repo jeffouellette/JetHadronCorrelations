@@ -153,11 +153,11 @@ void PlotResponseMatrix (const bool doPrimTracksOnly = false) {
 
 
   {
-    TFile* inFile = new TFile (Form ("%s/MakeResponseMatrix/%s/allSamples.root", rootPath.Data (), doPrimTracksOnly ? "MCRecoJetsTruthMatchedParts" : "Nominal"), "read");
+    TFile* inFile = new TFile (Form ("%s/MakeResponseMatrix/%s/allSamples_finePtJBins_truncated.root", rootPath.Data (), doPrimTracksOnly ? "MCRecoJetsTruthMatchedParts" : "Nominal"), "read");
 
     
     //////////////////////////////////////////////////////////////////////////////////////////////////// 
-    // LOAD HALF-CLOSURE TRAINING AND TEST HISTOGRAMS
+    // LOAD FULL AND HALF-CLOSURE TRAINING, PLUS TEST HISTOGRAMS
     //////////////////////////////////////////////////////////////////////////////////////////////////// 
     for (short iEvFrac : {0, 1}) {
 
@@ -169,7 +169,8 @@ void PlotResponseMatrix (const bool doPrimTracksOnly = false) {
 
         h_jet_pt_ref[iEvFrac][iVar] = (TH1D*) inFile->Get (Form ("h_jet_pt_%sClosure_ref_mc_%s", evFrac.Data (), var.Data ()));
 
-        for (short iDir = 0; iDir < nDir; iDir++) {
+        //for (short iDir = 0; iDir < nDir; iDir++) {
+        for (short iDir : {0, 2}) {
 
           const TString dir = directions[iDir];
       
@@ -184,7 +185,8 @@ void PlotResponseMatrix (const bool doPrimTracksOnly = false) {
 
           h_jet_pt[iEvFrac][iCent][iVar] = (TH1D*) inFile->Get (Form ("h_jet_pt_%sClosure_%s_mc_%s", evFrac.Data (), cent, var.Data ()));
 
-          for (short iDir = 0; iDir < nDir; iDir++) {
+          //for (short iDir = 0; iDir < nDir; iDir++) {
+          for (short iDir : {0, 2}) {
 
             const TString dir = directions[iDir];
       
@@ -205,7 +207,8 @@ void PlotResponseMatrix (const bool doPrimTracksOnly = false) {
 
           } // end loop over iCent
 
-          for (short iDir = 0; iDir < nDir; iDir++) {
+          //for (short iDir = 0; iDir < nDir; iDir++) {
+          for (short iDir : {0, 2}) {
 
             const TString dir = directions[iDir];
       
@@ -229,7 +232,7 @@ void PlotResponseMatrix (const bool doPrimTracksOnly = false) {
 
 
     //////////////////////////////////////////////////////////////////////////////////////////////////// 
-    // LOAD HALF-CLOSURE RESPONSE MATRICES
+    // LOAD FULL AND HALF-CLOSURE RESPONSE MATRICES
     //////////////////////////////////////////////////////////////////////////////////////////////////// 
     for (short iEvFrac : {0, 1, 2}) {
 
@@ -237,12 +240,12 @@ void PlotResponseMatrix (const bool doPrimTracksOnly = false) {
 
       rooUnfResp_jet_pt_ref[iEvFrac] = (RooUnfoldResponse*) inFile->Get (Form ("rooUnfResp_jet_pt_ref_mc_%s", evFrac.Data ()));
 
-      for (short iDir = 0; iDir < nDir; iDir++) {
+      //for (short iDir = 0; iDir < nDir; iDir++) {
+      for (short iDir : {0, 2}) {
 
         const TString dir = directions[iDir];
 
         rooUnfResp_jet_trk_pt_ref_sig[iEvFrac][iDir] = (RooUnfoldResponse*) inFile->Get (Form ("rooUnfResp_jet_trk_pt_%s_ref_sig_mc_%s", dir.Data (), evFrac.Data ()));
-        //rooUnfResp_jet_trk_pt_ref_sig[iEvFrac][iDir] = (RooUnfoldResponse*) inFile->Get (Form ("rooUnfResp_jet_trk_pt_%s_ref_sig_mc_wgts", dir.Data ()));
 
       } // end loop over iDir
 
@@ -252,12 +255,12 @@ void PlotResponseMatrix (const bool doPrimTracksOnly = false) {
 
         rooUnfResp_jet_pt[iEvFrac][iCent] = (RooUnfoldResponse*) inFile->Get (Form ("rooUnfResp_jet_pt_%s_mc_%s", cent, evFrac.Data ()));
 
-        for (short iDir = 0; iDir < nDir; iDir++) {
+        //for (short iDir = 0; iDir < nDir; iDir++) {
+        for (short iDir : {0, 2}) {
 
           const TString dir = directions[iDir];
 
           rooUnfResp_jet_trk_pt_sig[iEvFrac][iDir][iCent] = (RooUnfoldResponse*) inFile->Get (Form ("rooUnfResp_jet_trk_pt_%s_%s_sig_mc_%s", dir.Data (), cent, evFrac.Data ()));
-          //rooUnfResp_jet_trk_pt_sig[iEvFrac][iDir][iCent] = (RooUnfoldResponse*) inFile->Get (Form ("rooUnfResp_jet_trk_pt_%s_%s_sig_mc_wgts", dir.Data (), cent));
 
         } // end loop over iFile
 
@@ -294,7 +297,8 @@ void PlotResponseMatrix (const bool doPrimTracksOnly = false) {
 
   //      h_jet_counts_ref_tot[iPtJ][iVar] = (TH1D*) inFile->Get (Form ("h_jet_counts_%s_mc17", pTJ.Data ()))->Clone (Form ("h_jet_counts_ref_tot_%s_mc_%s", pTJ.Data (), var.Data ()));
 
-  //      for (short iDir = 0; iDir < nDir; iDir++) {
+  //      //for (short iDir = 0; iDir < nDir; iDir++) {
+  //      for (short iDir : {0, 2}) {
 
   //        const TString dir = directions[iDir];
 
@@ -333,7 +337,8 @@ void PlotResponseMatrix (const bool doPrimTracksOnly = false) {
 
   //      h_jet_counts_tot[iPtJ][iCent][iVar] = (TH1D*) inFile->Get (Form ("h_jet_counts_%s_mc16", pTJ.Data ()))->Clone (Form ("h_jet_counts_pPb_tot_%s_%s_mc_%s", cent.Data (), pTJ.Data (), var.Data ()));
 
-  //      for (short iDir = 0; iDir < nDir; iDir++) {
+  //      //for (short iDir = 0; iDir < nDir; iDir++) {
+  //      for (short iDir : {0, 2}) {
 
   //        const TString dir = directions[iDir];
 
@@ -373,7 +378,8 @@ void PlotResponseMatrix (const bool doPrimTracksOnly = false) {
 
       h_jet_counts_bkg[iPtJ][iCent] = (TH1D*) inFile->Get (Form ("h_jet_counts_%s_mixed_mc16", pTJ.Data ()))->Clone (Form ("h_jet_counts_pPb_bkg_%s_%s_mc_Nominal", cent.Data (), pTJ.Data ()));
 
-      for (short iDir = 0; iDir < nDir; iDir++) {
+      //for (short iDir = 0; iDir < nDir; iDir++) {
+      for (short iDir : {0, 2}) {
 
         const TString dir = directions[iDir];
 
@@ -404,7 +410,8 @@ void PlotResponseMatrix (const bool doPrimTracksOnly = false) {
 
       const TString var = (iVar == 0 ? "Nominal" : "MCTruthJetsTruthParts");
 
-      for (short iDir = 0; iDir < nDir; iDir++) {
+      //for (short iDir = 0; iDir < nDir; iDir++) {
+      for (short iDir : {0, 2}) {
 
         const TString dir = directions[iDir];
 
@@ -456,7 +463,7 @@ void PlotResponseMatrix (const bool doPrimTracksOnly = false) {
 
 
   //////////////////////////////////////////////////////////////////////////////////////////////////// 
-  // UNFOLD HALF-CLOSURE HISTOGRAMS
+  // UNFOLD FULL AND HALF-CLOSURE HISTOGRAMS
   //////////////////////////////////////////////////////////////////////////////////////////////////// 
   std::cout << "Unfolding a lot of histograms many times..." << std::endl;
   for (short iEvFrac : {0, 1}) {
@@ -492,12 +499,25 @@ void PlotResponseMatrix (const bool doPrimTracksOnly = false) {
     } // end loop over iPtJInt
 
     for (short nIter = 0; nIter < maxIters; nIter++) {
-      std::cout << "  |--> on 1D unfold, at niter = " << nIter << "..." << std::endl;
+      std::cout << "  |--> on 1D unfold, with niter = " << nIter+1 << "..." << std::endl;
 
-      bayesUnf = new RooUnfoldBayes (rooUnfResp_jet_pt_ref[iEvFrac], h_jet_pt_ref[iEvFrac][0], nIter+1);
+      RooUnfoldResponse* resp = rooUnfResp_jet_pt_ref[iEvFrac];
+      resp->UseOverflow (0);
+
+      TH1D* h_raw = (TH1D*) h_jet_pt_ref[iEvFrac][0]->Clone ("h_raw");
+      for (int iX = 1; iX <= h_raw->GetNbinsX (); iX++) {
+        if (h_raw->GetBinCenter (iX) < 20) {
+          h_raw->SetBinContent (iX, 0);
+          h_raw->SetBinError (iX, 0);
+        }
+      }
+
+      bayesUnf = new RooUnfoldBayes (resp, h_raw, nIter+1);
       bayesUnf->SetVerbose (-1);
       h = (TH1D*) bayesUnf->Hreco ()->Clone (Form ("h_jet_pt_ref_unf_%s_mc_nIter%i", evFrac.Data (), nIter+1));
       h_jet_pt_ref_unf[iEvFrac][nIter] = h;
+
+      SaferDelete (&h_raw);
       SaferDelete (&bayesUnf);
 
       for (short iPtJInt : {0, 1}) {
@@ -522,10 +542,23 @@ void PlotResponseMatrix (const bool doPrimTracksOnly = false) {
 
         const short iUnfCent = iCent;
 
-        bayesUnf = new RooUnfoldBayes (rooUnfResp_jet_pt[iEvFrac][iUnfCent], h_jet_pt[iEvFrac][iCent][0], nIter+1);
+        RooUnfoldResponse* resp = rooUnfResp_jet_pt[iEvFrac][iUnfCent];
+        resp->UseOverflow (0);
+  
+        TH1D* h_raw = (TH1D*) h_jet_pt[iEvFrac][iCent][0]->Clone ("h_raw");
+        for (int iX = 1; iX <= h_raw->GetNbinsX (); iX++) {
+          if (h_raw->GetBinCenter (iX) < 20) {
+            h_raw->SetBinContent (iX, 0);
+            h_raw->SetBinError (iX, 0);
+          }
+        }
+  
+        bayesUnf = new RooUnfoldBayes (resp, h_raw, nIter+1);
         bayesUnf->SetVerbose (-1);
         h = (TH1D*) bayesUnf->Hreco ()->Clone (Form ("h_jet_pt_unf_%s_%s_mc_nIter%i", evFrac.Data (), cent, nIter+1));
         h_jet_pt_unf[iEvFrac][iCent][nIter] = h;
+  
+        SaferDelete (&h_raw);
         SaferDelete (&bayesUnf);
 
         for (short iPtJInt : {0, 1}) {
@@ -547,15 +580,31 @@ void PlotResponseMatrix (const bool doPrimTracksOnly = false) {
 
 
     for (short nIter = 0; nIter < max2DIters; nIter++) {
-      std::cout << "  |--> on 2D unfold, at niter = " << nIter << "..." << std::endl;
+      std::cout << "  |--> on 2D unfold, with niter = " << nIter+1 << "..." << std::endl;
 
-      for (short iDir = 0; iDir < nDir; iDir++) {
+      //for (short iDir = 0; iDir < nDir; iDir++) {
+      for (short iDir : {0, 2}) {
 
         const TString dir = directions[iDir];
 
-        bayesUnf = new RooUnfoldBayes (rooUnfResp_jet_trk_pt_ref_sig[iEvFrac][iDir], h2_jet_trk_pt_ref_sig[iEvFrac][iDir][0], nIter+1);
+        RooUnfoldResponse* resp = rooUnfResp_jet_trk_pt_ref_sig[iEvFrac][iDir];
+        resp->UseOverflow (0);
+  
+        TH2D* h2_raw = (TH2D*) h2_jet_trk_pt_ref_sig[iEvFrac][iDir][0]->Clone ("h2_raw");
+        for (int iY = 1; iY <= h2_raw->GetNbinsY (); iY++) {
+          if (h2_raw->GetYaxis ()->GetBinCenter (iY) < 20) {
+            for (int iX = 1; iX <= h2_raw->GetNbinsX (); iX++) {
+              h2_raw->SetBinContent (iX, iY, 0);
+              h2_raw->SetBinError (iX, iY, 0);
+            }
+          }
+        }
+  
+        bayesUnf = new RooUnfoldBayes (resp, h2_raw, nIter+1);
         bayesUnf->SetVerbose (-1);
         h2_jet_trk_pt_ref_sig_unf[iEvFrac][iDir][nIter] = (TH2D*) bayesUnf->Hreco ()->Clone (Form ("h2_jet_trk_pt_%s_ref_sig_unf_%s_mc_nIter%i", dir.Data (), evFrac.Data (), nIter+1));
+
+        SaferDelete (&h2_raw);
         SaferDelete (&bayesUnf);
 
         for (short iCent = 0; iCent < nFcalCentBins+1; iCent++) {
@@ -564,9 +613,24 @@ void PlotResponseMatrix (const bool doPrimTracksOnly = false) {
 
           const short iUnfCent = iCent;
 
-          bayesUnf = new RooUnfoldBayes (rooUnfResp_jet_trk_pt_sig[iEvFrac][iDir][iUnfCent], h2_jet_trk_pt_sig[iEvFrac][iDir][iCent][0], nIter+1);
+          RooUnfoldResponse* resp = rooUnfResp_jet_trk_pt_sig[iEvFrac][iDir][iUnfCent];
+          resp->UseOverflow (0);
+    
+          TH2D* h2_raw = (TH2D*) h2_jet_trk_pt_sig[iEvFrac][iDir][iCent][0]->Clone ("h2_raw");
+          for (int iY = 1; iY <= h2_raw->GetNbinsY (); iY++) {
+            if (h2_raw->GetYaxis ()->GetBinCenter (iY) < 20) {
+              for (int iX = 1; iX <= h2_raw->GetNbinsX (); iX++) {
+                h2_raw->SetBinContent (iX, iY, 0);
+                h2_raw->SetBinError (iX, iY, 0);
+              }
+            }
+          }
+    
+          bayesUnf = new RooUnfoldBayes (resp, h2_raw, nIter+1);
           bayesUnf->SetVerbose (-1);
           h2_jet_trk_pt_sig_unf[iEvFrac][iDir][iCent][nIter] = (TH2D*) bayesUnf->Hreco ()->Clone (Form ("h2_jet_trk_pt_%s_%s_sig_unf_%s_mc_nIter%i", dir.Data (), cent, evFrac.Data (), nIter+1));
+
+          SaferDelete (&h2_raw);
           SaferDelete (&bayesUnf);
 
         } // end loop over iCent
@@ -591,7 +655,8 @@ void PlotResponseMatrix (const bool doPrimTracksOnly = false) {
 
       TH1D* h = h_jet_pt_ref[iEvFrac][iVar]; 
 
-      for (short iDir = 0; iDir < nDir; iDir++) {
+      //for (short iDir = 0; iDir < nDir; iDir++) {
+      for (short iDir : {0, 2}) {
 
         TH2D* h2 = h2_jet_trk_pt_ref_sig[iEvFrac][iDir][iVar];
         for (short iX = 1; iX <= h2->GetNbinsX (); iX++) {
@@ -615,7 +680,8 @@ void PlotResponseMatrix (const bool doPrimTracksOnly = false) {
 
         h = h_jet_pt[iEvFrac][iCent][iVar]; 
 
-        for (short iDir = 0; iDir < nDir; iDir++) {
+        //for (short iDir = 0; iDir < nDir; iDir++) {
+        for (short iDir : {0, 2}) {
     
           TH2D* h2 = h2_jet_trk_pt_sig[iEvFrac][iDir][iCent][iVar];
           for (short iX = 1; iX <= h2->GetNbinsX (); iX++) {
@@ -643,7 +709,8 @@ void PlotResponseMatrix (const bool doPrimTracksOnly = false) {
 
       TH1D* h = h_jet_pt_ref_unf[iEvFrac][1];
 
-      for (short iDir = 0; iDir < nDir; iDir++) {
+      //for (short iDir = 0; iDir < nDir; iDir++) {
+      for (short iDir : {0, 2}) {
 
         TH2D* h2 = h2_jet_trk_pt_ref_sig_unf[iEvFrac][iDir][nIter];
         for (short iX = 1; iX <= h2->GetNbinsX (); iX++) {
@@ -660,7 +727,8 @@ void PlotResponseMatrix (const bool doPrimTracksOnly = false) {
 
         h = h_jet_pt_unf[iEvFrac][iCent][1];
 
-        for (short iDir = 0; iDir < nDir; iDir++) {
+        //for (short iDir = 0; iDir < nDir; iDir++) {
+        for (short iDir : {0, 2}) {
     
           TH2D* h2 = h2_jet_trk_pt_sig_unf[iEvFrac][iDir][iCent][nIter];
           for (short iX = 1; iX <= h2->GetNbinsX (); iX++) {
@@ -690,7 +758,8 @@ void PlotResponseMatrix (const bool doPrimTracksOnly = false) {
 
     const TString evFrac = (iEvFrac == 0 ? "half" : "full");
 
-    for (short iDir = 0; iDir < nDir; iDir++) {
+    //for (short iDir = 0; iDir < nDir; iDir++) {
+    for (short iDir : {0, 2}) {
 
       const TString dir = directions[iDir];
 
@@ -754,7 +823,8 @@ void PlotResponseMatrix (const bool doPrimTracksOnly = false) {
       const double minJetPt = (iPtJInt == 0 ? 30. : 60.);
       const double maxJetPt = 300;
 
-      for (short iDir = 0; iDir < nDir; iDir++) {
+      //for (short iDir = 0; iDir < nDir; iDir++) {
+      for (short iDir : {0, 2}) {
     
         const TString dir = directions[iDir];
     
@@ -859,7 +929,8 @@ void PlotResponseMatrix (const bool doPrimTracksOnly = false) {
 
       const TString pTJInt = (iPtJInt == 0 ? "30GeV" : "60GeV");
 
-      for (short iDir = 0; iDir < nDir; iDir++) {
+      //for (short iDir = 0; iDir < nDir; iDir++) {
+      for (short iDir : {0, 2}) {
 
         const TString dir = directions[iDir];
 
@@ -912,7 +983,8 @@ void PlotResponseMatrix (const bool doPrimTracksOnly = false) {
     //const TString funcStr = "[0]+[1]*log(x)+[2]*pow(log(x),2)+[3]*pow(log(x),3)+[4]*pow(log(x),4)";
     std::cout << "|--> pTJInt = " << pTJInt << std::endl;
 
-    for (short iDir = 0; iDir < nDir; iDir++) {
+    //for (short iDir = 0; iDir < nDir; iDir++) {
+    for (short iDir : {0, 2}) {
 
       const TString dir = directions[iDir];
       std::cout << "  |--> dir = " << dir << std::endl;
@@ -965,7 +1037,8 @@ void PlotResponseMatrix (const bool doPrimTracksOnly = false) {
 
     for (short iPtJInt : {0, 1}) {
 
-      for (short iDir = 0; iDir < nDir; iDir++) {
+      //for (short iDir = 0; iDir < nDir; iDir++) {
+      for (short iDir : {0, 2}) {
 
         h_jetInt_trk_pt_ref_sig_unf_fullClosure[iPtJInt][iDir]->Write ();
         //f_jetInt_trk_pt_ref_sig_unf_fullClosure[iPtJInt][iDir]->Write ();
@@ -987,11 +1060,11 @@ void PlotResponseMatrix (const bool doPrimTracksOnly = false) {
 
 
 
-
   std::cout << "Finished main computational code, proceeded to plotting routines." << std::endl;
   {
     TLine* l = new TLine ();
     TLatex* tl = new TLatex ();
+
 
     for (short iEvFrac : {1, 0}) {
   
@@ -1126,12 +1199,13 @@ void PlotResponseMatrix (const bool doPrimTracksOnly = false) {
   
   
   
-  
+
       for (short iPtJInt : {0, 1}) {
   
         const int minJetPt = (iPtJInt == 0 ? 30 : 60);
   
-        for (short iDir = 0; iDir < 3; iDir++) {
+        //for (short iDir = 0; iDir < nDir; iDir++) {
+        for (short iDir : {0, 2}) {
   
           const TString dir = directions[iDir];
   
@@ -1217,7 +1291,8 @@ void PlotResponseMatrix (const bool doPrimTracksOnly = false) {
   
         const int minJetPt = (iPtJInt == 0 ? 30 : 60);
   
-        for (short iDir = 0; iDir < 3; iDir++) {
+        //for (short iDir = 0; iDir < nDir; iDir++) {
+        for (short iDir : {0, 2}) {
   
           const TString dir = directions[iDir];
   
@@ -1480,7 +1555,8 @@ void PlotResponseMatrix (const bool doPrimTracksOnly = false) {
   
         const int minJetPt = (iPtJInt == 0 ? 30 : 60);
   
-        for (short iDir = 0; iDir < 3; iDir++) {
+        //for (short iDir = 0; iDir < nDir; iDir++) {
+        for (short iDir : {0, 2}) {
   
           const TString dir = directions[iDir];
   
@@ -1603,7 +1679,8 @@ void PlotResponseMatrix (const bool doPrimTracksOnly = false) {
   
         const int minJetPt = (iPtJInt == 0 ? 30 : 60);
   
-        for (short iDir = 0; iDir < 3; iDir++) {
+        //for (short iDir = 0; iDir < nDir; iDir++) {
+        for (short iDir : {0, 2}) {
   
           const TString dir = directions[iDir];
   
@@ -1682,7 +1759,8 @@ void PlotResponseMatrix (const bool doPrimTracksOnly = false) {
 
 
 
-    for (short iDir = 0; iDir < 3; iDir++) {
+    //for (short iDir = 0; iDir < nDir; iDir++) {
+    for (short iDir : {0, 2}) {
 
       const TString dir = directions[iDir];
 
@@ -1707,8 +1785,8 @@ void PlotResponseMatrix (const bool doPrimTracksOnly = false) {
       TAxis* yax = h2->GetYaxis ();
       TAxis* zax = h2->GetZaxis ();
 
-      xax->SetTitle ("Truth-level #it{p}_{T}^{jet}");
-      yax->SetTitle ("Reco.-level #it{p}_{T}^{jet}");
+      xax->SetTitle ("Truth-level #it{p}_{T}^{jet} [GeV]");
+      yax->SetTitle ("Reco.-level #it{p}_{T}^{jet} [GeV]");
       zax->SetTitle ("");
 
       xax->SetTitleFont (43);
@@ -1727,45 +1805,101 @@ void PlotResponseMatrix (const bool doPrimTracksOnly = false) {
       xax->SetTitleOffset (2.0);
       yax->SetTitleOffset (2.0);
 
-      xax->SetNdivisions (-12);
-      yax->SetNdivisions (-12);
+      xax->SetNdivisions (-40);
+      yax->SetNdivisions (-40);
 
       h2->DrawCopy ("colz");
       SaferDelete (&h2);
 
       tl->SetTextFont (43);
-      tl->SetTextSize (16);
+      tl->SetTextSize (14);
       tl->SetTextAlign (33);
-      tl->SetTextAngle (30);
+      tl->SetTextAngle (60);
 
-      tl->DrawLatex (std::floor (0.5*nPtChBins), -3, "15-20 GeV");
-      tl->DrawLatex (std::floor (1.5*nPtChBins), -3, "20-30 GeV");
-      tl->DrawLatex (std::floor (2.5*nPtChBins), -3, "30-45 GeV");
-      tl->DrawLatex (std::floor (3.5*nPtChBins), -3, "45-60 GeV");
-      tl->DrawLatex (std::floor (4.5*nPtChBins), -3, "60-90 GeV");
-      tl->DrawLatex (std::floor (5.5*nPtChBins), -3, "90-120 GeV");
-      tl->DrawLatex (std::floor (6.5*nPtChBins), -3, "120-160 GeV");
-      tl->DrawLatex (std::floor (7.5*nPtChBins), -3, "160-200 GeV");
-      tl->DrawLatex (std::floor (8.5*nPtChBins), -3, "200-240 GeV");
-      tl->DrawLatex (std::floor (9.5*nPtChBins), -3, "240-300 GeV");
-      tl->DrawLatex (std::floor (10.5*nPtChBins), -3, "300-350 GeV");
-      tl->DrawLatex (std::floor (11.5*nPtChBins), -3, "350-400 GeV");
+      tl->DrawLatex (std::floor (0.5*nPtChBins), -6, "10-11");
+      tl->DrawLatex (std::floor (1.5*nPtChBins), -6, "11-12");
+      tl->DrawLatex (std::floor (2.5*nPtChBins), -6, "12-13");
+      tl->DrawLatex (std::floor (3.5*nPtChBins), -6, "13-14");
+      tl->DrawLatex (std::floor (4.5*nPtChBins), -6, "14-15");
+      tl->DrawLatex (std::floor (5.5*nPtChBins), -6, "15-17.5");
+      tl->DrawLatex (std::floor (6.5*nPtChBins), -6, "17.5-20");
+      tl->DrawLatex (std::floor (7.5*nPtChBins), -6, "20-22.5");
+      tl->DrawLatex (std::floor (8.5*nPtChBins), -6, "22.5-25");
+      tl->DrawLatex (std::floor (9.5*nPtChBins), -6, "25-27.5");
+      tl->DrawLatex (std::floor (10.5*nPtChBins), -6, "27.5-30");
+      tl->DrawLatex (std::floor (11.5*nPtChBins), -6, "30-33");
+      tl->DrawLatex (std::floor (12.5*nPtChBins), -6, "33-36");
+      tl->DrawLatex (std::floor (13.5*nPtChBins), -6, "36-40");
+      tl->DrawLatex (std::floor (14.5*nPtChBins), -6, "40-45");
+      tl->DrawLatex (std::floor (15.5*nPtChBins), -6, "45-50");
+      tl->DrawLatex (std::floor (16.5*nPtChBins), -6, "50-55");
+      tl->DrawLatex (std::floor (17.5*nPtChBins), -6, "55-60");
+      tl->DrawLatex (std::floor (18.5*nPtChBins), -6, "60-65");
+      tl->DrawLatex (std::floor (19.5*nPtChBins), -6, "65-70");
+      tl->DrawLatex (std::floor (20.5*nPtChBins), -6, "70-75");
+      tl->DrawLatex (std::floor (21.5*nPtChBins), -6, "75-82.5");
+      tl->DrawLatex (std::floor (22.5*nPtChBins), -6, "82.5-90");
+      tl->DrawLatex (std::floor (23.5*nPtChBins), -6, "90-100");
+      tl->DrawLatex (std::floor (24.5*nPtChBins), -6, "100-110");
+      tl->DrawLatex (std::floor (25.5*nPtChBins), -6, "110-120");
+      tl->DrawLatex (std::floor (26.5*nPtChBins), -6, "120-130");
+      tl->DrawLatex (std::floor (27.5*nPtChBins), -6, "130-145");
+      tl->DrawLatex (std::floor (28.5*nPtChBins), -6, "145-160");
+      tl->DrawLatex (std::floor (29.5*nPtChBins), -6, "160-180");
+      tl->DrawLatex (std::floor (30.5*nPtChBins), -6, "180-200");
+      tl->DrawLatex (std::floor (31.5*nPtChBins), -6, "200-220");
+      tl->DrawLatex (std::floor (32.5*nPtChBins), -6, "220-240");
+      tl->DrawLatex (std::floor (33.5*nPtChBins), -6, "240-260");
+      tl->DrawLatex (std::floor (34.5*nPtChBins), -6, "260-280");
+      tl->DrawLatex (std::floor (35.5*nPtChBins), -6, "280-300");
+      tl->DrawLatex (std::floor (36.5*nPtChBins), -6, "300-325");
+      tl->DrawLatex (std::floor (37.5*nPtChBins), -6, "325-350");
+      tl->DrawLatex (std::floor (38.5*nPtChBins), -6, "350-375");
+      tl->DrawLatex (std::floor (39.5*nPtChBins), -6, "375-400");
 
       tl->SetTextAlign (32);
       tl->SetTextAngle (330);
 
-      tl->DrawLatex (-3, 1+std::floor (0.5*nPtChBins), "15-20 GeV");
-      tl->DrawLatex (-3, 1+std::floor (1.5*nPtChBins), "20-30 GeV");
-      tl->DrawLatex (-3, 1+std::floor (2.5*nPtChBins), "30-45 GeV");
-      tl->DrawLatex (-3, 1+std::floor (3.5*nPtChBins), "45-60 GeV");
-      tl->DrawLatex (-3, 1+std::floor (4.5*nPtChBins), "60-90 GeV");
-      tl->DrawLatex (-3, 1+std::floor (5.5*nPtChBins), "90-120 GeV");
-      tl->DrawLatex (-3, 1+std::floor (6.5*nPtChBins), "120-160 GeV");
-      tl->DrawLatex (-3, 1+std::floor (7.5*nPtChBins), "160-200 GeV");
-      tl->DrawLatex (-3, 1+std::floor (8.5*nPtChBins), "200-240 GeV");
-      tl->DrawLatex (-3, 1+std::floor (9.5*nPtChBins), "240-300 GeV");
-      tl->DrawLatex (-3, 1+std::floor (10.5*nPtChBins), "300-350 GeV");
-      tl->DrawLatex (-3, 1+std::floor (11.5*nPtChBins), "350-400 GeV");
+      tl->DrawLatex (-6, std::floor (0.5*nPtChBins), "10-11");
+      tl->DrawLatex (-6, std::floor (1.5*nPtChBins), "11-12");
+      tl->DrawLatex (-6, std::floor (2.5*nPtChBins), "12-13");
+      tl->DrawLatex (-6, std::floor (3.5*nPtChBins), "13-14");
+      tl->DrawLatex (-6, std::floor (4.5*nPtChBins), "14-15");
+      tl->DrawLatex (-6, std::floor (5.5*nPtChBins), "15-17.5");
+      tl->DrawLatex (-6, std::floor (6.5*nPtChBins), "17.5-20");
+      tl->DrawLatex (-6, std::floor (7.5*nPtChBins), "20-22.5");
+      tl->DrawLatex (-6, std::floor (8.5*nPtChBins), "22.5-25");
+      tl->DrawLatex (-6, std::floor (9.5*nPtChBins), "25-27.5");
+      tl->DrawLatex (-6, std::floor (10.5*nPtChBins), "27.5-30");
+      tl->DrawLatex (-6, std::floor (11.5*nPtChBins), "30-33");
+      tl->DrawLatex (-6, std::floor (12.5*nPtChBins), "33-36");
+      tl->DrawLatex (-6, std::floor (13.5*nPtChBins), "36-40");
+      tl->DrawLatex (-6, std::floor (14.5*nPtChBins), "40-45");
+      tl->DrawLatex (-6, std::floor (15.5*nPtChBins), "45-50");
+      tl->DrawLatex (-6, std::floor (16.5*nPtChBins), "50-55");
+      tl->DrawLatex (-6, std::floor (17.5*nPtChBins), "55-60");
+      tl->DrawLatex (-6, std::floor (18.5*nPtChBins), "60-65");
+      tl->DrawLatex (-6, std::floor (19.5*nPtChBins), "65-70");
+      tl->DrawLatex (-6, std::floor (20.5*nPtChBins), "70-75");
+      tl->DrawLatex (-6, std::floor (21.5*nPtChBins), "75-82.5");
+      tl->DrawLatex (-6, std::floor (22.5*nPtChBins), "82.5-90");
+      tl->DrawLatex (-6, std::floor (23.5*nPtChBins), "90-100");
+      tl->DrawLatex (-6, std::floor (24.5*nPtChBins), "100-110");
+      tl->DrawLatex (-6, std::floor (25.5*nPtChBins), "110-120");
+      tl->DrawLatex (-6, std::floor (26.5*nPtChBins), "120-130");
+      tl->DrawLatex (-6, std::floor (27.5*nPtChBins), "130-145");
+      tl->DrawLatex (-6, std::floor (28.5*nPtChBins), "145-160");
+      tl->DrawLatex (-6, std::floor (29.5*nPtChBins), "160-180");
+      tl->DrawLatex (-6, std::floor (30.5*nPtChBins), "180-200");
+      tl->DrawLatex (-6, std::floor (31.5*nPtChBins), "200-220");
+      tl->DrawLatex (-6, std::floor (32.5*nPtChBins), "220-240");
+      tl->DrawLatex (-6, std::floor (33.5*nPtChBins), "240-260");
+      tl->DrawLatex (-6, std::floor (34.5*nPtChBins), "260-280");
+      tl->DrawLatex (-6, std::floor (35.5*nPtChBins), "280-300");
+      tl->DrawLatex (-6, std::floor (36.5*nPtChBins), "300-325");
+      tl->DrawLatex (-6, std::floor (37.5*nPtChBins), "325-350");
+      tl->DrawLatex (-6, std::floor (38.5*nPtChBins), "350-375");
+      tl->DrawLatex (-6, std::floor (39.5*nPtChBins), "375-400");
 
       tl->SetTextFont (43);
       tl->SetTextSize (32);
@@ -1780,17 +1914,19 @@ void PlotResponseMatrix (const bool doPrimTracksOnly = false) {
       tl->DrawLatexNDC (0.26, 0.850, "Pythia8 #it{pp}, #sqrt{s} = 5.02 TeV");
       tl->DrawLatexNDC (0.26, 0.810, (dir == "ns" ? "Near-side" : (dir == "perp" ? "Perpendicular" : "Away-side")));
 
+      l->SetLineStyle (2);
+      l->SetLineWidth (2);
       l->SetLineColor (kGreen+2);
-      l->DrawLine (0, nPtChBins*2, nPtChBins*10, nPtChBins*2);
-      l->DrawLine (nPtChBins*2, 0, nPtChBins*2, nPtChBins*10);
+      l->DrawLine (nPtChBins*0,  nPtChBins*11, nPtChBins*36, nPtChBins*11);
+      l->DrawLine (nPtChBins*11, nPtChBins*0,  nPtChBins*11, nPtChBins*36);
 
       l->SetLineColor (kMagenta+2);
-      l->DrawLine (nPtChBins*4, nPtChBins*4, nPtChBins*10, nPtChBins*4);
-      l->DrawLine (nPtChBins*4, nPtChBins*4, nPtChBins*4, nPtChBins*10);
+      l->DrawLine (nPtChBins*0,  nPtChBins*18, nPtChBins*36, nPtChBins*18);
+      l->DrawLine (nPtChBins*18, nPtChBins*0,  nPtChBins*18, nPtChBins*36);
 
       l->SetLineColor (kBlack);
-      l->DrawLine (nPtChBins*10, nPtChBins*2, nPtChBins*10, nPtChBins*10);
-      l->DrawLine (nPtChBins*2, nPtChBins*10, nPtChBins*10, nPtChBins*10);
+      l->DrawLine (nPtChBins*36, nPtChBins*11, nPtChBins*36, nPtChBins*36);
+      l->DrawLine (nPtChBins*11, nPtChBins*36, nPtChBins*36, nPtChBins*36);
 
       c->SaveAs (Form ("%s/Plots/Unfolding/MC_Jet_TrkPt_ResponseMatrix_ref_2D_%s.png", workPath.Data (), dir.Data ()));
       c->SaveAs (Form ("%s/Plots/Unfolding/MC_Jet_TrkPt_ResponseMatrix_ref_2D_%s.pdf", workPath.Data (), dir.Data ()));
@@ -1803,7 +1939,8 @@ void PlotResponseMatrix (const bool doPrimTracksOnly = false) {
 
       const char* cent = (iCent == nFcalCentBins ? "pPb_allCent" : Form ("pPb_iCent%i", iCent));
 
-      for (short iDir = 0; iDir < 3; iDir++) {
+      //for (short iDir = 0; iDir < nDir; iDir++) {
+      for (short iDir : {0, 2}) {
 
         const TString dir = directions[iDir];
 
@@ -1828,8 +1965,8 @@ void PlotResponseMatrix (const bool doPrimTracksOnly = false) {
         TAxis* yax = h2->GetYaxis ();
         TAxis* zax = h2->GetZaxis ();
 
-        xax->SetTitle ("Truth-level #it{p}_{T}^{jet}");
-        yax->SetTitle ("Reco.-level #it{p}_{T}^{jet}");
+        xax->SetTitle ("Reco.-level #it{p}_{T}^{jet} [GeV]");
+        yax->SetTitle ("Truth-level #it{p}_{T}^{jet} [GeV]");
         zax->SetTitle ("");
 
         xax->SetTitleFont (43);
@@ -1848,45 +1985,101 @@ void PlotResponseMatrix (const bool doPrimTracksOnly = false) {
         xax->SetTitleOffset (2.0);
         yax->SetTitleOffset (2.0);
 
-        xax->SetNdivisions (-12);
-        yax->SetNdivisions (-12);
+        xax->SetNdivisions (-40);
+        yax->SetNdivisions (-40);
 
         h2->DrawCopy ("colz");
         SaferDelete (&h2);
 
         tl->SetTextFont (43);
-        tl->SetTextSize (16);
+        tl->SetTextSize (14);
         tl->SetTextAlign (33);
-        tl->SetTextAngle (30);
+        tl->SetTextAngle (60);
 
-        tl->DrawLatex (std::floor (0.5*nPtChBins), -3, "15-20 GeV");
-        tl->DrawLatex (std::floor (1.5*nPtChBins), -3, "20-30 GeV");
-        tl->DrawLatex (std::floor (2.5*nPtChBins), -3, "30-45 GeV");
-        tl->DrawLatex (std::floor (3.5*nPtChBins), -3, "45-60 GeV");
-        tl->DrawLatex (std::floor (4.5*nPtChBins), -3, "60-90 GeV");
-        tl->DrawLatex (std::floor (5.5*nPtChBins), -3, "90-120 GeV");
-        tl->DrawLatex (std::floor (6.5*nPtChBins), -3, "120-160 GeV");
-        tl->DrawLatex (std::floor (7.5*nPtChBins), -3, "160-200 GeV");
-        tl->DrawLatex (std::floor (8.5*nPtChBins), -3, "200-240 GeV");
-        tl->DrawLatex (std::floor (9.5*nPtChBins), -3, "240-300 GeV");
-        tl->DrawLatex (std::floor (10.5*nPtChBins), -3, "300-350 GeV");
-        tl->DrawLatex (std::floor (11.5*nPtChBins), -3, "350-400 GeV");
+        tl->DrawLatex (std::floor (0.5*nPtChBins), -6, "10-11");
+        tl->DrawLatex (std::floor (1.5*nPtChBins), -6, "11-12");
+        tl->DrawLatex (std::floor (2.5*nPtChBins), -6, "12-13");
+        tl->DrawLatex (std::floor (3.5*nPtChBins), -6, "13-14");
+        tl->DrawLatex (std::floor (4.5*nPtChBins), -6, "14-15");
+        tl->DrawLatex (std::floor (5.5*nPtChBins), -6, "15-17.5");
+        tl->DrawLatex (std::floor (6.5*nPtChBins), -6, "17.5-20");
+        tl->DrawLatex (std::floor (7.5*nPtChBins), -6, "20-22.5");
+        tl->DrawLatex (std::floor (8.5*nPtChBins), -6, "22.5-25");
+        tl->DrawLatex (std::floor (9.5*nPtChBins), -6, "25-27.5");
+        tl->DrawLatex (std::floor (10.5*nPtChBins), -6, "27.5-30");
+        tl->DrawLatex (std::floor (11.5*nPtChBins), -6, "30-33");
+        tl->DrawLatex (std::floor (12.5*nPtChBins), -6, "33-36");
+        tl->DrawLatex (std::floor (13.5*nPtChBins), -6, "36-40");
+        tl->DrawLatex (std::floor (14.5*nPtChBins), -6, "40-45");
+        tl->DrawLatex (std::floor (15.5*nPtChBins), -6, "45-50");
+        tl->DrawLatex (std::floor (16.5*nPtChBins), -6, "50-55");
+        tl->DrawLatex (std::floor (17.5*nPtChBins), -6, "55-60");
+        tl->DrawLatex (std::floor (18.5*nPtChBins), -6, "60-65");
+        tl->DrawLatex (std::floor (19.5*nPtChBins), -6, "65-70");
+        tl->DrawLatex (std::floor (20.5*nPtChBins), -6, "70-75");
+        tl->DrawLatex (std::floor (21.5*nPtChBins), -6, "75-82.5");
+        tl->DrawLatex (std::floor (22.5*nPtChBins), -6, "82.5-90");
+        tl->DrawLatex (std::floor (23.5*nPtChBins), -6, "90-100");
+        tl->DrawLatex (std::floor (24.5*nPtChBins), -6, "100-110");
+        tl->DrawLatex (std::floor (25.5*nPtChBins), -6, "110-120");
+        tl->DrawLatex (std::floor (26.5*nPtChBins), -6, "120-130");
+        tl->DrawLatex (std::floor (27.5*nPtChBins), -6, "130-145");
+        tl->DrawLatex (std::floor (28.5*nPtChBins), -6, "145-160");
+        tl->DrawLatex (std::floor (29.5*nPtChBins), -6, "160-180");
+        tl->DrawLatex (std::floor (30.5*nPtChBins), -6, "180-200");
+        tl->DrawLatex (std::floor (31.5*nPtChBins), -6, "200-220");
+        tl->DrawLatex (std::floor (32.5*nPtChBins), -6, "220-240");
+        tl->DrawLatex (std::floor (33.5*nPtChBins), -6, "240-260");
+        tl->DrawLatex (std::floor (34.5*nPtChBins), -6, "260-280");
+        tl->DrawLatex (std::floor (35.5*nPtChBins), -6, "280-300");
+        tl->DrawLatex (std::floor (36.5*nPtChBins), -6, "300-325");
+        tl->DrawLatex (std::floor (37.5*nPtChBins), -6, "325-350");
+        tl->DrawLatex (std::floor (38.5*nPtChBins), -6, "350-375");
+        tl->DrawLatex (std::floor (39.5*nPtChBins), -6, "375-400");
 
         tl->SetTextAlign (32);
         tl->SetTextAngle (330);
 
-        tl->DrawLatex (-3, 1+std::floor (0.5*nPtChBins), "15-20 GeV");
-        tl->DrawLatex (-3, 1+std::floor (1.5*nPtChBins), "20-30 GeV");
-        tl->DrawLatex (-3, 1+std::floor (2.5*nPtChBins), "30-45 GeV");
-        tl->DrawLatex (-3, 1+std::floor (3.5*nPtChBins), "45-60 GeV");
-        tl->DrawLatex (-3, 1+std::floor (4.5*nPtChBins), "60-90 GeV");
-        tl->DrawLatex (-3, 1+std::floor (5.5*nPtChBins), "90-120 GeV");
-        tl->DrawLatex (-3, 1+std::floor (6.5*nPtChBins), "120-160 GeV");
-        tl->DrawLatex (-3, 1+std::floor (7.5*nPtChBins), "160-200 GeV");
-        tl->DrawLatex (-3, 1+std::floor (8.5*nPtChBins), "200-240 GeV");
-        tl->DrawLatex (-3, 1+std::floor (9.5*nPtChBins), "240-300 GeV");
-        tl->DrawLatex (-3, 1+std::floor (10.5*nPtChBins), "300-350 GeV");
-        tl->DrawLatex (-3, 1+std::floor (11.5*nPtChBins), "350-400 GeV");
+        tl->DrawLatex (-6, std::floor (0.5*nPtChBins), "10-11");
+        tl->DrawLatex (-6, std::floor (1.5*nPtChBins), "11-12");
+        tl->DrawLatex (-6, std::floor (2.5*nPtChBins), "12-13");
+        tl->DrawLatex (-6, std::floor (3.5*nPtChBins), "13-14");
+        tl->DrawLatex (-6, std::floor (4.5*nPtChBins), "14-15");
+        tl->DrawLatex (-6, std::floor (5.5*nPtChBins), "15-17.5");
+        tl->DrawLatex (-6, std::floor (6.5*nPtChBins), "17.5-20");
+        tl->DrawLatex (-6, std::floor (7.5*nPtChBins), "20-22.5");
+        tl->DrawLatex (-6, std::floor (8.5*nPtChBins), "22.5-25");
+        tl->DrawLatex (-6, std::floor (9.5*nPtChBins), "25-27.5");
+        tl->DrawLatex (-6, std::floor (10.5*nPtChBins), "27.5-30");
+        tl->DrawLatex (-6, std::floor (11.5*nPtChBins), "30-33");
+        tl->DrawLatex (-6, std::floor (12.5*nPtChBins), "33-36");
+        tl->DrawLatex (-6, std::floor (13.5*nPtChBins), "36-40");
+        tl->DrawLatex (-6, std::floor (14.5*nPtChBins), "40-45");
+        tl->DrawLatex (-6, std::floor (15.5*nPtChBins), "45-50");
+        tl->DrawLatex (-6, std::floor (16.5*nPtChBins), "50-55");
+        tl->DrawLatex (-6, std::floor (17.5*nPtChBins), "55-60");
+        tl->DrawLatex (-6, std::floor (18.5*nPtChBins), "60-65");
+        tl->DrawLatex (-6, std::floor (19.5*nPtChBins), "65-70");
+        tl->DrawLatex (-6, std::floor (20.5*nPtChBins), "70-75");
+        tl->DrawLatex (-6, std::floor (21.5*nPtChBins), "75-82.5");
+        tl->DrawLatex (-6, std::floor (22.5*nPtChBins), "82.5-90");
+        tl->DrawLatex (-6, std::floor (23.5*nPtChBins), "90-100");
+        tl->DrawLatex (-6, std::floor (24.5*nPtChBins), "100-110");
+        tl->DrawLatex (-6, std::floor (25.5*nPtChBins), "110-120");
+        tl->DrawLatex (-6, std::floor (26.5*nPtChBins), "120-130");
+        tl->DrawLatex (-6, std::floor (27.5*nPtChBins), "130-145");
+        tl->DrawLatex (-6, std::floor (28.5*nPtChBins), "145-160");
+        tl->DrawLatex (-6, std::floor (29.5*nPtChBins), "160-180");
+        tl->DrawLatex (-6, std::floor (30.5*nPtChBins), "180-200");
+        tl->DrawLatex (-6, std::floor (31.5*nPtChBins), "200-220");
+        tl->DrawLatex (-6, std::floor (32.5*nPtChBins), "220-240");
+        tl->DrawLatex (-6, std::floor (33.5*nPtChBins), "240-260");
+        tl->DrawLatex (-6, std::floor (34.5*nPtChBins), "260-280");
+        tl->DrawLatex (-6, std::floor (35.5*nPtChBins), "280-300");
+        tl->DrawLatex (-6, std::floor (36.5*nPtChBins), "300-325");
+        tl->DrawLatex (-6, std::floor (37.5*nPtChBins), "325-350");
+        tl->DrawLatex (-6, std::floor (38.5*nPtChBins), "350-375");
+        tl->DrawLatex (-6, std::floor (39.5*nPtChBins), "375-400");
 
         tl->SetTextFont (43);
         tl->SetTextSize (32);
@@ -1902,17 +2095,19 @@ void PlotResponseMatrix (const bool doPrimTracksOnly = false) {
         tl->DrawLatexNDC (0.26, 0.810, iCent == nZdcCentBins ? "0-100%" : Form ("FCal %i-%i%%", zdcCentPercs[iCent+1], zdcCentPercs[iCent]));
         tl->DrawLatexNDC (0.26, 0.770, (dir == "ns" ? "Near-side" : (dir == "perp" ? "Perpendicular" : "Away-side")));
 
+        l->SetLineStyle (2);
+        l->SetLineWidth (2);
         l->SetLineColor (kGreen+2);
-        l->DrawLine (nPtChBins*2, nPtChBins*2, nPtChBins*10, nPtChBins*2);
-        l->DrawLine (nPtChBins*2, nPtChBins*2, nPtChBins*2, nPtChBins*10);
+        l->DrawLine (nPtChBins*0,  nPtChBins*11, nPtChBins*36, nPtChBins*11);
+        l->DrawLine (nPtChBins*11, nPtChBins*0,  nPtChBins*11, nPtChBins*36);
 
         l->SetLineColor (kMagenta+2);
-        l->DrawLine (nPtChBins*4, nPtChBins*4, nPtChBins*10, nPtChBins*4);
-        l->DrawLine (nPtChBins*4, nPtChBins*4, nPtChBins*4, nPtChBins*10);
+        l->DrawLine (nPtChBins*0,  nPtChBins*18, nPtChBins*36, nPtChBins*18);
+        l->DrawLine (nPtChBins*18, nPtChBins*0,  nPtChBins*18, nPtChBins*36);
 
         l->SetLineColor (kBlack);
-        l->DrawLine (nPtChBins*10, nPtChBins*2, nPtChBins*10, nPtChBins*10);
-        l->DrawLine (nPtChBins*2, nPtChBins*10, nPtChBins*10, nPtChBins*10);
+        l->DrawLine (nPtChBins*36, nPtChBins*11, nPtChBins*36, nPtChBins*36);
+        l->DrawLine (nPtChBins*11, nPtChBins*36, nPtChBins*36, nPtChBins*36);
 
         c->SaveAs (Form ("%s/Plots/Unfolding/MC_Jet_TrkPt_ResponseMatrix_%s_2D_%s.png", workPath.Data (), cent, dir.Data ()));
         c->SaveAs (Form ("%s/Plots/Unfolding/MC_Jet_TrkPt_ResponseMatrix_%s_2D_%s.pdf", workPath.Data (), cent, dir.Data ()));
@@ -1948,8 +2143,8 @@ void PlotResponseMatrix (const bool doPrimTracksOnly = false) {
       TAxis* yax = h2->GetYaxis ();
       TAxis* zax = h2->GetZaxis ();
 
-      xax->SetTitle ("Truth-level #it{p}_{T}^{jet}");
-      yax->SetTitle ("Reco.-level #it{p}_{T}^{jet}");
+      xax->SetTitle ("Reco.-level #it{p}_{T}^{jet} [GeV]");
+      yax->SetTitle ("Truth-level #it{p}_{T}^{jet} [GeV]");
       zax->SetTitle ("");
 
       xax->SetMoreLogLabels ();
@@ -1989,13 +2184,15 @@ void PlotResponseMatrix (const bool doPrimTracksOnly = false) {
       tl->DrawLatexNDC (0.26, 0.890, "#bf{#it{ATLAS}} Simulation Internal");
       tl->DrawLatexNDC (0.26, 0.850, "Pythia8 #it{pp}, #sqrt{s} = 5.02 TeV");
 
+      l->SetLineStyle (2);
+      l->SetLineWidth (2);
       l->SetLineColor (kGreen+2);
-      l->DrawLine (30, 30, 30, 300);
-      l->DrawLine (30, 30, 300, 30);
+      l->DrawLine (30, 10, 30, 300);
+      l->DrawLine (10, 30, 300, 30);
 
       l->SetLineColor (kMagenta+2);
-      l->DrawLine (60, 60, 60, 300);
-      l->DrawLine (60, 60, 300, 60);
+      l->DrawLine (60, 10, 60, 300);
+      l->DrawLine (10, 60, 300, 60);
 
       l->SetLineColor (kBlack);
       l->DrawLine (300, 30, 300, 300);
@@ -2035,8 +2232,8 @@ void PlotResponseMatrix (const bool doPrimTracksOnly = false) {
       TAxis* yax = h2->GetYaxis ();
       TAxis* zax = h2->GetZaxis ();
 
-      xax->SetTitle ("Truth-level #it{p}_{T}^{jet}");
-      yax->SetTitle ("Reco.-level #it{p}_{T}^{jet}");
+      xax->SetTitle ("Reco.-level #it{p}_{T}^{jet} [GeV]");
+      yax->SetTitle ("Truth-level #it{p}_{T}^{jet} [GeV]");
       zax->SetTitle ("");
 
       xax->SetMoreLogLabels ();
@@ -2077,13 +2274,15 @@ void PlotResponseMatrix (const bool doPrimTracksOnly = false) {
       tl->DrawLatexNDC (0.26, 0.850, "Pythia8 #it{pp} + #it{p}+Pb overlay, #sqrt{s} = 5.02 TeV");
       tl->DrawLatexNDC (0.26, 0.810, iCent == nZdcCentBins ? "0-100%" : Form ("FCal %i-%i%%", zdcCentPercs[iCent+1], zdcCentPercs[iCent]));
 
+      l->SetLineStyle (2);
+      l->SetLineWidth (2);
       l->SetLineColor (kGreen+2);
-      l->DrawLine (30, 30, 30, 300);
-      l->DrawLine (30, 30, 300, 30);
+      l->DrawLine (30, 10, 30, 300);
+      l->DrawLine (10, 30, 300, 30);
 
       l->SetLineColor (kMagenta+2);
-      l->DrawLine (60, 60, 60, 300);
-      l->DrawLine (60, 60, 300, 60);
+      l->DrawLine (60, 10, 60, 300);
+      l->DrawLine (10, 60, 300, 60);
 
       l->SetLineColor (kBlack);
       l->DrawLine (300, 30, 300, 300);
@@ -2097,7 +2296,8 @@ void PlotResponseMatrix (const bool doPrimTracksOnly = false) {
     /*
     for (short iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
   
-      for (short iDir = 0; iDir < 3; iDir++) {
+      //for (short iDir = 0; iDir < nDir; iDir++) {
+      for (short iDir : {0, 2}) {
   
         const TString dir = directions[iDir];
   

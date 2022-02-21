@@ -47,7 +47,7 @@ void ProcessNIters (const char* rawTag, const char* outFileTag, const short nIte
   const short nIters1DMin = nItersMin;
   const double* nIters1DVals = linspace (nIters1DMin, nIters1DMax, nIters1DMax-nIters1DMin);
 
-  const bool useJetWgts = false;
+  const bool useJetWgts = true;
   const bool useCentDiffUnf = true;
 
   TH1D*     h_jet_pt_ref                  = nullptr;

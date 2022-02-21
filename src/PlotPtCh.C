@@ -30,12 +30,19 @@
 using namespace JetHadronCorrelations;
 
 
+// whether to draw systematics plots
 //const bool makeTotalSystPlots   = false;
 //const bool makeBkgdSystPlots    = false;
-const bool makeSigSystPlots     = true;
-const bool makeIpPbSystPlots    = true;
+const bool makeSigSystPlots     = false;
+const bool makeIpPbSystPlots    = false;
+
+// whether to draw covariance plots
 const bool makeCovariancePlots  = false;
+
+// whether to draw no unfold points for comparison
 const bool DrawNoUnfold         = true;
+
+// whether to draw a constant fit for comparison
 const bool DrawConstFit         = false;
 
 
@@ -355,7 +362,8 @@ void PlotPtCh (const char* rawTag, const char* unfoldTag) {
 
         h_jet_pt_ref_unf[iDType][iPtJInt] = (TH1D*) inFile->Get (Form ("h_jet_pt_ref_unf_%s_%s_Nominal", dType.Data (), pTJInt.Data ()));
 
-        for (short iDir = 0; iDir < nDir; iDir++) {
+        //for (short iDir = 0; iDir < nDir; iDir++) {
+        for (short iDir : {0, 2}) {
 
           const TString dir = directions[iDir];
 
@@ -372,7 +380,8 @@ void PlotPtCh (const char* rawTag, const char* unfoldTag) {
 
           h_jet_pt_unf[iDType][iPtJInt][iCent] = (TH1D*) inFile->Get (Form ("h_jet_pt_unf_%s_%s_%s_Nominal", dType.Data (), cent.Data (), pTJInt.Data ()));
 
-          for (short iDir = 0; iDir < nDir; iDir++) {
+          //for (short iDir = 0; iDir < nDir; iDir++) {
+          for (short iDir : {0, 2}) {
 
             const TString dir = directions[iDir];
 
@@ -397,7 +406,8 @@ void PlotPtCh (const char* rawTag, const char* unfoldTag) {
 
       const TString pTJInt = (iPtJInt == 0 ? "30GeV" : "60GeV");
 
-      for (short iDir = 0; iDir < nDir; iDir++) {
+      //for (short iDir = 0; iDir < nDir; iDir++) {
+      for (short iDir : {0, 2}) {
 
         const TString dir = directions[iDir];
 
@@ -1621,7 +1631,8 @@ void PlotPtCh (const char* rawTag, const char* unfoldTag) {
 
       const TString pTJInt = (iPtJInt == 0 ? "30GeV" : "60GeV");
 
-      for (short iDir : {0, 1, 2}) {
+      //for (short iDir = 0; iDir < nDir; iDir++) {
+      for (short iDir : {0, 2}) {
     
         const char* canvasName = Form ("c_jetInt_trk_pt_cov_ref_%s_%s", directions[iDir].Data (), pTJInt.Data ());
         TCanvas* c = new TCanvas (canvasName, "", 960, 800);
@@ -1720,7 +1731,8 @@ void PlotPtCh (const char* rawTag, const char* unfoldTag) {
 
         const TString pTJInt = (iPtJInt == 0 ? "30GeV" : "60GeV");
 
-        for (short iDir : {0, 1, 2}) {
+        //for (short iDir = 0; iDir < nDir; iDir++) {
+        for (short iDir : {0, 2}) {
       
           const char* canvasName = Form ("c_jetInt_trk_pt_cov_pPb_%s_%s_%s", directions[iDir].Data (), cent.Data (), pTJInt.Data ());
           TCanvas* c = new TCanvas (canvasName, "", 960, 800);
@@ -1822,7 +1834,8 @@ void PlotPtCh (const char* rawTag, const char* unfoldTag) {
 
     const TString pTJInt = (iPtJInt == 0 ? "30GeV" : "60GeV");
 
-    for (short iDir : {0, 1, 2}) {
+    //for (short iDir = 0; iDir < nDir; iDir++) {
+    for (short iDir : {0, 2}) {
   
       const char* canvasName = Form ("c_jetInt_trk_pt_signalYields_%s_%s", directions[iDir].Data (), pTJInt.Data ());
       TCanvas* c = new TCanvas (canvasName, "", 800, 1000);
@@ -1922,7 +1935,9 @@ void PlotPtCh (const char* rawTag, const char* unfoldTag) {
 
     const TString pTJInt = (iPtJInt == 0 ? "30GeV" : "60GeV");
 
-    for (short iDir : {0, 1, 2}) {
+    //for (short iDir = 0; iDir < nDir; iDir++) {
+    for (short iDir : {0, 2}) {
+
       const char* canvasName = Form ("c_jetInt_trk_pt_IpPb_iDir%i_%s", iDir, pTJInt.Data ());
       TCanvas* c = new TCanvas (canvasName, "", 1200, 800);
       c->Divide (3, 2);
@@ -2144,6 +2159,7 @@ void PlotPtCh (const char* rawTag, const char* unfoldTag) {
     const TString pTJInt = (iPtJInt == 0 ? "30GeV" : "60GeV");
 
     for (short iDir : {0, 2}) {
+
       const char* canvasName = Form ("c_jetInt_trk_pt_IpPb_GAM_Ratio_iDir%i_%s", iDir, pTJInt.Data ());
       TCanvas* c = new TCanvas (canvasName, "", 1200, 800);
       c->Divide (3, 2);
@@ -2230,6 +2246,7 @@ void PlotPtCh (const char* rawTag, const char* unfoldTag) {
     const TString pTJInt = (iPtJInt == 0 ? "30GeV" : "60GeV");
 
     for (short iDir : {0, 2}) {
+
       const char* canvasName = Form ("c_jetInt_trk_pt_IpPb_GAM_Comparison_iDir%i_%s", iDir, pTJInt.Data ());
       TCanvas* c = new TCanvas (canvasName, "", 1200, 800);
       c->Divide (3, 2);
@@ -2324,6 +2341,7 @@ void PlotPtCh (const char* rawTag, const char* unfoldTag) {
     const TString pTJInt = (iPtJInt == 0 ? "30GeV" : "60GeV");
 
     for (short iDir : {0, 1, 2}) {
+
       const char* canvasName = Form ("c_jetInt_trk_pt_IpPb_fewCent_iDir%i_%s", iDir, pTJInt.Data ());
       TCanvas* c = new TCanvas (canvasName, "", 1200, 400);
       c->Divide (3, 1);
@@ -2646,6 +2664,7 @@ void PlotPtCh (const char* rawTag, const char* unfoldTag) {
     const TString pTJInt = (iPtJInt == 0 ? "30GeV" : "60GeV");
 
     for (short iDir : {0, 2}) {
+
       const char* canvasName = Form ("c_jetInt_trk_pt_IpPb_Angantyr_Comp_iDir%i_%s", iDir, pTJInt.Data ());
       TCanvas* c = new TCanvas (canvasName, "", 1200, 800);
       c->Divide (3, 2);
@@ -2776,6 +2795,7 @@ void PlotPtCh (const char* rawTag, const char* unfoldTag) {
     const TString pTJInt = (iPtJInt == 0 ? "30GeV" : "60GeV");
 
     for (short iDir : {0, 2}) {
+
       const char* canvasName = Form ("c_jetInt_trk_pt_IpPb_Angantyr_0-20perc_Comp_iDir%i_%s", iDir, pTJInt.Data ());
       TCanvas* c = new TCanvas (canvasName, "", 800, 800);
       c->cd ();
@@ -2891,6 +2911,7 @@ void PlotPtCh (const char* rawTag, const char* unfoldTag) {
 
   {
     for (short iDir : {0, 2}) {
+
       const char* canvasName = Form ("c_jetInt_trk_pt_IpPb_Angantyr_0-20perc_Comp_iDir%i_allPtJet", iDir);
       TCanvas* c = new TCanvas (canvasName, "", 800, 800);
       c->cd ();
@@ -3002,6 +3023,7 @@ void PlotPtCh (const char* rawTag, const char* unfoldTag) {
     const TString pTJInt = "60GeV";
 
     for (short iDir : {0, 2}) {
+
       const char* canvasName = Form ("c_jetInt_trk_pt_IpPb_AMPT_Comp_iDir%i_%s", iDir, pTJInt.Data ());
       TCanvas* c = new TCanvas (canvasName, "", 800, 800);
       c->cd ();

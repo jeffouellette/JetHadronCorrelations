@@ -149,7 +149,7 @@ void PlotJetEnergyResolution () {
         {
           gPad->SetLogx ();
 
-          TH1D* htemp = new TH1D ("htemp", "", 1, 20, pTJBins[nPtJBins]);
+          TH1D* htemp = new TH1D ("htemp", "", 1, pTJBins[0], pTJBins[nPtJBins]);
           htemp->SetBinContent (1, 100);
       
           TAxis* xax = htemp->GetXaxis ();
@@ -229,7 +229,7 @@ void PlotJetEnergyResolution () {
         {
           gPad->SetLogx ();
 
-          TH1D* htemp = new TH1D ("htemp", "", 1, 20, pTJBins[nPtJBins]);
+          TH1D* htemp = new TH1D ("htemp", "", 1, pTJBins[0], pTJBins[nPtJBins]);
           htemp->SetBinContent (1, 100);
       
           TAxis* xax = htemp->GetXaxis ();
@@ -310,7 +310,7 @@ void PlotJetEnergyResolution () {
         {
           gPad->SetLogx ();
 
-          TH1D* htemp = new TH1D ("htemp", "", 1, 20, pTJBins[nPtJBins]);
+          TH1D* htemp = new TH1D ("htemp", "", 1, pTJBins[0], pTJBins[nPtJBins]);
       
           TAxis* xax = htemp->GetXaxis ();
           TAxis* yax = htemp->GetYaxis ();
@@ -388,7 +388,7 @@ void PlotJetEnergyResolution () {
         {
           gPad->SetLogx ();
 
-          TH1D* htemp = new TH1D ("htemp", "", 1, 20, pTJBins[nPtJBins]);
+          TH1D* htemp = new TH1D ("htemp", "", 1, pTJBins[0], pTJBins[nPtJBins]);
     
           TAxis* xax = htemp->GetXaxis ();
           TAxis* yax = htemp->GetYaxis ();
@@ -467,7 +467,7 @@ void PlotJetEnergyResolution () {
         {
           gPad->SetLogx ();
 
-          TH1D* htemp = new TH1D ("htemp", "", 1, 20, pTJBins[nPtJBins]);
+          TH1D* htemp = new TH1D ("htemp", "", 1, pTJBins[0], pTJBins[nPtJBins]);
     
           TAxis* xax = htemp->GetXaxis ();
           TAxis* yax = htemp->GetYaxis ();
@@ -545,7 +545,7 @@ void PlotJetEnergyResolution () {
         {
           gPad->SetLogx ();
 
-          TH1D* htemp = new TH1D ("htemp", "", 1, 20, pTJBins[nPtJBins]);
+          TH1D* htemp = new TH1D ("htemp", "", 1, pTJBins[0], pTJBins[nPtJBins]);
     
           TAxis* xax = htemp->GetXaxis ();
           TAxis* yax = htemp->GetYaxis ();
