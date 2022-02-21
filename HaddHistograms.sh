@@ -12,12 +12,12 @@ declare -a datavardirs=("Nominal")
 #declare -a mcvardirs=("Nominal" "JESVar0" "JESVar1" "JESVar2" "JESVar3" "JESVar4" "JESVar5" "JESVar6" "JESVar7" "JESVar8" "JESVar9" "JESVar10" "JESVar11" "JESVar12" "JESVar13" "JESVar15" "JESVar16" "JESVar17" "JESVar18" "JESVar19" "MCRecoJetsTruthParts" "MCTruthJetsTruthParts")
 #declare -a mcvardirs=("JESVar18" "JESVar19")
 #declare -a mcvardirs=("MCRecoJetsTruthMatchedParts")
-declare -a mcvardirs=("JESVar16")
+declare -a mcvardirs=("Nominal")
 
 #declare -a mcmixvardirs=("Nominal")
 #declare -a mcmixvardirs=("Nominal" "JESVar0" "JESVar1" "JESVar2" "JESVar3" "JESVar4" "JESVar5" "JESVar6" "JESVar7" "JESVar8" "JESVar9" "JESVar10" "JESVar11" "JESVar12" "JESVar13" "JESVar15" "JESVar16" "JESVar17" "JESVar18" "JESVar19")
 #declare -a mcmixvardirs=("Nominal" "MixCatVar2" "MixCatVar6")
-declare -a mcmixvardirs=("JESVar16")
+declare -a mcmixvardirs=("Nominal")
 
 declare -a sigmixdirs=("JetsHists" "MixedHists")
 #declare -a sigmixdirs=("MixedHists")
@@ -138,14 +138,14 @@ for vardir in ${mcmixvardirs[@]}; do
   targetPath=rootFiles/Histograms/All/MixedHists/${vardir}
   mcPath=rootFiles/Histograms/MC/MixedHists/${vardir}
   
-  hadd -f ${targetPath}/mc17_5TeV_hists.root \
-          ${mcPath}/pp17_JZ0*hists.root \
-          ${mcPath}/pp17_JZ1_a*hists.root \
-          ${mcPath}/pp17_JZ1_b*hists.root \
-          ${mcPath}/pp17_JZ2_a*hists.root \
-          ${mcPath}/pp17_JZ2_b*hists.root \
-          ${mcPath}/pp17_JZ3_a*hists.root \
-          ${mcPath}/pp17_JZ3_b*hists.root &
+  #hadd -f ${targetPath}/mc17_5TeV_hists.root \
+  #        ${mcPath}/pp17_JZ0*hists.root \
+  #        ${mcPath}/pp17_JZ1_a*hists.root \
+  #        ${mcPath}/pp17_JZ1_b*hists.root \
+  #        ${mcPath}/pp17_JZ2_a*hists.root \
+  #        ${mcPath}/pp17_JZ2_b*hists.root \
+  #        ${mcPath}/pp17_JZ3_a*hists.root \
+  #        ${mcPath}/pp17_JZ3_b*hists.root &
   
   for cent in $(seq 0 4); do   
   

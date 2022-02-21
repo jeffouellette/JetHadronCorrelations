@@ -98,6 +98,10 @@ bool JetEnergyResolution (const char* directory,
     std::cout << "Checking for leading truth jet with pT < " << truth_jet_max_pt << std::endl;
 
 
+  // weight for this JZ slice
+  const float jzScaleFactor = GetJZScaleFactor (TString (inFileName)) * crossSectionPicoBarns * mcFilterEfficiency * GetJetLuminosity () / mcNumberEvents; // sigma * f * L_int
+
+
   std::cout << std::endl << "Jet acceptance config.:" << std::endl;
   std::cout << "Anti-kT R=0.2:" << std::endl;
   std::cout << "  --> jets truth matched to within dR < " << akt2_TruthMatchMaxDR << std::endl;
@@ -300,7 +304,7 @@ bool JetEnergyResolution (const char* directory,
 
     //const double eventWeight = 1;
     // JZ weighting scheme: sigma * eff * L_int / N_evt
-    const double eventWeight = (IsHijing () ? 1 : mcEventWeights->at (0) * crossSectionPicoBarns * mcFilterEfficiency * GetJetLuminosity () / mcNumberEvents);
+    const double eventWeight = (IsHijing () ? 1 : jzScaleFactor * mcEventWeights->at (0));
 
 
     // Fill histograms for all jet radii
@@ -309,6 +313,10 @@ bool JetEnergyResolution (const char* directory,
       const JetRadius radius = radii[iR];
 
       const float jet_TruthMatchMaxDR = GetAktTruthMatchMaxDR (radius); // maximum truth match delta R cut
+
+      // find truth-reco jet matches uniquely
+      const std::vector <short> recoJetMatches = GetAktRecoJetMatches (radius);
+      //const std::vector <short> truthJetMatches = GetAktTruthJetMatches (recoJetMatches, radius);
 
 
       // NEW VERSION -- loop over truth jets
@@ -323,11 +331,12 @@ bool JetEnergyResolution (const char* directory,
         if (GetAktTruthJetIso (iTJet, radius) < GetAktTruthIsoMinDR (radius))
           continue; // truth jet isolation cut
 
-        const int iJet = GetAktHIJetMatch (iTJet, radius);
+        const int iJet = recoJetMatches [iTJet];
+        //const int iJet = GetAktHIJetMatch (iTJet, radius);
         if (iJet == -1)
           continue; // in case of no reco. jet match
 
-        const float jpt = GetAktHIJetPt (iJet, radius);
+        const float jpt  = GetAktHIJetPt  (iJet, r0p4, -1, 1);
         const float jeta = GetAktHIJetEta (iJet, radius);
         const float jphi = GetAktHIJetPhi (iJet, radius);
         const float jen = GetAktHIJetEn (iJet, radius);
@@ -366,60 +375,6 @@ bool JetEnergyResolution (const char* directory,
         }
 
       } // end loop over jets
-
-      // OLD VERSION -- loop over reco. jets
-      /*
-      const int jn = GetAktHIJetN (radius);
-      for (int iJet = 0; iJet < jn; iJet++) {
-        if (!MeetsJetAcceptanceCuts (iJet, radius))
-          continue;
-
-        const float jpt = GetAktHIJetPt (iJet, radius);
-        const float jeta = GetAktHIJetEta (iJet, radius);
-        const float jphi = GetAktHIJetPhi (iJet, radius);
-        const float jen = GetAktHIJetEn (iJet, radius);
-
-        if (GetAktHIJetIso (iJet, radius) < GetAktHIIsoMinDR (radius))
-          continue; // reco. jet isolation cut
-
-        const int iTJet = GetAktTruthJetMatch (iJet, radius);
-        if (iTJet == -1)
-          continue; // in case of no truth jet match
-
-        const float tjpt = GetAktTruthJetPt (iTJet, radius);
-        const float tjeta = GetAktTruthJetEta (iTJet, radius);
-        const float tjphi = GetAktTruthJetPhi (iTJet, radius);
-        const float tjen = GetAktTruthJetEn (iTJet, radius);
-
-        if (DeltaR (jeta, tjeta, jphi, tjphi) > jet_TruthMatchMaxDR)
-          continue; // reco.-truth jet matching cut
-
-        if (GetAktTruthJetIso (iTJet, radius) < GetAktTruthIsoMinDR (radius))
-          continue; // truth jet isolation cut
-
-        if (jpt / tjpt < 0.4 && GetAktHIJetPt (iJet, radius, -1, 2) < 15) // cuts on pre-calibrated jet pT
-          continue; // cut out very low pT jets (before calibration), except in cases with a correspondingly low pT truth match.
-
-        short iPtJ = -1;
-        if (pTJBins[0] <= tjpt) {
-          iPtJ = 0;
-          while (iPtJ < nPtJBins && pTJBins[iPtJ+1] < tjpt) iPtJ++;
-        }
-
-        short iEta = -1;
-        if (finerEtaBins[0] <= tjeta) {
-          iEta = 0;
-          while (iEta < nFinerEtaBins && finerEtaBins[iEta+1] < tjeta) iEta++;
-        }
-
-        if (iPtJ >= 0 && iPtJ < nPtJBins && iEta >= 0 && iEta < nFinerEtaBins) {
-          h_jpts[iR][iPtJ][iEta]->Fill (jpt / tjpt);
-          h_jes[iR][iPtJ][iEta]->Fill (jen / tjen);
-          h_jetacorr[iR][iPtJ][iEta]->Fill (jeta - tjeta);
-        }
-
-      } // end loop over jets
-      */
 
     } // end loop over jet radii
 

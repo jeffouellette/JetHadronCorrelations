@@ -411,15 +411,15 @@ bool JetHadronSkimmer (const char* directory,
     // vertexing cuts, require no pileup vertices and primary vertex with |vz| < 150mm
     {
       bool hasPrimary = false;
-      bool hasPileup = false;
+      //bool hasPileup = false;
       vz = -999;
       for (int iVert = 0; iVert < nvert; iVert++) {
         if (vert_type[iVert] == 1) {
           hasPrimary = true;
           vz = vert_z[iVert];
         }
-        else if (vert_type[iVert] == 3)
-          hasPileup = true;
+        //else if (vert_type[iVert] == 3)
+        //  hasPileup = true;
       }
       //if (hasPileup || std::fabs (vz) > 150 || !hasPrimary)
       //  continue;

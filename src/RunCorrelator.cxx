@@ -35,6 +35,7 @@ bool sameTreeMixing = false;
 
 float truth_jet_min_pt = 0;
 float truth_jet_max_pt = FLT_MAX;
+float jzScaleFactor = 1;
 
 
 
@@ -366,7 +367,6 @@ bool Correlator (const char* tag, const char* outFilePattern, TTree* jetsTree, T
   TH2D* h2_flavourRespUnc = GetFlavorResponseUnc (r0p4);
 
 
-
   ////////////////////////////////////////////////////////////////////////////////////////////////////  
   // Main loop over events
   ////////////////////////////////////////////////////////////////////////////////////////////////////  
@@ -442,7 +442,7 @@ bool Correlator (const char* tag, const char* outFilePattern, TTree* jetsTree, T
       if (iLTJ == -1 || GetAktTruthJetPt (iLTJ, r0p4) < truth_jet_min_pt || GetAktTruthJetPt (iLTJ, r0p4) > truth_jet_max_pt)
         continue;
 
-      event_weight = mcEventWeights->at (0) * crossSectionPicoBarns * mcFilterEfficiency * GetJetLuminosity () / mcNumberEvents; // sigma * f * L_int
+      event_weight = jzScaleFactor * mcEventWeights->at (0);
     }
 
 
@@ -473,6 +473,11 @@ bool Correlator (const char* tag, const char* outFilePattern, TTree* jetsTree, T
       continue;
 
 
+    // find truth-reco jet matches uniquely
+    const std::vector <short> recoJetMatches = GetAktRecoJetMatches (r0p4, nJESVar);
+    const std::vector <short> truthJetMatches = GetAktTruthJetMatches (recoJetMatches, r0p4);
+
+
     // initialize all histogramming bins to 0 for this event
     for (short iPtJ = 0; iPtJ < nPtJBins; iPtJ++)
       jet_pt_counts[iPtJ] = 0;
@@ -483,7 +488,7 @@ bool Correlator (const char* tag, const char* outFilePattern, TTree* jetsTree, T
     const short jn = UseTruthJets () ? GetAktTruthJetN (r0p4) :  GetAktHIJetN (r0p4);
     for (short iJet = 0; iJet < jn; iJet++) {
 
-      float jpt  = (UseTruthJets () ? GetAktTruthJetPt  (iJet, r0p4) : GetAktHIJetPt  (iJet, r0p4, nJESVar));
+      float jpt  = (UseTruthJets () ? GetAktTruthJetPt  (iJet, r0p4) : GetAktHIJetPt  (iJet, r0p4, nJESVar, IsCollisions () || (IsDataOverlay () && truthJetMatches[iJet] == -1) ? 0 : 1));
       const float jeta = (UseTruthJets () ? GetAktTruthJetEta (iJet, r0p4) : GetAktHIJetEta (iJet, r0p4, nJESVar));
       const float jphi = (UseTruthJets () ? GetAktTruthJetPhi (iJet, r0p4) : GetAktHIJetPhi (iJet, r0p4, nJESVar));
 
@@ -503,11 +508,12 @@ bool Correlator (const char* tag, const char* outFilePattern, TTree* jetsTree, T
 
       // in MC, check that the jet is truth-matched. Otherwise problems can emerge, particularly in the overlay.
       if (!IsCollisions () && !UseTruthJets ()) {
-        const short iTJet = GetAktTruthJetMatch (iJet, r0p4);
+        const short iTJet = truthJetMatches[iJet];
+        //const short iTJet = GetAktTruthJetMatch (iJet, r0p4);
         if (iTJet == -1)
           continue; // in case of no truth jet match
         const float tjpt = GetAktTruthJetPt (iTJet, r0p4);
-        if (std::fabs (jpt/tjpt - 1) > 3*0.01*f_jer->Eval (tjpt))
+        if (std::fabs (jpt/tjpt - 1) > nJERSigma*0.01*f_jer->Eval (tjpt))
           continue; // cut on jets reconstructed well outside the JER
       }
 
@@ -656,7 +662,7 @@ bool Correlator (const char* tag, const char* outFilePattern, TTree* jetsTree, T
     // loop over all jets again in the event but now correlate tracks
     for (short iJet = 0; iJet < jn; iJet++) {
 
-      float jpt  = (UseTruthJets () ? GetAktTruthJetPt  (iJet, r0p4) : GetAktHIJetPt  (iJet, r0p4, nJESVar));
+      float jpt  = (UseTruthJets () ? GetAktTruthJetPt  (iJet, r0p4) : GetAktHIJetPt  (iJet, r0p4, nJESVar, IsCollisions () || (IsDataOverlay () && truthJetMatches[iJet] == -1) ? 0 : 1));
       const float jeta = (UseTruthJets () ? GetAktTruthJetEta (iJet, r0p4) : GetAktHIJetEta (iJet, r0p4, nJESVar));
       const float jphi = (UseTruthJets () ? GetAktTruthJetPhi (iJet, r0p4) : GetAktHIJetPhi (iJet, r0p4, nJESVar));
 
@@ -676,11 +682,12 @@ bool Correlator (const char* tag, const char* outFilePattern, TTree* jetsTree, T
 
       // In MC, check that the jet is truth-matched. Otherwise problems can emerge, particularly in the overlay.
       if (!IsCollisions () && !UseTruthJets ()) {
-        const short iTJet = GetAktTruthJetMatch (iJet, r0p4);
+        const short iTJet = truthJetMatches[iJet];
+        //const short iTJet = GetAktTruthJetMatch (iJet, r0p4);
         if (iTJet == -1)
           continue; // in case of no truth jet match
         const float tjpt = GetAktTruthJetPt (iTJet, r0p4);
-        if (std::fabs (jpt/tjpt - 1) > 3*0.01*f_jer->Eval (tjpt))
+        if (std::fabs (jpt/tjpt - 1) > nJERSigma*0.01*f_jer->Eval (tjpt))
           continue; // cut on jets reconstructed well outside the JER
       }
 
@@ -1012,6 +1019,10 @@ bool RunCorrelator (const char* directory,
     std::cout << "Checking for leading truth jet with pT > " << truth_jet_min_pt << std::endl;
   if (truth_jet_max_pt != FLT_MAX)
     std::cout << "Checking for leading truth jet with pT < " << truth_jet_max_pt << std::endl;
+
+
+  // weight for this JZ slice
+  jzScaleFactor = GetJZScaleFactor (TString (jetsInFileName)) * crossSectionPicoBarns * mcFilterEfficiency * GetJetLuminosity () / mcNumberEvents; // sigma * f * L_int
 
   return Correlator (TString (tag), outFilePattern, jetsInTree, tracksInTree);
 

@@ -900,6 +900,17 @@ float GetJZXR04MaxPt (const TString& fname) {
 
 
 /**
+ * Returns the residual JZ scaling factor to smooth the spectrum transition at 60 GeV from SoftQCD to HardQCD
+ */
+float GetJZScaleFactor (const TString& fname) {
+  if (!IsCollisions () && !(fname.Contains ("JZ0") || fname.Contains ("JZ1") || fname.Contains ("Hijing")))
+    return 0.859275;
+  return 1.;
+}
+
+
+
+/**
  * Returns a copy of the histogram detailing the Zdc cuts.
  */
 TH1D* GetZdcCuts () {
@@ -1274,27 +1285,86 @@ bool MeetsTrackCuts (int iTrk, const int nWPVar) {
 
 
 
+///**
+// * NOW DEPRECATED
+// * Returns the matched truth jet within DR < pi to this HI jet.
+// * Returns -1 if no truth jet is matched within this DR range, or the radius is invalid.
+// */
+//int GetAktTruthJetMatch (const int iJ, const JetRadius& radius, const int nJESVar) {
+//  assert (GetAktHIJetN (radius) > iJ);
+//  float mindr = M_PI;
+//  int match = -1;
+//  const float jeta = GetAktHIJetEta (iJ, radius, nJESVar);
+//  const float jphi = GetAktHIJetPhi (iJ, radius, nJESVar);
+//  const int nTJ = GetAktTruthJetN (radius);
+//  for (int iTJ = 0; iTJ < nTJ; iTJ++) {
+//    const float dr = DeltaR (jeta, GetAktTruthJetEta (iTJ, radius), jphi, GetAktTruthJetPhi (iTJ, radius));
+//    if (dr < mindr) {
+//      match = iTJ;
+//      mindr = dr;
+//    }
+//  }
+//  if (mindr > GetAktTruthMatchMaxDR (radius))
+//    return -1;
+//  return match;
+//}
+
+
+
 /**
- * Returns the matched truth jet within DR < pi to this HI jet.
- * Returns -1 if no truth jet is matched within this DR range, or the radius is invalid.
+ * Returns a vector storing the index of the reco jet match for each truth jet.
+ * Elements are -1 if the truth jet has no reco match.
  */
-int GetAktTruthJetMatch (const int iJ, const JetRadius& radius, const int nJESVar) {
-  assert (GetAktHIJetN (radius) > iJ);
-  float mindr = M_PI;
-  int match = -1;
-  const float jeta = GetAktHIJetEta (iJ, radius, nJESVar);
-  const float jphi = GetAktHIJetPhi (iJ, radius, nJESVar);
-  const int nTJ = GetAktTruthJetN (radius);
-  for (int iTJ = 0; iTJ < nTJ; iTJ++) {
-    const float dr = DeltaR (jeta, GetAktTruthJetEta (iTJ, radius), jphi, GetAktTruthJetPhi (iTJ, radius));
-    if (dr < mindr) {
-      match = iTJ;
-      mindr = dr;
-    }
+std::vector <short> GetAktRecoJetMatches (const JetRadius& radius, const short nJESVar) {
+  if (IsCollisions ())
+    return std::vector <short> (0);
+
+  const short nRJ = GetAktHIJetN (radius);
+
+  std::vector <short> recoMatches (GetAktTruthJetN (radius));
+
+  for (short iTJ = 0; iTJ < (short) recoMatches.size (); iTJ++) {
+    const float tjeta = GetAktTruthJetEta (iTJ, radius);
+    const float tjphi = GetAktTruthJetPhi (iTJ, radius);
+
+    float mindr = GetAktTruthMatchMaxDR (radius);
+    short recoMatch = -1;
+
+    for (short iRJ = 0; iRJ < nRJ; iRJ++) {
+      if (GetAktHIJetPt (iRJ, radius, nJESVar) < GetAktTruthMatchMinRecoPt (radius))
+        continue;
+      const float dr = DeltaR (tjeta, GetAktHIJetEta (iRJ, radius, nJESVar), tjphi, GetAktHIJetPhi (iRJ, radius, nJESVar));
+      if (dr < mindr) {
+        recoMatch = iRJ;
+        mindr = dr;
+      }
+    } // end loop over iRJ
+
+    recoMatches[iTJ] = recoMatch;
+  } // end loop over iTJ
+
+  return recoMatches; 
+}
+
+
+/**
+ * Inverts the vector storing the index of the reco jet match for each truth jet.
+ * If a reco jet has a truth match according to the input array, the truth index is stored at the reco index.
+ * Elements are -1 if the reco jet has no truth match.
+ */
+std::vector <short> GetAktTruthJetMatches (const std::vector <short>& recoMatches, const JetRadius& radius) {
+  if (IsCollisions ())
+    return std::vector <short> (0);
+
+  std::vector <short> truthMatches (GetAktHIJetN (radius));
+
+  for (short iRJ = 0; iRJ < (short) truthMatches.size (); iRJ++) {
+    short iTJ = 0;
+    while (iTJ < (short) recoMatches.size () && recoMatches[iTJ] != iRJ) iTJ++;
+    truthMatches[iRJ] = (iTJ == (short) recoMatches.size () ? -1 : iTJ);
   }
-  if (mindr > GetAktTruthMatchMaxDR (radius))
-    return -1;
-  return match;
+
+  return truthMatches;
 }
 
 
@@ -1444,32 +1514,33 @@ float GetAktTruthMatchMinRecoPt (const JetRadius& radius) {
 
 
 
-/**
- * Returns the matched HI jet within DR < 1 to this truth jet.
- * Returns -1 if no HI jet is matched within this DR range, or the radius is invalid.
- */
-int GetAktHIJetMatch (const int iTJ, const JetRadius& radius, const int nJESVar) {
-  assert (GetAktTruthJetN (radius) > iTJ);
-  assert (nJESVar >= -1 && nJESVar < nJESSys);
-  float mindr = M_PI;
-  int match = -1;
-  const float tjeta = GetAktTruthJetEta (iTJ, radius);
-  const float tjphi = GetAktTruthJetPhi (iTJ, radius);
-  //const float minpt = GetAktTruthMatchMinRecoPt (radius);
-  const int nJ = GetAktHIJetN (radius);
-  for (int iJ = 0; iJ < nJ; iJ++) {
-    //if (GetAktHIJetPt (iJ, radius, nJESVar) < minpt)
-    //  continue; 
-    const float dr = DeltaR (tjeta, GetAktHIJetEta (iJ, radius, nJESVar), tjphi, GetAktHIJetPhi (iJ, radius, nJESVar));
-    if (dr < mindr) {
-      match = iJ;
-      mindr = dr;
-    }
-  }
-  if (mindr > GetAktTruthMatchMaxDR (radius))
-    return -1;
-  return match;
-}
+///**
+// * NOW DEPRECATED
+// * Returns the matched HI jet within DR < 1 to this truth jet.
+// * Returns -1 if no HI jet is matched within this DR range, or the radius is invalid.
+// */
+//int GetAktHIJetMatch (const int iTJ, const JetRadius& radius, const int nJESVar) {
+//  assert (GetAktTruthJetN (radius) > iTJ);
+//  assert (nJESVar >= -1 && nJESVar < nJESSys);
+//  float mindr = M_PI;
+//  int match = -1;
+//  const float tjeta = GetAktTruthJetEta (iTJ, radius);
+//  const float tjphi = GetAktTruthJetPhi (iTJ, radius);
+//  //const float minpt = GetAktTruthMatchMinRecoPt (radius);
+//  const int nJ = GetAktHIJetN (radius);
+//  for (int iJ = 0; iJ < nJ; iJ++) {
+//    //if (GetAktHIJetPt (iJ, radius, nJESVar) < minpt)
+//    //  continue; 
+//    const float dr = DeltaR (tjeta, GetAktHIJetEta (iJ, radius, nJESVar), tjphi, GetAktHIJetPhi (iJ, radius, nJESVar));
+//    if (dr < mindr) {
+//      match = iJ;
+//      mindr = dr;
+//    }
+//  }
+//  if (mindr > GetAktTruthMatchMaxDR (radius))
+//    return -1;
+//  return match;
+//}
 
 
 
@@ -1508,7 +1579,7 @@ float GetAktHIJetPt (const int iJ, const JetRadius& radius, const int nJESVar, c
     if (IsCollisions () || scale == 0)                  return akt4_hi_jet_pt_xcalib[iJ] * jesVar;
     if (!IsDataOverlay () || scale == 1)                return akt4_hi_jet_pt_etajes[iJ] * jesVar;
     if (scale == 2)                                     return akt4_hi_jet_pt_precalib[iJ] * jesVar;
-    if (GetAktTruthJetMatch (iJ, radius, nJESVar) >= 0) return akt4_hi_jet_pt_etajes[iJ] * jesVar;
+    //if (GetAktTruthJetMatch (iJ, radius, nJESVar) >= 0) return akt4_hi_jet_pt_etajes[iJ] * jesVar;
     else                                                return akt4_hi_jet_pt_xcalib[iJ] * jesVar;
   }
   case JetRadius::R0p2: {
@@ -1516,7 +1587,7 @@ float GetAktHIJetPt (const int iJ, const JetRadius& radius, const int nJESVar, c
     if (IsCollisions () || scale == 0)                  return akt2_hi_jet_pt_xcalib[iJ] * jesVar;
     if (!IsDataOverlay () || scale == 1)                return akt2_hi_jet_pt_etajes[iJ] * jesVar;
     if (scale == 2)                                     return akt2_hi_jet_pt_precalib[iJ] * jesVar;
-    if (GetAktTruthJetMatch (iJ, radius, nJESVar) >= 0) return akt2_hi_jet_pt_etajes[iJ] * jesVar;
+    //if (GetAktTruthJetMatch (iJ, radius, nJESVar) >= 0) return akt2_hi_jet_pt_etajes[iJ] * jesVar;
     else                                                return akt2_hi_jet_pt_xcalib[iJ] * jesVar;
   }
   default: 
@@ -1575,7 +1646,7 @@ float GetAktHIJetEn (const int iJ, const JetRadius& radius, const int nJESVar, c
     if (IsCollisions () || scale == 0)                  return akt4_hi_jet_e_xcalib[iJ] * jesVar;
     if (!IsDataOverlay () || scale == 1)                return akt4_hi_jet_e_etajes[iJ] * jesVar;
     if (scale == 2)                                     return akt4_hi_jet_e_precalib[iJ] * jesVar;
-    if (GetAktTruthJetMatch (iJ, radius, nJESVar) >= 0) return akt4_hi_jet_e_etajes[iJ] * jesVar;
+    //if (GetAktTruthJetMatch (iJ, radius, nJESVar) >= 0) return akt4_hi_jet_e_etajes[iJ] * jesVar;
     else                                                return akt4_hi_jet_e_xcalib[iJ] * jesVar;
   }
   case JetRadius::R0p2: {
@@ -1583,7 +1654,7 @@ float GetAktHIJetEn (const int iJ, const JetRadius& radius, const int nJESVar, c
     if (IsCollisions () || scale == 0)                  return akt2_hi_jet_e_xcalib[iJ] * jesVar;
     if (!IsDataOverlay () || scale == 1)                return akt2_hi_jet_e_etajes[iJ] * jesVar;
     if (scale == 2)                                     return akt2_hi_jet_e_precalib[iJ] * jesVar;
-    if (GetAktTruthJetMatch (iJ, radius, nJESVar) >= 0) return akt2_hi_jet_e_etajes[iJ] * jesVar;
+    //if (GetAktTruthJetMatch (iJ, radius, nJESVar) >= 0) return akt2_hi_jet_e_etajes[iJ] * jesVar;
     else                                                return akt2_hi_jet_e_xcalib[iJ] * jesVar;
   }
 

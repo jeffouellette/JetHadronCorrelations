@@ -879,7 +879,7 @@ void AnalyzeJetEnergyResolution () {
       for (int iEta = 0; iEta <= nEtaBins; iEta++) {
 
         {
-          TF1* f = new TF1 (Form ("f_r%i_avg_jer_%s_iEta%i", r, sys.c_str (), iEta), "sqrt([0]*[0] + [1]*[1]/x + pow([2]/x, 2))", pTJBins[0], pTJBins[nPtJBins]);
+          TF1* f = new TF1 (Form ("f_r%i_avg_jer_%s_iEta%i", r, sys.c_str (), iEta), "sqrt([0]*[0] + [1]*[1]/x + pow([2]/x, 2))", 12, pTJBins[nPtJBins]);
           f_avg_jer[iSys][iR][iEta] = f;
 
           TH1D* h = h_avg_jer[iSys][iR][iEta];
@@ -887,7 +887,7 @@ void AnalyzeJetEnergyResolution () {
         }
 
         {
-          TF1* f = new TF1 (Form ("f_r%i_avg_jptr_%s_iEta%i", r, sys.c_str (), iEta), "sqrt([0]*[0] + [1]*[1]/x + pow([2]/x, 2))", pTJBins[0], pTJBins[nPtJBins]);
+          TF1* f = new TF1 (Form ("f_r%i_avg_jptr_%s_iEta%i", r, sys.c_str (), iEta), "sqrt([0]*[0] + [1]*[1]/x + pow([2]/x, 2))", 12, pTJBins[nPtJBins]);
           f_avg_jptr[iSys][iR][iEta] = f;
 
           TH1D* h = h_avg_jptr[iSys][iR][iEta];

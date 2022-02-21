@@ -147,6 +147,10 @@ bool JetPtWeights (const char* directory,
     std::cout << "Checking for leading truth jet with pT < " << truth_jet_max_pt << std::endl;
 
 
+  // weight for this JZ slice
+  const float jzScaleFactor = GetJZScaleFactor (TString (inFileName)) * crossSectionPicoBarns * mcFilterEfficiency * GetJetLuminosity () / mcNumberEvents; // sigma * f * L_int
+
+
   tree->SetBranchAddress ("run_number",     &run_number);
   tree->SetBranchAddress ("event_number",   &event_number);
   tree->SetBranchAddress ("lumi_block",     &lumi_block);
@@ -245,7 +249,8 @@ bool JetPtWeights (const char* directory,
   else if (IspPb ())  sys = "pPb";
   else                sys = "???";
 
-  const double finePtJBins[] = {7.5, 8, 8.5, 9, 9.5, 10, 10.5, 11, 11.5, 12, 12.5, 13, 13.5, 14, 14.5, 15, 15.5, 16, 16.5, 17, 17.5, 18, 18.5, 19, 19.5, 20, 20.5, 21, 21.5, 22, 22.5, 23, 23.5, 24, 24.5, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 47.5, 50, 52.5, 55, 57.5, 60, 62.5, 65, 67.5, 70, 72.5, 75, 80, 85, 90, 95, 100, 105, 110, 115, 120, 125, 130, 140, 150, 160, 170, 180, 190, 200, 210, 220, 240, 260, 280, 300, 325, 350, 375, 400};
+  const double finePtJBins[] = {10, 11, 12, 13, 14, 15, 17.5, 20, 22.5, 25, 27.5, 30, 33, 36, 40, 45, 50, 55, 60, 65, 70, 75, 82.5, 90, 100, 110, 120, 130, 145, 160, 180, 200, 220, 240, 260, 280, 300, 325, 350, 375, 400};
+  //const double finePtJBins[] = {7.5, 8, 8.5, 9, 9.5, 10, 10.5, 11, 11.5, 12, 12.5, 13, 13.5, 14, 14.5, 15, 15.5, 16, 16.5, 17, 17.5, 18, 18.5, 19, 19.5, 20, 20.5, 21, 21.5, 22, 22.5, 23, 23.5, 24, 24.5, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 47.5, 50, 52.5, 55, 57.5, 60, 62.5, 65, 67.5, 70, 72.5, 75, 80, 85, 90, 95, 100, 105, 110, 115, 120, 125, 130, 140, 150, 160, 170, 180, 190, 200, 210, 220, 240, 260, 280, 300, 325, 350, 375, 400};
   const short nFinePtJBins = sizeof (finePtJBins) / sizeof (finePtJBins[0]) - 1;
 
 
@@ -346,7 +351,7 @@ bool JetPtWeights (const char* directory,
       prescale = trigger->trigPrescale;
     }
     else {
-      prescale = (IsHijing () ? 1 : mcEventWeights->at (0) * crossSectionPicoBarns * mcFilterEfficiency * GetJetLuminosity () / mcNumberEvents);
+      prescale = (IsHijing () ? 1 : jzScaleFactor * mcEventWeights->at (0));
     }
 
 
@@ -416,6 +421,11 @@ bool JetPtWeights (const char* directory,
       continue;
 
 
+    // find truth-reco jet matches uniquely
+    const std::vector <short> recoJetMatches = GetAktRecoJetMatches (r0p4, nJESVar);
+    const std::vector <short> truthJetMatches = GetAktTruthJetMatches (recoJetMatches, r0p4);
+
+
     // initialize all histogramming bins to 0 for this event
     for (short iPtJ = 0; iPtJ < nFinePtJBins; iPtJ++)
       jet_pt_counts[iPtJ] = 0;
@@ -426,7 +436,7 @@ bool JetPtWeights (const char* directory,
     const short jn = UseTruthJets () ? GetAktTruthJetN (r0p4) :  GetAktHIJetN (r0p4);
     for (short iJet = 0; iJet < jn; iJet++) {
 
-      float rjpt  = (UseTruthJets () ? GetAktTruthJetPt  (iJet, r0p4) : GetAktHIJetPt  (iJet, r0p4, nJESVar));
+      float rjpt  = (UseTruthJets () ? GetAktTruthJetPt  (iJet, r0p4) : GetAktHIJetPt  (iJet, r0p4, nJESVar, IsCollisions () || (IsDataOverlay () && truthJetMatches[iJet] == -1) ? 0 : 1));
       const float rjeta = (UseTruthJets () ? GetAktTruthJetEta (iJet, r0p4) : GetAktHIJetEta (iJet, r0p4, nJESVar));
       const float rjphi = (UseTruthJets () ? GetAktTruthJetPhi (iJet, r0p4) : GetAktHIJetPhi (iJet, r0p4, nJESVar));
 
@@ -446,20 +456,20 @@ bool JetPtWeights (const char* directory,
 
       // in MC, check that the jet is truth-matched. Otherwise problems can emerge, particularly in the overlay.
       if (!IsCollisions () && !UseTruthJets ()) {
-        const short iTJet = GetAktTruthJetMatch (iJet, r0p4);
+        //const short iTJet = GetAktTruthJetMatch (iJet, r0p4);
+        const short iTJet = truthJetMatches[iJet];
         if (iTJet == -1)
           continue; // in case of no truth jet match
 
-        h2_jet_pt_eta_jer_frac_den[iFile]->Fill (rjpt, rjeta);
+        h2_jet_pt_eta_jer_frac_den[iFile]->Fill (rjpt, rjeta, ewgt * thisjwgt);
         const float tjpt = GetAktTruthJetPt (iTJet, r0p4);
-        if (std::fabs (rjpt/tjpt - 1) > 3*0.01*f_jer->Eval (tjpt))
+        if (std::fabs (rjpt/tjpt - 1) > nJERSigma*0.01*f_jer->Eval (tjpt))
           continue; // cut on jets reconstructed well outside the JER
-        h2_jet_pt_eta_jer_frac_num[iFile]->Fill (rjpt, rjeta);
+        h2_jet_pt_eta_jer_frac_num[iFile]->Fill (rjpt, rjeta, ewgt * thisjwgt);
 
         //if (rjpt < truth_jet_min_pt || rjpt > truth_jet_max_pt)
         //  continue; // cut on jets outside truth range. Ensures that only one sample fills each pT region.
-      }
-
+      } 
 
       // find which pTJ bin this jet belongs in
       short iPtJ = 0;

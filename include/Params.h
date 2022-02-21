@@ -26,8 +26,8 @@ const double muon_mass = 0.105658;
 
 const float min_trk_pt = 0.4;
 
-const float akt2_TruthMatchMaxDR = 0.1; // Truth-matching maximum dR for R=0.2 jets
-const float akt4_TruthMatchMaxDR = 0.2; // Truth-matching maximum dR for R=0.4 jets
+const float akt2_TruthMatchMaxDR = 0.15; // Truth-matching maximum dR for R=0.2 jets
+const float akt4_TruthMatchMaxDR = 0.3; // Truth-matching maximum dR for R=0.4 jets
 const float akt2_hi_TruthMatchMinRecoPt = 0; // Minimum HI jet pT for reco. matching of R=0.2 truth jets
 const float akt4_hi_TruthMatchMinRecoPt = 0; // Minimum HI jet pT for reco. matching of R=0.4 truth jets
 const float akt2_hi_IsoMinPt = 7; // Minimum pT for isolation calculation of R=0.2 HI jets
@@ -38,6 +38,8 @@ const float akt2_hi_IsoMinDR = 0.0; // Minimum isolation DR for R=0.2 HI jets
 const float akt4_hi_IsoMinDR = 0.0; // Minimum isolation DR for R=0.4 HI jets
 const float akt2_truth_IsoMinDR = 0.5; // Minimum isolation DR for R=0.2 truth jets
 const float akt4_truth_IsoMinDR = 1.0; // Minimum isolation DR for R=0.4 truth jets
+
+const float nJERSigma = 3; // Number of sigma on the JER to cut at in MC
 
 extern TString workPath;
 extern TString extWorkPath;
@@ -133,9 +135,10 @@ const short nDRBins = sizeof (drBins) / sizeof (drBins[0]); // last bin is inclu
 const double etaTrkBins[] = {0, 0.5, 1.0, 1.5, 2.0, 2.5};
 const short nEtaTrkBins = sizeof (etaTrkBins) / sizeof (etaTrkBins[0]) - 1;
 
-
+// position in array       0                                                11                          18                                                                                    36                  40
+const double pTJBins[] = {10, 11, 12, 13, 14, 15, 17.5, 20, 22.5, 25, 27.5, 30, 33, 36, 40, 45, 50, 55, 60, 65, 70, 75, 82.5, 90, 100, 110, 120, 130, 145, 160, 180, 200, 220, 240, 260, 280, 300, 325, 350, 375, 400};
 //double pTJBins[] = {7.5, 8, 8.5, 9, 9.5, 10, 10.5, 11, 11.5, 12, 12.5, 13, 13.5, 14, 14.5, 15, 15.5, 16, 16.5, 17, 17.5, 18, 18.5, 19, 19.5, 20, 20.5, 21, 21.5, 22, 22.5, 23, 23.5, 24, 24.5, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 47.5, 50, 52.5, 55, 57.5, 60, 62.5, 65, 67.5, 70, 72.5, 75, 80, 85, 90, 95, 100, 105, 110, 115, 120, 125, 130, 140, 150, 160, 170, 180, 190, 200, 210, 220, 240, 260, 280, 300, 325, 350, 375, 400};
-double pTJBins[] = {15, 20, 30, 45, 60, 90, 120, 160, 200, 240, 300, 350, 400};
+//double pTJBins[] = {15, 20, 30, 45, 60, 90, 120, 160, 200, 240, 300, 350, 400};
 const short nPtJBins = sizeof (pTJBins) / sizeof (pTJBins[0]) - 1;
 
 short GetPtJBin (const float jpt) {

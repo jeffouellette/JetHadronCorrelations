@@ -301,6 +301,12 @@ float GetJZXR04MaxPt (const TString& fname);
 
 
 /**
+ * Returns the residual JZ scaling factor to smooth the spectrum transition at 60 GeV from SoftQCD to HardQCD
+ */
+float GetJZScaleFactor (const TString& fname);
+
+
+/**
  * Returns a copy of the histogram detailing the Zdc cuts.
  */
 TH1D* GetZdcCuts ();
@@ -372,11 +378,27 @@ bool MeetsTrackCuts (int iTrk, const int nWPVar = 0);
 //FCalEt GetTruthCorrectedFCal (FCalEt values);
 
 
+///**
+// * NOW DEPRECATED
+// * Returns the matched truth jet within DR < 1 to this HI jet.
+// * Returns -1 if no truth jet is matched within this DR range, or the radius is invalid.
+// */
+//int GetAktTruthJetMatch (const int iJ, const JetRadius& radius, const int nJESVar = -1);
+
+
 /**
- * Returns the matched truth jet within DR < 1 to this HI jet.
- * Returns -1 if no truth jet is matched within this DR range, or the radius is invalid.
+ * Returns a vector storing the index of the reco jet match for each truth jet.
+ * Elements are -1 if the truth jet has no reco match.
  */
-int GetAktTruthJetMatch (const int iJ, const JetRadius& radius, const int nJESVar = -1);
+std::vector <short> GetAktRecoJetMatches (const JetRadius& radius, const short nJESVar = -1);
+
+
+/**
+ * Inverts the vector storing the index of the reco jet match for each truth jet.
+ * If a reco jet has a truth match according to the input array, the truth index is stored at the reco index.
+ * Elements are -1 if the reco jet has no truth match.
+ */
+std::vector <short> GetAktTruthJetMatches (const std::vector <short>& recoMatches, const JetRadius& radius);
 
 
 /**
@@ -442,11 +464,12 @@ float GetAktTruthIsoMinDR (const JetRadius& radius);
 float GetAktTruthMatchMinRecoPt (const JetRadius& radius);
 
 
-/**
- * Returns the matched HI jet within DR < 1 to this truth jet.
- * Returns -1 if no HI jet is matched within this DR range, or the radius is invalid.
- */
-int GetAktHIJetMatch (const int iTJ, const JetRadius& radius, const int nJESVar = -1);
+///**
+// * NOW DEPRECATED
+// * Returns the matched HI jet within DR < 1 to this truth jet.
+// * Returns -1 if no HI jet is matched within this DR range, or the radius is invalid.
+// */
+//int GetAktHIJetMatch (const int iTJ, const JetRadius& radius, const int nJESVar = -1);
 
 
 /**
