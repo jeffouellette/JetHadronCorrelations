@@ -10,6 +10,7 @@ run/logs
 rootlogon.C
 Setup.sh
 Slides
+FlavourUnc/*.pdf
 *.d
 *.so
 *ACLiC*

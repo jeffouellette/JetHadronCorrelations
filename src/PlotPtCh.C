@@ -1878,6 +1878,7 @@ void PlotPtCh (const char* rawTag, const char* unfoldTag) {
 
       g = make_graph (h);
       ScaleGraph (g, nullptr, std::pow (10, 3));
+      RecenterGraph (g);
       ResetXErrors (g);
       myDraw (g, colorfulColors[0], kFullCircle, 1.4, 1, 2, "P", false);
       SaferDelete (&g);
@@ -1899,6 +1900,7 @@ void PlotPtCh (const char* rawTag, const char* unfoldTag) {
         SaferDelete (&g);
   
         g = make_graph (h);
+        RecenterGraph (g);
         ResetXErrors (g);
         ScaleGraph (g, nullptr, std::pow (10, 2-iCent));
         myDraw (g, colorfulColors[iCent+1], kFullCircle, 1.4, 1, 2, "P", false);

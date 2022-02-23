@@ -32,12 +32,16 @@ const std::vector <TString> variations = {
 
   "MixCatVar4",
   "MixCatVar5",
+*/
 
+/*
   "UnfoldingAltWgtsVar",
+
+
   "NonClosureVar",
-  //"RefoldingVar",
+*/
 
-
+/*
   "JESVar0",
   "JESVar1",
   "JESVar2",
@@ -60,6 +64,7 @@ const std::vector <TString> variations = {
   "JESVar18",
   //"JESVar20",
 */
+
 
 
 

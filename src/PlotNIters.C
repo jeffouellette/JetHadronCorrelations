@@ -313,8 +313,8 @@ void PlotNIters (const char* rawTag, const char* nitersTag, const short nItersMa
 
             const TString cent = (iCent == nZdcCentBins ? "allCent" : Form ("iCent%i", iCent));
   
-            h_jetInt_trk_pt_unf_nIters[iPtJInt][iDir][iCent][iIter] = (TH1D*) inFile->Get (Form ("h_jetInt_trk_pt_%s_pPb_unf_%s_data_%s_Nominal_nIters%i", cent.Data (), dir.Data (), pTJInt.Data (), nIters));
-            h_jetInt_trk_pt_rfld_nIters[iPtJInt][iDir][iCent][iIter] = (TH1D*) inFile->Get (Form ("h_jetInt_trk_pt_%s_pPb_rfld_%s_data_%s_Nominal_nIters%i", cent.Data (), dir.Data (), pTJInt.Data (), nIters));
+            h_jetInt_trk_pt_unf_nIters[iPtJInt][iDir][iCent][iIter] = (TH1D*) inFile->Get (Form ("h_jetInt_trk_pt_%s_pPb_unf_%s_data_%s_Nominal_nIters%i", dir.Data (), cent.Data (), pTJInt.Data (), nIters));
+            h_jetInt_trk_pt_rfld_nIters[iPtJInt][iDir][iCent][iIter] = (TH1D*) inFile->Get (Form ("h_jetInt_trk_pt_%s_pPb_rfld_%s_data_%s_Nominal_nIters%i", dir.Data (), cent.Data (), pTJInt.Data (), nIters));
             //h_jetInt_trk_pt_unf_nIters[iPtJInt][iDir][iCent][iIter]->Scale (h_jet_pt_unf_nIters[iCent][iIter]->Integral (h_jet_pt_unf_nIters[iCent][iIter]->FindBin (minJetPt+0.01), h_jet_pt_unf_nIters[iCent][iIter]->FindBin (maxJetPt-0.01)));
   
           } // end loop over iCent
@@ -771,12 +771,12 @@ void PlotNIters (const char* rawTag, const char* nitersTag, const short nItersMa
         myDraw (g_jetInt_trk_pt_ref_unfIterUnc[iPtJInt][iDir], kRed, kOpenSquare, 1.0, 1, 2, "PL", false);
 
         myText (0.2, 0.865, kBlack, "#bf{#it{pp}}", 0.05);
-        l->DrawLine (xopt, ymin, xopt, ymax/ymaxSF);
+        l->DrawLine (xopt, ymin, xopt, doLogY ? std::pow (10, 0.8*std::log10 (ymax)+0.2*std::log10 (ymin)) : 0.8*ymax+0.2*ymin);
 
         l->SetLineColor (myGreen);
         l->SetLineStyle (3);
         const int xopt_2d = GetTrkSpectraNIters (false, iPtJInt, iDir, -1);
-        l->DrawLine (xopt_2d, ymin, xopt_2d, ymax/ymaxSF);
+        l->DrawLine (xopt_2d, ymin, xopt_2d, doLogY ? std::pow (10, 0.8*std::log10 (ymax)+0.2*std::log10 (ymin)) : 0.8*ymax+0.2*ymin);
         l->SetLineColor (kBlack);
         l->SetLineStyle (2);
 
@@ -813,12 +813,12 @@ void PlotNIters (const char* rawTag, const char* nitersTag, const short nItersMa
           myText (0.2, 0.865, kBlack, Form ("#bf{#it{p}+Pb, ZDC %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.05);
         else
           myText (0.2, 0.865, kBlack, "#bf{#it{p}+Pb, 0-100%}", 0.05);
-        l->DrawLine (xopt, ymin, xopt, ymax/ymaxSF);
+        l->DrawLine (xopt, ymin, xopt, doLogY ? std::pow (10, 0.8*std::log10 (ymax)+0.2*std::log10 (ymin)) : 0.8*ymax+0.2*ymin);
 
         l->SetLineColor (myGreen);
         l->SetLineStyle (3);
         const int xopt_2d = GetTrkSpectraNIters (false, iPtJInt, iDir, iCent);
-        l->DrawLine (xopt_2d, ymin, xopt_2d, ymax/ymaxSF);
+        l->DrawLine (xopt_2d, ymin, xopt_2d, std::pow (10, 0.8*std::log10 (ymax)+0.2*std::log10 (ymin)));
         l->SetLineColor (kBlack);
         l->SetLineStyle (2);
 
@@ -830,8 +830,8 @@ void PlotNIters (const char* rawTag, const char* nitersTag, const short nItersMa
       myText (0.1, 0.93, kBlack, "#bf{#it{ATLAS}} Internal", 0.07);
       myText (0.1, 0.84, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.07);
       myText (0.1, 0.75, kBlack, "#it{p}+Pb, #sqrt{s} = 5.02 TeV", 0.07);
-      myText (0.1, 0.66, kBlack, Form ("#it{p}_{T}^{jet} [GeV] #in (%i, 300)", iPtJInt == 0 ? 30 : 60), 0.065);
-      myText (0.1, 0.57, kBlack, Form ("#it{p}_{T}^{ch} [GeV] #in (%g, %g)", GetMinPtCh (iPtJInt), GetMaxPtCh (iPtJInt)), 0.065);
+      myText (0.1, 0.66, kBlack, Form ("#it{p}_{T}^{jet} = %i-300 GeV", iPtJInt == 0 ? 30 : 60), 0.065);
+      myText (0.1, 0.57, kBlack, Form ("#it{p}_{T}^{ch} = %g-%g GeV", GetMinPtCh (iPtJInt), GetMaxPtCh (iPtJInt)), 0.065);
       myText (0.1, 0.48, kBlack, Form ("#Delta#phi_{ch,jet} %s", directions[iDir] == "ns" ? "< #pi/8" : (directions[iDir] == "as" ? "> 7#pi/8" : "#in (#pi/3, 2#pi/3)")), 0.065);
       myLineText2 (0.15, 0.40, kBlack,        kFullCircle, "#sigma_{stat} #oplus #sigma_{iter}, #alpha = 0", 1.2, 0.06);
       myLineText2 (0.15, 0.31, kBlue,         kOpenCircle, "#sigma_{stat} only, #alpha = 0", 1.2, 0.06);
@@ -890,12 +890,12 @@ void PlotNIters (const char* rawTag, const char* nitersTag, const short nItersMa
         myDraw (g_jetInt_trk_pt_ref_unfIterHybUnc[iPtJInt][iDir], kRed, kOpenSquare, 1.0, 1, 2, "PL", false);
 
         myText (0.2, 0.865, kBlack, "#bf{#it{pp}}", 0.05);
-        l->DrawLine (xopt, ymin, xopt, ymax/ymaxSF);
+        l->DrawLine (xopt, ymin, xopt, doLogY ? std::pow (10, 0.8*std::log10 (ymax)+0.2*std::log10 (ymin)) : 0.8*ymax+0.2*ymin);
 
         l->SetLineColor (myGreen);
         l->SetLineStyle (3);
         const int xopt_2d = GetTrkSpectraNIters (false, iPtJInt, iDir, -1);
-        l->DrawLine (xopt_2d, ymin, xopt_2d, ymax/ymaxSF);
+        l->DrawLine (xopt_2d, ymin, xopt_2d, std::pow (10, 0.8*std::log10 (ymax)+0.2*std::log10 (ymin)));
         l->SetLineColor (kBlack);
         l->SetLineStyle (2);
 
@@ -932,12 +932,12 @@ void PlotNIters (const char* rawTag, const char* nitersTag, const short nItersMa
           myText (0.2, 0.865, kBlack, Form ("#bf{#it{p}+Pb, ZDC %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.05);
         else
           myText (0.2, 0.865, kBlack, "#bf{#it{p}+Pb, 0-100%}", 0.05);
-        l->DrawLine (xopt, ymin, xopt, ymax/ymaxSF);
+        l->DrawLine (xopt, ymin, xopt, doLogY ? std::pow (10, 0.8*std::log10 (ymax)+0.2*std::log10 (ymin)) : 0.8*ymax+0.2*ymin);
 
         l->SetLineColor (myGreen);
         l->SetLineStyle (3);
         const int xopt_2d = GetTrkSpectraNIters (false, iPtJInt, iDir, iCent);
-        l->DrawLine (xopt_2d, ymin, xopt_2d, ymax/ymaxSF);
+        l->DrawLine (xopt_2d, ymin, xopt_2d, std::pow (10, 0.8*std::log10 (ymax)+0.2*std::log10 (ymin)));
         l->SetLineColor (kBlack);
         l->SetLineStyle (2);
 
@@ -949,8 +949,8 @@ void PlotNIters (const char* rawTag, const char* nitersTag, const short nItersMa
       myText (0.1, 0.93, kBlack, "#bf{#it{ATLAS}} Internal", 0.07);
       myText (0.1, 0.84, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.07);
       myText (0.1, 0.75, kBlack, "#it{p}+Pb, #sqrt{s} = 5.02 TeV", 0.07);
-      myText (0.1, 0.66, kBlack, Form ("#it{p}_{T}^{jet} [GeV] #in (%i, 300)", iPtJInt == 0 ? 30 : 60), 0.065);
-      myText (0.1, 0.57, kBlack, Form ("#it{p}_{T}^{ch} [GeV] #in (%g, %g)", GetMinPtCh (iPtJInt), GetMaxPtCh (iPtJInt)), 0.065);
+      myText (0.1, 0.66, kBlack, Form ("#it{p}_{T}^{jet} = %i-300 GeV", iPtJInt == 0 ? 30 : 60), 0.065);
+      myText (0.1, 0.57, kBlack, Form ("#it{p}_{T}^{ch} = %g-%g GeV", GetMinPtCh (iPtJInt), GetMaxPtCh (iPtJInt)), 0.065);
       myText (0.1, 0.48, kBlack, Form ("#Delta#phi_{ch,jet} %s", directions[iDir] == "ns" ? "< #pi/8" : (directions[iDir] == "as" ? "> 7#pi/8" : "#in (#pi/3, 2#pi/3)")), 0.065);
       myLineText2 (0.15, 0.40, kBlack,        kFullCircle, "#sigma_{stat} #oplus #sigma_{iter}, #alpha = 0.5", 1.2, 0.06);
       myLineText2 (0.15, 0.31, kBlue,         kOpenCircle, "#sigma_{stat} only, #alpha = 0.5", 1.2, 0.06);
@@ -1009,12 +1009,12 @@ void PlotNIters (const char* rawTag, const char* nitersTag, const short nItersMa
         myDraw (g_jetInt_trk_pt_ref_unfIterRelUnc[iPtJInt][iDir], kRed, kOpenSquare, 1.0, 1, 2, "PL", false);
 
         myText (0.2, 0.865, kBlack, "#bf{#it{pp}}", 0.05);
-        l->DrawLine (xopt, ymin, xopt, ymax/ymaxSF);
+        l->DrawLine (xopt, ymin, xopt, doLogY ? std::pow (10, 0.8*std::log10 (ymax)+0.2*std::log10 (ymin)) : 0.8*ymax+0.2*ymin);
 
         l->SetLineColor (myGreen);
         l->SetLineStyle (3);
         const int xopt_2d = GetTrkSpectraNIters (false, iPtJInt, iDir, -1);
-        l->DrawLine (xopt_2d, ymin, xopt_2d, ymax/ymaxSF);
+        l->DrawLine (xopt_2d, ymin, xopt_2d, std::pow (10, 0.8*std::log10 (ymax)+0.2*std::log10 (ymin)));
         l->SetLineColor (kBlack);
         l->SetLineStyle (2);
 
@@ -1051,12 +1051,12 @@ void PlotNIters (const char* rawTag, const char* nitersTag, const short nItersMa
           myText (0.2, 0.865, kBlack, Form ("#bf{#it{p}+Pb, ZDC %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.05);
         else
           myText (0.2, 0.865, kBlack, "#bf{#it{p}+Pb, 0-100%}", 0.05);
-        l->DrawLine (xopt, ymin, xopt, ymax/ymaxSF);
+        l->DrawLine (xopt, ymin, xopt, doLogY ? std::pow (10, 0.8*std::log10 (ymax)+0.2*std::log10 (ymin)) : 0.8*ymax+0.2*ymin);
 
         l->SetLineColor (myGreen);
         l->SetLineStyle (3);
         const int xopt_2d = GetTrkSpectraNIters (false, iPtJInt, iDir, iCent);
-        l->DrawLine (xopt_2d, ymin, xopt_2d, ymax/ymaxSF);
+        l->DrawLine (xopt_2d, ymin, xopt_2d, std::pow (10, 0.8*std::log10 (ymax)+0.2*std::log10 (ymin)));
         l->SetLineColor (kBlack);
         l->SetLineStyle (2);
 
@@ -1068,8 +1068,8 @@ void PlotNIters (const char* rawTag, const char* nitersTag, const short nItersMa
       myText (0.1, 0.93, kBlack, "#bf{#it{ATLAS}} Internal", 0.07);
       myText (0.1, 0.84, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.07);
       myText (0.1, 0.75, kBlack, "#it{p}+Pb, #sqrt{s} = 5.02 TeV", 0.07);
-      myText (0.1, 0.66, kBlack, Form ("#it{p}_{T}^{jet} [GeV] #in (%i, 300)", iPtJInt == 0 ? 30 : 60), 0.065);
-      myText (0.1, 0.57, kBlack, Form ("#it{p}_{T}^{ch} [GeV] #in (%g, %g)", GetMinPtCh (iPtJInt), GetMaxPtCh (iPtJInt)), 0.065);
+      myText (0.1, 0.66, kBlack, Form ("#it{p}_{T}^{jet} = %i-300 GeV", iPtJInt == 0 ? 30 : 60), 0.065);
+      myText (0.1, 0.57, kBlack, Form ("#it{p}_{T}^{ch} = %g-%g GeV", GetMinPtCh (iPtJInt), GetMaxPtCh (iPtJInt)), 0.065);
       myText (0.1, 0.48, kBlack, Form ("#Delta#phi_{ch,jet} %s", directions[iDir] == "ns" ? "< #pi/8" : (directions[iDir] == "as" ? "> 7#pi/8" : "#in (#pi/3, 2#pi/3)")), 0.065);
       myLineText2 (0.15, 0.40, kBlack,        kFullCircle, "#sigma_{stat} #oplus #sigma_{iter}, #alpha = 1", 1.2, 0.06);
       myLineText2 (0.15, 0.31, kBlue,         kOpenCircle, "#sigma_{stat} only, #alpha = 1", 1.2, 0.06);
@@ -1125,12 +1125,12 @@ void PlotNIters (const char* rawTag, const char* nitersTag, const short nItersMa
       myDraw (g_jet_pt_ref_unfIterUnc[iPtJInt], kRed, kOpenSquare, 1.0, 1, 2, "PL", false);
 
       myText (0.2, 0.865, kBlack, "#bf{#it{pp}}", 0.05);
-      l->DrawLine (xopt, ymin, xopt, ymax/ymaxSF);
+      l->DrawLine (xopt, ymin, xopt, doLogY ? std::pow (10, 0.8*std::log10 (ymax)+0.2*std::log10 (ymin)) : 0.8*ymax+0.2*ymin);
 
       l->SetLineColor (myGreen);
       l->SetLineStyle (3);
       const int xopt_2d = GetJetSpectraNIters (false, iPtJInt, -1);
-      l->DrawLine (xopt_2d, ymin, xopt_2d, ymax/ymaxSF);
+      l->DrawLine (xopt_2d, ymin, xopt_2d, std::pow (10, 0.8*std::log10 (ymax)+0.2*std::log10 (ymin)));
       l->SetLineColor (kBlack);
       l->SetLineStyle (2);
     }
@@ -1165,12 +1165,12 @@ void PlotNIters (const char* rawTag, const char* nitersTag, const short nItersMa
         myText (0.2, 0.865, kBlack, Form ("#bf{#it{p}+Pb, ZDC %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.05);
       else
         myText (0.2, 0.865, kBlack, "#bf{#it{p}+Pb, 0-100%}", 0.05);
-      l->DrawLine (xopt, ymin, xopt, ymax/ymaxSF);
+      l->DrawLine (xopt, ymin, xopt, doLogY ? std::pow (10, 0.8*std::log10 (ymax)+0.2*std::log10 (ymin)) : 0.8*ymax+0.2*ymin);
 
       l->SetLineColor (myGreen);
       l->SetLineStyle (3);
       const int xopt_2d = GetJetSpectraNIters (false, iPtJInt, iCent);
-      l->DrawLine (xopt_2d, ymin, xopt_2d, ymax/ymaxSF);
+      l->DrawLine (xopt_2d, ymin, xopt_2d, std::pow (10, 0.8*std::log10 (ymax)+0.2*std::log10 (ymin)));
       l->SetLineColor (kBlack);
       l->SetLineStyle (2);
 
@@ -1180,7 +1180,7 @@ void PlotNIters (const char* rawTag, const char* nitersTag, const short nItersMa
     myText (0.1, 0.93, kBlack, "#bf{#it{ATLAS}} Internal", 0.07);
     myText (0.1, 0.84, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.07);
     myText (0.1, 0.75, kBlack, "#it{p}+Pb, #sqrt{s} = 5.02 TeV", 0.07);
-    myText (0.1, 0.66, kBlack, Form ("#it{p}_{T}^{jet} [GeV] #in (%i, 300)", iPtJInt == 0 ? 30 : 60), 0.065);
+    myText (0.1, 0.66, kBlack, Form ("#it{p}_{T}^{jet} = %i-300 GeV", iPtJInt == 0 ? 30 : 60), 0.065);
     myLineText2 (0.15, 0.56, kBlack,        kFullCircle, "#sigma_{stat} #oplus #sigma_{iter}, #alpha = 0", 1.2, 0.06);
     myLineText2 (0.15, 0.48, kBlue,         kOpenCircle, "#sigma_{stat} only, #alpha = 0", 1.2, 0.06);
     myLineText2 (0.15, 0.40, kRed,          kOpenSquare, "#sigma_{iter} only, #alpha = 0", 1.2, 0.06);
@@ -1233,12 +1233,12 @@ void PlotNIters (const char* rawTag, const char* nitersTag, const short nItersMa
       myDraw (g_jet_pt_ref_unfIterHybUnc[iPtJInt], kRed, kOpenSquare, 1.0, 1, 2, "PL", false);
 
       myText (0.2, 0.865, kBlack, "#bf{#it{pp}}", 0.05);
-      l->DrawLine (xopt, ymin, xopt, ymax/ymaxSF);
+      l->DrawLine (xopt, ymin, xopt, doLogY ? std::pow (10, 0.8*std::log10 (ymax)+0.2*std::log10 (ymin)) : 0.8*ymax+0.2*ymin);
 
       l->SetLineColor (myGreen);
       l->SetLineStyle (3);
       const int xopt_2d = GetJetSpectraNIters (false, iPtJInt, -1);
-      l->DrawLine (xopt_2d, ymin, xopt_2d, ymax/ymaxSF);
+      l->DrawLine (xopt_2d, ymin, xopt_2d, std::pow (10, 0.8*std::log10 (ymax)+0.2*std::log10 (ymin)));
       l->SetLineColor (kBlack);
       l->SetLineStyle (2);
     }
@@ -1273,12 +1273,12 @@ void PlotNIters (const char* rawTag, const char* nitersTag, const short nItersMa
         myText (0.2, 0.865, kBlack, Form ("#bf{#it{p}+Pb, ZDC %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.05);
       else
         myText (0.2, 0.865, kBlack, "#bf{#it{p}+Pb, 0-100%}", 0.05);
-      l->DrawLine (xopt, ymin, xopt, ymax/ymaxSF);
+      l->DrawLine (xopt, ymin, xopt, doLogY ? std::pow (10, 0.8*std::log10 (ymax)+0.2*std::log10 (ymin)) : 0.8*ymax+0.2*ymin);
 
       l->SetLineColor (myGreen);
       l->SetLineStyle (3);
       const int xopt_2d = GetJetSpectraNIters (false, iPtJInt, iCent);
-      l->DrawLine (xopt_2d, ymin, xopt_2d, ymax/ymaxSF);
+      l->DrawLine (xopt_2d, ymin, xopt_2d, std::pow (10, 0.8*std::log10 (ymax)+0.2*std::log10 (ymin)));
       l->SetLineColor (kBlack);
       l->SetLineStyle (2);
 
@@ -1288,7 +1288,7 @@ void PlotNIters (const char* rawTag, const char* nitersTag, const short nItersMa
     myText (0.1, 0.93, kBlack, "#bf{#it{ATLAS}} Internal", 0.07);
     myText (0.1, 0.84, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.07);
     myText (0.1, 0.75, kBlack, "#it{p}+Pb, #sqrt{s} = 5.02 TeV", 0.07);
-    myText (0.1, 0.66, kBlack, Form ("#it{p}_{T}^{jet} [GeV] #in (%i, 300)", iPtJInt == 0 ? 30 : 60), 0.065);
+    myText (0.1, 0.66, kBlack, Form ("#it{p}_{T}^{jet} = %i-300 GeV", iPtJInt == 0 ? 30 : 60), 0.065);
     myLineText2 (0.15, 0.56, kBlack,        kFullCircle, "#sigma_{stat} #oplus #sigma_{iter}, #alpha = 0.5", 1.2, 0.06);
     myLineText2 (0.15, 0.48, kBlue,         kOpenCircle, "#sigma_{stat} only, #alpha = 0.5", 1.2, 0.06);
     myLineText2 (0.15, 0.40, kRed,          kOpenSquare, "#sigma_{iter} only, #alpha = 0.5", 1.2, 0.06);
@@ -1364,12 +1364,12 @@ void PlotNIters (const char* rawTag, const char* nitersTag, const short nItersMa
       myDraw (g_jet_pt_ref_unfIterRelUnc[iPtJInt], kRed, kOpenSquare, 1.0, 1, 2, "PL", false);
 
       myText (0.2, 0.865, kBlack, "#bf{#it{pp}}", 0.05);
-      l->DrawLine (xopt, ymin, xopt, ymax/ymaxSF);
+      l->DrawLine (xopt, ymin, xopt, doLogY ? std::pow (10, 0.8*std::log10 (ymax)+0.2*std::log10 (ymin)) : 0.8*ymax+0.2*ymin);
 
       l->SetLineColor (myGreen);
       l->SetLineStyle (3);
       const int xopt_2d = GetJetSpectraNIters (false, iPtJInt, -1);
-      l->DrawLine (xopt_2d, ymin, xopt_2d, ymax/ymaxSF);
+      l->DrawLine (xopt_2d, ymin, xopt_2d, std::pow (10, 0.8*std::log10 (ymax)+0.2*std::log10 (ymin)));
       l->SetLineColor (kBlack);
       l->SetLineStyle (2);
     }
@@ -1404,12 +1404,12 @@ void PlotNIters (const char* rawTag, const char* nitersTag, const short nItersMa
         myText (0.2, 0.865, kBlack, Form ("#bf{#it{p}+Pb, ZDC %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.05);
       else
         myText (0.2, 0.865, kBlack, "#bf{#it{p}+Pb, 0-100%}", 0.05);
-      l->DrawLine (xopt, ymin, xopt, ymax/ymaxSF);
+      l->DrawLine (xopt, ymin, xopt, doLogY ? std::pow (10, 0.8*std::log10 (ymax)+0.2*std::log10 (ymin)) : 0.8*ymax+0.2*ymin);
 
       l->SetLineColor (myGreen);
       l->SetLineStyle (3);
       const int xopt_2d = GetJetSpectraNIters (false, iPtJInt, iCent);
-      l->DrawLine (xopt_2d, ymin, xopt_2d, ymax/ymaxSF);
+      l->DrawLine (xopt_2d, ymin, xopt_2d, std::pow (10, 0.8*std::log10 (ymax)+0.2*std::log10 (ymin)));
       l->SetLineColor (kBlack);
       l->SetLineStyle (2);
 
@@ -1419,7 +1419,7 @@ void PlotNIters (const char* rawTag, const char* nitersTag, const short nItersMa
     myText (0.1, 0.93, kBlack, "#bf{#it{ATLAS}} Internal", 0.07);
     myText (0.1, 0.84, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.07);
     myText (0.1, 0.75, kBlack, "#it{p}+Pb, #sqrt{s} = 5.02 TeV", 0.07);
-    myText (0.1, 0.66, kBlack, Form ("#it{p}_{T}^{jet} [GeV] #in (%i, 300)", iPtJInt == 0 ? 30 : 60), 0.065);
+    myText (0.1, 0.66, kBlack, Form ("#it{p}_{T}^{jet} = %i-300 GeV", iPtJInt == 0 ? 30 : 60), 0.065);
     myLineText2 (0.15, 0.56, kBlack,        kFullCircle, "#sigma_{stat} #oplus #sigma_{iter}, #alpha = 1", 1.2, 0.06);
     myLineText2 (0.15, 0.48, kBlue,         kOpenCircle, "#sigma_{stat} only, #alpha = 1", 1.2, 0.06);
     myLineText2 (0.15, 0.40, kRed,          kOpenSquare, "#sigma_{iter} only, #alpha = 1", 1.2, 0.06);
@@ -1526,6 +1526,104 @@ void PlotNIters (const char* rawTag, const char* nitersTag, const short nItersMa
     }
 
     c->SaveAs (Form ("%s/Plots/PtCh/UnfComp_Summary_JetSpectrum.pdf", workPath.Data ()));
+  }
+
+
+
+
+  {
+    const char* canvasName = "c_jet_pt_rfldVsRaw";
+    TCanvas* c = new TCanvas (canvasName, "", 1400, 700);
+    c->Divide (4, 2);
+
+    TGAE* g = nullptr;
+
+    const double ymin = 0.5;
+    const double ymax = 1.5;
+
+    {
+      c->cd (7);
+
+      gPad->SetLogx ();
+
+      const short nIters = GetJetSpectraNIters (false, 0, -1);
+
+      TH1D* h = new TH1D ("h", Form (";#it{p}_{T}^{jet} [GeV];Refolded at %i iterations / No unfold", nIters), 1, pTJBins[0], pTJBins[nPtJBins]);
+      h->GetXaxis ()->SetMoreLogLabels ();
+      h->GetYaxis ()->SetRangeUser (ymin, ymax);
+      h->SetBinContent (1, 1);
+      h->SetLineStyle (2);
+      h->SetLineWidth (2);
+      h->SetLineColor (kBlack);
+      h->DrawCopy ("hist ][");
+      SaferDelete (&h);
+
+      short iIter = 0;
+      while (iIter < nIters1DMax && nIters1DVals[iIter] != nIters) iIter++;
+
+      h = h_jet_pt_ref_rfld_nIters[iIter];
+      g = make_graph (h);
+      ScaleGraph (g, h_jet_pt_ref[0]);
+      myDraw (g, colorfulColors[0], kOpenCircle, 1.0, 1, 2, "PL", false);
+      SaferDelete (&g);
+
+      l->SetLineStyle (2);
+      l->SetLineWidth (2);
+      l->SetLineColor (kBlack);
+      l->DrawLine (30, 0.875*ymin+0.125*ymax, 30, 0.125*ymin+0.875*ymax);
+      l->DrawLine (300, 0.875*ymin+0.125*ymax, 300, 0.125*ymin+0.875*ymax);
+
+      myText (0.2, 0.865, kBlack, "#bf{#it{pp}}", 0.05);
+      myText (0.66, 0.200, kBlack, Form ("#bf{%i iterations}", nIters), 0.05);
+    }
+
+
+    for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
+      c->cd (nZdcCentBins+1-iCent);
+
+      gPad->SetLogx ();
+
+      const short nIters = GetJetSpectraNIters (false, 0, iCent);
+
+      TH1D* h = new TH1D ("h", Form (";#it{p}_{T}^{jet} [GeV];Refolded at %i iterations / No unfold", nIters), 1, pTJBins[0], pTJBins[nPtJBins]);
+      h->GetXaxis ()->SetMoreLogLabels ();
+      h->GetYaxis ()->SetRangeUser (ymin, ymax);
+      h->SetBinContent (1, 1);
+      h->SetLineStyle (2);
+      h->SetLineWidth (2);
+      h->SetLineColor (kBlack);
+      h->DrawCopy ("hist ][");
+      SaferDelete (&h);
+
+      short iIter = 0;
+      while (iIter < nIters1DMax && nIters1DVals[iIter] != nIters) iIter++;
+
+      h = h_jet_pt_rfld_nIters[iCent][iIter];
+      g = make_graph (h);
+      ScaleGraph (g, h_jet_pt[0][iCent]);
+      myDraw (g, colorfulColors[iCent+1], kOpenCircle, 1.0, 1, 2, "PL", false);
+      SaferDelete (&g);
+
+      l->SetLineStyle (2);
+      l->SetLineWidth (2);
+      l->SetLineColor (kBlack);
+      l->DrawLine (30, 0.875*ymin+0.125*ymax, 30, 0.125*ymin+0.875*ymax);
+      l->DrawLine (300, 0.875*ymin+0.125*ymax, 300, 0.125*ymin+0.875*ymax);
+
+      if (iCent < nZdcCentBins)
+        myText (0.2, 0.865, kBlack, Form ("#bf{#it{p}+Pb, ZDC %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.05);
+      else
+        myText (0.2, 0.865, kBlack, "#bf{#it{p}+Pb, 0-100%}", 0.05);
+      myText (0.66, 0.200, kBlack, Form ("#bf{%i iterations}", nIters), 0.05);
+
+    } // end loop over iCent
+
+    c->cd (8);
+    myText (0.1, 0.93, kBlack, "#bf{#it{ATLAS}} Internal", 0.07);
+    myText (0.1, 0.84, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.07);
+    myText (0.1, 0.75, kBlack, "#it{p}+Pb, #sqrt{s} = 5.02 TeV", 0.07);
+
+    c->SaveAs (Form ("%s/Plots/PtCh/RefoldedComp_Summary_JetSpectrum.pdf", workPath.Data ()));
   }
 
 
@@ -1714,7 +1812,7 @@ void PlotNIters (const char* rawTag, const char* nitersTag, const short nItersMa
     myText (0.1, 0.84, kBlack, "#bf{#it{ATLAS}} Internal", 0.07);
     myText (0.1, 0.75, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.07);
     myText (0.1, 0.66, kBlack, "#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV", 0.07);
-    myText (0.1, 0.57, kBlack, Form ("#it{p}_{T}^{jet} [GeV] #in (%i, %i)", minJetPt, maxJetPt), 0.07);
+    myText (0.1, 0.57, kBlack, Form ("#it{p}_{T}^{jet} = %i-%i GeV", minJetPt, maxJetPt), 0.07);
   
     c->SaveAs (Form ("%s/Plots/PtCh/UnfRatioTest_NJet_%s.pdf", workPath.Data (), pTJInt.Data ()));
   
@@ -1910,7 +2008,7 @@ void PlotNIters (const char* rawTag, const char* nitersTag, const short nItersMa
     myText (0.1, 0.84, kBlack, "#bf{#it{ATLAS}} Internal", 0.07);
     myText (0.1, 0.75, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.07);
     myText (0.1, 0.66, kBlack, "#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV", 0.07);
-    myText (0.1, 0.57, kBlack, Form ("#it{p}_{T}^{jet} [GeV] #in (%i, %i)", minJetPt, maxJetPt), 0.07);
+    myText (0.1, 0.57, kBlack, Form ("#it{p}_{T}^{jet} = %i-%i GeV", minJetPt, maxJetPt), 0.07);
   
     c->SaveAs (Form ("%s/Plots/PtCh/UnfConv_NJet_%s.pdf", workPath.Data (), pTJInt.Data ()));
   
@@ -2077,7 +2175,7 @@ void PlotNIters (const char* rawTag, const char* nitersTag, const short nItersMa
     myText (0.1, 0.84, kBlack, "#bf{#it{ATLAS}} Internal", 0.07);
     myText (0.1, 0.75, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.07);
     myText (0.1, 0.66, kBlack, "#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV", 0.07);
-    myText (0.1, 0.57, kBlack, Form ("#it{p}_{T}^{jet} [GeV] #in (%i, %i)", minJetPt, maxJetPt), 0.07);
+    myText (0.1, 0.57, kBlack, Form ("#it{p}_{T}^{jet} = %i-%i GeV", minJetPt, maxJetPt), 0.07);
   
     c->SaveAs (Form ("%s/Plots/PtCh/Refolded_NJet_%s.pdf", workPath.Data (), pTJInt.Data ()));
   
@@ -2186,7 +2284,7 @@ void PlotNIters (const char* rawTag, const char* nitersTag, const short nItersMa
       myText (0.1, 0.93, kBlack, "#bf{#it{ATLAS}} Internal", 0.07);
       myText (0.1, 0.84, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.07);
       myText (0.1, 0.75, kBlack, "#it{p}+Pb, #sqrt{s} = 5.02 TeV", 0.07);
-      myText (0.1, 0.66, kBlack, Form ("#it{p}_{T}^{jet} [GeV] #in (%i, 300)", iPtJInt == 0 ? 30 : 60), 0.065);
+      myText (0.1, 0.66, kBlack, Form ("#it{p}_{T}^{jet} = %i-300 GeV", iPtJInt == 0 ? 30 : 60), 0.065);
       myText (0.1, 0.57, kBlack, Form ("#Delta#phi_{ch,jet} %s", directions[iDir] == "ns" ? "< #pi/8" : (directions[iDir] == "as" ? "> 7#pi/8" : "#in (#pi/3, 2#pi/3)")), 0.065);
       short iCol = 7;
       for (short iIter : {11, 9, 7, 5}) {
@@ -2318,7 +2416,7 @@ void PlotNIters (const char* rawTag, const char* nitersTag, const short nItersMa
       myText (0.1, 0.93, kBlack, "#bf{#it{ATLAS}} Internal", 0.07);
       myText (0.1, 0.84, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.07);
       myText (0.1, 0.75, kBlack, "#it{p}+Pb, #sqrt{s} = 5.02 TeV", 0.07);
-      myText (0.1, 0.66, kBlack, Form ("#it{p}_{T}^{jet} [GeV] #in (%i, 300)", iPtJInt == 0 ? 30 : 60), 0.065);
+      myText (0.1, 0.66, kBlack, Form ("#it{p}_{T}^{jet} = %i-300 GeV", iPtJInt == 0 ? 30 : 60), 0.065);
       myText (0.1, 0.57, kBlack, Form ("#Delta#phi_{ch,jet} %s", directions[iDir] == "ns" ? "< #pi/8" : (directions[iDir] == "as" ? "> 7#pi/8" : "#in (#pi/3, 2#pi/3)")), 0.065);
       short iCol = 7;
       for (short iIter : iIters) {
@@ -2466,7 +2564,7 @@ void PlotNIters (const char* rawTag, const char* nitersTag, const short nItersMa
       myText (0.1, 0.93, kBlack, "#bf{#it{ATLAS}} Internal", 0.07);
       myText (0.1, 0.84, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.07);
       myText (0.1, 0.75, kBlack, "#it{p}+Pb, #sqrt{s} = 5.02 TeV", 0.07);
-      myText (0.1, 0.66, kBlack, Form ("#it{p}_{T}^{jet} [GeV] #in (%i, 300)", iPtJInt == 0 ? 30 : 60), 0.065);
+      myText (0.1, 0.66, kBlack, Form ("#it{p}_{T}^{jet} = %i-300 GeV", iPtJInt == 0 ? 30 : 60), 0.065);
       myText (0.1, 0.57, kBlack, Form ("#Delta#phi_{ch,jet} %s", directions[iDir] == "ns" ? "< #pi/8" : (directions[iDir] == "as" ? "> 7#pi/8" : "#in (#pi/3, 2#pi/3)")), 0.065);
 
       c->SaveAs (Form ("%s/Plots/PtCh/UnfComp_Summary_%iGeVJets_%s.pdf", workPath.Data (), iPtJInt == 0 ? 30 : 60, directions[iDir] == "ns" ? "nearside" : (directions[iDir] == "as" ? "awayside" : "perpendicular")));

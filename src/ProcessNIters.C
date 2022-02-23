@@ -24,8 +24,12 @@
 #include <string.h>
 #include <math.h>
 #include <chrono>
+#include <mutex>
 
 using namespace JetHadronCorrelations;
+
+
+std::mutex mu;
 
 
 void Unfold2DRef (
@@ -49,6 +53,7 @@ void Unfold2DRef (
     bayesName.ReplaceAll ("REPLACE_", "");
     bayesName.ReplaceAll ("pTJInt_", "");
 
+    mu.lock ();
     RooUnfoldBayes* bayesUnf2D = new RooUnfoldBayes (bayesName, bayesName);
     bayesUnf2D->SetResponse (resp);
     bayesUnf2D->SetMeasured (h2_raw);
@@ -56,13 +61,15 @@ void Unfold2DRef (
     bayesUnf2D->SetIterations (nIters);
     bayesUnf2D->SetSmoothing (false);
     bayesUnf2D->SetVerbose (-1);
+    mu.unlock ();
 
-    TH2D* h2_unf = (TH2D*) bayesUnf2D->Hreco ()->Clone (Form ("h2_unf_%iIters", nIters));
+    TH2D* h2_unf = (TH2D*) bayesUnf2D->Hreco (RooUnfold::kErrors, &mu)->Clone (Form ("h2_unf_%iIters", nIters));
 
-    delete bayesUnf2D;
-    //SaferDelete (&bayesUnf2D);
+    mu.lock ();
+    SaferDelete (&bayesUnf2D);
+    mu.unlock ();
 
-    TH2D* h2_rfld = (TH2D*) resp->ApplyToTruth (h2_unf)->Clone (Form ("h2_rfld_%iIters", nIters));
+    TH2D* h2_rfld = (TH2D*) resp->ApplyToTruth (h2_unf, Form ("h2_rfld_%iIters", nIters), &mu);
 
     for (short iPtJInt : {0, 1}) {
 
@@ -75,7 +82,9 @@ void Unfold2DRef (
       unfName.ReplaceAll ("nIters", Form ("nIters%i", nIters));
       unfName.ReplaceAll ("pTJInt", pTJInt);
 
+      mu.lock ();
       TH1D* h_unf = new TH1D (unfName, "", nPtChBins, pTChBins);
+      mu.unlock ();
       h_unf->Sumw2 ();
       h_unf_arr[iPtJInt][iDir][iIter] = h_unf;
 
@@ -84,7 +93,9 @@ void Unfold2DRef (
       rfldName.ReplaceAll ("nIters", Form ("nIters%i", nIters));
       rfldName.ReplaceAll ("pTJInt", pTJInt);
 
+      mu.lock ();
       TH1D* h_rfld = new TH1D (rfldName, "", nPtChBins, pTChBins);
+      mu.unlock ();
       h_rfld->Sumw2 ();
       h_rfld_arr[iPtJInt][iDir][iIter] = h_rfld;
   
@@ -112,13 +123,17 @@ void Unfold2DRef (
 
     } // end loop over iPtJInt
 
+    mu.lock ();
     delete h2_unf;
     delete h2_rfld;
+    mu.unlock ();
 
   } // end loop over iIter
 
+  mu.lock ();
   delete h2_raw;
   delete h2_cov;
+  mu.unlock ();
 
   return;
 }
@@ -147,6 +162,7 @@ void Unfold2D (
     bayesName.ReplaceAll ("REPLACE_", "");
     bayesName.ReplaceAll ("pTJInt_", "");
 
+    mu.lock ();
     RooUnfoldBayes* bayesUnf2D = new RooUnfoldBayes (bayesName, bayesName);
     bayesUnf2D->SetResponse (resp);
     bayesUnf2D->SetMeasured (h2_raw);
@@ -154,13 +170,15 @@ void Unfold2D (
     bayesUnf2D->SetIterations (nIters);
     bayesUnf2D->SetSmoothing (false);
     bayesUnf2D->SetVerbose (-1);
+    mu.unlock ();
 
-    TH2D* h2_unf = (TH2D*) bayesUnf2D->Hreco ()->Clone (Form ("h2_unf_%iIters", nIters));
+    TH2D* h2_unf = (TH2D*) bayesUnf2D->Hreco (RooUnfold::kErrors, &mu)->Clone (Form ("h2_unf_%iIters", nIters));
 
-    delete bayesUnf2D;
-    //SaferDelete (&bayesUnf2D);
+    mu.lock ();
+    SaferDelete (&bayesUnf2D);
+    mu.unlock ();
 
-    TH2D* h2_rfld = (TH2D*) resp->ApplyToTruth (h2_unf)->Clone (Form ("h2_rfld_%iIters", nIters));
+    TH2D* h2_rfld = (TH2D*) resp->ApplyToTruth (h2_unf, Form ("h2_rfld_%iIters", nIters), &mu);
 
     for (short iPtJInt : {0, 1}) {
 
@@ -173,7 +191,9 @@ void Unfold2D (
       unfName.ReplaceAll ("nIters", Form ("nIters%i", nIters));
       unfName.ReplaceAll ("pTJInt", pTJInt);
 
+      mu.lock ();
       TH1D* h_unf = new TH1D (unfName, "", nPtChBins, pTChBins);
+      mu.unlock ();
       h_unf->Sumw2 ();
       h_unf_arr[iPtJInt][iDir][iCent][iIter] = h_unf;
 
@@ -182,7 +202,9 @@ void Unfold2D (
       rfldName.ReplaceAll ("nIters", Form ("nIters%i", nIters));
       rfldName.ReplaceAll ("pTJInt", pTJInt);
 
+      mu.lock ();
       TH1D* h_rfld = new TH1D (rfldName, "", nPtChBins, pTChBins);
+      mu.unlock ();
       h_rfld->Sumw2 ();
       h_rfld_arr[iPtJInt][iDir][iCent][iIter] = h_rfld;
   
@@ -210,13 +232,17 @@ void Unfold2D (
 
     } // end loop over iPtJInt
 
+    mu.lock ();
     delete h2_unf;
     delete h2_rfld;
+    mu.unlock ();
 
   } // end loop over iIter
 
+  mu.lock ();
   delete h2_raw;
   delete h2_cov;
+  mu.unlock ();
 
 }
 
@@ -408,6 +434,12 @@ void ProcessNIters (const char* rawTag, const char* outFileTag, const short nIte
   // THEN CONVERT BACK TO 1D HISTOGRAMS FOR INTEGRATED JET PT SELECTIONS
   //////////////////////////////////////////////////////////////////////////////////////////////////// 
   {
+    TH1D* h_raw = (TH1D*) h_jet_pt_ref->Clone ("h_raw");
+    for (int iX = 1; iX <= h_raw->FindBin (20-0.01); iX++) {
+      h_raw->SetBinContent (iX, 0);
+      h_raw->SetBinError   (iX, 0);
+    } // end loop over iX
+
     {
       for (short iIter = 0; iIter < nIters1DMax-nIters1DMin+1; iIter++) {
 
@@ -420,12 +452,15 @@ void ProcessNIters (const char* rawTag, const char* outFileTag, const short nIte
         //bayesUnf->SetMeasuredCov (TMatrixD (nPtJBins, nPtJBins, h2_jet_pt_ref_cov->GetArray ()));
         TH1D* h_unf = (TH1D*) bayesUnf->Hreco ()->Clone (Form ("h_jet_pt_ref_unf_data_Nominal_nIters%i", nIters));
         TH1D* h_rfld = (TH1D*) resp->ApplyToTruth (h_unf)->Clone (Form ("h_jet_pt_ref_rfld_data_Nominal_nIters%i", nIters));
+
         SaferDelete (&bayesUnf);
 
         h_jet_pt_ref_unf_nIters[iIter] = h_unf;
         h_jet_pt_ref_rfld_nIters[iIter] = h_rfld;
 
       } // end loop over iIter
+
+      SaferDelete (&h_raw);
     }
 
 
@@ -433,6 +468,12 @@ void ProcessNIters (const char* rawTag, const char* outFileTag, const short nIte
 
       const TString cent = (iCent == nZdcCentBins ? "allCent" : Form ("iCent%i", iCent));
       const short iUnfCent = (useCentDiffUnf ? iCent : nZdcCentBins);
+
+      TH1D* h_raw = (TH1D*) h_jet_pt[iCent]->Clone ("h_raw");
+      for (int iX = 1; iX <= h_raw->FindBin (20-0.01); iX++) {
+        h_raw->SetBinContent (iX, 0);
+        h_raw->SetBinError   (iX, 0);
+      } // end loop over iX
 
       for (short iIter = 0; iIter < nIters1DMax-nIters1DMin+1; iIter++) {
   
@@ -445,12 +486,15 @@ void ProcessNIters (const char* rawTag, const char* outFileTag, const short nIte
         //bayesUnf->SetMeasuredCov (TMatrixD (nPtJBins, nPtJBins, h2_jet_pt_cov[iCent]->GetArray ()));
         TH1D* h_unf = (TH1D*) bayesUnf->Hreco ()->Clone (Form ("h_jet_pt_unf_data_%s_Nominal_nIters%i", cent.Data (), nIters));
         TH1D* h_rfld = (TH1D*) resp->ApplyToTruth (h_unf)->Clone (Form ("h_jet_pt_rfld_data_%s_Nominal_nIters%i", cent.Data (), nIters));
+
         SaferDelete (&bayesUnf);
 
         h_jet_pt_unf_nIters[iCent][iIter] = h_unf;
         h_jet_pt_rfld_nIters[iCent][iIter] = h_rfld;
 
       } // end loop over iIter
+
+      SaferDelete (&h_raw);
 
     } // end loop over iCent
 
@@ -487,6 +531,9 @@ void ProcessNIters (const char* rawTag, const char* outFileTag, const short nIte
 
         for (short iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
 
+          if (0.5 * (pTJBins[iPtJ] + pTJBins[iPtJ+1]) < 20)
+            continue;
+
           TH1D* h = h_jet_trk_pt_ref_sig[iPtJ][iDir];
 
           for (short iPtCh = 0; iPtCh < nPtChBins; iPtCh++) {
@@ -518,6 +565,9 @@ void ProcessNIters (const char* rawTag, const char* outFileTag, const short nIte
         std::cout << "Doing 2D unfold for iCent = " << iCent << " , iDir = " << iDir << std::endl;
 
         for (short iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
+
+          if (0.5 * (pTJBins[iPtJ] + pTJBins[iPtJ+1]) < 20)
+            continue;
 
           TH1D* h = h_jet_trk_pt_sig[iPtJ][iDir][iCent];
 

@@ -3,6 +3,15 @@ Analysis of jet-hadron correlations in 5.02 TeV p+Pb and pp with ATLAS run 2 dat
 
 Notation: files ending in **.cxx** are meant to be compiled (see Makefile). Files ending in **.C** are ROOT macros.
 
+## Prerequisites ##
+The following auxiliary packages are required for a successful analysis. The below were compiled with ROOT 6.24/06 (compiled with clang using C++11).
+1. https://github.com/jeffouellette/RootUtilities
+
+2. https://github.com/jeffouellette/atlas-hi
+
+3. https://gitlab.cern.ch/RooUnfold/RooUnfold
+Note that a few minor modifications are necessary to RooUnfold to account for thread-safe heap allocation. In case multiple threads are creating RooUnfold objects, it is important to make sure that they do not create any "new" objects on the heap simultaneously. I don't totally understand this but it prevents random crashes due to weird memory allocation issues. I have provided template replacement code in RooUnfoldTemplates/\*\_template.\*. **It is completely possible that these fixes are not sufficient and crashes will occur, because there may be other heap allocations that are not thread-protected. In the case of a crash when running an unfolding, try again -- I have personally not had issues with the basic fixes implemented here**.
+
 
 ## Before running the correlations code ##
 There are several primary analysis routines for analyzing TTrees for auxiliary studies:
