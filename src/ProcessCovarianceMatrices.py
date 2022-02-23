@@ -33,7 +33,7 @@ outFileName = os.getenv ("JETHADRONCORR_DATA_PATH") + "/rootFiles/Results/Proces
 # basic arrays...
 dTypes = ["data", "mc"]
 directions = ["ns", "perp", "as"] # angular integration regions; near-side, perpendicular, away-side
-pTJBins = [15, 20, 30, 45, 60, 90, 120, 160, 200, 240, 300, 350, 400] # jet pT bins
+pTJBins = [10, 11, 12, 13, 14, 15, 17.5, 20, 22.5, 25, 27.5, 30, 33, 36, 40, 45, 50, 55, 60, 65, 70, 75, 82.5, 90, 100, 110, 120, 130, 145, 160, 180, 200, 220, 240, 260, 280, 300, 325, 350, 375, 400] # jet pT bins
 pTChBins = [0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.2, 1.4, 1.6, 1.8, 2, 2.5, 3, 3.5, 4, 5, 6, 8, 10, 12, 16, 20, 30, 40, 50, 60, 75, 90, 120] # charged particle pT bins
 centBins = ["iCent0", "iCent1", "iCent2", "iCent3", "iCent4", "allCent"]
 

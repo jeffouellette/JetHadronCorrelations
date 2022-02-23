@@ -2340,7 +2340,7 @@ void PlotPtCh (const char* rawTag, const char* unfoldTag) {
 
     const TString pTJInt = (iPtJInt == 0 ? "30GeV" : "60GeV");
 
-    for (short iDir : {0, 1, 2}) {
+    for (short iDir : {0, 2}) {
 
       const char* canvasName = Form ("c_jetInt_trk_pt_IpPb_fewCent_iDir%i_%s", iDir, pTJInt.Data ());
       TCanvas* c = new TCanvas (canvasName, "", 1200, 400);
@@ -2384,16 +2384,6 @@ void PlotPtCh (const char* rawTag, const char* unfoldTag) {
         SaferDelete (&g);
 
 
-        //h = h_jetInt_trk_pt_iaaNoUnf[0][iPtJInt][iDir][iCent];
-        //g = make_graph (h);
-        //ResetXErrors (g);
-        //if (iDir == 1)
-        //  TrimGraph (g, 0, 10);
-        //RecenterGraph (g);
-        //myDraw (g, colorfulColors[nZdcCentBins-iCent], kOpenCircle, 1.0, 1, 2, "P", false);
-        //SaferDelete (&g);
-
-
         if (iCent < nZdcCentBins)
           myText (0.2, 0.865, colorfulColors[nZdcCentBins-iCent], Form ("#bf{#it{p}+Pb, ZDC %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.05);
         else
@@ -2410,9 +2400,6 @@ void PlotPtCh (const char* rawTag, const char* unfoldTag) {
       c->cd (2);
       myText (0.2, 0.80, kBlack, Form ("#it{p}_{T}^{jet} > %i GeV", iPtJInt == 0 ? 30 : 60), 0.05);
       myText (0.2, 0.74, kBlack, Form ("#Delta#phi_{ch,jet} %s", directions[iDir] == "ns" ? "< #pi/8" : (directions[iDir] == "as" ? "> 7#pi/8" : "#in (#pi/3, 2#pi/3)")), 0.05);
-      //c->cd (3);
-      //myLineText2 (0.26, 0.80, kBlack, kFullCircle, "Unfolded", 1.2, 0.05);
-      //myLineText2 (0.26, 0.74, kBlack, kOpenCircle, "No unfold", 1.2, 0.05);
 
       c->SaveAs (Form ("%s/Plots/PtCh/IpPb_FewCent_Summary_%iGeVJets_%s.pdf", workPath.Data (), iPtJInt == 0 ? 30 : 60, directions[iDir] == "ns" ? "nearside" : (directions[iDir] == "as" ? "awayside" : "perpendicular")));
     } // end loop over iDir

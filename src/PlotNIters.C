@@ -106,16 +106,16 @@ void PlotNIters (const char* rawTag, const char* nitersTag, const short nItersMa
   TH1D****  h_jetInt_trk_pt_ref_sig   = Get3DArray <TH1D*> (2, 2, nDir);
   TH1D***** h_jetInt_trk_pt_sig       = Get4DArray <TH1D*> (2, 2, nDir, nZdcCentBins+1);
 
-  TH1D****  h_jetInt_trk_pt_ref_unf_nIters  = Get3DArray <TH1D*> (nPtJBins, nDir, nItersMax-nItersMin+2);
-  TH1D***** h_jetInt_trk_pt_unf_nIters      = Get4DArray <TH1D*> (nPtJBins, nDir, nZdcCentBins+1, nItersMax-nItersMin+2);
+  TH1D****  h_jetInt_trk_pt_ref_unf_nIters  = Get3DArray <TH1D*> (nPtJBins, nDir, nItersMax-nItersMin+1);
+  TH1D***** h_jetInt_trk_pt_unf_nIters      = Get4DArray <TH1D*> (nPtJBins, nDir, nZdcCentBins+1, nItersMax-nItersMin+1);
 
-  TH1D****  h_jetInt_trk_pt_ref_rfld_nIters = Get3DArray <TH1D*> (nPtJBins, nDir, nItersMax-nItersMin+2);
-  TH1D***** h_jetInt_trk_pt_rfld_nIters     = Get4DArray <TH1D*> (nPtJBins, nDir, nZdcCentBins+1, nItersMax-nItersMin+2);
+  TH1D****  h_jetInt_trk_pt_ref_rfld_nIters = Get3DArray <TH1D*> (nPtJBins, nDir, nItersMax-nItersMin+1);
+  TH1D***** h_jetInt_trk_pt_rfld_nIters     = Get4DArray <TH1D*> (nPtJBins, nDir, nZdcCentBins+1, nItersMax-nItersMin+1);
 
-  TH1D**    h_jet_pt_ref_unf_nIters       = Get1DArray <TH1D*> (nIters1DMax-nIters1DMin+2);
-  TH1D**    h_jet_pt_ref_rfld_nIters      = Get1DArray <TH1D*> (nIters1DMax-nIters1DMin+2);
-  TH1D***   h_jet_pt_unf_nIters           = Get2DArray <TH1D*> (nZdcCentBins+1, nIters1DMax-nIters1DMin+2);
-  TH1D***   h_jet_pt_rfld_nIters          = Get2DArray <TH1D*> (nZdcCentBins+1, nIters1DMax-nIters1DMin+2);
+  TH1D**    h_jet_pt_ref_unf_nIters       = Get1DArray <TH1D*> (nIters1DMax-nIters1DMin+1);
+  TH1D**    h_jet_pt_ref_rfld_nIters      = Get1DArray <TH1D*> (nIters1DMax-nIters1DMin+1);
+  TH1D***   h_jet_pt_unf_nIters           = Get2DArray <TH1D*> (nZdcCentBins+1, nIters1DMax-nIters1DMin+1);
+  TH1D***   h_jet_pt_rfld_nIters          = Get2DArray <TH1D*> (nZdcCentBins+1, nIters1DMax-nIters1DMin+1);
 
   TGraph**    g_jet_pt_ref_unfIterUnc     = Get1DArray <TGraph*> (2);                 // sums of iterations uncertainties as a function of nIter -- data only
   TGraph***   g_jet_pt_unfIterUnc         = Get2DArray <TGraph*> (2, nZdcCentBins+1); // sums of iterations uncertainties as a function of nIter -- data only
@@ -172,7 +172,8 @@ void PlotNIters (const char* rawTag, const char* nitersTag, const short nItersMa
     std::cout << "Reading " << inFileName.Data () << std::endl;
     inFile = new TFile (inFileName, "read");
 
-    for (short iDType = 0; iDType < 2; iDType++) {
+    //for (short iDType = 0; iDType < 2; iDType++) {
+    for (short iDType = 0; iDType < 1; iDType++) {
 
       const TString dType = (iDType == 0 ? "data" : "mc");
 
@@ -230,7 +231,8 @@ void PlotNIters (const char* rawTag, const char* nitersTag, const short nItersMa
     std::cout << "Reading " << inFileName.Data () << std::endl;
     inFile = new TFile (inFileName, "read");
 
-    for (short iDType = 0; iDType < 2; iDType++) {
+    //for (short iDType = 0; iDType < 2; iDType++) {
+    for (short iDType = 0; iDType < 1; iDType++) {
 
       const TString dType = (iDType == 0 ? "data" : "mc");
 
@@ -311,8 +313,8 @@ void PlotNIters (const char* rawTag, const char* nitersTag, const short nItersMa
 
             const TString cent = (iCent == nZdcCentBins ? "allCent" : Form ("iCent%i", iCent));
   
-            h_jetInt_trk_pt_unf_nIters[iPtJInt][iDir][iCent][iIter] = (TH1D*) inFile->Get (Form ("h_jetInt_trk_pt_%s_pPb_unf_%s_data_%s_Nominal_nIters%i", dir.Data (), cent.Data (), pTJInt.Data (), nIters));
-            h_jetInt_trk_pt_rfld_nIters[iPtJInt][iDir][iCent][iIter] = (TH1D*) inFile->Get (Form ("h_jetInt_trk_pt_%s_pPb_rfld_%s_data_%s_Nominal_nIters%i", dir.Data (), cent.Data (), pTJInt.Data (), nIters));
+            h_jetInt_trk_pt_unf_nIters[iPtJInt][iDir][iCent][iIter] = (TH1D*) inFile->Get (Form ("h_jetInt_trk_pt_%s_pPb_unf_%s_data_%s_Nominal_nIters%i", cent.Data (), dir.Data (), pTJInt.Data (), nIters));
+            h_jetInt_trk_pt_rfld_nIters[iPtJInt][iDir][iCent][iIter] = (TH1D*) inFile->Get (Form ("h_jetInt_trk_pt_%s_pPb_rfld_%s_data_%s_Nominal_nIters%i", cent.Data (), dir.Data (), pTJInt.Data (), nIters));
             //h_jetInt_trk_pt_unf_nIters[iPtJInt][iDir][iCent][iIter]->Scale (h_jet_pt_unf_nIters[iCent][iIter]->Integral (h_jet_pt_unf_nIters[iCent][iIter]->FindBin (minJetPt+0.01), h_jet_pt_unf_nIters[iCent][iIter]->FindBin (maxJetPt-0.01)));
   
           } // end loop over iCent
@@ -1547,7 +1549,6 @@ void PlotNIters (const char* rawTag, const char* nitersTag, const short nItersMa
 
     {
       c->cd (7);
-      gPad->SetLogx();
 
       g = new TGAE (nIters1DMax - nIters1DMin + 1);
 
@@ -1628,7 +1629,6 @@ void PlotNIters (const char* rawTag, const char* nitersTag, const short nItersMa
     for (short iCent = 0; iCent < nFcalCentBins+1; iCent++) {
 
       c->cd (nFcalCentBins+1-iCent);
-      gPad->SetLogx();
 
       g = new TGAE (nIters1DMax - nIters1DMin + 1);
 
@@ -1741,7 +1741,6 @@ void PlotNIters (const char* rawTag, const char* nitersTag, const short nItersMa
 
     {
       c->cd (7);
-      gPad->SetLogx();
 
       g = new TGAE (nIters1DMax - nIters1DMin + 1);
 
@@ -1824,7 +1823,6 @@ void PlotNIters (const char* rawTag, const char* nitersTag, const short nItersMa
     for (short iCent = 0; iCent < nFcalCentBins+1; iCent++) {
 
       c->cd (nFcalCentBins+1-iCent);
-      gPad->SetLogx();
 
       g = new TGAE (nIters1DMax - nIters1DMin + 1);
 
@@ -1938,7 +1936,6 @@ void PlotNIters (const char* rawTag, const char* nitersTag, const short nItersMa
 
     {
       c->cd (7);
-      gPad->SetLogx();
 
       g = new TGAE (nIters1DMax - nIters1DMin + 1);
 
@@ -2007,7 +2004,6 @@ void PlotNIters (const char* rawTag, const char* nitersTag, const short nItersMa
     for (short iCent = 0; iCent < nFcalCentBins+1; iCent++) {
 
       c->cd (nFcalCentBins+1-iCent);
-      gPad->SetLogx();
 
       g = new TGAE (nIters1DMax - nIters1DMin + 1);
 
@@ -2363,7 +2359,7 @@ void PlotNIters (const char* rawTag, const char* nitersTag, const short nItersMa
         const short nIterVar = nIterOpt + 1;//jetInt_trk_pt_ref_niter_opt[iPtJInt][iDir][0];
 
         short iIterOpt = 0;
-        while (iIterOpt < nItersMax-nItersMin+2 && nItersVals[iIterOpt] != nIterOpt) iIterOpt++;
+        while (iIterOpt < nItersMax-nItersMin+1 && nItersVals[iIterOpt] != nIterOpt) iIterOpt++;
         short iIterVar = iIterOpt+1;
 
         TH1D* h = new TH1D ("h", Form (";#it{p}_{T}^{ch} [GeV];%i vs. %i iterations", nIterOpt, nIterVar), 1, pTChBins[1], iDir == 1 ? 10 : pTChBins[nPtChBins-(iPtJInt == 0 ? 3 : 1)]);//pTChBins[nPtChBins]);
@@ -2417,7 +2413,7 @@ void PlotNIters (const char* rawTag, const char* nitersTag, const short nItersMa
         const short nIterVar = nIterOpt + 1;//jetInt_trk_pt_niter_opt[iPtJInt][iDir][iCent][0];
 
         short iIterOpt = 0;
-        while (iIterOpt < nItersMax-nItersMin+2 && nItersVals[iIterOpt] != nIterOpt) iIterOpt++;
+        while (iIterOpt < nItersMax-nItersMin+1 && nItersVals[iIterOpt] != nIterOpt) iIterOpt++;
         short iIterVar = iIterOpt+1;
 
         TH1D* h = new TH1D ("h", Form (";#it{p}_{T}^{ch} [GeV];%i vs. %i iterations", nIterOpt, nIterVar), 1, pTChBins[1], iDir == 1 ? 10 : pTChBins[nPtChBins-(iPtJInt == 0 ? 3 : 1)]);//pTChBins[nPtChBins]);

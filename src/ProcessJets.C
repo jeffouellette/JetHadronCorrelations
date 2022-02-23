@@ -24,8 +24,6 @@
 
 using namespace JetHadronCorrelations;
 
-const bool doJZ123 = false;
-
 
 TString GetSamp (const short iDType, const short iSamp) {
   if (iDType == 0)
@@ -82,11 +80,11 @@ void ProcessJets (const char* tag, const char* outFileTag) {
 
 
   // unfolded jet spectra
-  TH1D**    h_jet_pt_ref_unf_nIters         = Get1DArray <TH1D*> (nIters1DMax-nIters1DMin+2);
+  TH1D**    h_jet_pt_ref_unf_nIters         = Get1DArray <TH1D*> (nIters1DMax-nIters1DMin+1);
   TH1D***   h_jet_pt_unf_nIters             = Get2DArray <TH1D*> (nZdcCentBins+1, nIters1DMax-nIters1DMin+1);
 
   // refolded jet spectra
-  TH1D**    h_jet_pt_ref_rfld_nIters        = Get1DArray <TH1D*> (nIters1DMax-nIters1DMin+2);
+  TH1D**    h_jet_pt_ref_rfld_nIters        = Get1DArray <TH1D*> (nIters1DMax-nIters1DMin+1);
   TH1D***   h_jet_pt_rfld_nIters            = Get2DArray <TH1D*> (nZdcCentBins+1, nIters1DMax-nIters1DMin+1);
 
 

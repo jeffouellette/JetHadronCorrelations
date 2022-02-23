@@ -153,7 +153,7 @@ void PlotResponseMatrix (const bool doPrimTracksOnly = false) {
 
 
   {
-    TFile* inFile = new TFile (Form ("%s/MakeResponseMatrix/%s/allSamples_finePtJBins_truncated.root", rootPath.Data (), doPrimTracksOnly ? "MCRecoJetsTruthMatchedParts" : "Nominal"), "read");
+    TFile* inFile = new TFile (Form ("%s/MakeResponseMatrix/%s/allSamples.root", rootPath.Data (), doPrimTracksOnly ? "MCRecoJetsTruthMatchedParts" : "Nominal"), "read");
 
     
     //////////////////////////////////////////////////////////////////////////////////////////////////// 
@@ -462,6 +462,7 @@ void PlotResponseMatrix (const bool doPrimTracksOnly = false) {
 
 
 
+/*
   //////////////////////////////////////////////////////////////////////////////////////////////////// 
   // UNFOLD FULL AND HALF-CLOSURE HISTOGRAMS
   //////////////////////////////////////////////////////////////////////////////////////////////////// 
@@ -1057,6 +1058,7 @@ void PlotResponseMatrix (const bool doPrimTracksOnly = false) {
 
     } // end loop over iPtJInt
   }
+*/
 
 
 
@@ -1066,6 +1068,7 @@ void PlotResponseMatrix (const bool doPrimTracksOnly = false) {
     TLatex* tl = new TLatex ();
 
 
+/*
     for (short iEvFrac : {1, 0}) {
   
       const TString evFrac = (iEvFrac == 0 ? "half" : "full");
@@ -1755,6 +1758,7 @@ void PlotResponseMatrix (const bool doPrimTracksOnly = false) {
       } // end loop over iPtJInt
 
     } // end loop over iEvFrac
+*/
 
 
 
@@ -1785,8 +1789,8 @@ void PlotResponseMatrix (const bool doPrimTracksOnly = false) {
       TAxis* yax = h2->GetYaxis ();
       TAxis* zax = h2->GetZaxis ();
 
-      xax->SetTitle ("Truth-level #it{p}_{T}^{jet} [GeV]");
-      yax->SetTitle ("Reco.-level #it{p}_{T}^{jet} [GeV]");
+      xax->SetTitle ("Reco.-level #it{p}_{T}^{jet} [GeV]");
+      yax->SetTitle ("Truth-level #it{p}_{T}^{jet} [GeV]");
       zax->SetTitle ("");
 
       xax->SetTitleFont (43);

@@ -671,7 +671,7 @@ void SmoothSystematics (TGAE* sys, TF1* func, TH1D* nom, TH1D* var);
  * Returns the covariance matrix contained in inFileName.
  * Has dimensions (nPtJBins*nPtChBins)^2
  */
-TMatrixD GetCovarianceMatrix (const TString inFileName);
+TMatrixD* GetCovarianceMatrix (const TString inFileName);
 
 
 /**

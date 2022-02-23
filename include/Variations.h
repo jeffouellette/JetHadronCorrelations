@@ -14,7 +14,7 @@
 const std::vector <TString> variations = {
   "Nominal",
 
-
+/*
   "HITightVar",
   "HILooseVar",
   "TrkEffVar",
@@ -35,7 +35,7 @@ const std::vector <TString> variations = {
 
   "UnfoldingAltWgtsVar",
   "NonClosureVar",
-  "RefoldingVar",
+  //"RefoldingVar",
 
 
   "JESVar0",
@@ -59,6 +59,7 @@ const std::vector <TString> variations = {
   "JESVar19",
   "JESVar18",
   //"JESVar20",
+*/
 
 
 

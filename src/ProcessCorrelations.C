@@ -151,8 +151,8 @@ void ProcessCorrelations (const char* tag, const char* outFileTag) {//, const in
       if ((iDType == 0 && dataVariations.count (var) == 0) || (iDType == 1 && mcVariations.count (var) + otherMCVariations.count (var) == 0))
         continue;
 
-      const bool hasRefBkg = true;//(iDType != 1 && variationsWithNoppBkgd.count (var) == 0);
-      const bool hasBkg = true;//(variationsWithNopPbBkgd.count (var) == 0);
+      const bool hasRefBkg = (iDType != 1 && variationsWithNoppBkgd.count (var) == 0);
+      const bool hasBkg = (variationsWithNopPbBkgd.count (var) == 0);
 
       TH2D* h2_cov = nullptr;
 

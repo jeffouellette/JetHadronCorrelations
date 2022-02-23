@@ -21,13 +21,21 @@
 #endif
 
 #include <iostream>
+#include <thread>
 #include <string.h>
 #include <math.h>
+#include <mutex>
+
+std::mutex mu;
 
 using namespace JetHadronCorrelations;
 
 
 short GetTrkSpectraNIters (const bool isMC, const short iPtJInt, const short iDir, const short iCent) {
+
+  /* FOR DEBUGGING */
+  //return 1;
+
   if (iDir == 1)
     return 1;
 
@@ -49,24 +57,24 @@ short GetTrkSpectraNIters (const bool isMC, const short iPtJInt, const short iDi
       switch (iDir) {
         case 0: // near-side
         switch (iCent) {
-          case 5:  return 2;//11; // all centralities
-          case 4:  return 2;//9; // 0-20%
-          case 3:  return 2;//9; // 20-40%...
-          case 2:  return 2;//9;
-          case 1:  return 2;//7;
-          case 0:  return 2;//7; // ... 80-100%
-          case -1: return 2;//7; // pp
+          case 5:  return 4;//11; // all centralities
+          case 4:  return 3;//9; // 0-20%
+          case 3:  return 4;//9; // 20-40%...
+          case 2:  return 3;//9;
+          case 1:  return 4;//7;
+          case 0:  return 4;//7; // ... 80-100%
+          case -1: return 4;//7; // pp
           default: return 0;
         }
         case 2: // away-side
         switch (iCent) {
-          case 5:  return 2;//9; // all centralities
-          case 4:  return 2;//9; // 0-20%
-          case 3:  return 2;//9; // 20-40%...
-          case 2:  return 2;//7;
-          case 1:  return 2;//7;
-          case 0:  return 2;//7; // ... 80-100%
-          case -1: return 2;//7; // pp
+          case 5:  return 4;//9; // all centralities
+          case 4:  return 3;//9; // 0-20%
+          case 3:  return 3;//9; // 20-40%...
+          case 2:  return 3;//7;
+          case 1:  return 3;//7;
+          case 0:  return 3;//7; // ... 80-100%
+          case -1: return 3;//7; // pp
           default: return 0;
         }
         default: return 0;
@@ -75,24 +83,24 @@ short GetTrkSpectraNIters (const bool isMC, const short iPtJInt, const short iDi
       switch (iDir) {
         case 0: // near-side
         switch (iCent) {
-          case 5:  return 10;//31;//17; // all centralities
-          case 4:  return 10;//26;//15; // 0-20%
-          case 3:  return 9;//24;//15; // 20-40%...
-          case 2:  return 9;//19;//13;
-          case 1:  return 6;//9;//11;
-          case 0:  return 6;//9;//9;  // ... 80-100%
-          case -1: return 9;//10;//15; // pp
+          case 5:  return 3;//17; // all centralities
+          case 4:  return 2;//15; // 0-20%
+          case 3:  return 2;//15; // 20-40%...
+          case 2:  return 3;//13;
+          case 1:  return 3;//11;
+          case 0:  return 2;//9;  // ... 80-100%
+          case -1: return 3;//15; // pp
           default: return 0;
         }
         case 2: // away-side
         switch (iCent) {
-          case 5:  return 9;//29;//15; // all centralities
-          case 4:  return 8;//23;//13; // 0-20%
-          case 3:  return 7;//20;//13; // 20-40%...
-          case 2:  return 8;//10;//11;
-          case 1:  return 3;//8;//11; // "nominal" version
-          case 0:  return 4;//8;//9;  // ... 80-100%
-          case -1: return 8;//9;//15; // pp
+          case 5:  return 3;//15; // all centralities
+          case 4:  return 2;//13; // 0-20%
+          case 3:  return 2;//13; // 20-40%...
+          case 2:  return 2;//11;
+          case 1:  return 3;//11; // "nominal" version
+          case 0:  return 2;//9;  // ... 80-100%
+          case -1: return 3;//15; // pp
           default: return 0;
         }
         default: return 0;
@@ -112,11 +120,11 @@ short GetJetSpectraNIters (const bool isMC, const short iPtJInt, const short iCe
       case 0: // pTJ > 30 GeV
       //return std::max (GetTrkSpectraNIters (iPtJInt, 0, iCent), GetTrkSpectraNIters (iPtJInt, 1, iCent));
       switch (iCent) {
-        case 5:  return 5;//13; // all centralities
-        case 4:  return 5;//13; // 0-20%
-        case 3:  return 4;//11; // 20-40%...
-        case 2:  return 3;//11;
-        case 1:  return 4;//9;
+        case 5:  return 4;//13; // all centralities
+        case 4:  return 2;//13; // 0-20%
+        case 3:  return 5;//11; // 20-40%...
+        case 2:  return 4;//11;
+        case 1:  return 5;//9;
         case 0:  return 4;//9;  // ... 80-100%
         case -1: return 3;//15; // pp
         default: return 0;
@@ -124,18 +132,66 @@ short GetJetSpectraNIters (const bool isMC, const short iPtJInt, const short iCe
       case 1: // pTJ > 60 GeV
       //return std::max (GetTrkSpectraNIters (iPtJInt, 0, iCent), GetTrkSpectraNIters (iPtJInt, 1, iCent));
       switch (iCent) {
-        case 5:  return 4;//17; // all centralities
-        case 4:  return 3;//15; // 0-20%
-        case 3:  return 3;//13; // 20-40% ...
+        case 5:  return 2;//17; // all centralities
+        case 4:  return 2;//15; // 0-20%
+        case 3:  return 2;//13; // 20-40% ...
         case 2:  return 2;//13;
         case 1:  return 2;//11;
         case 0:  return 2;//9;  // ... 80-100%
-        case -1: return 3;//15; // pp
+        case -1: return 2;//15; // pp
         default: return 0;
       }
       default: return 0;
     }
   }
+}
+
+
+
+void DoUnfold2D (RooUnfoldResponse* resp, const TString baseName, const TH2D* h2_raw, const TMatrixD* m_cov, TH2D** h2_unf, TMatrixD** m_unf_cov, const short nIters) {
+  RooUnfoldBayes* bayesUnf2D = nullptr;
+
+  TString bayesName = baseName;
+  bayesName.ReplaceAll ("REPLACE_", "bayes_");
+
+  mu.lock ();
+  if (m_cov != nullptr) {
+    bayesUnf2D = new RooUnfoldBayes (bayesName, bayesName);
+    bayesUnf2D->SetResponse (resp);
+    bayesUnf2D->SetMeasured (h2_raw);
+    bayesUnf2D->SetMeasuredCov (*m_cov);
+    bayesUnf2D->SetIterations (nIters);
+    bayesUnf2D->SetSmoothing (false);
+  }
+  else {
+    bayesUnf2D = new RooUnfoldBayes (resp, h2_raw, nIters);
+  }
+  assert (bayesUnf2D);
+  mu.unlock ();
+
+  bayesUnf2D->SetVerbose (-1);
+
+  TString unfName = baseName;
+  unfName.ReplaceAll ("REPLACE_", "h2_unf_");
+  TH2D* h2_ptr = (TH2D*) bayesUnf2D->Hreco ();
+
+  mu.lock ();
+  (*h2_unf) = (TH2D*) h2_ptr->Clone (unfName);
+  assert (*h2_unf);
+  mu.unlock ();
+
+  if (m_cov != nullptr) {
+    mu.lock ();
+    (*m_unf_cov) = new TMatrixD (bayesUnf2D->Ereco ());
+    mu.unlock ();
+    assert (*m_unf_cov);
+  }
+  else
+    (*m_unf_cov) = nullptr;
+
+  delete bayesUnf2D;
+
+  return;
 }
 
 
@@ -156,8 +212,8 @@ void ProcessUnfolding (const char* inFileTag, const char* outFileTag) {
   TH1D*****   h_jetInt_trk_dphi_ref_sig           = Get4DArray <TH1D*> (2, 2, nPtChSelections, nVar);
   TH1D******  h_jetInt_trk_dphi_sig               = Get5DArray <TH1D*> (2, 2, nPtChSelections, nZdcCentBins+1, nVar);
 
-  TH2D***     h2_jet_trk_pt_ref_sig               = Get2DArray <TH2D*> (2, nDir);
-  TH2D****    h2_jet_trk_pt_sig                   = Get3DArray <TH2D*> (2, nDir, nZdcCentBins+1);
+  //TH2D***     h2_jet_trk_pt_ref_sig               = Get2DArray <TH2D*> (2, nDir);
+  //TH2D****    h2_jet_trk_pt_sig                   = Get3DArray <TH2D*> (2, nDir, nZdcCentBins+1);
 
   //TH2D****    h2_jetInt_trk_pt_cov_ref_sig        = Get3DArray <TH2D*> (2, 2, nDir);
   //TH2D*****   h2_jetInt_trk_pt_cov_sig            = Get4DArray <TH2D*> (2, 2, nDir, nZdcCentBins+1);
@@ -183,11 +239,11 @@ void ProcessUnfolding (const char* inFileTag, const char* outFileTag) {
   TH1D****    h_jetInt_trk_pt_iaa_closure         = Get3DArray <TH1D*> (2, nDir, nZdcCentBins+1);
   TGAE****    g_jetInt_trk_pt_iaa_closure         = Get3DArray <TGAE*> (2, nDir, nZdcCentBins+1);
 
-  float*      nJetInt_ref_rfld_raw                = Get1DArray <float> (2);
-  float**     nJetInt_rfld_raw                    = Get2DArray <float> (2, nZdcCentBins+1);
+  //float*      nJetInt_ref_rfld_raw                = Get1DArray <float> (2);
+  //float**     nJetInt_rfld_raw                    = Get2DArray <float> (2, nZdcCentBins+1);
 
-  TH1D***     h_jetInt_trk_pt_ref_rfld            = Get2DArray <TH1D*> (2, nDir);
-  TH1D****    h_jetInt_trk_pt_rfld                = Get3DArray <TH1D*> (2, nDir, nZdcCentBins+1);
+  //TH1D***     h_jetInt_trk_pt_ref_rfld            = Get2DArray <TH1D*> (2, nDir);
+  //TH1D****    h_jetInt_trk_pt_rfld                = Get3DArray <TH1D*> (2, nDir, nZdcCentBins+1);
 
 
   RooUnfoldResponse***   rooUnfResp_jet_pt_ref                    = Get2DArray <RooUnfoldResponse*> (3, nVar); // with (1) vs. without (0) jet pT weights, or (2) for no weights ("full closure")
@@ -518,9 +574,6 @@ void ProcessUnfolding (const char* inFileTag, const char* outFileTag) {
       const bool doUnfold = (variationsWithNoUnfold.count (var) == 0);
       const short jetWgtsType = (iDType == 1 ? 2 : ((variationsWithUnwgtdRespMatrix.count (var) == 0) ? 1 : 0)); // MC uses no weights, nominal data (which is not included in "variationsWithUnwgtdRespMatrix" set) uses functional weights ("wgts" at index = 1), and syst. uncertainty uses histogram weights ("altwgts" at index = 0)
 
-      const bool doRefoldSF = (var == "RefoldingVar");
-      const bool calcRefold = (var == "Nominal" && iDType == 0);
-
       if (doUnfold) {
         std::cout << "Doing 1D unfold for var = " << var << std::endl;
 
@@ -533,12 +586,6 @@ void ProcessUnfolding (const char* inFileTag, const char* outFileTag) {
             RooUnfoldBayes* bayesUnf = new RooUnfoldBayes (resp, h_jet_pt_ref[iDType][iVar], GetJetSpectraNIters (iDType == 0 ? false : true, iPtJInt, -1));
             bayesUnf->SetVerbose (-1);
             h_jet_pt_ref_unf[iDType][iPtJInt][iVar] = (TH1D*) bayesUnf->Hreco ()->Clone (Form ("h_jet_pt_ref_unf_%s_%s_%s", dType.Data (), pTJInt.Data (), var.Data ()));
-            if (calcRefold) {
-              TH1D* h_rfld = (TH1D*) resp->ApplyToTruth (h_jet_pt_ref_unf[iDType][iPtJInt][iVar]);
-              nJetInt_ref_rfld_raw[iPtJInt] = h_rfld->Integral (iPtJInt == 0 ? 3 : 5, 10);
-              double den = h_jet_pt_ref[iDType][iVar]->Integral (iPtJInt == 0 ? 3 : 5, 10);
-              nJetInt_ref_rfld_raw[iPtJInt] = nJetInt_ref_rfld_raw[iPtJInt] / den;
-            }
             SaferDelete (&bayesUnf);
           }
 
@@ -552,12 +599,6 @@ void ProcessUnfolding (const char* inFileTag, const char* outFileTag) {
             RooUnfoldBayes* bayesUnf = new RooUnfoldBayes (resp, h_jet_pt[iDType][iCent][iVar], GetJetSpectraNIters (iDType == 0 ? false : true, iPtJInt, iCent));
             bayesUnf->SetVerbose (-1);
             h_jet_pt_unf[iDType][iPtJInt][iCent][iVar] = (TH1D*) bayesUnf->Hreco ()->Clone (Form ("h_jet_pt_unf_%s_%s_%s_%s", dType.Data (), cent.Data (), pTJInt.Data (), var.Data ()));
-            if (calcRefold) {
-              TH1D* h_rfld = (TH1D*) resp->ApplyToTruth (h_jet_pt_unf[iDType][iPtJInt][iCent][iVar]);
-              nJetInt_rfld_raw[iPtJInt][iCent] = h_rfld->Integral (iPtJInt == 0 ? 3 : 5, 10);
-              double den = h_jet_pt[iDType][iCent][iVar]->Integral (iPtJInt == 0 ? 3 : 5, 10);
-              nJetInt_rfld_raw[iPtJInt][iCent] = nJetInt_rfld_raw[iPtJInt][iCent] / den;
-            }
             SaferDelete (&bayesUnf);
 
           } // end loop over iCent
@@ -589,264 +630,193 @@ void ProcessUnfolding (const char* inFileTag, const char* outFileTag) {
 
           const TString dir = directions[iDir];
 
-          TH2D* h2 = new TH2D (Form ("h2_jet_trk_pt_ref_sig_%s_%s_%s", dType.Data (), dir.Data (), var.Data ()), "", nPtChBins, pTChBins, nPtJBins, pTJBins);
-          if (var == "Nominal")
-            h2_jet_trk_pt_ref_sig[iDType][iDir] = h2;
-          h2->Sumw2 ();
+          TH2D* h2_raw_ref = nullptr;
+          TH2D** h2_raw = new TH2D*[nZdcCentBins+1];
 
-          std::cout << "Doing 2D unfold for var = " << var << ", iCent = pp, iDir = " << iDir << std::endl;
+          TMatrixD* m_cov_ref = (var != "Nominal" ? nullptr : GetCovarianceMatrix (rootPath + "/Results/ProcessCovarianceMatrices_AllJets/" + TString ("h2_jetAll_trk_pt_cov_") + dir + TString ("_ref_sig_") + dType + TString (".txt")));
+          TMatrixD** m_cov = new TMatrixD*[nZdcCentBins+1];
 
-          for (short iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
+          {
+            h2_raw_ref = new TH2D (Form ("h2_jet_trk_pt_ref_sig_%s_%s_%s", dType.Data (), dir.Data (), var.Data ()), "", nPtChBins, pTChBins, nPtJBins, pTJBins);
+            //if (var == "Nominal")
+            //  h2_jet_trk_pt_ref_sig[iDType][iDir] = h2_raw;
+            h2_raw_ref->Sumw2 ();
 
-            TGAE* g = g_jet_trk_pt_ref_sig_syst[iPtJ][iDir][iVar];
-            TH1D* h = h_jet_trk_pt_ref_sig[iDType][iPtJ][iDir][0];
-            //const float nJet = h_jet_pt_ref[iDType][iVar]->GetBinContent (iPtJ+1);
-
-            for (short iPtCh = 0; iPtCh < nPtChBins; iPtCh++) {
-              if (g != nullptr && g->GetErrorYhigh (iPtCh) * g->GetErrorYlow (iPtCh) != 0)
-                std::cout << "--> nonzero error in both x & y for iDType = " << iDType << ", var = " << var << ", iPtJ = " << iPtJ << ", iDir = " << iDir << ", iPtCh = " << iPtCh << std::endl;
-              const float shift = (g == nullptr ? 0. : g->GetErrorYhigh (iPtCh) - g->GetErrorYlow (iPtCh)); // only one of these is nonzero, so this picks up the correct sign!
-              h2->SetBinContent (iPtCh+1, iPtJ+1, (h->GetBinContent (iPtCh+1) + shift) * h->GetBinWidth (iPtCh+1));
-              h2->SetBinError   (iPtCh+1, iPtJ+1, h->GetBinError (iPtCh+1) * h->GetBinWidth (iPtCh+1)); // assumes no additional statistical uncertainty from variation... probably ok
-            } // end loop over iPtCh
-
-          } // end loop over iPtJ
-
-
-          for (short iPtJInt : {0, 1}) {
-
-            const TString pTJInt = (iPtJInt == 0 ? "30GeV" : "60GeV");
-            const float minJetPt = (iPtJInt == 0 ? 30. : 60.);
-            const float maxJetPt = 300;
-
-            const short nIters = GetTrkSpectraNIters (iDType == 0 ? false : true, iPtJInt, iDir, -1);
-
-            if (doRefoldSF) {
-              for (short iPtCh = 0; iPtCh < nPtChBins; iPtCh++) {
-                const float mult = h_jetInt_trk_pt_ref_rfld[iPtJInt][iDir]->GetBinContent (iPtCh+1) / nJetInt_ref_rfld_raw[iPtJInt];
-                for (short iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
-                  h2->SetBinContent (iPtCh+1, iPtJ+1, h2->GetBinContent (iPtCh+1, iPtJ+1) * mult);
-                } // end loop over iPtJ
-              } // end loop over iPtCh
-            }
-
-            RooUnfoldResponse* resp = rooUnfResp_jet_trk_pt_ref_sig[jetWgtsType][iDir][iUnfVar];
-            resp->UseOverflow (0);
-            RooUnfoldBayes* bayesUnf2D = nullptr;
-            if (var == "Nominal") {
-              bayesUnf2D = new RooUnfoldBayes ("test", "test");
-              bayesUnf2D->SetResponse (resp);
-              bayesUnf2D->SetMeasured (h2);
-              bayesUnf2D->SetMeasuredCov (GetCovarianceMatrix (rootPath + "/Results/ProcessCovarianceMatrices_AllJets/" + TString ("h2_jetAll_trk_pt_cov_") + dir + TString ("_ref_sig_") + dType + TString (".txt")));
-              bayesUnf2D->SetIterations (nIters);
-              bayesUnf2D->SetSmoothing (false);
-            }
-            else {
-              bayesUnf2D = new RooUnfoldBayes (resp, h2, nIters);
-            }
-
-            bayesUnf2D->SetVerbose (-1);
-            TH2D* h2_unf = (TH2D*) bayesUnf2D->Hreco ()->Clone ("h2_unf");
-
-            if (doRefoldSF) {
-              for (short iPtCh = 0; iPtCh < nPtChBins; iPtCh++) {
-                const float mult = h_jetInt_trk_pt_ref_rfld[iPtJInt][iDir]->GetBinContent (iPtCh+1) / nJetInt_ref_rfld_raw[iPtJInt];
-                for (short iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
-                  h2->SetBinContent (iPtCh+1, iPtJ+1, h2->GetBinContent (iPtCh+1, iPtJ+1) / mult); // un-do scaling so we can reuse histogram on next iPtJInt bin
-                } // end loop over iPtJ
-              } // end loop over iPtCh
-            }
-
-            TH2D* h2_rfld = nullptr;
-            if (calcRefold)
-              h2_rfld = (TH2D*) resp->ApplyToTruth (h2_unf);
-
-            TH1D* h_unf = new TH1D (Form ("h_jetInt_trk_pt_%s_ref_unf_%s_%s_%s", dir.Data (), dType.Data (), pTJInt.Data (), var.Data ()), "", nPtChBins, pTChBins);
-            h_unf->Sumw2 ();
-            h_jetInt_trk_pt_ref_unf[iDType][iPtJInt][iDir][iVar] = h_unf;
-
-            TH1D* h_rfld = nullptr;
-            if (calcRefold) {
-              h_rfld = new TH1D (Form ("h_jetInt_trk_pt_%s_ref_rfld_%s_%s_%s", dir.Data (), dType.Data (), pTJInt.Data (), var.Data ()), "", nPtChBins, pTChBins);
-              h_rfld->Sumw2 ();
-              h_jetInt_trk_pt_ref_rfld[iPtJInt][iDir] = h_rfld;
-            }
-
-            double totalJets = 0, totalJetsUF = 0;
             for (short iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
 
-              if (0.5 * (pTJBins[iPtJ] + pTJBins[iPtJ+1]) < minJetPt || maxJetPt < 0.5 * (pTJBins[iPtJ] + pTJBins[iPtJ+1])) continue;
-
-              totalJets += h_jet_pt_ref[iDType][iVar]->GetBinContent (iPtJ+1);
-              totalJetsUF += h_jet_pt_ref_unf[iDType][iPtJInt][iVar]->GetBinContent (iPtJ+1);
-              //totalJetsUF += h_unf_njet->GetBinContent (iPtJ+1);
+              TGAE* g = g_jet_trk_pt_ref_sig_syst[iPtJ][iDir][iVar];
+              TH1D* h = h_jet_trk_pt_ref_sig[iDType][iPtJ][iDir][0];
 
               for (short iPtCh = 0; iPtCh < nPtChBins; iPtCh++) {
-                h_unf->SetBinContent (iPtCh+1, h_unf->GetBinContent (iPtCh+1) + h2_unf->GetBinContent (iPtCh+1, iPtJ+1));
-                h_unf->SetBinError (iPtCh+1, h_unf->GetBinError (iPtCh+1) + std::pow (h2_unf->GetBinError (iPtCh+1, iPtJ+1), 2));
-                if (calcRefold) {
-                  h_rfld->SetBinContent (iPtCh+1, h_rfld->GetBinContent (iPtCh+1) + h2_rfld->GetBinContent (iPtCh+1, iPtJ+1));
-                  h_rfld->SetBinError (iPtCh+1, h_rfld->GetBinError (iPtCh+1) + std::pow (h2_rfld->GetBinError (iPtCh+1, iPtJ+1), 2));
-                }
+                if (g != nullptr && g->GetErrorYhigh (iPtCh) * g->GetErrorYlow (iPtCh) != 0)
+                  std::cout << "--> nonzero error in both x & y for iDType = " << iDType << ", var = " << var << ", iPtJ = " << iPtJ << ", iDir = " << iDir << ", iPtCh = " << iPtCh << std::endl;
+                const float shift = (g == nullptr ? 0. : g->GetErrorYhigh (iPtCh) - g->GetErrorYlow (iPtCh)); // only one of these is nonzero, so this picks up the correct sign!
+                h2_raw_ref->SetBinContent (iPtCh+1, iPtJ+1, (h->GetBinContent (iPtCh+1) + shift) * h->GetBinWidth (iPtCh+1));
+                h2_raw_ref->SetBinError   (iPtCh+1, iPtJ+1, h->GetBinError (iPtCh+1) * h->GetBinWidth (iPtCh+1)); // assumes no additional statistical uncertainty from variation... probably ok
               } // end loop over iPtCh
 
             } // end loop over iPtJ
 
+            m_cov_ref = (var != "Nominal" ? nullptr : GetCovarianceMatrix (rootPath + "/Results/ProcessCovarianceMatrices_AllJets/" + TString ("h2_jetAll_trk_pt_cov_") + dir + TString ("_ref_sig_") + dType + TString (".txt")));
+          }
 
-            for (short iPtCh = 0; iPtCh < nPtChBins; iPtCh++) {
-              h_unf->SetBinContent (iPtCh+1, h_unf->GetBinContent (iPtCh+1) / (totalJetsUF * h_unf->GetBinWidth (iPtCh+1)));
-              h_unf->SetBinError (iPtCh+1, std::sqrt (h_unf->GetBinError (iPtCh+1)) / (totalJetsUF * h_unf->GetBinWidth (iPtCh+1)));
-              if (calcRefold) {
-                h_rfld->SetBinContent (iPtCh+1, h_rfld->GetBinContent (iPtCh+1) / (totalJets * h_rfld->GetBinWidth (iPtCh+1)));
-                h_rfld->SetBinError (iPtCh+1, std::sqrt (h_rfld->GetBinError (iPtCh+1)) / (totalJets * h_rfld->GetBinWidth (iPtCh+1)));
-              }
-            } // end loop over iPtCh
+          for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
 
-            if (calcRefold) {
-              h_rfld->Divide (h_jetInt_trk_pt_ref_sig[iDType][iPtJInt][iDir][0]);
-              h_rfld->Smooth (3);
-            }
+            const TString cent = (iCent == nZdcCentBins ? "allCent" : Form ("iCent%i", iCent)); 
 
-
-            if (var == "Nominal") {
-              TH2D* h2_cov = new TH2D (Form ("h2_jetInt_trk_pt_cov_%s_ref_unf_%s_%s", dir.Data (), dType.Data (), pTJInt.Data ()), "", nPtChBins, pTChBins, nPtChBins, pTChBins);
-              h2_jetInt_trk_pt_cov_ref_unf[iDType][iPtJInt][iDir] = h2_cov;
-              TMatrixD m_unf_cov = TMatrixD (bayesUnf2D->Ereco ());
-
-              for (short iPtCh1 = 0; iPtCh1 < nPtChBins; iPtCh1++) {
-
-                for (short iPtCh2 = 0; iPtCh2 < nPtChBins; iPtCh2++) {
-
-                  for (short iPtJ1 = 0; iPtJ1 < nPtJBins; iPtJ1++) {
-
-                    if (0.5 * (pTJBins[iPtJ1] + pTJBins[iPtJ1+1]) < minJetPt || maxJetPt < 0.5 * (pTJBins[iPtJ1] + pTJBins[iPtJ1+1])) continue;
-
-                    for (short iPtJ2 = 0; iPtJ2 < nPtJBins; iPtJ2++) {
-  
-                      if (0.5 * (pTJBins[iPtJ2] + pTJBins[iPtJ2+1]) < minJetPt || maxJetPt < 0.5 * (pTJBins[iPtJ2] + pTJBins[iPtJ2+1])) continue;
-
-                      h2_cov->SetBinContent (iPtCh1+1, iPtCh2+1, h2_cov->GetBinContent (iPtCh1+1, iPtCh2+1) + m_unf_cov[iPtJ1*nPtChBins + iPtCh1][iPtJ2*nPtChBins + iPtCh2]);
-
-                    } // end loop over iPtJ2
-
-                  } // end loop over iPtJ
-
-                  h2_cov->SetBinContent (iPtCh1+1, iPtCh2+1, h2_cov->GetBinContent (iPtCh1+1, iPtCh2+1) / (std::pow (totalJetsUF, 2) * h2_cov->GetXaxis ()->GetBinWidth (iPtCh1+1) * h2_cov->GetYaxis ()->GetBinWidth (iPtCh2+1)));
-                  //if (h->GetBinContent (iPtCh1+1) * h->GetBinContent (iPtCh2+1) > 0)
-                  //  h2_cov->SetBinContent (iPtCh1+1, iPtCh2+1, h2_cov->GetBinContent (iPtCh1+1, iPtCh2+1) / (h->GetBinContent (iPtCh1+1) * h->GetBinContent (iPtCh2+1)));
-
-                } // end loop over iPtCh2
-
-                h_unf->SetBinError (iPtCh1+1, std::sqrt (h2_cov->GetBinContent (iPtCh1+1, iPtCh1+1)));
-
-              } // end loop over iPtCh
-            }
-
-
-            //SaferDelete (&h_unf_njet);
-            SaferDelete (&h2_unf);
-            SaferDelete (&bayesUnf2D);
-
-          } // end loop over iPtJInt
-
-          if (var != "Nominal")
-            SaferDelete (&h2);
-
-        } // end loop over iDir
-
-
-        for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
-
-          const TString cent = (iCent == nZdcCentBins ? "allCent" : Form ("iCent%i", iCent)); 
-          const short iUnfCent = (useCentDiffUnf ? iCent : nZdcCentBins);
-
-          //for (short iDir = 0; iDir < nDir; iDir++) {
-          for (short iDir : {0, 2}) {
-
-            const TString dir = directions[iDir];
-
-            TH2D* h2 = new TH2D (Form ("h2_jet_trk_pt_sig_%s_%s_%s_%s", dType.Data (), dir.Data (), cent.Data (), var.Data ()), "", nPtChBins, pTChBins, nPtJBins, pTJBins);
-            if (var == "Nominal")
-              h2_jet_trk_pt_sig[iDType][iDir][iCent] = h2;
-            h2->Sumw2 ();
-
-            std::cout << "Doing 2D unfold for var = " << var << ", iCent = " << iCent << " , iDir = " << iDir << std::endl;
+            h2_raw[iCent] = new TH2D (Form ("h2_jet_trk_pt_sig_%s_%s_%s_%s", dType.Data (), dir.Data (), cent.Data (), var.Data ()), "", nPtChBins, pTChBins, nPtJBins, pTJBins);
+            //if (var == "Nominal")
+            //  h2_jet_trk_pt_sig[iDType][iDir][iCent] = h2_raw;
+            h2_raw[iCent]->Sumw2 ();
 
             for (short iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
 
               TGAE* g = g_jet_trk_pt_sig_syst[iPtJ][iDir][iCent][iVar];
               TH1D* h = h_jet_trk_pt_sig[iDType][iPtJ][iDir][iCent][0];
-              //const float nJet = h_jet_pt[iDType][iCent][iVar]->GetBinContent (iPtJ+1);
 
               for (short iPtCh = 0; iPtCh < nPtChBins; iPtCh++) {
                 if (g != nullptr && g->GetErrorYhigh (iPtCh) * g->GetErrorYlow (iPtCh) != 0)
                   std::cout << "--> nonzero error in both x & y for iDType = " << iDType << ", var = " << var << ", iCent = " << iCent << ", iPtJ = " << iPtJ << ", iDir = " << iDir << ", iPtCh = " << iPtCh << std::endl;
                 const float shift = (g == nullptr ? 0. : g->GetErrorYhigh (iPtCh) - g->GetErrorYlow (iPtCh)); // only one of these is nonzero, so this picks up the correct sign!
-                h2->SetBinContent (iPtCh+1, iPtJ+1, (h->GetBinContent (iPtCh+1) + shift) * h->GetBinWidth (iPtCh+1));
-                h2->SetBinError   (iPtCh+1, iPtJ+1, h->GetBinError (iPtCh+1) * h->GetBinWidth (iPtCh+1)); // assumes no additional statistical uncertainty from variation... probably ok
+                h2_raw[iCent]->SetBinContent (iPtCh+1, iPtJ+1, (h->GetBinContent (iPtCh+1) + shift) * h->GetBinWidth (iPtCh+1));
+                h2_raw[iCent]->SetBinError   (iPtCh+1, iPtJ+1, h->GetBinError (iPtCh+1) * h->GetBinWidth (iPtCh+1)); // assumes no additional statistical uncertainty from variation... probably ok
               } // end loop over iPtCh
 
             } // end loop over iPtJ
 
+            m_cov[iCent] = (var != "Nominal" ? nullptr : GetCovarianceMatrix (rootPath + "/Results/ProcessCovarianceMatrices_AllJets/" + TString ("h2_jetAll_trk_pt_cov_") + dir + TString ("_pPb_sig_") + cent + TString ("_") + dType + TString (".txt")));
 
-            for (short iPtJInt : {0, 1}) {
+          } // end loop over iCent
 
-              const TString pTJInt = (iPtJInt == 0 ? "30GeV" : "60GeV");
-              const float minJetPt = (iPtJInt == 0 ? 30. : 60.);
-              const float maxJetPt = 300;
+
+
+          for (short iPtJInt : {0, 1}) {
+
+            std::vector <std::thread> threads;
+
+            const TString pTJInt = (iPtJInt == 0 ? "30GeV" : "60GeV");
+            const float minJetPt = (iPtJInt == 0 ? 30. : 60.);
+            const float maxJetPt = 300;
+
+            TH2D* h2_unf_ref = nullptr;
+            TH2D** h2_unf = new TH2D*[nZdcCentBins+1];
+
+            TMatrixD* m_unf_cov_ref = nullptr;
+            TMatrixD** m_unf_cov = new TMatrixD*[nZdcCentBins+1];
+
+            {
+              std::cout << "Doing 2D unfold for var = " << var << ", iPtJInt = " << iPtJInt << ", iCent = pp, iDir = " << iDir << std::endl;
+
+              const short nIters = GetTrkSpectraNIters (iDType == 0 ? false : true, iPtJInt, iDir, -1);
+
+              RooUnfoldResponse* resp = rooUnfResp_jet_trk_pt_ref_sig[jetWgtsType][iDir][iUnfVar];
+              resp->UseOverflow (0);
+
+              TString baseName = Form ("REPLACE_iPtJInt%i_ref", iPtJInt);
+
+              std::thread t (DoUnfold2D, resp, baseName, h2_raw_ref, m_cov_ref, &(h2_unf_ref), &(m_unf_cov_ref), nIters);
+              threads.push_back (std::move (t));
+            }
+
+
+            for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
+
+              const TString cent = (iCent == nZdcCentBins ? "allCent" : Form ("iCent%i", iCent)); 
+              const short iUnfCent = (useCentDiffUnf ? iCent : nZdcCentBins);
+
+              std::cout << "Doing 2D unfold for var = " << var << ", iPtJInt = " << iPtJInt << ", iCent = " << iCent << ", iDir = " << iDir << std::endl;
 
               const short nIters = GetTrkSpectraNIters (iDType == 0 ? false : true, iPtJInt, iDir, iCent);
 
-              if (doRefoldSF) {
-                for (short iPtCh = 0; iPtCh < nPtChBins; iPtCh++) {
-                  const double mult = h_jetInt_trk_pt_rfld[iPtJInt][iDir][iCent]->GetBinContent (iPtCh+1) / nJetInt_rfld_raw[iPtJInt][iCent];
-                  for (short iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
-                    h2->SetBinContent (iPtCh+1, iPtJ+1, h2->GetBinContent (iPtCh+1, iPtJ+1) * mult);
-                  } // end loop over iPtJ
-                } // end loop over iPtCh
-              }
-  
               RooUnfoldResponse* resp = rooUnfResp_jet_trk_pt_sig[jetWgtsType][iDir][iUnfCent][iUnfVar];
               resp->UseOverflow (0);
-              RooUnfoldBayes* bayesUnf2D = nullptr;
-              if (var == "Nominal") {
-                bayesUnf2D = new RooUnfoldBayes ("test", "test");
-                bayesUnf2D->SetResponse (resp);
-                bayesUnf2D->SetMeasured (h2);
-                bayesUnf2D->SetMeasuredCov (GetCovarianceMatrix (rootPath + "/Results/ProcessCovarianceMatrices_AllJets/" + TString ("h2_jetAll_trk_pt_cov_") + dir + TString ("_pPb_sig_") + cent + TString ("_") + dType + TString (".txt")));
-                bayesUnf2D->SetIterations (nIters);
-                bayesUnf2D->SetSmoothing (false);
-              }
-              else {
-                bayesUnf2D = new RooUnfoldBayes (resp, h2, nIters);
-              }
 
-              bayesUnf2D->SetVerbose (-1);
-              TH2D* h2_unf = (TH2D*) bayesUnf2D->Hreco ()->Clone ("h2_unf");
+              TString baseName = Form ("REPLACE_iPtJInt%i_pPb_%s", iPtJInt, cent.Data ());
 
-              if (doRefoldSF) {
+              std::thread t (DoUnfold2D, resp, baseName, h2_raw[iCent], m_cov[iCent], &(h2_unf[iCent]), &(m_unf_cov[iCent]), nIters);
+              threads.push_back (std::move (t));
+
+            } // end loop over iCent
+
+            // wait for threads to finish...
+            for (std::thread& t : threads) {
+              t.join ();
+            }
+
+
+            {
+              TH1D* h_unf = new TH1D (Form ("h_jetInt_trk_pt_%s_ref_unf_%s_%s_%s", dir.Data (), dType.Data (), pTJInt.Data (), var.Data ()), "", nPtChBins, pTChBins);
+              h_unf->Sumw2 ();
+              h_jetInt_trk_pt_ref_unf[iDType][iPtJInt][iDir][iVar] = h_unf;
+
+              double totalJets = 0, totalJetsUF = 0;
+              for (short iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
+
+                if (0.5 * (pTJBins[iPtJ] + pTJBins[iPtJ+1]) < minJetPt || maxJetPt < 0.5 * (pTJBins[iPtJ] + pTJBins[iPtJ+1])) continue;
+
+                totalJets += h_jet_pt_ref[iDType][iVar]->GetBinContent (iPtJ+1);
+                totalJetsUF += h_jet_pt_ref_unf[iDType][iPtJInt][iVar]->GetBinContent (iPtJ+1);
+                //totalJetsUF += h_unf_njet->GetBinContent (iPtJ+1);
+
                 for (short iPtCh = 0; iPtCh < nPtChBins; iPtCh++) {
-                  const double mult = h_jetInt_trk_pt_rfld[iPtJInt][iDir][iCent]->GetBinContent (iPtCh+1) / nJetInt_rfld_raw[iPtJInt][iCent];
-                  for (short iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
-                    h2->SetBinContent (iPtCh+1, iPtJ+1, h2->GetBinContent (iPtCh+1, iPtJ+1) / mult); // un-do scaling so we can reuse histogram on next iPtJInt bin
-                  } // end loop over iPtJ
+                  h_unf->SetBinContent (iPtCh+1, h_unf->GetBinContent (iPtCh+1) + h2_unf_ref->GetBinContent (iPtCh+1, iPtJ+1));
+                  h_unf->SetBinError (iPtCh+1, h_unf->GetBinError (iPtCh+1) + std::pow (h2_unf_ref->GetBinError (iPtCh+1, iPtJ+1), 2));
+                } // end loop over iPtCh
+
+              } // end loop over iPtJ
+
+
+              for (short iPtCh = 0; iPtCh < nPtChBins; iPtCh++) {
+                h_unf->SetBinContent (iPtCh+1, h_unf->GetBinContent (iPtCh+1) / (totalJetsUF * h_unf->GetBinWidth (iPtCh+1)));
+                h_unf->SetBinError (iPtCh+1, std::sqrt (h_unf->GetBinError (iPtCh+1)) / (totalJetsUF * h_unf->GetBinWidth (iPtCh+1)));
+              } // end loop over iPtCh
+
+
+              if (var == "Nominal") {
+                TH2D* h2_cov = new TH2D (Form ("h2_jetInt_trk_pt_cov_%s_ref_unf_%s_%s", dir.Data (), dType.Data (), pTJInt.Data ()), "", nPtChBins, pTChBins, nPtChBins, pTChBins);
+                h2_jetInt_trk_pt_cov_ref_unf[iDType][iPtJInt][iDir] = h2_cov;
+
+                for (short iPtCh1 = 0; iPtCh1 < nPtChBins; iPtCh1++) {
+
+                  for (short iPtCh2 = 0; iPtCh2 < nPtChBins; iPtCh2++) {
+
+                    for (short iPtJ1 = 0; iPtJ1 < nPtJBins; iPtJ1++) {
+
+                      if (0.5 * (pTJBins[iPtJ1] + pTJBins[iPtJ1+1]) < minJetPt || maxJetPt < 0.5 * (pTJBins[iPtJ1] + pTJBins[iPtJ1+1])) continue;
+
+                      for (short iPtJ2 = 0; iPtJ2 < nPtJBins; iPtJ2++) {
+  
+                        if (0.5 * (pTJBins[iPtJ2] + pTJBins[iPtJ2+1]) < minJetPt || maxJetPt < 0.5 * (pTJBins[iPtJ2] + pTJBins[iPtJ2+1])) continue;
+
+                        h2_cov->SetBinContent (iPtCh1+1, iPtCh2+1, h2_cov->GetBinContent (iPtCh1+1, iPtCh2+1) + (*m_unf_cov_ref)[iPtJ1*nPtChBins + iPtCh1][iPtJ2*nPtChBins + iPtCh2]);
+
+                      } // end loop over iPtJ2
+
+                    } // end loop over iPtJ
+
+                    h2_cov->SetBinContent (iPtCh1+1, iPtCh2+1, h2_cov->GetBinContent (iPtCh1+1, iPtCh2+1) / (std::pow (totalJetsUF, 2) * h2_cov->GetXaxis ()->GetBinWidth (iPtCh1+1) * h2_cov->GetYaxis ()->GetBinWidth (iPtCh2+1)));
+                    //if (h->GetBinContent (iPtCh1+1) * h->GetBinContent (iPtCh2+1) > 0)
+                    //  h2_cov->SetBinContent (iPtCh1+1, iPtCh2+1, h2_cov->GetBinContent (iPtCh1+1, iPtCh2+1) / (h->GetBinContent (iPtCh1+1) * h->GetBinContent (iPtCh2+1)));
+
+                  } // end loop over iPtCh2
+
+                  h_unf->SetBinError (iPtCh1+1, std::sqrt (h2_cov->GetBinContent (iPtCh1+1, iPtCh1+1)));
+
                 } // end loop over iPtCh
               }
 
-              TH2D* h2_rfld = nullptr;
-              if (calcRefold)
-                h2_rfld = (TH2D*) resp->ApplyToTruth (h2_unf);
+              SaferDelete (&h2_unf_ref);
+              SaferDelete (&m_unf_cov_ref);
+            }
+
+
+            for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
+
+              const TString cent = (iCent == nZdcCentBins ? "allCent" : Form ("iCent%i", iCent)); 
 
               TH1D* h_unf = new TH1D (Form ("h_jetInt_trk_pt_%s_pPb_unf_%s_%s_%s_%s", dir.Data (), cent.Data (), dType.Data (), pTJInt.Data (), var.Data ()), "", nPtChBins, pTChBins);
               h_unf->Sumw2 ();
               h_jetInt_trk_pt_unf[iDType][iPtJInt][iDir][iCent][iVar] = h_unf;
-
-              TH1D* h_rfld = nullptr;
-              if (calcRefold) {
-                h_rfld = new TH1D (Form ("h_jetInt_trk_pt_%s_pPb_rfld_%s_%s_%s_%s", dir.Data (), cent.Data (), dType.Data (), pTJInt.Data (), var.Data ()), "", nPtChBins, pTChBins);
-                h_rfld->Sumw2 ();
-                h_jetInt_trk_pt_rfld[iPtJInt][iDir][iCent] = h_rfld;
-              }
 
               double totalJetsUF = 0, totalJets = 0;
               for (short iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
@@ -858,12 +828,8 @@ void ProcessUnfolding (const char* inFileTag, const char* outFileTag) {
                 //totalJetsUF += h_unf_njet->GetBinContent (iPtJ+1);
 
                 for (short iPtCh = 0; iPtCh < nPtChBins; iPtCh++) {
-                  h_unf->SetBinContent (iPtCh+1, h_unf->GetBinContent (iPtCh+1) + h2_unf->GetBinContent (iPtCh+1, iPtJ+1));
-                  h_unf->SetBinError (iPtCh+1, h_unf->GetBinError (iPtCh+1) + std::pow (h2_unf->GetBinError (iPtCh+1, iPtJ+1), 2));
-                  if (calcRefold) {
-                    h_rfld->SetBinContent (iPtCh+1, h_rfld->GetBinContent (iPtCh+1) + h2_rfld->GetBinContent (iPtCh+1, iPtJ+1));
-                    h_rfld->SetBinError (iPtCh+1, h_rfld->GetBinError (iPtCh+1) + std::pow (h2_rfld->GetBinError (iPtCh+1, iPtJ+1), 2));
-                  }
+                  h_unf->SetBinContent (iPtCh+1, h_unf->GetBinContent (iPtCh+1) + h2_unf[iCent]->GetBinContent (iPtCh+1, iPtJ+1));
+                  h_unf->SetBinError (iPtCh+1, h_unf->GetBinError (iPtCh+1) + std::pow (h2_unf[iCent]->GetBinError (iPtCh+1, iPtJ+1), 2));
                 } // end loop over iPtCh
 
               } // end loop over iPtJ
@@ -872,22 +838,12 @@ void ProcessUnfolding (const char* inFileTag, const char* outFileTag) {
               for (short iPtCh = 0; iPtCh < nPtChBins; iPtCh++) {
                 h_unf->SetBinContent (iPtCh+1, h_unf->GetBinContent (iPtCh+1) / (totalJetsUF * h_unf->GetBinWidth (iPtCh+1)));
                 h_unf->SetBinError (iPtCh+1, std::sqrt (h_unf->GetBinError (iPtCh+1)) / (totalJetsUF * h_unf->GetBinWidth (iPtCh+1)));
-                if (calcRefold) {
-                  h_rfld->SetBinContent (iPtCh+1, h_rfld->GetBinContent (iPtCh+1) / (totalJets * h_rfld->GetBinWidth (iPtCh+1)));
-                  h_rfld->SetBinError (iPtCh+1, std::sqrt (h_rfld->GetBinError (iPtCh+1)) / (totalJets * h_rfld->GetBinWidth (iPtCh+1)));
-                }
               } // end loop over iPtCh
-
-              if (calcRefold) {
-                h_rfld->Divide (h_jetInt_trk_pt_sig[iDType][iPtJInt][iDir][iCent][0]);
-                h_rfld->Smooth (3);
-              }
 
 
               if (var == "Nominal") {
                 TH2D* h2_cov = new TH2D (Form ("h2_jetInt_trk_pt_cov_%s_pPb_unf_%s_%s_%s", dir.Data (), cent.Data (), dType.Data (), pTJInt.Data ()), "", nPtChBins, pTChBins, nPtChBins, pTChBins);
                 h2_jetInt_trk_pt_cov_unf[iDType][iPtJInt][iDir][iCent] = h2_cov;
-                TMatrixD m_unf_cov = TMatrixD (bayesUnf2D->Ereco ());
 
                 for (short iPtCh1 = 0; iPtCh1 < nPtChBins; iPtCh1++) {
   
@@ -901,7 +857,7 @@ void ProcessUnfolding (const char* inFileTag, const char* outFileTag) {
     
                         if (0.5 * (pTJBins[iPtJ2] + pTJBins[iPtJ2+1]) < minJetPt || maxJetPt < 0.5 * (pTJBins[iPtJ2] + pTJBins[iPtJ2+1])) continue;
   
-                        h2_cov->SetBinContent (iPtCh1+1, iPtCh2+1, h2_cov->GetBinContent (iPtCh1+1, iPtCh2+1) + m_unf_cov[iPtJ1*nPtChBins + iPtCh1][iPtJ2*nPtChBins + iPtCh2]);
+                        h2_cov->SetBinContent (iPtCh1+1, iPtCh2+1, h2_cov->GetBinContent (iPtCh1+1, iPtCh2+1) + (*(m_unf_cov[iCent]))[iPtJ1*nPtChBins + iPtCh1][iPtJ2*nPtChBins + iPtCh2]);
 
                       } // end loop over iPtJ2
   
@@ -918,19 +874,32 @@ void ProcessUnfolding (const char* inFileTag, const char* outFileTag) {
                 } // end loop over iPtCh
               }
 
+              SaferDelete (&(h2_unf[iCent]));
+              SaferDelete (&(m_unf_cov[iCent]));
+            } // end loop over iCent
 
-              //SaferDelete (&h_unf_njet);
-              SaferDelete (&h2_unf);
-              SaferDelete (&bayesUnf2D);
+            delete[] h2_unf;
 
-            } // end loop over iPtJInt
+          } // end loop over iPtJInt
 
-            if (var != "Nominal")
-              SaferDelete (&h2);
 
-          } // end loop over iDir
 
-        } // end loop over iCent
+          {
+            SaferDelete (&h2_raw_ref);
+            SaferDelete (&m_cov_ref);
+
+            for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
+
+              SaferDelete (&h2_raw[iCent]);
+              SaferDelete (&m_cov[iCent]);
+
+            } // end loop over iCent
+
+            delete[] h2_raw;
+            delete[] m_cov;
+          }
+
+        } // end loop over iDir
 
       } else {
 
@@ -1666,18 +1635,18 @@ void ProcessUnfolding (const char* inFileTag, const char* outFileTag) {
       } // end loop over iVar
 
 
-      //for (short iDir = 0; iDir < nDir; iDir++) {
-      for (short iDir : {0, 2}) {
+      ////for (short iDir = 0; iDir < nDir; iDir++) {
+      //for (short iDir : {0, 2}) {
 
-        h2_jet_trk_pt_ref_sig[iDType][iDir]->Write ();
+      //  h2_jet_trk_pt_ref_sig[iDType][iDir]->Write ();
 
-        for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
+      //  for (short iCent = 0; iCent < nZdcCentBins+1; iCent++) {
 
-          h2_jet_trk_pt_sig[iDType][iDir][iCent]->Write ();
+      //    h2_jet_trk_pt_sig[iDType][iDir][iCent]->Write ();
 
-        } // end loop over iCent
+      //  } // end loop over iCent
 
-      } // end loop over iDir
+      //} // end loop over iDir
 
 
       for (short iPtJInt : {0, 1}) {

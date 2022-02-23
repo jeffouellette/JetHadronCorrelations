@@ -4,7 +4,7 @@ LDFLAGS=`root-config --glibs --ldflags` -Llib -L${ROOT_UTILS_PATH}/lib -L${ATLAS
 
 libraries = LocalUtilities
 algorithms = JetHadronSkimmer CentralityAnalysis JetSubtractedEnergy TrackingPerformance TrackMomentumResolution JetEnergyResolution JetPtWeights
-binaries = Process AnalyzeTrackMomentumResolution AnalyzeJetEnergyResolution RunCorrelator MakeResponseMatrix ProcessCorrelations ProcessUnfolding PlotTrackingPerformance JetPtWeights
+binaries = Process AnalyzeTrackMomentumResolution AnalyzeJetEnergyResolution RunCorrelator MakeResponseMatrix ProcessCorrelations ProcessUnfolding ProcessNIters PlotTrackingPerformance
 
 .PHONY : libs algs bins directories clean
 
@@ -35,6 +35,9 @@ ProcessCorrelations : $(libraries) src/ProcessCorrelations.C
 
 ProcessUnfolding : $(libraries) src/ProcessUnfolding.C
 	$(CXX) $(CXXFLAGS) src/ProcessUnfolding.C $(LDFLAGS) $(libraries:%=-l%) $(algorithms:%=-l%) -o bin/ProcessUnfolding.exe
+
+ProcessNIters : $(libraries) src/ProcessNIters.C
+	$(CXX) $(CXXFLAGS) src/ProcessNIters.C $(LDFLAGS) $(libraries:%=-l%) $(algorithms:%=-l%) -o bin/ProcessNIters.exe
 
 PlotTrackingPerformance : $(libraries) src/PlotTrackingPerformance.C
 	$(CXX) $(CXXFLAGS) src/PlotTrackingPerformance.C $(LDFLAGS) $(libraries:%=-l%) $(algorithms:%=-l%) -o bin/PlotTrackingPerformance.exe

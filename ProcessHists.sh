@@ -1,5 +1,5 @@
-root -l -b -q 'src/ProcessJets.C("All", "AllJets")'
-root -l -b -q 'src/PlotJets.C("All", "AllJets")'
+#root -l -b -q 'src/ProcessJets.C("All", "AllJets")'
+#root -l -b -q 'src/PlotJets.C("All", "AllJets")'
 
 #root -l -b -q 'src/PlotResponseMatrix.C+(false)'
 
@@ -7,11 +7,9 @@ root -l -b -q 'src/PlotJets.C("All", "AllJets")'
 #python src/ProcessCovarianceMatrices.py AllJets AllJets
 #./bin/ProcessUnfolding.exe AllJets AllJets
 
-#root -l -b -q 'src/ProcessNIters.C("AllJets", "AllJets_NIters20", 20)'
-#root -l -b -q 'src/ProcessNIters.C("AllJets", "AllJets_NIters50", 50)'
-
-#root -l -b -q 'src/PlotNIters.C("AllJets", "AllJets_NIters20", 20, 20)'
-#root -l -b -q 'src/PlotNIters.C("AllJets", "AllJets_NIters50", 50)'
+#./bin/ProcessNIters.exe AllJets AllJets_NIters1 1 25
+./bin/ProcessNIters.exe AllJets AllJets_NIters20 20 25
+#root -l -b -q 'src/PlotNIters.C("AllJets", "AllJets_NIters20", 20, 25)'
 
 #root -l -b -q 'src/PlotPtCh.C("AllJets", "AllJets")'
 #root -l -b -q 'src/PlotDPhi.C("AllJets", "AllJets")'
