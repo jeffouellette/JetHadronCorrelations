@@ -249,10 +249,6 @@ bool JetPtWeights (const char* directory,
   else if (IspPb ())  sys = "pPb";
   else                sys = "???";
 
-  const double finePtJBins[] = {10, 11, 12, 13, 14, 15, 17.5, 20, 22.5, 25, 27.5, 30, 33, 36, 40, 45, 50, 55, 60, 65, 70, 75, 82.5, 90, 100, 110, 120, 130, 145, 160, 180, 200, 220, 240, 260, 280, 300, 325, 350, 375, 400};
-  //const double finePtJBins[] = {7.5, 8, 8.5, 9, 9.5, 10, 10.5, 11, 11.5, 12, 12.5, 13, 13.5, 14, 14.5, 15, 15.5, 16, 16.5, 17, 17.5, 18, 18.5, 19, 19.5, 20, 20.5, 21, 21.5, 22, 22.5, 23, 23.5, 24, 24.5, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 47.5, 50, 52.5, 55, 57.5, 60, 62.5, 65, 67.5, 70, 72.5, 75, 80, 85, 90, 95, 100, 105, 110, 115, 120, 125, 130, 140, 150, 160, 170, 180, 190, 200, 210, 220, 240, 260, 280, 300, 325, 350, 375, 400};
-  const short nFinePtJBins = sizeof (finePtJBins) / sizeof (finePtJBins[0]) - 1;
-
 
   const double etaJBins[] = {-2.8, -2.1, -1.2, -0.8, -0.3, 0, 0.3, 0.8, 1.2, 2.1, 2.8};
   const short nEtaJBins = sizeof (etaJBins) / sizeof (etaJBins[0]) - 1;
@@ -263,11 +259,12 @@ bool JetPtWeights (const char* directory,
   TFile** outFiles = new TFile*[nFiles];
 
   TH1D**  h_evt_counts    = Get1DArray <TH1D*> (nFiles);
+  TH1D*** h_jet_counts    = Get2DArray <TH1D*> (nFiles, nPtJBins);
 
   TH1D**  h_jet_pt        = Get1DArray <TH1D*> (nFiles);
   TH2D**  h2_jet_pt_cov   = Get1DArray <TH2D*> (nFiles);
 
-  TH2D*** h2_jet_eta_phi  = Get2DArray <TH2D*> (nFiles, nFinePtJBins);
+  TH2D*** h2_jet_eta_phi  = Get2DArray <TH2D*> (nFiles, nPtJBins);
 
   TH2D**  h2_jet_pt_eta_jer_frac_num = Get1DArray <TH2D*> (nFiles);
   TH2D**  h2_jet_pt_eta_jer_frac_den = Get1DArray <TH2D*> (nFiles);
@@ -282,18 +279,20 @@ bool JetPtWeights (const char* directory,
 
     h_evt_counts[iFile] = new TH1D ("h_evt_counts",  "", 3, -0.5, 2.5);
 
-    h_jet_pt[iFile] = new TH1D ("h_jet_pt", ";#it{p}_{T}^{jet} [GeV];(1/N_{jet}) (dN_{jet}/d#it{p}_{T}) [GeV^{-1}]", nFinePtJBins, finePtJBins);
-    h2_jet_pt_cov[iFile] = new TH2D ("h2_jet_pt_cov", ";#it{p}_{T}^{jet} [GeV];#it{p}_{T}^{jet} [GeV];Covariance", nFinePtJBins, finePtJBins, nFinePtJBins, finePtJBins);
+    h_jet_pt[iFile] = new TH1D ("h_jet_pt", ";#it{p}_{T}^{jet} [GeV];(1/N_{jet}) (dN_{jet}/d#it{p}_{T}) [GeV^{-1}]", nPtJBins, pTJBins);
+    h2_jet_pt_cov[iFile] = new TH2D ("h2_jet_pt_cov", ";#it{p}_{T}^{jet} [GeV];#it{p}_{T}^{jet} [GeV];Covariance", nPtJBins, pTJBins, nPtJBins, pTJBins);
 
-    h2_jet_pt_eta_jer_frac_num[iFile] = new TH2D ("h2_jet_pt_eta_jer_frac_num", ";#it{p}_{T}^{jet} [GeV];#it{#eta}^{jet};N_{jet}", nFinePtJBins, finePtJBins, nEtaJBins, etaJBins);
+    h2_jet_pt_eta_jer_frac_num[iFile] = new TH2D ("h2_jet_pt_eta_jer_frac_num", ";#it{p}_{T}^{jet} [GeV];#it{#eta}^{jet};N_{jet}", nPtJBins, pTJBins, nEtaJBins, etaJBins);
     h2_jet_pt_eta_jer_frac_num[iFile]->Sumw2 ();
 
-    h2_jet_pt_eta_jer_frac_den[iFile] = new TH2D ("h2_jet_pt_eta_jer_frac_den", ";#it{p}_{T}^{jet} [GeV];#it{#eta}^{jet};N_{jet}", nFinePtJBins, finePtJBins, nEtaJBins, etaJBins);
+    h2_jet_pt_eta_jer_frac_den[iFile] = new TH2D ("h2_jet_pt_eta_jer_frac_den", ";#it{p}_{T}^{jet} [GeV];#it{#eta}^{jet};N_{jet}", nPtJBins, pTJBins, nEtaJBins, etaJBins);
     h2_jet_pt_eta_jer_frac_den[iFile]->Sumw2 ();
 
-    for (short iPtJ = 0; iPtJ < nFinePtJBins; iPtJ++) {
+    for (short iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
 
-      const TString pTJ = Form ("%g-%gGeVJets", finePtJBins[iPtJ], finePtJBins[iPtJ+1]);
+      const TString pTJ = Form ("%g-%gGeVJets", pTJBins[iPtJ], pTJBins[iPtJ+1]);
+
+      h_jet_counts[iFile][iPtJ] = new TH1D (Form ("h_jet_counts_%s", pTJ.Data ()),  "", 3, -0.5, 2.5);
 
       h2_jet_eta_phi[iFile][iPtJ] = new TH2D (Form ("h2_jet_eta_phi_%s", pTJ.Data ()), ";#eta^{jet};#phi^{jet};Counts", 64, -3.2, 3.2, 64, -M_PI, M_PI);
     } // end loop over iPtJ
@@ -301,7 +300,8 @@ bool JetPtWeights (const char* directory,
   } // end loop over iFile
 
   // arrays for filling histograms & covariance matrices correctly
-  double* jet_pt_counts         = Get1DArray <double> (nFinePtJBins);
+  int* jet_pt_counts            = Get1DArray <int> (nPtJBins);
+  double* jet_pt_sumwgts        = Get1DArray <double> (nPtJBins);
 
 
   const JetRadius r0p4 = JetRadius::R0p4;
@@ -427,8 +427,10 @@ bool JetPtWeights (const char* directory,
 
 
     // initialize all histogramming bins to 0 for this event
-    for (short iPtJ = 0; iPtJ < nFinePtJBins; iPtJ++)
+    for (short iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
       jet_pt_counts[iPtJ] = 0;
+      jet_pt_sumwgts[iPtJ] = 0;
+    } // end loop over iPtJ
 
    
     short nj = 0;
@@ -472,21 +474,10 @@ bool JetPtWeights (const char* directory,
       } 
 
       // find which pTJ bin this jet belongs in
-      short iPtJ = 0;
-      if (rjpt < finePtJBins[0])
-        iPtJ = -1;
-      else {
-        while (iPtJ < nFinePtJBins) {
-          if (rjpt < finePtJBins[iPtJ+1])
-            break;
-          else
-            iPtJ++;
-        }
-      }
-
-
-      if (0 <= iPtJ && iPtJ < nFinePtJBins) {
-        jet_pt_counts[iPtJ] += thisjwgt;
+      const short iPtJ = GetPtJBin (rjpt);
+      if (0 <= iPtJ && iPtJ < nPtJBins) {
+        jet_pt_counts[iPtJ] += 1;
+        jet_pt_sumwgts[iPtJ] += thisjwgt;
         h2_jet_eta_phi[iFile][iPtJ]->Fill (rjeta, rjphi);
         nj++; // add to total number of "trigger" jets
       }
@@ -496,9 +487,9 @@ bool JetPtWeights (const char* directory,
     if (nj == 0)
       continue;
 
-    for (short iPtJX = 0; iPtJX < nFinePtJBins; iPtJX++) {
+    for (short iPtJX = 0; iPtJX < nPtJBins; iPtJX++) {
       h_jet_pt[iCent]->SetBinContent (iPtJX+1, h_jet_pt[iCent]->GetBinContent (iPtJX+1) + (ewgt)*(jet_pt_counts[iPtJX]));
-      for (short iPtJY = 0; iPtJY < nFinePtJBins; iPtJY++)
+      for (short iPtJY = 0; iPtJY < nPtJBins; iPtJY++)
         h2_jet_pt_cov[iCent]->SetBinContent (iPtJX+1, iPtJY+1, h2_jet_pt_cov[iCent]->GetBinContent (iPtJX+1, iPtJY+1) + (ewgt)*(jet_pt_counts[iPtJX])*(jet_pt_counts[iPtJY]));
     }
 
@@ -507,6 +498,20 @@ bool JetPtWeights (const char* directory,
     h_evt_counts[iFile]->SetBinContent (1, h_evt_counts[iFile]->GetBinContent (1) + 1);
     h_evt_counts[iFile]->SetBinContent (2, h_evt_counts[iFile]->GetBinContent (2) + ewgt);
     h_evt_counts[iFile]->SetBinContent (3, h_evt_counts[iFile]->GetBinContent (3) + ewgt*ewgt);
+
+    for (short iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
+      const int njets = jet_pt_counts[iPtJ];
+      const float jwgt = jet_pt_sumwgts[iPtJ];
+
+      if (jwgt <= 0)
+        continue; // IMPORTANT! Skip entries where there were no jets. These shouldn't contribute to the per-jet track yield at all.
+
+      // the weights for the per-jet track yield are "w_evt * sum (w_jet)"
+      h_jet_counts[iFile][iPtJ]->SetBinContent (1, h_jet_counts[iFile][iPtJ]->GetBinContent (1) + njets);
+      h_jet_counts[iFile][iPtJ]->SetBinContent (2, h_jet_counts[iFile][iPtJ]->GetBinContent (2) + ewgt*njets);
+      h_jet_counts[iFile][iPtJ]->SetBinContent (3, h_jet_counts[iFile][iPtJ]->GetBinContent (3) + std::pow (ewgt*njets, 2));
+
+    } // end loop over iPtJ
 
   } // end event loop
 
@@ -530,6 +535,8 @@ bool JetPtWeights (const char* directory,
     h2_jet_pt_cov[iFile]->Write ();
 
     for (short iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
+
+      h_jet_counts[iFile][iPtJ]->Write ();
 
       h2_jet_eta_phi[iFile][iPtJ]->Write ();
 

@@ -20,8 +20,8 @@ gridPass=090
 #syst=Nominal
 
 # Data streams; MinBias or Main
-#jetstream=Main
-#tracksstream=Main
+jetstream=Main
+tracksstream=MinBias
 
 
 #Arguments are
@@ -40,12 +40,12 @@ gridPass=090
 
 
 
-# p+Pb non-mixed
-Arguments = data_$(gridPass) data16 pPb16_5TeV Collisions $(trig) $(syst) ./rootFiles/Histograms/$(trig)/JetsHists/$(syst)/$(run)_iCent_hists.root user.jeouelle.$(swVersion).hadrons.$(gridPass).data16_hip5TeV.00$(run).physics_$(jetstream).merge.AOD.r11416_p3868_Tree.root/
-Error = run/errors/RunCorrelator_$(trig)_JetsHists_$(run)_$(syst).err
-Log = /tmp/jeff/logs/RunCorrelator_$(trig)_JetsHists_$(run)_$(syst).log
-Output = run/outputs/RunCorrelator_$(trig)_JetsHists_$(run)_$(syst).out
-Queue run in (312796 312837 312937 312945 312968 314199)
+## p+Pb non-mixed
+#Arguments = data_$(gridPass) data16 pPb16_5TeV Collisions $(trig) $(syst) ./rootFiles/Histograms/$(trig)/JetsHists/$(syst)/$(run)_iCent_hists.root user.jeouelle.$(swVersion).hadrons.$(gridPass).data16_hip5TeV.00$(run).physics_$(jetstream).merge.AOD.r11416_p3868_Tree.root/
+#Error = run/errors/RunCorrelator_$(trig)_JetsHists_$(run)_$(syst).err
+#Log = /tmp/jeff/logs/RunCorrelator_$(trig)_JetsHists_$(run)_$(syst).log
+#Output = run/outputs/RunCorrelator_$(trig)_JetsHists_$(run)_$(syst).out
+#Queue run in (312796 312837 312937 312945 312968 314199)
 
 
 
