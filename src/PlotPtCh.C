@@ -3199,7 +3199,7 @@ void PlotPtCh (const char* rawTag, const char* unfoldTag) {
       g->SetMarkerStyle (kOpenCircle);
       g->SetMarkerSize (1.4);
 
-      ((TGAE*) g->Clone ())->Draw ("AP");
+      ((TGAE*) g->Clone ())->Draw ("APL");
       SaferDelete (&g);
       SaferDelete (&h);
 
@@ -3209,7 +3209,7 @@ void PlotPtCh (const char* rawTag, const char* unfoldTag) {
         g = make_graph (h);
         SaferDelete (&h);
         ResetXErrors (g);
-        myDraw (g, colors[iCent], kOpenCircle, 1.4);
+        myDraw (g, colors[iCent], kOpenCircle, 1.4, 1, 2, "PL");
         SaferDelete (&g);
       }
 

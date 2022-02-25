@@ -70,7 +70,7 @@ double GetTGraphMax (const TGraph* g, double ymax = DBL_MIN) {
 
 
 int GetCrossOverPoint (const TGraph* gstat, const TGraph* giter, const int offset = 1) {
-  double x = 0, y = 0, xopt = 0;
+  double x = 0, y = 0, xopt = 1;
   for (short i = 0; i < giter->GetN (); i++) {
     gstat->GetPoint (i+1, x, y);
     double ydum = y;
@@ -1461,7 +1461,7 @@ void PlotNIters (const char* rawTag, const char* nitersTag, const short nItersMa
         g = make_graph (h);
         ScaleGraph (g, (iIter == 0 ? h_jet_pt_ref[0] : h_jet_pt_ref_unf_nIters[iIter-1]));
         //ResetXErrors (g);
-        myDraw (g, colorfulColors[iCol--], kOpenCircle, 1.0, 1, 2, "P", false);
+        myDraw (g, colorfulColors[iCol--], kOpenCircle, 1.0, 1, 2, "PL", false);
         SaferDelete (&g);
       }
 
@@ -1496,7 +1496,7 @@ void PlotNIters (const char* rawTag, const char* nitersTag, const short nItersMa
         g = make_graph (h);
         ScaleGraph (g, (iIter == 0 ? h_jet_pt[0][iCent] : h_jet_pt_unf_nIters[iCent][iIter-1]));
         //ResetXErrors (g);
-        myDraw (g, colorfulColors[iCol--], kOpenCircle, 1.0, 1, 2, "P", false);
+        myDraw (g, colorfulColors[iCol--], kOpenCircle, 1.0, 1, 2, "PL", false);
         SaferDelete (&g);
       }
 
@@ -1716,10 +1716,10 @@ void PlotNIters (const char* rawTag, const char* nitersTag, const short nItersMa
 
       l->SetLineColor (myGreen);
       l->SetLineStyle (3);
-      l->DrawLine (GetJetSpectraNIters (false, iPtJInt, -1), ymin, GetJetSpectraNIters (false, iPtJInt, -1), ymax);
+      l->DrawLine (GetJetSpectraNIters (false, iPtJInt, -1), ymin, GetJetSpectraNIters (false, iPtJInt, -1), 0.8*ymax+0.2*ymin);
       l->SetLineColor (kBlack);
       l->SetLineStyle (2);
-      l->DrawLine (nIter1p, ymin, nIter1p, ymax);
+      l->DrawLine (nIter1p, ymin, nIter1p, 0.8*ymax+0.2*ymin);
   
       myText (0.2, 0.84, kBlack, "#bf{#it{pp}}", 0.06);
     }
@@ -1796,10 +1796,10 @@ void PlotNIters (const char* rawTag, const char* nitersTag, const short nItersMa
 
       l->SetLineColor (myGreen);
       l->SetLineStyle (3);
-      l->DrawLine (GetJetSpectraNIters (false, iPtJInt, iCent), ymin, GetJetSpectraNIters (false, iPtJInt, iCent), ymax);
+      l->DrawLine (GetJetSpectraNIters (false, iPtJInt, iCent), ymin, GetJetSpectraNIters (false, iPtJInt, iCent), 0.8*ymax+0.2*ymin);
       l->SetLineColor (kBlack);
       l->SetLineStyle (2);
-      l->DrawLine (nIter1p, ymin, nIter1p, ymax);
+      l->DrawLine (nIter1p, ymin, nIter1p, 0.8*ymax+0.2*ymin);
   
       if (iCent < nFcalCentBins)
         myText (0.2, 0.84, kBlack, Form ("#bf{#it{p}+Pb, ZDC %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.06);
@@ -1910,10 +1910,10 @@ void PlotNIters (const char* rawTag, const char* nitersTag, const short nItersMa
 
       l->SetLineColor (myGreen);
       l->SetLineStyle (3);
-      l->DrawLine (GetJetSpectraNIters (false, iPtJInt, -1), ymin, GetJetSpectraNIters (false, iPtJInt, -1), ymax);
+      l->DrawLine (GetJetSpectraNIters (false, iPtJInt, -1), ymin, GetJetSpectraNIters (false, iPtJInt, -1), 0.8*ymax+0.2*ymin);
       l->SetLineColor (kBlack);
       l->SetLineStyle (2);
-      l->DrawLine (nIter1p, ymin, nIter1p, ymax);
+      l->DrawLine (nIter1p, ymin, nIter1p, 0.8*ymax+0.2*ymin);
   
       myText (0.2, 0.84, kBlack, "#bf{#it{pp}}", 0.06);
     }
@@ -1992,10 +1992,10 @@ void PlotNIters (const char* rawTag, const char* nitersTag, const short nItersMa
 
       l->SetLineColor (myGreen);
       l->SetLineStyle (3);
-      l->DrawLine (GetJetSpectraNIters (false, iPtJInt, iCent), ymin, GetJetSpectraNIters (false, iPtJInt, iCent), ymax);
+      l->DrawLine (GetJetSpectraNIters (false, iPtJInt, iCent), ymin, GetJetSpectraNIters (false, iPtJInt, iCent), 0.8*ymax+0.2*ymin);
       l->SetLineColor (kBlack);
       l->SetLineStyle (2);
-      l->DrawLine (nIter1p, ymin, nIter1p, ymax);
+      l->DrawLine (nIter1p, ymin, nIter1p, 0.8*ymax+0.2*ymin);
   
       if (iCent < nFcalCentBins)
         myText (0.2, 0.84, kBlack, Form ("#bf{#it{p}+Pb, ZDC %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.06);
@@ -2029,8 +2029,8 @@ void PlotNIters (const char* rawTag, const char* nitersTag, const short nItersMa
     TH1D* h = nullptr;
     TGAE* g = nullptr;
 
-    const float ymin = 0.78;//0.95;
-    const float ymax = 1.17;//1.075;
+    const float ymin = 0.89;//0.95;
+    const float ymax = 1.08;//1.075;
 
     {
       c->cd (7);
@@ -2091,10 +2091,10 @@ void PlotNIters (const char* rawTag, const char* nitersTag, const short nItersMa
 
       l->SetLineColor (myGreen);
       l->SetLineStyle (3);
-      l->DrawLine (GetJetSpectraNIters (false, iPtJInt, -1), ymin, GetJetSpectraNIters (false, iPtJInt, -1), ymax);
+      l->DrawLine (GetJetSpectraNIters (false, iPtJInt, -1), ymin, GetJetSpectraNIters (false, iPtJInt, -1), 0.8*ymax+0.2*ymin);
       l->SetLineColor (kBlack);
       l->SetLineStyle (2);
-      l->DrawLine (nIter1p, ymin, nIter1p, ymax);
+      l->DrawLine (nIter1p, ymin, nIter1p, 0.8*ymax+0.2*ymin);
   
       myText (0.2, 0.84, kBlack, "#bf{#it{pp}}", 0.06);
     }
@@ -2159,10 +2159,10 @@ void PlotNIters (const char* rawTag, const char* nitersTag, const short nItersMa
 
       l->SetLineColor (myGreen);
       l->SetLineStyle (3);
-      l->DrawLine (GetJetSpectraNIters (false, iPtJInt, iCent), ymin, GetJetSpectraNIters (false, iPtJInt, iCent), ymax);
+      l->DrawLine (GetJetSpectraNIters (false, iPtJInt, iCent), ymin, GetJetSpectraNIters (false, iPtJInt, iCent), 0.8*ymax+0.2*ymin);
       l->SetLineColor (kBlack);
       l->SetLineStyle (2);
-      l->DrawLine (nIter1p, ymin, nIter1p, ymax);
+      l->DrawLine (nIter1p, ymin, nIter1p, 0.8*ymax+0.2*ymin);
   
       if (iCent < nFcalCentBins)
         myText (0.2, 0.84, kBlack, Form ("#bf{#it{p}+Pb, ZDC %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.06);
@@ -2231,7 +2231,7 @@ void PlotNIters (const char* rawTag, const char* nitersTag, const short nItersMa
           ScaleGraph (g, hprev, nJetsIter / nJetsPrev);
           ResetXErrors (g);
           if (iDir == 1) TrimGraph (g, 0, 10);
-          myDraw (g, colorfulColors[iCol--], kOpenCircle, 1.0, 1, 2, "P", false);
+          myDraw (g, colorfulColors[iCol--], kOpenCircle, 1.0, 1, 2, "PL", false);
           SaferDelete (&g);
         }
 
@@ -2269,7 +2269,7 @@ void PlotNIters (const char* rawTag, const char* nitersTag, const short nItersMa
           ScaleGraph (g, hprev, nJetsIter / nJetsPrev);
           ResetXErrors (g);
           if (iDir == 1) TrimGraph (g, 0, 10);
-          myDraw (g, colorfulColors[iCol--], kOpenCircle, 1.0, 1, 2, "P", false);
+          myDraw (g, colorfulColors[iCol--], kOpenCircle, 1.0, 1, 2, "PL", false);
           SaferDelete (&g);
         }
 
@@ -2362,7 +2362,7 @@ void PlotNIters (const char* rawTag, const char* nitersTag, const short nItersMa
 
           ResetXErrors (g);
           if (iDir == 1) TrimGraph (g, 0, 10);
-          myDraw (g, colorfulColors[iCol--], kOpenCircle, 1.0, 1, 2, "P", false);
+          myDraw (g, colorfulColors[iCol--], kOpenCircle, 1.0, 1, 2, "PL", false);
           SaferDelete (&g);
         }
 
@@ -2401,7 +2401,7 @@ void PlotNIters (const char* rawTag, const char* nitersTag, const short nItersMa
 
           ResetXErrors (g);
           if (iDir == 1) TrimGraph (g, 0, 10);
-          myDraw (g, colorfulColors[iCol--], kOpenCircle, 1.0, 1, 2, "P", false);
+          myDraw (g, colorfulColors[iCol--], kOpenCircle, 1.0, 1, 2, "PL", false);
           SaferDelete (&g);
         }
 

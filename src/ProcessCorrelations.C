@@ -21,14 +21,9 @@
 using namespace JetHadronCorrelations;
 
 
-void ProcessCorrelations (const char* tag, const char* outFileTag) {//, const int nItersMax = 20) {
+void ProcessCorrelations (const char* tag, const char* outFileTag) {
 
   TFile* inFile = nullptr;
-
-  //const int nItersMin = 1;
-  //const double* nItersVals = linspace (nItersMin, nItersMax, nItersMax-nItersMin);
-
-  //const bool useJetWgts = true;
 
   TH1D***   h_evt_counts_ref              = Get2DArray <TH1D*> (2, nVar);
   TH1D****  h_jet_counts_ref              = Get3DArray <TH1D*> (2, nPtJBins, nVar);

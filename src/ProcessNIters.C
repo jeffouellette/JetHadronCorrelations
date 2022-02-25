@@ -451,7 +451,7 @@ void ProcessNIters (const char* rawTag, const char* outFileTag, const short nIte
         bayesUnf->SetVerbose (-1);
         //bayesUnf->SetMeasuredCov (TMatrixD (nPtJBins, nPtJBins, h2_jet_pt_ref_cov->GetArray ()));
         TH1D* h_unf = (TH1D*) bayesUnf->Hreco ()->Clone (Form ("h_jet_pt_ref_unf_data_Nominal_nIters%i", nIters));
-        TH1D* h_rfld = (TH1D*) resp->ApplyToTruth (h_unf)->Clone (Form ("h_jet_pt_ref_rfld_data_Nominal_nIters%i", nIters));
+        TH1D* h_rfld = (TH1D*) resp->ApplyToTruth (h_unf, Form ("h_jet_pt_ref_rfld_data_Nominal_nIters%i", nIters));
 
         SaferDelete (&bayesUnf);
 
@@ -485,7 +485,7 @@ void ProcessNIters (const char* rawTag, const char* outFileTag, const short nIte
         bayesUnf->SetVerbose (-1);
         //bayesUnf->SetMeasuredCov (TMatrixD (nPtJBins, nPtJBins, h2_jet_pt_cov[iCent]->GetArray ()));
         TH1D* h_unf = (TH1D*) bayesUnf->Hreco ()->Clone (Form ("h_jet_pt_unf_data_%s_Nominal_nIters%i", cent.Data (), nIters));
-        TH1D* h_rfld = (TH1D*) resp->ApplyToTruth (h_unf)->Clone (Form ("h_jet_pt_rfld_data_%s_Nominal_nIters%i", cent.Data (), nIters));
+        TH1D* h_rfld = (TH1D*) resp->ApplyToTruth (h_unf, Form ("h_jet_pt_rfld_data_%s_Nominal_nIters%i", cent.Data (), nIters));
 
         SaferDelete (&bayesUnf);
 
