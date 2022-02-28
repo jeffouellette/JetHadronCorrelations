@@ -333,7 +333,8 @@ bool Correlator (const char* tag, const char* outFilePattern, TTree* jetsTree, T
   double*** jet_trk_pt_counts   = Get3DArray <double> (nPtJBins, nDir, nPtChBins);
 
   //const long nEvts = (doMixing ? 1. : 1.) * (jetsTree->GetEntries ()); // for debugging... TODO remove me!
-  const long nEvts = (doMixing ? 20. : 1.) * (jetsTree->GetEntries ());
+  //const long nEvts = (doMixing ? 20. : 1.) * (jetsTree->GetEntries ());
+  const long nEvts = (jetsTree->GetEntries ());
   const long nTrkEvts = tracksTree->GetEntries ();
 
   std::cout << "Correlator will process " << nEvts << " events" << std::endl;
@@ -529,287 +530,292 @@ bool Correlator (const char* tag, const char* outFilePattern, TTree* jetsTree, T
     if (nj == 0)
       continue;
 
-    for (short iPtJX = 0; iPtJX < nPtJBins; iPtJX++) {
-      h_jet_pt[iCent]->SetBinContent (iPtJX+1, h_jet_pt[iCent]->GetBinContent (iPtJX+1) + (ewgt)*(jet_pt_counts[iPtJX]));
-      for (short iPtJY = 0; iPtJY < nPtJBins; iPtJY++)
-        h2_jet_pt_cov[iCent]->SetBinContent (iPtJX+1, iPtJY+1, h2_jet_pt_cov[iCent]->GetBinContent (iPtJX+1, iPtJY+1) + (ewgt)*(jet_pt_counts[iPtJX])*(jet_pt_counts[iPtJY]));
-    }
+
+    for (short iMixEvt = 0; iMixEvt < (doMixing ? 20 : 1); iMixEvt++) {
+
+      for (short iPtJX = 0; iPtJX < nPtJBins; iPtJX++) {
+        h_jet_pt[iCent]->SetBinContent (iPtJX+1, h_jet_pt[iCent]->GetBinContent (iPtJX+1) + (ewgt)*(jet_pt_counts[iPtJX]));
+        for (short iPtJY = 0; iPtJY < nPtJBins; iPtJY++)
+          h2_jet_pt_cov[iCent]->SetBinContent (iPtJX+1, iPtJY+1, h2_jet_pt_cov[iCent]->GetBinContent (iPtJX+1, iPtJY+1) + (ewgt)*(jet_pt_counts[iPtJX])*(jet_pt_counts[iPtJY]));
+      }
 
 
-    // the weights for the per-trigger jet yield are "w_evt"
-    h_evt_counts[iFile]->SetBinContent (1, h_evt_counts[iFile]->GetBinContent (1) + 1);
-    h_evt_counts[iFile]->SetBinContent (2, h_evt_counts[iFile]->GetBinContent (2) + ewgt);
-    h_evt_counts[iFile]->SetBinContent (3, h_evt_counts[iFile]->GetBinContent (3) + ewgt*ewgt);
+      // the weights for the per-trigger jet yield are "w_evt"
+      h_evt_counts[iFile]->SetBinContent (1, h_evt_counts[iFile]->GetBinContent (1) + 1);
+      h_evt_counts[iFile]->SetBinContent (2, h_evt_counts[iFile]->GetBinContent (2) + ewgt);
+      h_evt_counts[iFile]->SetBinContent (3, h_evt_counts[iFile]->GetBinContent (3) + ewgt*ewgt);
 
-    for (short iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
-      const float jwgt = jet_pt_counts[iPtJ];
+      for (short iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
+        const float jwgt = jet_pt_counts[iPtJ];
 
-      if (jwgt <= 0)
-        continue; // IMPORTANT! Skip entries where there were no jets. These shouldn't contribute to the per-jet track yield at all.
+        if (jwgt <= 0)
+          continue; // IMPORTANT! Skip entries where there were no jets. These shouldn't contribute to the per-jet track yield at all.
 
-      // the weights for the per-jet track yield are "w_evt * sum (w_jet)"
-      h_jet_counts[iFile][iPtJ]->SetBinContent (1, h_jet_counts[iFile][iPtJ]->GetBinContent (1) + 1);
-      h_jet_counts[iFile][iPtJ]->SetBinContent (2, h_jet_counts[iFile][iPtJ]->GetBinContent (2) + ewgt*jwgt);
-      h_jet_counts[iFile][iPtJ]->SetBinContent (3, h_jet_counts[iFile][iPtJ]->GetBinContent (3) + std::pow (ewgt*jwgt, 2));
+        // the weights for the per-jet track yield are "w_evt * sum (w_jet)"
+        h_jet_counts[iFile][iPtJ]->SetBinContent (1, h_jet_counts[iFile][iPtJ]->GetBinContent (1) + 1);
+        h_jet_counts[iFile][iPtJ]->SetBinContent (2, h_jet_counts[iFile][iPtJ]->GetBinContent (2) + ewgt*jwgt);
+        h_jet_counts[iFile][iPtJ]->SetBinContent (3, h_jet_counts[iFile][iPtJ]->GetBinContent (3) + std::pow (ewgt*jwgt, 2));
 
-    } // end loop over iPtJ
-
-
-    // System boost in p+Pb or pp -- requires a run number to be specified to check for pPb vs Pbp
-    const float yboost = GetBoost (run_number);
+      } // end loop over iPtJ
 
 
-    // do mixed event procedure: get a good event to mix with here
-    if (doMixing) {
-
-      // get the "centrality" bin for the current event
-      const short iMixCent = GetBin (mixCentBins, nMixCentBins, fcalA_et + (Ispp () ? fcalC_et : 0));
-      if (iMixCent < 0 || nMixCentBins <= iMixCent)
-        continue; // sanity check (not too peripheral or too central)
-
-      const long oldTrkEvt = iTrkEvt;
-      bool goodEvent = false;
-      do {
-        iTrkEvt = (iTrkEvt + 1) % nTrkEvts; // make sure to wrap around
-
-        // make sure we are not mixing an event with itself
-        if (sameTreeMixing && iTrkEvt == iEvt % jetsTree->GetEntries ())
-          continue;
-
-        tracksTree->GetEntry (iTrkEvt);
-
-        // make sure we are not mixing an event with itself (better version)
-        if (run_number == run_number_matching && lumi_block == lumi_block_matching && event_number == event_number_matching)
-          continue;
-
-        // triggering cut, require appropriate track selection trigger to have fired
-        if (!trackTreeTrigger->trigDecision)
-          continue;
+      // System boost in p+Pb or pp -- requires a run number to be specified to check for pPb vs Pbp
+      const float yboost = GetBoost (run_number);
 
 
-        // p+Pb data only -- exclude ZDC == 0 events (errors)
-        if (IsCollisions () && IspPb () && ZdcCalibEnergy_A_matching == 0)
-          continue;
+      // do mixed event procedure: get a good event to mix with here
+      if (doMixing) {
 
-        // vertexing cuts, require no pileup vertices and primary vertex with |vz| < 150mm
-        float vz_matching = -999;
-        {
-          bool hasPrimary = false;
-          bool hasPileup = false;
-          for (short iVert = 0; iVert < nvert_matching; iVert++) {
-            if (vert_type_matching[iVert] == 1) {
-              hasPrimary = true;
-              vz_matching = vert_z_matching[iVert];
-            }
-            else if (vert_type_matching[iVert] == 3)
-              hasPileup = true;
-          }
-          if (hasPileup || std::fabs (vz_matching) > 150 || !hasPrimary)
+        // get the "centrality" bin for the current event
+        const short iMixCent = GetBin (mixCentBins, nMixCentBins, fcalA_et + (Ispp () ? fcalC_et : 0));
+        if (iMixCent < 0 || nMixCentBins <= iMixCent)
+          continue; // sanity check (not too peripheral or too central)
+
+        const long oldTrkEvt = iTrkEvt;
+        bool goodEvent = false;
+        do {
+          iTrkEvt = (iTrkEvt + 1) % nTrkEvts; // make sure to wrap around
+
+          // make sure we are not mixing an event with itself
+          if (sameTreeMixing && iTrkEvt == iEvt % jetsTree->GetEntries ())
             continue;
+
+          tracksTree->GetEntry (iTrkEvt);
+
+          // make sure we are not mixing an event with itself (better version)
+          if (run_number == run_number_matching && lumi_block == lumi_block_matching && event_number == event_number_matching)
+            continue;
+
+          // triggering cut, require appropriate track selection trigger to have fired
+          if (!trackTreeTrigger->trigDecision)
+            continue;
+
+
+          // p+Pb data only -- exclude ZDC == 0 events (errors)
+          if (IsCollisions () && IspPb () && ZdcCalibEnergy_A_matching == 0)
+            continue;
+
+          // vertexing cuts, require no pileup vertices and primary vertex with |vz| < 150mm
+          float vz_matching = -999;
+          {
+            bool hasPrimary = false;
+            bool hasPileup = false;
+            for (short iVert = 0; iVert < nvert_matching; iVert++) {
+              if (vert_type_matching[iVert] == 1) {
+                hasPrimary = true;
+                vz_matching = vert_z_matching[iVert];
+              }
+              else if (vert_type_matching[iVert] == 3)
+                hasPileup = true;
+            }
+            if (hasPileup || std::fabs (vz_matching) > 150 || !hasPrimary)
+              continue;
+          }
+
+          // further mixing categories -- Zdc centrality in p+Pb data and FCal centrality in MC
+          if (IsCollisions () && IspPb () && GetBin (zdcCentBins, nZdcCentBins, ZdcCalibEnergy_A_matching*1e3) != GetBin (zdcCentBins, nZdcCentBins, ZdcCalibEnergy_A*1e3))
+            continue; // require the same ZDC centrality if doing the p+Pb mixed event
+          //else if (!IsCollisions () && IspPb () && GetBin (fcalCentBins, nFcalCentBins, fcalA_et_matching) != iCent) 
+          //  continue; // require the same FCal centrality in MC
+          if (GetBin (mixCentBins, nMixCentBins, fcalA_et_matching + (Ispp () ? fcalC_et_matching : 0)) != iMixCent)
+            continue; // then match FCal centrality with jet ("trigger") event
+
+          if (DoMixCatVar4 () || DoMixCatVar5 ()) {
+            // calculate Q2 vector for matched event
+            QnVector Q2mix = (IspPb () ? GetPbQ2Vec (true) : GetProtonQ2Vec (true));
+            if (DeltaPhi (psi2, std::atan2 (Q2mix.second, Q2mix.first)/2.) > M_PI / 4)
+              continue; // cut on psi2 matching for mixed event -- exploratory for now!
+          }
+
+          // if we've made it this far without proceeding to the next loop then its a good event!
+          goodEvent = true;
         }
+        while (!goodEvent && iTrkEvt != oldTrkEvt);
 
-        // further mixing categories -- Zdc centrality in p+Pb data and FCal centrality in MC
-        if (IsCollisions () && IspPb () && GetBin (zdcCentBins, nZdcCentBins, ZdcCalibEnergy_A_matching*1e3) != GetBin (zdcCentBins, nZdcCentBins, ZdcCalibEnergy_A*1e3))
-          continue; // require the same ZDC centrality if doing the p+Pb mixed event
-        //else if (!IsCollisions () && IspPb () && GetBin (fcalCentBins, nFcalCentBins, fcalA_et_matching) != iCent) 
-        //  continue; // require the same FCal centrality in MC
-        if (GetBin (mixCentBins, nMixCentBins, fcalA_et_matching + (Ispp () ? fcalC_et_matching : 0)) != iMixCent)
-          continue; // then match FCal centrality with jet ("trigger") event
-
-        if (DoMixCatVar4 () || DoMixCatVar5 ()) {
-          // calculate Q2 vector for matched event
-          QnVector Q2mix = (IspPb () ? GetPbQ2Vec (true) : GetProtonQ2Vec (true));
-          if (DeltaPhi (psi2, std::atan2 (Q2mix.second, Q2mix.first)/2.) > M_PI / 4)
-            continue; // cut on psi2 matching for mixed event -- exploratory for now!
-        }
-
-        // if we've made it this far without proceeding to the next loop then its a good event!
-        goodEvent = true;
-      }
-      while (!goodEvent && iTrkEvt != oldTrkEvt);
-
-      if (!goodEvent) {
-        std::cout << "Sorry, I could not find a good mixed event, so I will be skipping this very interesting trigger event!" << std::endl;
-        continue;
-      }
-    } // now we have a good mixed event match (if applicable)
-
-
-    // initialize all yields to 0
-    for (short iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
-      for (short iPtCh = 0; iPtCh < nPtChSelections; iPtCh++) {
-        for (short iDPhi = 0; iDPhi < nDPhiBins; iDPhi++) {
-          jet_trk_dphi_counts[iPtJ][iPtCh][iDPhi] = 0;
-        }
-      } // end loop over iPtCh
-      for (short iDir = 0; iDir < nDir; iDir++) {
-        for (short iPtCh = 0; iPtCh < nPtChBins; iPtCh++) {
-          jet_trk_pt_counts[iPtJ][iDir][iPtCh] = 0;
-        }
-      } // end loop over iDir
-    } // end loop over iPtJ
-
-
-    //// Get multiplicity bin for event, must be done after mixing (important)!
-    //short iMult = 0;
-    //while (iMult < nMultBins-1 && multBins[iMult+1] < trk_n)
-    //  iMult++;
-    //if (nMultBins < iMult)
-    //  continue;
-    const short iMult = nMultBins-1;
-
-
-    // loop over all jets again in the event but now correlate tracks
-    for (short iJet = 0; iJet < jn; iJet++) {
-
-      float jpt  = (UseTruthJets () ? GetAktTruthJetPt  (iJet, r0p4) : GetAktHIJetPt  (iJet, r0p4, nJESVar, IsCollisions () || (IsDataOverlay () && truthJetMatches[iJet] == -1) ? 0 : 1));
-      const float jeta = (UseTruthJets () ? GetAktTruthJetEta (iJet, r0p4) : GetAktHIJetEta (iJet, r0p4, nJESVar));
-      const float jphi = (UseTruthJets () ? GetAktTruthJetPhi (iJet, r0p4) : GetAktHIJetPhi (iJet, r0p4, nJESVar));
-
-      if (nJESVar == 18) // Flavour-dependent response unc.
-        jpt *= 1 + (h2_flavourRespUnc->GetBinContent (h2_flavourRespUnc->GetXaxis ()->FindBin (jpt), h2_flavourRespUnc->GetYaxis ()->FindBin (IspPb () ? jeta : std::fabs (jeta))));
-      else if (nJESVar == 19) // Flavour fraction unc.
-        jpt *= 1 + (h2_flavourFracUnc->GetBinContent (h2_flavourFracUnc->GetXaxis ()->FindBin (jpt), h2_flavourFracUnc->GetYaxis ()->FindBin (IspPb () ? jeta : std::fabs (jeta))));
-
-      if (!MeetsJetAcceptanceCuts (iJet, r0p4, nJESVar))
-        continue; // jet eta/phi & timing cuts
-      if (!MeetsJetPtCut (jpt))
-        continue; // jet pT cuts, for trigger relevance purposes
-
-      const float thisjwgt = GetAktJetWeight (jpt, jeta, jphi, r0p4);
-      if (thisjwgt <= 0.)
-        continue; // sanity check
-
-      // In MC, check that the jet is truth-matched. Otherwise problems can emerge, particularly in the overlay.
-      if (!IsCollisions () && !UseTruthJets ()) {
-        const short iTJet = truthJetMatches[iJet];
-        //const short iTJet = GetAktTruthJetMatch (iJet, r0p4);
-        if (iTJet == -1)
-          continue; // in case of no truth jet match
-        const float tjpt = GetAktTruthJetPt (iTJet, r0p4);
-        if (std::fabs (jpt/tjpt - 1) > nJERSigma*0.01*f_jer->Eval (tjpt))
-          continue; // cut on jets reconstructed well outside the JER
-      }
-
-      const short iPtJ = GetPtJBin (jpt);
-      if (iPtJ < 0 || nPtJBins <= iPtJ) 
-        continue; // sanity check
-
-      // correlate charged particles with this jet  
-      for (short iTrk = 0; iTrk < trk_n; iTrk++) {
-
-        if (!MeetsTrackCuts (iTrk, nTrkWPVar))
-          continue; // cut on bad quality tracks
-
-        if (trk_pt[iTrk] < pTChBins[0])
-          continue; // histogram pT cut on tracks
-
-        //// better rapidity selection by considering mass more carefully
-        //const double trk_m = pion_mass; // assume everyone is a pi^+
-        //const double trk_en = std::sqrt (std::pow (trk_m, 2) + trk_pt[iTrk] * std::cosh ((double)(trk_eta[iTrk])));
-        //const double trk_pz = ((double)trk_pt[iTrk]) * std::sinh ((double)trk_eta[iTrk]);
-        //const double trk_y = (trk_en > trk_pz ? 0.5 * std::log ((trk_en + trk_pz)/(trk_en - trk_pz)) : 0.);
-
-        const float trk_y = trk_eta[iTrk];
-        if (std::fabs (trk_y - yboost) > 2.035) // 2.035 = 2.5 - 0.465
-          continue; // rapidity acceptance cut
-
-        const float dphi = DeltaPhi (jphi, trk_phi[iTrk]);
-        const short iDPhi = GetDPhiBin (dphi);
-        if (iDPhi < 0 || nDPhiBins <= iDPhi)
-          continue; // sanity check to avoid under/over-flow
-
-        short iEta = 0;
-        while (iEta < nEtaTrkBins && etaTrkBins[iEta+1] < std::fabs (trk_eta[iTrk]))
-          iEta++;
-        if (iEta == nEtaTrkBins)
+        if (!goodEvent) {
+          std::cout << "Sorry, I could not find a good mixed event, so I will be skipping this very interesting trigger event!" << std::endl;
           continue;
+        }
+      } // now we have a good mixed event match (if applicable)
 
 
-        const float teff = h2_trk_eff[iMult]->GetBinContent (h2_trk_eff[iMult]->FindBin (trk_eta[iTrk], trk_pt[iTrk]));
-        const float tpur = (DoPrimFitVar () ? g_trk_pur[iEta]->Eval (trk_pt[iTrk]) : gf_trk_pur[iEta]->Eval (trk_pt[iTrk]));
-        const float twgt = thisjwgt * (UseTruthParticles () ? 1 : (teff > 0. ? tpur / teff : 0.));
+      // initialize all yields to 0
+      for (short iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
+        for (short iPtCh = 0; iPtCh < nPtChSelections; iPtCh++) {
+          for (short iDPhi = 0; iDPhi < nDPhiBins; iDPhi++) {
+            jet_trk_dphi_counts[iPtJ][iPtCh][iDPhi] = 0;
+          }
+        } // end loop over iPtCh
+        for (short iDir = 0; iDir < nDir; iDir++) {
+          for (short iPtCh = 0; iPtCh < nPtChBins; iPtCh++) {
+            jet_trk_pt_counts[iPtJ][iDir][iPtCh] = 0;
+          }
+        } // end loop over iDir
+      } // end loop over iPtJ
+
+
+      //// Get multiplicity bin for event, must be done after mixing (important)!
+      //short iMult = 0;
+      //while (iMult < nMultBins-1 && multBins[iMult+1] < trk_n)
+      //  iMult++;
+      //if (nMultBins < iMult)
+      //  continue;
+      const short iMult = nMultBins-1;
+
+
+      // loop over all jets again in the event but now correlate tracks
+      for (short iJet = 0; iJet < jn; iJet++) {
+
+        float jpt  = (UseTruthJets () ? GetAktTruthJetPt  (iJet, r0p4) : GetAktHIJetPt  (iJet, r0p4, nJESVar, IsCollisions () || (IsDataOverlay () && truthJetMatches[iJet] == -1) ? 0 : 1));
+        const float jeta = (UseTruthJets () ? GetAktTruthJetEta (iJet, r0p4) : GetAktHIJetEta (iJet, r0p4, nJESVar));
+        const float jphi = (UseTruthJets () ? GetAktTruthJetPhi (iJet, r0p4) : GetAktHIJetPhi (iJet, r0p4, nJESVar));
+
+        if (nJESVar == 18) // Flavour-dependent response unc.
+          jpt *= 1 + (h2_flavourRespUnc->GetBinContent (h2_flavourRespUnc->GetXaxis ()->FindBin (jpt), h2_flavourRespUnc->GetYaxis ()->FindBin (IspPb () ? jeta : std::fabs (jeta))));
+        else if (nJESVar == 19) // Flavour fraction unc.
+          jpt *= 1 + (h2_flavourFracUnc->GetBinContent (h2_flavourFracUnc->GetXaxis ()->FindBin (jpt), h2_flavourFracUnc->GetYaxis ()->FindBin (IspPb () ? jeta : std::fabs (jeta))));
+
+        if (!MeetsJetAcceptanceCuts (iJet, r0p4, nJESVar))
+          continue; // jet eta/phi & timing cuts
+        if (!MeetsJetPtCut (jpt))
+          continue; // jet pT cuts, for trigger relevance purposes
+
+        const float thisjwgt = GetAktJetWeight (jpt, jeta, jphi, r0p4);
+        if (thisjwgt <= 0.)
+          continue; // sanity check
+
+        // In MC, check that the jet is truth-matched. Otherwise problems can emerge, particularly in the overlay.
+        if (!IsCollisions () && !UseTruthJets ()) {
+          const short iTJet = truthJetMatches[iJet];
+          //const short iTJet = GetAktTruthJetMatch (iJet, r0p4);
+          if (iTJet == -1)
+            continue; // in case of no truth jet match
+          const float tjpt = GetAktTruthJetPt (iTJet, r0p4);
+          if (std::fabs (jpt/tjpt - 1) > nJERSigma*0.01*f_jer->Eval (tjpt))
+            continue; // cut on jets reconstructed well outside the JER
+        }
+
+        const short iPtJ = GetPtJBin (jpt);
+        if (iPtJ < 0 || nPtJBins <= iPtJ) 
+          continue; // sanity check
+
+        // correlate charged particles with this jet  
+        for (short iTrk = 0; iTrk < trk_n; iTrk++) {
+
+          if (!MeetsTrackCuts (iTrk, nTrkWPVar))
+            continue; // cut on bad quality tracks
+
+          if (trk_pt[iTrk] < pTChBins[0])
+            continue; // histogram pT cut on tracks
+
+          //// better rapidity selection by considering mass more carefully
+          //const double trk_m = pion_mass; // assume everyone is a pi^+
+          //const double trk_en = std::sqrt (std::pow (trk_m, 2) + trk_pt[iTrk] * std::cosh ((double)(trk_eta[iTrk])));
+          //const double trk_pz = ((double)trk_pt[iTrk]) * std::sinh ((double)trk_eta[iTrk]);
+          //const double trk_y = (trk_en > trk_pz ? 0.5 * std::log ((trk_en + trk_pz)/(trk_en - trk_pz)) : 0.);
+
+          const float trk_y = trk_eta[iTrk];
+          if (std::fabs (trk_y - yboost) > 2.035) // 2.035 = 2.5 - 0.465
+            continue; // rapidity acceptance cut
+
+          const float dphi = DeltaPhi (jphi, trk_phi[iTrk]);
+          const short iDPhi = GetDPhiBin (dphi);
+          if (iDPhi < 0 || nDPhiBins <= iDPhi)
+            continue; // sanity check to avoid under/over-flow
+
+          short iEta = 0;
+          while (iEta < nEtaTrkBins && etaTrkBins[iEta+1] < std::fabs (trk_eta[iTrk]))
+            iEta++;
+          if (iEta == nEtaTrkBins)
+            continue;
+
+
+          const float teff = h2_trk_eff[iMult]->GetBinContent (h2_trk_eff[iMult]->FindBin (trk_eta[iTrk], trk_pt[iTrk]));
+          const float tpur = (DoPrimFitVar () ? g_trk_pur[iEta]->Eval (trk_pt[iTrk]) : gf_trk_pur[iEta]->Eval (trk_pt[iTrk]));
+          const float twgt = thisjwgt * (UseTruthParticles () ? 1 : (teff > 0. ? tpur / teff : 0.));
+
+          for (short iPtCh = 0; iPtCh < nPtChSelections; iPtCh++) {
+            const TString pTChStr = pTChSelections[iPtCh];
+            if (pTChStrCuts[pTChStr].first < trk_pt[iTrk] && trk_pt[iTrk] < pTChStrCuts[pTChStr].second) {
+              jet_trk_dphi_counts[iPtJ][iPtCh][iDPhi] += twgt;
+              break;
+            }
+          }
+
+          const short iPtCh = GetPtChBin (trk_pt[iTrk]);
+          if (iPtCh < 0 || iPtCh >= nPtChBins)
+            continue; // sanity check to avoid under/over-flow
+
+          short iDir = -1;
+          if (dphi < M_PI/8.)
+            iDir = 0;
+            //jet_trk_pt_ns_counts[iPtCh]           += twgt;
+          else if (M_PI/3. < dphi && dphi < 2.*M_PI/3.)
+            iDir = 1;
+            //jet_trk_pt_perp_counts[iPtCh]         += twgt;
+          else if (dphi > 7.*M_PI/8.)
+            iDir = 2;
+            //jet_trk_pt_as_counts[iPtCh]           += twgt;
+          if (iDir != -1)
+            jet_trk_pt_counts[iPtJ][iDir][iPtCh]  += twgt;
+
+        } // end loop over tracks
+
+      } // end loop over jets
+
+
+      // evaluate the per-jet hadron yields for that event by dividing out the number of jets
+      for (short iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
+        const float jwgt = jet_pt_counts[iPtJ];
+
+        if (jwgt == 0)
+          continue; // IMPORTANT! Skip entries where there were no jets. These shouldn't contribute to the per-jet track yield at all.
 
         for (short iPtCh = 0; iPtCh < nPtChSelections; iPtCh++) {
-          const TString pTChStr = pTChSelections[iPtCh];
-          if (pTChStrCuts[pTChStr].first < trk_pt[iTrk] && trk_pt[iTrk] < pTChStrCuts[pTChStr].second) {
-            jet_trk_dphi_counts[iPtJ][iPtCh][iDPhi] += twgt;
-            break;
+          for (short iDPhi = 0; iDPhi < nDPhiBins; iDPhi++) {
+            jet_trk_dphi_counts[iPtJ][iPtCh][iDPhi] = jet_trk_dphi_counts[iPtJ][iPtCh][iDPhi] / jwgt;
           }
-        }
-
-        const short iPtCh = GetPtChBin (trk_pt[iTrk]);
-        if (iPtCh < 0 || iPtCh >= nPtChBins)
-          continue; // sanity check to avoid under/over-flow
-
-        short iDir = -1;
-        if (dphi < M_PI/8.)
-          iDir = 0;
-          //jet_trk_pt_ns_counts[iPtCh]           += twgt;
-        else if (M_PI/3. < dphi && dphi < 2.*M_PI/3.)
-          iDir = 1;
-          //jet_trk_pt_perp_counts[iPtCh]         += twgt;
-        else if (dphi > 7.*M_PI/8.)
-          iDir = 2;
-          //jet_trk_pt_as_counts[iPtCh]           += twgt;
-        if (iDir != -1)
-          jet_trk_pt_counts[iPtJ][iDir][iPtCh]  += twgt;
-
-      } // end loop over tracks
-
-    } // end loop over jets
+        } // end loop over iPtCh
+        for (short iDir = 0; iDir < nDir; iDir++) {
+          for (short iPtCh = 0; iPtCh < nPtChBins; iPtCh++) {
+            jet_trk_pt_counts[iPtJ][iDir][iPtCh] = jet_trk_pt_counts[iPtJ][iDir][iPtCh] / jwgt;
+          }
+        } // end loop over iDir
+      } // end loop over iPtJ
 
 
-    // evaluate the per-jet hadron yields for that event by dividing out the number of jets
-    for (short iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
-      const float jwgt = jet_pt_counts[iPtJ];
+      // store results in averaging & covariance histograms
+      for (short iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
+        const float jwgt = jet_pt_counts[iPtJ];
 
-      if (jwgt == 0)
-        continue; // IMPORTANT! Skip entries where there were no jets. These shouldn't contribute to the per-jet track yield at all.
+        if (jwgt == 0)
+          continue; // IMPORTANT! Skip entries where there were no jets. These shouldn't contribute to the per-jet track yield at all.
 
-      for (short iPtCh = 0; iPtCh < nPtChSelections; iPtCh++) {
-        for (short iDPhi = 0; iDPhi < nDPhiBins; iDPhi++) {
-          jet_trk_dphi_counts[iPtJ][iPtCh][iDPhi] = jet_trk_dphi_counts[iPtJ][iPtCh][iDPhi] / jwgt;
-        }
-      } // end loop over iPtCh
-      for (short iDir = 0; iDir < nDir; iDir++) {
-        for (short iPtCh = 0; iPtCh < nPtChBins; iPtCh++) {
-          jet_trk_pt_counts[iPtJ][iDir][iPtCh] = jet_trk_pt_counts[iPtJ][iDir][iPtCh] / jwgt;
-        }
-      } // end loop over iDir
-    } // end loop over iPtJ
+        for (short iPtCh = 0; iPtCh < nPtChSelections; iPtCh++) {
+          TH1D* h = h_jet_trk_dphi[iFile][iPtJ][iPtCh];
+          TH2D* h2 = h2_jet_trk_dphi_cov[iFile][iPtJ][iPtCh];
+          double* counts = jet_trk_dphi_counts[iPtJ][iPtCh];
+          for (short iDPhiX = 0; iDPhiX < nDPhiBins; iDPhiX++) {
+            h->SetBinContent (iDPhiX+1, h->GetBinContent (iDPhiX+1) + (ewgt)*(jwgt)*(counts[iDPhiX]));
+            for (short iDPhiY = 0; iDPhiY < nDPhiBins; iDPhiY++)
+              h2->SetBinContent (iDPhiX+1, iDPhiY+1, h2->GetBinContent (iDPhiX+1, iDPhiY+1) + (ewgt)*(jwgt)*(counts[iDPhiX])*(counts[iDPhiY]));
+          }
+        } // end loop over iPtCh
 
+        for (short iDir = 0; iDir < nDir; iDir++) {
+          TH1D* h = h_jet_trk_pt[iFile][iPtJ][iDir];
+          TH2D* h2 = h2_jet_trk_pt_cov[iFile][iPtJ][iDir];
+          double* counts = jet_trk_pt_counts[iPtJ][iDir];
+          for (short iPtChX = 0; iPtChX < nPtChBins; iPtChX++) {
+            h->SetBinContent (iPtChX+1, h->GetBinContent (iPtChX+1) + (ewgt)*(jwgt)*(counts[iPtChX]));
+            for (short iPtChY = 0; iPtChY < nPtChBins; iPtChY++)
+              h2->SetBinContent (iPtChX+1, iPtChY+1, h2->GetBinContent (iPtChX+1, iPtChY+1) + (ewgt)*(jwgt)*(counts[iPtChX])*(counts[iPtChY]));
+          }
+        } // end loop over iDir
 
-    // store results in averaging & covariance histograms
-    for (short iPtJ = 0; iPtJ < nPtJBins; iPtJ++) {
-      const float jwgt = jet_pt_counts[iPtJ];
+      } // end loop over iPtJ
 
-      if (jwgt == 0)
-        continue; // IMPORTANT! Skip entries where there were no jets. These shouldn't contribute to the per-jet track yield at all.
-
-      for (short iPtCh = 0; iPtCh < nPtChSelections; iPtCh++) {
-        TH1D* h = h_jet_trk_dphi[iFile][iPtJ][iPtCh];
-        TH2D* h2 = h2_jet_trk_dphi_cov[iFile][iPtJ][iPtCh];
-        double* counts = jet_trk_dphi_counts[iPtJ][iPtCh];
-        for (short iDPhiX = 0; iDPhiX < nDPhiBins; iDPhiX++) {
-          h->SetBinContent (iDPhiX+1, h->GetBinContent (iDPhiX+1) + (ewgt)*(jwgt)*(counts[iDPhiX]));
-          for (short iDPhiY = 0; iDPhiY < nDPhiBins; iDPhiY++)
-            h2->SetBinContent (iDPhiX+1, iDPhiY+1, h2->GetBinContent (iDPhiX+1, iDPhiY+1) + (ewgt)*(jwgt)*(counts[iDPhiX])*(counts[iDPhiY]));
-        }
-      } // end loop over iPtCh
-
-      for (short iDir = 0; iDir < nDir; iDir++) {
-        TH1D* h = h_jet_trk_pt[iFile][iPtJ][iDir];
-        TH2D* h2 = h2_jet_trk_pt_cov[iFile][iPtJ][iDir];
-        double* counts = jet_trk_pt_counts[iPtJ][iDir];
-        for (short iPtChX = 0; iPtChX < nPtChBins; iPtChX++) {
-          h->SetBinContent (iPtChX+1, h->GetBinContent (iPtChX+1) + (ewgt)*(jwgt)*(counts[iPtChX]));
-          for (short iPtChY = 0; iPtChY < nPtChBins; iPtChY++)
-            h2->SetBinContent (iPtChX+1, iPtChY+1, h2->GetBinContent (iPtChX+1, iPtChY+1) + (ewgt)*(jwgt)*(counts[iPtChX])*(counts[iPtChY]));
-        }
-      } // end loop over iDir
-
-    } // end loop over iPtJ
+    } // end loop over iMixEvt
 
   } // end loop over events
   std::cout << "Finished event loop." << std::endl;
