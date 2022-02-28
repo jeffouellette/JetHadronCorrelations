@@ -17,8 +17,24 @@
 #include <iostream>
 #include <string.h>
 #include <math.h>
+#include <thread>
 
 using namespace JetHadronCorrelations;
+
+
+
+void DoCovarianceCalc (TH1D* h, TH2D* h2_cov, TH1D* hcounts, const bool delCovMat, const double sf) {
+  CalcUncertainties (h, h2_cov, hcounts);
+
+  h->Scale (sf, "width");
+
+  if (delCovMat)
+    delete h2_cov;
+  else
+    h2_cov->Scale (std::pow (sf, 2));
+
+  return;
+}
 
 
 void ProcessCorrelations (const char* tag, const char* outFileTag) {
@@ -151,6 +167,8 @@ void ProcessCorrelations (const char* tag, const char* outFileTag) {
 
       TH2D* h2_cov = nullptr;
 
+      std::vector <std::thread> threads;
+
       {
         TString inFileName = Form ("%s/Histograms/%s/JetsHists/%s/%s17_5TeV_hists.root", rootPath.Data (), tag, var.Data (), dType.Data ());
         std::cout << "Reading " << inFileName.Data () << std::endl;
@@ -188,19 +206,14 @@ void ProcessCorrelations (const char* tag, const char* outFileTag) {
             h_jet_trk_pt_ref[iDType][iPtJ][iDir][iVar]  = (TH1D*) inFile->Get (Form ("h_jet_trk_pt_%s_%s_%s17",       dir.Data (), pTJ.Data (), dType.Data ()))->Clone (Form ("h_jet_trk_pt_%s_ref_%s_%s_%s",       dir.Data (), dType.Data (), pTJ.Data (), var.Data ()));
             h2_cov                                      = (TH2D*) inFile->Get (Form ("h2_jet_trk_pt_cov_%s_%s_%s17",  dir.Data (), pTJ.Data (), dType.Data ()))->Clone (Form ("h2_jet_trk_pt_cov_%s_ref_%s_%s_%s",  dir.Data (), dType.Data (), pTJ.Data (), var.Data ()));
 
-            CalcUncertainties (h_jet_trk_pt_ref[iDType][iPtJ][iDir][iVar], h2_cov, h_jet_counts_ref[iDType][iPtJ][iVar]);
-
-            h_jet_trk_pt_ref[iDType][iPtJ][iDir][iVar]->Scale (h_jet_pt_ref[iDType][iVar]->GetBinContent (iPtJ+1), "width");
-            if (iVar == 0)  {
+            if (iVar == 0)
               h2_jet_trk_pt_cov_ref[iDType][iPtJ][iDir] = h2_cov;
-              h2_cov->Scale (std::pow (h_jet_pt_ref[iDType][iVar]->GetBinContent (iPtJ+1), 2));
-            }
-            else
-              SaferDelete (&h2_cov);
 
-            //SaferDelete (&h2_jet_trk_pt_cov_ref[iDType][iPtJ][iDir]);
+            std::thread t (DoCovarianceCalc, h_jet_trk_pt_ref[iDType][iPtJ][iDir][iVar], h2_cov, h_jet_counts_ref[iDType][iPtJ][iVar], variations[iVar] != "Nominal", h_jet_pt_ref[iDType][iVar]->GetBinContent (iPtJ+1));
+            threads.push_back (std::move (t));
 
           } // end loop over iDir
+
 
           for (short iPtCh = 0; iPtCh < nPtChSelections; iPtCh++) {
 
@@ -209,21 +222,20 @@ void ProcessCorrelations (const char* tag, const char* outFileTag) {
             h_jet_trk_dphi_ref[iDType][iPtJ][iPtCh][iVar] = (TH1D*) inFile->Get (Form ("h_jet_trk_dphi_%s_%s_%s17",       ptch.Data (), pTJ.Data (), dType.Data ()))->Clone (Form ("h_jet_trk_dphi_%s_ref_%s_%s_%s",      ptch.Data (), dType.Data (), pTJ.Data (), var.Data ()));
             h2_cov                                        = (TH2D*) inFile->Get (Form ("h2_jet_trk_dphi_cov_%s_%s_%s17",  ptch.Data (), pTJ.Data (), dType.Data ()))->Clone (Form ("h2_jet_trk_dphi_cov_%s_ref_%s_%s_%s", ptch.Data (), dType.Data (), pTJ.Data (), var.Data ()));
 
-            CalcUncertainties (h_jet_trk_dphi_ref[iDType][iPtJ][iPtCh][iVar], h2_cov, h_jet_counts_ref[iDType][iPtJ][iVar]);
-
-            h_jet_trk_dphi_ref[iDType][iPtJ][iPtCh][iVar]->Scale (h_jet_pt_ref[iDType][iVar]->GetBinContent (iPtJ+1));
-            if (iVar == 0) {
+            if (iVar == 0)
               h2_jet_trk_dphi_cov_ref[iDType][iPtJ][iPtCh] = h2_cov;
-              h2_cov->Scale (std::pow (h_jet_pt_ref[iDType][iVar]->GetBinContent (iPtJ+1), 2));
-            }
-            else
-              SaferDelete (&h2_cov);
 
-            h_jet_trk_dphi_ref[iDType][iPtJ][iPtCh][iVar]->Scale (1., "width");
-
-            //SaferDelete (&h2_jet_trk_dphi_cov_ref[iDType][iPtJ][iPtCh]);
+            std::thread t (DoCovarianceCalc, h_jet_trk_dphi_ref[iDType][iPtJ][iPtCh][iVar], h2_cov, h_jet_counts_ref[iDType][iPtJ][iVar], variations[iVar] != "Nominal", h_jet_pt_ref[iDType][iVar]->GetBinContent (iPtJ+1));
+            threads.push_back (std::move (t));
 
           } // end loop over iPtCh
+
+
+          // wait for all threads to finish...
+          for (std::thread& t : threads)
+            t.join ();
+          threads.clear ();
+
 
           SaferDelete (&h_jet_counts_ref[iDType][iPtJ][iVar]);
 
@@ -254,21 +266,14 @@ void ProcessCorrelations (const char* tag, const char* outFileTag) {
             h_jet_trk_pt_ref_bkg[iDType][iPtJ][iDir][iVar]  = (TH1D*) inFile->Get (Form ("h_jet_trk_pt_%s_%s_mixed_%s17",       dir.Data (), pTJ.Data (), dType.Data ()))->Clone (Form ("h_jet_trk_pt_%s_ref_bkg_%s_%s_%s",       dir.Data (), dType.Data (), pTJ.Data (), var.Data ()));
             h2_cov                                          = (TH2D*) inFile->Get (Form ("h2_jet_trk_pt_cov_%s_%s_mixed_%s17",  dir.Data (), pTJ.Data (), dType.Data ()))->Clone (Form ("h2_jet_trk_pt_cov_%s_ref_bkg_%s_%s_%s",  dir.Data (), dType.Data (), pTJ.Data (), var.Data ()));
 
-            CalcUncertainties (h_jet_trk_pt_ref_bkg[iDType][iPtJ][iDir][iVar], h2_cov, h_jet_counts_ref_bkg[iDType][iPtJ][iVar]);
-
-            h_jet_trk_pt_ref_bkg[iDType][iPtJ][iDir][iVar]->Scale (h_jet_pt_ref[iDType][iVar]->GetBinContent (iPtJ+1));
-            if (iVar == 0) {
+            if (iVar == 0)
               h2_jet_trk_pt_cov_ref_bkg[iDType][iPtJ][iDir] = h2_cov;
-              h2_cov->Scale (std::pow (h_jet_pt_ref[iDType][iVar]->GetBinContent (iPtJ+1), 2));
-            }
-            else 
-              SaferDelete (&h2_cov);
 
-            h_jet_trk_pt_ref_bkg[iDType][iPtJ][iDir][iVar]->Scale (1., "width");
-
-            //SaferDelete (&h2_jet_trk_pt_cov_ref_bkg[iDType][iPtJ][iDir]);
+            std::thread t (DoCovarianceCalc, h_jet_trk_pt_ref_bkg[iDType][iPtJ][iDir][iVar], h2_cov, h_jet_counts_ref_bkg[iDType][iPtJ][iVar], variations[iVar] != "Nominal", h_jet_pt_ref[iDType][iVar]->GetBinContent (iPtJ+1));
+            threads.push_back (std::move (t));
 
           } // end loop over iDir
+
 
           for (short iPtCh = 0; iPtCh < nPtChSelections; iPtCh++) {
 
@@ -277,21 +282,18 @@ void ProcessCorrelations (const char* tag, const char* outFileTag) {
             h_jet_trk_dphi_ref_bkg[iDType][iPtJ][iPtCh][iVar] = (TH1D*) inFile->Get (Form ("h_jet_trk_dphi_%s_%s_mixed_%s17",       ptch.Data (), pTJ.Data (), dType.Data ()))->Clone (Form ("h_jet_trk_dphi_%s_ref_bkg_%s_%s_%s",      ptch.Data (), dType.Data (), pTJ.Data (), var.Data ()));
             h2_cov                                            = (TH2D*) inFile->Get (Form ("h2_jet_trk_dphi_cov_%s_%s_mixed_%s17",  ptch.Data (), pTJ.Data (), dType.Data ()))->Clone (Form ("h2_jet_trk_dphi_cov_%s_ref_bkg_%s_%s_%s", ptch.Data (), dType.Data (), pTJ.Data (), var.Data ()));
 
-            CalcUncertainties (h_jet_trk_dphi_ref_bkg[iDType][iPtJ][iPtCh][iVar], h2_cov, h_jet_counts_ref_bkg[iDType][iPtJ][iVar]);
-
-            h_jet_trk_dphi_ref_bkg[iDType][iPtJ][iPtCh][iVar]->Scale (h_jet_pt_ref[iDType][iVar]->GetBinContent (iPtJ+1));
-            if (iVar == 0) {
+            if (iVar == 0)
               h2_jet_trk_dphi_cov_ref_bkg[iDType][iPtJ][iPtCh] = h2_cov;
-              h2_cov->Scale (std::pow (h_jet_pt_ref[iDType][iVar]->GetBinContent (iPtJ+1), 2));
-            }
-            else
-              SaferDelete (&h2_cov);
 
-            h_jet_trk_dphi_ref_bkg[iDType][iPtJ][iPtCh][iVar]->Scale (1., "width");
-
-            //SaferDelete (&h2_jet_trk_dphi_cov_ref_bkg[iDType][iPtJ][iPtCh]);
+            std::thread t (DoCovarianceCalc, h_jet_trk_dphi_ref_bkg[iDType][iPtJ][iPtCh][iVar], h2_cov, h_jet_counts_ref_bkg[iDType][iPtJ][iVar], variations[iVar] != "Nominal", h_jet_pt_ref[iDType][iVar]->GetBinContent (iPtJ+1));
+            threads.push_back (std::move (t));
 
           } // end loop over iPtCh
+
+          // wait for all threads to finish...
+          for (std::thread& t : threads)
+            t.join ();
+          threads.clear ();
 
           SaferDelete (&h_jet_counts_ref_bkg[iDType][iPtJ][iVar]);
 
@@ -355,19 +357,14 @@ void ProcessCorrelations (const char* tag, const char* outFileTag) {
             h_jet_trk_pt[iDType][iPtJ][iDir][iCent][iVar] = (TH1D*) inFile->Get (Form ("h_jet_trk_pt_%s_%s_%s16",       dir.Data (), pTJ.Data (), dType.Data ()))->Clone (Form ("h_jet_trk_pt_%s_pPb_%s_%s_%s_%s",       dir.Data (), cent.Data (), dType.Data (), pTJ.Data (), var.Data ()));
             h2_cov                                        = (TH2D*) inFile->Get (Form ("h2_jet_trk_pt_cov_%s_%s_%s16",  dir.Data (), pTJ.Data (), dType.Data ()))->Clone (Form ("h2_jet_trk_pt_cov_%s_pPb_%s_%s_%s_%s",  dir.Data (), cent.Data (), dType.Data (), pTJ.Data (), var.Data ()));
 
-            CalcUncertainties (h_jet_trk_pt[iDType][iPtJ][iDir][iCent][iVar], h2_cov, h_jet_counts[iDType][iPtJ][iCent][iVar]);
-
-            h_jet_trk_pt[iDType][iPtJ][iDir][iCent][iVar]->Scale (h_jet_pt[iDType][iCent][iVar]->GetBinContent (iPtJ+1), "width");
-            if (iVar == 0) {
+            if (iVar == 0)
               h2_jet_trk_pt_cov[iDType][iPtJ][iDir][iCent] = h2_cov;
-              h2_cov->Scale (std::pow (h_jet_pt[iDType][iCent][iVar]->GetBinContent (iPtJ+1), 2));
-            }
-            else
-              SaferDelete (&h2_cov);
 
-            //SaferDelete (&h2_jet_trk_pt_cov[iDType][iPtJ][iDir][iCent]);
+            std::thread t (DoCovarianceCalc, h_jet_trk_pt[iDType][iPtJ][iDir][iCent][iVar], h2_cov, h_jet_counts[iDType][iPtJ][iCent][iVar], variations[iVar] != "Nominal", h_jet_pt[iDType][iCent][iVar]->GetBinContent (iPtJ+1));
+            threads.push_back (std::move (t));
 
           } // end loop over iDir
+
 
           for (short iPtCh = 0; iPtCh < nPtChSelections; iPtCh++) {
 
@@ -376,21 +373,19 @@ void ProcessCorrelations (const char* tag, const char* outFileTag) {
             h_jet_trk_dphi[iDType][iPtJ][iPtCh][iCent][iVar]  = (TH1D*) inFile->Get (Form ("h_jet_trk_dphi_%s_%s_%s16",       ptch.Data (), pTJ.Data (), dType.Data ()))->Clone (Form ("h_jet_trk_dphi_%s_pPb_%s_%s_%s_%s",      ptch.Data (), cent.Data (), dType.Data (), pTJ.Data (), var.Data ()));
             h2_cov                                            = (TH2D*) inFile->Get (Form ("h2_jet_trk_dphi_cov_%s_%s_%s16",  ptch.Data (), pTJ.Data (), dType.Data ()))->Clone (Form ("h2_jet_trk_dphi_cov_%s_pPb_%s_%s_%s_%s", ptch.Data (), cent.Data (), dType.Data (), pTJ.Data (), var.Data ()));
 
-            CalcUncertainties (h_jet_trk_dphi[iDType][iPtJ][iPtCh][iCent][iVar], h2_cov, h_jet_counts[iDType][iPtJ][iCent][iVar]);
-
-            h_jet_trk_dphi[iDType][iPtJ][iPtCh][iCent][iVar]->Scale (h_jet_pt[iDType][iCent][iVar]->GetBinContent (iPtJ+1));
-            if (iVar == 0) {
+            if (iVar == 0)
               h2_jet_trk_dphi_cov[iDType][iPtJ][iPtCh][iCent] = h2_cov;
-              h2_cov->Scale (std::pow (h_jet_pt[iDType][iCent][iVar]->GetBinContent (iPtJ+1), 2));
-            }
-            else
-              SaferDelete (&h2_cov);
 
-            h_jet_trk_dphi[iDType][iPtJ][iPtCh][iCent][iVar]->Scale (1., "width");
-
-            //SaferDelete (&h2_jet_trk_dphi_cov[iDType][iPtJ][iPtCh][iCent]);
+            std::thread t (DoCovarianceCalc, h_jet_trk_dphi[iDType][iPtJ][iPtCh][iCent][iVar], h2_cov, h_jet_counts[iDType][iPtJ][iCent][iVar], variations[iVar] != "Nominal", h_jet_pt[iDType][iCent][iVar]->GetBinContent (iPtJ+1));
+            threads.push_back (std::move (t));
 
           } // end loop over iPtCh
+
+          // wait for all threads to finish...
+          for (std::thread& t : threads)
+            t.join ();
+          threads.clear ();
+
 
           SaferDelete (&h_jet_counts[iDType][iPtJ][iCent][iVar]);
 
@@ -425,19 +420,16 @@ void ProcessCorrelations (const char* tag, const char* outFileTag) {
               h_jet_trk_pt_bkg[iDType][iPtJ][iDir][iCent][iVar] = (TH1D*) inFile->Get (Form ("h_jet_trk_pt_%s_%s_mixed_%s16",       dir.Data (), pTJ.Data (), dType.Data ()))->Clone (Form ("h_jet_trk_pt_%s_pPb_bkg_%s_%s_%s_%s",       dir.Data (), cent.Data (), dType.Data (), pTJ.Data (), var.Data ()));
               h2_cov                                            = (TH2D*) inFile->Get (Form ("h2_jet_trk_pt_cov_%s_%s_mixed_%s16",  dir.Data (), pTJ.Data (), dType.Data ()))->Clone (Form ("h2_jet_trk_pt_cov_%s_pPb_bkg_%s_%s_%s_%s",  dir.Data (), cent.Data (), dType.Data (), pTJ.Data (), var.Data ()));
 
-              CalcUncertainties (h_jet_trk_pt_bkg[iDType][iPtJ][iDir][iCent][iVar], h2_cov, h_jet_counts_bkg[iDType][iPtJ][iCent][iVar]);
-
-              h_jet_trk_pt_bkg[iDType][iPtJ][iDir][iCent][iVar]->Scale (h_jet_pt[iDType][iCent][iVar]->GetBinContent (iPtJ+1), "width");
-              if (iVar == 0) {
+              if (iVar == 0)
                 h2_jet_trk_pt_cov_bkg[iDType][iPtJ][iDir][iCent] = h2_cov;
-                h2_cov->Scale (std::pow (h_jet_pt[iDType][iCent][iVar]->GetBinContent (iPtJ+1), 2));
-              }
-              else
-                SaferDelete (&h2_cov);
+  
+              std::thread t (DoCovarianceCalc, h_jet_trk_pt_bkg[iDType][iPtJ][iDir][iCent][iVar], h2_cov, h_jet_counts_bkg[iDType][iPtJ][iCent][iVar], variations[iVar] != "Nominal", h_jet_pt[iDType][iCent][iVar]->GetBinContent (iPtJ+1));
+              threads.push_back (std::move (t));
 
               //SaferDelete (&h2_jet_trk_pt_cov_bkg[iDType][iPtJ][iDir][iCent]);
 
             } // end loop over iDir
+
 
             for (short iPtCh = 0; iPtCh < nPtChSelections; iPtCh++) {
 
@@ -446,19 +438,19 @@ void ProcessCorrelations (const char* tag, const char* outFileTag) {
               h_jet_trk_dphi_bkg[iDType][iPtJ][iPtCh][iCent][iVar]  = (TH1D*) inFile->Get (Form ("h_jet_trk_dphi_%s_%s_mixed_%s16",       ptch.Data (), pTJ.Data (), dType.Data ()))->Clone (Form ("h_jet_trk_dphi_%s_pPb_bkg_%s_%s_%s_%s",      ptch.Data (), cent.Data (), dType.Data (), pTJ.Data (), var.Data ()));
               h2_cov                                                = (TH2D*) inFile->Get (Form ("h2_jet_trk_dphi_cov_%s_%s_mixed_%s16",  ptch.Data (), pTJ.Data (), dType.Data ()))->Clone (Form ("h2_jet_trk_dphi_cov_%s_pPb_bkg_%s_%s_%s_%s", ptch.Data (), cent.Data (), dType.Data (), pTJ.Data (), var.Data ()));
 
-              CalcUncertainties (h_jet_trk_dphi_bkg[iDType][iPtJ][iPtCh][iCent][iVar], h2_cov, h_jet_counts_bkg[iDType][iPtJ][iCent][iVar]);
-
-              h_jet_trk_dphi_bkg[iDType][iPtJ][iPtCh][iCent][iVar]->Scale (h_jet_pt[iDType][iCent][iVar]->GetBinContent (iPtJ+1), "width");
-              if (iVar == 0) {
+              if (iVar == 0)
                 h2_jet_trk_dphi_cov_bkg[iDType][iPtJ][iPtCh][iCent] = h2_cov;
-                h2_cov->Scale (std::pow (h_jet_pt[iDType][iCent][iVar]->GetBinContent (iPtJ+1), 2));
-              }
-              else
-                SaferDelete (&h2_cov);
 
-              //SaferDelete (&h2_jet_trk_dphi_cov_bkg[iDType][iPtJ][iPtCh][iCent]);
+              std::thread t (DoCovarianceCalc, h_jet_trk_dphi_bkg[iDType][iPtJ][iPtCh][iCent][iVar], h2_cov, h_jet_counts_bkg[iDType][iPtJ][iCent][iVar], variations[iVar] != "Nominal", h_jet_pt[iDType][iCent][iVar]->GetBinContent (iPtJ+1));
+              threads.push_back (std::move (t));
 
             } // end loop over iPtCh
+
+            // wait for all threads to finish...
+            for (std::thread& t : threads)
+              t.join ();
+            threads.clear ();
+
 
             //SaferDelete (&h_jet_counts_bkg[iDType][iPtJ][iCent]);
 
