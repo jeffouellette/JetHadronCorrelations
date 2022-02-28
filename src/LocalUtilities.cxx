@@ -1030,6 +1030,7 @@ std::map <const unsigned int, float>* GetOverlayFCalMap () {
  * Returns an abbreviated, unique identifier for a given dataset.
  */
 TString GetIdentifier (const int dataSet, const char* directory, const char* inFileName) {
+
   TString id;
   if (IsCollisions ()) {
     id = to_string (dataSet);
@@ -1063,9 +1064,9 @@ TString GetIdentifier (const int dataSet, const char* directory, const char* inF
   else if (TString (inFileName).Contains ("420015"))
     id = id + "_JZ5";
 
-  if (TString (inFileName).Contains ("e4108"))
+  if (TString (inFileName).Contains ("e4108") || (TString (inFileName).Contains ("420010") && TString (inFileName).Contains ("e8362")))
     id = id + "_SampleA";
-  else if (TString (inFileName).Contains ("e6608"))
+  else if (TString (inFileName).Contains ("e6608") || (TString (inFileName).Contains ("420010") && TString (inFileName).Contains ("e8426")))
     id = id + "_SampleB";
 
   // FROM Z+h analysis (now deprecated)
