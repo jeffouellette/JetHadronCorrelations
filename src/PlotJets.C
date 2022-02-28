@@ -2055,7 +2055,7 @@ void PlotJets (const char* tag, const char* inFileTag) {
     c->SetLogy ();
 
     const double maxx = 400;
-    h = new TH1D ("htemp", ";#it{p}_{T}^{jet} [GeV];dN_{jet} / d#it{p}_{T}^{jet} [GeV^{-1}]", 1, pTJBins[0], maxx);
+    h = new TH1D ("htemp", ";Reco. #it{p}_{T}^{jet} [GeV];dN_{jet} / d#it{p}_{T}^{jet} [GeV^{-1}]", 1, pTJBins[0], maxx);
     h->GetXaxis ()->SetMoreLogLabels ();
     h->GetYaxis ()->SetRangeUser (ymin, ymax);
     h->GetXaxis ()->SetTitleSize (0.036);

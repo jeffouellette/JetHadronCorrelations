@@ -569,7 +569,8 @@ void ProcessUnfolding (const char* inFileTag, const char* outFileTag) {
       const short iUnfVar = 0;//(mcVariations.count (var) == 0 ? 0 : iVar);
 
       const bool doUnfold = (variationsWithNoUnfold.count (var) == 0);
-      const short jetWgtsType = (iDType == 1 ? 2 : ((variationsWithUnwgtdRespMatrix.count (var) == 0) ? 1 : 0)); // MC uses no weights, nominal data (which is not included in "variationsWithUnwgtdRespMatrix" set) uses functional weights ("wgts" at index = 1), and syst. uncertainty uses histogram weights ("altwgts" at index = 0)
+      //const short jetWgtsType = (iDType == 1 ? 2 : ((variationsWithUnwgtdRespMatrix.count (var) == 0) ? 1 : 0)); // MC uses no weights, nominal data (which is not included in "variationsWithUnwgtdRespMatrix" set) uses functional weights ("wgts" at index = 1), and syst. uncertainty uses histogram weights ("altwgts" at index = 0)
+      const short jetWgtsType = (iDType == 1 || variationsWithUnwgtdRespMatrix.count (var) > 0 ? 2 : 0); // MC uses no weights, nominal data (which is not included in "variationsWithUnwgtdRespMatrix" set) uses functional weights ("wgts" at index = 1), and syst. uncertainty uses no weights at index 2
 
       if (doUnfold) {
         std::cout << "Doing 1D unfold for var = " << var << std::endl;

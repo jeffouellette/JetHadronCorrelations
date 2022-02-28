@@ -33,8 +33,8 @@ using namespace JetHadronCorrelations;
 // whether to draw systematics plots
 //const bool makeTotalSystPlots   = false;
 //const bool makeBkgdSystPlots    = false;
-const bool makeSigSystPlots     = false;
-const bool makeIpPbSystPlots    = false;
+const bool makeSigSystPlots     = true;
+const bool makeIpPbSystPlots    = true;
 
 // whether to draw covariance plots
 const bool makeCovariancePlots  = false;
@@ -636,13 +636,13 @@ void PlotPtCh (const char* rawTag, const char* unfoldTag) {
           SaferDelete (&g);
         }
 
-        myText (0.24, 0.12, kBlack, Form ("#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV, #bf{%s %i-%i%%}", iDType == 0 ? "ZDC" : "FCal", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.020/fuPad);
-        myText (0.24, 0.06, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.020/fuPad);
+        myText (0.24, 0.12, kBlack, Form ("#it{p}+Pb, #sqrt{#it{s}_{NN}} = 5.02 TeV, #bf{%s %i-%i%%}", iDType == 0 ? "ZDC" : "FCal", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.020/fuPad);
+        myText (0.24, 0.06, kBlack, "#it{pp}, #sqrt{#it{s}} = 5.02 TeV", 0.020/fuPad);
 
         tl->SetTextAlign (22);
         tl->SetTextFont (42);
         tl->SetTextSize (0.022/fuPad);
-        tl->DrawLatexNDC (0.1/0.52 + 0.5*(1.-0.1/0.52), 0.94, "#Delta#phi < #pi/8 (near-side)");
+        tl->DrawLatexNDC (0.1/0.52 + 0.5*(1.-0.1/0.52), 0.94, "#Delta#it{#phi} < #pi/8 (near-side)");
 
 
         urPad->cd (); 
@@ -716,7 +716,7 @@ void PlotPtCh (const char* rawTag, const char* unfoldTag) {
         myBoxText2 (0.10, 0.12, myGreen, kOpenCircle, "#it{p}+Pb bkgd.", 1.2, 0.020/fuPad);
         myBoxText2 (0.10, 0.06, myPurple, kOpenCircle, "#it{pp} bkgd.", 1.2, 0.020/fuPad);
 
-        tl->DrawLatexNDC (0.5*(1-0.03/0.48), 0.94, "#Delta#phi > 7#pi/8 (away-side)");
+        tl->DrawLatexNDC (0.5*(1-0.03/0.48), 0.94, "#Delta#it{#phi} > 7#pi/8 (away-side)");
 
 
         clPad->cd (); 
@@ -1032,13 +1032,13 @@ void PlotPtCh (const char* rawTag, const char* unfoldTag) {
 
 
     //myText (0.24, 0.78, kBlack, "#bf{#it{ATLAS}} Internal", 0.022/fuPad);
-    myText (0.24, 0.12, kBlack, "#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV", 0.020/fuPad);
-    myText (0.24, 0.06, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.020/fuPad);
+    myText (0.24, 0.12, kBlack, "#it{p}+Pb, #sqrt{#it{s}_{NN}} = 5.02 TeV", 0.020/fuPad);
+    myText (0.24, 0.06, kBlack, "#it{pp}, #sqrt{#it{s}} = 5.02 TeV", 0.020/fuPad);
 
     tl->SetTextAlign (22);
     tl->SetTextFont (42);
     tl->SetTextSize (0.022/fuPad);
-    tl->DrawLatexNDC (0.1/0.52 + 0.5*(1.-0.1/0.52), 0.94, "#Delta#phi < #pi/8 (near-side)");
+    tl->DrawLatexNDC (0.1/0.52 + 0.5*(1.-0.1/0.52), 0.94, "#Delta#it{#phi} < #pi/8 (near-side)");
 
 
     urPad->cd (); 
@@ -1102,7 +1102,7 @@ void PlotPtCh (const char* rawTag, const char* unfoldTag) {
     myLineText2 (0.10, 0.12, kBlack, kFullCircle, "#it{pp} total", 0.8, 0.020/fuPad);
     myLineText2 (0.10, 0.06, kBlack, kOpenCircle, "#it{pp} bkgd.", 0.8, 0.020/fuPad);
 
-    tl->DrawLatexNDC (0.5*(1-0.03/0.48), 0.94, "#Delta#phi > 7#pi/8 (away-side)");
+    tl->DrawLatexNDC (0.5*(1-0.03/0.48), 0.94, "#Delta#it{#phi} > 7#pi/8 (away-side)");
 
 
     clPad->cd (); 
@@ -1370,13 +1370,13 @@ void PlotPtCh (const char* rawTag, const char* unfoldTag) {
 
 
     //myText (0.24, 0.78, kBlack, "#bf{#it{ATLAS}} Internal", 0.022/fuPad);
-    myText (0.24, 0.12, kBlack, Form ("#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV, #bf{ZDC %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.020/fuPad);
-    myText (0.24, 0.06, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.020/fuPad);
+    myText (0.24, 0.12, kBlack, Form ("#it{p}+Pb, #sqrt{#it{s}_{NN}} = 5.02 TeV, #bf{ZDC %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.020/fuPad);
+    myText (0.24, 0.06, kBlack, "#it{pp}, #sqrt{#it{s}} = 5.02 TeV", 0.020/fuPad);
 
     tl->SetTextAlign (22);
     tl->SetTextFont (42);
     tl->SetTextSize (0.022/fuPad);
-    tl->DrawLatexNDC (0.1/0.52 + 0.5*(1.-0.1/0.52), 0.94, "#Delta#phi < #pi/8 (near-side)");
+    tl->DrawLatexNDC (0.1/0.52 + 0.5*(1.-0.1/0.52), 0.94, "#Delta#it{#phi} < #pi/8 (near-side)");
 
 
     urPad->cd (); 
@@ -1441,7 +1441,7 @@ void PlotPtCh (const char* rawTag, const char* unfoldTag) {
     myLineText2 (0.10, 0.12, myGreen, kOpenCircle, "#it{pp} bkgd., #bf{w/} FCal matching", 0.8, 0.020/fuPad);
     myLineText2 (0.10, 0.06, myOrange, kOpenSquare, "#it{pp} bkgd., #bf{w/out} FCal matching", 0.8, 0.020/fuPad);
 
-    tl->DrawLatexNDC (0.5*(1-0.03/0.48), 0.94, "#Delta#phi > 7#pi/8 (away-side)");
+    tl->DrawLatexNDC (0.5*(1-0.03/0.48), 0.94, "#Delta#it{#phi} > 7#pi/8 (away-side)");
 
 
     clPad->cd (); 
@@ -1710,8 +1710,8 @@ void PlotPtCh (const char* rawTag, const char* unfoldTag) {
         b->SetLineStyle (1);
         b->Draw ("l");
         myText (0.22, 0.90, kBlack, "#bf{#it{ATLAS}} Internal", 0.036);
-        myText (0.22, 0.85, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.036);
-        myText (0.22, 0.80, kBlack, Form ("#it{p}_{T}^{jet} > %i GeV, #Delta#phi_{ch,jet} %s", iPtJInt == 0 ? 30 : 60, directions[iDir] == "ns" ? "< #pi/8" : (directions[iDir] == "as" ? "> 7#pi/8" : "#in (#pi/3, 2#pi/3)")), 0.036);
+        myText (0.22, 0.85, kBlack, "#it{pp}, #sqrt{#it{s}} = 5.02 TeV", 0.036);
+        myText (0.22, 0.80, kBlack, Form ("#it{p}_{T}^{jet} > %i GeV, #Delta#it{#phi}_{ch,jet} %s", iPtJInt == 0 ? 30 : 60, directions[iDir] == "ns" ? "< #pi/8" : (directions[iDir] == "as" ? "> 7#pi/8" : "#in (#pi/3, 2#pi/3)")), 0.036);
         myText (0.22, 0.75, kBlack, Form ("Diagonality = %.2f", r), 0.036);
 
         c->SaveAs (Form ("%s/Plots/PtCh/Covariance_SignalJetTaggedYield_pp_%iGeVJets_%s.pdf", workPath.Data (), iPtJInt == 0 ? 30 : 60, directions[iDir] == "ns" ? "nearside" : (directions[iDir] == "as" ? "awayside" : "perpendicular")));
@@ -1809,8 +1809,8 @@ void PlotPtCh (const char* rawTag, const char* unfoldTag) {
           b->SetLineStyle (1);
           b->Draw ("l");
           myText (0.22, 0.90, kBlack, "#bf{#it{ATLAS}} Internal", 0.036);
-          myText (0.22, 0.85, kBlack, "#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV", 0.036);
-          myText (0.22, 0.80, kBlack, Form ("#it{p}_{T}^{jet} > %i GeV, #Delta#phi_{ch,jet} %s", iPtJInt == 0 ? 30 : 60, directions[iDir] == "ns" ? "< #pi/8" : (directions[iDir] == "as" ? "> 7#pi/8" : "#in (#pi/3, 2#pi/3)")), 0.036);
+          myText (0.22, 0.85, kBlack, "#it{p}+Pb, #sqrt{#it{s}_{NN}} = 5.02 TeV", 0.036);
+          myText (0.22, 0.80, kBlack, Form ("#it{p}_{T}^{jet} > %i GeV, #Delta#it{#phi}_{ch,jet} %s", iPtJInt == 0 ? 30 : 60, directions[iDir] == "ns" ? "< #pi/8" : (directions[iDir] == "as" ? "> 7#pi/8" : "#in (#pi/3, 2#pi/3)")), 0.036);
           if (iCent == nZdcCentBins)
             myText (0.22, 0.75, kBlack, "ZDC 0-100%", 0.036);
           else
@@ -1909,10 +1909,10 @@ void PlotPtCh (const char* rawTag, const char* unfoldTag) {
       } // end loop over iCent
 
       myText (0.56, 0.90, kBlack, "#bf{#it{ATLAS}} Internal", 0.032);
-      myText (0.56, 0.86, kBlack, Form ("#it{p}_{T}^{jet} > %i GeV, #Delta#phi_{ch,jet} %s", iPtJInt == 0 ? 30 : 60, directions[iDir] == "ns" ? "< #pi/8" : (directions[iDir] == "as" ? "> 7#pi/8" : "#in (#pi/3, 2#pi/3)")), 0.032);
+      myText (0.56, 0.86, kBlack, Form ("#it{p}_{T}^{jet} > %i GeV, #Delta#it{#phi}_{ch,jet} %s", iPtJInt == 0 ? 30 : 60, directions[iDir] == "ns" ? "< #pi/8" : (directions[iDir] == "as" ? "> 7#pi/8" : "#in (#pi/3, 2#pi/3)")), 0.032);
 
-      myText (0.18, 0.385, kBlack, "#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV", 0.030);
-      myText (0.18, 0.350, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.030);
+      myText (0.18, 0.385, kBlack, "#it{p}+Pb, #sqrt{#it{s}_{NN}} = 5.02 TeV", 0.030);
+      myText (0.18, 0.350, kBlack, "#it{pp}, #sqrt{#it{s}} = 5.02 TeV", 0.030);
       myText (0.18, 0.315, kBlack, "ZDC centralities", 0.030);
 
       mySimpleMarkerAndBoxAndLineText (0.25, 0.275, 1.4, 1001, colorfulSystColors[0], 0.8, colorfulColors[0], kFullCircle, 1.6, "#it{pp} (#times10^{3})", 0.030);
@@ -2019,11 +2019,11 @@ void PlotPtCh (const char* rawTag, const char* unfoldTag) {
       myText (0.065, 0.971, kBlack, "#bf{#it{ATLAS}} Internal", 0.027);
   
       c->cd (1);
-      myText (0.2, 0.80, kBlack, "#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV", 0.05);
-      myText (0.2, 0.74, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.05);
+      myText (0.2, 0.80, kBlack, "#it{p}+Pb, #sqrt{#it{s}_{NN}} = 5.02 TeV", 0.05);
+      myText (0.2, 0.74, kBlack, "#it{pp}, #sqrt{#it{s}} = 5.02 TeV", 0.05);
       c->cd (2);
       myText (0.2, 0.80, kBlack, Form ("#it{p}_{T}^{jet} > %i GeV", iPtJInt == 0 ? 30 : 60), 0.05);
-      myText (0.2, 0.74, kBlack, Form ("#Delta#phi_{ch,jet} %s", directions[iDir] == "ns" ? "< #pi/8" : (directions[iDir] == "as" ? "> 7#pi/8" : "#in (#pi/3, 2#pi/3)")), 0.05);
+      myText (0.2, 0.74, kBlack, Form ("#Delta#it{#phi}_{ch,jet} %s", directions[iDir] == "ns" ? "< #pi/8" : (directions[iDir] == "as" ? "> 7#pi/8" : "#in (#pi/3, 2#pi/3)")), 0.05);
 
       if (DrawNoUnfold) {
         c->cd (3);
@@ -2142,10 +2142,10 @@ void PlotPtCh (const char* rawTag, const char* unfoldTag) {
 
       c->cd (8);
       myText (0.1, 0.93, kBlack, "#bf{#it{ATLAS}} Internal", 0.07);
-      myText (0.1, 0.84, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.07);
-      myText (0.1, 0.75, kBlack, "#it{p}+Pb, #sqrt{s} = 5.02 TeV", 0.07);
+      myText (0.1, 0.84, kBlack, "#it{pp}, #sqrt{#it{s}} = 5.02 TeV", 0.07);
+      myText (0.1, 0.75, kBlack, "#it{p}+Pb, #sqrt{#it{s}} = 5.02 TeV", 0.07);
       myText (0.1, 0.66, kBlack, Form ("#it{p}_{T}^{jet} > %i GeV", iPtJInt == 0 ? 30 : 60), 0.07);
-      myText (0.1, 0.57, kBlack, Form ("#Delta#phi_{ch,jet} %s", directions[iDir] == "ns" ? "< #pi/8" : (directions[iDir] == "as" ? "> 7#pi/8" : "#in (#pi/3, 2#pi/3)")), 0.07);
+      myText (0.1, 0.57, kBlack, Form ("#Delta#it{#phi}_{ch,jet} %s", directions[iDir] == "ns" ? "< #pi/8" : (directions[iDir] == "as" ? "> 7#pi/8" : "#in (#pi/3, 2#pi/3)")), 0.07);
 
       c->SaveAs (Form ("%s/Plots/PtCh/Yield_GAM_Comparison_%iGeVJets_%s.pdf", workPath.Data (), iPtJInt == 0 ? 30 : 60, directions[iDir] == "ns" ? "nearside" : (directions[iDir] == "as" ? "awayside" : "perpendicular")));
 
@@ -2224,11 +2224,11 @@ void PlotPtCh (const char* rawTag, const char* unfoldTag) {
       myText (0.065, 0.971, kBlack, "#bf{#it{ATLAS}} Internal", 0.027);
   
       c->cd (1);
-      myText (0.2, 0.80, kBlack, "#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV", 0.05);
-      myText (0.2, 0.74, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.05);
+      myText (0.2, 0.80, kBlack, "#it{p}+Pb, #sqrt{#it{s}_{NN}} = 5.02 TeV", 0.05);
+      myText (0.2, 0.74, kBlack, "#it{pp}, #sqrt{#it{s}} = 5.02 TeV", 0.05);
       c->cd (2);
       myText (0.2, 0.80, kBlack, Form ("#it{p}_{T}^{jet} > %i GeV", iPtJInt == 0 ? 30 : 60), 0.05);
-      myText (0.2, 0.74, kBlack, Form ("#Delta#phi_{ch,jet} %s", directions[iDir] == "ns" ? "< #pi/8" : (directions[iDir] == "as" ? "> 7#pi/8" : "#in (#pi/3, 2#pi/3)")), 0.05);
+      myText (0.2, 0.74, kBlack, Form ("#Delta#it{#phi}_{ch,jet} %s", directions[iDir] == "ns" ? "< #pi/8" : (directions[iDir] == "as" ? "> 7#pi/8" : "#in (#pi/3, 2#pi/3)")), 0.05);
 
       //if (DrawNoUnfold) {
       //  c->cd (3);
@@ -2318,11 +2318,11 @@ void PlotPtCh (const char* rawTag, const char* unfoldTag) {
       myText (0.065, 0.971, kBlack, "#bf{#it{ATLAS}} Internal", 0.027);
   
       c->cd (1);
-      myText (0.2, 0.80, kBlack, "#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV", 0.05);
-      myText (0.2, 0.74, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.05);
+      myText (0.2, 0.80, kBlack, "#it{p}+Pb, #sqrt{#it{s}_{NN}} = 5.02 TeV", 0.05);
+      myText (0.2, 0.74, kBlack, "#it{pp}, #sqrt{#it{s}} = 5.02 TeV", 0.05);
       c->cd (2);
       myText (0.2, 0.80, kBlack, Form ("#it{p}_{T}^{jet} > %i GeV", iPtJInt == 0 ? 30 : 60), 0.05);
-      myText (0.2, 0.74, kBlack, Form ("#Delta#phi_{ch,jet} %s", directions[iDir] == "ns" ? "< #pi/8" : (directions[iDir] == "as" ? "> 7#pi/8" : "#in (#pi/3, 2#pi/3)")), 0.05);
+      myText (0.2, 0.74, kBlack, Form ("#Delta#it{#phi}_{ch,jet} %s", directions[iDir] == "ns" ? "< #pi/8" : (directions[iDir] == "as" ? "> 7#pi/8" : "#in (#pi/3, 2#pi/3)")), 0.05);
 
       c->cd (3);
       myLineText2 (0.26, 0.80, kBlack, kFullCircle, "Current", 1.2, 0.05);
@@ -2342,69 +2342,250 @@ void PlotPtCh (const char* rawTag, const char* unfoldTag) {
 
     const TString pTJInt = (iPtJInt == 0 ? "30GeV" : "60GeV");
 
-    for (short iDir : {0, 2}) {
+    const char* canvasName = Form ("c_jetInt_trk_pt_IpPb_fewCent_%s", pTJInt.Data ());
+    TCanvas* c = new TCanvas (canvasName, "", 1200, 900);
 
-      const char* canvasName = Form ("c_jetInt_trk_pt_IpPb_fewCent_iDir%i_%s", iDir, pTJInt.Data ());
-      TCanvas* c = new TCanvas (canvasName, "", 1200, 400);
-      c->Divide (3, 1);
+    const double llMargin = 0.17;
+    const double lrMargin = 0;//0.032;
+    const double clMargin = 0;//0.032;
+    const double crMargin = 0;//0.032;
+    const double rlMargin = 0;//0.032;
+    const double rrMargin = 0.08;
+
+    const double dbMargin = 0.16;
+    const double dtMargin = 0.08*8./11.;
+    const double ubMargin = 0.16;
+    const double utMargin = 0.08*8./11.;
+
+    const double deltaL = (1. - llMargin - lrMargin);
+    const double deltaC = (1. - clMargin - crMargin);
+    const double deltaR = (1. - rlMargin - rrMargin);
+
+    const double deltaD = (1. - dbMargin - dtMargin);
+    const double deltaU = (1. - ubMargin - utMargin);
+
+    const double a = (double) (deltaR * deltaC / (deltaL*deltaR + deltaC*deltaR + deltaL*deltaC));
+    const double b = (double) (deltaR * deltaL / (deltaL*deltaR + deltaC*deltaR + deltaL*deltaC));
+
+    const double xPadLCMiddle = a;
+    const double xPadCRMiddle = a+b;
+
+    const double yPadMiddle = deltaU / (deltaD + deltaU);
+
+    TPad* luPad = nullptr;
+    TPad* cuPad = nullptr;
+    TPad* ruPad = nullptr;
+    TPad* ldPad = nullptr;
+    TPad* cdPad = nullptr;
+    TPad* rdPad = nullptr;
+
+    luPad = new TPad (Form ("%s_luPad", canvasName), "", 0, yPadMiddle, xPadLCMiddle, 1);
+    cuPad = new TPad (Form ("%s_cuPad", canvasName), "", xPadLCMiddle, yPadMiddle, xPadCRMiddle, 1);
+    ruPad = new TPad (Form ("%s_ruPad", canvasName), "", xPadCRMiddle, yPadMiddle, 1, 1);
+    ldPad = new TPad (Form ("%s_ldPad", canvasName), "", 0, 0, xPadLCMiddle, yPadMiddle);
+    cdPad = new TPad (Form ("%s_cdPad", canvasName), "", xPadLCMiddle, 0, xPadCRMiddle, yPadMiddle);
+    rdPad = new TPad (Form ("%s_rdPad", canvasName), "", xPadCRMiddle, 0, 1, yPadMiddle);
+
+    luPad->SetLeftMargin (llMargin);
+    luPad->SetRightMargin (lrMargin);
+    cuPad->SetLeftMargin (clMargin);
+    cuPad->SetRightMargin (crMargin);
+    ruPad->SetLeftMargin (rlMargin);
+    ruPad->SetRightMargin (rrMargin);
+    luPad->SetBottomMargin (ubMargin);
+    luPad->SetTopMargin (utMargin);
+    cuPad->SetBottomMargin (ubMargin);
+    cuPad->SetTopMargin (utMargin);
+    ruPad->SetBottomMargin (ubMargin);
+    ruPad->SetTopMargin (utMargin);
+    ldPad->SetLeftMargin (llMargin);
+    ldPad->SetRightMargin (lrMargin);
+    cdPad->SetLeftMargin (clMargin);
+    cdPad->SetRightMargin (crMargin);
+    rdPad->SetLeftMargin (rlMargin);
+    rdPad->SetRightMargin (rrMargin);
+    ldPad->SetBottomMargin (dbMargin);
+    ldPad->SetTopMargin (dtMargin);
+    cdPad->SetBottomMargin (dbMargin);
+    cdPad->SetTopMargin (dtMargin);
+    rdPad->SetBottomMargin (dbMargin);
+    rdPad->SetTopMargin (dtMargin);
+
+
+    std::vector <TPad*> pads = {luPad, cuPad, ruPad, ldPad, cdPad, rdPad};
+    short iPad = 0;
+
+    c->cd ();
+    for (TPad*& pad : pads)
+      pad->Draw ();
+
+    const double xmin = pTChBins[1];
+    const double xmax = pTChBins[nPtChBins-(iPtJInt == 0 ? 3 : 1)];
+
+    short iCol = 0;
+
+    for (short iDir : {2, 0}) {
+
+      const double tMargin = (iDir < 3 ? dtMargin : utMargin);
+      const double bMargin = (iPad < 3 ? dbMargin : ubMargin);
+
+      const double ymin = (iDir == 0 ? 0.72 : 0.66);
+      const double ymax = (iDir == 0 ? 1.38 : 1.32);
 
       int iCanvas = 1;
-      for (short iCent : {0, 2, 4}) {
-        c->cd (iCanvas++);
+      for (short iCent : {4, 2, 0}) {
+        //c->cd (iCanvas++);
+        pads[iPad++]->cd ();
 
         gPad->SetLogx ();
 
-        TH1D* h = new TH1D ("h", ";#it{p}_{T}^{ch} [GeV];#it{I}_{#it{p}Pb}", 1, pTChBins[1], iDir == 1 ? 10 : pTChBins[nPtChBins-(iPtJInt == 0 ? 3 : 1)]);//pTChBins[nPtChBins]);
+        TH1D* h = new TH1D ("h", ";#it{p}_{T}^{ch} [GeV];#it{I}_{#it{p}Pb}", 1, xmin, xmax);
         h->GetXaxis ()->SetMoreLogLabels ();
-        h->GetYaxis ()->SetRangeUser (0.74, 1.4);
-        //h->GetYaxis ()->SetRangeUser (0.0, 3);
-        h->SetBinContent (1, 1);
-        h->SetLineStyle (2);
-        h->SetLineWidth (2);
-        h->SetLineColor (kBlack);
+        h->GetYaxis ()->SetRangeUser (ymin, ymax);
+        h->SetLineWidth (0);
+
+        TAxis* xax = h->GetXaxis ();
+        TAxis* yax = h->GetYaxis ();
+
+        xax->SetTitleFont (43);
+        xax->SetTitleSize (24);
+        xax->SetTitleOffset (1.5*xax->GetTitleOffset ());
+        xax->SetLabelSize (0);
+        yax->SetLabelSize (0);
+        if (iPad % 3 != 1) {
+          yax->SetTitleSize (0);
+        }
+        else if (iPad % 3 == 1) {
+          yax->SetTitleFont (43);
+          yax->SetTitleSize (24);
+          yax->SetTitleOffset (1.8*yax->GetTitleOffset ());
+        }
+
         h->DrawCopy ("hist ][");
-        SaferDelete (&h);
+
+
+        //if (iPad % 3 == 1) {
+        {
+          tl->SetTextFont (43);
+          tl->SetTextSize (19);
+          tl->SetTextAlign (21);
+          tl->SetTextColor (kBlack);
+          const double yoff = ymin - 0.05 * (ymax-ymin) / (1.-tMargin-bMargin); // y-axis is linear...
+          if (iPad % 3 == 1)
+            tl->DrawLatex (0.5, yoff, "0.5");
+          tl->DrawLatex (1,  yoff, "1");
+          tl->DrawLatex (2,  yoff, "2");
+          tl->DrawLatex (3,  yoff, "3");
+          tl->DrawLatex (4,  yoff, "4");
+          tl->DrawLatex (5,  yoff, "5");
+          tl->DrawLatex (6,  yoff, "6");
+          tl->DrawLatex (10, yoff, "10");
+          tl->DrawLatex (20, yoff, "20");
+          tl->DrawLatex (30, yoff, "30");
+          if (iPtJInt == 1)
+            tl->DrawLatex (60, yoff, "60");
+        }
+
+        if (iPad % 3 == 1) {
+          tl->SetTextFont (43);
+          tl->SetTextSize (19);
+          tl->SetTextAlign (32);
+          tl->SetTextColor (kBlack);
+          const double xoff = xmin / exp (0.01 * (log (xmax) - log (xmin)) / (1.-llMargin-lrMargin)); // x-axis is logarithmic...
+          if (iPad <= 3)
+            tl->DrawLatex (xoff, 0.7, "0.7");
+          tl->DrawLatex (xoff, 0.8, "0.8");
+          tl->DrawLatex (xoff, 0.9, "0.9");
+          tl->DrawLatex (xoff, 1.0, "1.0");
+          tl->DrawLatex (xoff, 1.1, "1.1");
+          tl->DrawLatex (xoff, 1.2, "1.2");
+          tl->DrawLatex (xoff, 1.3, "1.3");
+
+        }
+
 
         double x, y;
 
         TGAE* g = (TGAE*) g_jetInt_trk_pt_iaa_syst[iPtJInt][iDir][iCent][0]->Clone ();
-        h = h_jetInt_trk_pt_iaa[0][iPtJInt][iDir][iCent];
-        //h = h_jetInt_trk_pt_iaa_syst[iPtJInt][iDir][iCent][iMCTruthJetsTruthParts];
-        SetCentralValuesKeepRelativeErrors (g, h);
+        SetCentralValuesKeepRelativeErrors (g, h_jetInt_trk_pt_iaa[0][iPtJInt][iDir][iCent]);
         if (iDir == 1)
           TrimGraph (g, 0, 10);
         RecenterGraph (g);
-        myDrawSystFill (g, colorfulSystColors[nZdcCentBins-iCent], 0.6, 1001);
+        myDrawSystFill (g, colorfulSystColors[iCol], 0.6, 1001);
         SaferDelete (&g);
 
-        g = make_graph (h);
+
+        h->SetBinContent (1, 1);
+        h->SetLineStyle (2);
+        h->SetLineWidth (2);
+        h->SetLineColor (kBlack);
+        h->DrawCopy ("hist ][ same");
+        SaferDelete (&h);
+
+
+        gPad->RedrawAxis ();
+
+        g = make_graph (h_jetInt_trk_pt_iaa[0][iPtJInt][iDir][iCent]);
         if (iDir == 1)
           TrimGraph (g, 0, 10);
         RecenterGraph (g);
         ResetXErrors (g);
-        myDraw (g, colorfulColors[nZdcCentBins-iCent], kFullCircle, 1.0, 1, 2, "P", false);
+        myDraw (g, colorfulColors[iCol], kFullCircle, 1.0, 1, 2, "P", false);
         SaferDelete (&g);
 
 
-        if (iCent < nZdcCentBins)
-          myText (0.2, 0.865, colorfulColors[nZdcCentBins-iCent], Form ("#bf{#it{p}+Pb, ZDC %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.05);
-        else
-          myText (0.2, 0.865, colorfulColors[0], "#bf{#it{p}+Pb, 0-100%}", 0.05);
+        tl->SetTextFont (43);
+        tl->SetTextSize (22);
+        tl->SetTextAlign (11);
+        tl->SetTextColor (colorfulColors[iCol]);
+        const float xtxt = std::exp (0.59*std::log (xmax) + 0.41*std::log (xmin));
+        tl->DrawLatex (xtxt, 0.90*ymax + 0.10*ymin, Form ("#bf{ZDC %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]));
+        tl->DrawLatex (xtxt, 0.82*ymax + 0.18*ymin, Form ("#bf{#Delta#it{#phi}_{ch,jet} %s}", iDir == 0 ? "< #pi/8" : "> 7#pi/8"));
+
+
+        //const float xtxt = 0.6 + (1.-0.6)*(gPad->GetLeftMargin () - gPad->GetRightMargin ())/(1.-gPad->GetLeftMargin ()-gPad->GetRightMargin ());
+        //myText (xtxt, 0.86, colorfulColors[iCol], Form ("#bf{ZDC %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.0185/(gPad->GetWNDC ()));
+        //myText (xtxt, 0.80, colorfulColors[iCol++], Form ("#bf{#Delta#it{#phi}_{ch,jet} %s}", iDir == 0 ? "< #pi/8" : "> 7#pi/8"), 0.0185/(gPad->GetWNDC ()));
+
+        iCol++;
 
       } // end loop over iCent
 
-      c->cd ();
-      myText (0.065, 0.950, kBlack, "#bf{#it{ATLAS}} Internal", 0.054);
-  
-      c->cd (1);
-      myText (0.2, 0.80, kBlack, "#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV", 0.05);
-      myText (0.2, 0.74, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.05);
-      c->cd (2);
-      myText (0.2, 0.80, kBlack, Form ("#it{p}_{T}^{jet} > %i GeV", iPtJInt == 0 ? 30 : 60), 0.05);
-      myText (0.2, 0.74, kBlack, Form ("#Delta#phi_{ch,jet} %s", directions[iDir] == "ns" ? "< #pi/8" : (directions[iDir] == "as" ? "> 7#pi/8" : "#in (#pi/3, 2#pi/3)")), 0.05);
-
-      c->SaveAs (Form ("%s/Plots/PtCh/IpPb_FewCent_Summary_%iGeVJets_%s.pdf", workPath.Data (), iPtJInt == 0 ? 30 : 60, directions[iDir] == "ns" ? "nearside" : (directions[iDir] == "as" ? "awayside" : "perpendicular")));
     } // end loop over iDir
+
+    tl->SetTextFont (43);
+    tl->SetTextSize (22);
+    tl->SetTextAlign (11);
+    tl->SetTextColor (kBlack);
+
+    for (short iRow : {0, 1}) {
+
+      const double ymin = (iRow == 1 ? 0.72 : 0.66);
+      const double ymax = (iRow == 1 ? 1.38 : 1.32);
+
+      pads[0+3*iRow]->cd ();
+      float xtxt = std::exp (0.05*std::log (xmax) + 0.95*std::log (xmin));
+      tl->SetTextSize (24);
+      tl->DrawLatex (xtxt, 0.90*ymax+0.10*ymin, "#bf{#it{ATLAS}} Internal");
+      tl->SetTextSize (22);
+      tl->DrawLatex (xtxt, 0.81*ymax+0.19*ymin,  Form ("#bf{#it{p}_{T}^{jet} > %i GeV}", iPtJInt == 0 ? 30 : 60));
+
+      pads[1+3*iRow]->cd ();
+      xtxt = std::exp (0.05*std::log (xmax) + 0.95*std::log (xmin));
+      tl->DrawLatex (xtxt, 0.90*ymax+0.10*ymin,  "#it{pp}, 3.6 pb^{-1}");
+      xtxt = std::exp (0.05*std::log (xmax) + 0.95*std::log (xmin));
+      tl->DrawLatex (xtxt, 0.82*ymax+0.18*ymin,  "#sqrt{#it{s}} = 5.02 TeV");
+      //tl->DrawLatex (xtxt, 0.74*ymax+0.26*ymin,  "#it{L}_{int} = 3.6 pb^{-1}");
+
+      pads[2+3*iRow]->cd ();
+      xtxt = std::exp (0.05*std::log (xmax) + 0.95*std::log (xmin));
+      tl->DrawLatex (xtxt, 0.90*ymax+0.10*ymin,  "#it{p}+Pb, 0.36 nb^{-1}");
+      xtxt = std::exp (0.05*std::log (xmax) + 0.95*std::log (xmin));
+      tl->DrawLatex (xtxt, 0.82*ymax+0.18*ymin,  "#sqrt{#it{s}_{NN}} = 5.02 TeV");
+      //tl->DrawLatex (xtxt, 0.74*ymax+0.26*ymin,  "#it{L}_{int} = 0.36 nb^{-1}");
+    }
+
+    c->SaveAs (Form ("%s/Plots/PtCh/IpPb_FewCent_Summary_%iGeVJets.pdf", workPath.Data (), iPtJInt == 0 ? 30 : 60));
   } // end loop over iPtJInt
 
 
@@ -2474,11 +2655,11 @@ void PlotPtCh (const char* rawTag, const char* unfoldTag) {
       myText (0.065, 0.971, kBlack, "#bf{#it{ATLAS}} Internal", 0.027);
   
       c->cd (1);
-      myText (0.2, 0.80, kBlack, "#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV", 0.05);
-      myText (0.2, 0.74, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.05);
+      myText (0.2, 0.80, kBlack, "#it{p}+Pb, #sqrt{#it{s}_{NN}} = 5.02 TeV", 0.05);
+      myText (0.2, 0.74, kBlack, "#it{pp}, #sqrt{#it{s}} = 5.02 TeV", 0.05);
       c->cd (2);
       myText (0.2, 0.80, kBlack, Form ("#it{p}_{T}^{jet} > %i GeV", iPtJInt == 0 ? 30 : 60), 0.05);
-      myText (0.2, 0.74, kBlack, Form ("#Delta#phi_{ch,jet} %s", directions[iDir] == "ns" ? "< #pi/8" : (directions[iDir] == "as" ? "> 7#pi/8" : "#in (#pi/3, 2#pi/3)")), 0.05);
+      myText (0.2, 0.74, kBlack, Form ("#Delta#it{#phi}_{ch,jet} %s", directions[iDir] == "ns" ? "< #pi/8" : (directions[iDir] == "as" ? "> 7#pi/8" : "#in (#pi/3, 2#pi/3)")), 0.05);
       c->cd (3);
       myLineText2 (0.26, 0.80, kBlack, kFullCircle, "This result", 1.2, 0.05);
       myLineText2 (0.26, 0.73, kBlack, kFullSquare, Form ("ATLAS #it{R}_{D(#it{p}_{T})}; #it{p}_{T}^{jet} = %i-%i GeV", iPtJInt == 0 ? 45 : 60, iPtJInt == 0 ? 60 : 80), 1.2, 0.05);
@@ -2553,11 +2734,11 @@ void PlotPtCh (const char* rawTag, const char* unfoldTag) {
       myText (0.065, 0.971, kBlack, "#bf{#it{ATLAS}} Internal", 0.027);
   
       c->cd (1);
-      myText (0.2, 0.80, kBlack, "#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV", 0.05);
-      myText (0.2, 0.74, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.05);
+      myText (0.2, 0.80, kBlack, "#it{p}+Pb, #sqrt{#it{s}_{NN}} = 5.02 TeV", 0.05);
+      myText (0.2, 0.74, kBlack, "#it{pp}, #sqrt{#it{s}} = 5.02 TeV", 0.05);
       c->cd (2);
       myText (0.2, 0.80, kBlack, "#it{p}_{T}^{jet} > 60 GeV", 0.05);
-      myText (0.2, 0.74, kBlack, Form ("#Delta#phi_{ch,jet} %s", directions[iDir] == "ns" ? "< #pi/8" : (directions[iDir] == "as" ? "> 7#pi/8" : "#in (#pi/3, 2#pi/3)")), 0.05);
+      myText (0.2, 0.74, kBlack, Form ("#Delta#it{#phi}_{ch,jet} %s", directions[iDir] == "ns" ? "< #pi/8" : (directions[iDir] == "as" ? "> 7#pi/8" : "#in (#pi/3, 2#pi/3)")), 0.05);
       c->cd (3);
       myLineText2 (0.26, 0.80, kBlack, kFullCircle, "This result", 1.2, 0.05);
       myLineText2 (0.26, 0.73, kBlack, kFullSquare, "CMS #it{R}_{D(#it{p}_{T})}; #it{p}_{T}^{jet} = 60-80 GeV", 1.2, 0.05);
@@ -2632,11 +2813,11 @@ void PlotPtCh (const char* rawTag, const char* unfoldTag) {
       myText (0.065, 0.971, kBlack, "#bf{#it{ATLAS}} Internal", 0.027);
   
       c->cd (1);
-      myText (0.2, 0.80, kBlack, "#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV", 0.05);
-      myText (0.2, 0.74, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.05);
+      myText (0.2, 0.80, kBlack, "#it{p}+Pb, #sqrt{#it{s}_{NN}} = 5.02 TeV", 0.05);
+      myText (0.2, 0.74, kBlack, "#it{pp}, #sqrt{#it{s}} = 5.02 TeV", 0.05);
       c->cd (2);
       myText (0.2, 0.80, kBlack, "#it{p}_{T}^{jet} > 60 GeV", 0.05);
-      myText (0.2, 0.74, kBlack, Form ("#Delta#phi_{ch,jet} %s", directions[iDir] == "ns" ? "< #pi/8" : (directions[iDir] == "as" ? "> 7#pi/8" : "#in (#pi/3, 2#pi/3)")), 0.05);
+      myText (0.2, 0.74, kBlack, Form ("#Delta#it{#phi}_{ch,jet} %s", directions[iDir] == "ns" ? "< #pi/8" : (directions[iDir] == "as" ? "> 7#pi/8" : "#in (#pi/3, 2#pi/3)")), 0.05);
       c->cd (3);
       myLineText2 (0.26, 0.80, kBlack, kFullCircle, "This result", 1.2, 0.05);
       myLineText2 (0.26, 0.73, kBlack, kFullSquare, "CMS h^{#pm} #it{R}_{#it{p}Pb}", 1.2, 0.05);
@@ -2759,12 +2940,12 @@ void PlotPtCh (const char* rawTag, const char* unfoldTag) {
       myText (0.065, 0.971, kBlack, "#bf{#it{ATLAS}} Internal", 0.027);
   
       c->cd (1);
-      myText (0.2, 0.80, kBlack, "#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV", 0.05);
-      myText (0.2, 0.74, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.05);
+      myText (0.2, 0.80, kBlack, "#it{p}+Pb, #sqrt{#it{s}_{NN}} = 5.02 TeV", 0.05);
+      myText (0.2, 0.74, kBlack, "#it{pp}, #sqrt{#it{s}} = 5.02 TeV", 0.05);
       myText (0.2, 0.68, kBlack, "Pythia 8.306", 0.05);
       c->cd (2);
       myText (0.2, 0.80, kBlack, Form ("#it{p}_{T}^{jet} > %i GeV", iPtJInt == 0 ? 30 : 60), 0.05);
-      myText (0.2, 0.74, kBlack, Form ("#Delta#phi_{ch,jet} %s", directions[iDir] == "ns" ? "< #pi/8" : (directions[iDir] == "as" ? "> 7#pi/8" : "#in (#pi/3, 2#pi/3)")), 0.05);
+      myText (0.2, 0.74, kBlack, Form ("#Delta#it{#phi}_{ch,jet} %s", directions[iDir] == "ns" ? "< #pi/8" : (directions[iDir] == "as" ? "> 7#pi/8" : "#in (#pi/3, 2#pi/3)")), 0.05);
       c->cd (3);
       myLineText2 (0.26, 0.80, kBlack, kFullCircle, "Data", 1.2, 0.05);
       myLineText (0.26, 0.73, myPurple, 2, "#scale[0.8]{#bf{ANGANTYR}}, w/ EPPS16 (NLO)", 1.5, 0.05);
@@ -2881,9 +3062,9 @@ void PlotPtCh (const char* rawTag, const char* unfoldTag) {
       //SaferDelete (&gdown);
 
       myText (0.24, 0.890, kBlack, "#bf{#it{ATLAS}} Internal", 0.034);
-      myText (0.24, 0.850, kBlack, "#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV, ZDC 0-20%", 0.034);
-      myText (0.24, 0.810, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.034);
-      myText (0.24, 0.770, kBlack, Form ("#it{p}_{T}^{jet} > %i GeV, #Delta#phi_{ch,jet} %s", iPtJInt == 0 ? 30 : 60, directions[iDir] == "ns" ? "< #pi/8" : (directions[iDir] == "as" ? "> 7#pi/8" : "#in (#pi/3, 2#pi/3)")), 0.034);
+      myText (0.24, 0.850, kBlack, "#it{p}+Pb, #sqrt{#it{s}_{NN}} = 5.02 TeV, ZDC 0-20%", 0.034);
+      myText (0.24, 0.810, kBlack, "#it{pp}, #sqrt{#it{s}} = 5.02 TeV", 0.034);
+      myText (0.24, 0.770, kBlack, Form ("#it{p}_{T}^{jet} > %i GeV, #Delta#it{#phi}_{ch,jet} %s", iPtJInt == 0 ? 30 : 60, directions[iDir] == "ns" ? "< #pi/8" : (directions[iDir] == "as" ? "> 7#pi/8" : "#in (#pi/3, 2#pi/3)")), 0.034);
       mySimpleMarkerAndBoxAndLineText (0.32, 0.725, 1.5, 1001, kBlack, 0.0, kBlack, 53, 1.8, "Data", 0.034);
 
       mySimpleMarkerAndBoxAndLineText (0.32, 0.685, 1.5, 1001, myLitePurple, 0.7, myViolet, kDot, 0.0, "#scale[0.8]{#bf{ANGANTYR}}, w/ EPPS16 (NLO)", 0.034, 2);
@@ -2899,20 +3080,83 @@ void PlotPtCh (const char* rawTag, const char* unfoldTag) {
 
 
   {
+    const char* canvasName = "c_jetInt_trk_pt_IpPb_Angantyr_0-20perc_Comp_allPtJet";
+    TCanvas* c = new TCanvas (canvasName, "", 1300, 700);
+    c->cd ();
+
+    const double llMargin = 0.17;
+    const double lrMargin = 0;//0.032;
+    const double rlMargin = 0;//0.032;
+    const double rrMargin = 0.06;
+  
+    const double bMargin = 0.16;
+    const double tMargin = 0.04;
+  
+    const double deltaL = (1. - llMargin - lrMargin);
+    const double deltaR = (1. - rlMargin - rrMargin);
+  
+    const double xPadMiddle = deltaR / (deltaL + deltaR);
+  
+
+    TPad* lPad = nullptr;
+    TPad* rPad = nullptr;
+
+    lPad = new TPad (Form ("%s_lPad", canvasName), "", 0, 0, xPadMiddle, 1);
+    rPad = new TPad (Form ("%s_rPad", canvasName), "", xPadMiddle, 0, 1, 1);
+
+    lPad->SetLeftMargin (llMargin);
+    lPad->SetRightMargin (lrMargin);
+    rPad->SetLeftMargin (rlMargin);
+    rPad->SetRightMargin (rrMargin);
+    lPad->SetBottomMargin (bMargin);
+    lPad->SetTopMargin (tMargin);
+    rPad->SetBottomMargin (bMargin);
+    rPad->SetTopMargin (tMargin);
+
+    std::vector <TPad*> pads = {lPad, rPad};
+    short iPad = 0;
+
+    const double xmin = 3;
+    const double xmax = pTChBins[nPtChBins-1];
+    const double ymin = 0.77;
+    const double ymax = 1.37;
+
+    for (TPad*& pad : pads)
+      pad->Draw ();
+
+    const short iCent = 4;
+
     for (short iDir : {0, 2}) {
 
-      const char* canvasName = Form ("c_jetInt_trk_pt_IpPb_Angantyr_0-20perc_Comp_iDir%i_allPtJet", iDir);
-      TCanvas* c = new TCanvas (canvasName, "", 800, 800);
-      c->cd ();
+      pads[iPad]->cd ();
 
-      const short iCent = 4;
       gPad->SetLogx ();
 
-      //TH1D* h = new TH1D ("h", ";#it{p}_{T}^{ch} [GeV];#it{I}_{#it{p}Pb}", 1, pTChBins[1], iDir == 1 ? 10 : pTChBins[nPtChBins-(iPtJInt == 0 ? 3 : 1)]);//pTChBins[nPtChBins]);
-      TH1D* h = new TH1D ("h", ";#it{p}_{T}^{ch} [GeV];#it{I}_{#it{p}Pb}", 1, 3, iDir == 1 ? 10 : pTChBins[nPtChBins-1]);//pTChBins[nPtChBins]);
-      h->GetXaxis ()->SetMoreLogLabels ();
-      h->GetYaxis ()->SetRangeUser (0.67, 1.37);
-      //h->GetYaxis ()->SetRangeUser (0.0, 3);
+      TH1D* h = new TH1D ("h", ";#it{p}_{T}^{ch} [GeV];#it{I}_{#it{p}Pb}", 1, xmin, xmax); 
+
+      TAxis* xax = h->GetXaxis ();
+      TAxis* yax = h->GetYaxis ();
+
+      xax->SetMoreLogLabels ();
+      yax->SetRangeUser (ymin, ymax);
+
+      xax->SetTitleFont (43);
+      xax->SetTitleSize (34);
+      xax->SetTitleOffset (1.0*xax->GetTitleOffset ());
+      xax->SetLabelFont (43);
+      xax->SetLabelSize (33);
+      if (iPad > 0) {
+        yax->SetTitleSize (0);
+        yax->SetLabelSize (0);
+      }
+      else {
+        yax->SetTitleFont (43);
+        yax->SetTitleSize (34);
+        yax->SetLabelFont (43);
+        yax->SetLabelSize (32);
+        yax->SetTitleOffset (1.0*yax->GetTitleOffset ());
+      }
+
       h->SetBinContent (1, 1);
       h->SetLineStyle (2);
       h->SetLineWidth (2);
@@ -2922,7 +3166,7 @@ void PlotPtCh (const char* rawTag, const char* unfoldTag) {
 
       TGAE* g = nullptr;
 
-      gStyle->SetEndErrorSize (5);
+      //gStyle->SetEndErrorSize (5);
       for (int iPtJInt : {0, 1}) {
 
         g = (TGAE*) g_jetInt_trk_pt_iaa_syst[iPtJInt][iDir][iCent][0]->Clone ();
@@ -2987,21 +3231,33 @@ void PlotPtCh (const char* rawTag, const char* unfoldTag) {
 
       }
 
-      myText (0.24, 0.890, kBlack, "#bf{#it{ATLAS}} Internal", 0.034);
-      myText (0.24, 0.850, kBlack, "#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV, ZDC 0-20%", 0.032);
-      myText (0.24, 0.810, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.032);
-      myText (0.24, 0.770, kBlack, Form ("#Delta#phi_{ch,jet} %s", directions[iDir] == "ns" ? "< #pi/8" : (directions[iDir] == "as" ? "> 7#pi/8" : "#in (#pi/3, 2#pi/3)")), 0.032);
+      iPad++;
+    } // end loop over iDir
 
-      mySimpleMarkerAndBoxAndLineText (0.29, 0.360, 1.5, 1001, kGray+1,       0.50, kBlack,  53, 1.8, "Data, #it{p}_{T}^{jet} > 60 GeV", 0.028);
-      mySimpleMarkerAndBoxAndLineText (0.29, 0.320, 1.5, 1001, myLiteYellow,  0.35, kBlack,  21, 1.8, "Data, #it{p}_{T}^{jet} > 30 GeV", 0.028);
+    pads[0]->cd ();
+    float xtxt = std::exp (0.05*std::log (xmax) + 0.95*std::log (xmin));
+    tl->SetTextSize (32);
+    tl->DrawLatex (xtxt, 0.90*ymax+0.10*ymin, "#bf{#it{ATLAS}} Internal");
+    tl->SetTextSize (28);
+    tl->DrawLatex (xtxt, 0.82*ymax+0.18*ymin,  "#it{pp}, #sqrt{#it{s}} = 5.02 TeV, 3.6 pb^{-1}");
+    tl->DrawLatex (xtxt, 0.74*ymax+0.26*ymin,  "#it{p}+Pb, #sqrt{#it{s}_{NN}} = 5.02 TeV, 0.36 nb^{-1}");
+    xtxt = std::exp (0.68*std::log (xmax) + 0.32*std::log (xmin));
+    tl->DrawLatex (xtxt, 0.90*ymax+0.10*ymin, "#Delta#it{#phi}_{ch,jet} < #pi/8");
 
-      mySimpleMarkerAndBoxAndLineText (0.29, 0.280, 1.5, 1001, myLitePurple, 0.7, myViolet, kDot, 0.0, "#scale[0.8]{#bf{ANGANTYR}}, EPPS16 (NLO), #it{p}_{T}^{jet} > 60 GeV", 0.028, 2);
-      mySimpleMarkerAndBoxAndLineText (0.29, 0.240, 1.5, 1001, myLiteRed,    0.7, myRed,    kDot, 0.0, "#scale[0.8]{#bf{ANGANTYR}}, EPPS16 (NLO), #it{p}_{T}^{jet} > 30 GeV", 0.028, 2);
-      mySimpleMarkerAndBoxAndLineText (0.29, 0.200, 1.5, 1001, myLiteBlue,   0.5, myBlue,   kDot, 0.0, "#scale[0.8]{#bf{ANGANTYR}}, no nPDF, #it{p}_{T}^{jet} > 60 GeV",      0.028, 1);
+    pads[1]->cd ();
+    tl->DrawLatex (xtxt, 0.90*ymax+0.10*ymin, "#Delta#it{#phi}_{ch,jet} > 7#pi/8");
 
-      c->SaveAs (Form ("%s/Plots/PtCh/IpPb_Angantyr_Comp_0-20perc_AllPtJets_%s.pdf", workPath.Data (), directions[iDir] == "ns" ? "nearside" : (directions[iDir] == "as" ? "awayside" : "perpendicular")));
-    } // end iDir=0 scope
-    gStyle->SetEndErrorSize (0);
+    pads[0]->cd ();
+    mySimpleMarkerAndBoxAndLineText (0.33, 0.320, 1.80, 1001, myLitePurple, 0.7, myViolet, kDot, 0.0, "#scale[0.8]{#bf{ANGANTYR}, EPPS16 (NLO), #it{p}_{T}^{jet} > 60 GeV}", 0.042, 2);
+    mySimpleMarkerAndBoxAndLineText (0.33, 0.265, 1.80, 1001, myLiteRed,    0.7, myRed,    kDot, 0.0, "#scale[0.8]{#bf{ANGANTYR}, EPPS16 (NLO), #it{p}_{T}^{jet} > 30 GeV}", 0.042, 2);
+    mySimpleMarkerAndBoxAndLineText (0.33, 0.210, 1.80, 1001, myLiteBlue,   0.5, myBlue,   kDot, 0.0, "#scale[0.8]{#bf{ANGANTYR}, no nPDF, #it{p}_{T}^{jet} > 60 GeV}",      0.042, 1);
+
+    pads[1]->cd ();
+    mySimpleMarkerAndBoxAndLineText (0.33-llMargin+rlMargin, 0.320, 1.80, 1001, kGray+1,       0.50, kBlack,  53, 2.0, "#scale[0.87]{Data, #it{p}_{T}^{jet} > 60 GeV}", 0.042);
+    mySimpleMarkerAndBoxAndLineText (0.33-llMargin+rlMargin, 0.265, 1.80, 1001, myLiteYellow,  0.35, kBlack,  21, 2.0, "#scale[0.87]{Data, #it{p}_{T}^{jet} > 30 GeV}", 0.042);
+
+    c->SaveAs (Form ("%s/Plots/PtCh/IpPb_Angantyr_Comp_0-20perc_AllPtJets.pdf", workPath.Data ()));
+    //gStyle->SetEndErrorSize (0);
   } // end loop over iPtJInt
 
 
@@ -3067,9 +3323,9 @@ void PlotPtCh (const char* rawTag, const char* unfoldTag) {
       SaferDelete (&g);
 
       myText (0.24, 0.890, kBlack, "#bf{#it{ATLAS}} Internal", 0.034);
-      myText (0.24, 0.850, kBlack, "#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV, ZDC 0-20%", 0.034);
-      myText (0.24, 0.810, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.034);
-      myText (0.24, 0.770, kBlack, Form ("#it{p}_{T}^{jet} > 60 GeV, #Delta#phi_{ch,jet} %s", directions[iDir] == "ns" ? "< #pi/8" : (directions[iDir] == "as" ? "> 7#pi/8" : "#in (#pi/3, 2#pi/3)")), 0.034);
+      myText (0.24, 0.850, kBlack, "#it{p}+Pb, #sqrt{#it{s}_{NN}} = 5.02 TeV, ZDC 0-20%", 0.034);
+      myText (0.24, 0.810, kBlack, "#it{pp}, #sqrt{#it{s}} = 5.02 TeV", 0.034);
+      myText (0.24, 0.770, kBlack, Form ("#it{p}_{T}^{jet} > 60 GeV, #Delta#it{#phi}_{ch,jet} %s", directions[iDir] == "ns" ? "< #pi/8" : (directions[iDir] == "as" ? "> 7#pi/8" : "#in (#pi/3, 2#pi/3)")), 0.034);
       //mySimpleMarkerAndBoxAndLineText (0.32, 0.725, 1.5, 1001, colorfulSystColors[0], 1.0, colorfulColors[0], kFullCircle, 1.6, "Data", 0.034);
       mySimpleMarkerAndBoxAndLineText (0.32, 0.725, 1.5, 1001, kBlack, 0.0, kBlack, 53, 1.8, "Data", 0.034);
       mySimpleMarkerAndBoxAndLineText (0.32, 0.685, 1.5, 1001, kWhite, 0.0, myViolet, kFullSquare, 1.8, "AMPT, w/ FS interactions", 0.034);
@@ -3144,13 +3400,13 @@ void PlotPtCh (const char* rawTag, const char* unfoldTag) {
 
 
       myText (0.52, 0.890, kBlack, "#bf{#it{ATLAS}} Internal", 0.034);
-      myText (0.52, 0.845, kBlack, "Pb+Pb, #sqrt{s_{NN}} = 5.02 TeV", 0.034);
-      myText (0.52, 0.800, kBlack, "#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV", 0.034);
-      myText (0.52, 0.755, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.034);
+      myText (0.52, 0.845, kBlack, "Pb+Pb, #sqrt{#it{s}_{NN}} = 5.02 TeV", 0.034);
+      myText (0.52, 0.800, kBlack, "#it{p}+Pb, #sqrt{#it{s}_{NN}} = 5.02 TeV", 0.034);
+      myText (0.52, 0.755, kBlack, "#it{pp}, #sqrt{#it{s}} = 5.02 TeV", 0.034);
       mySimpleMarkerAndBoxAndLineText (0.28, 0.355, 1.5, 1001, jhSystCol, 0.6, jhCol, 53, 1.8, "0-20\% #it{p}+Pb jet-#it{h}", 0.034);
-      myText (0.28, 0.310, kBlack, Form ("#it{p}_{T}^{jet} > %i GeV, #Delta#phi_{h,jet} %s", iPtJInt == 0 ? 30 : 60, directions[iDir] == "ns" ? "< #pi/8" : (directions[iDir] == "as" ? "> 7#pi/8" : "#in (#pi/3, 2#pi/3)")), 0.034);
+      myText (0.28, 0.310, kBlack, Form ("#it{p}_{T}^{jet} > %i GeV, #Delta#it{#phi}_{h,jet} %s", iPtJInt == 0 ? 30 : 60, directions[iDir] == "ns" ? "< #pi/8" : (directions[iDir] == "as" ? "> 7#pi/8" : "#in (#pi/3, 2#pi/3)")), 0.034);
       mySimpleMarkerAndBoxAndLineText (0.28, 0.255, 1.5, 1001, zhSystCol, 0.5, zhCol, kFullSquare, 1.8, "0-10\% Pb+Pb #it{Z}-#it{h}", 0.034);
-      myText (0.28, 0.210, kBlack, Form ("#it{p}_{T}^{Z} %s, #Delta#phi_{hZ} > 3#pi/4", iPtJInt == 0 ? "= 30-60 GeV" : "> 60 GeV"), 0.034);
+      myText (0.28, 0.210, kBlack, Form ("#it{p}_{T}^{Z} %s, #Delta#it{#phi}_{hZ} > 3#pi/4", iPtJInt == 0 ? "= 30-60 GeV" : "> 60 GeV"), 0.034);
       c->SaveAs (Form ("%s/Plots/PtCh/IpPb_Zh_Comp_0-20perc_%iGeVJets_%s.pdf", workPath.Data (), iPtJInt == 0 ? 30 : 60, directions[iDir] == "ns" ? "nearside" : (directions[iDir] == "as" ? "awayside" : "perpendicular")));
     } // end iDir=0 scope
   } // end loop over iPtJInt
@@ -3214,9 +3470,9 @@ void PlotPtCh (const char* rawTag, const char* unfoldTag) {
       }
 
       myText (0.22, 0.89, kBlack, "#bf{#it{ATLAS}} Internal", 0.032);
-      myText (0.22, 0.85, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.032);
-      myText (0.22, 0.81, kBlack, "#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV", 0.032);
-      myText (0.22, 0.77, kBlack, Form ("#it{p}_{T}^{jet} > %i GeV, #Delta#phi_{ch,jet} %s", iPtJInt == 0 ? 30 : 60, directions[iDir] == "ns" ? "< #pi/8" : (directions[iDir] == "as" ? "> 7#pi/8" : "#in (#pi/3, 2#pi/3)")), 0.032);
+      myText (0.22, 0.85, kBlack, "#it{pp}, #sqrt{#it{s}} = 5.02 TeV", 0.032);
+      myText (0.22, 0.81, kBlack, "#it{p}+Pb, #sqrt{#it{s}_{NN}} = 5.02 TeV", 0.032);
+      myText (0.22, 0.77, kBlack, Form ("#it{p}_{T}^{jet} > %i GeV, #Delta#it{#phi}_{ch,jet} %s", iPtJInt == 0 ? 30 : 60, directions[iDir] == "ns" ? "< #pi/8" : (directions[iDir] == "as" ? "> 7#pi/8" : "#in (#pi/3, 2#pi/3)")), 0.032);
       myLineText2 (0.25, 0.72, kBlack, kOpenCircle, "#bf{#it{pp}}", 1.4, 0.032, true);
       for (short iCent = 0; iCent < nZdcCentBins; iCent++)
         myLineText2 (0.25, 0.68-iCent*0.04, colors[iCent], kOpenCircle, Form ("#bf{#it{p}+Pb, %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 1.4, 0.032, true);
@@ -3287,9 +3543,9 @@ void PlotPtCh (const char* rawTag, const char* unfoldTag) {
       }
 
       myText (0.22, 0.89, kBlack, "#bf{#it{ATLAS}} Internal", 0.032);
-      myText (0.22, 0.85, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.032);
-      myText (0.22, 0.81, kBlack, "#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV", 0.032);
-      myText (0.22, 0.77, kBlack, Form ("#it{p}_{T}^{jet} > %i GeV, #Delta#phi_{ch,jet} %s", iPtJInt == 0 ? 30 : 60, directions[iDir] == "ns" ? "< #pi/8" : (directions[iDir] == "as" ? "> 7#pi/8" : "#in (#pi/3, 2#pi/3)")), 0.032);
+      myText (0.22, 0.85, kBlack, "#it{pp}, #sqrt{#it{s}} = 5.02 TeV", 0.032);
+      myText (0.22, 0.81, kBlack, "#it{p}+Pb, #sqrt{#it{s}_{NN}} = 5.02 TeV", 0.032);
+      myText (0.22, 0.77, kBlack, Form ("#it{p}_{T}^{jet} > %i GeV, #Delta#it{#phi}_{ch,jet} %s", iPtJInt == 0 ? 30 : 60, directions[iDir] == "ns" ? "< #pi/8" : (directions[iDir] == "as" ? "> 7#pi/8" : "#in (#pi/3, 2#pi/3)")), 0.032);
       myLineText2 (0.25, 0.72, kBlack, kOpenCircle, "#bf{#it{pp}}", 1.4, 0.032, true);
       for (short iCent = 0; iCent < nZdcCentBins; iCent++)
         myLineText2 (0.25, 0.68-iCent*0.04, colors[iCent], kOpenCircle, Form ("#bf{#it{p}+Pb, %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 1.4, 0.032, true);
@@ -3374,8 +3630,8 @@ void PlotPtCh (const char* rawTag, const char* unfoldTag) {
       //    }
 
       //    myText (0.22, 0.89, kBlack, Form ("#bf{#it{ATLAS}} %sInternal", iDType == 0 ? "" : "Simulation "), 0.032);
-      //    myText (0.22, 0.85, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.032);
-      //    myText (0.22, 0.81, kBlack, Form ("#it{p}_{T}^{jet} > %i GeV, #Delta#phi_{ch,jet} %s", iPtJInt == 0 ? 30 : 60, directions[iDir] == "ns" ? "< #pi/8" : "> 7#pi/8"), 0.032);
+      //    myText (0.22, 0.85, kBlack, "#it{pp}, #sqrt{#it{s}} = 5.02 TeV", 0.032);
+      //    myText (0.22, 0.81, kBlack, Form ("#it{p}_{T}^{jet} > %i GeV, #Delta#it{#phi}_{ch,jet} %s", iPtJInt == 0 ? 30 : 60, directions[iDir] == "ns" ? "< #pi/8" : "> 7#pi/8"), 0.032);
 
       //    short count = 0;
       //    for (short iVar = 1; iVar < nVar; iVar++) {
@@ -3453,8 +3709,8 @@ void PlotPtCh (const char* rawTag, const char* unfoldTag) {
       //      }
 
       //      myText (0.22, 0.89, kBlack, Form ("#bf{#it{ATLAS}} %sInternal", iDType == 0 ? "" : "Simulation "), 0.032);
-      //      myText (0.22, 0.85, kBlack, Form ("#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV, #bf{%s %i-%i%%}", iDType == 0 ? "ZDC" : "FCal", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.032);
-      //      myText (0.22, 0.81, kBlack, Form ("#it{p}_{T}^{jet} > %i GeV, #Delta#phi_{ch,jet} %s", iPtJInt == 0 ? 30 : 60, directions[iDir] == "ns" ? "< #pi/8" : "> 7#pi/8"), 0.032);
+      //      myText (0.22, 0.85, kBlack, Form ("#it{p}+Pb, #sqrt{#it{s}_{NN}} = 5.02 TeV, #bf{%s %i-%i%%}", iDType == 0 ? "ZDC" : "FCal", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.032);
+      //      myText (0.22, 0.81, kBlack, Form ("#it{p}_{T}^{jet} > %i GeV, #Delta#it{#phi}_{ch,jet} %s", iPtJInt == 0 ? 30 : 60, directions[iDir] == "ns" ? "< #pi/8" : "> 7#pi/8"), 0.032);
 
       //      short count = 0;
       //      for (short iVar = 1; iVar < nVar; iVar++) {
@@ -3533,8 +3789,8 @@ void PlotPtCh (const char* rawTag, const char* unfoldTag) {
       //    }
 
       //    myText (0.22, 0.89, kBlack, Form ("#bf{#it{ATLAS}} %sInternal", iDType == 0 ? "" : "Simulation "), 0.032);
-      //    myText (0.22, 0.85, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.032);
-      //    myText (0.22, 0.81, kBlack, Form ("#it{p}_{T}^{jet} > %i GeV, #Delta#phi_{ch,jet} %s", iPtJInt == 0 ? 30 : 60, directions[iDir] == "ns" ? "< #pi/8" : "> 7#pi/8"), 0.032);
+      //    myText (0.22, 0.85, kBlack, "#it{pp}, #sqrt{#it{s}} = 5.02 TeV", 0.032);
+      //    myText (0.22, 0.81, kBlack, Form ("#it{p}_{T}^{jet} > %i GeV, #Delta#it{#phi}_{ch,jet} %s", iPtJInt == 0 ? 30 : 60, directions[iDir] == "ns" ? "< #pi/8" : "> 7#pi/8"), 0.032);
 
       //    short count = 0;
       //    for (short iVar = 1; iVar < nVar; iVar++) {
@@ -3612,8 +3868,8 @@ void PlotPtCh (const char* rawTag, const char* unfoldTag) {
       //      }
 
       //      myText (0.22, 0.89, kBlack, Form ("#bf{#it{ATLAS}} %sInternal", iDType == 0 ? "" : "Simulation "), 0.032);
-      //      myText (0.22, 0.85, kBlack, Form ("#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV, #bf{%s %i-%i%%}", iDType == 0 ? "ZDC" : "FCal", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.032);
-      //      myText (0.22, 0.81, kBlack, Form ("#it{p}_{T}^{jet} > %i GeV, #Delta#phi_{ch,jet} %s", iPtJInt == 0 ? 30 : 60, directions[iDir] == "ns" ? "< #pi/8" : "> 7#pi/8"), 0.032);
+      //      myText (0.22, 0.85, kBlack, Form ("#it{p}+Pb, #sqrt{#it{s}_{NN}} = 5.02 TeV, #bf{%s %i-%i%%}", iDType == 0 ? "ZDC" : "FCal", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.032);
+      //      myText (0.22, 0.81, kBlack, Form ("#it{p}_{T}^{jet} > %i GeV, #Delta#it{#phi}_{ch,jet} %s", iPtJInt == 0 ? 30 : 60, directions[iDir] == "ns" ? "< #pi/8" : "> 7#pi/8"), 0.032);
 
       //      short count = 0;
       //      for (short iVar = 1; iVar < nVar; iVar++) {
@@ -3694,11 +3950,11 @@ void PlotPtCh (const char* rawTag, const char* unfoldTag) {
           }
 
           myText (0.22, 0.89, kBlack, Form ("#bf{#it{ATLAS}} %sInternal", iDType == 0 ? "" : "Simulation "), 0.032);
-          myText (0.22, 0.85, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.032);
+          myText (0.22, 0.85, kBlack, "#it{pp}, #sqrt{#it{s}} = 5.02 TeV", 0.032);
           if (directions[iDir] == "ns")
-            myText (0.22, 0.81, kBlack, Form ("#it{p}_{T}^{jet} > %i GeV, #Delta#phi_{ch,jet} < #pi/8 (near-side)", iPtJInt == 0 ? 30 : 60), 0.032);
+            myText (0.22, 0.81, kBlack, Form ("#it{p}_{T}^{jet} > %i GeV, #Delta#it{#phi}_{ch,jet} < #pi/8 (near-side)", iPtJInt == 0 ? 30 : 60), 0.032);
           else if (directions[iDir] == "as")
-            myText (0.22, 0.81, kBlack, Form ("#it{p}_{T}^{jet} > %i GeV, #Delta#phi_{ch,jet} > 7#pi/8 (away-side)", iPtJInt == 0 ? 30 : 60), 0.032);
+            myText (0.22, 0.81, kBlack, Form ("#it{p}_{T}^{jet} > %i GeV, #Delta#it{#phi}_{ch,jet} > 7#pi/8 (away-side)", iPtJInt == 0 ? 30 : 60), 0.032);
 
           short count = 0;
           for (short iVar = 1; iVar < nVar; iVar++) {
@@ -3778,11 +4034,11 @@ void PlotPtCh (const char* rawTag, const char* unfoldTag) {
             }
 
             myText (0.22, 0.89, kBlack, Form ("#bf{#it{ATLAS}} %sInternal", iDType == 0 ? "" : "Simulation "), 0.032);
-            myText (0.22, 0.85, kBlack, Form ("#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV, #bf{%s %i-%i%%}", iDType == 0 ? "ZDC" : "FCal", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.032);
+            myText (0.22, 0.85, kBlack, Form ("#it{p}+Pb, #sqrt{#it{s}_{NN}} = 5.02 TeV, #bf{%s %i-%i%%}", iDType == 0 ? "ZDC" : "FCal", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.032);
             if (directions[iDir] == "ns")
-              myText (0.22, 0.81, kBlack, Form ("#it{p}_{T}^{jet} > %i GeV, #Delta#phi_{ch,jet} < #pi/8 (near-side)", iPtJInt == 0 ? 30 : 60), 0.032);
+              myText (0.22, 0.81, kBlack, Form ("#it{p}_{T}^{jet} > %i GeV, #Delta#it{#phi}_{ch,jet} < #pi/8 (near-side)", iPtJInt == 0 ? 30 : 60), 0.032);
             else if (directions[iDir] == "as")
-              myText (0.22, 0.81, kBlack, Form ("#it{p}_{T}^{jet} > %i GeV, #Delta#phi_{ch,jet} > 7#pi/8 (away-side)", iPtJInt == 0 ? 30 : 60), 0.032);
+              myText (0.22, 0.81, kBlack, Form ("#it{p}_{T}^{jet} > %i GeV, #Delta#it{#phi}_{ch,jet} > 7#pi/8 (away-side)", iPtJInt == 0 ? 30 : 60), 0.032);
 
             short count = 0;
             for (short iVar = 1; iVar < nVar; iVar++) {
@@ -3931,8 +4187,8 @@ void PlotPtCh (const char* rawTag, const char* unfoldTag) {
 
           c->cd (8);
           myText (0.00, 0.95, kBlack, "#bf{#it{ATLAS}} Internal", 0.06);
-          myText (0.00, 0.87, kBlack, "#it{pp} & #it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV", 0.06);
-          myText (0.00, 0.79, kBlack, Form ("#it{p}_{T}^{jet} > %i GeV, #Delta#phi_{ch,jet} %s", iPtJInt == 0 ? 30 : 60, directions[iDir] == "ns" ? "< #pi/8" : "> 7#pi/8"), 0.06);
+          myText (0.00, 0.87, kBlack, "#it{pp} & #it{p}+Pb, #sqrt{#it{s}_{NN}} = 5.02 TeV", 0.06);
+          myText (0.00, 0.79, kBlack, Form ("#it{p}_{T}^{jet} > %i GeV, #Delta#it{#phi}_{ch,jet} %s", iPtJInt == 0 ? 30 : 60, directions[iDir] == "ns" ? "< #pi/8" : "> 7#pi/8"), 0.06);
 
           short count = 0;
           for (short iVar = 1; iVar < nVar; iVar++) {
@@ -4014,12 +4270,12 @@ void PlotPtCh (const char* rawTag, const char* unfoldTag) {
             }
   
             myText (0.22, 0.89, kBlack, Form ("#bf{#it{ATLAS}} %sInternal", iDType == 0 ? "" : "Simulation "), 0.032);
-            myText (0.22, 0.85, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.032);
-            myText (0.22, 0.81, kBlack, Form ("#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV, #bf{%s %i-%i%%}", iDType == 0 ? "ZDC" : "FCal", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.032);
+            myText (0.22, 0.85, kBlack, "#it{pp}, #sqrt{#it{s}} = 5.02 TeV", 0.032);
+            myText (0.22, 0.81, kBlack, Form ("#it{p}+Pb, #sqrt{#it{s}_{NN}} = 5.02 TeV, #bf{%s %i-%i%%}", iDType == 0 ? "ZDC" : "FCal", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.032);
             if (directions[iDir] == "ns")
-              myText (0.22, 0.77, kBlack, Form ("#it{p}_{T}^{jet} > %i GeV, #Delta#phi_{ch,jet} < #pi/8 (near-side)", iPtJInt == 0 ? 30 : 60), 0.032);
+              myText (0.22, 0.77, kBlack, Form ("#it{p}_{T}^{jet} > %i GeV, #Delta#it{#phi}_{ch,jet} < #pi/8 (near-side)", iPtJInt == 0 ? 30 : 60), 0.032);
             else if (directions[iDir] == "as")
-              myText (0.22, 0.77, kBlack, Form ("#it{p}_{T}^{jet} > %i GeV, #Delta#phi_{ch,jet} > 7#pi/8 (away-side)", iPtJInt == 0 ? 30 : 60), 0.032);
+              myText (0.22, 0.77, kBlack, Form ("#it{p}_{T}^{jet} > %i GeV, #Delta#it{#phi}_{ch,jet} > 7#pi/8 (away-side)", iPtJInt == 0 ? 30 : 60), 0.032);
   
             short count = 0;
             for (short iVar = 1; iVar < nVar; iVar++) {
@@ -4117,7 +4373,7 @@ void PlotPtCh (const char* rawTag, const char* unfoldTag) {
           c->cd (7);
           myText (0.00, 0.95, kBlack, "#bf{#it{ATLAS}} Internal", 0.07);
           myText (0.00, 0.87, kBlack, Form ("#it{p}_{T}^{jet} > %i GeV", iPtJInt == 0 ? 30 : 60), 0.07);
-          myText (0.00, 0.79, kBlack, Form ("#Delta#phi_{ch,jet} %s", directions[iDir] == "ns" ? "< #pi/8 (near-side)" : "> 7#pi/8 (away-side)"), 0.07);
+          myText (0.00, 0.79, kBlack, Form ("#Delta#it{#phi}_{ch,jet} %s", directions[iDir] == "ns" ? "< #pi/8 (near-side)" : "> 7#pi/8 (away-side)"), 0.07);
 
           short count = 0;
           for (short iVar = 1; iVar < nVar; iVar++) {
@@ -4219,11 +4475,11 @@ void PlotPtCh (const char* rawTag, const char* unfoldTag) {
           SaferDelete (&g);
 
           myText (0.22, 0.89, kBlack, "#bf{#it{ATLAS}} Internal", 0.032);
-          myText (0.22, 0.85, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.032);
+          myText (0.22, 0.85, kBlack, "#it{pp}, #sqrt{#it{s}} = 5.02 TeV", 0.032);
           if (directions[iDir] == "ns")
-            myText (0.22, 0.81, kBlack, Form ("#it{p}_{T}^{jet} > %i GeV, #Delta#phi_{ch,jet} < #pi/8 (near-side)", iPtJInt == 0 ? 30 : 60), 0.032);
+            myText (0.22, 0.81, kBlack, Form ("#it{p}_{T}^{jet} > %i GeV, #Delta#it{#phi}_{ch,jet} < #pi/8 (near-side)", iPtJInt == 0 ? 30 : 60), 0.032);
           else if (directions[iDir] == "as")
-            myText (0.22, 0.81, kBlack, Form ("#it{p}_{T}^{jet} > %i GeV, #Delta#phi_{ch,jet} > 7#pi/8 (away-side)", iPtJInt == 0 ? 30 : 60), 0.032);
+            myText (0.22, 0.81, kBlack, Form ("#it{p}_{T}^{jet} > %i GeV, #Delta#it{#phi}_{ch,jet} > 7#pi/8 (away-side)", iPtJInt == 0 ? 30 : 60), 0.032);
 
           short count = 0;
           for (short iTotVar : {0, 1, 2}) {
@@ -4289,11 +4545,11 @@ void PlotPtCh (const char* rawTag, const char* unfoldTag) {
             SaferDelete (&g);
 
             myText (0.22, 0.89, kBlack, "#bf{#it{ATLAS}} Internal", 0.032);
-            myText (0.22, 0.85, kBlack, Form ("#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV, #bf{ZDC %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.032);
+            myText (0.22, 0.85, kBlack, Form ("#it{p}+Pb, #sqrt{#it{s}_{NN}} = 5.02 TeV, #bf{ZDC %i-%i%%}", zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.032);
             if (directions[iDir] == "ns")
-              myText (0.22, 0.81, kBlack, Form ("#it{p}_{T}^{jet} > %i GeV, #Delta#phi_{ch,jet} < #pi/8 (near-side)", iPtJInt == 0 ? 30 : 60), 0.032);
+              myText (0.22, 0.81, kBlack, Form ("#it{p}_{T}^{jet} > %i GeV, #Delta#it{#phi}_{ch,jet} < #pi/8 (near-side)", iPtJInt == 0 ? 30 : 60), 0.032);
             else if (directions[iDir] == "as")
-              myText (0.22, 0.81, kBlack, Form ("#it{p}_{T}^{jet} > %i GeV, #Delta#phi_{ch,jet} > 7#pi/8 (away-side)", iPtJInt == 0 ? 30 : 60), 0.032);
+              myText (0.22, 0.81, kBlack, Form ("#it{p}_{T}^{jet} > %i GeV, #Delta#it{#phi}_{ch,jet} > 7#pi/8 (away-side)", iPtJInt == 0 ? 30 : 60), 0.032);
 
             short count = 0;
             for (short iTotVar : {0, 1, 2}) {
@@ -4449,10 +4705,10 @@ void PlotPtCh (const char* rawTag, const char* unfoldTag) {
 
           c->cd (8);
           myText (0.1, 0.93, kBlack, "#bf{#it{ATLAS}} Internal", 0.07);
-          myText (0.1, 0.84, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.07);
-          myText (0.1, 0.75, kBlack, "#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV", 0.07);
+          myText (0.1, 0.84, kBlack, "#it{pp}, #sqrt{#it{s}} = 5.02 TeV", 0.07);
+          myText (0.1, 0.75, kBlack, "#it{p}+Pb, #sqrt{#it{s}_{NN}} = 5.02 TeV", 0.07);
           myText (0.1, 0.66, kBlack, Form ("#it{p}_{T}^{jet} > %i GeV", iPtJInt == 0 ? 30 : 60), 0.07);
-          myText (0.1, 0.57, kBlack, Form ("#Delta#phi_{ch,jet} %s", directions[iDir] == "ns" ? "< #pi/8 (near-side)" : "> 7#pi/8 (away-side)"), 0.07);
+          myText (0.1, 0.57, kBlack, Form ("#Delta#it{#phi}_{ch,jet} %s", directions[iDir] == "ns" ? "< #pi/8 (near-side)" : "> 7#pi/8 (away-side)"), 0.07);
 
           short count = 0;
           myLineColorText (0.16, 0.49, kGray+1, 2, "#bf{Total stat. unc.}", 2.0, 0.07);
@@ -4523,12 +4779,12 @@ void PlotPtCh (const char* rawTag, const char* unfoldTag) {
             SaferDelete (&g);
 
             myText (0.22, 0.89, kBlack, "#bf{#it{ATLAS}} Internal", 0.032);
-            myText (0.22, 0.85, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.032);
-            myText (0.22, 0.81, kBlack, Form ("#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV, #bf{ZDC %i-%i%%}",  zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.032);
+            myText (0.22, 0.85, kBlack, "#it{pp}, #sqrt{#it{s}} = 5.02 TeV", 0.032);
+            myText (0.22, 0.81, kBlack, Form ("#it{p}+Pb, #sqrt{#it{s}_{NN}} = 5.02 TeV, #bf{ZDC %i-%i%%}",  zdcCentPercs[iCent+1], zdcCentPercs[iCent]), 0.032);
             if (directions[iDir] == "ns")
-              myText (0.22, 0.77, kBlack, Form ("#it{p}_{T}^{jet} > %i GeV, #Delta#phi_{ch,jet} < #pi/8 (near-side)", iPtJInt == 0 ? 30 : 60), 0.032);
+              myText (0.22, 0.77, kBlack, Form ("#it{p}_{T}^{jet} > %i GeV, #Delta#it{#phi}_{ch,jet} < #pi/8 (near-side)", iPtJInt == 0 ? 30 : 60), 0.032);
             else if (directions[iDir] == "as")
-              myText (0.22, 0.77, kBlack, Form ("#it{p}_{T}^{jet} > %i GeV, #Delta#phi_{ch,jet} > 7#pi/8 (away-side)", iPtJInt == 0 ? 30 : 60), 0.032);
+              myText (0.22, 0.77, kBlack, Form ("#it{p}_{T}^{jet} > %i GeV, #Delta#it{#phi}_{ch,jet} > 7#pi/8 (away-side)", iPtJInt == 0 ? 30 : 60), 0.032);
 
             short count = 0;
             for (short iTotVar : {0, 1, 2}) {
@@ -4621,10 +4877,10 @@ void PlotPtCh (const char* rawTag, const char* unfoldTag) {
 
           c->cd (7);
           myText (0.1, 0.93, kBlack, "#bf{#it{ATLAS}} Internal", 0.07);
-          myText (0.1, 0.84, kBlack, "#it{pp}, #sqrt{s} = 5.02 TeV", 0.07);
-          myText (0.1, 0.75, kBlack, "#it{p}+Pb, #sqrt{s_{NN}} = 5.02 TeV", 0.07);
+          myText (0.1, 0.84, kBlack, "#it{pp}, #sqrt{#it{s}} = 5.02 TeV", 0.07);
+          myText (0.1, 0.75, kBlack, "#it{p}+Pb, #sqrt{#it{s}_{NN}} = 5.02 TeV", 0.07);
           myText (0.1, 0.66, kBlack, Form ("#it{p}_{T}^{jet} > %i GeV", iPtJInt == 0 ? 30 : 60), 0.07);
-          myText (0.1, 0.57, kBlack, Form ("#Delta#phi_{ch,jet} %s", directions[iDir] == "ns" ? "< #pi/8 (near-side)" : "> 7#pi/8 (away-side)"), 0.07);
+          myText (0.1, 0.57, kBlack, Form ("#Delta#it{#phi}_{ch,jet} %s", directions[iDir] == "ns" ? "< #pi/8 (near-side)" : "> 7#pi/8 (away-side)"), 0.07);
 
           short count = 0;
           myLineColorText (0.16, 0.49, kGray+1, 2, "#bf{Total stat. unc.}", 2.0, 0.07);
